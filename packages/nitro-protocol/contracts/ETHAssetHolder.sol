@@ -70,6 +70,6 @@ contract ETHAssetHolder is AssetHolder {
      */
     function _transferAsset(address payable destination, uint256 amount) internal override {
         (bool success, ) = destination.call{value: amount}('');
-        require(success, 'Could not transfer asset');
+        require(success, 'Could not transfer ETH');
     }
 }

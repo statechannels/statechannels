@@ -18,8 +18,8 @@ contract AssetHolder is IAssetHolder {
     mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
     /**
-     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Performs no checks.
-     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Performs no checks.
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      * @param destination External destination or channel to transfer funds *to*.
@@ -61,6 +61,8 @@ contract AssetHolder is IAssetHolder {
             }
         }
 
+        require(affordsForDestination > 0, '_transfer fromChannel allocates 0 to destination');
+        
         // effects
         holdings[fromChannelId] -= affordsForDestination;
 
@@ -113,20 +115,22 @@ contract AssetHolder is IAssetHolder {
             );
         } 
 
-        // storage updated BEFORE asset transferred (prevent reentrancy)
 
+        // storage updated BEFORE external contracts called (prevent reentrancy attacks)
         if (_isExternalDestination(destination)) {
-            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
-            emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);    
         } else {
             holdings[destination] += affordsForDestination;
         }
+        // Event emitted regardless of success of external calls
+        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+
         
     }
 
     /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed.
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Does not check allocationBytes against on chain storage.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Does not check allocationBytes against on chain storage.
      * @param channelId Unique identifier for a state channel.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      */
@@ -192,7 +196,9 @@ contract AssetHolder is IAssetHolder {
         } else {
             delete assetOutcomeHashes[channelId];
         }
-        // holdings updated BEFORE asset transferred (prevent reentrancy)
+
+
+        // holdings updated BEFORE asset transferred (prevent reentrancy attacks)
         uint256 payoutAmount;
         for (uint256 m = 0; m < numPayouts; m++) {
             if (overlap && m == numPayouts.sub(1)) {
@@ -202,10 +208,11 @@ contract AssetHolder is IAssetHolder {
             }
             if (_isExternalDestination(allocation[m].destination)) {
                 _transferAsset(_bytes32ToAddress(allocation[m].destination), payoutAmount);
-                emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
+            // Event emitted regardless of success of external calls
+            emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
         }
     }
 
@@ -421,14 +428,14 @@ contract AssetHolder is IAssetHolder {
             if (payouts[j] > 0) {
                 if (_isExternalDestination(allocation[j].destination)) {
                     _transferAsset(_bytes32ToAddress(allocation[j].destination), payouts[j]);
-                    emit AssetTransferred(
+                } else {
+                    holdings[allocation[j].destination] += payouts[j];
+                }
+            emit AssetTransferred(
                         guarantorChannelId,
                         allocation[j].destination,
                         payouts[j]
                     );
-                } else {
-                    holdings[allocation[j].destination] += payouts[j];
-                }
             }
         }
     }

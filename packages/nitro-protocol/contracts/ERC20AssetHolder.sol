@@ -71,6 +71,6 @@ contract ERC20AssetHolder is AssetHolder {
      * @param amount Quantity of tokens to be transferred.
      */
     function _transferAsset(address payable destination, uint256 amount) internal virtual override {
-        Token.transfer(destination, amount);
+        require(Token.transfer(destination, amount), 'Could not transfer ERC20 tokens');
     }
 }
