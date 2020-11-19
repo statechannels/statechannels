@@ -12,7 +12,7 @@ export default async function setup(): Promise<void> {
     return;
   }
 
-  process.env['CHAIN_NETWORK_ID'] = '0x01';
+  process.env['CHAIN_NETWORK_ID'] = '9002';
   process.env['GANACHE_HOST'] = '0.0.0.0';
   process.env['GANACHE_PORT'] = '8545';
   process.env[
@@ -27,7 +27,7 @@ export default async function setup(): Promise<void> {
   if (!process.env.GANACHE_PORT) {
     throw new Error('process.env.GANACHE_PORT must be defined');
   }
-  const ganacheServer = new GanacheServer(parseInt(process.env.GANACHE_PORT), 1337, accounts);
+  const ganacheServer = new GanacheServer(parseInt(process.env.GANACHE_PORT), Number(process.env.CHAIN_NETWORK_ID), accounts);
   await ganacheServer.ready();
 
   const deployedArtifacts = await deploy();
