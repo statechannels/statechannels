@@ -198,7 +198,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
 
-  // todo: remove this
+  // TODO: remove this
   // The reason for the wait:
   // - B CloseChannel objective succeeds BEFORE AssetTransferred event arrives
   // - B has no funds in the channel, so B does not wait for an AssetTransferred event to complete the CloseObjective
