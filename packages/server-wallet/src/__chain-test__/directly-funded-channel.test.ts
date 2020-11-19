@@ -183,12 +183,27 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 4,
   });
 
-  expect(await closeCompletedA).toMatchObject({channelId, objectiveType: 'CloseChannel'});
-  expect(await closeCompletedB).toMatchObject({channelId, objectiveType: 'CloseChannel'});
+  expect(await closeCompletedA).toMatchObject({
+    channelId,
+    objectiveType: 'CloseChannel',
+  });
+  expect(await closeCompletedB).toMatchObject({
+    channelId,
+    objectiveType: 'CloseChannel',
+  });
 
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
+
+  // todo: remove this
+  // The reason for the wait:
+  // - B CloseChannel objective succeeds BEFORE AssetTransferred event arrives
+  // - B has no funds in the channel, so B does not wait for an AssetTransferred event to complete the CloseObjective
+  // - AssetTransferred event arrives to B after the test finishes running
+  // - We see "Error: Unable to acquire a connection"
+  // - The error does NOT fail the test
+  await new Promise(r => setTimeout(r, 500));
 }, 50_000);
