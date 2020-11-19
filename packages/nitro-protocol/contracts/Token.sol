@@ -10,7 +10,7 @@ contract Token is ERC20 {
      * @dev Constructor function minting 10 billion tokens to the owner. Do not use msg.sender for default owner as that will not work with CREATE2
      * @param owner Tokens are minted to the owner address
      */
-    constructor(address owner) public ERC20('TestToken', 'TEST') {
+    constructor(address owner) ERC20('TestToken', 'TEST') {
         _mint(owner, 10_000_000_000);
     }
 }
