@@ -44,7 +44,7 @@ it("signs a final state when it's my turn", async () => {
 it("accepts and sends an objective when it isn't my turn", async () => {
   const appData = '0x0f00';
   const turnNum = 8;
-  const runningState = {turnNum, appData};
+  const runningState = {turnNum, appData, channelNonce: 2};
   const c = channel({
     channelNonce: 2,
     vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
@@ -69,7 +69,7 @@ it("signs a final state when it's my turn for many channels at once", async () =
   for (let i = 3; i < 7; i++) {
     const c = channel({
       channelNonce: i,
-      vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
+      vars: [stateWithHashSignedBy([alice(), bob()])({...runningState, channelNonce: i})],
     });
     await Channel.query(w.knex).insert(c);
     channelIds.push(c.channelId);

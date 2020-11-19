@@ -10,7 +10,7 @@ beforeEach(async () => seedAlicesSigningWallet(knex));
 afterAll(async () => await knex.destroy());
 
 it('can insert Channel instances to, and fetch them from, the database', async () => {
-  const vars = [stateWithHashSignedBy()()];
+  const vars = [stateWithHashSignedBy()({channelNonce: 1234})];
   const c1 = channel({channelNonce: 1234, vars});
 
   await Channel.query(knex)
@@ -39,9 +39,8 @@ it('does not store extraneous fields in the variables property', async () => {
 });
 
 it('can insert multiple channels instances within a transaction', async () => {
-  const vars = [stateWithHashSignedBy()()];
-  const c1 = channel({vars});
-  const c2 = channel({channelNonce: 1234, vars});
+  const c1 = channel({vars: [stateWithHashSignedBy()()]});
+  const c2 = channel({channelNonce: 1234, vars: [stateWithHashSignedBy()({channelNonce: 1234})]});
 
   await Channel.transaction(knex, async tx => {
     await Channel.query(tx).insert(c1);
