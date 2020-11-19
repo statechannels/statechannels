@@ -129,8 +129,9 @@ export class GanacheServer {
     public readonly chainId: number = 9001,
     accounts: Account[] = ETHERLIME_ACCOUNTS,
     public readonly timeout: number = 10_000,
-    gasLimit = 1000000000,
-    gasPrice = 1
+    gasLimit = 10_00_000_000,
+    gasPrice = 1,
+    blockTime: number | undefined = undefined
   ) {
     logger.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
     this.fundedPrivateKey = accounts[0].privateKey;
@@ -151,7 +152,8 @@ export class GanacheServer {
             ? extractLogsFromVerboseGanacheOutput(this.buffer, x)
             : logger.info(x);
         }
-      }
+      },
+      blockTime
     };
 
     this.server = ganache.server({...serverOptions, _chainId: this.chainId} as any);

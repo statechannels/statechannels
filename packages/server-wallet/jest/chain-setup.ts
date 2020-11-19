@@ -27,7 +27,15 @@ export default async function setup(): Promise<void> {
   if (!process.env.GANACHE_PORT) {
     throw new Error('process.env.GANACHE_PORT must be defined');
   }
-  const ganacheServer = new GanacheServer(parseInt(process.env.GANACHE_PORT), Number(process.env.CHAIN_NETWORK_ID), accounts);
+  const ganacheServer = new GanacheServer(
+    parseInt(process.env.GANACHE_PORT),
+    Number(process.env.CHAIN_NETWORK_ID),
+    accounts,
+    10_000, // timeout
+    10_00_000_000, // gasLimit
+    1, // gasPrice
+    1 // blockTime
+  );
   await ganacheServer.ready();
 
   const deployedArtifacts = await deploy();

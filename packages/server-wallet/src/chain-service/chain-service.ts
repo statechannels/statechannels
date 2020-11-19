@@ -15,7 +15,7 @@ import {
   toNitroSignedState,
   Uint256,
 } from '@statechannels/wallet-core';
-import {Contract, ethers, providers, utils, Wallet} from 'ethers';
+import {Contract, ethers, Event, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
@@ -82,8 +82,8 @@ export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterIn
 
 const Deposited = 'Deposited' as const;
 const AssetTransferred = 'AssetTransferred' as const;
-type DepositedEvent = {type: 'Deposited'} & HoldingUpdatedArg;
-type AssetTransferredEvent = {type: 'AssetTransferred'} & AssetTransferredArg;
+type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
+type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
 type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
 function isEthAssetHolder(address: Address): boolean {
@@ -251,6 +251,7 @@ export class ChainService implements ChainServiceInterface {
           channelId,
           assetHolderAddress: makeAddress(contract.address),
           amount: BN.from(holding),
+          ethersEvent: null,
         }))
       );
 
@@ -258,12 +259,14 @@ export class ChainService implements ChainServiceInterface {
         currentHolding,
         obs.pipe(filter(event => event.channelId === channelId))
       ).subscribe({
-        next: event => {
+        next: async event => {
           switch (event.type) {
             case Deposited:
+              await this.waitForConfirmations(event.ethersEvent);
               subscriber.holdingUpdated(event);
               break;
             case AssetTransferred:
+              await this.waitForConfirmations(event.ethersEvent);
               subscriber.assetTransferred(event);
               break;
             default:
@@ -291,25 +294,43 @@ export class ChainService implements ChainServiceInterface {
     subscriptions.map(s => s.unsubscribe());
   }
 
+  private async waitForConfirmations(event: Event | null): Promise<void> {
+    const numConfirmations = 6;
+    if (event) {
+      await (await event.getTransaction()).wait(numConfirmations);
+      return;
+    }
+
+    let initBlockNumber = -1;
+    await new Promise(resolve =>
+      this.provider.on('block', blockNumber => {
+        if (initBlockNumber === -1) initBlockNumber = blockNumber;
+        if (blockNumber >= initBlockNumber + numConfirmations) resolve();
+      })
+    );
+  }
+
   private addContractObservable(contract: Contract): Observable<ContractEvent> {
     // Create an observable that emits events on contract events
     const obs = new Observable<ContractEvent>(subs => {
       // TODO: add other event types
-      contract.on(Deposited, (destination, _amountDeposited, destinationHoldings) =>
+      contract.on(Deposited, (destination, _amountDeposited, destinationHoldings, event) =>
         subs.next({
           type: Deposited,
           channelId: destination,
           assetHolderAddress: makeAddress(contract.address),
           amount: BN.from(destinationHoldings),
+          ethersEvent: event,
         })
       );
-      contract.on(AssetTransferred, (channelId, destination, payoutAmount) =>
+      contract.on(AssetTransferred, (channelId, destination, payoutAmount, event) =>
         subs.next({
           type: AssetTransferred,
           channelId,
           assetHolderAddress: makeAddress(contract.address),
           to: makeDestination(destination),
           amount: BN.from(payoutAmount),
+          ethersEvent: event,
         })
       );
     });
