@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.11.7](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.4...@statechannels/server-wallet@1.11.7) (2020-11-19)
+
+
+### Bug Fixes
+
+* add missing dependency to package.json of server-wallet ([ab174e5](https://github.com/statechannels/statechannels/commit/ab174e5fb250edaa0dee8360dfd08a584b317de4))
+* do not allow non variable data in the db ([be0c73c](https://github.com/statechannels/statechannels/commit/be0c73c76458fa9674411ab39fb3b43ca6064ec5))
+* do not rely on revert reason in chain service ([13d9f4e](https://github.com/statechannels/statechannels/commit/13d9f4edc516629196a367fc63a034c047584b55))
+* fix broken tests ([a1c0730](https://github.com/statechannels/statechannels/commit/a1c0730fef0dd11b2bfa0a15d06e900b902c3180))
+* set Token contract owner when deploying ([6f07676](https://github.com/statechannels/statechannels/commit/6f076764a59112428ca7133c2631ddcf236cf618))
+* use latest block timestamp for computing channel finalization ([123d0ea](https://github.com/statechannels/statechannels/commit/123d0eaf78889fc2702270e8d1c454430167f7d2))
+
+
+
+
+
 ## [1.11.6](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.4...@statechannels/server-wallet@1.11.6) (2020-11-19)
 
 

@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.6](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.3...@statechannels/nitro-protocol@0.8.6) (2020-11-19)
+
+
+### Bug Fixes
+
+* fix artifacts path ([c1b30fa](https://github.com/statechannels/monorepo/commit/c1b30fa2b7c1bf1450154cd288c7d889663ea932))
+* gitignore solcInputs ([a9e814b](https://github.com/statechannels/monorepo/commit/a9e814b152bb1563dd7a46c0f9535942f88c4eac))
+* pass owner as parameter to Token.sol constructor and redeploy contracts ([9606a52](https://github.com/statechannels/monorepo/commit/9606a52fc5a140a99f317901547b1c7cf329c28f)), closes [/docs.openzeppelin.com/cli/2.8/deploying-with-create2#create2](https://github.com//docs.openzeppelin.com/cli/2.8/deploying-with-create2/issues/create2)
+* use a valid address in the Token constructor ([8096e49](https://github.com/statechannels/monorepo/commit/8096e494a3fa9bac79521e661c3e53a7247ab487))
+
+
+
+
+
 ## [0.8.5](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.3...@statechannels/nitro-protocol@0.8.5) (2020-11-19)
 
 
