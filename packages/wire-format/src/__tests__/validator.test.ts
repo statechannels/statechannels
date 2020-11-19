@@ -1,5 +1,7 @@
 /* eslint-disable jest/no-try-expect */
-import {messageIsValid, validateMessage} from '../validator';
+import _ from 'lodash';
+
+import {messageIsValid, validateMessage, validateState} from '../validator';
 
 import * as good from './good_sample_messages';
 import * as bad from './bad_sample_messages';
@@ -43,7 +45,7 @@ describe('validate message', () => {
             message: () => `expected message ${message}, received ${err.message}`
           };
         }
-        if (err.jsonBlob !== jsonBlob) {
+        if (!_.isEqual(err.jsonBlob, jsonBlob)) {
           return {
             pass: false,
             message: () => `incorrect json blob`
@@ -96,6 +98,12 @@ describe('validate message', () => {
       'Invalid message',
       bad.nullObjectives,
       'Property at root.data.objectives should be array'
+    );
+
+    expect(() => validateState({turnNum: 3})).toThrowValidationError(
+      'Invalid state',
+      {turnNum: 3},
+      "Missing required property 'appData' at root"
     );
   });
 });
