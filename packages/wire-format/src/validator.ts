@@ -33,10 +33,12 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
 export const messageIsValid = ajv.compile({$ref: 'api.json#/definitions/Message'});
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function validateMessage(jsonBlob: object): Message {
-  const valid = messageIsValid(jsonBlob);
-  if (!valid) {
-    const errorMessages = messageIsValid.errors?.map(e => prettyPrintError(e)).join('; ');
-    throw new Error(`Validation Error: ${errorMessages}`);
+  if (!messageIsValid(jsonBlob)) {
+    throw new WireFormatValidationError(
+      'Invalid message',
+      jsonBlob,
+      messageIsValid.errors?.map(e => prettyPrintError(e))
+    );
   }
   return jsonBlob as Message;
 }
@@ -46,8 +48,18 @@ export const stateIsValid = ajv.compile({$ref: 'api.json#/definitions/SignedStat
 export function validateState(jsonBlob: object): SignedState {
   const valid = stateIsValid(jsonBlob);
   if (!valid) {
-    const errorMessages = stateIsValid.errors?.map(e => prettyPrintError(e)).join('; ');
-    throw new Error(`Validation Error: ${errorMessages}`);
+    throw new WireFormatValidationError(
+      'Invalid state',
+      jsonBlob,
+      stateIsValid.errors?.map(e => prettyPrintError(e))
+    );
   }
   return jsonBlob as SignedState;
+}
+
+class WireFormatValidationError extends Error {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  constructor(reason: string, public jsonBlob: any, public errorMessages?: string[]) {
+    super(reason);
+  }
 }
