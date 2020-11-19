@@ -301,13 +301,18 @@ export class ChainService implements ChainServiceInterface {
       return;
     }
 
-    let initBlockNumber = -1;
-    await new Promise(resolve =>
-      this.provider.on('block', blockNumber => {
+    await new Promise(resolve => {
+      let initBlockNumber = -1;
+      const blockListener = (blockNumber: any) => {
         if (initBlockNumber === -1) initBlockNumber = blockNumber;
-        if (blockNumber >= initBlockNumber + numConfirmations) resolve();
-      })
-    );
+        if (blockNumber >= initBlockNumber + numConfirmations) {
+          this.provider.removeListener('block', blockListener);
+          resolve();
+        }
+      };
+
+      this.provider.on('block', blockListener);
+    });
   }
 
   private addContractObservable(contract: Contract): Observable<ContractEvent> {
