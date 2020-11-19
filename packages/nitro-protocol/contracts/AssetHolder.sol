@@ -250,6 +250,7 @@ contract AssetHolder is IAssetHolder {
         for (uint256 i = 0; i < allocation.length; i++) {
             if (balance == 0) {
                 // if funds are completely depleted, keep the allocationItem and do not pay out
+                break;
             } else {
                 _amount = allocation[i].amount;
                 if (balance < _amount) {
