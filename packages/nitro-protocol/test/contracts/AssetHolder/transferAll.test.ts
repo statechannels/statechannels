@@ -10,6 +10,7 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+  writeGasConsumption,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
@@ -98,7 +99,8 @@ describe('transferAll', () => {
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
-        const {events: eventsFromLogs} = await (await tx).wait();
+        const {events: eventsFromLogs, gasUsed} = await (await tx).wait();
+        await writeGasConsumption('./transferAll.gas.md', name, gasUsed);
         const expectedEvents = [];
         Object.keys(events).forEach(destination => {
           if (events[destination] && events[destination].gt(0)) {
