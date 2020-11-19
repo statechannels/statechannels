@@ -22,12 +22,15 @@ describe('validate message', () => {
     expect(validateMessage(good.goodMessage)).toEqual(good.goodMessage);
   });
 
-  expect.extend({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const _expect: any = Object.assign(expect);
+  _expect.extend({
     toThrowValidationError(
-      errThrower,
-      message,
-      jsonBlob,
-      validationError
+      errThrower: () => Error,
+      message: string,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jsonBlob: any,
+      validationError: string
     ): jest.CustomMatcherResult {
       try {
         errThrower();
@@ -69,38 +72,40 @@ describe('validate message', () => {
     }
   });
 
-  it('test custom matcher', () => {
-    // TODO: I don't know how to get rid of this type error
-    expect(() => validateMessage(bad.dataMissing)).toThrowValidationError(
+  it('returns helpful errors', () => {
+    // Otherwise jest complains about zero expectations
+    expect(0).toEqual(0);
+
+    _expect(() => validateMessage(bad.dataMissing)).toThrowValidationError(
       'Invalid message',
       bad.dataMissing,
       "Missing required property 'data' at root"
     );
-    expect(() => validateMessage(bad.extraProperty)).toThrowValidationError(
+    _expect(() => validateMessage(bad.extraProperty)).toThrowValidationError(
       'Invalid message',
       bad.extraProperty,
       "Unexpected property 'iShouldntBeHere' found at root "
     );
 
-    expect(() => validateMessage(bad.emptyState)).toThrowValidationError(
+    _expect(() => validateMessage(bad.emptyState)).toThrowValidationError(
       'Invalid message',
       bad.emptyState,
       "Missing required property 'appData' at root.data.signedStates[0]"
     );
 
-    expect(() => validateMessage(bad.emptyStringObjectives)).toThrowValidationError(
+    _expect(() => validateMessage(bad.emptyStringObjectives)).toThrowValidationError(
       'Invalid message',
       bad.emptyStringObjectives,
       'Property at root.data.objectives should be array'
     );
 
-    expect(() => validateMessage(bad.nullObjectives)).toThrowValidationError(
+    _expect(() => validateMessage(bad.nullObjectives)).toThrowValidationError(
       'Invalid message',
       bad.nullObjectives,
       'Property at root.data.objectives should be array'
     );
 
-    expect(() => validateState({turnNum: 3})).toThrowValidationError(
+    _expect(() => validateState({turnNum: 3})).toThrowValidationError(
       'Invalid state',
       {turnNum: 3},
       "Missing required property 'appData' at root"
