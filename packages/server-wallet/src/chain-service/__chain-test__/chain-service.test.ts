@@ -106,7 +106,8 @@ async function setUpConclude(isEth = true) {
     outcome,
     participants: [alice, bob],
     channelNonce: getChannelNonce(),
-    chainId: '0x01',
+    // eslint-disable-next-line no-process-env
+    chainId: process.env.CHAIN_NETWORK_ID || '9002',
     challengeDuration: 9001,
   };
   const channelId = getChannelId({
