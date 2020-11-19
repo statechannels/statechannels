@@ -1,3 +1,5 @@
+import _ from 'lodash';
+
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
@@ -35,7 +37,7 @@ it('returns an outgoing message with the latest state', async () => {
     appData,
     participants,
   };
-  const nextState = {turnNum: turnNum + 1, appData};
+  const nextState = {turnNum: turnNum + 1, appData, participants};
   const c = channel({
     participants,
     vars: [
@@ -45,7 +47,10 @@ it('returns an outgoing message with the latest state', async () => {
   });
 
   const inserted = await Channel.query(w.knex).insert(c);
-  expect(inserted.vars).toMatchObject([runningState, nextState]);
+  expect(inserted.vars).toMatchObject([
+    _.omit(runningState, ['participants']),
+    _.omit(nextState, ['participants']),
+  ]);
 
   const channelId = c.channelId;
 
