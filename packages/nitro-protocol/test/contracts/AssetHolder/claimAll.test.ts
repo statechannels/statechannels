@@ -39,9 +39,9 @@ beforeAll(async () => {
 });
 
 const reason5 =
-  'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId';
+  'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash';
 const reason6 =
-  'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId';
+  'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
