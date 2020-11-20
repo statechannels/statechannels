@@ -300,7 +300,7 @@ export class ChainService implements ChainServiceInterface {
       return;
     }
 
-    await new Promise(resolve => {
+    await new Promise<void>(resolve => {
       let initBlockNumber = -1;
       const blockListener = (blockNumber: any) => {
         if (initBlockNumber === -1) initBlockNumber = blockNumber;
