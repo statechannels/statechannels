@@ -35,7 +35,8 @@ beforeAll(async () => {
   );
 });
 
-const reason0 = 'transfer | submitted data does not match stored assetOutcomeHash';
+const reason0 =
+  'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash';
 const reason1 = '_transfer | fromChannel affords 0 for destination';
 
 // c is the channel we are transferring from.
