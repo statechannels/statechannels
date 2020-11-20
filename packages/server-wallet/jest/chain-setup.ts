@@ -33,8 +33,7 @@ export default async function setup(): Promise<void> {
     accounts,
     10_000, // timeout
     10_00_000_000, // gasLimit
-    1, // gasPrice
-    0.5 // blockTime
+    1 // gasPrice
   );
   await ganacheServer.ready();
 

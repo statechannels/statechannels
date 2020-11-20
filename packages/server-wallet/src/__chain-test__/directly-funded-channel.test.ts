@@ -1,13 +1,18 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, constants, ethers, providers} from 'ethers';
+import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
+import _ from 'lodash';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
 import {defaultTestConfig} from '../config';
 import {ObjectiveSucceededValue, SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
+
+// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
+const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 
 if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const rpcEndpoint = defaultTestConfig.rpcEndpoint;
@@ -40,6 +45,20 @@ beforeAll(async () => {
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
   await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
+
+  const mineBlocks = async () => {
+    for (const _i in _.range(5)) {
+      await provider.send('evm_mine', []);
+    }
+  };
+
+  const assetHolder = new Contract(
+    ethAssetHolderAddress,
+    ContractArtifacts.EthAssetHolderArtifact.abi,
+    provider
+  );
+  assetHolder.on('Deposited', mineBlocks);
+  assetHolder.on('AssetTransferred', mineBlocks);
 });
 
 afterAll(async () => {
@@ -72,8 +91,7 @@ it('Create a directly funded channel between two wallets ', async () => {
         amount: bFunding,
       },
     ],
-    // eslint-disable-next-line
-    assetHolderAddress: makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS as string),
+    assetHolderAddress: ethAssetHolderAddress,
   };
 
   const channelParams: CreateChannelParams = {
