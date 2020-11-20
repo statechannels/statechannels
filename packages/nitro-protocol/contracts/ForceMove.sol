@@ -395,6 +395,7 @@ contract ForceMove is IForceMove {
     function _recoverSigner(bytes32 _d, Signature memory sig) internal pure returns (address) {
         bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
         address a = ecrecover(prefixedHash, sig.v, sig.r, sig.s);
+        require(a != address(0), 'Invalid signature');
         return (a);
     }
 

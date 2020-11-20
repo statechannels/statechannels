@@ -1,8 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import {Contract, Wallet, ethers, Signature} from 'ethers';
 
 const {HashZero} = ethers.constants;
-const {defaultAbiCoder, hexlify} = ethers.utils;
+const {defaultAbiCoder} = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -11,6 +11,7 @@ import {getFixedPart, getVariablePart, State} from '../../../src/contract/state'
 import {
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
+  INVALID_SIGNATURE,
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
@@ -94,7 +95,8 @@ const accepts6 = acceptsWhenChallengePresent + 'when the turnNumRecord increases
 
 const revertsWhenOpenIf = 'It reverts for an open channel if ';
 const reverts1 = revertsWhenOpenIf + 'the turnNumRecord does not increase';
-const reverts2 = revertsWhenOpenIf + 'the challengerSig is incorrect';
+const reverts2a = revertsWhenOpenIf + 'the challengerSig is incorrect';
+const reverts2b = revertsWhenOpenIf + 'the challengerSig is invalid';
 const reverts3 = revertsWhenOpenIf + 'the states do not form a validTransition chain';
 
 const reverts4 = 'It reverts when a challenge is present if the turnNumRecord does not increase';
@@ -107,8 +109,6 @@ describe('challenge', () => {
   const largestTurnNum = 8;
   const isFinalCount = 0;
   const challenger = wallets[2];
-  const wrongSig = {v: 1, s: HashZero, r: HashZero};
-
   const empty = HashZero; // Equivalent to openAtZero
   const openAtFive = clearedChallengeHash(5);
   const openAtLargestTurnNum = clearedChallengeHash(largestTurnNum);
@@ -121,28 +121,28 @@ describe('challenge', () => {
   let channelNonce = getRandomNonce('challenge');
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | initialChannelStorageHash    | stateData      | challengeSignature | reasonString
-    ${accepts1} | ${empty}                     | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts2} | ${empty}                     | ${threeStates} | ${undefined}       | ${undefined}
-    ${accepts3} | ${openAtFive}                | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts3} | ${openAtLargestTurnNum}      | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts4} | ${openAtFive}                | ${threeStates} | ${undefined}       | ${undefined}
-    ${accepts5} | ${challengeAtFive}           | ${oneState}    | ${undefined}       | ${undefined}
-    ${accepts6} | ${challengeAtFive}           | ${threeStates} | ${undefined}       | ${undefined}
-    ${reverts1} | ${openAtTwenty}              | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_DECREASED}
-    ${reverts2} | ${empty}                     | ${oneState}    | ${wrongSig}        | ${CHALLENGER_NON_PARTICIPANT}
-    ${reverts3} | ${empty}                     | ${invalid}     | ${undefined}       | ${COUNTING_APP_INVALID_TRANSITION}
-    ${reverts4} | ${challengeAtTwenty}         | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts4} | ${challengeAtLargestTurnNum} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts5} | ${finalizedAtFive}           | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
+    description  | initialChannelStorageHash    | stateData      | challengeSignatureType | reasonString
+    ${accepts1}  | ${empty}                     | ${oneState}    | ${'correct'}           | ${undefined}
+    ${accepts2}  | ${empty}                     | ${threeStates} | ${'correct'}           | ${undefined}
+    ${accepts3}  | ${openAtFive}                | ${oneState}    | ${'correct'}           | ${undefined}
+    ${accepts3}  | ${openAtLargestTurnNum}      | ${oneState}    | ${'correct'}           | ${undefined}
+    ${accepts4}  | ${openAtFive}                | ${threeStates} | ${'correct'}           | ${undefined}
+    ${accepts5}  | ${challengeAtFive}           | ${oneState}    | ${'correct'}           | ${undefined}
+    ${accepts6}  | ${challengeAtFive}           | ${threeStates} | ${'correct'}           | ${undefined}
+    ${reverts1}  | ${openAtTwenty}              | ${oneState}    | ${'correct'}           | ${TURN_NUM_RECORD_DECREASED}
+    ${reverts2a} | ${empty}                     | ${oneState}    | ${'incorrect'}         | ${CHALLENGER_NON_PARTICIPANT}
+    ${reverts2b} | ${empty}                     | ${oneState}    | ${'invalid'}           | ${INVALID_SIGNATURE}
+    ${reverts3}  | ${empty}                     | ${invalid}     | ${'correct'}           | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts4}  | ${challengeAtTwenty}         | ${oneState}    | ${'correct'}           | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts4}  | ${challengeAtLargestTurnNum} | ${oneState}    | ${'correct'}           | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5}  | ${finalizedAtFive}           | ${oneState}    | ${'correct'}           | ${CHANNEL_FINALIZED}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-
     async ({
       description,
       initialChannelStorageHash,
       stateData,
-      challengeSignature,
+      challengeSignatureType,
       reasonString,
     }) => {
       const {appDatas, whoSignedWhat} = stateData;
@@ -171,8 +171,24 @@ describe('challenge', () => {
         state: states[states.length - 1],
         signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
       };
-      challengeSignature =
-        challengeSignature || signChallengeMessage([challengeState], challenger.privateKey);
+
+      const correctChallengeSignature = signChallengeMessage(
+        [challengeState],
+        challenger.privateKey
+      );
+      let challengeSignature: ethers.Signature;
+
+      switch (challengeSignatureType) {
+        case 'incorrect':
+          challengeSignature = {...correctChallengeSignature, v: correctChallengeSignature.v + 1};
+          break;
+        case 'invalid':
+          challengeSignature = {v: 1, s: HashZero, r: HashZero} as ethers.Signature;
+          break;
+        case 'correct':
+        default:
+          challengeSignature = correctChallengeSignature;
+      }
 
       // Set current channelStorageHashes value
       await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();

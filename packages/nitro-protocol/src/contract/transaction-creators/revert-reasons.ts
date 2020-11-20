@@ -10,6 +10,7 @@ export const UNACCEPTABLE_WHO_SIGNED_WHAT = 'Unacceptable whoSignedWhat array';
 export const WHO_SIGNED_WHAT_WRONG_LENGTH =
   '_validSignatures: whoSignedWhat must be the same length as participants';
 export const WRONG_CHANNEL_STORAGE = 'Channel storage does not match stored version.';
+export const INVALID_SIGNATURE = 'Invalid signature';
 
 // Function-specific messages
 export const CHALLENGER_NON_PARTICIPANT = 'Challenger is not a participant';
