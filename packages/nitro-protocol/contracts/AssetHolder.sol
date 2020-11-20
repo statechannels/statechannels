@@ -343,7 +343,7 @@ contract AssetHolder is IAssetHolder {
         // first increase payouts according to guarantee
         for (uint256 i = 0; i < guarantee.destinations.length; i++) {
             if (balance == 0) {
-                    break;
+                break;
             }
             // for each destination in the guarantee
             bytes32 _destination = guarantee.destinations[i];
