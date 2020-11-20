@@ -33,6 +33,17 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 let chainService: ChainService;
 let channelNonce = 0;
 
+async function mineBlocks() {
+  for (const _i in _.range(5)) {
+    await provider.send('evm_mine', []);
+  }
+}
+
+function mineOnEvent(contract: Contract) {
+  contract.on('Deposited', mineBlocks);
+  contract.on('AssetTransferred', mineBlocks);
+}
+
 jest.setTimeout(20_000);
 
 beforeAll(() => {
@@ -46,9 +57,25 @@ beforeAll(() => {
     process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey
   );
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
+
+  const ethHolder = new Contract(
+    ethAssetHolderAddress,
+    ContractArtifacts.EthAssetHolderArtifact.abi,
+    provider
+  );
+  mineOnEvent(ethHolder);
+  const erc20Holder = new Contract(
+    erc20AssetHolderAddress,
+    ContractArtifacts.Erc20AssetHolderArtifact.abi,
+    provider
+  );
+  mineOnEvent(erc20Holder);
 });
 
-afterAll(() => chainService.destructor());
+afterAll(() => {
+  chainService.destructor();
+  provider.polling = false;
+});
 
 function getChannelNonce() {
   return channelNonce++;
@@ -195,6 +222,14 @@ describe('registerChannel', () => {
       holdingUpdated,
       assetTransferred: _.noop,
     });
+    // On chain service channel registration, the chain service:
+    // 1. Reads the initial balance for the channel.
+    // 2. Emits emits the initial balance after the balance has been confirmed.
+    // At the moment, balance confirmed === wait for the sixth block after balance read
+    // This logic grants the chain service up to 100ms to register the channel and read the initial balance
+    //   before mining new blocks.
+    await new Promise(r => setTimeout(r, 100));
+    await mineBlocks();
     await p;
   });
 

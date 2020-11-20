@@ -40,25 +40,29 @@ async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
 }
 
+async function mineBlocks() {
+  for (const _i in _.range(5)) {
+    await provider.send('evm_mine', []);
+  }
+}
+
+function mineOnEvent(contract: Contract) {
+  contract.on('Deposited', mineBlocks);
+  contract.on('AssetTransferred', mineBlocks);
+}
+
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
   await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
 
-  const mineBlocks = async () => {
-    for (const _i in _.range(5)) {
-      await provider.send('evm_mine', []);
-    }
-  };
-
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,
     provider
   );
-  assetHolder.on('Deposited', mineBlocks);
-  assetHolder.on('AssetTransferred', mineBlocks);
+  mineOnEvent(assetHolder);
 });
 
 afterAll(async () => {
