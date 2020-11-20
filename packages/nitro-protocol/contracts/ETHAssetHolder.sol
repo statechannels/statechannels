@@ -29,7 +29,7 @@ contract ETHAssetHolder is AssetHolder {
         bytes32 destination,
         uint256 expectedHeld,
         uint256 amount
-    ) public payable {
+    ) external payable {
         require(!_isExternalDestination(destination), 'Cannot deposit to external destination');
         require(msg.value == amount, 'Insufficient ETH for ETH deposit');
         uint256 amountDeposited;
