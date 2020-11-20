@@ -59,7 +59,7 @@ interface IForceMove {
      * @param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
      */
     function challenge(
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         uint48 largestTurnNum,
         IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
@@ -98,7 +98,7 @@ interface IForceMove {
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      */
     function checkpoint(
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         uint48 largestTurnNum,
         IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
@@ -119,7 +119,7 @@ interface IForceMove {
      */
     function conclude(
         uint48 largestTurnNum,
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         bytes32 appPartHash,
         bytes32 outcomeHash,
         uint8 numStates,
