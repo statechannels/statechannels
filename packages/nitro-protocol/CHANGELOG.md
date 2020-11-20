@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.3...@statechannels/nitro-protocol@0.9.0) (2020-11-20)
+
+
+### Bug Fixes
+
+* fix artifacts path ([c1b30fa](https://github.com/statechannels/monorepo/commit/c1b30fa2b7c1bf1450154cd288c7d889663ea932))
+* gitignore solcInputs ([a9e814b](https://github.com/statechannels/monorepo/commit/a9e814b152bb1563dd7a46c0f9535942f88c4eac))
+* pass owner as parameter to Token.sol constructor and redeploy contracts ([9606a52](https://github.com/statechannels/monorepo/commit/9606a52fc5a140a99f317901547b1c7cf329c28f)), closes [/docs.openzeppelin.com/cli/2.8/deploying-with-create2#create2](https://github.com//docs.openzeppelin.com/cli/2.8/deploying-with-create2/issues/create2)
+* use a valid address in the Token constructor ([8096e49](https://github.com/statechannels/monorepo/commit/8096e494a3fa9bac79521e661c3e53a7247ab487))
+
+
+### Features
+
+* catch external destination collisions ([db7370d](https://github.com/statechannels/monorepo/commit/db7370de0bfc07aafed504654d1b428390bab52c))
+* check chainId() in adjudicator contract ([66e1c1e](https://github.com/statechannels/monorepo/commit/66e1c1eed5bebd2873d59c3f6630f1ab34eb2db1))
+* emit AssetTransferred for internal transfers ([9fe3a68](https://github.com/statechannels/monorepo/commit/9fe3a68c70cac1add1470c812f4be5bab225d5f8))
+
+
+### Performance Improvements
+
+* break out of loop when balance is zero ([151c36e](https://github.com/statechannels/monorepo/commit/151c36ee74d7a3d046751180f4e3666fcbd3f13e))
+* break out of outer loop if balance is zero ([18b11bb](https://github.com/statechannels/monorepo/commit/18b11bb754702e7ffa289aaa05867b6093de88d0))
+
+
+
+
+
 ## [0.8.6](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.3...@statechannels/nitro-protocol@0.8.6) (2020-11-19)
 
 
