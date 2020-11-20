@@ -37,7 +37,9 @@ describe('signState', () => {
   let c: Channel;
 
   beforeEach(async () => {
-    c = await Channel.query(knex).insert(channel({vars: [stateWithHashSignedBy([bob()])()]}));
+    c = await Channel.query(knex)
+      .insert(channel({vars: [stateWithHashSignedBy([bob()])()]}))
+      .withGraphFetched('signingWallet');
   });
 
   it('signs the state, returning the signed state', async () => {
@@ -45,12 +47,12 @@ describe('signState', () => {
     expect(c.latestSignedByMe).toBeUndefined();
     const state = {...c.vars[0], ...c.channelConstants};
     const signature = signState(state, alice().privateKey).signature;
-    const result = await store.signState(c.channelId, c.vars[0], tx);
+    const result = await store.signState(c, c.vars[0], tx);
     expect(result).toMatchObject({...state, signatures: [{signature, signer: alice().address}]});
   });
 
   it('uses a transaction', async () => {
-    const updatedC = await store.signState(c.channelId, c.vars[0], tx);
+    const updatedC = await store.signState(c, c.vars[0], tx);
     expect(updatedC).toBeDefined();
 
     // Fetch the current channel outside the transaction context

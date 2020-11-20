@@ -11,6 +11,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {ProtocolAction} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WalletResponse} from '../wallet/response-builder';
+import {Channel} from '../models/channel';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -80,7 +81,8 @@ export class ObjectiveManager {
           switch (action.type) {
             case 'SignState': {
               const {myIndex, channelId} = protocolState.app;
-              const signedState = await this.store.signState(action.channelId, action, tx);
+              const channel = await Channel.forId(channelId, tx);
+              const signedState = await this.store.signState(channel, action, tx);
               response.queueState(signedState, myIndex, channelId);
               return;
             }

@@ -50,6 +50,7 @@ import {
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
+import {Channel} from '../models/channel';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
@@ -420,13 +421,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
-          UpdateChannel.updateChannel({channelId, appData, outcome}, channel),
+          UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
           this.walletConfig.timingMetrics
         )
       );
       const signedState = await timer('signing state', async () => {
         try {
-          return this.store.signState(channelId, nextState, tx);
+          return this.store.signState(channel, nextState, tx);
         } catch (err) {
           this.logger.error({err, nextState}, 'Unable to update channel');
           throw err;
@@ -440,7 +441,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       return response.singleChannelOutput();
     };
 
-    return this.store.lockApp(channelId, criticalCode, handleMissingChannel);
+    return this.store.lockApp(channelId, criticalCode, handleMissingChannel, true);
   }
 
   async closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
@@ -602,8 +603,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
             switch (action.type) {
               case 'SignLedgerState': {
                 const {myIndex, channelId} = protocolState.fundingChannel;
-
-                const signedState = await this.store.signState(channelId, action.stateToSign, tx);
+                const channel = await Channel.forId(channelId, tx);
+                const signedState = await this.store.signState(channel, action.stateToSign, tx);
 
                 response.queueState(signedState, myIndex, channelId);
 
