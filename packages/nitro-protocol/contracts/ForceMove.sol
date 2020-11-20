@@ -22,7 +22,7 @@ contract ForceMove is IForceMove {
      * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
      */
     function getChannelStorage(bytes32 channelId)
-        public
+        external
         view
         returns (
             uint48 turnNumRecord,
@@ -52,7 +52,7 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
-    ) public override {
+    ) external override {
         bytes32 channelId = _getChannelId(fixedPart);
 
         require(
@@ -126,7 +126,7 @@ contract ForceMove is IForceMove {
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) public override {
+    ) external override {
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getChannelStorage(channelId);
 
@@ -198,7 +198,7 @@ contract ForceMove is IForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) public override {
+    ) external override {
         bytes32 channelId = _getChannelId(fixedPart);
 
         // checks
@@ -237,7 +237,7 @@ contract ForceMove is IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public override {
+    ) external override {
         bytes32 channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
