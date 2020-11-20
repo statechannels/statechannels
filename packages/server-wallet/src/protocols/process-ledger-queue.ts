@@ -10,6 +10,7 @@ import {
   areAllocationItemsEqual,
   BN,
   AllocationItem,
+  Errors,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -88,9 +89,9 @@ const allocateFundsToChannels = (
     } catch (e) {
       if (
         // A proposed channel wants more funds than are available from a participant
-        e.message.toString() === 'Insufficient funds in fundingChannel channel' ||
+        e.message.toString() === Errors.InsufficientFunds ||
         // There is no participant balance at all (exactly 0 left)
-        e.message.toString() === 'Destination missing from ledger channel'
+        e.message.toString() === Errors.DestinationMissing
       )
         insufficientFunds.push(channelId);
       return outcome;
