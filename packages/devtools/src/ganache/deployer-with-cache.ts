@@ -66,7 +66,7 @@ export class GanacheNCacheDeployer {
 
     await new Promise((resolve, reject) =>
       lockfile.lock(lockPath, {wait: 300_000 /* 5 minutes */}, result => {
-        !result ? resolve() : reject(result);
+        !result ? resolve(result) : reject(result);
       })
     );
 
@@ -105,7 +105,7 @@ export class GanacheNCacheDeployer {
     } finally {
       await new Promise((resolve, reject) =>
         lockfile.unlock(lockPath, result => {
-          result ? reject(result) : resolve();
+          result ? reject(result) : resolve(result);
         })
       );
     }
