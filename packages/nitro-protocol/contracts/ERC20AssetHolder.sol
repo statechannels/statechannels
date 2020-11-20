@@ -34,7 +34,7 @@ contract ERC20AssetHolder is AssetHolder {
         bytes32 destination,
         uint256 expectedHeld,
         uint256 amount
-    ) public {
+    ) external {
         require(!_isExternalDestination(destination), 'Cannot deposit to external destination');
         uint256 amountDeposited;
         // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
