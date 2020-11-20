@@ -426,19 +426,20 @@ contract AssetHolder is IAssetHolder {
         }
 
         if (residualAllocationAmount == 0) {
-            Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
-                allocation.length - 1
-            );
-            // full payout so we want to splice a shorter outcome
-            for (uint256 k = 0; k < i; k++) {
-                splicedAllocation[k] = allocation[k];
-            }
-            for (uint256 k = i + 1; k < allocation.length; k++) {
-                splicedAllocation[k - 1] = allocation[k];
-            }
-            if (splicedAllocation.length == 0) {
+            // We want to splice a shorter outcome
+            if (allocation.length == 1) {
+                // special case there are no allocations left in the target's outcome
                 delete assetOutcomeHashes[guarantee.targetChannelId];
             } else {
+                Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
+                    allocation.length - 1
+                );
+                for (uint256 k = 0; k < i; k++) {
+                    splicedAllocation[k] = allocation[k];
+                }
+                for (uint256 k = i + 1; k < allocation.length; k++) {
+                    splicedAllocation[k - 1] = allocation[k];
+                }
                 assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
                     abi.encode(
                         Outcome.AssetOutcome(
@@ -448,23 +449,21 @@ contract AssetHolder is IAssetHolder {
                     )
                 );
             }
-        }
 
-        if (residualAllocationAmount == 0) {
-        // we want to splice a shorter guarantee
-            bytes32[] memory newDestinations = new bytes32[](
-                guarantee.destinations.length - 1
-            );
-
-            for (uint256 k = 0; k < j; k++) {
-                newDestinations[k] = guarantee.destinations[k];
-            }
-            for (uint256 k = j + 1; k < allocation.length; k++) {
-                newDestinations[k - 1] = guarantee.destinations[k];
-            }
-            if (newDestinations.length == 0) {
+            if (guarantee.destinations.length == 1) {
+                // special case there are no destinations left in the guarantee
                 delete assetOutcomeHashes[guarantorChannelId];
             } else {
+                // we want to splice a shorter guarantee
+                bytes32[] memory newDestinations = new bytes32[](
+                    guarantee.destinations.length - 1
+                );
+                for (uint256 k = 0; k < j; k++) {
+                    newDestinations[k] = guarantee.destinations[k];
+                }
+                for (uint256 k = j + 1; k < allocation.length; k++) {
+                    newDestinations[k - 1] = guarantee.destinations[k];
+                }
                 assetOutcomeHashes[guarantorChannelId] = keccak256(abi.encode(Outcome.Guarantee(guarantee.targetChannelId, newDestinations)));
             }
         }
