@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.3](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.2...@statechannels/wire-format@0.8.3) (2020-11-20)
+
+**Note:** Version bump only for package @statechannels/wire-format
+
+
+
+
+
 ## [0.8.2](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.1...@statechannels/wire-format@0.8.2) (2020-11-17)
 
 
