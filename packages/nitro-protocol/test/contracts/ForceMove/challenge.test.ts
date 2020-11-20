@@ -24,6 +24,7 @@ import {
   getRandomNonce,
   getTestProvider,
   ongoingChallengeHash,
+  randomExternalDestination,
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
@@ -39,6 +40,15 @@ const wallets = new Array(3);
 const challengeDuration = 86400; // 1 day
 const emptyOutcome: Outcome = [
   {allocationItems: [], assetHolderAddress: Wallet.createRandom().address},
+];
+
+const randomDestination = randomExternalDestination();
+
+const largeOutcome = (number: number): Outcome => [
+  {
+    allocationItems: Array(number).fill({destination: randomDestination, amount: '0x01'}),
+    assetHolderAddress: Wallet.createRandom().address,
+  },
 ];
 
 const appDefinition = getPlaceHolderContractAddress();
@@ -102,6 +112,12 @@ const reverts3 = revertsWhenOpenIf + 'the states do not form a validTransition c
 const reverts4 = 'It reverts when a challenge is present if the turnNumRecord does not increase';
 const reverts5 = 'It reverts when the channel is finalized';
 
+const large1 = 'It copes with a large outcome with 10 allocationItems ';
+const large2 = 'It copes with a large outcome with 100 allocationItems ';
+const large3 = 'It copes with a large outcome with 1000 allocationItems ';
+const large4 = 'It copes with a large outcome with 10000 allocationItems ';
+const large5 = 'It copes with a large outcome with 100000 allocationItems ';
+
 type StateData = {appDatas: number[]; whoSignedWhat: number[]; outcome: Outcome}; // Only used in this test
 
 describe('challenge', () => {
@@ -112,6 +128,17 @@ describe('challenge', () => {
   };
   const oneState: StateData = {appDatas: [2], whoSignedWhat: [0, 0, 0], outcome: emptyOutcome};
   const invalid: StateData = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2], outcome: emptyOutcome};
+  const outcome10: StateData = {appDatas: [2], whoSignedWhat: [0, 0, 0], outcome: largeOutcome(10)};
+  const outcome100: StateData = {
+    appDatas: [2],
+    whoSignedWhat: [0, 0, 0],
+    outcome: largeOutcome(100),
+  };
+  const outcome1000: StateData = {
+    appDatas: [2],
+    whoSignedWhat: [0, 0, 0],
+    outcome: largeOutcome(1000),
+  };
   const largestTurnNum = 8;
   const isFinalCount = 0;
   const challenger = wallets[2];
@@ -143,6 +170,9 @@ describe('challenge', () => {
     ${reverts4} | ${challengeAtTwenty}         | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts4} | ${challengeAtLargestTurnNum} | ${oneState}    | ${undefined}       | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts5} | ${finalizedAtFive}           | ${oneState}    | ${undefined}       | ${CHANNEL_FINALIZED}
+    ${large1}   | ${empty}                     | ${outcome10}   | ${undefined}       | ${undefined}
+    ${large2}   | ${empty}                     | ${outcome100}  | ${undefined}       | ${undefined}
+    ${large3}   | ${empty}                     | ${outcome1000} | ${undefined}       | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
 
@@ -242,7 +272,7 @@ describe('challenge', () => {
           finalizesAt: eventFinalizesAt,
           state: states[states.length - 1],
           challengerAddress: challenger.address,
-          outcome: emptyOutcome,
+          outcome,
         };
         const expectedChannelStorageHash = channelDataToChannelStorageHash(expectedChannelStorage);
 
@@ -253,7 +283,7 @@ describe('challenge', () => {
   );
 });
 
-describe('forceMove with transaction generator', () => {
+describe('challenge with transaction generator', () => {
   beforeEach(async () => {
     await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
   });
