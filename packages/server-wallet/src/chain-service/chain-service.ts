@@ -90,6 +90,8 @@ function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
 }
 
+const blockConfirmations = 5;
+
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
@@ -245,14 +247,7 @@ export class ChainService implements ChainServiceInterface {
       // Fetch the current contract holding, and emit as an event
       const contract = this.getOrAddContractMapping(assetHolder);
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
-      const currentHolding = from(
-        (contract.holdings(channelId) as Promise<string>).then((holding: any) => ({
-          type: Deposited,
-          channelId,
-          assetHolderAddress: makeAddress(contract.address),
-          amount: BN.from(holding),
-        }))
-      );
+      const currentHolding = from(this.getInitialHoldings(contract, channelId));
 
       const subscription = concat<ContractEvent>(
         currentHolding,
@@ -293,25 +288,22 @@ export class ChainService implements ChainServiceInterface {
     subscriptions.map(s => s.unsubscribe());
   }
 
+  private async getInitialHoldings(contract: Contract, channelId: string): Promise<DepositedEvent> {
+    const holding = BN.from(await contract.holdings(channelId));
+
+    return {
+      type: Deposited,
+      channelId,
+      assetHolderAddress: makeAddress(contract.address),
+      amount: BN.from(holding),
+    };
+  }
+
   private async waitForConfirmations(event: Event | undefined): Promise<void> {
-    const blocksAfterEventOrRead = 5;
     if (event) {
-      await (await event.getTransaction()).wait(blocksAfterEventOrRead + 1);
+      await (await event.getTransaction()).wait(blockConfirmations + 1);
       return;
     }
-
-    await new Promise<void>(resolve => {
-      let initBlockNumber = -1;
-      const blockListener = (blockNumber: any) => {
-        if (initBlockNumber === -1) initBlockNumber = blockNumber;
-        if (blockNumber >= initBlockNumber + blocksAfterEventOrRead) {
-          this.provider.removeListener('block', blockListener);
-          resolve();
-        }
-      };
-
-      this.provider.on('block', blockListener);
-    });
   }
 
   private addContractObservable(contract: Contract): Observable<ContractEvent> {

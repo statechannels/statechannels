@@ -222,14 +222,6 @@ describe('registerChannel', () => {
       holdingUpdated,
       assetTransferred: _.noop,
     });
-    // On chain service channel registration, the chain service:
-    // 1. Reads the initial balance for the channel.
-    // 2. Emits emits the initial balance after the balance has been confirmed.
-    // At the moment, balance confirmed === wait for the sixth block after balance read
-    // This logic grants the chain service up to 100ms to register the channel and read the initial balance
-    //   before mining new blocks.
-    await new Promise(r => setTimeout(r, 100));
-    await mineBlocks();
     await p;
   });
 
