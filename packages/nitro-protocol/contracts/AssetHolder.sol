@@ -356,18 +356,8 @@ contract AssetHolder is IAssetHolder {
      */
     function transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) public {
         // checks
-        require(
-            assetOutcomeHashes[fromChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'transfer | submitted data does not match stored assetOutcomeHash'
-        );
+        _requireCorrectAllocationHash(fromChannelId, allocationBytes);
+        // effects and interactions
         _transfer(fromChannelId, allocationBytes, destination);
     }
 
@@ -379,18 +369,7 @@ contract AssetHolder is IAssetHolder {
      */
     function transferAll(bytes32 channelId, bytes memory allocationBytes) public override {
         // checks
-        require(
-            assetOutcomeHashes[channelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'transferAll | submitted data does not match stored assetOutcomeHash'
-        );
+        _requireCorrectAllocationHash(channelId, allocationBytes);
         // effects and interactions
         _transferAll(channelId, allocationBytes);
     }
@@ -406,6 +385,9 @@ contract AssetHolder is IAssetHolder {
         virtual
         AdjudicatorOnly
     {
+        // no checks
+        //
+        // effects and interactions
         _transferAll(channelId, allocationBytes);
     }
 
@@ -423,34 +405,9 @@ contract AssetHolder is IAssetHolder {
     ) public override {
         
         // checks
-        require(
-            assetOutcomeHashes[guarantorChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Guarantee),
-                            guaranteeBytes
-                        )
-                    )
-                ),
-            'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId'
-        );
-
-
+        _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
-
-        require(
-            assetOutcomeHashes[guarantee.targetChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId'
-        );
+        _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
 
         // effects and interactions
         _claimAll(guarantorChannelId,guarantee, allocationBytes);
@@ -531,5 +488,39 @@ contract AssetHolder is IAssetHolder {
      */
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
         return address(uint160(uint256(destination)));
+    }
+
+    // **************
+    // Requirers
+    // **************
+
+    function _requireCorrectAllocationHash(bytes32 channelId, bytes memory allocationBytes) internal {
+        require(
+            assetOutcomeHashes[channelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash'
+        );
+    }
+
+    function _requireCorrectGuaranteeHash(bytes32 guarantorChannelId, bytes memory guaranteeBytes) internal {
+        require(
+            assetOutcomeHashes[guarantorChannelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Guarantee),
+                            guaranteeBytes
+                        )
+                    )
+                ),
+            'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash'
+        );
     }
 }
