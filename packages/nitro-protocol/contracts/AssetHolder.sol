@@ -217,114 +217,18 @@ contract AssetHolder is IAssetHolder {
     }
 
 
-
-    // **************
-    // Public methods
-    // **************
-
     /**
-     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
-     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
-     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     * @param destination External destination or channel to transfer funds *to*.
-     */
-    function transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) public {
-        // checks
-        require(
-            assetOutcomeHashes[fromChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'transfer | submitted data does not match stored assetOutcomeHash'
-        );
-        _transfer(fromChannelId, allocationBytes, destination);
-    }
-
-    /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Checks against the storage in this contract.
-     * @param channelId Unique identifier for a state channel.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     */
-    function transferAll(bytes32 channelId, bytes memory allocationBytes) public override {
-        // checks
-        require(
-            assetOutcomeHashes[channelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'transferAll | submitted data does not match stored assetOutcomeHash'
-        );
-        _transferAll(channelId, allocationBytes);
-    }
-
-    /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
-     * @param channelId Unique identifier for a state channel.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes)
-        external
-        virtual
-        AdjudicatorOnly
-    {
-        _transferAll(channelId, allocationBytes);
-    }
-
-    /**
-     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
-     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
+     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes against on chain storage.
+     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes against on chain storage.
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
-     * @param guaranteeBytes The abi.encode of Outcome.Guarantee
+     * @param guarantee The guarantee
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
      */
-    function claimAll(
+    function _claimAll(
         bytes32 guarantorChannelId,
-        bytes memory guaranteeBytes,
+        Outcome.Guarantee memory guarantee,
         bytes memory allocationBytes
-    ) public override {
-        
-        // CHECKS
-        require(
-            assetOutcomeHashes[guarantorChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Guarantee),
-                            guaranteeBytes
-                        )
-                    )
-                ),
-            'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId'
-        );
-
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
-
-        require(
-            assetOutcomeHashes[guarantee.targetChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId'
-        );
-
+    ) internal {
         uint256 balance = holdings[guarantorChannelId];
 
         Outcome.AllocationItem[] memory allocation = abi.decode(
@@ -438,6 +342,118 @@ contract AssetHolder is IAssetHolder {
                     );
             }
         }
+    }
+    // **************
+    // Public methods
+    // **************
+
+    /**
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     * @param destination External destination or channel to transfer funds *to*.
+     */
+    function transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) public {
+        // checks
+        require(
+            assetOutcomeHashes[fromChannelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'transfer | submitted data does not match stored assetOutcomeHash'
+        );
+        _transfer(fromChannelId, allocationBytes, destination);
+    }
+
+    /**
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Checks against the storage in this contract.
+     * @param channelId Unique identifier for a state channel.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     */
+    function transferAll(bytes32 channelId, bytes memory allocationBytes) public override {
+        // checks
+        require(
+            assetOutcomeHashes[channelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'transferAll | submitted data does not match stored assetOutcomeHash'
+        );
+        // effects and interactions
+        _transferAll(channelId, allocationBytes);
+    }
+
+    /**
+     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
+     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
+     * @param channelId Unique identifier for a state channel.
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     */
+    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes)
+        external
+        virtual
+        AdjudicatorOnly
+    {
+        _transferAll(channelId, allocationBytes);
+    }
+
+    /**
+     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     * @param guarantorChannelId Unique identifier for a guarantor state channel.
+     * @param guaranteeBytes The abi.encode of Outcome.Guarantee
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
+     */
+    function claimAll(
+        bytes32 guarantorChannelId,
+        bytes memory guaranteeBytes,
+        bytes memory allocationBytes
+    ) public override {
+        
+        // checks
+        require(
+            assetOutcomeHashes[guarantorChannelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Guarantee),
+                            guaranteeBytes
+                        )
+                    )
+                ),
+            'claimAll | submitted data does not match assetOutcomeHash stored against guarantorChannelId'
+        );
+
+
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+
+        require(
+            assetOutcomeHashes[guarantee.targetChannelId] ==
+                keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            allocationBytes
+                        )
+                    )
+                ),
+            'claimAll | submitted data does not match assetOutcomeHash stored against targetChannelId'
+        );
+
+        // effects and interactions
+        _claimAll(guarantorChannelId,guarantee, allocationBytes);
     }
 
     // **************
