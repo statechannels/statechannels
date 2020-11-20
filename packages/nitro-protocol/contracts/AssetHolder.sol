@@ -53,6 +53,28 @@ contract AssetHolder is IAssetHolder {
     }
 
     /**
+     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     * @param guarantorChannelId Unique identifier for a guarantor state channel.
+     * @param guaranteeBytes The abi.encode of Outcome.Guarantee
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
+     * @param destination External destination or channel to transfer funds *to*.
+     */
+    function claim(
+        bytes32 guarantorChannelId,
+        bytes memory guaranteeBytes,
+        bytes memory allocationBytes,
+        bytes32 destination
+    ) public {
+        // checks
+        _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+        _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
+        // effects and interactions
+        _claim(guarantorChannelId,guarantee, allocationBytes, destination);
+    }
+
+    /**
      * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
@@ -217,7 +239,7 @@ contract AssetHolder is IAssetHolder {
                     )
                 )
             );
-        }
+        } 
 
         // storage updated BEFORE external contracts called (prevent reentrancy attacks)
         if (_isExternalDestination(destination)) {
@@ -225,8 +247,8 @@ contract AssetHolder is IAssetHolder {
         } else {
             holdings[destination] += affordsForDestination;
         }
-        // Event emitted regardless of success of external calls
-        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
+        // Event emitted
+        emit AssetTransferred(fromChannelId, destination, affordsForDestination);        
     }
 
     /**
@@ -312,14 +334,154 @@ contract AssetHolder is IAssetHolder {
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
-            // Event emitted regardless of success of external calls
+            // Event emitted 
             emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
         }
     }
 
     /**
-     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes against on chain storage.
-     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes against on chain storage.
+     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
+     * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
+     * @param guarantorChannelId Unique identifier for a guarantor state channel.
+     * @param guarantee The guarantee
+     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
+     * @param destination External destination or channel to transfer funds *to*.
+     */
+    function _claim(
+        bytes32 guarantorChannelId,
+        Outcome.Guarantee memory guarantee,
+        bytes memory allocationBytes,
+        bytes32 destination
+    ) internal {
+
+        Outcome.AllocationItem[] memory allocation = abi.decode(
+        allocationBytes,
+        (Outcome.AllocationItem[])
+        );
+        uint256 balance = holdings[guarantorChannelId];
+        uint256 affordsForDestination;
+        uint256 residualAllocationAmount;
+        uint256 _amount;
+        uint256 j; // indexes guarantee 
+        uint256 i; // indexes target allocations
+
+        for (j = 0; j < guarantee.destinations.length; j++) {
+            // for each _destination in the guarantee
+            bytes32 _destination = guarantee.destinations[i];
+            // if destination matches the one that is passed in
+            // loop over allocations in the target channel and decrease balance until we hit the specified destination
+            if (_destination == destination) {
+                for (i = 0; i < allocation.length; i++) {
+                    if (balance == 0) {
+                        revert('_claim | guarantorChannel affords 0 for destination');
+                    }
+                    _amount = allocation[i].amount;
+                    if (allocation[i].destination == destination) {
+                        if (balance < _amount) {
+                            affordsForDestination = balance;
+                            residualAllocationAmount = _amount - balance;
+                            balance = 0;
+                        } else {
+                            affordsForDestination = _amount;
+                            residualAllocationAmount = 0;
+                            balance = balance.sub(_amount);
+                        }
+                    break; // means that i holds the index of the destination that may need to be altered or removed for the target channel
+                    }
+                    if (balance < _amount) {
+                        balance = 0;
+                    } else {
+                        balance = balance.sub(_amount);
+                    }
+                }
+                break; // means that j holds the index of the destination that may need to be removed for the guarantor channel
+            }
+        }
+
+        require(affordsForDestination > 0, '_claim | guarantor affords 0 for destination');
+        
+        // effects
+        holdings[guarantorChannelId] -= affordsForDestination;
+
+        // construct new outcome for target
+        if (residualAllocationAmount > 0) {
+            // new allocation identical save for a single entry 
+            Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
+                allocation.length
+            );
+            for (uint256 k = 0; k < allocation.length; k++) {
+                newAllocation[k] = allocation[k];
+                if (allocation[k].destination == destination) {
+                    newAllocation[k].amount = residualAllocationAmount;
+                }
+            }
+            assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
+                abi.encode(
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        abi.encode(newAllocation)
+                    )
+                )
+            );
+        }
+
+        if (residualAllocationAmount == 0) {
+            Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
+                allocation.length - 1
+            );
+            // full payout so we want to splice a shorter outcome
+            for (uint256 k = 0; k < i; k++) {
+                splicedAllocation[k] = allocation[k];
+            }
+            for (uint256 k = i + 1; k < allocation.length; k++) {
+                splicedAllocation[k - 1] = allocation[k];
+            }
+            if (splicedAllocation.length == 0) {
+                delete assetOutcomeHashes[guarantee.targetChannelId];
+            } else {
+                assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            abi.encode(splicedAllocation)
+                        )
+                    )
+                );
+            }
+        }
+
+        if (residualAllocationAmount == 0) {
+        // we want to splice a shorter guarantee
+            bytes32[] memory newDestinations = new bytes32[](
+                guarantee.destinations.length - 1
+            );
+
+            for (uint256 k = 0; k < j; k++) {
+                newDestinations[k] = guarantee.destinations[k];
+            }
+            for (uint256 k = j + 1; k < allocation.length; k++) {
+                newDestinations[k - 1] = guarantee.destinations[k];
+            }
+            if (newDestinations.length == 0) {
+                delete assetOutcomeHashes[guarantorChannelId];
+            } else {
+                assetOutcomeHashes[guarantorChannelId] = keccak256(abi.encode(Outcome.Guarantee(guarantee.targetChannelId, newDestinations)));
+            }
+        }
+
+        // storage updated BEFORE external contracts called (prevent reentrancy attacks)
+        if (_isExternalDestination(destination)) {
+            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);    
+        } else {
+            holdings[destination] += affordsForDestination;
+        }
+        // Event emitted
+        emit AssetTransferred(guarantorChannelId, destination, affordsForDestination);        
+    }
+
+    /**
+     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes or guarantee against on chain storage.
+     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes or guarantee against on chain storage.
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
      * @param guarantee The guarantee
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
