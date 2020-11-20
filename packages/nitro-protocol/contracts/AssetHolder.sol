@@ -18,7 +18,7 @@ contract AssetHolder is IAssetHolder {
     mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
     // **************
-    // Public methods
+    // External methods
     // **************
 
     /**
@@ -28,11 +28,7 @@ contract AssetHolder is IAssetHolder {
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      * @param destination External destination or channel to transfer funds *to*.
      */
-    function transfer(
-        bytes32 fromChannelId,
-        bytes memory allocationBytes,
-        bytes32 destination
-    ) public {
+    function transfer(bytes32 fromChannelId, bytes calldata allocationBytes, bytes32 destination) external {
         // checks
         _requireCorrectAllocationHash(fromChannelId, allocationBytes);
         // effects and interactions
@@ -45,7 +41,7 @@ contract AssetHolder is IAssetHolder {
      * @param channelId Unique identifier for a state channel.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      */
-    function transferAll(bytes32 channelId, bytes memory allocationBytes) public override {
+    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external override {
         // checks
         _requireCorrectAllocationHash(channelId, allocationBytes);
         // effects and interactions
@@ -62,10 +58,10 @@ contract AssetHolder is IAssetHolder {
      */
     function claim(
         bytes32 guarantorChannelId,
-        bytes memory guaranteeBytes,
-        bytes memory allocationBytes,
+        bytes calldata guaranteeBytes,
+        bytes calldata allocationBytes,
         bytes32 destination
-    ) public {
+    ) external {
         // checks
         _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
@@ -83,9 +79,9 @@ contract AssetHolder is IAssetHolder {
      */
     function claimAll(
         bytes32 guarantorChannelId,
-        bytes memory guaranteeBytes,
-        bytes memory allocationBytes
-    ) public override {
+        bytes calldata guaranteeBytes,
+        bytes calldata allocationBytes
+    ) external override {
         // checks
         _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
