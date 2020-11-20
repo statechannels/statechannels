@@ -294,9 +294,9 @@ export class ChainService implements ChainServiceInterface {
   }
 
   private async waitForConfirmations(event: Event | undefined): Promise<void> {
-    const numConfirmations = 6;
+    const blocksAfterEventOrRead = 5;
     if (event) {
-      await (await event.getTransaction()).wait(numConfirmations);
+      await (await event.getTransaction()).wait(blocksAfterEventOrRead + 1);
       return;
     }
 
@@ -304,7 +304,7 @@ export class ChainService implements ChainServiceInterface {
       let initBlockNumber = -1;
       const blockListener = (blockNumber: any) => {
         if (initBlockNumber === -1) initBlockNumber = blockNumber;
-        if (blockNumber >= initBlockNumber + numConfirmations) {
+        if (blockNumber >= initBlockNumber + blocksAfterEventOrRead) {
           this.provider.removeListener('block', blockListener);
           resolve();
         }
