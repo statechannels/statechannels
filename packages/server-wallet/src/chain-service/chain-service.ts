@@ -301,6 +301,8 @@ export class ChainService implements ChainServiceInterface {
 
   private async waitForConfirmations(event: Event | undefined): Promise<void> {
     if (event) {
+      // `tx.wait(n)` resolves after n blocks are mined that include the given transaction `tx`
+      // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse
       await (await event.getTransaction()).wait(blockConfirmations + 1);
       return;
     }
