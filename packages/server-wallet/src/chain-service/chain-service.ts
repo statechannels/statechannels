@@ -82,7 +82,7 @@ export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterIn
 
 const Deposited = 'Deposited' as const;
 const AssetTransferred = 'AssetTransferred' as const;
-type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
+type DepositedEvent = {type: 'Deposited'; ethersEvent?: Event} & HoldingUpdatedArg;
 type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
 type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
@@ -251,11 +251,10 @@ export class ChainService implements ChainServiceInterface {
           channelId,
           assetHolderAddress: makeAddress(contract.address),
           amount: BN.from(holding),
-          ethersEvent: null,
         }))
       );
 
-      const subscription = concat(
+      const subscription = concat<ContractEvent>(
         currentHolding,
         obs.pipe(filter(event => event.channelId === channelId))
       ).subscribe({
@@ -294,7 +293,7 @@ export class ChainService implements ChainServiceInterface {
     subscriptions.map(s => s.unsubscribe());
   }
 
-  private async waitForConfirmations(event: Event | null): Promise<void> {
+  private async waitForConfirmations(event: Event | undefined): Promise<void> {
     const numConfirmations = 6;
     if (event) {
       await (await event.getTransaction()).wait(numConfirmations);
