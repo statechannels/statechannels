@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import {Contract, Wallet, ethers, Signature} from 'ethers';
 
 const {HashZero} = ethers.constants;
 const {defaultAbiCoder, hexlify} = ethers.utils;
@@ -14,7 +14,7 @@ import {
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {SignedState} from '../../../src/index';
+import {Outcome, SignedState} from '../../../src/index';
 import {signChallengeMessage, signState, signStates} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
@@ -37,7 +37,9 @@ const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 86400; // 1 day
-const outcome = [{allocationItems: [], assetHolderAddress: Wallet.createRandom().address}];
+const emptyOutcome: Outcome = [
+  {allocationItems: [], assetHolderAddress: Wallet.createRandom().address},
+];
 
 const appDefinition = getPlaceHolderContractAddress();
 const keys = [
@@ -100,10 +102,16 @@ const reverts3 = revertsWhenOpenIf + 'the states do not form a validTransition c
 const reverts4 = 'It reverts when a challenge is present if the turnNumRecord does not increase';
 const reverts5 = 'It reverts when the channel is finalized';
 
+type StateData = {appDatas: number[]; whoSignedWhat: number[]; outcome: Outcome}; // Only used in this test
+
 describe('challenge', () => {
-  const threeStates = {appDatas: [0, 1, 2], whoSignedWhat: [0, 1, 2]};
-  const oneState = {appDatas: [2], whoSignedWhat: [0, 0, 0]};
-  const invalid = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2]};
+  const threeStates: StateData = {
+    appDatas: [0, 1, 2],
+    whoSignedWhat: [0, 1, 2],
+    outcome: emptyOutcome,
+  };
+  const oneState: StateData = {appDatas: [2], whoSignedWhat: [0, 0, 0], outcome: emptyOutcome};
+  const invalid: StateData = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2], outcome: emptyOutcome};
   const largestTurnNum = 8;
   const isFinalCount = 0;
   const challenger = wallets[2];
@@ -144,8 +152,14 @@ describe('challenge', () => {
       stateData,
       challengeSignature,
       reasonString,
+    }: {
+      description: string;
+      initialChannelStorageHash: string;
+      stateData: StateData;
+      challengeSignature: Signature;
+      reasonString: string;
     }) => {
-      const {appDatas, whoSignedWhat} = stateData;
+      const {appDatas, whoSignedWhat, outcome} = stateData;
       const channel: Channel = {
         chainId,
         participants,
@@ -228,7 +242,7 @@ describe('challenge', () => {
           finalizesAt: eventFinalizesAt,
           state: states[states.length - 1],
           challengerAddress: challenger.address,
-          outcome,
+          outcome: emptyOutcome,
         };
         const expectedChannelStorageHash = channelDataToChannelStorageHash(expectedChannelStorage);
 
