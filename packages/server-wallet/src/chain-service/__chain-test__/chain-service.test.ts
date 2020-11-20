@@ -161,7 +161,7 @@ describe('registerChannel', () => {
     const channelId = randomChannelId();
     const wrongChannelId = randomChannelId();
     let counter = 0;
-    let resolve: () => void;
+    let resolve: (value: unknown) => void;
     const p = new Promise(r => (resolve = r));
 
     const holdingUpdated = (arg: HoldingUpdatedArg): void => {
@@ -184,7 +184,7 @@ describe('registerChannel', () => {
           });
           counter++;
           chainService.unregisterChannel(channelId);
-          resolve();
+          resolve(undefined);
           break;
         default:
           throw new Error('Should not reach here');
@@ -210,7 +210,7 @@ describe('registerChannel', () => {
             assetHolderAddress: ethAssetHolderAddress,
             amount: BN.from(5),
           });
-          resolve();
+          resolve(true);
         },
         assetTransferred: _.noop,
       })
@@ -219,7 +219,7 @@ describe('registerChannel', () => {
 
   it('Channel with multiple asset holders', async () => {
     const channelId = randomChannelId();
-    let resolve: () => void;
+    let resolve: (value: unknown) => void;
     const p = new Promise(r => (resolve = r));
     const objectsToMatch = _.flatten(
       [0, 5].map(amount =>
@@ -241,7 +241,7 @@ describe('registerChannel', () => {
       expect(index).toBeGreaterThan(-1);
       // Note, splice mutates the array on which it is called
       objectsToMatch.splice(index, 1);
-      if (!objectsToMatch.length) resolve();
+      if (!objectsToMatch.length) resolve(true);
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       holdingUpdated,
@@ -279,7 +279,7 @@ describe('concludeAndWithdraw', () => {
                 to: makeDestination(bAddress),
                 channelId,
               });
-              resolve();
+              resolve(true);
               break;
           }
         },
@@ -320,7 +320,7 @@ describe('concludeAndWithdraw', () => {
                 to: makeDestination(bAddress),
                 channelId,
               });
-              resolve();
+              resolve(true);
               break;
           }
         },
