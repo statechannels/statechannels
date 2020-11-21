@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.3.30](https://github.com/statechannels/statechannels/compare/docs-website@0.3.29...docs-website@0.3.30) (2020-11-21)
+
+**Note:** Version bump only for package docs-website
+
+
+
+
+
 ## [0.3.29](https://github.com/statechannels/statechannels/compare/docs-website@0.3.25...docs-website@0.3.29) (2020-11-20)
 
 **Note:** Version bump only for package docs-website

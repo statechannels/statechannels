@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.12.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.8...@statechannels/server-wallet@1.12.0) (2020-11-21)
+
+
+### Bug Fixes
+
+* add type to get around Error TS2794: Expected 1 arguments, but got 0 ([cd09464](https://github.com/statechannels/statechannels/commit/cd09464cba6c19ce5bcbb599c22af2d1fc09ff6a))
+* insert a timeout to avoid directly-funded-channel log error ([d7f8744](https://github.com/statechannels/statechannels/commit/d7f87440bc94692fbaa632162a6e5c990ed0f728))
+* remove block listener after event is confirmed ([0871514](https://github.com/statechannels/statechannels/commit/08715141d88524940b2adb7f1a0002f830c492ec))
+* remove logic delaying initial holdingUpdated call ([cdadfc8](https://github.com/statechannels/statechannels/commit/cdadfc88dd91873f4865a55f207d3ac035ea8d93))
+* wait for the sixth block after balance read ([22fb374](https://github.com/statechannels/statechannels/commit/22fb374eeff8aed95f1513f76f8c08776e8327dd))
+
+
+### Features
+
+* chain service waits for 6 blocks before forwarding an event ([3019b2d](https://github.com/statechannels/statechannels/commit/3019b2d69f26318ac0c43cf010e9f7765fd78790))
+
+
+### Performance Improvements
+
+* add channel_id index to objectives_channels ([22ebcf7](https://github.com/statechannels/statechannels/commit/22ebcf7159fe19193d9fde10a6977dfd99d3c7db))
+
+
+
+
+
 ## [1.11.8](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.4...@statechannels/server-wallet@1.11.8) (2020-11-20)
 
 

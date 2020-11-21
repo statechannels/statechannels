@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.9.0...@statechannels/nitro-protocol@0.9.1) (2020-11-21)
+
+
+### Bug Fixes
+
+* add nonzero check after ecrecover ([32503b8](https://github.com/statechannels/monorepo/commit/32503b858a4f609685c2f1c4badfaf3c9e992e58))
+
+
+
+
+
 # [0.9.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.8.3...@statechannels/nitro-protocol@0.9.0) (2020-11-20)
 
 

@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](https://github.com/statechannels/monorepo/compare/@statechannels/devtools@0.4.5...@statechannels/devtools@0.5.0) (2020-11-21)
+
+
+### Bug Fixes
+
+* incorrect gasLimit format ([2a2b58a](https://github.com/statechannels/monorepo/commit/2a2b58a013606bc9e3d3add25366a8fceae576f7))
+
+
+### Features
+
+* chain service waits for 6 blocks before forwarding an event ([3019b2d](https://github.com/statechannels/monorepo/commit/3019b2d69f26318ac0c43cf010e9f7765fd78790))
+
+
+
+
+
 ## [0.4.5](https://github.com/statechannels/monorepo/compare/@statechannels/devtools@0.4.4...@statechannels/devtools@0.4.5) (2020-11-20)
 
 **Note:** Version bump only for package @statechannels/devtools
