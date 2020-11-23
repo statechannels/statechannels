@@ -62,7 +62,12 @@ test.each`
       latestSignedByMe,
       funding,
       myIndex,
-      directFundingStatus: Channel.directFundingStatus(supported, funding, participants[myIndex]),
+      directFundingStatus: Channel.directFundingStatus(
+        supported,
+        funding,
+        participants[myIndex],
+        'Direct'
+      ),
     },
   });
   expect(protocol(ps)).toMatchObject(action);
