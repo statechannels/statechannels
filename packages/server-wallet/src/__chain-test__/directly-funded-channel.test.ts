@@ -42,15 +42,16 @@ async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
 }
 
-async function mineBlocks() {
-  for (const _i in _.range(5)) {
+async function mineBlocks(confirmations = 5) {
+  for (const _i in _.range(confirmations)) {
     await provider.send('evm_mine', []);
   }
 }
 
+const mineBlocksForEvent = () => mineBlocks();
+
 function mineOnEvent(contract: Contract) {
-  contract.on('Deposited', mineBlocks);
-  contract.on('AssetTransferred', mineBlocks);
+  contract.on('Deposited', mineBlocksForEvent);
 }
 
 beforeAll(async () => {
@@ -119,10 +120,6 @@ it('Create a directly funded channel between two wallets ', async () => {
     .toPromise();
 
   const assetTransferredAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
-    .pipe(take(3))
-    .toPromise();
-
-  const assetTransferredBPromise = fromEvent<SingleChannelOutput>(b as any, 'channelUpdated')
     .pipe(take(3))
     .toPromise();
 
@@ -207,17 +204,24 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, close2A.channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 4,
+    fundingStatus: 'Funded',
   });
 
-  const assetTransferredA = await assetTransferredAPromise;
-  const assetTransferredB = await assetTransferredBPromise;
-
-  expect(assetTransferredA.channelResult).toMatchObject({
+  // Mine a few blocks, but not enough for the chain service to update holdings
+  // Then wait 500ms so that, if the chain service incorrectly updated holdings,
+  // then the updated holdings would have been processed by the wallet.
+  await mineBlocks(3);
+  await new Promise(r => setTimeout(r, 500));
+  expect(getChannelResultFor(channelId, (await a.getChannels()).channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 4,
-    fundingStatus: 'Defunded',
+    //fundingStatus: 'Funded',
   });
-  expect(assetTransferredB.channelResult).toMatchObject({
+
+  await mineBlocks(2);
+  const assetTransferredA = await assetTransferredAPromise;
+
+  expect(assetTransferredA.channelResult).toMatchObject({
     status: 'closed',
     turnNum: 4,
     fundingStatus: 'Defunded',
