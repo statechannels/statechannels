@@ -195,7 +195,7 @@ export class Channel extends Model implements RequiredColumns {
     }
 
     const outcome = supported?.outcome;
-    if (!outcome) {
+    if (!supported || !outcome) {
       return 'Unfunded';
     }
 
@@ -220,7 +220,7 @@ export class Channel extends Model implements RequiredColumns {
     const amountTransferredToMe = funding.transferredOut
       .filter(tf => tf.toAddress === myAllocation.destination)
       .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
-    if (BN.gt(myAllocation.amount, 0) && BN.gte(amountTransferredToMe, myAllocation.amount)) {
+    if (supported.isFinal && BN.gte(amountTransferredToMe, myAllocation.amount)) {
       return 'Defunded';
     }
 
