@@ -46,7 +46,7 @@ export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWa
       erc20AssetHolderAddress: process.env.ERC20_ASSET_HOLDER_ADDRESS,
     },
 
-    skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
+    skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
 
     workerThreadAmount: readInt(process.env.AMOUNT_OF_WORKER_THREADS, config.workerThreadAmount),
     loggingConfiguration: {
