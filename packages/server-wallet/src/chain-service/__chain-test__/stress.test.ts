@@ -12,8 +12,9 @@ const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRE
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultTestConfig.rpcEndpoint;
+if (!defaultTestConfig.networkConfiguration.rpcEndpoint)
+  throw new Error('rpc endpoint must be defined');
+const rpcEndpoint = defaultTestConfig.networkConfiguration.rpcEndpoint;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 // This is the private key for which ERC20 tokens are allocated on contract creation
 const ethWalletWithTokens = new Wallet(defaultTestConfig.ethereumPrivateKey, provider);

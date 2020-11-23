@@ -46,7 +46,10 @@ import {ObjectiveModel, DBObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
-import {logger as defaultLogger} from '../logger';
+import {defaultTestConfig} from '../config';
+import {createLogger} from '../logger';
+
+const defaultLogger = createLogger(defaultTestConfig);
 
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -192,7 +195,7 @@ export class Store {
 
       if (
         !(await timer('validating transition', async () =>
-          validateTransition(supported, signedState, bytecode, this.skipEvmValidation)
+          validateTransition(supported, signedState, bytecode, this.logger, this.skipEvmValidation)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
@@ -570,7 +573,7 @@ export class Store {
         });
 
       const isValidTransition = syncTimer('validating transition', () =>
-        validateTransition(supported, state, bytecode, this.skipEvmValidation)
+        validateTransition(supported, state, bytecode, this.logger, this.skipEvmValidation)
       );
 
       if (!isValidTransition) {

@@ -3,15 +3,15 @@ import {BN, makeAddress, makeDestination, Participant} from '@statechannels/wall
 import {ethers} from 'ethers';
 
 import {Outgoing} from '../..';
-import {defaultTestConfig} from '../../config';
+import {createTestConfig} from '../../config';
 import {Bytes32} from '../../type-aliases';
 import {Wallet} from '../../wallet';
 import {crashAndRestart, getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
-let a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
-let b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
+let a = Wallet.create(createTestConfig('TEST_A'));
+let b = Wallet.create(createTestConfig('TEST_B'));
 
 let participantA: Participant;
 let participantB: Participant;

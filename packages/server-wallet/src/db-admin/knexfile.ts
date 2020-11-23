@@ -16,35 +16,30 @@ WARNING: @statechannels/devtools not detected.
   else throw err;
 }
 
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import {extractDBConfigFromServerWalletConfig, ServerWalletConfig} from '../config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
-
-let knexConfig: Config = {
-  ...extractDBConfigFromServerWalletConfig(defaultConfig),
-  debug: defaultConfig.debugKnex === 'TRUE',
-  migrations: {
-    directory: path.join(BASE_PATH, 'migrations'),
-    loadExtensions: extensions,
-  },
-  seeds: {
-    directory: path.join(BASE_PATH, 'seeds'),
-    loadExtensions: extensions,
-  },
-  /**
-   * SEE: db-admin-connection.ts
-   * To safely run migrations, we cannot use knexSnakeCaseMappers in the knex config
-   * https://github.com/Vincit/objection.js/issues/1144
-   * So, in our admin knex config, which is used for running migrations, we
-   * overwrite the two config options set by knexSnakeCaseMappers
-   */
-  postProcessResponse: undefined,
-  wrapIdentifier: undefined,
-};
-
-if (defaultConfig.nodeEnv === 'development') {
-  knexConfig = {...knexConfig, pool: {min: 0, max: 1}};
+export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> {
+  return {
+    ...extractDBConfigFromServerWalletConfig(walletConfig),
+    debug: walletConfig.databaseConfiguration.debug,
+    migrations: {
+      directory: path.join(BASE_PATH, 'migrations'),
+      loadExtensions: extensions,
+    },
+    seeds: {
+      directory: path.join(BASE_PATH, 'seeds'),
+      loadExtensions: extensions,
+    },
+    /**
+     * SEE: db-admin-connection.ts
+     * To safely run migrations, we cannot use knexSnakeCaseMappers in the knex config
+     * https://github.com/Vincit/objection.js/issues/1144
+     * So, in our admin knex config, which is used for running migrations, we
+     * overwrite the two config options set by knexSnakeCaseMappers
+     */
+    postProcessResponse: undefined,
+    wrapIdentifier: undefined,
+  };
 }
-
-export const {client, connection, debug, migrations, seeds, pool} = knexConfig;

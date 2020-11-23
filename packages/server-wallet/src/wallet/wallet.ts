@@ -38,7 +38,12 @@ import * as ChannelState from '../protocols/state';
 import {isWalletError, PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
+import {
+  ServerWalletConfig,
+  extractDBConfigFromServerWalletConfig,
+  defaultConfig,
+  IncomingServerWalletConfig,
+} from '../config';
 import {
   ChainServiceInterface,
   ChainEventSubscriberInterface,
@@ -111,36 +116,37 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   readonly walletConfig: ServerWalletConfig;
 
-  public static create(walletConfig?: ServerWalletConfig): SingleThreadedWallet {
+  public static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet {
     return new SingleThreadedWallet(walletConfig);
   }
 
   // protected constructor to force consumers to initialize wallet via Wallet.create(..)
-  protected constructor(walletConfig?: ServerWalletConfig) {
+  protected constructor(walletConfig: IncomingServerWalletConfig) {
     super();
-    this.walletConfig = walletConfig || defaultConfig;
+    this.walletConfig = _.assign({}, defaultConfig, walletConfig);
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
     this.logger = createLogger({...this.walletConfig});
     this.store = new Store(
       this.knex,
-      this.walletConfig.timingMetrics,
+      this.walletConfig.metricConfiguration.timingMetrics,
       this.walletConfig.skipEvmValidation,
-      this.walletConfig.chainNetworkID,
+      this.walletConfig.networkConfiguration.chainNetworkID,
       this.logger
     );
 
+    // TODO: This should probably be in validation
     // set up timing metrics
-    if (this.walletConfig.timingMetrics) {
-      if (!this.walletConfig.metricsOutputFile) {
+    if (this.walletConfig.metricConfiguration.timingMetrics) {
+      if (!this.walletConfig.metricConfiguration.metricsOutputFile) {
         throw Error('You must define a metrics output file');
       }
-      setupMetrics(this.walletConfig.metricsOutputFile);
+      setupMetrics(this.walletConfig.metricConfiguration.metricsOutputFile);
     }
 
-    if (walletConfig?.rpcEndpoint && walletConfig.ethereumPrivateKey) {
+    if (this.walletConfig.networkConfiguration.rpcEndpoint) {
       this.chainService = new ChainService(
-        walletConfig.rpcEndpoint,
-        walletConfig.ethereumPrivateKey
+        this.walletConfig.networkConfiguration.rpcEndpoint,
+        this.walletConfig.ethereumPrivateKey
       );
     } else {
       this.logger.debug(
@@ -153,7 +159,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       store: this.store,
       chainService: this.chainService,
       logger: this.logger,
-      timingMetrics: this.walletConfig.timingMetrics,
+      timingMetrics: this.walletConfig.metricConfiguration.timingMetrics,
     });
   }
 
@@ -164,7 +170,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(
-      this.walletConfig.chainNetworkID,
+      this.walletConfig.networkConfiguration.chainNetworkID,
       makeAddress(appDefinition),
       bytecode
     );
@@ -172,7 +178,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
     return this.store.upsertBytecode(
-      this.walletConfig.chainNetworkID,
+      this.walletConfig.networkConfiguration.chainNetworkID,
       makeAddress(appDefinition),
       bytecode
     );
@@ -329,7 +335,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     const constants = {
       appDefinition: makeAddress(appDefinition),
-      chainId: this.walletConfig.chainNetworkID,
+      chainId: this.walletConfig.networkConfiguration.chainNetworkID,
       challengeDuration: 9001,
       channelNonce,
       participants,
@@ -403,7 +409,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     allocations,
     appData,
   }: UpdateChannelParams): Promise<SingleChannelOutput> {
-    const timer = timerFactory(this.walletConfig.timingMetrics, `updateChannel ${channelId}`);
+    const timer = timerFactory(
+      this.walletConfig.metricConfiguration.timingMetrics,
+      `updateChannel ${channelId}`
+    );
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new UpdateChannel.UpdateChannelError(
         UpdateChannel.UpdateChannelError.reasons.channelNotFound,
@@ -416,13 +425,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
-        this.walletConfig.timingMetrics
+        this.walletConfig.metricConfiguration.timingMetrics
       );
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
           UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
-          this.walletConfig.timingMetrics
+          this.walletConfig.metricConfiguration.timingMetrics
         )
       );
       const signedState = await timer('signing state', async () => {
@@ -587,7 +596,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         );
         const action = recordFunctionMetrics(
           ProcessLedgerQueue.protocol(protocolState),
-          this.walletConfig.timingMetrics
+          this.walletConfig.metricConfiguration.timingMetrics
         );
 
         if (!action) {

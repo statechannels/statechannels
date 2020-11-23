@@ -13,7 +13,7 @@ import {SingleThreadedWallet} from './wallet';
 export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
 
 export const Wallet = {
-  create(walletConfig?: ServerWalletConfig): Wallet {
+  create(walletConfig: ServerWalletConfig): Wallet {
     if (walletConfig?.workerThreadAmount && walletConfig.workerThreadAmount > 0) {
       return MultiThreadedWallet.create(walletConfig);
     } else {

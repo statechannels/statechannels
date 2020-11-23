@@ -11,16 +11,13 @@ import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {
+  createTestConfig,
   extractDBConfigFromServerWalletConfig,
   ServerWalletConfig,
-  defaultTestConfig,
 } from '../src/config';
 
-export const payerConfig: ServerWalletConfig = {...defaultTestConfig, postgresDBName: 'payer'};
-export const receiverConfig: ServerWalletConfig = {
-  ...defaultTestConfig,
-  postgresDBName: 'receiver',
-};
+export const payerConfig: ServerWalletConfig = createTestConfig('payer');
+export const receiverConfig: ServerWalletConfig = createTestConfig('receiver');
 
 import {PerformanceTimer} from './payer/timers';
 

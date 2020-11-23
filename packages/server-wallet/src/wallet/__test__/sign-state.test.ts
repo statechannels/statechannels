@@ -18,7 +18,7 @@ let store: Store;
 beforeAll(async () => {
   store = new Store(
     knex,
-    defaultTestConfig.timingMetrics,
+    defaultTestConfig.metricConfiguration.timingMetrics,
     defaultTestConfig.skipEvmValidation,
     '0'
   );

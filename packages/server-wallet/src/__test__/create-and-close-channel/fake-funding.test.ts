@@ -7,12 +7,12 @@ import {
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
-import {defaultTestConfig} from '../../config';
+import {createTestConfig} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
-const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
-const b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
+const a = Wallet.create(createTestConfig('TEST_A'));
+const b = Wallet.create(createTestConfig('TEST_B'));
 
 let channelId: string;
 let participantA: Participant;

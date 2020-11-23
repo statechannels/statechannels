@@ -1,5 +1,7 @@
 import {makeAddress, SimpleAllocation} from '@statechannels/wallet-core';
 
+import {defaultTestConfig} from '../../config';
+import {createLogger} from '../../logger';
 import {validateTransition} from '../../utilities/validate-transition';
 
 import {alice, bob} from './fixtures/signing-wallets';
@@ -33,6 +35,7 @@ describe('validate transition', () => {
         stateWithHashSignedBy([fromSigner])(fromState),
         stateWithHashSignedBy([toSigner])(toState),
         undefined,
+        createLogger(defaultTestConfig),
         true
       )
     ).toEqual(expectedResult);

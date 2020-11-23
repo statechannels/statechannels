@@ -39,11 +39,11 @@ export default {
 
   handler: async (argv: {[key: string]: any} & Argv['argv']): Promise<void> => {
     const {database, numPayments, channels} = argv;
-
+    const {host, port} = defaultTestConfig.databaseConfiguration.connection;
     const payerClient = recordFunctionMetrics(
       new PayerClient(alice().privateKey, `http://127.0.0.1:65535`, {
         ...defaultTestConfig,
-        postgresDBName: database,
+        databaseConfiguration: {connection: {host, port, dbName: database}},
       })
     );
 

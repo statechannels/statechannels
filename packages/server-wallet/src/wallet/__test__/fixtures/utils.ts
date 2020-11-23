@@ -1,5 +1,6 @@
 import _ from 'lodash';
 import {StateVariables, Outcome} from '@statechannels/wallet-core';
+
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };

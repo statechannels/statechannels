@@ -2,9 +2,11 @@ import {createValidTransitionTransaction, State as NitroState} from '@statechann
 import * as PureEVM from '@connext/pure-evm-wasm';
 import {utils} from 'ethers';
 
-import {logger} from './logger';
 import {Bytes} from './type-aliases';
+import {createLogger} from './logger';
+import {defaultTestConfig} from './config';
 
+const logger = createLogger(defaultTestConfig);
 /**
  * Takes two states and runs the validateTransition in an evm (pureevm).
  * Returns a promise that resolves to true if the validateTransition

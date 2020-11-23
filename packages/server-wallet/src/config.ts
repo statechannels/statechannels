@@ -1,65 +1,174 @@
-/**
- * This should be the only file that reads from the environment.
- */
-
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
 import * as pino from 'pino';
 
-export interface ServerWalletConfig {
-  nodeEnv?: 'test' | 'development' | 'production';
-  postgresDatabaseUrl?: string;
-  postgresHost?: string;
-  postgresPort?: string;
-  postgresDBName?: string;
-  postgresDBUser?: string;
-  postgresDBPassword?: string;
-  ethereumPrivateKey: string;
-  rpcEndpoint?: string;
-  chainNetworkID: string;
+/**
+ * Database config
+ */
+
+export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration &
+  Partial<OptionalDatabaseConfiguration>;
+
+export type RequiredConnectionConfiguration = {dbName: string} | string;
+export type OptionalConnectionConfiguration =
+  | {host: string; port: number; user?: string; password?: string}
+  | string;
+
+export type DatabasePoolConfiguration = {max?: number; min?: number};
+
+export type RequiredDatabaseConfiguration = {connection: RequiredConnectionConfiguration};
+export type OptionalDatabaseConfiguration = {
+  pool?: DatabasePoolConfiguration;
+  debug?: boolean;
+  connection: OptionalConnectionConfiguration;
+};
+export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
+
+export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
+  connection: {host: string; port: number};
+} = {
+  pool: undefined,
+  debug: false,
+  connection: {host: 'localhost', port: 5432},
+};
+
+/**
+ * Network config
+ */
+export type NetworkConfiguration = {
   erc20Address?: string;
   ethAssetHolderAddress?: string;
   erc20AssetHolderAddress?: string;
-  debugKnex?: string;
-  skipEvmValidation: boolean;
-  timingMetrics: boolean;
-  metricsOutputFile?: string;
-  workerThreadAmount: number;
-  logLevel: pino.Level;
-  logDestination?: string; // console or undefined will log to console
-  postgresPoolSize?: {max: number; min: number};
-}
-
-// TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
-export const defaultConfig: ServerWalletConfig = {
-  nodeEnv: process.env.NODE_ENV as 'test' | 'development' | 'production',
-  postgresDatabaseUrl: process.env.SERVER_URL,
-  postgresHost: process.env.SERVER_HOST,
-  postgresPort: process.env.SERVER_PORT,
-  postgresDBName: process.env.SERVER_DB_NAME,
-  postgresDBUser: process.env.SERVER_DB_USER,
-  postgresDBPassword: process.env.SERVER_DB_PASSWORD,
-  ethereumPrivateKey:
-    process.env.ETHEREUM_PRIVATE_KEY ||
-    '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
-  rpcEndpoint: process.env.RPC_ENDPOINT,
-  chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x00',
-  ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
-  erc20Address: process.env.ERC20_ADDRESS,
-  erc20AssetHolderAddress: process.env.ERC20_ASSET_HOLDER_ADDRESS,
-  debugKnex: process.env.DEBUG_KNEX,
-  skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
-  timingMetrics: process.env.TIMING_METRICS === 'ON',
-  metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
-  workerThreadAmount: Number.parseInt(process.env.AMOUNT_OF_WORKER_THREADS || '0', 10),
-  logLevel: (process.env.LOG_LEVEL as pino.Level) || 'info',
-  logDestination: process.env.LOG_DESTINATION || 'console',
+  rpcEndpoint?: string;
+  chainNetworkID: string;
+};
+export const defaultNetworkConfiguration: NetworkConfiguration = {
+  chainNetworkID: '0x00',
+  erc20Address: undefined,
+  ethAssetHolderAddress: undefined,
+  erc20AssetHolderAddress: undefined,
 };
 
-export const defaultTestConfig = {
+/**
+ * Logging and Metrics config
+ */
+export type LoggingConfiguration = {logLevel: pino.Level; logDestination: string};
+export const defaultLoggingConfiguration: LoggingConfiguration = {
+  logLevel: 'info',
+  logDestination: 'console',
+};
+
+export type MetricConfiguration = {timingMetrics: boolean; metricsOutputFile?: string};
+export const defaultMetricConfiguration = {timingMetrics: false};
+
+/**
+ * Server Wallet config
+ */
+
+/**
+ * The required configuration to use the server wallet
+ */
+export type RequiredServerWalletConfig = {
+  databaseConfiguration: RequiredDatabaseConfiguration;
+};
+
+/**
+ * Additional configuration options for the server wallet
+ */
+export interface OptionalServerWalletConfig {
+  databaseConfiguration: OptionalDatabaseConfiguration;
+  stateChannelPrivateKey: string;
+  ethereumPrivateKey: string;
+  networkConfiguration: NetworkConfiguration;
+  skipEvmValidation: boolean;
+  workerThreadAmount: number;
+  loggingConfiguration: LoggingConfiguration;
+  metricConfiguration: MetricConfiguration;
+}
+
+export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWalletConfig;
+export type IncomingServerWalletConfig = RequiredServerWalletConfig &
+  Partial<OptionalServerWalletConfig>;
+
+/**
+ * These are the default values that will be used by the server wallet
+ * if not overidden in the provided config
+ */
+export const defaultConfig: OptionalServerWalletConfig = {
+  databaseConfiguration: defaultDatabaseConfiguration,
+  networkConfiguration: defaultNetworkConfiguration,
+  loggingConfiguration: defaultLoggingConfiguration,
+  metricConfiguration: defaultMetricConfiguration,
+  // TODO: List addresses these keys correspond to
+  stateChannelPrivateKey: '0x1b427b7ab88e2e10674b5aa92bb63c0ca26aa0b5a858e1d17295db6ad91c049b',
+  ethereumPrivateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
+  skipEvmValidation: false,
+  workerThreadAmount: 10,
+};
+
+function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
+  if (!envValue) return defaultValue || false;
+  return envValue?.toLowerCase() === 'true';
+}
+function readInt(envValue: string | undefined, defaultValue?: number): number {
+  if (!envValue) return defaultValue || 0;
+  return Number.parseInt(envValue);
+}
+export const configFromEnvVars: ServerWalletConfig = {
+  databaseConfiguration: {
+    connection: process.env.SERVER_URL || {
+      host: process.env.SERVER_HOST || defaultDatabaseConfiguration.connection.host,
+      port: Number(process.env.SERVER_PORT) || defaultDatabaseConfiguration.connection.port,
+      dbName: process.env.SERVER_DB_NAME || '',
+      user: process.env.SERVER_DB_USER,
+      password: process.env.SERVER_DB_PASSWORD,
+    },
+    debug: readBoolean(process.env.DEBUG_KNEX, defaultConfig.databaseConfiguration.debug),
+  },
+  metricConfiguration: {
+    timingMetrics: readBoolean(
+      process.env.TIMING_METRICS,
+      defaultConfig.metricConfiguration.timingMetrics
+    ),
+    metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
+  },
+
+  stateChannelPrivateKey:
+    process.env.STATE_CHANNEL_PRIVATE_KEY || defaultConfig.stateChannelPrivateKey,
+  ethereumPrivateKey: process.env.ETHEREUM_PRIVATE_KEY || defaultConfig.ethereumPrivateKey,
+  networkConfiguration: {
+    rpcEndpoint: process.env.RPC_ENDPOINT,
+    chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x00',
+    ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+    erc20Address: process.env.ERC20_ADDRESS,
+    erc20AssetHolderAddress: process.env.ERC20_ASSET_HOLDER_ADDRESS,
+  },
+
+  skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
+
+  workerThreadAmount: readInt(
+    process.env.AMOUNT_OF_WORKER_THREADS,
+    defaultConfig.workerThreadAmount
+  ),
+  loggingConfiguration: {
+    logLevel: (process.env.LOG_LEVEL as pino.Level) || defaultConfig.loggingConfiguration.logLevel,
+    logDestination:
+      process.env.LOG_DESTINATION || defaultConfig.loggingConfiguration.logDestination,
+  },
+};
+type HasDatabaseConnectionConfigObject = {
+  databaseConfiguration: {connection: {host: string; port: number; dbName: string}};
+};
+export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfigObject = {
   ...defaultConfig,
-  skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
-  postgresPoolSize: {max: 1, min: 0},
+  skipEvmValidation: readBoolean(process.env.SKIP_EVM_VALIDATION, true),
+  databaseConfiguration: {
+    connection: {
+      host: defaultDatabaseConfiguration.connection.host,
+      port: defaultDatabaseConfiguration.connection.port,
+      dbName: 'server_wallet_test',
+    },
+  },
 };
 
 export function extractDBConfigFromServerWalletConfig(
@@ -67,14 +176,30 @@ export function extractDBConfigFromServerWalletConfig(
 ): Config {
   return {
     client: 'postgres',
-    connection: serverWalletConfig.postgresDatabaseUrl || {
-      host: serverWalletConfig.postgresHost,
-      port: Number(serverWalletConfig.postgresPort),
-      database: serverWalletConfig.postgresDBName,
-      user: serverWalletConfig.postgresDBUser,
-      password: serverWalletConfig.postgresDBPassword,
-    },
+    connection: serverWalletConfig.databaseConfiguration.connection,
     ...knexSnakeCaseMappers(),
-    pool: serverWalletConfig.postgresPoolSize || {},
+    pool: serverWalletConfig.databaseConfiguration.pool || {},
   };
+}
+
+export function createTestConfig(databaseName: string): ServerWalletConfig {
+  const {host, port} = defaultTestConfig.databaseConfiguration.connection;
+
+  return {
+    ...defaultTestConfig,
+    databaseConfiguration: {
+      ...defaultTestConfig.databaseConfiguration,
+      connection: {host, port, dbName: databaseName},
+    },
+  };
+}
+
+export function getDbName(config: ServerWalletConfig): string {
+  if (typeof config.databaseConfiguration.connection === 'string') {
+    // TODO: parse out the db name from the connection string
+    return config.databaseConfiguration.connection;
+  } else {
+    // TODO: Sort out the typing
+    return (config.databaseConfiguration.connection as {dbName: string}).dbName;
+  }
 }
