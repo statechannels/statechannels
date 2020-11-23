@@ -365,7 +365,7 @@ contract AssetHolder is IAssetHolder {
             if (balance == 0) {
                 revert('_claim | guarantorChannel affords 0 for destination');
             }
-            // for each _destination in the guarantee,
+            // for each destination in the guarantee,
             // find the first corresponding allocationItem in the target allocation
             bytes32 guaranteeDestination = guarantee.destinations[j];
             for (i = 0; i < allocation.length; i++) {
@@ -389,7 +389,7 @@ contract AssetHolder is IAssetHolder {
                             }
                             balance = balance.sub(_amount); // this isn't used after we break
                         }
-                    
+                    break;
                 }
             }
             if (affordsForDestination > 0) {
