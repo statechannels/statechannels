@@ -232,7 +232,12 @@ export class Channel extends Model implements RequiredColumns {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
-    const directFundingStatus = this._directFundingStatus(supported, funding, myIndex);
+    const directFundingStatus = this._directFundingStatus(
+      supported,
+      funding,
+      myIndex,
+      participants[myIndex]
+    );
     return {
       myIndex: myIndex as 0 | 1,
       participants,
@@ -358,7 +363,8 @@ export class Channel extends Model implements RequiredColumns {
   private _directFundingStatus(
     supported: SignedStateVarsWithHash | undefined,
     fundingFn: (address: Address) => ChannelStateFunding,
-    myIndex: number
+    myIndex: number,
+    myParticipant: Participant
   ): DirectFundingStatus {
     const outcome = supported?.outcome;
     if (!outcome) {
@@ -367,24 +373,37 @@ export class Channel extends Model implements RequiredColumns {
 
     const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
 
-    const myItem = allocationItems[myIndex];
+    // Collapse all allocation items with my destination into one
+    const myAllocation = allocationItems
+      .filter(ai => ai.destination === myParticipant.destination)
+      .reduce(
+        (soFar, currentAi) => ({
+          ...soFar,
+          amount: BN.add(soFar.amount, currentAi.amount),
+        }),
+        {
+          destination: myParticipant.destination,
+          amount: BN.from(0),
+        }
+      );
+
     const funding = fundingFn(assetHolderAddress);
 
     const amountTransferredToMe = funding.transferredOut
-      .filter(tf => tf.toAddress === myItem.destination)
+      .filter(tf => tf.toAddress === myAllocation.destination)
       .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
-    if (BN.gte(amountTransferredToMe, myItem.amount)) {
+    if (BN.gte(amountTransferredToMe, myAllocation.amount)) {
       return 'Defunded';
     }
 
     const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-    if (BN.eq(amountTransferredToMe, 0) && BN.gte(fullFunding, funding.amount)) {
+    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fullFunding)) {
       return 'Funded';
     }
 
     const allocationsBeforeMe = _.takeWhile(
       allocationItems,
-      a => a.destination !== myItem.destination
+      a => a.destination !== myAllocation.destination
     );
     const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
     if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {

@@ -222,8 +222,16 @@ function myPostfundTurnNumber({app}: ProtocolState): number {
 }
 
 const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false => {
+  /**
+   * The below logic assumes:
+   *  1. Each destination occurs at most once.
+   *  2. We only care about a single destination.
+   * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
+   */
+
   if (!app.supported) return false;
   if (app.chainServiceRequests.indexOf('fund') > -1) return false;
+  if (app.directFundingStatus !== 'ReadyToFund') return false;
 
   const myDestination = app.participants[app.myIndex].destination;
   const {allocationItems, assetHolderAddress} = checkThat(
@@ -231,16 +239,7 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
     isSimpleAllocation
   );
 
-  /**
-   * The below logic assumes:
-   *  1. Each destination occurs at most once.
-   *  2. We only care about a single destination.
-   * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
-   */
   const currentFunding = app.funding(assetHolderAddress).amount;
-  const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
-  const targetFunding = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
-  if (BN.lt(currentFunding, targetFunding)) return false;
 
   const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
   if (!myAllocationItem) {
