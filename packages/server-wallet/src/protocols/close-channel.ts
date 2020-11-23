@@ -1,4 +1,4 @@
-import {BN, checkThat, isSimpleAllocation, State, unreachable} from '@statechannels/wallet-core';
+import {checkThat, isSimpleAllocation, State, unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 import {Logger} from 'pino';
 
@@ -169,21 +169,7 @@ function everyoneSignedFinalState(ps: ProtocolState): boolean {
 //       should there be a generic logic for computing whether a channel is defunded regardless of funding type?
 function successfulWithdraw({app}: ProtocolState): boolean {
   if (app.fundingStrategy !== 'Direct') return true;
-  if (!app.supported) return false;
-
-  const {allocationItems, assetHolderAddress} = checkThat(
-    app.supported.outcome,
-    isSimpleAllocation
-  );
-  const myDestination = app.participants[app.myIndex].destination;
-  const amountOwedToMe = allocationItems
-    .filter(ai => ai.destination === myDestination)
-    .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
-  const amountTransferredToMe = app
-    .funding(assetHolderAddress)
-    .transferredOut.filter(tf => tf.toAddress === myDestination)
-    .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
-  return BN.eq(amountOwedToMe, amountTransferredToMe);
+  return app.directFundingStatus === 'Defunded';
 }
 
 const isMyTurn = (ps: ProtocolState): boolean =>
