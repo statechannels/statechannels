@@ -43,8 +43,6 @@ const reason5 =
 const reason6 =
   'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash';
 
-const reason7 = '_claim | guarantorChannel affords 0 for destination';
-
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
 // 3. claim G1 (step 1 of alternative in figure 23 of nitro paper)
@@ -55,7 +53,7 @@ describe('claim', () => {
   it.each`
     name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | destination | tOutcomeAfter   | heldAfter | payouts   | events    | reason
     ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${'I'}      | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${{I: 5}} | ${undefined}
-    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${'B'}      | ${{A: 5, B: 5}} | ${{g: 5}} | ${{}}     | ${{}}     | ${reason7}
+    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${'B'}      | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${{B: 5}} | ${undefined}
     ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${'I'}      | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${{I: 5}} | ${undefined}
     ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${'A'}      | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}} | ${{A: 5}} | ${undefined}
     ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${'B'}      | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${{}}     | ${reason5}
