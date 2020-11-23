@@ -16,7 +16,7 @@ import {
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {SignedState} from '../../../src/index';
-import {signChallengeMessage, signState, signStates} from '../../../src/signatures';
+import {signChallengeMessage, signData, signState, signStates} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
   clearedChallengeHash,
@@ -29,6 +29,7 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {createForceMoveTransaction} from '../../../src/transactions';
+import {hashChallengeMessage} from '../../../src/contract/challenge';
 
 const provider = getTestProvider();
 
@@ -180,7 +181,7 @@ describe('challenge', () => {
 
       switch (challengeSignatureType) {
         case 'incorrect':
-          challengeSignature = {...correctChallengeSignature, v: correctChallengeSignature.v + 1};
+          challengeSignature = signChallengeMessageByNonParticipant([challengeState], participants);
           break;
         case 'invalid':
           challengeSignature = {v: 1, s: HashZero, r: HashZero} as ethers.Signature;
@@ -283,3 +284,23 @@ describe('forceMove with transaction generator', () => {
     expect(response).toBeDefined();
   });
 });
+
+function signChallengeMessageByNonParticipant(
+  signedStates: SignedState[],
+  participants: string[]
+): Signature {
+  if (signedStates.length === 0) {
+    throw new Error('At least one signed state must be provided');
+  }
+  let nonParticipant = participants[0];
+  let pK;
+  while (participants.find(participant => participant == nonParticipant)) {
+    const wallet = Wallet.createRandom();
+    nonParticipant = wallet.address;
+    pK = wallet.privateKey;
+  }
+  const challengeState = signedStates[signedStates.length - 1].state;
+  const challengeHash = hashChallengeMessage(challengeState);
+
+  return signData(challengeHash, pK);
+}

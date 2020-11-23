@@ -71,7 +71,7 @@ function hashMessage(hashedData: string): string {
   return utils.hashMessage(utils.arrayify(hashedData));
 }
 
-function signData(hashedData: string, privateKey: string): Signature {
+export function signData(hashedData: string, privateKey: string): Signature {
   const signingKey = new utils.SigningKey(privateKey);
 
   return utils.splitSignature(signingKey.signDigest(hashMessage(hashedData)));
