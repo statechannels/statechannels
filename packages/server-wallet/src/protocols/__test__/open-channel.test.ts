@@ -6,6 +6,7 @@ import {protocol} from '../open-channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {SignState, fundChannel} from '../actions';
 import {channel} from '../../models/__test__/fixtures/channel';
+import {Channel} from '../../models/channel';
 
 import {applicationProtocolState} from './fixtures/protocol-state';
 
@@ -30,8 +31,9 @@ const reversedPFState1 = {outcome, turnNum: 1, participants: [bob(), alice()]};
 
 const funded = () => ({
   amount: BN.from(5),
+  transferredOut: [],
 });
-const notFunded = () => ({amount: BN.from(0)});
+const notFunded = () => ({amount: BN.from(0), transferredOut: []});
 
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
 const fundChannelAction1 = fundChannel({
@@ -51,10 +53,17 @@ test.each`
   ${prefundState1}    | ${0}    | ${prefundState0}    | ${prefundState1}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
   ${prefundState1}    | ${1}    | ${prefundState1}    | ${prefundState1}    | ${funded}    | ${signState(postfundState3)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
   ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${notFunded} | ${fundChannelAction1}          | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
-  ${altPrefundState0} | ${0}    | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is secont to deposit'} | ${'submits transaction'}
+  ${altPrefundState0} | ${0}    | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is second to deposit'} | ${'submits transaction'}
 `('$result $cond', ({supported, latest, latestSignedByMe, funding, action, myIndex}) => {
   const ps = applicationProtocolState({
-    app: {supported, latest, latestSignedByMe, funding, myIndex},
+    app: {
+      supported,
+      latest,
+      latestSignedByMe,
+      funding,
+      myIndex,
+      directFundingStatus: Channel.directFundingStatus(supported, funding, participants[myIndex]),
+    },
   });
   expect(protocol(ps)).toMatchObject(action);
 });
