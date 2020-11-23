@@ -24,6 +24,7 @@ import {
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
+  nonParticipant,
   ongoingChallengeHash,
   setupContracts,
   writeGasConsumption,
@@ -47,6 +48,7 @@ const keys = [
   '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
   '0x1b7598002c59e7d9131d7e7c9d0ec48ed065a3ed04af56674497d6b0048f2d84',
 ];
+
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
   wallets[i] = new Wallet(keys[i]);
@@ -181,7 +183,7 @@ describe('challenge', () => {
 
       switch (challengeSignatureType) {
         case 'incorrect':
-          challengeSignature = signChallengeMessageByNonParticipant([challengeState], participants);
+          challengeSignature = signChallengeMessageByNonParticipant([challengeState]);
           break;
         case 'invalid':
           challengeSignature = {v: 1, s: HashZero, r: HashZero} as ethers.Signature;
@@ -285,22 +287,11 @@ describe('forceMove with transaction generator', () => {
   });
 });
 
-function signChallengeMessageByNonParticipant(
-  signedStates: SignedState[],
-  participants: string[]
-): Signature {
+function signChallengeMessageByNonParticipant(signedStates: SignedState[]): Signature {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
   }
-  let nonParticipant = participants[0];
-  let pK;
-  while (participants.find(participant => participant == nonParticipant)) {
-    const wallet = Wallet.createRandom();
-    nonParticipant = wallet.address;
-    pK = wallet.privateKey;
-  }
   const challengeState = signedStates[signedStates.length - 1].state;
   const challengeHash = hashChallengeMessage(challengeState);
-
-  return signData(challengeHash, pK);
+  return signData(challengeHash, nonParticipant.privateKey);
 }
