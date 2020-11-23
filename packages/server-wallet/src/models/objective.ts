@@ -1,5 +1,5 @@
-import {objectiveId, Objective, OpenChannel, CloseChannel} from '@statechannels/wallet-core';
-import {Model, TransactionOrKnex} from 'objection';
+import { objectiveId, Objective, OpenChannel, CloseChannel } from '@statechannels/wallet-core';
+import { Model, TransactionOrKnex } from 'objection';
 import _ from 'lodash';
 
 function extractReferencedChannels(objective: Objective): string[] {
@@ -64,7 +64,7 @@ export class ObjectiveModel extends Model {
     // Prevent a require loop
     // https://vincit.github.io/objection.js/guide/relations.html#require-loops
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const {Channel} = require('./channel');
+    const { Channel } = require('./channel');
 
     return {
       objectivesChannels: {
@@ -103,7 +103,7 @@ export class ObjectiveModel extends Model {
       // Requires objective and channels to exist
       await Promise.all(
         extractReferencedChannels(objectiveToBeStored).map(async value =>
-          ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
+          ObjectiveChannelModel.query(trx).insert({ objectiveId: id, channelId: value })
         )
       );
       return objective;
@@ -116,15 +116,11 @@ export class ObjectiveModel extends Model {
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'approved'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({ status: 'approved' });
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'succeeded'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({ status: 'succeeded' });
   }
 
   static async forChannelIds(

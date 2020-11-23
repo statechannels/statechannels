@@ -1,15 +1,15 @@
-import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ContractArtifacts} from '@statechannels/nitro-protocol';
-import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
+import { CreateChannelParams, Participant, Allocation } from '@statechannels/client-api-schema';
+import { ETHERLIME_ACCOUNTS } from '@statechannels/devtools';
+import { ContractArtifacts } from '@statechannels/nitro-protocol';
+import { BN, makeAddress, makeDestination } from '@statechannels/wallet-core';
+import { BigNumber, constants, Contract, ethers, providers } from 'ethers';
 import _ from 'lodash';
-import {fromEvent} from 'rxjs';
-import {take} from 'rxjs/operators';
+import { fromEvent } from 'rxjs';
+import { take } from 'rxjs/operators';
 
-import {defaultTestConfig} from '../config';
-import {ObjectiveSucceededValue, SingleChannelOutput, Wallet} from '../wallet';
-import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
+import { defaultTestConfig } from '../config';
+import { ObjectiveSucceededValue, SingleChannelOutput, Wallet } from '../wallet';
+import { getChannelResultFor, getPayloadFor } from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -145,7 +145,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 0,
   });
 
-  const prefundB = await b.joinChannel({channelId});
+  const prefundB = await b.joinChannel({ channelId });
   expect(getChannelResultFor(channelId, [prefundB.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 1,
@@ -187,7 +187,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 3,
   });
 
-  const closeA = await a.closeChannel({channelId});
+  const closeA = await a.closeChannel({ channelId });
   expect(closeA.channelResult).toMatchObject({
     status: 'closing',
     turnNum: 4,

@@ -1,14 +1,14 @@
-import {ChannelResult} from '@statechannels/client-api-schema';
-import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
+import { ChannelResult } from '@statechannels/client-api-schema';
+import { Participant, serializeMessage, SignedState } from '@statechannels/wallet-core';
 
-import {Channel} from '../models/channel';
-import {DBObjective, toWireObjective} from '../models/objective';
-import {Outgoing} from '../protocols/actions';
-import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
-import {WALLET_VERSION} from '../version';
-import {ChannelState, toChannelResult} from '../protocols/state';
+import { Channel } from '../models/channel';
+import { DBObjective, toWireObjective } from '../models/objective';
+import { Outgoing } from '../protocols/actions';
+import { mergeChannelResults, mergeOutgoing } from '../utilities/messaging';
+import { WALLET_VERSION } from '../version';
+import { ChannelState, toChannelResult } from '../protocols/state';
 
-import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '.';
+import { MultipleChannelOutput, SingleChannelOutput, WalletEvent } from '.';
 
 export class WalletResponse {
   _channelResults: Record<string, ChannelResult> = {};
@@ -127,7 +127,7 @@ export class WalletResponse {
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
-              requests: [{type: 'GetChannel', channelId}],
+              requests: [{ type: 'GetChannel', channelId }],
             },
             p.participantId,
             myParticipantId,

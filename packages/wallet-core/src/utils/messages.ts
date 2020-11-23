@@ -1,6 +1,6 @@
-import {makeAddress, Participant} from '../types';
+import { makeAddress, Participant } from '../types';
 
-import {makeDestination} from '.';
+import { makeDestination } from '.';
 
 export function convertToParticipant(participant: {
   destination: string;
@@ -10,6 +10,6 @@ export function convertToParticipant(participant: {
   return {
     ...participant,
     signingAddress: makeAddress(participant.signingAddress),
-    destination: makeDestination(participant.destination)
+    destination: makeDestination(participant.destination),
   };
 }

@@ -37,7 +37,7 @@ export function configureEnvVariables(): void {
     /* eslint-disable @typescript-eslint/no-var-requires */
     const result = require('dotenv-expand')(
       require('dotenv').config({
-        path: scEnvFile
+        path: scEnvFile,
       })
     );
     console.log('The following env vars were loaded to process.env:');
@@ -84,7 +84,7 @@ export function configureEnvVariables(): void {
       /* eslint-disable @typescript-eslint/no-var-requires */
       require('dotenv-expand')(
         require('dotenv').config({
-          path: dotenvFile
+          path: dotenvFile,
         })
       );
       /* eslint-enable @typescript-eslint/no-var-requires */

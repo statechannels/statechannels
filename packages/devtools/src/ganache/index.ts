@@ -48,7 +48,7 @@ async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> 
 
   process.on('SIGINT', () => server && server.close());
   process.on('SIGTERM', () => server && server.close());
-  process.on('uncaughtException', e => {
+  process.on('uncaughtException', (e) => {
     server && server.close();
     throw e;
   });

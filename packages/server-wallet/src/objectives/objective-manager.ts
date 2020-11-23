@@ -1,20 +1,20 @@
-import {Logger} from 'pino';
-import {BN} from '@statechannels/wallet-core';
+import { Logger } from 'pino';
+import { BN } from '@statechannels/wallet-core';
 
-import {Bytes32} from '../type-aliases';
+import { Bytes32 } from '../type-aliases';
 import * as OpenChannelProtocol from '../protocols/open-channel';
 import * as CloseChannelProtocol from '../protocols/close-channel';
 import * as ChannelState from '../protocols/state';
-import {Store} from '../wallet/store';
-import {LedgerRequest} from '../models/ledger-request';
-import {ChainServiceInterface} from '../chain-service';
-import {ProtocolAction} from '../protocols/actions';
-import {recordFunctionMetrics} from '../metrics';
-import {WalletResponse} from '../wallet/response-builder';
-import {Channel} from '../models/channel';
+import { Store } from '../wallet/store';
+import { LedgerRequest } from '../models/ledger-request';
+import { ChainServiceInterface } from '../chain-service';
+import { ProtocolAction } from '../protocols/actions';
+import { recordFunctionMetrics } from '../metrics';
+import { WalletResponse } from '../wallet/response-builder';
+import { Channel } from '../models/channel';
 
-import {ObjectiveManagerParams} from './types';
-import {CloseChannelObjective} from './close-channel';
+import { ObjectiveManagerParams } from './types';
+import { CloseChannelObjective } from './close-channel';
 
 export class ObjectiveManager {
   private store: Store;
@@ -26,7 +26,7 @@ export class ObjectiveManager {
     return new this(params);
   }
 
-  private constructor({store, logger, chainService, timingMetrics}: ObjectiveManagerParams) {
+  private constructor({ store, logger, chainService, timingMetrics }: ObjectiveManagerParams) {
     this.store = store;
     this.logger = logger;
     this.chainService = chainService;
@@ -80,7 +80,7 @@ export class ObjectiveManager {
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
             case 'SignState': {
-              const {myIndex, channelId} = protocolState.app;
+              const { myIndex, channelId } = protocolState.app;
               const channel = await Channel.forId(channelId, tx);
               const signedState = await this.store.signState(channel, action, tx);
               response.queueState(signedState, myIndex, channelId);
@@ -136,7 +136,7 @@ export class ObjectiveManager {
           try {
             await doAction(nextAction);
           } catch (error) {
-            this.logger.error({error}, 'Error handling action');
+            this.logger.error({ error }, 'Error handling action');
             await tx.rollback(error);
             attemptAnotherProtocolStep = false;
           }

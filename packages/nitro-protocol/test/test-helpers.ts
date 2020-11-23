@@ -11,9 +11,9 @@ import {
   Event,
 } from 'ethers';
 
-import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
-import {Bytes} from '../src/contract/types';
-import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
+import { ChallengeClearedEvent, ChallengeRegisteredStruct } from '../src/contract/challenge';
+import { Bytes } from '../src/contract/types';
+import { channelDataToChannelStorageHash } from '../src/contract/channel-storage';
 import {
   AllocationAssetOutcome,
   encodeAllocation,
@@ -24,7 +24,7 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
-import {AssetTransferredEvent, Bytes32, DepositedEvent} from '../src';
+import { AssetTransferredEvent, Bytes32, DepositedEvent } from '../src';
 
 // Interfaces
 
@@ -52,7 +52,7 @@ export const getTestProvider = (): ethers.providers.JsonRpcProvider => {
 
 export async function setupContracts(
   provider: ethers.providers.JsonRpcProvider,
-  artifact: {abi: ethers.ContractInterface},
+  artifact: { abi: ethers.ContractInterface },
   address: string
 ): Promise<ethers.Contract> {
   const signer = provider.getSigner(0);
@@ -214,11 +214,7 @@ export function randomChannelId(channelNonce = 0): Bytes32 {
 }
 
 export const randomExternalDestination = (): string =>
-  '0x' +
-  ethers.Wallet.createRandom()
-    .address.slice(2, 42)
-    .padStart(64, '0')
-    .toLowerCase();
+  '0x' + ethers.Wallet.createRandom().address.slice(2, 42).padStart(64, '0').toLowerCase();
 
 export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
@@ -226,7 +222,7 @@ export async function sendTransaction(
   transaction: providers.TransactionRequest
 ): Promise<providers.TransactionReceipt> {
   const signer = provider.getSigner();
-  const response = await signer.sendTransaction({to: contractAddress, ...transaction});
+  const response = await signer.sendTransaction({ to: contractAddress, ...transaction });
   return await response.wait();
 }
 
@@ -255,7 +251,7 @@ export function replaceAddressesAndBigNumberify(
   addresses: AddressesLookup
 ): AssetOutcomeShortHand | OutcomeShortHand | string {
   const newObject = {};
-  Object.keys(object).forEach(key => {
+  Object.keys(object).forEach((key) => {
     if (typeof object[key] === 'object') {
       // Recurse
       newObject[addresses[key]] = replaceAddressesAndBigNumberify(object[key], addresses);
@@ -272,11 +268,11 @@ export function resetMultipleHoldings(
   multipleHoldings: OutcomeShortHand,
   contractsArray: Contract[]
 ): void {
-  Object.keys(multipleHoldings).forEach(assetHolder => {
+  Object.keys(multipleHoldings).forEach((assetHolder) => {
     const holdings = multipleHoldings[assetHolder];
-    Object.keys(holdings).forEach(async destination => {
+    Object.keys(holdings).forEach(async (destination) => {
       const amount = holdings[destination];
-      contractsArray.forEach(async contract => {
+      contractsArray.forEach(async (contract) => {
         if (contract.address === assetHolder) {
           await (await contract.setHoldings(destination, amount)).wait();
           expect((await contract.holdings(destination)).eq(amount)).toBe(true);
@@ -291,11 +287,11 @@ export function checkMultipleHoldings(
   multipleHoldings: OutcomeShortHand,
   contractsArray: Contract[]
 ): void {
-  Object.keys(multipleHoldings).forEach(assetHolder => {
+  Object.keys(multipleHoldings).forEach((assetHolder) => {
     const holdings = multipleHoldings[assetHolder];
-    Object.keys(holdings).forEach(async destination => {
+    Object.keys(holdings).forEach(async (destination) => {
       const amount = holdings[destination];
-      contractsArray.forEach(async contract => {
+      contractsArray.forEach(async (contract) => {
         if (contract.address === assetHolder) {
           expect((await contract.holdings(destination)).eq(amount)).toBe(true);
         }
@@ -310,15 +306,15 @@ export function checkMultipleAssetOutcomeHashes(
   outcome: OutcomeShortHand,
   contractsArray: Contract[]
 ): void {
-  Object.keys(outcome).forEach(assetHolder => {
+  Object.keys(outcome).forEach((assetHolder) => {
     const assetOutcome = outcome[assetHolder];
     const allocationAfter = [];
-    Object.keys(assetOutcome).forEach(destination => {
+    Object.keys(assetOutcome).forEach((destination) => {
       const amount = assetOutcome[destination];
-      allocationAfter.push({destination, amount});
+      allocationAfter.push({ destination, amount });
     });
     const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
-    contractsArray.forEach(async contract => {
+    contractsArray.forEach(async (contract) => {
       if (contract.address === assetHolder) {
         expect(await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash);
       }
@@ -329,9 +325,9 @@ export function checkMultipleAssetOutcomeHashes(
 // Computes an outcome from a shorthand description
 export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
   const outcome: AllocationAssetOutcome[] = [];
-  Object.keys(outcomeShortHand).forEach(assetHolder => {
+  Object.keys(outcomeShortHand).forEach((assetHolder) => {
     const allocation: Allocation = [];
-    Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
+    Object.keys(outcomeShortHand[assetHolder]).forEach((destination) =>
       allocation.push({
         destination,
         amount: BigNumber.from(outcomeShortHand[assetHolder][destination]).toHexString(),
@@ -352,12 +348,12 @@ export function assetTransferredEventsFromPayouts(
   assetHolder: string
 ): AssetTransferredEvent[] {
   const assetTransferredEvents = [];
-  Object.keys(singleAssetPayouts).forEach(destination => {
+  Object.keys(singleAssetPayouts).forEach((destination) => {
     if (singleAssetPayouts[destination] && BigNumber.from(singleAssetPayouts[destination]).gt(0)) {
       assetTransferredEvents.push({
         contract: assetHolder,
         name: 'AssetTransferred',
-        args: {channelId, destination, amount: singleAssetPayouts[destination]},
+        args: { channelId, destination, amount: singleAssetPayouts[destination] },
       });
     }
   });
@@ -366,10 +362,10 @@ export function assetTransferredEventsFromPayouts(
 
 export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): Event[] {
   const events = [];
-  logs.forEach(log => {
-    contractsArray.forEach(contract => {
+  logs.forEach((log) => {
+    contractsArray.forEach((contract) => {
       if (log.address === contract.address) {
-        events.push({...contract.interface.parseLog(log), contract: log.address});
+        events.push({ ...contract.interface.parseLog(log), contract: log.address });
       }
     });
   });
@@ -381,7 +377,7 @@ export async function writeGasConsumption(
   description: string,
   gas: BigNumberish
 ): Promise<void> {
-  await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
+  await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', (err) => {
     if (err) throw err;
   });
 }

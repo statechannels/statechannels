@@ -1,16 +1,16 @@
 import _ from 'lodash';
-import {configureEnvVariables} from '@statechannels/devtools';
-import {ethers} from 'ethers';
+import { configureEnvVariables } from '@statechannels/devtools';
+import { ethers } from 'ethers';
 import Knex from 'knex';
 
 configureEnvVariables();
 
-import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
-import {withSupportedState} from '../src/models/__test__/fixtures/channel';
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
-import {Channel} from '../src/models/channel';
-import {Wallet} from '../src/wallet';
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../src/config';
+import { seedAlicesSigningWallet } from '../src/db/seeds/1_signing_wallet_seeds';
+import { withSupportedState } from '../src/models/__test__/fixtures/channel';
+import { stateVars } from '../src/wallet/__test__/fixtures/state-vars';
+import { Channel } from '../src/models/channel';
+import { Wallet } from '../src/wallet';
+import { defaultConfig, extractDBConfigFromServerWalletConfig } from '../src/config';
 
 const knex = Knex(extractDBConfigFromServerWalletConfig(defaultConfig));
 
@@ -22,7 +22,7 @@ async function setup(n = NUM_UPDATES): Promise<Channel[]> {
 
   const channels = [];
   for (const channelNonce of iter) {
-    const c = withSupportedState()({channelNonce, vars: [stateVars({turnNum: 3})]});
+    const c = withSupportedState()({ channelNonce, vars: [stateVars({ turnNum: 3 })] });
     await Channel.query(knex).insert(c);
 
     channels.push(c);
@@ -44,7 +44,7 @@ async function benchmark(): Promise<void> {
     channels.map(async channel =>
       wallet.updateChannel({
         channelId: channel.channelId,
-        allocations: [{assetHolderAddress: ethers.constants.AddressZero, allocationItems: []}],
+        allocations: [{ assetHolderAddress: ethers.constants.AddressZero, allocationItems: [] }],
         appData: '0x',
       })
     )
@@ -57,7 +57,7 @@ async function benchmark(): Promise<void> {
   for (const channel of channels) {
     await wallet.updateChannel({
       channelId: channel.channelId,
-      allocations: [{assetHolderAddress: ethers.constants.AddressZero, allocationItems: []}],
+      allocations: [{ assetHolderAddress: ethers.constants.AddressZero, allocationItems: [] }],
       appData: '0x',
     });
   }
@@ -70,7 +70,7 @@ async function benchmark(): Promise<void> {
     channels.map(async channel =>
       wallet.updateChannel({
         channelId: channel.channelId,
-        allocations: [{assetHolderAddress: ethers.constants.AddressZero, allocationItems: []}],
+        allocations: [{ assetHolderAddress: ethers.constants.AddressZero, allocationItems: [] }],
         appData: '0x',
       })
     )

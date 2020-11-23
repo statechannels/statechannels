@@ -1,29 +1,29 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet, ethers } from 'ethers';
 
-const {HashZero} = ethers.constants;
+const { HashZero } = ethers.constants;
 
-const {defaultAbiCoder} = ethers.utils;
+const { defaultAbiCoder } = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
-import {Outcome} from '../../../src/contract/outcome';
-import {State} from '../../../src/contract/state';
-import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { channelDataToChannelStorageHash } from '../../../src/contract/channel-storage';
+import { Outcome } from '../../../src/contract/outcome';
+import { State } from '../../../src/contract/state';
+import { checkpointArgs } from '../../../src/contract/transaction-creators/force-move';
 import {
   CHANNEL_FINALIZED,
   TURN_NUM_RECORD_NOT_INCREASED,
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
+import { COUNTING_APP_INVALID_TRANSITION } from '../../revert-reasons';
 import {
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
   setupContracts,
 } from '../../test-helpers';
-import {signStates} from '../../../src';
+import { signStates } from '../../../src';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -32,7 +32,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const assetHolderAddress = Wallet.createRandom().address;
-const defaultOutcome: Outcome = [{assetHolderAddress, allocationItems: []}];
+const defaultOutcome: Outcome = [{ assetHolderAddress, allocationItems: [] }];
 let appDefinition;
 
 // Populate wallets and participants array
@@ -101,9 +101,9 @@ describe('checkpoint', () => {
     ${reverts5} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${future}    | ${COUNTING_APP_INVALID_TRANSITION}
     ${reverts6} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${future}    | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
     ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
-  `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
-    const {appDatas, whoSignedWhat} = support;
-    const channel: Channel = {chainId, channelNonce, participants};
+  `('$description', async ({ largestTurnNum, support, challenger, finalizesAt, reason }) => {
+    const { appDatas, whoSignedWhat } = support;
+    const channel: Channel = { chainId, channelNonce, participants };
     const channelId = getChannelId(channel);
 
     const states = appDatas.map((data, idx) => ({
@@ -147,7 +147,7 @@ describe('checkpoint', () => {
 
     const signatures = await signStates(states, wallets, whoSignedWhat);
 
-    const tx = ForceMove.checkpoint(...checkpointArgs({states, signatures, whoSignedWhat}));
+    const tx = ForceMove.checkpoint(...checkpointArgs({ states, signatures, whoSignedWhat }));
     if (reason) {
       await expectRevert(() => tx, reason);
     } else {

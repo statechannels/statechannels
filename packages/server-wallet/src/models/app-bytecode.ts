@@ -1,7 +1,7 @@
-import {Address} from '@statechannels/wallet-core';
-import {Model, TransactionOrKnex} from 'objection';
+import { Address } from '@statechannels/wallet-core';
+import { Model, TransactionOrKnex } from 'objection';
 
-import {Bytes32, Bytes} from '../type-aliases';
+import { Bytes32, Bytes } from '../type-aliases';
 
 export interface RequiredColumns {
   readonly chainId: Bytes32;
@@ -42,10 +42,7 @@ export class AppBytecode extends Model implements RequiredColumns {
     appDefinition: Address,
     txOrKnex: TransactionOrKnex
   ): Promise<Bytes | undefined> {
-    return (
-      await AppBytecode.query(txOrKnex)
-        .where({chainId, appDefinition})
-        .first()
-    )?.appBytecode;
+    return (await AppBytecode.query(txOrKnex).where({ chainId, appDefinition }).first())
+      ?.appBytecode;
   }
 }

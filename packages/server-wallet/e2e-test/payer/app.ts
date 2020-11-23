@@ -1,9 +1,9 @@
 import express from 'express';
 import pino from 'express-pino-logger';
 
-import {logger} from '../logger';
-import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {RECEIVER_PORT} from '../e2e-utils';
+import { logger } from '../logger';
+import { alice } from '../../src/wallet/__test__/fixtures/signing-wallets';
+import { RECEIVER_PORT } from '../e2e-utils';
 
 import PayerClient from './client';
 export async function startApp(): Promise<express.Application> {
@@ -11,7 +11,7 @@ export async function startApp(): Promise<express.Application> {
   await client.warmup();
   const app = express();
 
-  app.use(pino({logger: logger as any}));
+  app.use(pino({ logger: logger as any }));
 
   app.post('/status', (_req, res) => res.status(200).send('OK'));
 

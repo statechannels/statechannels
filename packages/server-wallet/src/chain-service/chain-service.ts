@@ -15,13 +15,13 @@ import {
   toNitroSignedState,
   Uint256,
 } from '@statechannels/wallet-core';
-import {Contract, ethers, Event, providers, utils, Wallet} from 'ethers';
-import {concat, from, Observable, Subscription} from 'rxjs';
-import {filter, share} from 'rxjs/operators';
-import {NonceManager} from '@ethersproject/experimental';
+import { Contract, ethers, Event, providers, utils, Wallet } from 'ethers';
+import { concat, from, Observable, Subscription } from 'rxjs';
+import { filter, share } from 'rxjs/operators';
+import { NonceManager } from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 
-import {Bytes32} from '../type-aliases';
+import { Bytes32 } from '../type-aliases';
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -82,8 +82,8 @@ export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterIn
 
 const Deposited = 'Deposited' as const;
 const AssetTransferred = 'AssetTransferred' as const;
-type DepositedEvent = {type: 'Deposited'; ethersEvent?: Event} & HoldingUpdatedArg;
-type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
+type DepositedEvent = { type: 'Deposited'; ethersEvent?: Event } & HoldingUpdatedArg;
+type AssetTransferredEvent = { type: 'AssetTransferred'; ethersEvent: Event } & AssetTransferredArg;
 type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
 function isEthAssetHolder(address: Address): boolean {
@@ -100,7 +100,7 @@ export class ChainService implements ChainServiceInterface {
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
   private nitroAdjudicator: Contract;
 
-  private transactionQueue = new PQueue({concurrency: 1});
+  private transactionQueue = new PQueue({ concurrency: 1 });
 
   constructor(provider: string, pk: string, pollingInterval?: number) {
     this.provider = new providers.JsonRpcProvider(provider);

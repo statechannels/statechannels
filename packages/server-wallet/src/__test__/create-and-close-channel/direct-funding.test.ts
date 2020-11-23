@@ -4,17 +4,17 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, ethers} from 'ethers';
+import { makeAddress, makeDestination } from '@statechannels/wallet-core';
+import { BigNumber, ethers } from 'ethers';
 
-import {defaultTestConfig} from '../../config';
-import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import { defaultTestConfig } from '../../config';
+import { Wallet } from '../../wallet';
+import { getChannelResultFor, getPayloadFor } from '../test-helpers';
 
 const AddressZero = ethers.constants.AddressZero;
 
-const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
-const b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
+const a = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_A' });
+const b = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_B' });
 
 let channelId: string;
 let participantA: Participant;
@@ -89,7 +89,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   });
 
   //      PreFund0B
-  const resultB1 = await b.joinChannel({channelId});
+  const resultB1 = await b.joinChannel({ channelId });
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 1,

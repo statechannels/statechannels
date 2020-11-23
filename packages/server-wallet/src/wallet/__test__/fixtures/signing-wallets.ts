@@ -1,4 +1,4 @@
-import {SigningWallet} from '../../../models/signing-wallet';
+import { SigningWallet } from '../../../models/signing-wallet';
 
 export const alice = (): SigningWallet =>
   SigningWallet.fromJson({

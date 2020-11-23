@@ -1,6 +1,6 @@
-import {utils, BigNumber} from 'ethers';
+import { utils, BigNumber } from 'ethers';
 
-import {parseEventResult} from '../ethers-utils';
+import { parseEventResult } from '../ethers-utils';
 
 export interface DepositedEvent {
   destination: string;
@@ -15,7 +15,7 @@ export interface AssetTransferredEvent {
 }
 
 export function getDepositedEvent(eventResult: any[]): DepositedEvent {
-  const {destination, amountDeposited, destinationHoldings} = parseEventResult(eventResult);
+  const { destination, amountDeposited, destinationHoldings } = parseEventResult(eventResult);
   return {
     destination,
     amountDeposited: BigNumber.from(amountDeposited),
@@ -24,7 +24,7 @@ export function getDepositedEvent(eventResult: any[]): DepositedEvent {
 }
 
 export function getAssetTransferredEvent(eventResult: any[]): AssetTransferredEvent {
-  const {channelId, destination, amount} = parseEventResult(eventResult);
+  const { channelId, destination, amount } = parseEventResult(eventResult);
   return {
     channelId,
     destination,

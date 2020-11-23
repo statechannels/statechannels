@@ -2,7 +2,7 @@
 // otherwise we force all consumers of the package to set esModuleInterop to true
 import Ajv = require('ajv');
 
-import {Message, SignedState} from './types';
+import { Message, SignedState } from './types';
 
 // eslint-disable-next-line
 const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
@@ -30,20 +30,20 @@ function prettyPrintError(e: Ajv.ErrorObject): string {
   return JSON.stringify(e);
 }
 
-export const messageIsValid = ajv.compile({$ref: 'api.json#/definitions/Message'});
+export const messageIsValid = ajv.compile({ $ref: 'api.json#/definitions/Message' });
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function validateMessage(jsonBlob: object): Message {
   if (!messageIsValid(jsonBlob)) {
     throw new WireFormatValidationError(
       'Invalid message',
       jsonBlob,
-      messageIsValid.errors?.map(e => prettyPrintError(e))
+      messageIsValid.errors?.map((e) => prettyPrintError(e))
     );
   }
   return jsonBlob as Message;
 }
 
-export const stateIsValid = ajv.compile({$ref: 'api.json#/definitions/SignedState'});
+export const stateIsValid = ajv.compile({ $ref: 'api.json#/definitions/SignedState' });
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function validateState(jsonBlob: object): SignedState {
   const valid = stateIsValid(jsonBlob);
@@ -51,7 +51,7 @@ export function validateState(jsonBlob: object): SignedState {
     throw new WireFormatValidationError(
       'Invalid state',
       jsonBlob,
-      stateIsValid.errors?.map(e => prettyPrintError(e))
+      stateIsValid.errors?.map((e) => prettyPrintError(e))
     );
   }
   return jsonBlob as SignedState;

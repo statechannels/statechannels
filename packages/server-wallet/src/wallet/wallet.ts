@@ -24,21 +24,25 @@ import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {ethers, constants} from 'ethers';
-import {Logger} from 'pino';
-import {Payload as WirePayload} from '@statechannels/wire-format';
+import { ethers, constants } from 'ethers';
+import { Logger } from 'pino';
+import { Payload as WirePayload } from '@statechannels/wire-format';
 
-import {Bytes32, Uint256} from '../type-aliases';
-import {Outgoing} from '../protocols/actions';
-import {createLogger} from '../logger';
+import { Bytes32, Uint256 } from '../type-aliases';
+import { Outgoing } from '../protocols/actions';
+import { createLogger } from '../logger';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
-import {isWalletError, PushMessageError} from '../errors/wallet-error';
-import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
-import {ServerWalletConfig, extractDBConfigFromServerWalletConfig, defaultConfig} from '../config';
+import { isWalletError, PushMessageError } from '../errors/wallet-error';
+import { timerFactory, recordFunctionMetrics, setupMetrics } from '../metrics';
+import { mergeChannelResults, mergeOutgoing } from '../utilities/messaging';
+import {
+  ServerWalletConfig,
+  extractDBConfigFromServerWalletConfig,
+  defaultConfig,
+} from '../config';
 import {
   ChainServiceInterface,
   ChainEventSubscriberInterface,
@@ -47,14 +51,14 @@ import {
   ChainService,
   MockChainService,
 } from '../chain-service';
-import {DBAdmin} from '../db-admin/db-admin';
-import {WALLET_VERSION} from '../version';
-import {ObjectiveManager} from '../objectives';
-import {Channel} from '../models/channel';
+import { DBAdmin } from '../db-admin/db-admin';
+import { WALLET_VERSION } from '../version';
+import { ObjectiveManager } from '../objectives';
+import { Channel } from '../models/channel';
 
-import {Store, AppHandler, MissingAppHandler} from './store';
-import {WalletInterface} from './types';
-import {WalletResponse} from './response-builder';
+import { Store, AppHandler, MissingAppHandler } from './store';
+import { WalletInterface } from './types';
+import { WalletResponse } from './response-builder';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
@@ -101,7 +105,8 @@ export interface UpdateChannelFundingParams {
   amount: Uint256;
 }
 
-export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
+export class SingleThreadedWallet
+  extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
   knex: Knex;
   store: Store;
@@ -120,7 +125,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     super();
     this.walletConfig = walletConfig || defaultConfig;
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
-    this.logger = createLogger({...this.walletConfig});
+    this.logger = createLogger({ ...this.walletConfig });
     this.store = new Store(
       this.knex,
       this.walletConfig.timingMetrics,
@@ -186,7 +191,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     );
 
     const outbox = mergeOutgoing(messages.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
-    return {channelResults, outbox};
+    return { channelResults, outbox };
   }
 
   public async destroy(): Promise<void> {
@@ -202,16 +207,16 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return response.multipleChannelOutput();
   }
 
-  public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
+  public async syncChannel({ channelId }: SyncChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
     await this._syncChannel(channelId, response);
     return response.singleChannelOutput();
   }
 
   private async _syncChannel(channelId: string, response: WalletResponse): Promise<void> {
-    const {states, channelState} = await this.store.getStates(channelId);
+    const { states, channelState } = await this.store.getStates(channelId);
 
-    const {myIndex, participants} = channelState;
+    const { myIndex, participants } = channelState;
 
     states.forEach(s => response.queueState(s, myIndex, channelId));
 
@@ -251,7 +256,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   private async _updateChannelFunding(
-    {channelId, assetHolderAddress, amount}: UpdateChannelFundingParams,
+    { channelId, assetHolderAddress, amount }: UpdateChannelFundingParams,
     response: WalletResponse
   ): Promise<void> {
     await this.store.updateFunding(
@@ -335,7 +340,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       participants,
     };
 
-    const {channel, firstSignedState: signedState, objective} = await this.store.createChannel(
+    const { channel, firstSignedState: signedState, objective } = await this.store.createChannel(
       constants,
       appData,
       outcome,
@@ -359,7 +364,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     await Promise.all(
       objectives.map(
-        async ({type, objectiveId}) =>
+        async ({ type, objectiveId }) =>
           type === 'OpenChannel' && (await this.store.approveObjective(objectiveId))
       )
     );
@@ -371,7 +376,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return response.multipleChannelOutput();
   }
 
-  async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
+  async joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
     const channel = await this.store.getChannel(channelId);
 
@@ -407,12 +412,12 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new UpdateChannel.UpdateChannelError(
         UpdateChannel.UpdateChannelError.reasons.channelNotFound,
-        {channelId}
+        { channelId }
       );
     };
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
       const response = WalletResponse.initialize();
-      const {myIndex} = channel;
+      const { myIndex } = channel;
 
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
@@ -421,7 +426,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
-          UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
+          UpdateChannel.updateChannel({ channelId, appData, outcome }, channel.protocolState),
           this.walletConfig.timingMetrics
         )
       );
@@ -429,7 +434,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         try {
           return this.store.signState(channel, nextState, tx);
         } catch (err) {
-          this.logger.error({err, nextState}, 'Unable to update channel');
+          this.logger.error({ err, nextState }, 'Unable to update channel');
           throw err;
         }
       });
@@ -454,7 +459,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return response.multipleChannelOutput();
   }
 
-  async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
+  async closeChannel({ channelId }: CloseChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     await this._closeChannel(channelId, response);
@@ -492,7 +497,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     return response.multipleChannelOutput();
   }
 
-  async getState({channelId}: GetStateParams): Promise<SingleChannelOutput> {
+  async getState({ channelId }: GetStateParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     try {
@@ -502,7 +507,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       return response.singleChannelOutput();
     } catch (err) {
-      this.logger.error({err}, 'Could not get channel');
+      this.logger.error({ err }, 'Could not get channel');
       throw err;
     }
   }
@@ -517,7 +522,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       return response.multipleChannelOutput();
     } catch (err) {
-      this.logger.error({err}, 'Error during pushMessage');
+      this.logger.error({ err }, 'Error during pushMessage');
       throw new PushMessageError('Error during pushMessage', {
         thisWalletVersion: WALLET_VERSION,
         payloadWalletVersion: wirePayload.walletVersion,
@@ -529,7 +534,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   private async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
     const store = this.store;
 
-    const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
+    const { channelIds, channelResults: fromStoring } = await this.store.pushMessage(wirePayload);
 
     // add channelResults to response
     fromStoring.forEach(cr => response.queueChannelResult(cr));
@@ -539,7 +544,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     for (const request of wirePayload.requests || []) {
       const channelId = request.channelId;
 
-      const {states: signedStates, channelState} = await store.getStates(channelId);
+      const { states: signedStates, channelState } = await store.getStates(channelId);
 
       // add signed states to response
       signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
@@ -564,7 +569,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     // - The ledger channel is in the channels array
     // - The ledger channel is funding one of the channels in the channels array
     const ledgersToProcess = _.chain(await this.store.getAllPendingLedgerRequests())
-      .filter(({channelToBeFunded, ledgerChannelId}) =>
+      .filter(({ channelToBeFunded, ledgerChannelId }) =>
         _.some(
           channels,
           channelId => channelId === channelToBeFunded || channelId === ledgerChannelId
@@ -574,7 +579,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       .value();
 
     while (ledgersToProcess.length) {
-      const {ledgerChannelId} = ledgersToProcess[0];
+      const { ledgerChannelId } = ledgersToProcess[0];
 
       await this.store.lockApp(ledgerChannelId, async tx => {
         const setError = async (e: Error): Promise<void> => {
@@ -602,7 +607,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           try {
             switch (action.type) {
               case 'SignLedgerState': {
-                const {myIndex, channelId} = protocolState.fundingChannel;
+                const { myIndex, channelId } = protocolState.fundingChannel;
                 const channel = await Channel.forId(channelId, tx);
                 const signedState = await this.store.signState(channel, action.stateToSign, tx);
 
@@ -614,7 +619,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
               }
 
               case 'MarkLedgerFundingRequestsAsComplete': {
-                const {fundedChannels, defundedChannels} = action;
+                const { fundedChannels, defundedChannels } = action;
                 await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
                 await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
                 requiresAnotherCrankUponCompletion = true;
@@ -624,7 +629,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                 throw 'Unimplemented';
             }
           } catch (err) {
-            this.logger.error({err}, 'Error handling action');
+            this.logger.error({ err }, 'Error handling action');
             await setError(err);
           }
         }
@@ -660,7 +665,11 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   // ChainEventSubscriberInterface implementation
-  async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
+  async holdingUpdated({
+    channelId,
+    amount,
+    assetHolderAddress,
+  }: HoldingUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);

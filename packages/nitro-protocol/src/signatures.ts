@@ -1,8 +1,8 @@
-import {Wallet, utils, Signature} from 'ethers';
+import { Wallet, utils, Signature } from 'ethers';
 
-import {hashChallengeMessage} from './contract/challenge';
-import {getChannelId} from './contract/channel';
-import {hashState, State} from './contract/state';
+import { hashChallengeMessage } from './contract/challenge';
+import { getChannelId } from './contract/channel';
+import { hashState, State } from './contract/state';
 
 export interface SignedState {
   state: State;
@@ -12,8 +12,8 @@ export interface SignedState {
 export function getStateSignerAddress(signedState: SignedState): string {
   const stateHash = hashState(signedState.state);
   const recoveredAddress = utils.verifyMessage(utils.arrayify(stateHash), signedState.signature);
-  const {channel} = signedState.state;
-  const {participants} = channel;
+  const { channel } = signedState.state;
+  const { participants } = channel;
 
   if (participants.indexOf(recoveredAddress) < 0) {
     throw new Error(
@@ -34,7 +34,7 @@ export function signState(state: State, privateKey: string): SignedState {
   const hashedState = hashState(state);
 
   const signature = signData(hashedState, privateKey);
-  return {state, signature};
+  return { state, signature };
 }
 
 export async function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature> {
@@ -48,7 +48,7 @@ export async function signStates(
   wallets: Wallet[],
   whoSignedWhat: number[]
 ): Promise<Signature[]> {
-  const stateHashes = states.map(s => hashState(s));
+  const stateHashes = states.map((s) => hashState(s));
   const promises = wallets.map(async (w, i) => await sign(w, stateHashes[whoSignedWhat[i]]));
   return Promise.all(promises);
 }

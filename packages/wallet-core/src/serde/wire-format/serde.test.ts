@@ -1,15 +1,15 @@
 /* eslint-disable jest/no-disabled-tests */
-import {validateState} from '@statechannels/wire-format';
+import { validateState } from '@statechannels/wire-format';
 
 import {
   wireStateFormat,
   internalStateFormat,
   internalMessageFormat,
   wireMessageFormat,
-  walletVersion
+  walletVersion,
 } from './example';
-import {serializeState, serializeMessage} from './serialize';
-import {deserializeState, deserializeMessage} from './deserialize';
+import { serializeState, serializeMessage } from './serialize';
+import { deserializeState, deserializeMessage } from './deserialize';
 
 it('works for states', () => {
   expect(serializeState(internalStateFormat)).toEqual(wireStateFormat);
@@ -17,7 +17,7 @@ it('works for states', () => {
 });
 
 it('works for a message', () => {
-  const {recipient, sender} = wireMessageFormat;
+  const { recipient, sender } = wireMessageFormat;
   expect(serializeMessage(walletVersion, internalMessageFormat, recipient, sender)).toEqual(
     wireMessageFormat
   );

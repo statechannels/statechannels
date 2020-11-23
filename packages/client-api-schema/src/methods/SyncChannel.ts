@@ -1,6 +1,6 @@
-import {ChannelId} from '../data-types';
-import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-types';
-import {ErrorCodes as AllErrors} from '../error-codes';
+import { ChannelId } from '../data-types';
+import { JsonRpcRequest, JsonRpcResponse, JsonRpcError } from '../jsonrpc-header-types';
+import { ErrorCodes as AllErrors } from '../error-codes';
 
 export interface SyncChannelParams {
   channelId: ChannelId;

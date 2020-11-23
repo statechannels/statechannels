@@ -1,6 +1,6 @@
-import {FundingStrategy} from '@statechannels/client-api-schema';
+import { FundingStrategy } from '@statechannels/client-api-schema';
 
-import {SignedState, Participant} from './types';
+import { SignedState, Participant } from './types';
 
 type _Objective<Name, Data> = {
   participants: Participant[];
@@ -8,15 +8,15 @@ type _Objective<Name, Data> = {
 } & Data;
 export type OpenChannel = _Objective<
   'OpenChannel',
-  {targetChannelId: string; fundingStrategy: FundingStrategy}
+  { targetChannelId: string; fundingStrategy: FundingStrategy }
 >;
 export type VirtuallyFund = _Objective<
   'VirtuallyFund',
-  {targetChannelId: string; jointChannelId: string}
+  { targetChannelId: string; jointChannelId: string }
 >;
 export type FundGuarantor = _Objective<
   'FundGuarantor',
-  {jointChannelId: string; ledgerChannelId: string; guarantorId: string}
+  { jointChannelId: string; ledgerChannelId: string; guarantorId: string }
 >;
 
 export type Objective = OpenChannel | VirtuallyFund | FundGuarantor;

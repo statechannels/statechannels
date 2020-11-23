@@ -1,6 +1,6 @@
-import {utils} from 'ethers';
+import { utils } from 'ethers';
 
-import {Address, Bytes32, Uint256, Uint48} from './types';
+import { Address, Bytes32, Uint256, Uint48 } from './types';
 
 export interface Channel {
   channelNonce: Uint48;
@@ -13,7 +13,7 @@ export function isExternalDestination(bytes32: Bytes32): boolean {
 }
 
 export function getChannelId(channel: Channel): Bytes32 {
-  const {chainId, participants, channelNonce} = channel;
+  const { chainId, participants, channelNonce } = channel;
   const channelId = utils.keccak256(
     utils.defaultAbiCoder.encode(
       ['uint256', 'address[]', 'uint256'],

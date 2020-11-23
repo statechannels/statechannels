@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import {addAddressCheck, addBytes32Check, addBytesCheck, dropConstraint} from '../utils';
+import { addAddressCheck, addBytes32Check, addBytesCheck, dropConstraint } from '../utils';
 
 import {
   dropByteConstraints as dropOldByteConstraints,

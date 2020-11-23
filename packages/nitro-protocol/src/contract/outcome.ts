@@ -1,6 +1,6 @@
-import {utils} from 'ethers';
+import { utils } from 'ethers';
 
-import {Address, Bytes, Bytes32, Uint256} from './types';
+import { Address, Bytes, Bytes32, Uint256 } from './types';
 
 export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
@@ -21,12 +21,12 @@ export function encodeGuarantee(guarantee: Guarantee): Bytes32 {
 }
 
 export function decodeGuarantee(encodedGuarantee: Bytes): Guarantee {
-  const {targetChannelId, destinations} = utils.defaultAbiCoder.decode(
+  const { targetChannelId, destinations } = utils.defaultAbiCoder.decode(
     ['tuple(bytes32 targetChannelId, bytes32[] destinations)'],
     encodedGuarantee
   )[0];
 
-  return {targetChannelId, destinations};
+  return { targetChannelId, destinations };
 }
 
 export function isGuarantee(
@@ -55,7 +55,10 @@ export function decodeAllocation(encodedAllocation: Bytes): Allocation {
     encodedAllocation
   )[0];
 
-  return allocationItems.map(a => ({destination: a.destination, amount: a.amount.toHexString()}));
+  return allocationItems.map((a) => ({
+    destination: a.destination,
+    amount: a.amount.toHexString(),
+  }));
 }
 
 export function isAllocation(
@@ -93,7 +96,7 @@ export function encodeAssetOutcomeFromBytes(
 ): Bytes32 {
   return utils.defaultAbiCoder.encode(
     ['tuple(uint8 assetOutcomeType, bytes allocationOrGuarantee)'],
-    [{assetOutcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee}]
+    [{ assetOutcomeType, allocationOrGuarantee: encodedAllocationOrGuarantee }]
   );
 }
 
@@ -101,15 +104,15 @@ export function decodeOutcomeItem(
   encodedAssetOutcome: Bytes,
   assetHolderAddress: string
 ): AssetOutcome {
-  const {outcomeType, allocationOrGuarantee} = utils.defaultAbiCoder.decode(
+  const { outcomeType, allocationOrGuarantee } = utils.defaultAbiCoder.decode(
     ['tuple(uint8 outcomeType, bytes allocationOrGuarantee)'],
     encodedAssetOutcome
   )[0];
   switch (outcomeType) {
     case AssetOutcomeType.AllocationOutcomeType:
-      return {assetHolderAddress, allocationItems: decodeAllocation(allocationOrGuarantee)};
+      return { assetHolderAddress, allocationItems: decodeAllocation(allocationOrGuarantee) };
     case AssetOutcomeType.GuaranteeOutcomeType:
-      return {assetHolderAddress, guarantee: decodeGuarantee(allocationOrGuarantee)};
+      return { assetHolderAddress, guarantee: decodeGuarantee(allocationOrGuarantee) };
     default:
       throw new Error(`Received invalid outcome type ${outcomeType}`);
   }
@@ -148,7 +151,7 @@ export function decodeOutcome(encodedOutcome: Bytes): Outcome {
     ['tuple(address assetHolderAddress, bytes outcomeContent)[]'],
     encodedOutcome
   )[0];
-  return assetOutcomes.map(a => decodeOutcomeItem(a.outcomeContent, a.assetHolderAddress));
+  return assetOutcomes.map((a) => decodeOutcomeItem(a.outcomeContent, a.assetHolderAddress));
 }
 
 export function encodeOutcome(outcome: Outcome): Bytes32 {

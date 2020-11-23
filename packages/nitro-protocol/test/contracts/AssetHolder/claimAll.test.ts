@@ -1,8 +1,8 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber, utils} from 'ethers';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, BigNumber, utils } from 'ethers';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
-import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
+import { claimAllArgs } from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
   AssetOutcomeShortHand,
@@ -51,15 +51,15 @@ const reason6 =
 // Amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
-    name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | tOutcomeAfter   | heldAfter | payouts         | events          | reason
-    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${{I: 5}}       | ${undefined}
-    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${{B: 5}}       | ${undefined}
-    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${{I: 5}}       | ${undefined}
-    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}}       | ${{A: 5}}       | ${undefined}
-    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${{}}           | ${reason5}
-    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${{}}           | ${reason6}
-    ${'7. swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{}}           | ${{g: 2}} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${undefined}
-    ${'8. underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${{}}           | ${{g: 2}} | ${{A: 5, B: 5}} | ${{A: 5, B: 5}} | ${undefined}
+    name                                               | heldBefore   | guaranteeDestinations | tOutcomeBefore          | tOutcomeAfter     | heldAfter   | payouts           | events            | reason
+    ${'1. straight-through guarantee, 3 destinations'} | ${{ g: 5 }}  | ${['I', 'A', 'B']}    | ${{ I: 5, A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${{ g: 0 }} | ${{ I: 5 }}       | ${{ I: 5 }}       | ${undefined}
+    ${'2. swap guarantee,             2 destinations'} | ${{ g: 5 }}  | ${['B', 'A']}         | ${{ A: 5, B: 5 }}       | ${{ A: 5 }}       | ${{ g: 0 }} | ${{ B: 5 }}       | ${{ B: 5 }}       | ${undefined}
+    ${'3. swap guarantee,             3 destinations'} | ${{ g: 5 }}  | ${['I', 'B', 'A']}    | ${{ I: 5, A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${{ g: 0 }} | ${{ I: 5 }}       | ${{ I: 5 }}       | ${undefined}
+    ${'4. straight-through guarantee, 2 destinations'} | ${{ g: 5 }}  | ${['A', 'B']}         | ${{ A: 5, B: 5 }}       | ${{ B: 5 }}       | ${{ g: 0 }} | ${{ A: 5 }}       | ${{ A: 5 }}       | ${undefined}
+    ${'5. allocation not on chain'}                    | ${{ g: 5 }}  | ${['B', 'A']}         | ${{}}                   | ${{ A: 5 }}       | ${{ g: 0 }} | ${{ B: 5 }}       | ${{}}             | ${reason5}
+    ${'6. guarantee not on chain'}                     | ${{ g: 5 }}  | ${[]}                 | ${{ A: 5, B: 5 }}       | ${{ A: 5 }}       | ${{ g: 0 }} | ${{ B: 5 }}       | ${{}}             | ${reason6}
+    ${'7. swap guarantee, overfunded, 2 destinations'} | ${{ g: 12 }} | ${['B', 'A']}         | ${{ A: 5, B: 5 }}       | ${{}}             | ${{ g: 2 }} | ${{ A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${undefined}
+    ${'8. underspecified guarantee, overfunded      '} | ${{ g: 12 }} | ${['B']}              | ${{ A: 5, B: 5 }}       | ${{}}             | ${{ g: 2 }} | ${{ A: 5, B: 5 }} | ${{ A: 5, B: 5 }} | ${undefined}
   `(
     '$name',
     async ({
@@ -99,11 +99,13 @@ describe('claimAll', () => {
         heldAfter,
         payouts,
         events,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
-      guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
+      ].map(
+        (object) => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand
+      );
+      guaranteeDestinations = guaranteeDestinations.map((x) => addresses[x]);
 
       // Set holdings (only works on test contract)
-      new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
+      new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async (key) => {
         // Key must be either in heldBefore or heldAfter or both
         const amount = heldBefore[key] ? heldBefore[key] : BigNumber.from(0);
         await (await AssetHolder.setHoldings(key, amount)).wait();
@@ -112,8 +114,8 @@ describe('claimAll', () => {
 
       // Compute an appropriate allocation.
       const allocation = [];
-      Object.keys(tOutcomeBefore).forEach(key =>
-        allocation.push({destination: key, amount: tOutcomeBefore[key]})
+      Object.keys(tOutcomeBefore).forEach((key) =>
+        allocation.push({ destination: key, amount: tOutcomeBefore[key] })
       );
       const [, outcomeHash] = allocationToParams(allocation);
 
@@ -152,7 +154,7 @@ describe('claimAll', () => {
         );
 
         // Extract logs
-        const {logs, gasUsed} = await (await tx).wait();
+        const { logs, gasUsed } = await (await tx).wait();
         await writeGasConsumption('./claimAll.gas.md', name, gasUsed);
 
         // Compile events from logs
@@ -162,14 +164,14 @@ describe('claimAll', () => {
         expect(eventsFromLogs).toMatchObject(expectedEvents);
 
         // Check new holdings
-        Object.keys(heldAfter).forEach(async key =>
+        Object.keys(heldAfter).forEach(async (key) =>
           expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         );
 
         // Check new outcomeHash
         const allocationAfter = [];
-        Object.keys(tOutcomeAfter).forEach(key => {
-          allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
+        Object.keys(tOutcomeAfter).forEach((key) => {
+          allocationAfter.push({ destination: key, amount: tOutcomeAfter[key] });
         });
         const [, expectedNewOutcomeHash] = allocationToParams(allocationAfter);
         expect(await AssetHolder.assetOutcomeHashes(targetId)).toEqual(expectedNewOutcomeHash);

@@ -1,9 +1,9 @@
-import {ChannelResult} from '@statechannels/client-api-schema';
-import {Payload} from '@statechannels/wallet-core';
+import { ChannelResult } from '@statechannels/client-api-schema';
+import { Payload } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {Notice} from '../protocols/actions';
-import {WALLET_VERSION} from '../version';
+import { Notice } from '../protocols/actions';
+import { WALLET_VERSION } from '../version';
 
 // Merges any messages to the same recipient into one message
 // This makes message delivery less painful with the request/response model
@@ -17,17 +17,17 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
     throw new Error(`Trying to merge outgoing messages with multiple recipients ${senders}`);
   }
 
-  const {sender} = outgoing[0].params;
+  const { sender } = outgoing[0].params;
 
   const mergedOutgoing: Record<string, Payload> = {};
 
   for (const notice of outgoing) {
-    const {recipient, data} = notice.params as {recipient: string; data: Payload};
+    const { recipient, data } = notice.params as { recipient: string; data: Payload };
     if (!mergedOutgoing[recipient]) {
-      mergedOutgoing[recipient] = {walletVersion: WALLET_VERSION};
+      mergedOutgoing[recipient] = { walletVersion: WALLET_VERSION };
     }
 
-    const {signedStates, requests, objectives} = mergedOutgoing[recipient];
+    const { signedStates, requests, objectives } = mergedOutgoing[recipient];
 
     mergedOutgoing[recipient] = {
       walletVersion: WALLET_VERSION,
@@ -37,7 +37,7 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
     };
   }
   return Object.keys(mergedOutgoing).map(k => ({
-    params: {sender, recipient: k, data: mergedOutgoing[k]},
+    params: { sender, recipient: k, data: mergedOutgoing[k] },
     method: 'MessageQueued' as const,
   }));
 }

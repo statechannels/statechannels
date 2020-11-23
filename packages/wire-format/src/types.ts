@@ -142,7 +142,7 @@ export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 
 // channel requests
-type GetChannel = {type: 'GetChannel'; channelId: Bytes32};
+type GetChannel = { type: 'GetChannel'; channelId: Bytes32 };
 export type ChannelRequest = GetChannel;
 
 export interface Payload {

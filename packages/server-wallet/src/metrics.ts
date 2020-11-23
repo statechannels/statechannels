@@ -1,11 +1,11 @@
-import {performance, PerformanceObserver, PerformanceEntry} from 'perf_hooks';
+import { performance, PerformanceObserver, PerformanceEntry } from 'perf_hooks';
 import fs from 'fs';
 
 import Knex from 'knex';
 
 export function setupMetrics(metricsOutputFile: string): void {
   if (metricsOutputFile) {
-    fs.writeFileSync(metricsOutputFile, '', {flag: 'w'});
+    fs.writeFileSync(metricsOutputFile, '', { flag: 'w' });
   }
   const log = (entry: PerformanceEntry): void => {
     if (metricsOutputFile) {

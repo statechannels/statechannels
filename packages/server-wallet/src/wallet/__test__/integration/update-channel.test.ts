@@ -1,17 +1,20 @@
-import {utils} from 'ethers';
+import { utils } from 'ethers';
 
-import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
-import {updateChannelArgs} from '../fixtures/update-channel';
-import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateWithHashSignedBy} from '../fixtures/states';
-import {alice, bob} from '../fixtures/signing-wallets';
-import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig} from '../../../config';
-import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
-import {AppBytecode} from '../../../models/app-bytecode';
-import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import { Channel } from '../../../models/channel';
+import { Wallet } from '../..';
+import { updateChannelArgs } from '../fixtures/update-channel';
+import { seedAlicesSigningWallet } from '../../../db/seeds/1_signing_wallet_seeds';
+import { stateWithHashSignedBy } from '../fixtures/states';
+import { alice, bob } from '../fixtures/signing-wallets';
+import { channel } from '../../../models/__test__/fixtures/channel';
+import { defaultTestConfig } from '../../../config';
+import { testKnex as knex } from '../../../../jest/knex-setup-teardown';
+import { AppBytecode } from '../../../models/app-bytecode';
+import {
+  appBytecode,
+  COUNTING_APP_DEFINITION,
+} from '../../../models/__test__/fixtures/app-bytecode';
+import { DBAdmin } from '../../../db-admin/db-admin';
 
 let w: Wallet;
 
@@ -22,7 +25,7 @@ afterEach(async () => {
 const appData1 = utils.defaultAbiCoder.encode(['uint256'], [1]);
 const appData2 = utils.defaultAbiCoder.encode(['uint256'], [2]);
 beforeEach(async () => {
-  w = Wallet.create({...defaultTestConfig, skipEvmValidation: false});
+  w = Wallet.create({ ...defaultTestConfig, skipEvmValidation: false });
 
   await new DBAdmin(knex).truncateDB();
   await seedAlicesSigningWallet(knex);
@@ -44,28 +47,28 @@ it('updates a channel', async () => {
 
   const channelId = c.channelId;
   const current = await Channel.forId(channelId, knex);
-  expect(current.latest).toMatchObject({turnNum: 5, appData: appData1});
+  expect(current.latest).toMatchObject({ turnNum: 5, appData: appData1 });
 
-  await expect(w.updateChannel(updateChannelArgs({appData: appData2}))).resolves.toMatchObject({
+  await expect(w.updateChannel(updateChannelArgs({ appData: appData2 }))).resolves.toMatchObject({
     outbox: [
       {
         params: {
           recipient: 'bob',
           sender: 'alice',
-          data: {signedStates: [{turnNum: 6, appData: appData2}]},
+          data: { signedStates: [{ turnNum: 6, appData: appData2 }] },
         },
       },
     ],
-    channelResult: {channelId, turnNum: 6, appData: appData2},
+    channelResult: { channelId, turnNum: 6, appData: appData2 },
   });
 
   const updated = await Channel.forId(channelId, knex);
-  expect(updated.latest).toMatchObject({turnNum: 6, appData: appData2});
+  expect(updated.latest).toMatchObject({ turnNum: 6, appData: appData2 });
 });
 
 describe('error cases', () => {
   it('throws when it is not my turn', async () => {
-    const c = channel({vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 4})]});
+    const c = channel({ vars: [stateWithHashSignedBy([alice(), bob()])({ turnNum: 4 })] });
     await Channel.query(w.knex).insert(c);
 
     await expect(w.updateChannel(updateChannelArgs())).rejects.toMatchObject(
@@ -90,7 +93,7 @@ describe('error cases', () => {
       ],
     });
     await Channel.query(w.knex).insert(c);
-    await expect(w.updateChannel(updateChannelArgs({appData: appData1}))).rejects.toMatchObject(
+    await expect(w.updateChannel(updateChannelArgs({ appData: appData1 }))).rejects.toMatchObject(
       Error('Invalid state transition')
     );
   });

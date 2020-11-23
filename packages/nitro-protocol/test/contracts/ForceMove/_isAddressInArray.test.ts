@@ -1,7 +1,7 @@
-import {Contract, Wallet} from 'ethers';
+import { Contract, Wallet } from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import { getTestProvider, setupContracts } from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;

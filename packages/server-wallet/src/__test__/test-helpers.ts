@@ -1,9 +1,9 @@
-import {ChannelResult} from '@statechannels/client-api-schema';
-import {Payload, SignedState} from '@statechannels/wire-format';
-import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-core';
+import { ChannelResult } from '@statechannels/client-api-schema';
+import { Payload, SignedState } from '@statechannels/wire-format';
+import { AllocationItem, areAllocationItemsEqual } from '@statechannels/wallet-core';
 
-import {Wallet} from '../wallet';
-import {Outgoing} from '..';
+import { Wallet } from '../wallet';
+import { Outgoing } from '..';
 
 export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {
   const filteredOutbox = outbox.filter(outboxItem => outboxItem.params.recipient === participantId);

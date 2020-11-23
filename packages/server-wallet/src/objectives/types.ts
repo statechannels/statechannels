@@ -1,10 +1,10 @@
-import {Logger} from 'pino';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import { Logger } from 'pino';
+import { ChannelResult } from '@statechannels/client-api-schema';
 
-import {Store} from '../wallet/store';
-import {ChainServiceInterface} from '../chain-service';
-import {Outgoing} from '../protocols/actions';
-import {WalletEvent} from '../wallet';
+import { Store } from '../wallet/store';
+import { ChainServiceInterface } from '../chain-service';
+import { Outgoing } from '../protocols/actions';
+import { WalletEvent } from '../wallet';
 
 export interface ObjectiveManagerParams {
   store: Store;

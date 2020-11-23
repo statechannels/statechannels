@@ -1,6 +1,6 @@
-import {Model, TransactionOrKnex} from 'objection';
+import { Model, TransactionOrKnex } from 'objection';
 
-import {Bytes32} from '../type-aliases';
+import { Bytes32 } from '../type-aliases';
 
 export type LedgerRequestStatus =
   | 'pending' // Request added to DB to be handled by ProcessLedgerQueue
@@ -43,22 +43,18 @@ export class LedgerRequest extends Model implements LedgerRequestType {
     status: LedgerRequestStatus,
     tx: TransactionOrKnex
   ): Promise<void> {
-    await LedgerRequest.query(tx)
-      .findById([channelToBeFunded, type])
-      .patch({status});
+    await LedgerRequest.query(tx).findById([channelToBeFunded, type]).patch({ status });
   }
 
   static async getPendingRequests(
     ledgerChannelId: string,
     tx: TransactionOrKnex
   ): Promise<LedgerRequestType[]> {
-    return LedgerRequest.query(tx)
-      .select()
-      .where({ledgerChannelId, status: 'pending'});
+    return LedgerRequest.query(tx).select().where({ ledgerChannelId, status: 'pending' });
   }
 
   static async getAllPendingRequests(tx: TransactionOrKnex): Promise<LedgerRequestType[]> {
-    return LedgerRequest.query(tx).where({status: 'pending'});
+    return LedgerRequest.query(tx).where({ status: 'pending' });
   }
 
   static async requestLedgerFunding(

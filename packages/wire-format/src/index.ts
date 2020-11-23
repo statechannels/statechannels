@@ -1,3 +1,3 @@
 export * from './types';
 
-export {validateMessage, validateState} from './validator';
+export { validateMessage, validateState } from './validator';

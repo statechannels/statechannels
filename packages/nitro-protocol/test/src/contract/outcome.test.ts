@@ -1,4 +1,4 @@
-import {utils, Wallet} from 'ethers';
+import { utils, Wallet } from 'ethers';
 
 import {
   decodeAllocation,
@@ -20,11 +20,11 @@ const guarantee: Guarantee = {
   targetChannelId,
   destinations,
 };
-const allocationItems: AllocationItem[] = [{destination, amount: '0x05'}];
+const allocationItems: AllocationItem[] = [{ destination, amount: '0x05' }];
 
 const outcome = [
-  {assetHolderAddress, allocationItems},
-  {assetHolderAddress, guarantee},
+  { assetHolderAddress, allocationItems },
+  { assetHolderAddress, guarantee },
 ];
 const emptyOutcome = [];
 
@@ -41,7 +41,7 @@ describe('outcome', () => {
       ${description1} | ${encodeAllocation} | ${decodeAllocation} | ${allocationItems}
       ${description2} | ${encodeOutcome}    | ${decodeOutcome}    | ${outcome}
       ${description3} | ${encodeOutcome}    | ${decodeOutcome}    | ${emptyOutcome}
-    `('$description', ({encodeFunction, decodeFunction, data}) => {
+    `('$description', ({ encodeFunction, decodeFunction, data }) => {
       const encodedData = encodeFunction(data);
       const decodedData = decodeFunction(encodedData);
       expect(decodedData).toEqual(data);

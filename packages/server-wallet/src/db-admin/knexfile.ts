@@ -1,6 +1,6 @@
 import * as path from 'path';
 
-import {Config} from 'knex';
+import { Config } from 'knex';
 
 // Populate env vars as knexfile is used directly in yarn scripts
 // TODO: We should not need to depend on devtools at this step.
@@ -16,7 +16,7 @@ WARNING: @statechannels/devtools not detected.
   else throw err;
 }
 
-import {defaultConfig, extractDBConfigFromServerWalletConfig} from '../config';
+import { defaultConfig, extractDBConfigFromServerWalletConfig } from '../config';
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
@@ -44,7 +44,7 @@ let knexConfig: Config = {
 };
 
 if (defaultConfig.nodeEnv === 'development') {
-  knexConfig = {...knexConfig, pool: {min: 0, max: 1}};
+  knexConfig = { ...knexConfig, pool: { min: 0, max: 1 } };
 }
 
-export const {client, connection, debug, migrations, seeds, pool} = knexConfig;
+export const { client, connection, debug, migrations, seeds, pool } = knexConfig;

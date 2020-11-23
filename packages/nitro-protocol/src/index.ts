@@ -36,7 +36,7 @@ export {
   getChallengeClearedEvent,
   ChallengeRegisteredEvent,
 } from './contract/challenge';
-export {Channel, getChannelId} from './contract/channel';
+export { Channel, getChannelId } from './contract/channel';
 export {
   validTransition,
   ForceMoveAppContractInterface,
@@ -58,7 +58,7 @@ export {
   AllocationAssetOutcome,
   hashOutcome,
 } from './contract/outcome';
-export {channelDataToChannelStorageHash} from './contract/channel-storage';
+export { channelDataToChannelStorageHash } from './contract/channel-storage';
 
 export {
   State,
@@ -68,7 +68,7 @@ export {
   hashAppPart,
   hashState,
 } from './contract/state';
-export {createDepositTransaction as createERC20DepositTransaction} from './contract/transaction-creators/erc20-asset-holder';
+export { createDepositTransaction as createERC20DepositTransaction } from './contract/transaction-creators/erc20-asset-holder';
 export {
   createDepositTransaction as createETHDepositTransaction,
   createTransferAllTransaction,
@@ -84,7 +84,7 @@ export {
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
-export {Signatures, Transactions};
+export { Signatures, Transactions };
 
 // types
-export {Uint256, Bytes32} from './contract/types';
+export { Uint256, Bytes32 } from './contract/types';

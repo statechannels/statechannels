@@ -8,14 +8,8 @@ const validateAddresses = 'validate_addresses';
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(nonces, table => {
     table.increments('id');
-    table
-      .integer('value')
-      .notNullable()
-      .defaultTo(0);
-    table
-      .specificType(addresses, 'text[]')
-      .notNullable()
-      .unique();
+    table.integer('value').notNullable().defaultTo(0);
+    table.specificType(addresses, 'text[]').notNullable().unique();
   });
 
   await knex.raw(`\

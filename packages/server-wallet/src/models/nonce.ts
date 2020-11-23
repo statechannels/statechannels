@@ -1,10 +1,10 @@
 import Knex from 'knex';
-import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
-import {ethers} from 'ethers';
-import {Address} from '@statechannels/wallet-core';
+import { JSONSchema, Model, Pojo, ModelOptions } from 'objection';
+import { ethers } from 'ethers';
+import { Address } from '@statechannels/wallet-core';
 
-import {Uint48} from '../type-aliases';
-import {WalletError, Values} from '../errors/wallet-error';
+import { Uint48 } from '../type-aliases';
+import { WalletError, Values } from '../errors/wallet-error';
 
 export class Nonce extends Model {
   readonly id!: number;
@@ -22,20 +22,20 @@ export class Nonce extends Model {
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): Pojo {
     super.$beforeValidate(jsonSchema, json, _opt);
 
-    const {addresses} = json;
+    const { addresses } = json;
 
     if (!Array.isArray(addresses)) {
-      throw new NonceError(NonceError.reasons.addressNotInArray, {addresses});
+      throw new NonceError(NonceError.reasons.addressNotInArray, { addresses });
     }
 
     const notAddr = addresses.find(addr => !isAddress(addr));
-    if (notAddr) throw new NonceError(NonceError.reasons.notAnAddress, {notAddr});
+    if (notAddr) throw new NonceError(NonceError.reasons.notAnAddress, { notAddr });
 
     return json;
   }
 
   static async next(knex: Knex, addresses: Address[]): Promise<number> {
-    const insertQuery = knex('nonces').insert({addresses});
+    const insertQuery = knex('nonces').insert({ addresses });
 
     return knex
       .raw(
@@ -48,7 +48,7 @@ export class Nonce extends Model {
   }
 
   static async ensureLatest(value: Uint48, addresses: Address[], knex: Knex): Promise<void> {
-    await Nonce.fromJson({value, addresses}).use(knex);
+    await Nonce.fromJson({ value, addresses }).use(knex);
   }
 
   async use(knex: Knex): Promise<void> {

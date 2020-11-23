@@ -1,10 +1,10 @@
-import {serializeAllocation} from './serialize';
-import {deserializeAllocations} from './deserialize';
+import { serializeAllocation } from './serialize';
+import { deserializeAllocations } from './deserialize';
 import {
   externalEthAllocation,
   internalEthAllocation,
   internalMixedAllocation,
-  externalMixedAllocation
+  externalMixedAllocation,
 } from './example';
 
 it('works for a simple eth allocation', () => {

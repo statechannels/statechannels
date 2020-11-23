@@ -1,9 +1,12 @@
-import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
+import {
+  createValidTransitionTransaction,
+  State as NitroState,
+} from '@statechannels/nitro-protocol';
 import * as PureEVM from '@connext/pure-evm-wasm';
-import {utils} from 'ethers';
+import { utils } from 'ethers';
 
-import {logger} from './logger';
-import {Bytes} from './type-aliases';
+import { logger } from './logger';
+import { Bytes } from './type-aliases';
 
 /**
  * Takes two states and runs the validateTransition in an evm (pureevm).
@@ -24,7 +27,7 @@ export const validateTransitionWithEVM = (
 
   if (bytecode === '0x') return false;
 
-  const {data} = createValidTransitionTransaction(from, to);
+  const { data } = createValidTransitionTransaction(from, to);
 
   const result = PureEVM.exec(
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),

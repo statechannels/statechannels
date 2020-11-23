@@ -1,17 +1,17 @@
-import {CreateChannelParams} from '@statechannels/client-api-schema';
-import {BN, makeAddress, makeDestination, Participant} from '@statechannels/wallet-core';
-import {ethers} from 'ethers';
+import { CreateChannelParams } from '@statechannels/client-api-schema';
+import { BN, makeAddress, makeDestination, Participant } from '@statechannels/wallet-core';
+import { ethers } from 'ethers';
 
-import {Outgoing} from '../..';
-import {defaultTestConfig} from '../../config';
-import {Bytes32} from '../../type-aliases';
-import {Wallet} from '../../wallet';
-import {crashAndRestart, getChannelResultFor, getPayloadFor} from '../test-helpers';
+import { Outgoing } from '../..';
+import { defaultTestConfig } from '../../config';
+import { Bytes32 } from '../../type-aliases';
+import { Wallet } from '../../wallet';
+import { crashAndRestart, getChannelResultFor, getPayloadFor } from '../test-helpers';
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
-let a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
-let b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
+let a = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_A' });
+let b = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_B' });
 
 let participantA: Participant;
 let participantB: Participant;
@@ -75,7 +75,7 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   const channelId = resultA0.channelResult.channelId;
   await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
 
-  const resultB1 = await b.joinChannel({channelId});
+  const resultB1 = await b.joinChannel({ channelId });
   await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
   const fundingPostADeposit = {
     channelId,
@@ -166,24 +166,24 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
     const params = testCreateChannelParams(10, 10, ledgerChannelId);
 
     const {
-      channelResults: [{channelId}],
+      channelResults: [{ channelId }],
       outbox,
     } = await a.createChannel(params);
 
     await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
 
-    const {outbox: join} = await b.joinChannel({channelId});
+    const { outbox: join } = await b.joinChannel({ channelId });
 
     await exchangeMessagesBetweenAandB([join], []);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -205,18 +205,18 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
   });
 
   it('closing said channel', async () => {
-    const {outbox: close} = await a.closeChannel({channelId: appChannelId});
+    const { outbox: close } = await a.closeChannel({ channelId: appChannelId });
 
     await exchangeMessagesBetweenAandB([], [close]);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -255,24 +255,24 @@ describe('Funding a single channel with 50% of ledger funds', () => {
     const params = testCreateChannelParams(5, 5, ledgerChannelId);
 
     const {
-      channelResults: [{channelId}],
+      channelResults: [{ channelId }],
       outbox,
     } = await a.createChannel(params);
 
     await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
 
-    const {outbox: join} = await b.joinChannel({channelId});
+    const { outbox: join } = await b.joinChannel({ channelId });
 
     await exchangeMessagesBetweenAandB([join], []);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -304,18 +304,18 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   });
 
   it('closing said channel', async () => {
-    const {outbox: close} = await a.closeChannel({channelId: appChannelId});
+    const { outbox: close } = await a.closeChannel({ channelId: appChannelId });
 
     await exchangeMessagesBetweenAandB([], [close]);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -328,7 +328,7 @@ describe('Funding a single channel with 50% of ledger funds', () => {
       status: 'closed',
     });
 
-    expect(allocationItems).not.toContainEqual({destination: appChannelId});
+    expect(allocationItems).not.toContainEqual({ destination: appChannelId });
 
     expect(allocationItems).toContainAllocationItem({
       destination: participantA.destination,
@@ -363,14 +363,14 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 
     await exchangeMessagesBetweenAandB([resultB.outbox], []);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -399,18 +399,18 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     await exchangeMessagesBetweenAandB(
       [],
       await Promise.all(
-        appChannelIds.map(async channelId => (await a.closeChannel({channelId})).outbox)
+        appChannelIds.map(async channelId => (await a.closeChannel({ channelId })).outbox)
       )
     );
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -424,7 +424,7 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
         turnNum: 4,
         status: 'closed',
       });
-      expect(allocationItems).not.toContainEqual({destination: channelId});
+      expect(allocationItems).not.toContainEqual({ destination: channelId });
     }
 
     expect(allocationItems).toContainAllocationItem({
@@ -454,7 +454,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const createMessageAndJoinBatch = async (): Promise<Bytes32[]> => {
-      const {outbox, channelResults} = await a.createChannels(params, N);
+      const { outbox, channelResults } = await a.createChannels(params, N);
       const channelIds = channelResults.map(c => c.channelId);
       await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
       const joinResults = await b.joinChannels(channelIds);
@@ -466,14 +466,14 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
 
     const channelIds = results.flat();
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger.status).toBe('running');
@@ -500,18 +500,18 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     await exchangeMessagesBetweenAandB(
       [],
       await Promise.all(
-        appChannelIds.map(async channelId => (await a.closeChannel({channelId})).outbox)
+        appChannelIds.map(async channelId => (await a.closeChannel({ channelId })).outbox)
       )
     );
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = ledger;
 
     expect(ledger).toMatchObject({
@@ -523,7 +523,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
         turnNum: 4,
         status: 'closed',
       });
-      expect(allocationItems).not.toContainEqual({destination: channelId});
+      expect(allocationItems).not.toContainEqual({ destination: channelId });
     }
 
     expect(allocationItems).toContainAllocationItem({
@@ -555,12 +555,12 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
     await exchangeMessagesBetweenAandB([resultB1.outbox], []);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     expect(allocationItems).toHaveLength(2);
@@ -601,23 +601,23 @@ describe('Funding multiple channels syncronously without enough funds', () => {
     const resultA = await a.createChannel(params);
     const channelId = resultA.channelResults[0].channelId;
     await b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
-    const resultB = await b.joinChannel({channelId});
+    const resultB = await b.joinChannel({ channelId });
 
     await exchangeMessagesBetweenAandB([resultB.outbox], []);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     expect(allocationItems).toHaveLength(2);
 
     const unfundedChannels = channelResults.filter(c => c.channelId === channelId);
 
-    expect(unfundedChannels).toMatchObject([{turnNum: 1, status: 'opening'}]);
+    expect(unfundedChannels).toMatchObject([{ turnNum: 1, status: 'opening' }]);
     expect(allocationItems).not.toContainAllocationItem({
       destination: makeDestination(channelId),
       amount: BN.from(2),
@@ -644,17 +644,17 @@ describe('Funding multiple channels concurrently (one sided)', () => {
     const channelId1 = create1.channelResults[0].channelId;
     const channelId2 = create2.channelResults[0].channelId;
 
-    const {outbox: join1} = await b.joinChannel({channelId: channelId1});
-    const {outbox: join2} = await b.joinChannel({channelId: channelId2});
+    const { outbox: join1 } = await b.joinChannel({ channelId: channelId1 });
+    const { outbox: join2 } = await b.joinChannel({ channelId: channelId2 });
 
     await exchangeMessagesBetweenAandB([join1, join2], []);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     for (const channelId of [channelId1, channelId2]) {
@@ -673,7 +673,7 @@ describe('Funding multiple channels concurrently (one sided)', () => {
 async function proposeMultipleChannelsToEachother(
   params: CreateChannelParams,
   N = 2 // Total number of channels = 2 * N
-): Promise<{aToJoin: Bytes32[]; bToJoin: Bytes32[]}> {
+): Promise<{ aToJoin: Bytes32[]; bToJoin: Bytes32[] }> {
   const aToJoin = [];
   const bToJoin = [];
   for (let i = 0; i < N; i++) {
@@ -684,7 +684,7 @@ async function proposeMultipleChannelsToEachother(
     aToJoin.push(createB.channelResults[0].channelId);
     bToJoin.push(createA.channelResults[0].channelId);
   }
-  return {aToJoin, bToJoin};
+  return { aToJoin, bToJoin };
 }
 
 describe('Funding multiple channels concurrently (two sides)', () => {
@@ -702,17 +702,17 @@ describe('Funding multiple channels concurrently (two sides)', () => {
       aToJoin: [channelId2],
     } = await proposeMultipleChannelsToEachother(params, 1);
 
-    const {outbox: joinB} = await b.joinChannel({channelId: channelId1});
-    const {outbox: joinA} = await a.joinChannel({channelId: channelId2});
+    const { outbox: joinB } = await b.joinChannel({ channelId: channelId1 });
+    const { outbox: joinA } = await a.joinChannel({ channelId: channelId2 });
 
     await exchangeMessagesBetweenAandB([joinB], [joinA]);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     for (const channelId of [channelId1, channelId2]) {
@@ -732,12 +732,12 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const {
-      channelResults: [{channelId: channelId1}],
+      channelResults: [{ channelId: channelId1 }],
       outbox: outboxA1,
     } = await a.createChannel(params);
 
     const {
-      channelResults: [{channelId: channelId2}],
+      channelResults: [{ channelId: channelId2 }],
       outbox: outboxA2,
     } = await a.createChannel(params);
 
@@ -745,31 +745,31 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     await b.pushMessage(getPayloadFor(participantB.participantId, outboxA2));
 
     const {
-      channelResults: [{channelId: channelId3}],
+      channelResults: [{ channelId: channelId3 }],
       outbox: outboxB3,
     } = await b.createChannel(params);
 
     const {
-      channelResults: [{channelId: channelId4}],
+      channelResults: [{ channelId: channelId4 }],
       outbox: outboxB4,
     } = await b.createChannel(params);
 
     await a.pushMessage(getPayloadFor(participantA.participantId, outboxB3));
     await a.pushMessage(getPayloadFor(participantA.participantId, outboxB4));
 
-    const {outbox: joinB1} = await b.joinChannel({channelId: channelId1});
-    const {outbox: joinB2} = await b.joinChannel({channelId: channelId2});
-    const {outbox: joinA3} = await a.joinChannel({channelId: channelId3});
-    const {outbox: joinA4} = await a.joinChannel({channelId: channelId4});
+    const { outbox: joinB1 } = await b.joinChannel({ channelId: channelId1 });
+    const { outbox: joinB2 } = await b.joinChannel({ channelId: channelId2 });
+    const { outbox: joinA3 } = await a.joinChannel({ channelId: channelId3 });
+    const { outbox: joinA4 } = await a.joinChannel({ channelId: channelId4 });
 
     await exchangeMessagesBetweenAandB([joinB1, joinB2], [joinA3, joinA4]);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     for (const channelId of [channelId1, channelId2, channelId3, channelId4]) {
@@ -788,24 +788,24 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
-    const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(params);
+    const { aToJoin, bToJoin } = await proposeMultipleChannelsToEachother(params);
 
-    const joinB1 = await b.joinChannel({channelId: bToJoin[0]});
-    const joinA2 = await a.joinChannel({channelId: aToJoin[0]});
-    const joinB3 = await b.joinChannel({channelId: bToJoin[1]});
-    const joinA4 = await a.joinChannel({channelId: aToJoin[1]});
+    const joinB1 = await b.joinChannel({ channelId: bToJoin[0] });
+    const joinA2 = await a.joinChannel({ channelId: aToJoin[0] });
+    const joinB3 = await b.joinChannel({ channelId: bToJoin[1] });
+    const joinA4 = await a.joinChannel({ channelId: aToJoin[1] });
 
     const messagesAwillSendToB = [joinA2.outbox, joinA4.outbox];
     const messagesBwillSendToA = [joinB1.outbox, joinB3.outbox];
 
     await exchangeMessagesBetweenAandB(messagesBwillSendToA, messagesAwillSendToB);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     const channelIds = [...bToJoin, ...aToJoin];
@@ -836,7 +836,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
-    const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(params);
+    const { aToJoin, bToJoin } = await proposeMultipleChannelsToEachother(params);
 
     const joinB = await b.joinChannels(bToJoin);
     const joinA = await a.joinChannels(aToJoin);
@@ -846,12 +846,12 @@ describe('Funding multiple channels concurrently (two sides)', () => {
 
     await exchangeMessagesBetweenAandB(messagesBwillSendToA, messagesAwillSendToB);
 
-    const {channelResults} = await a.getChannels();
+    const { channelResults } = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({ channelResults, outbox: [] });
 
     const {
-      allocations: [{allocationItems}],
+      allocations: [{ allocationItems }],
     } = getChannelResultFor(ledgerChannelId, channelResults);
 
     const channelIds = [...bToJoin, ...aToJoin];

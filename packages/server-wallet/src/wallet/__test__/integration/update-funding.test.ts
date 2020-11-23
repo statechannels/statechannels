@@ -1,17 +1,17 @@
-import {BN, makeAddress} from '@statechannels/wallet-core';
-import {ethers, constants} from 'ethers';
+import { BN, makeAddress } from '@statechannels/wallet-core';
+import { ethers, constants } from 'ethers';
 
-import {channel} from '../../../models/__test__/fixtures/channel';
-import {stateWithHashSignedBy} from '../fixtures/states';
-import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
-import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {alice, bob} from '../fixtures/signing-wallets';
-import {Funding} from '../../../models/funding';
-import {ObjectiveModel} from '../../../models/objective';
-import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
-import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
+import { channel } from '../../../models/__test__/fixtures/channel';
+import { stateWithHashSignedBy } from '../fixtures/states';
+import { Channel } from '../../../models/channel';
+import { Wallet } from '../..';
+import { seedAlicesSigningWallet } from '../../../db/seeds/1_signing_wallet_seeds';
+import { alice, bob } from '../fixtures/signing-wallets';
+import { Funding } from '../../../models/funding';
+import { ObjectiveModel } from '../../../models/objective';
+import { defaultTestConfig } from '../../../config';
+import { DBAdmin } from '../../../db-admin/db-admin';
+import { getChannelResultFor, getSignedStateFor } from '../../../__test__/test-helpers';
 
 const AddressZero = makeAddress(ethers.constants.AddressZero);
 
@@ -30,15 +30,15 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   const c1 = channel({
     channelNonce: 1,
     vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0, channelNonce: 1}),
-      stateWithHashSignedBy([bob()])({turnNum: 1, channelNonce: 1}),
+      stateWithHashSignedBy([alice()])({ turnNum: 0, channelNonce: 1 }),
+      stateWithHashSignedBy([bob()])({ turnNum: 1, channelNonce: 1 }),
     ],
   });
   const c2 = channel({
     channelNonce: 2,
     vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0, channelNonce: 2}),
-      stateWithHashSignedBy([bob()])({turnNum: 1, channelNonce: 2}),
+      stateWithHashSignedBy([alice()])({ turnNum: 0, channelNonce: 2 }),
+      stateWithHashSignedBy([bob()])({ turnNum: 1, channelNonce: 2 }),
     ],
   });
   await Channel.query(w.knex).insert(c1);
@@ -73,7 +73,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     w.knex
   );
 
-  const {outbox, channelResults} = await w.updateFundingForChannels(
+  const { outbox, channelResults } = await w.updateFundingForChannels(
     channelIds.map(cId => ({
       channelId: cId,
       assetHolderAddress: makeAddress(constants.AddressZero),
@@ -111,12 +111,12 @@ it('sends the post fund setup when the funding event is provided for multiple ch
 it('sends the post fund setup when the funding event is provided', async () => {
   const c = channel({
     vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0}),
-      stateWithHashSignedBy([bob()])({turnNum: 1}),
+      stateWithHashSignedBy([alice()])({ turnNum: 0 }),
+      stateWithHashSignedBy([bob()])({ turnNum: 1 }),
     ],
   });
   await Channel.query(w.knex).insert(c);
-  const {channelId} = c;
+  const { channelId } = c;
 
   await ObjectiveModel.insert(
     {
@@ -148,10 +148,10 @@ it('sends the post fund setup when the funding event is provided', async () => {
         params: {
           recipient: 'bob',
           sender: 'alice',
-          data: {signedStates: [{turnNum: 2}]},
+          data: { signedStates: [{ turnNum: 2 }] },
         },
       },
     ],
-    channelResults: [{channelId: c.channelId, turnNum: 2}],
+    channelResults: [{ channelId: c.channelId, turnNum: 2 }],
   });
 });

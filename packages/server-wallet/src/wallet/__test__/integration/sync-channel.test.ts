@@ -1,15 +1,15 @@
 import _ from 'lodash';
 
-import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
-import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateWithHashSignedBy} from '../fixtures/states';
-import {alice, bob, charlie} from '../fixtures/signing-wallets';
+import { Channel } from '../../../models/channel';
+import { Wallet } from '../..';
+import { seedAlicesSigningWallet } from '../../../db/seeds/1_signing_wallet_seeds';
+import { stateWithHashSignedBy } from '../fixtures/states';
+import { alice, bob, charlie } from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
-import {channel} from '../../../models/__test__/fixtures/channel';
-import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import { channel } from '../../../models/__test__/fixtures/channel';
+import { testKnex as knex } from '../../../../jest/knex-setup-teardown';
+import { defaultTestConfig } from '../../../config';
+import { DBAdmin } from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -37,7 +37,7 @@ it('returns an outgoing message with the latest state', async () => {
     appData,
     participants,
   };
-  const nextState = {turnNum: turnNum + 1, appData, participants};
+  const nextState = { turnNum: turnNum + 1, appData, participants };
   const c = channel({
     participants,
     vars: [
@@ -54,7 +54,7 @@ it('returns an outgoing message with the latest state', async () => {
 
   const channelId = c.channelId;
 
-  await expect(w.syncChannel({channelId})).resolves.toMatchObject({
+  await expect(w.syncChannel({ channelId })).resolves.toMatchObject({
     outbox: [
       {
         method: 'MessageQueued',
@@ -63,7 +63,7 @@ it('returns an outgoing message with the latest state', async () => {
           sender: 'alice',
           data: {
             signedStates: [runningState, nextState],
-            requests: [{type: 'GetChannel', channelId}],
+            requests: [{ type: 'GetChannel', channelId }],
           },
         },
       },
@@ -74,7 +74,7 @@ it('returns an outgoing message with the latest state', async () => {
           sender: 'alice',
           data: {
             signedStates: [runningState, nextState],
-            requests: [{type: 'GetChannel', channelId}],
+            requests: [{ type: 'GetChannel', channelId }],
           },
         },
       },
@@ -83,11 +83,11 @@ it('returns an outgoing message with the latest state', async () => {
   });
 
   const updated = await Channel.forId(channelId, w.knex);
-  expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
+  expect(updated.protocolState).toMatchObject({ latest: runningState, supported: runningState });
 });
 
 it('reject when the channel is not known', async () => {
-  await expect(w.syncChannel({channelId: '0xf0'})).rejects.toMatchObject(
+  await expect(w.syncChannel({ channelId: '0xf0' })).rejects.toMatchObject(
     new Error('Channel not found')
   );
 });

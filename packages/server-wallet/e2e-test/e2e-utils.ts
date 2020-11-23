@@ -1,28 +1,28 @@
-import {ChildProcessWithoutNullStreams, ChildProcess, fork, spawn} from 'child_process';
+import { ChildProcessWithoutNullStreams, ChildProcess, fork, spawn } from 'child_process';
 
 import kill = require('tree-kill');
 import Knex = require('knex');
-import {Participant, makeDestination, makeAddress} from '@statechannels/wallet-core';
-import {Wallet} from 'ethers';
+import { Participant, makeDestination, makeAddress } from '@statechannels/wallet-core';
+import { Wallet } from 'ethers';
 import axios from 'axios';
 
-import {withSupportedState} from '../src/models/__test__/fixtures/channel';
-import {SigningWallet} from '../src/models/signing-wallet';
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
-import {Channel} from '../src/models/channel';
+import { withSupportedState } from '../src/models/__test__/fixtures/channel';
+import { SigningWallet } from '../src/models/signing-wallet';
+import { stateVars } from '../src/wallet/__test__/fixtures/state-vars';
+import { Channel } from '../src/models/channel';
 import {
   extractDBConfigFromServerWalletConfig,
   ServerWalletConfig,
   defaultTestConfig,
 } from '../src/config';
 
-export const payerConfig: ServerWalletConfig = {...defaultTestConfig, postgresDBName: 'payer'};
+export const payerConfig: ServerWalletConfig = { ...defaultTestConfig, postgresDBName: 'payer' };
 export const receiverConfig: ServerWalletConfig = {
   ...defaultTestConfig,
   postgresDBName: 'receiver',
 };
 
-import {PerformanceTimer} from './payer/timers';
+import { PerformanceTimer } from './payer/timers';
 
 export type E2EServer = {
   url: string;
@@ -111,7 +111,7 @@ export const waitForServerToStart = (
 
 export const knexPayer: Knex = Knex(extractDBConfigFromServerWalletConfig(payerConfig));
 export const knexReceiver: Knex = Knex(extractDBConfigFromServerWalletConfig(receiverConfig));
-export const killServer = async ({server}: E2EServer): Promise<void> => {
+export const killServer = async ({ server }: E2EServer): Promise<void> => {
   kill(server.pid);
 };
 
@@ -128,15 +128,15 @@ export async function seedTestChannels(
   const receiverSeeds = [];
   for (let i = 0; i < numOfChannels; i++) {
     const seed = withSupportedState([
-      SigningWallet.fromJson({privateKey: payerPrivateKey}),
-      SigningWallet.fromJson({privateKey: receiverPrivateKey}),
+      SigningWallet.fromJson({ privateKey: payerPrivateKey }),
+      SigningWallet.fromJson({ privateKey: receiverPrivateKey }),
     ])({
-      vars: [stateVars({turnNum: 3})],
+      vars: [stateVars({ turnNum: 3 })],
       channelNonce: i,
       participants: [payer, receiver],
     });
-    payerSeeds.push({...seed, signingAddress: payer.signingAddress});
-    receiverSeeds.push({...seed, signingAddress: receiver.signingAddress});
+    payerSeeds.push({ ...seed, signingAddress: payer.signingAddress });
+    receiverSeeds.push({ ...seed, signingAddress: receiver.signingAddress });
     channelIds.push(seed.channelId);
   }
   await Promise.all([

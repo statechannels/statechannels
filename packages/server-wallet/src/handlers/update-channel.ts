@@ -1,13 +1,13 @@
-import {Either, left, right, chain, map} from 'fp-ts/lib/Either';
-import {StateVariables, Outcome} from '@statechannels/wallet-core';
-import {pipe} from 'fp-ts/lib/function';
-import {ChannelId} from '@statechannels/client-api-schema';
+import { Either, left, right, chain, map } from 'fp-ts/lib/Either';
+import { StateVariables, Outcome } from '@statechannels/wallet-core';
+import { pipe } from 'fp-ts/lib/function';
+import { ChannelId } from '@statechannels/client-api-schema';
 
-import {SignState, signState} from '../protocols/actions';
-import {ChannelState, ChannelStateWithSupported} from '../protocols/state';
-import {WalletError, Values} from '../errors/wallet-error';
+import { SignState, signState } from '../protocols/actions';
+import { ChannelState, ChannelStateWithSupported } from '../protocols/state';
+import { WalletError, Values } from '../errors/wallet-error';
 
-import {hasSupportedState, isMyTurn} from './helpers';
+import { hasSupportedState, isMyTurn } from './helpers';
 
 type StepResult = Either<UpdateChannelError, ChannelStateWithSupported>;
 type UpdateChannelResult = Either<UpdateChannelError, SignState>;
@@ -70,7 +70,7 @@ export function updateChannel(
   channelState: ChannelState
 ): UpdateChannelResult {
   const signStateVars = (sv: StateVariables): SignState =>
-    signState({...sv, channelId: args.channelId});
+    signState({ ...sv, channelId: args.channelId });
 
   return pipe(
     channelState,

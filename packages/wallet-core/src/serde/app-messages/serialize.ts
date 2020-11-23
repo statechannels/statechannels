@@ -5,9 +5,9 @@ import {
   DomainBudget as AppDomainBudget,
   TokenBudget,
   ChannelResult,
-  ChannelStatus
+  ChannelStatus,
 } from '@statechannels/client-api-schema';
-import {constants} from 'ethers';
+import { constants } from 'ethers';
 
 import {
   Allocation,
@@ -17,30 +17,30 @@ import {
   AssetBudget,
   isAllocation,
   SignedState,
-  ChannelConstants
+  ChannelConstants,
 } from '../../types';
-import {checkThat, exists, formatAmount} from '../../utils';
-import {BN} from '../../bignumber';
+import { checkThat, exists, formatAmount } from '../../utils';
+import { BN } from '../../bignumber';
 
 export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
-  const budgets: TokenBudget[] = Object.keys(budget.forAsset).map(assetHolderAddress => {
+  const budgets: TokenBudget[] = Object.keys(budget.forAsset).map((assetHolderAddress) => {
     const assetBudget = checkThat<AssetBudget>(budget.forAsset[assetHolderAddress], exists);
-    const channels = Object.keys(assetBudget.channels).map(channelId => ({
+    const channels = Object.keys(assetBudget.channels).map((channelId) => ({
       channelId,
-      amount: formatAmount(BN.from(assetBudget.channels[channelId].amount))
+      amount: formatAmount(BN.from(assetBudget.channels[channelId].amount)),
     }));
     return {
       assetHolderAddress: assetHolderAddress || constants.AddressZero,
       availableReceiveCapacity: formatAmount(assetBudget.availableReceiveCapacity),
       availableSendCapacity: formatAmount(assetBudget.availableSendCapacity),
-      channels
+      channels,
     };
   });
 
   return {
     domain: budget.domain,
     hubAddress: budget.hubAddress,
-    budgets
+    budgets,
   };
 }
 
@@ -56,14 +56,14 @@ export function serializeAllocation(allocation: Allocation): AppAllocations {
 function serializeSimpleAllocation(allocation: SimpleAllocation): AppAllocation {
   return {
     allocationItems: allocation.allocationItems.map(serializeAllocationItem),
-    assetHolderAddress: allocation.assetHolderAddress
+    assetHolderAddress: allocation.assetHolderAddress,
   };
 }
 
 function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationItem {
   return {
     destination: allocationItem.destination,
-    amount: formatAmount(allocationItem.amount)
+    amount: formatAmount(allocationItem.amount),
   };
 }
 
@@ -78,9 +78,9 @@ type ChannelStoreEntry = {
 
 export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
   const {
-    latest: {appData, turnNum, outcome}, // TODO: This should be supported
-    channelConstants: {participants, appDefinition},
-    channelId
+    latest: { appData, turnNum, outcome }, // TODO: This should be supported
+    channelConstants: { participants, appDefinition },
+    channelId,
   } = channelEntry;
 
   if (!isAllocation(outcome)) {
@@ -105,6 +105,6 @@ export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelR
     appData,
     status,
     turnNum,
-    channelId
+    channelId,
   };
 }

@@ -9,14 +9,14 @@ import {
   makeAddress,
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
-import {flow} from 'fp-ts/lib/function';
+import { flow } from 'fp-ts/lib/function';
 
-import {SigningWallet} from '../../../models/signing-wallet';
-import {addHash} from '../../../state-utils';
+import { SigningWallet } from '../../../models/signing-wallet';
+import { addHash } from '../../../state-utils';
 
-import {Fixture, fixture, overwriteOutcome} from './utils';
-import {alice, bob} from './participants';
-import {alice as aliceWallet} from './signing-wallets';
+import { Fixture, fixture, overwriteOutcome } from './utils';
+import { alice, bob } from './participants';
+import { alice as aliceWallet } from './signing-wallets';
 
 const defaultState: State = {
   appData: '0x',
@@ -24,8 +24,8 @@ const defaultState: State = {
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([
-    {destination: alice().destination, amount: BN.from(1)},
-    {destination: bob().destination, amount: BN.from(3)},
+    { destination: alice().destination, amount: BN.from(1) },
+    { destination: bob().destination, amount: BN.from(3) },
   ]),
   participants: [alice(), bob()],
   channelNonce: 1,
@@ -50,7 +50,7 @@ const addSignatures = (wallets: SigningWallet[]) => (s: State): SignedState => (
 
 export const stateSignedBy = (signingWallets = [aliceWallet()]): Fixture<SignedState> =>
   fixture<SignedState>(
-    _.merge({signatures: []}, defaultState),
+    _.merge({ signatures: [] }, defaultState),
     flow(overwriteOutcome, addSignatures(signingWallets))
   );
 

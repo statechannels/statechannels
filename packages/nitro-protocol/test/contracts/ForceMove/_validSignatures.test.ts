@@ -1,9 +1,9 @@
-import {Contract, Wallet, utils} from 'ethers';
-const {id} = utils;
+import { Contract, Wallet, utils } from 'ethers';
+const { id } = utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
-import {sign} from '../../../src/signatures';
+import { getTestProvider, setupContracts } from '../../test-helpers';
+import { sign } from '../../../src/signatures';
 const provider = getTestProvider();
 let ForceMove: Contract;
 
@@ -33,7 +33,7 @@ describe('_validSignatures (participants sign only their own states)', () => {
     ${3}          | ${5}
   `(
     'works for, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants',
-    async ({nParticipants, largestTurnNum}) => {
+    async ({ nParticipants, largestTurnNum }) => {
       const nStates = nParticipants;
       const addresses = [];
       const sigs = [];
@@ -49,7 +49,7 @@ describe('_validSignatures (participants sign only their own states)', () => {
         const offset = (largestTurnNum + nParticipants - i) % nParticipants; // distance to owner of largestTurnNum
         whoSignedWhat[i] = nStates - 1 - offset;
         const sig = await sign(wallet, stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+        sigs[i] = { v: sig.v, r: sig.r, s: sig.s };
       }
       expect(
         await ForceMove.validSignatures(largestTurnNum, addresses, stateHashes, sigs, whoSignedWhat)
@@ -80,7 +80,7 @@ describe('_validSignatures (participants all sign a single state)', () => {
     ${2}          | ${7}
   `(
     'works for, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants',
-    async ({nParticipants, largestTurnNum}) => {
+    async ({ nParticipants, largestTurnNum }) => {
       // const nStates = 1
       const addresses = [];
       const sigs = [];
@@ -91,7 +91,7 @@ describe('_validSignatures (participants all sign a single state)', () => {
         addresses[i] = wallet.address;
         whoSignedWhat[i] = 0;
         const sig = await sign(wallet, stateHashes[whoSignedWhat[i]]);
-        sigs[i] = {v: sig.v, r: sig.r, s: sig.s};
+        sigs[i] = { v: sig.v, r: sig.r, s: sig.s };
       }
       expect(
         await ForceMove.validSignatures(largestTurnNum, addresses, stateHashes, sigs, whoSignedWhat)

@@ -1,15 +1,15 @@
 import Objection from 'objection';
 
-import {Store} from '../store';
-import {channel} from '../../models/__test__/fixtures/channel';
-import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {Channel} from '../../models/channel';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
-import {signState} from '../../utilities/signatures';
+import { Store } from '../store';
+import { channel } from '../../models/__test__/fixtures/channel';
+import { seedAlicesSigningWallet } from '../../db/seeds/1_signing_wallet_seeds';
+import { Channel } from '../../models/channel';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { defaultTestConfig } from '../../config';
+import { signState } from '../../utilities/signatures';
 
-import {stateWithHashSignedBy} from './fixtures/states';
-import {bob, alice} from './fixtures/signing-wallets';
+import { stateWithHashSignedBy } from './fixtures/states';
+import { bob, alice } from './fixtures/signing-wallets';
 
 let tx: Objection.Transaction;
 
@@ -38,17 +38,20 @@ describe('signState', () => {
 
   beforeEach(async () => {
     c = await Channel.query(knex)
-      .insert(channel({vars: [stateWithHashSignedBy([bob()])()]}))
+      .insert(channel({ vars: [stateWithHashSignedBy([bob()])()] }))
       .withGraphFetched('signingWallet');
   });
 
   it('signs the state, returning the signed state', async () => {
-    await expect(Channel.query(knex).where({id: c.id})).resolves.toHaveLength(1);
+    await expect(Channel.query(knex).where({ id: c.id })).resolves.toHaveLength(1);
     expect(c.latestSignedByMe).toBeUndefined();
-    const state = {...c.vars[0], ...c.channelConstants};
+    const state = { ...c.vars[0], ...c.channelConstants };
     const signature = signState(state, alice().privateKey).signature;
     const result = await store.signState(c, c.vars[0], tx);
-    expect(result).toMatchObject({...state, signatures: [{signature, signer: alice().address}]});
+    expect(result).toMatchObject({
+      ...state,
+      signatures: [{ signature, signer: alice().address }],
+    });
   });
 
   it('uses a transaction', async () => {

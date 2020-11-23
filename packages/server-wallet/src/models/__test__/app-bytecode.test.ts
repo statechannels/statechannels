@@ -1,9 +1,9 @@
-import {constants} from 'ethers';
-import {makeAddress} from '@statechannels/wallet-core';
+import { constants } from 'ethers';
+import { makeAddress } from '@statechannels/wallet-core';
 
-import {AppBytecode} from '../app-bytecode';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {DBAdmin} from '../../db-admin/db-admin';
+import { AppBytecode } from '../app-bytecode';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { DBAdmin } from '../../db-admin/db-admin';
 
 const CHAIN_ID = '0x01';
 const APP_DEFINTION = makeAddress(constants.AddressZero);

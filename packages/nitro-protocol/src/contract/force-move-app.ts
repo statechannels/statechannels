@@ -1,7 +1,7 @@
-import {utils, Contract} from 'ethers';
+import { utils, Contract } from 'ethers';
 
 import ForceMoveAppArtifact from '../../artifacts/contracts/interfaces/ForceMoveApp.sol/ForceMoveApp.json';
-import {State, getVariablePart} from '../contract/state';
+import { State, getVariablePart } from '../contract/state';
 
 //  https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 export const ForceMoveAppContractInterface = new utils.Interface(ForceMoveAppArtifact.abi);
@@ -24,7 +24,10 @@ export async function validTransition(
   );
 }
 
-export function createValidTransitionTransaction(fromState: State, toState: State): {data: string} {
+export function createValidTransitionTransaction(
+  fromState: State,
+  toState: State
+): { data: string } {
   const numberOfParticipants = toState.channel.participants.length;
   const fromVariablePart = getVariablePart(fromState);
   const toVariablePart = getVariablePart(toState);
@@ -35,5 +38,5 @@ export function createValidTransitionTransaction(fromState: State, toState: Stat
     turnNumB,
     numberOfParticipants,
   ]);
-  return {data};
+  return { data };
 }

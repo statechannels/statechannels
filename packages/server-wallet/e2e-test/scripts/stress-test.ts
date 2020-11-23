@@ -12,11 +12,11 @@ import {
   startPayerServer,
   PAYER_PORT,
 } from '../e2e-utils';
-import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {SigningWallet} from '../../src/models/signing-wallet';
-import {DBAdmin} from '../../src/db-admin/db-admin';
+import { alice, bob } from '../../src/wallet/__test__/fixtures/signing-wallets';
+import { SigningWallet } from '../../src/models/signing-wallet';
+import { DBAdmin } from '../../src/db-admin/db-admin';
 
-const {argv} = yargs
+const { argv } = yargs
   .option('duration', {
     type: 'number',
     default: 60,
@@ -29,7 +29,7 @@ const {argv} = yargs
     description: 'The amount of connections (and channels) to use in the stress test.',
   });
 
-(async function(): Promise<void> {
+(async function (): Promise<void> {
   const receiverServer = startReceiverServer();
   const payerServer = startPayerServer();
   await waitForServerToStart(receiverServer);
@@ -42,7 +42,7 @@ const {argv} = yargs
 
   // Adds Bob to Receiver's Database
   await SWReceiver.query(knexReceiver).insert(bob());
-  const {connections, duration} = argv;
+  const { connections, duration } = argv;
   const channelIds = await seedTestChannels(
     getParticipant('payer', alice().privateKey),
     alice().privateKey,
@@ -55,11 +55,11 @@ const {argv} = yargs
   const urls = channelIds.map(c => `http://localhost:${PAYER_PORT}/makePayment?channelId=${c}`);
 
   // TODO: The autocannon types incorrectly type url as string. It actually can be a string or an array of strings
-  const instance = autocannon({url: urls as any, connections, duration}, stopServer);
+  const instance = autocannon({ url: urls as any, connections, duration }, stopServer);
   // Tracking outputs things in a decent format so we use that
 
   // eslint-disable-next-line no-process-env
-  autocannon.track(instance, {renderLatencyTable: true, renderProgressBar: !process.env.CI});
+  autocannon.track(instance, { renderLatencyTable: true, renderProgressBar: !process.env.CI });
 
   async function stopServer(): Promise<void> {
     await killServer(receiverServer);

@@ -1,8 +1,8 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet} from 'ethers';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet } from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import { getTestProvider, setupContracts } from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -36,7 +36,7 @@ describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
     ${[0, 0, 2]}  | ${11}          | ${3}          | ${3}    | ${false}
   `(
     'returns $expectedResult for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
-    async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, expectedResult}) => {
+    async ({ whoSignedWhat, largestTurnNum, nParticipants, nStates, expectedResult }) => {
       expect(
         await ForceMove.acceptableWhoSignedWhat(
           whoSignedWhat,
@@ -55,7 +55,7 @@ describe('_acceptableWhoSignedWhat (expect revert)', () => {
     ${[0, 0]}     | ${2}           | ${3}          | ${1}    | ${'_validSignatures: whoSignedWhat must be the same length as participants'}
   `(
     'reverts for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
-    async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, reasonString}) => {
+    async ({ whoSignedWhat, largestTurnNum, nParticipants, nStates, reasonString }) => {
       await expectRevert(
         () =>
           ForceMove.acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),

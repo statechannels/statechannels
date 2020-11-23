@@ -1,9 +1,9 @@
-import {configureEnvVariables} from '@statechannels/devtools';
+import { configureEnvVariables } from '@statechannels/devtools';
 
-import {PAYER_PORT} from '../e2e-utils';
+import { PAYER_PORT } from '../e2e-utils';
 
-import {startApp} from './app';
-(async function(): Promise<void> {
+import { startApp } from './app';
+(async function (): Promise<void> {
   process.on('SIGINT', () => {
     server.close();
     process.exit(0);

@@ -1,5 +1,5 @@
-import {StateChannelsNotification} from './notifications';
-import {JsonRpcError, JsonRpcErrorResponse} from './jsonrpc-header-types';
+import { StateChannelsNotification } from './notifications';
+import { JsonRpcError, JsonRpcErrorResponse } from './jsonrpc-header-types';
 import {
   CreateChannelRequest,
   JoinChannelRequest,
@@ -37,7 +37,7 @@ import {
   JoinChannelError,
   GetStateError,
   CreateChannelError,
-  ChallengeChannelError
+  ChallengeChannelError,
 } from './methods';
 
 type GenericError = JsonRpcError<500, 'Wallet error'>;

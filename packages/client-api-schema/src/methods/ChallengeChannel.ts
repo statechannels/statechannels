@@ -1,6 +1,6 @@
-import {JsonRpcRequest, JsonRpcResponse, JsonRpcError} from '../jsonrpc-header-types';
-import {ChannelId, ChannelResult} from '../data-types';
-import {ErrorCodes as AllErrors} from '../error-codes';
+import { JsonRpcRequest, JsonRpcResponse, JsonRpcError } from '../jsonrpc-header-types';
+import { ChannelId, ChannelResult } from '../data-types';
+import { ErrorCodes as AllErrors } from '../error-codes';
 
 export interface ChallengeChannelParams {
   channelId: ChannelId;

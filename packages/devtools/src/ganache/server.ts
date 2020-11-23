@@ -141,17 +141,17 @@ export class GanacheServer {
     // it should be {balance: HexString, secretKey: string}[]
     const serverOptions: ganache.IServerOptions = {
       network_id: this.chainId,
-      accounts: accounts.map(a => ({balance: oneMillion, secretKey: a.privateKey})),
+      accounts: accounts.map((a) => ({balance: oneMillion, secretKey: a.privateKey})),
       gasLimit,
       gasPrice: BigNumber.from(gasPrice).toHexString(),
       verbose: SHOW_VERBOSE_GANACHE_OUTPUT,
       logger: {
-        log: x => {
+        log: (x) => {
           SHOW_VERBOSE_GANACHE_OUTPUT
             ? extractLogsFromVerboseGanacheOutput(this.buffer, x)
             : logger.info(x);
-        }
-      }
+        },
+      },
     };
 
     this.server = ganache.server({...serverOptions, _chainId: this.chainId} as any);
@@ -200,7 +200,7 @@ export class GanacheServer {
 
       deployedArtifacts[artifact.contractName] = {
         address: deployedArtifact.contractAddress,
-        abi: JSON.stringify(artifact.abi)
+        abi: JSON.stringify(artifact.abi),
       };
     }
     logger.info({deployedArtifacts}, 'Contracts deployed to chain');

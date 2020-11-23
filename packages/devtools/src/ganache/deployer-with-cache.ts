@@ -65,7 +65,7 @@ export class GanacheNCacheDeployer {
     )}.lock`;
 
     await new Promise((resolve, reject) =>
-      lockfile.lock(lockPath, {wait: 300_000 /* 5 minutes */}, result => {
+      lockfile.lock(lockPath, {wait: 300_000 /* 5 minutes */}, (result) => {
         !result ? resolve(result) : reject(result);
       })
     );
@@ -104,7 +104,7 @@ export class GanacheNCacheDeployer {
       }
     } finally {
       await new Promise((resolve, reject) =>
-        lockfile.unlock(lockPath, result => {
+        lockfile.unlock(lockPath, (result) => {
           result ? reject(result) : resolve(result);
         })
       );
@@ -134,7 +134,7 @@ export class GanacheNCacheDeployer {
   private findDeployment(deployments: Deployment[], key: CacheKey): Deployment | undefined {
     const {name, libraries, args, bytecode} = key;
 
-    return deployments.find(deployment => {
+    return deployments.find((deployment) => {
       // easy checks first
       if (deployment.name !== name || deployment.bytecode !== bytecode) {
         return false;

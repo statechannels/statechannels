@@ -1,4 +1,4 @@
-import {Transaction, TransactionOrKnex} from 'objection';
+import { Transaction, TransactionOrKnex } from 'objection';
 import {
   Objective,
   Outcome,
@@ -24,29 +24,29 @@ import {
   Destination,
   PrivateKey,
 } from '@statechannels/wallet-core';
-import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
+import { Payload as WirePayload, SignedState as WireSignedState } from '@statechannels/wire-format';
 import _ from 'lodash';
-import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
-import {ethers} from 'ethers';
+import { ChannelResult, FundingStrategy } from '@statechannels/client-api-schema';
+import { ethers } from 'ethers';
 import Knex from 'knex';
-import {Logger} from 'pino';
+import { Logger } from 'pino';
 import pMap from 'p-map';
 
-import {Channel, ChannelError, CHANNEL_COLUMNS} from '../models/channel';
-import {SigningWallet} from '../models/signing-wallet';
-import {addHash, addState, clearOldStates, fastDeserializeState} from '../state-utils';
-import {ChannelState, ChainServiceApi} from '../protocols/state';
-import {WalletError, Values} from '../errors/wallet-error';
-import {Bytes32, Uint256, Bytes} from '../type-aliases';
-import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} from '../metrics';
-import {isReverseSorted, pick} from '../utilities/helpers';
-import {Funding} from '../models/funding';
-import {Nonce} from '../models/nonce';
-import {ObjectiveModel, DBObjective} from '../models/objective';
-import {AppBytecode} from '../models/app-bytecode';
-import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
-import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
-import {logger as defaultLogger} from '../logger';
+import { Channel, ChannelError, CHANNEL_COLUMNS } from '../models/channel';
+import { SigningWallet } from '../models/signing-wallet';
+import { addHash, addState, clearOldStates, fastDeserializeState } from '../state-utils';
+import { ChannelState, ChainServiceApi } from '../protocols/state';
+import { WalletError, Values } from '../errors/wallet-error';
+import { Bytes32, Uint256, Bytes } from '../type-aliases';
+import { timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync } from '../metrics';
+import { isReverseSorted, pick } from '../utilities/helpers';
+import { Funding } from '../models/funding';
+import { Nonce } from '../models/nonce';
+import { ObjectiveModel, DBObjective } from '../models/objective';
+import { AppBytecode } from '../models/app-bytecode';
+import { LedgerRequest, LedgerRequestType } from '../models/ledger-request';
+import { shouldValidateTransition, validateTransition } from '../utilities/validate-transition';
+import { logger as defaultLogger } from '../logger';
 
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
@@ -60,7 +60,7 @@ function isUniqueViolationError(error: any): error is UniqueViolationError {
 }
 
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
-  throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
+  throw new ChannelError(ChannelError.reasons.channelMissing, { channelId });
 };
 
 export class Store {
@@ -144,10 +144,7 @@ export class Store {
     return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer('getting channel', () => {
-        const query = Channel.query(tx)
-          .where({channelId})
-          .forUpdate()
-          .first();
+        const query = Channel.query(tx).where({ channelId }).forUpdate().first();
 
         if (fetchSigningWallet) return query.withGraphFetched('signingWallet');
 
@@ -169,9 +166,9 @@ export class Store {
     }
     const timer = timerFactory(this.timingMetrics, `signState ${channel.channelId}`);
 
-    const state = addHash({...channel.channelConstants, ...vars});
+    const state = addHash({ ...channel.channelConstants, ...vars });
 
-    const {supported, latestSignedByMe} = channel;
+    const { supported, latestSignedByMe } = channel;
 
     if (latestSignedByMe && latestSignedByMe.turnNum >= state.turnNum)
       // Don't sign a new state with lower turnNum than already signed by you
@@ -180,7 +177,7 @@ export class Store {
     const signatureEntry = await timer('signing', async () =>
       channel.signingWallet.signState(state)
     );
-    const signedState = {...state, signatures: [signatureEntry]};
+    const signedState = { ...state, signatures: [signatureEntry] };
 
     if (supported && shouldValidateTransition(state, channel)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
@@ -230,8 +227,8 @@ export class Store {
 
     const result = await timer('updating', async () =>
       Channel.query(tx)
-        .where({channelId: channel.channelId})
-        .patch({vars: channel.vars})
+        .where({ channelId: channel.channelId })
+        .patch({ vars: channel.vars })
         .returning('*')
         .first()
     );
@@ -247,8 +244,8 @@ export class Store {
     const channel = await Channel.forId(channelId, tx);
 
     await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({chainServiceRequests: [...channel.chainServiceRequests, type]});
+      .where({ channelId: channel.channelId })
+      .patch({ chainServiceRequests: [...channel.chainServiceRequests, type] });
   }
 
   async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
@@ -257,7 +254,7 @@ export class Store {
     // - withGraphJoined is slightly faster in this case
     return (
       await Channel.query(tx ?? this.knex)
-        .where({'channels.channel_id': channelId})
+        .where({ 'channels.channel_id': channelId })
         .withGraphJoined('funding')
         .first()
     )?.protocolState;
@@ -266,13 +263,13 @@ export class Store {
   async getStates(
     channelId: Bytes32,
     tx?: Transaction
-  ): Promise<{states: SignedStateWithHash[]; channelState: ChannelState}> {
+  ): Promise<{ states: SignedStateWithHash[]; channelState: ChannelState }> {
     const channel = await Channel.forId(channelId, tx || this.knex);
 
     if (!channel) throw new StoreError(StoreError.reasons.channelMissing);
 
-    const {vars, channelConstants, protocolState: channelState} = channel;
-    return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
+    const { vars, channelConstants, protocolState: channelState } = channel;
+    return { states: vars.map(ss => _.merge(ss, channelConstants)), channelState };
   }
 
   async getChannels(): Promise<ChannelState[]> {
@@ -375,17 +372,17 @@ export class Store {
     tx: Transaction
   ): Promise<DBObjective> {
     const {
-      data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
+      data: { targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role },
     } = objective;
 
     // fetch the channel to make sure the channel exists
     const channel = await this.getChannel(channelId, tx);
     if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId});
+      throw new StoreError(StoreError.reasons.channelMissing, { channelId });
     }
 
     if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
-      throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
+      throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, { fundingStrategy });
 
     const objectiveToBeStored: DBObjective = {
       objectiveId: objectiveId(objective),
@@ -414,8 +411,8 @@ export class Store {
     }
 
     await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId})
+      .where({ channelId: channel.channelId })
+      .patch({ fundingStrategy, fundingLedgerChannelId })
       .returning('*')
       .first();
 
@@ -427,7 +424,7 @@ export class Store {
     tx: Transaction
   ): Promise<DBObjective> {
     const {
-      data: {targetChannelId, fundingStrategy},
+      data: { targetChannelId, fundingStrategy },
     } = objective;
 
     // fetch the channel to make sure the channel exists
@@ -522,7 +519,7 @@ export class Store {
       (await Channel.forId(channelId, tx)) ||
       (await createChannel(state, 'Unknown', undefined, tx));
 
-    const {supported} = channel;
+    const { supported } = channel;
     if (supported && shouldValidateTransition(state, channel)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
@@ -555,8 +552,8 @@ export class Store {
     // Insert into the DB
     return await asyncTimer('updating', () =>
       Channel.query(tx)
-        .where({channelId: channel.channelId})
-        .patch({vars: channel.vars})
+        .where({ channelId: channel.channelId })
+        .patch({ vars: channel.vars })
         .returning('*')
         .first()
     );
@@ -569,10 +566,10 @@ export class Store {
     fundingStrategy: FundingStrategy,
     role: 'app' | 'ledger' = 'app',
     fundingLedgerChannelId?: Bytes32
-  ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: DBObjective}> {
+  ): Promise<{ channel: ChannelState; firstSignedState: SignedState; objective: DBObjective }> {
     return await this.knex.transaction(async tx => {
       const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
-      const {channelId, participants} = channel;
+      const { channelId, participants } = channel;
       const firstSignedState = await this.signState(
         channel,
         {
@@ -599,7 +596,7 @@ export class Store {
       const objective = await this.ensureObjective(objectiveParams, tx);
       await this.approveObjective(objective.objectiveId, tx);
 
-      return {channel: await this.getChannel(channelId, tx), firstSignedState, objective};
+      return { channel: await this.getChannel(channelId, tx), firstSignedState, objective };
     });
   }
 
@@ -658,9 +655,7 @@ async function createChannel(
 ): Promise<Channel> {
   const addresses = constants.participants.map(p => p.signingAddress);
 
-  const signingWallet = await SigningWallet.query(txOrKnex)
-    .whereIn('address', addresses)
-    .first();
+  const signingWallet = await SigningWallet.query(txOrKnex).whereIn('address', addresses).first();
 
   if (!signingWallet) throw new StoreError(StoreError.reasons.notInChannel);
 

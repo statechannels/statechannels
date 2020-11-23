@@ -1,11 +1,11 @@
-import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
+import { BN, isSimpleAllocation, checkThat, State } from '@statechannels/wallet-core';
 import _ from 'lodash';
-import {Transaction} from 'knex';
+import { Transaction } from 'knex';
 
-import {Store} from '../wallet/store';
-import {Bytes32} from '../type-aliases';
+import { Store } from '../wallet/store';
+import { Bytes32 } from '../type-aliases';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import { Protocol, ProtocolResult, ChannelState, stage, Stage } from './state';
 import {
   signState,
   noAction,
@@ -48,18 +48,21 @@ function ledgerFundedThisChannel(ledger: ChannelState, app: ChannelState): boole
   if (!ledger.supported) return false;
   if (!app.supported) return false;
 
-  const {allocationItems: ledgerFunding} = checkThat(ledger.supported.outcome, isSimpleAllocation);
-  const {allocationItems: appFunding} = checkThat(app.supported.outcome, isSimpleAllocation);
+  const { allocationItems: ledgerFunding } = checkThat(
+    ledger.supported.outcome,
+    isSimpleAllocation
+  );
+  const { allocationItems: appFunding } = checkThat(app.supported.outcome, isSimpleAllocation);
   const targetFunding = appFunding.map(a => a.amount).reduce(BN.add, BN.from(0));
 
   return _.some(
     ledgerFunding,
-    ({destination, amount}) => destination === app.channelId && amount === targetFunding
+    ({ destination, amount }) => destination === app.channelId && amount === targetFunding
   );
 }
 
 function isFunded(ps: ProtocolState): boolean {
-  const {funding, supported, fundingStrategy} = ps.app;
+  const { funding, supported, fundingStrategy } = ps.app;
 
   switch (fundingStrategy) {
     case 'Fake':
@@ -80,7 +83,7 @@ function isFunded(ps: ProtocolState): boolean {
       if (ps.type !== 'LedgerFundingProtocolState') return false;
       if (!ps.ledger) return false;
       // TODO: in the future check "funding table"
-      if (!isFunded({type: 'DirectFundingProtocolState', app: ps.ledger})) return false;
+      if (!isFunded({ type: 'DirectFundingProtocolState', app: ps.ledger })) return false;
       return ledgerFundedThisChannel(ps.ledger, ps.app);
     }
 
@@ -89,16 +92,16 @@ function isFunded(ps: ProtocolState): boolean {
   }
 }
 
-function myPostfundTurnNumber({app}: ProtocolState): number {
+function myPostfundTurnNumber({ app }: ProtocolState): number {
   return app.participants.length + app.myIndex;
 }
 
-const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false => {
+const requestFundChannelIfMyTurn = ({ app }: ProtocolState): FundChannel | false => {
   if (!app.supported) return false;
   if (app.chainServiceRequests.indexOf('fund') > -1) return false;
 
   const myDestination = app.participants[app.myIndex].destination;
-  const {allocationItems, assetHolderAddress} = checkThat(
+  const { allocationItems, assetHolderAddress } = checkThat(
     app.supported?.outcome,
     isSimpleAllocation
   );
@@ -128,18 +131,19 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   });
 };
 
-const requestLedgerFunding = ({app}: ProtocolState): RequestLedgerFunding | false => {
+const requestLedgerFunding = ({ app }: ProtocolState): RequestLedgerFunding | false => {
   if (!app.supported) return false;
-  const {assetHolderAddress} = checkThat(app.supported.outcome, isSimpleAllocation);
+  const { assetHolderAddress } = checkThat(app.supported.outcome, isSimpleAllocation);
   return requestLedgerFundingAction({
     channelId: app.channelId,
     assetHolderAddress,
   });
 };
 
-const isFakeFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Fake';
-const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
-const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
+const isFakeFunded = ({ fundingStrategy }: ChannelState): boolean => fundingStrategy === 'Fake';
+const isDirectlyFunded = ({ fundingStrategy }: ChannelState): boolean =>
+  fundingStrategy === 'Direct';
+const isLedgerFunded = ({ fundingStrategy }: ChannelState): boolean => fundingStrategy === 'Ledger';
 
 const fundDirectly = (ps: ProtocolState): FundChannel | false => {
   return (
@@ -187,7 +191,7 @@ const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
 const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
   (ps.app.supported?.turnNum === ps.app.participants.length * 2 - 1 ||
     isRunning(ps.app.supported)) &&
-  completeObjective({channelId: ps.app.channelId});
+  completeObjective({ channelId: ps.app.channelId });
 
 export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
   signPreFundSetup(ps) ||
@@ -208,7 +212,7 @@ export const getOpenChannelProtocolState = async (
   switch (app.fundingStrategy) {
     case 'Direct':
     case 'Fake':
-      return {type: 'DirectFundingProtocolState', app};
+      return { type: 'DirectFundingProtocolState', app };
     case 'Ledger': {
       const req = await store.getLedgerRequest(app.channelId, 'fund', tx);
       return {

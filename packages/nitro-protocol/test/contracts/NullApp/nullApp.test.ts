@@ -1,9 +1,9 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet, ethers } from 'ethers';
 
-import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
+import { getRandomNonce, getTestProvider, setupContracts } from '../../test-helpers';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
-import {getVariablePart, State, Channel} from '../../../src';
+import { getVariablePart, State, Channel } from '../../../src';
 
 const provider = getTestProvider();
 
@@ -33,7 +33,7 @@ describe('null app', () => {
       appDefinition: ethers.constants.AddressZero,
       appData: '0x00',
     };
-    const toState: State = {...fromState, turnNum: 2};
+    const toState: State = { ...fromState, turnNum: 2 };
 
     await expectRevert(async () => {
       await NitroAdjudicator.validTransition(

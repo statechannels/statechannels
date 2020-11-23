@@ -1,4 +1,4 @@
-import {JSONSchema, Model, Pojo, ModelOptions} from 'objection';
+import { JSONSchema, Model, Pojo, ModelOptions } from 'objection';
 import {
   SignatureEntry,
   StateWithHash,
@@ -6,12 +6,12 @@ import {
   makeAddress,
   Address,
 } from '@statechannels/wallet-core';
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
-import {Bytes32} from '../type-aliases';
-import {Values} from '../errors/wallet-error';
-import {signState as wasmSignState} from '../utilities/signatures';
-import {addHash} from '../state-utils';
+import { Bytes32 } from '../type-aliases';
+import { Values } from '../errors/wallet-error';
+import { signState as wasmSignState } from '../utilities/signatures';
+import { addHash } from '../state-utils';
 
 export class SigningWallet extends Model {
   readonly id!: number;
@@ -24,7 +24,7 @@ export class SigningWallet extends Model {
     super.$beforeValidate(jsonSchema, json, _opt);
 
     if (!json.address) {
-      const {address} = new ethers.Wallet(json.privateKey);
+      const { address } = new ethers.Wallet(json.privateKey);
       json.address = address;
     }
 
@@ -63,7 +63,7 @@ export class SigningWallet extends Model {
 
 class SigningWalletError extends Error {
   readonly type = 'SigningWalletError';
-  static readonly reasons = {invalidAddress: 'Invalid address'} as const;
+  static readonly reasons = { invalidAddress: 'Invalid address' } as const;
 
   constructor(
     reason: Values<typeof SigningWalletError.reasons>,

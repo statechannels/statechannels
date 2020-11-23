@@ -1,9 +1,9 @@
-import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
-import {createChannelArgs} from '../fixtures/create-channel';
-import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import { Channel } from '../../../models/channel';
+import { Wallet } from '../..';
+import { createChannelArgs } from '../fixtures/create-channel';
+import { seedAlicesSigningWallet } from '../../../db/seeds/1_signing_wallet_seeds';
+import { defaultTestConfig } from '../../../config';
+import { DBAdmin } from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -22,9 +22,9 @@ describe('happy path', () => {
     expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
     const appData = '0xaf00';
-    const createPromise = w.createChannels(createChannelArgs({appData}), 1);
+    const createPromise = w.createChannels(createChannelArgs({ appData }), 1);
     await expect(createPromise).resolves.toMatchObject({
-      channelResults: [{channelId: expect.any(String)}],
+      channelResults: [{ channelId: expect.any(String) }],
     });
 
     await expect(createPromise).resolves.toMatchObject({
@@ -34,7 +34,7 @@ describe('happy path', () => {
             recipient: 'bob',
             sender: 'alice',
             data: {
-              signedStates: [{turnNum: 0, appData}],
+              signedStates: [{ turnNum: 0, appData }],
               objectives: [
                 {
                   participants: [], // TODO: remove, currently deprecating participants
@@ -48,9 +48,9 @@ describe('happy path', () => {
           },
         },
       ],
-      channelResults: [{channelId: expect.any(String), turnNum: 0, appData}],
+      channelResults: [{ channelId: expect.any(String), turnNum: 0, appData }],
     });
-    const {channelId} = (await createPromise).channelResults[0];
+    const { channelId } = (await createPromise).channelResults[0];
     expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 
     const updated = await Channel.forId(channelId, w.knex);
@@ -68,7 +68,7 @@ describe('happy path', () => {
   it('creates many channels', async () => {
     expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
-    const createArgs = createChannelArgs({appData: '0xaf00'});
+    const createArgs = createChannelArgs({ appData: '0xaf00' });
     const NUM_CHANNELS = 10;
 
     const result = await w.createChannels(createArgs, NUM_CHANNELS);

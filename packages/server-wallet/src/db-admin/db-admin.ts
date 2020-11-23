@@ -1,17 +1,17 @@
 import * as path from 'path';
-import {promisify} from 'util';
-import {exec as rawExec} from 'child_process';
+import { promisify } from 'util';
+import { exec as rawExec } from 'child_process';
 
 const exec = promisify(rawExec);
 import Knex from 'knex';
 
-import {SigningWallet} from '../models/signing-wallet';
-import {Channel} from '../models/channel';
-import {Nonce} from '../models/nonce';
-import {ObjectiveModel, ObjectiveChannelModel} from '../models/objective';
-import {Funding} from '../models/funding';
-import {AppBytecode} from '../models/app-bytecode';
-import {LedgerRequest} from '../models/ledger-request';
+import { SigningWallet } from '../models/signing-wallet';
+import { Channel } from '../models/channel';
+import { Nonce } from '../models/nonce';
+import { ObjectiveModel, ObjectiveChannelModel } from '../models/objective';
+import { Funding } from '../models/funding';
+import { AppBytecode } from '../models/app-bytecode';
+import { LedgerRequest } from '../models/ledger-request';
 
 export class DBAdmin {
   knex: Knex;

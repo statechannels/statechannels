@@ -8,20 +8,20 @@ import {
   serializeOutcome,
   makeAddress,
 } from '@statechannels/wallet-core';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
+import { ETH_ASSET_HOLDER_ADDRESS } from '@statechannels/wallet-core/lib/src/config';
 import Objection from 'objection';
 
-import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
-import {seedBobsSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateWithHashSignedBy} from '../fixtures/states';
-import {bob, alice} from '../fixtures/signing-wallets';
-import {bob as bobP} from '../fixtures/participants';
-import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
-import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
-import {ObjectiveModel} from '../../../models/objective';
+import { Channel } from '../../../models/channel';
+import { Wallet } from '../..';
+import { seedBobsSigningWallet } from '../../../db/seeds/1_signing_wallet_seeds';
+import { stateWithHashSignedBy } from '../fixtures/states';
+import { bob, alice } from '../fixtures/signing-wallets';
+import { bob as bobP } from '../fixtures/participants';
+import { channel } from '../../../models/__test__/fixtures/channel';
+import { defaultTestConfig } from '../../../config';
+import { DBAdmin } from '../../../db-admin/db-admin';
+import { getChannelResultFor, getSignedStateFor } from '../../../__test__/test-helpers';
+import { ObjectiveModel } from '../../../models/objective';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -37,9 +37,9 @@ afterEach(async () => {
 describe('directly funded app', () => {
   it('signs multiple prefund setups when joining multiple channels', async () => {
     const appData = '0x0f00';
-    const preFS = {turnNum: 0, appData};
-    const state1 = {...preFS, channelNonce: 1};
-    const state2 = {...preFS, channelNonce: 2};
+    const preFS = { turnNum: 0, appData };
+    const state1 = { ...preFS, channelNonce: 1 };
+    const state2 = { ...preFS, channelNonce: 2 };
 
     const c1 = channel({
       signingAddress: bob().address,
@@ -85,7 +85,7 @@ describe('directly funded app', () => {
       w.knex
     );
 
-    const {outbox, channelResults} = await w.joinChannels(channelIds);
+    const { outbox, channelResults } = await w.joinChannels(channelIds);
 
     expect(getChannelResultFor(c1.channelId, channelResults)).toMatchObject({
       channelId: c1.channelId,
@@ -97,15 +97,15 @@ describe('directly funded app', () => {
       turnNum: 1,
     });
 
-    expect(getSignedStateFor(c1.channelId, outbox)).toMatchObject({...state1, turnNum: 1});
-    expect(getSignedStateFor(c2.channelId, outbox)).toMatchObject({...state2, turnNum: 1});
+    expect(getSignedStateFor(c1.channelId, outbox)).toMatchObject({ ...state1, turnNum: 1 });
+    expect(getSignedStateFor(c2.channelId, outbox)).toMatchObject({ ...state2, turnNum: 1 });
 
     await Promise.all(
       channelIds.map(async c => {
         const updated = await Channel.forId(c, w.knex);
         expect(updated.protocolState).toMatchObject({
-          latest: {turnNum: 1},
-          supported: {turnNum: 1},
+          latest: { turnNum: 1 },
+          supported: { turnNum: 1 },
         });
       })
     );
@@ -113,17 +113,17 @@ describe('directly funded app', () => {
 
   it('signs the prefund setup ', async () => {
     const appData = '0x0f00';
-    const preFS0 = {turnNum: 0, appData};
-    const preFS1 = {turnNum: 1, appData};
+    const preFS0 = { turnNum: 0, appData };
+    const preFS1 = { turnNum: 1, appData };
     const c = channel({
       signingAddress: bob().address,
       vars: [stateWithHashSignedBy([alice()])(preFS0)],
     });
     await Channel.query(w.knex).insert(c);
-    const {channelId} = c;
+    const { channelId } = c;
     const current = await Channel.forId(channelId, w.knex);
 
-    expect(current.protocolState).toMatchObject({latest: preFS0, supported: undefined});
+    expect(current.protocolState).toMatchObject({ latest: preFS0, supported: undefined });
 
     await ObjectiveModel.insert(
       {
@@ -139,20 +139,20 @@ describe('directly funded app', () => {
       w.knex
     );
 
-    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
-      outbox: [{params: {recipient: 'alice', sender: 'bob', data: {signedStates: [preFS1]}}}],
-      channelResult: {channelId, turnNum: 1, appData, status: 'opening'},
+    await expect(w.joinChannel({ channelId })).resolves.toMatchObject({
+      outbox: [{ params: { recipient: 'alice', sender: 'bob', data: { signedStates: [preFS1] } } }],
+      channelResult: { channelId, turnNum: 1, appData, status: 'opening' },
     });
 
     const updated = await Channel.forId(channelId, w.knex);
 
-    expect(updated.protocolState).toMatchObject({latest: preFS1, supported: preFS1});
+    expect(updated.protocolState).toMatchObject({ latest: preFS1, supported: preFS1 });
   });
 
   it('signs the prefund setup and makes a deposit, when I am first to deposit in a directly funded app', async () => {
-    const outcome = simpleEthAllocation([{destination: bobP().destination, amount: BN.from(5)}]);
-    const preFS0 = {turnNum: 0, outcome};
-    const preFS1 = {turnNum: 1, outcome};
+    const outcome = simpleEthAllocation([{ destination: bobP().destination, amount: BN.from(5) }]);
+    const preFS0 = { turnNum: 0, outcome };
+    const preFS1 = { turnNum: 1, outcome };
 
     const c = channel({
       signingAddress: bob().address,
@@ -178,18 +178,18 @@ describe('directly funded app', () => {
       w.knex
     );
 
-    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
+    await expect(w.joinChannel({ channelId })).resolves.toMatchObject({
       outbox: [
         {
           method: 'MessageQueued',
           params: {
             recipient: 'alice',
             sender: 'bob',
-            data: {signedStates: [{...preFS1, outcome: serializeOutcome(preFS1.outcome)}]},
+            data: { signedStates: [{ ...preFS1, outcome: serializeOutcome(preFS1.outcome) }] },
           },
         },
       ],
-      channelResult: {channelId, turnNum: 1, status: 'opening'},
+      channelResult: { channelId, turnNum: 1, status: 'opening' },
     });
 
     const updated = await Channel.forId(channelId, w.knex);
@@ -219,7 +219,7 @@ describe('ledger funded app scenarios', () => {
             appDefinition: '0x0000000000000000000000000000000000000000',
             channelNonce: someNonConflictingChannelNonce,
             turnNum: 4,
-            outcome: simpleEthAllocation([{destination: bobP().destination, amount: BN.from(5)}]),
+            outcome: simpleEthAllocation([{ destination: bobP().destination, amount: BN.from(5) }]),
           }),
         ],
       })
@@ -272,11 +272,11 @@ describe('ledger funded app scenarios', () => {
   };
 
   it('countersigns a prefund setup and automatically creates a ledger update', async () => {
-    const outcome = simpleEthAllocation([{destination: bobP().destination, amount: BN.from(5)}]);
-    const preFS0 = {turnNum: 0, outcome};
-    const preFS1 = {turnNum: 1, outcome};
+    const outcome = simpleEthAllocation([{ destination: bobP().destination, amount: BN.from(5) }]);
+    const preFS0 = { turnNum: 0, outcome };
+    const preFS1 = { turnNum: 1, outcome };
 
-    const {channelId} = await putTestChannelInsideWallet({
+    const { channelId } = await putTestChannelInsideWallet({
       ...app,
       signingAddress: bob().address,
       vars: [stateWithHashSignedBy([alice()])(preFS0)],
@@ -284,7 +284,7 @@ describe('ledger funded app scenarios', () => {
 
     const signedPreFS1 = stateWithHashSignedBy([bob()])(preFS1);
 
-    await expect(w.joinChannel({channelId})).resolves.toMatchObject({
+    await expect(w.joinChannel({ channelId })).resolves.toMatchObject({
       outbox: [
         {
           method: 'MessageQueued',
@@ -308,7 +308,7 @@ describe('ledger funded app scenarios', () => {
       },
     });
 
-    const {protocolState} = await Channel.forId(channelId, w.knex);
+    const { protocolState } = await Channel.forId(channelId, w.knex);
 
     expect(protocolState).toMatchObject({
       latest: signedPreFS1,

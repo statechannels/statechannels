@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {StateVariables, Outcome} from '@statechannels/wallet-core';
+import { StateVariables, Outcome } from '@statechannels/wallet-core';
 export type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
@@ -39,7 +39,7 @@ export type Fixture<T> = (mergeProps?: DeepPartial<T>, extendProps?: DeepPartial
  * is probably what the consumer expects, and doing it in the modifier serves as a convenience for
  * developers who wish to pass a single `mergeProps` object.
  */
-export const fixture = function<T>(defaults: T, modifier: Modifier<T> = _.identity): Fixture<T> {
+export const fixture = function <T>(defaults: T, modifier: Modifier<T> = _.identity): Fixture<T> {
   return (mergeProps?: DeepPartial<T>, extendProps?: DeepPartial<T>): T =>
     modifier(_.extend(_.merge(_.cloneDeep(defaults), mergeProps), extendProps), mergeProps) as T;
 };
@@ -48,7 +48,7 @@ export const fixture = function<T>(defaults: T, modifier: Modifier<T> = _.identi
 // TODO: Should we just make the default outcome empty, making this function unnecessary?
 export function overwriteOutcome<T extends StateVariables>(
   result: T,
-  props?: {outcome: Outcome}
+  props?: { outcome: Outcome }
 ): T {
   if (props?.outcome) result.outcome = props.outcome;
 

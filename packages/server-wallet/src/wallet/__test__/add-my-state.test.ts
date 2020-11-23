@@ -1,13 +1,13 @@
 import Objection from 'objection';
 
-import {Store} from '../store';
-import {Channel} from '../../models/channel';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
-import {channel} from '../../models/__test__/fixtures/channel';
+import { Store } from '../store';
+import { Channel } from '../../models/channel';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { defaultTestConfig } from '../../config';
+import { channel } from '../../models/__test__/fixtures/channel';
 
-import {stateWithHashSignedBy} from './fixtures/states';
-import {alice, bob} from './fixtures/signing-wallets';
+import { stateWithHashSignedBy } from './fixtures/states';
+import { alice, bob } from './fixtures/signing-wallets';
 
 let store: Store;
 

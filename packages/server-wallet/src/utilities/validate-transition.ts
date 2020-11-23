@@ -1,14 +1,14 @@
 import _ from 'lodash';
-import {SignedState, StateWithHash, toNitroState} from '@statechannels/wallet-core';
-import {constants} from 'ethers';
+import { SignedState, StateWithHash, toNitroState } from '@statechannels/wallet-core';
+import { constants } from 'ethers';
 
-import {logger} from '../logger';
-import {validateTransitionWithEVM} from '../evm-validator';
-import {Bytes} from '../type-aliases';
-import {Channel} from '../models/channel';
+import { logger } from '../logger';
+import { validateTransitionWithEVM } from '../evm-validator';
+import { Bytes } from '../type-aliases';
+import { Channel } from '../models/channel';
 
 export function shouldValidateTransition(incomingState: StateWithHash, channel: Channel): boolean {
-  const {supported, isLedger, fundingStrategy} = channel;
+  const { supported, isLedger, fundingStrategy } = channel;
   // TODO: This is a temporary workaround for https://github.com/statechannels/statechannels/issues/2842
   // We should figure out a smarter way of handling this
   if (fundingStrategy == 'Fake' && incomingState.turnNum === 3) {
@@ -42,7 +42,7 @@ export function validateTransition(
     const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
     if (!turnNumCheck) {
       const VALIDATION_ERROR = `Turn number check failed.`;
-      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+      logger.error({ fromState, toState, error: Error(VALIDATION_ERROR) }, VALIDATION_ERROR);
     }
   }
 
@@ -71,14 +71,14 @@ export function validateTransition(
 
   if (!signatureValidation) {
     const VALIDATION_ERROR = `Signature validation failed.`;
-    logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+    logger.error({ fromState, toState, error: Error(VALIDATION_ERROR) }, VALIDATION_ERROR);
     return false;
   }
 
   // Final state specific validation
   if (toState.isFinal && !_.isEqual(fromState.outcome, toState.outcome)) {
     const VALIDATION_ERROR = `Outcome changed on a final state.`;
-    logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+    logger.error({ fromState, toState, error: Error(VALIDATION_ERROR) }, VALIDATION_ERROR);
     return false;
   }
 
@@ -92,7 +92,7 @@ export function validateTransition(
   if (isInFundingStage && !fundingStageValidation) {
     const VALIDATION_ERROR = `Invalid setup state transition.`;
 
-    logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+    logger.error({ fromState, toState, error: Error(VALIDATION_ERROR) }, VALIDATION_ERROR);
 
     return false;
   }
@@ -108,7 +108,7 @@ export function validateTransition(
     );
 
     if (!evmValidation) {
-      logger.error({fromState, toState}, 'EVM Validation failure');
+      logger.error({ fromState, toState }, 'EVM Validation failure');
       return false;
     }
   }

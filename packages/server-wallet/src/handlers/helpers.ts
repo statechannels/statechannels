@@ -1,6 +1,6 @@
-import {StateVariables} from '@statechannels/wallet-core';
+import { StateVariables } from '@statechannels/wallet-core';
 
-import {ChannelState, ChannelStateWithSupported, ChannelStateWithMe} from '../protocols/state';
+import { ChannelState, ChannelStateWithSupported, ChannelStateWithMe } from '../protocols/state';
 
 export const hasStateSignedByMe = (cs: ChannelState): cs is ChannelStateWithMe =>
   !!cs.latestSignedByMe;

@@ -1,4 +1,4 @@
-import {compose, map, filter} from 'lodash/fp';
+import { compose, map, filter } from 'lodash/fp';
 import _ from 'lodash';
 import {
   allocateToTarget,
@@ -12,13 +12,13 @@ import {
   AllocationItem,
   Errors,
 } from '@statechannels/wallet-core';
-import {Transaction} from 'knex';
+import { Transaction } from 'knex';
 
-import {Store} from '../wallet/store';
-import {Bytes32} from '../type-aliases';
-import {LedgerRequestType} from '../models/ledger-request';
+import { Store } from '../wallet/store';
+import { Bytes32 } from '../type-aliases';
+import { LedgerRequestType } from '../models/ledger-request';
 
-import {Protocol, ProtocolResult, ChannelState} from './state';
+import { Protocol, ProtocolResult, ChannelState } from './state';
 import {
   MarkLedgerFundingRequestsAsComplete,
   noAction,
@@ -38,7 +38,7 @@ function removeChannelFromAllocation(
 ): AllocationItem[] {
   if (!channel.supported) throw new Error('state is unsupported');
 
-  const {allocationItems: channelAllocations} = checkThat(
+  const { allocationItems: channelAllocations } = checkThat(
     channel.supported.outcome,
     isSimpleAllocation
   );
@@ -50,19 +50,19 @@ function removeChannelFromAllocation(
   if (removed[0].amount !== channelAllocations.map(x => x.amount).reduce(BN.add, BN.from(0)))
     throw new Error('Expected outcome allocations to add up to the allocation in ledger');
 
-  return channelAllocations.reduce((remainingItems, {destination, amount}) => {
+  return channelAllocations.reduce((remainingItems, { destination, amount }) => {
     const idx = remainingItems.findIndex(to => destination === to.destination);
     return idx > -1
       ? _.update(remainingItems, idx, to => ({
           destination,
           amount: BN.add(amount, to.amount),
         }))
-      : [...remainingItems, {destination, amount}];
+      : [...remainingItems, { destination, amount }];
   }, remaining);
 }
 
 const retrieveFundsFromClosedChannels = (
-  {assetHolderAddress, allocationItems}: SimpleAllocation,
+  { assetHolderAddress, allocationItems }: SimpleAllocation,
   channelsReturningFunds: ChannelState[]
 ): SimpleAllocation => ({
   type: 'SimpleAllocation',
@@ -78,7 +78,7 @@ const allocateFundsToChannels = (
   insufficientFunds: Bytes32[];
 } => {
   const insufficientFunds: Bytes32[] = [];
-  const allocated = allocationTargets.reduce((outcome, {channelId, supported}) => {
+  const allocated = allocationTargets.reduce((outcome, { channelId, supported }) => {
     try {
       return allocateToTarget(
         outcome,
@@ -98,7 +98,7 @@ const allocateFundsToChannels = (
     }
   }, original);
 
-  return {allocated, insufficientFunds};
+  return { allocated, insufficientFunds };
 };
 
 const intersectOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
@@ -152,7 +152,7 @@ const computeNewOutcome = ({
     latestNotSignedByMe,
     latestSignedByMe,
     channelId,
-    participants: {length: n},
+    participants: { length: n },
   },
   channelsRequestingFunds,
   channelsReturningFunds,
@@ -208,12 +208,12 @@ const computeNewOutcome = ({
       const merged = intersectOutcome(myExpectedOutcome, theirLatestOutcome);
       const xor = xorOutcome(myExpectedOutcome, theirLatestOutcome);
 
-      const bothFunding = channelsRequestingFunds.filter(({channelId}) =>
+      const bothFunding = channelsRequestingFunds.filter(({ channelId }) =>
         _.some(merged.allocationItems, ['destination', channelId])
       );
 
       const bothDefunding = channelsReturningFunds.filter(
-        ({channelId}) => !_.some(xor.allocationItems, ['destination', channelId])
+        ({ channelId }) => !_.some(xor.allocationItems, ['destination', channelId])
       );
 
       const agreedUponOutcome = allocateFundsToChannels(
@@ -242,14 +242,14 @@ const computeNewOutcome = ({
 };
 
 const markRequestsAsComplete = ({
-  fundingChannel: {supported},
+  fundingChannel: { supported },
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
   if (!supported) return false;
   if (channelsRequestingFunds.length === 0 && channelsReturningFunds.length === 0) return false;
 
-  const fundedChannels = channelsRequestingFunds.filter(({channelId}) =>
+  const fundedChannels = channelsRequestingFunds.filter(({ channelId }) =>
     _.some(
       checkThat(supported.outcome, isSimpleAllocation).allocationItems,
       allocationItem => allocationItem.destination === channelId
@@ -257,7 +257,7 @@ const markRequestsAsComplete = ({
   );
 
   const defundedChannels = channelsReturningFunds.filter(
-    ({channelId}) =>
+    ({ channelId }) =>
       !_.some(
         checkThat(supported.outcome, isSimpleAllocation).allocationItems,
         allocationItem => allocationItem.destination === channelId
@@ -291,7 +291,7 @@ export const getProcessLedgerQueueProtocolState = async (
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
     channelsRequestingFunds: await Promise.all<ChannelState>(
       compose(
-        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+        map(({ channelToBeFunded }: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
         filter(['status', 'pending']),
         filter(['type', 'fund'])
       )(ledgerRequests)
@@ -299,7 +299,7 @@ export const getProcessLedgerQueueProtocolState = async (
 
     channelsReturningFunds: await Promise.all<ChannelState>(
       compose(
-        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+        map(({ channelToBeFunded }: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
         filter(['status', 'pending']),
         filter(['type', 'defund'])
       )(ledgerRequests)
@@ -308,4 +308,4 @@ export const getProcessLedgerQueueProtocolState = async (
 };
 
 const sortByNonce = (channelStates: ChannelState[]): ChannelState[] =>
-  _.sortBy(channelStates, ({latest: {channelNonce}}) => channelNonce);
+  _.sortBy(channelStates, ({ latest: { channelNonce } }) => channelNonce);

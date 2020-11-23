@@ -4,7 +4,7 @@ import {
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Guarantee as GuaranteeWire,
-  Message as WireMessage
+  Message as WireMessage,
 } from '@statechannels/wire-format';
 
 import {
@@ -13,10 +13,10 @@ import {
   AllocationItem,
   SimpleAllocation,
   Payload,
-  SimpleGuarantee
+  SimpleGuarantee,
 } from '../../types';
-import {calculateChannelId} from '../../state-utils';
-import {formatAmount} from '../../utils';
+import { calculateChannelId } from '../../state-utils';
+import { formatAmount } from '../../utils';
 
 export function serializeMessage(
   walletVersion: string,
@@ -25,13 +25,13 @@ export function serializeMessage(
   sender?: string,
   channelId?: string
 ): WireMessage {
-  const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
+  const signedStates = (message.signedStates || []).map((s) => serializeState(s, channelId));
   const objectives = message.objectives;
-  const {requests} = message;
+  const { requests } = message;
   return {
     recipient,
     sender,
-    data: {walletVersion, signedStates, objectives, requests}
+    data: { walletVersion, signedStates, objectives, requests },
   };
 }
 
@@ -44,7 +44,7 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
     challengeDuration,
     turnNum,
     appData,
-    isFinal
+    isFinal,
   } = state;
 
   return {
@@ -58,7 +58,7 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
     isFinal,
     outcome: serializeOutcome(state.outcome),
     channelId: channelId || calculateChannelId(state),
-    signatures: state.signatures.map(s => s.signature)
+    signatures: state.signatures.map((s) => s.signature),
   };
 }
 
@@ -76,7 +76,7 @@ export function serializeOutcome(outcome: Outcome): OutcomeWire {
 function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire {
   return {
     assetHolderAddress: allocation.assetHolderAddress,
-    allocationItems: allocation.allocationItems.map(serializeAllocationItem)
+    allocationItems: allocation.allocationItems.map(serializeAllocationItem),
   };
 }
 
@@ -84,11 +84,11 @@ function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
   return {
     assetHolderAddress: guarantee.assetHolderAddress,
     targetChannelId: guarantee.targetChannelId,
-    destinations: guarantee.destinations
+    destinations: guarantee.destinations,
   };
 }
 
 function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
-  const {destination, amount} = allocationItem;
-  return {destination, amount: formatAmount(amount)};
+  const { destination, amount } = allocationItem;
+  return { destination, amount: formatAmount(amount) };
 }

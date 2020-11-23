@@ -1,4 +1,4 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 import {
   Allocation,
@@ -18,7 +18,7 @@ export function createTransferAllTransaction(
     channelId,
     encodeAllocation(allocation),
   ]);
-  return {data};
+  return { data };
 }
 
 export function claimAllArgs(
@@ -39,7 +39,7 @@ export function createClaimAllTransaction(
     'claimAll',
     claimAllArgs(channelId, guarantee, allocation)
   );
-  return {data};
+  return { data };
 }
 
 export function createSetOutcomeTransaction(
@@ -51,5 +51,5 @@ export function createSetOutcomeTransaction(
     channelId,
     hashOutcome(outcome),
   ]);
-  return {data};
+  return { data };
 }

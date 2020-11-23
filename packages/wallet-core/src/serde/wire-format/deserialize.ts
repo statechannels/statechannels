@@ -6,9 +6,9 @@ import {
   Allocation as AllocationWire,
   Message as WireMessage,
   isAllocations,
-  validateMessage
+  validateMessage,
 } from '@statechannels/wire-format';
-import {State as NitroState, hashState} from '@statechannels/nitro-protocol';
+import { State as NitroState, hashState } from '@statechannels/nitro-protocol';
 
 import {
   SignedState,
@@ -18,11 +18,11 @@ import {
   Objective,
   Participant,
   Payload,
-  makeAddress
+  makeAddress,
 } from '../../types';
-import {BN} from '../../bignumber';
-import {makeDestination} from '../../utils';
-import {convertToNitroOutcome, getSignerAddress} from '../../state-utils';
+import { BN } from '../../bignumber';
+import { makeDestination } from '../../utils';
+import { convertToNitroOutcome, getSignerAddress } from '../../state-utils';
 
 export function convertToInternalParticipant(participant: {
   destination: string;
@@ -32,7 +32,7 @@ export function convertToInternalParticipant(participant: {
   return {
     ...participant,
     signingAddress: makeAddress(participant.signingAddress),
-    destination: makeDestination(participant.destination)
+    destination: makeDestination(participant.destination),
   };
 }
 
@@ -40,12 +40,12 @@ type WirePayload = WireMessage['data'];
 
 export function validatePayload(rawPayload: unknown): WirePayload {
   // TODO: wire-format should export a validator specially for the payload
-  return validateMessage({recipient: '', sender: '', data: rawPayload}).data;
+  return validateMessage({ recipient: '', sender: '', data: rawPayload }).data;
 }
 
 export function deserializeMessage(message: WireMessage): Payload {
-  const signedStates = message.data.signedStates?.map(ss => deserializeState(ss));
-  const objectives = message.data.objectives?.map(objective => deserializeObjective(objective));
+  const signedStates = message.data.signedStates?.map((ss) => deserializeState(ss));
+  const objectives = message.data.objectives?.map((objective) => deserializeObjective(objective));
   const requests = message.data.requests;
   const walletVersion = message.data.walletVersion;
 
@@ -53,7 +53,7 @@ export function deserializeMessage(message: WireMessage): Payload {
     walletVersion,
     signedStates,
     objectives,
-    requests
+    requests,
   };
 }
 
@@ -63,13 +63,13 @@ export function wireStateToNitroState(state: SignedStateWire): NitroState {
     isFinal: state.isFinal,
     channel: {
       channelNonce: state.channelNonce,
-      participants: state.participants.map(s => s.signingAddress),
-      chainId: state.chainId
+      participants: state.participants.map((s) => s.signingAddress),
+      chainId: state.chainId,
     },
     challengeDuration: state.challengeDuration,
     outcome: convertToNitroOutcome(deserializeOutcome(state.outcome)),
     appDefinition: state.appDefinition,
-    appData: state.appData
+    appData: state.appData,
   };
 }
 export function hashWireState(state: SignedStateWire): string {
@@ -82,26 +82,26 @@ export function deserializeState(state: SignedStateWire): SignedState {
     channelId: undefined,
     appDefinition: makeAddress(state.appDefinition),
     outcome: deserializeOutcome(state.outcome),
-    participants: state.participants.map(convertToInternalParticipant)
+    participants: state.participants.map(convertToInternalParticipant),
   };
 
   return {
     ...deserializedState,
-    signatures: state.signatures.map(sig => ({
+    signatures: state.signatures.map((sig) => ({
       signature: sig,
-      signer: getSignerAddress(deserializedState, sig)
-    }))
+      signer: getSignerAddress(deserializedState, sig),
+    })),
   };
 }
 
 export function deserializeObjective(objective: ObjectiveWire): Objective {
-  const participants = objective.participants?.map(p => ({
+  const participants = objective.participants?.map((p) => ({
     ...p,
     signingAddress: makeAddress(p.signingAddress),
-    destination: makeDestination(p.destination)
+    destination: makeDestination(p.destination),
   }));
 
-  return {...objective, participants};
+  return { ...objective, participants };
 }
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity
@@ -118,7 +118,7 @@ export function deserializeOutcome(outcome: OutcomeWire): Outcome {
       default:
         return {
           type: 'MixedAllocation',
-          simpleAllocations: outcome.map(deserializeAllocation)
+          simpleAllocations: outcome.map(deserializeAllocation),
         };
     }
   } else {
@@ -128,7 +128,7 @@ export function deserializeOutcome(outcome: OutcomeWire): Outcome {
       return {
         type: 'SimpleGuarantee',
         ...outcome[0],
-        assetHolderAddress: makeAddress(outcome[0].assetHolderAddress)
+        assetHolderAddress: makeAddress(outcome[0].assetHolderAddress),
       };
     }
   }
@@ -137,15 +137,15 @@ export function deserializeOutcome(outcome: OutcomeWire): Outcome {
 }
 
 function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
-  const {assetHolderAddress, allocationItems} = allocation;
+  const { assetHolderAddress, allocationItems } = allocation;
   return {
     type: 'SimpleAllocation',
     assetHolderAddress: makeAddress(assetHolderAddress),
-    allocationItems: allocationItems.map(deserializeAllocationItem)
+    allocationItems: allocationItems.map(deserializeAllocationItem),
   };
 }
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
-  const {amount, destination} = allocationItem;
-  return {destination: makeDestination(destination), amount: BN.from(amount)};
+  const { amount, destination } = allocationItem;
+  return { destination: makeDestination(destination), amount: BN.from(amount) };
 }

@@ -1,35 +1,35 @@
 export const dataMissing = {
   recipient: 'alice',
-  sender: 'bob'
+  sender: 'bob',
 };
 
 export const extraProperty = {
   recipient: 'alice',
   sender: 'bob',
   data: {},
-  iShouldntBeHere: true
+  iShouldntBeHere: true,
 };
 
 export const emptyState = {
   recipient: 'alice',
   sender: 'bob',
   data: {
-    signedStates: [{}]
-  }
+    signedStates: [{}],
+  },
 };
 
 export const emptyStringObjectives = {
   recipient: 'alice',
   sender: 'bob',
   data: {
-    objectives: ''
-  }
+    objectives: '',
+  },
 };
 
 export const nullObjectives = {
   recipient: 'alice',
   sender: 'bob',
   data: {
-    objectives: null
-  }
+    objectives: null,
+  },
 };

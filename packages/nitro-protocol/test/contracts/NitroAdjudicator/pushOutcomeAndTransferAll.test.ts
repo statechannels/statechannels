@@ -1,12 +1,12 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet, ethers } from 'ethers';
 
 import AssetHolderArtifact1 from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import AssetHolderArtifact2 from '../../../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { AllocationAssetOutcome, encodeOutcome } from '../../../src/contract/outcome';
+import { hashState, State } from '../../../src/contract/state';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
@@ -85,8 +85,8 @@ const finalized = true;
 
 describe('pushOutcomeAndTransferAll', () => {
   it.each`
-    description     | setOutcome                     | heldBefore                     | newOutcome | heldAfter                      | payouts                        | reasonString
-    ${description2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
+    description     | setOutcome                           | heldBefore                           | newOutcome | heldAfter                            | payouts                              | reasonString
+    ${description2} | ${{ ETH: { A: 1 }, ETH2: { A: 2 } }} | ${{ ETH: { c: 1 }, ETH2: { c: 2 } }} | ${{}}      | ${{ ETH: { c: 0 }, ETH2: { c: 0 } }} | ${{ ETH: { A: 1 }, ETH2: { A: 2 } }} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -104,7 +104,7 @@ describe('pushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString: string;
     }) => {
-      const channel: Channel = {chainId, channelNonce, participants};
+      const channel: Channel = { chainId, channelNonce, participants };
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
@@ -116,7 +116,7 @@ describe('pushOutcomeAndTransferAll', () => {
         newOutcome,
         heldAfter,
         payouts,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
+      ].map((object) => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
@@ -165,7 +165,7 @@ describe('pushOutcomeAndTransferAll', () => {
         stateHash,
         challengerAddress,
         encodedOutcome,
-        {gasLimit: 300000}
+        { gasLimit: 300000 }
       );
 
       // Call method in a slightly different way if expecting a revert
@@ -175,7 +175,7 @@ describe('pushOutcomeAndTransferAll', () => {
         );
         await expectRevert(() => tx1, regex);
       } else {
-        const {logs} = await (await tx1).wait();
+        const { logs } = await (await tx1).wait();
 
         // Compile events from logs
         const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
@@ -184,7 +184,7 @@ describe('pushOutcomeAndTransferAll', () => {
         let expectedEvents = [];
 
         // Add AssetTransferred events to expectations
-        Object.keys(payouts).forEach(assetHolder => {
+        Object.keys(payouts).forEach((assetHolder) => {
           expectedEvents = expectedEvents.concat(
             assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
           );

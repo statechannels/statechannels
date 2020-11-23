@@ -1,8 +1,8 @@
-import {constants, utils, BigNumber} from 'ethers';
+import { constants, utils, BigNumber } from 'ethers';
 
-import {hashOutcome, Outcome} from './outcome';
-import {hashState, State} from './state';
-import {Address, Bytes, Bytes32, Uint48} from './types';
+import { hashOutcome, Outcome } from './outcome';
+import { hashState, State } from './state';
+import { Address, Bytes, Bytes32, Uint48 } from './types';
 
 export interface ChannelData {
   turnNumRecord: Uint48;
@@ -46,7 +46,7 @@ const CHANNEL_DATA_LITE_TYPE = `tuple(
 )`;
 
 export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes32 {
-  const {turnNumRecord, finalizesAt} = channelData;
+  const { turnNumRecord, finalizesAt } = channelData;
   const hash = utils.keccak256(encodeChannelData(channelData));
   const fingerprint = utils.hexDataSlice(hash, 12);
 
@@ -61,7 +61,7 @@ export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes
 
 export function parseChannelStorageHash(
   channelStorageHash: Bytes32
-): {turnNumRecord: number; finalizesAt: number; fingerprint: Bytes} {
+): { turnNumRecord: number; finalizesAt: number; fingerprint: Bytes } {
   validateHexString(channelStorageHash);
 
   //
@@ -76,7 +76,7 @@ export function parseChannelStorageHash(
     fingerprint,
   };
 }
-const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
+const asNumber: (s: string) => number = (s) => BigNumber.from(s).toNumber();
 
 export function channelDataStruct({
   finalizesAt,
@@ -103,7 +103,7 @@ export function channelDataStruct({
   const outcomeHash = isOpen || !outcome ? constants.HashZero : hashOutcome(outcome);
   challengerAddress = challengerAddress || constants.AddressZero;
 
-  return {turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash};
+  return { turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash };
 }
 
 export function encodeChannelData(data: ChannelData): Bytes {

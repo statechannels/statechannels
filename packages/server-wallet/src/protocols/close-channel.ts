@@ -1,10 +1,10 @@
-import {BN, checkThat, isSimpleAllocation, State} from '@statechannels/wallet-core';
-import {Transaction} from 'knex';
+import { BN, checkThat, isSimpleAllocation, State } from '@statechannels/wallet-core';
+import { Transaction } from 'knex';
 
-import {Store} from '../wallet/store';
-import {Bytes32} from '../type-aliases';
+import { Store } from '../wallet/store';
+import { Bytes32 } from '../type-aliases';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import { Protocol, ProtocolResult, ChannelState, stage, Stage } from './state';
 import {
   completeObjective,
   Withdraw,
@@ -34,11 +34,11 @@ function everyoneSignedFinalState(ps: ProtocolState): boolean {
 
 // TODO: where is the corresponding logic for ledger channels?
 //       should there be a generic logic for computing whether a channel is defunded regardless of funding type?
-function successfulWithdraw({app}: ProtocolState): boolean {
+function successfulWithdraw({ app }: ProtocolState): boolean {
   if (app.fundingStrategy !== 'Direct') return true;
   if (!app.supported) return false;
 
-  const {allocationItems, assetHolderAddress} = checkThat(
+  const { allocationItems, assetHolderAddress } = checkThat(
     app.supported.outcome,
     isSimpleAllocation
   );
@@ -95,13 +95,13 @@ const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
     assetHolderAddress: checkThat(ps.app.latest.outcome, isSimpleAllocation).assetHolderAddress,
   });
 
-const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
+const isLedgerFunded = ({ fundingStrategy }: ChannelState): boolean => fundingStrategy === 'Ledger';
 
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
   everyoneSignedFinalState(ps) &&
   ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
   successfulWithdraw(ps) &&
-  completeObjective({channelId: ps.app.channelId});
+  completeObjective({ channelId: ps.app.channelId });
 
 function chainWithdraw(ps: ProtocolState): Withdraw | false {
   return (
@@ -131,7 +131,7 @@ export const getCloseChannelProtocolState = async (
   switch (app.fundingStrategy) {
     case 'Direct':
     case 'Fake':
-      return {app};
+      return { app };
     case 'Ledger': {
       const req = await store.getLedgerRequest(app.channelId, 'defund', tx);
       return {

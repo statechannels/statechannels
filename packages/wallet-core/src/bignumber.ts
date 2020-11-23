@@ -1,6 +1,6 @@
-import {BigNumber as EthersBigNumber, BigNumberish} from 'ethers';
+import { BigNumber as EthersBigNumber, BigNumberish } from 'ethers';
 
-import {Uint256} from './types';
+import { Uint256 } from './types';
 
 type T = BigNumberish;
 

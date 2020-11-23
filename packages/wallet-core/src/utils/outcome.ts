@@ -1,5 +1,5 @@
 import * as _ from 'lodash';
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 import {
   AllocationItem,
@@ -9,12 +9,12 @@ import {
   Allocation,
   Destination,
   Address,
-  makeAddress
+  makeAddress,
 } from '../types';
-import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {BN, Zero} from '../bignumber';
+import { ETH_ASSET_HOLDER_ADDRESS } from '../config';
+import { BN, Zero } from '../bignumber';
 
-import {checkThat} from './helpers';
+import { checkThat } from './helpers';
 
 export function isSimpleAllocation(outcome: Outcome): outcome is SimpleAllocation {
   return outcome.type === 'SimpleAllocation';
@@ -33,7 +33,7 @@ export function assertSimpleEthAllocation(outcome: Outcome): SimpleAllocation {
 export const simpleEthAllocation = (allocationItems: AllocationItem[]): SimpleAllocation => ({
   type: 'SimpleAllocation',
   assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
-  allocationItems
+  allocationItems,
 });
 
 export const simpleEthGuarantee = (
@@ -43,7 +43,7 @@ export const simpleEthGuarantee = (
   type: 'SimpleGuarantee',
   destinations,
   targetChannelId,
-  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
+  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
 });
 
 export const simpleTokenAllocation = (
@@ -52,13 +52,13 @@ export const simpleTokenAllocation = (
 ): SimpleAllocation => ({
   type: 'SimpleAllocation',
   assetHolderAddress,
-  allocationItems
+  allocationItems,
 });
 
 export enum Errors {
   DestinationMissing = 'Destination missing from ledger channel',
   InsufficientFunds = 'Insufficient funds in ledger channel',
-  InvalidOutcomeType = 'Invalid outcome type'
+  InvalidOutcomeType = 'Invalid outcome type',
 }
 
 export const areAllocationItemsEqual = (a: AllocationItem, b: AllocationItem): boolean =>
@@ -79,9 +79,9 @@ export function allocateToTarget(
   let currentItems = currentOutcome.allocationItems;
 
   deductions
-    .filter(i => BN.gt(i.amount, 0))
-    .forEach(targetItem => {
-      const ledgerItem = currentItems.find(i => i.destination === targetItem.destination);
+    .filter((i) => BN.gt(i.amount, 0))
+    .forEach((targetItem) => {
+      const ledgerItem = currentItems.find((i) => i.destination === targetItem.destination);
       if (!ledgerItem) {
         throw new Error(Errors.DestinationMissing);
       }
@@ -92,8 +92,8 @@ export function allocateToTarget(
       if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
     });
 
-  currentItems.push({destination: makeDestination(targetChannelId), amount: total});
-  currentItems = currentItems.filter(i => BN.gt(i.amount, 0));
+  currentItems.push({ destination: makeDestination(targetChannelId), amount: total });
+  currentItems = currentItems.filter((i) => BN.gt(i.amount, 0));
 
   currentOutcome.allocationItems = currentItems;
   return currentOutcome;
@@ -105,7 +105,7 @@ export function makeDestination(addressOrDestination: string): Destination {
   // '0x' + 32 bytes
   const destinationLength = 32 * 2 + 2;
   const zeroPrefix =
-    '0x' + _.range(destinationLength - addressLength).reduce(soFar => soFar.concat('0'), '');
+    '0x' + _.range(destinationLength - addressLength).reduce((soFar) => soFar.concat('0'), '');
 
   // If an ethereum address is passed in, prepend 0s
   if (addressOrDestination.length === addressLength) {

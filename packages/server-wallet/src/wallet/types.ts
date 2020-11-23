@@ -6,9 +6,9 @@ import {
   GetStateParams,
   ChannelId,
 } from '@statechannels/client-api-schema';
-import {Participant} from '@statechannels/wallet-core';
+import { Participant } from '@statechannels/wallet-core';
 
-import {Bytes32} from '../type-aliases';
+import { Bytes32 } from '../type-aliases';
 
 import {
   MultipleChannelOutput,

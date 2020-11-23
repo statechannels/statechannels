@@ -1,18 +1,18 @@
-import {parentPort, isMainThread, workerData, threadId} from 'worker_threads';
+import { parentPort, isMainThread, workerData, threadId } from 'worker_threads';
 
-import {left, right} from 'fp-ts/lib/Either';
+import { left, right } from 'fp-ts/lib/Either';
 
-import {createLogger} from '../../logger';
-import {Wallet} from '../..';
-import {timerFactory} from '../../metrics';
-import {ServerWalletConfig} from '../../config';
+import { createLogger } from '../../logger';
+import { Wallet } from '../..';
+import { timerFactory } from '../../metrics';
+import { ServerWalletConfig } from '../../config';
 
-import {isStateChannelWorkerData} from './worker-data';
+import { isStateChannelWorkerData } from './worker-data';
 
 // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
 const walletConfig: ServerWalletConfig = {
   ...(workerData as ServerWalletConfig),
-  postgresPoolSize: {min: 0, max: 1},
+  postgresPoolSize: { min: 0, max: 1 },
   workerThreadAmount: 0, // don't want workers to start more workers
 };
 

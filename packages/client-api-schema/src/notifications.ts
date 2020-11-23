@@ -1,5 +1,5 @@
-import {JsonRpcNotification} from './jsonrpc-header-types';
-import {ChannelResult, Message, DomainBudget} from './data-types';
+import { JsonRpcNotification } from './jsonrpc-header-types';
+import { ChannelResult, Message, DomainBudget } from './data-types';
 
 // these notifications come *from* the wallet, which is not strictly how JSON-RPC should work
 // (since we treat the wallet as the 'server')
@@ -11,7 +11,7 @@ export type ChannelClosingNotification = JsonRpcNotification<'ChannelClosed', Ch
 
 export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Message>;
 export type BudgetUpdatedNotification = JsonRpcNotification<'BudgetUpdated', DomainBudget>;
-export type UiNotification = JsonRpcNotification<'UIUpdate', {showWallet: boolean}>;
+export type UiNotification = JsonRpcNotification<'UIUpdate', { showWallet: boolean }>;
 // eslint-disable-next-line @typescript-eslint/ban-types
 export type WalletReady = JsonRpcNotification<'WalletReady', {}>;
 
@@ -24,7 +24,7 @@ export type StateChannelsNotification =
   | UiNotification
   | WalletReady;
 
-type FilterByMethod<T, Method> = T extends {method: Method} ? T : never;
+type FilterByMethod<T, Method> = T extends { method: Method } ? T : never;
 
 export type StateChannelsNotificationType = {
   [T in StateChannelsNotification['method']]: [

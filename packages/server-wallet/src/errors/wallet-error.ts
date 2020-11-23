@@ -12,7 +12,7 @@ export abstract class WalletError extends Error {
   } as const;
 
   abstract readonly type: Values<typeof WalletError.errors>;
-  static readonly reasons: {[key: string]: string};
+  static readonly reasons: { [key: string]: string };
   constructor(
     public readonly reason: Values<typeof WalletError.reasons>,
     public readonly data: any = undefined
@@ -45,7 +45,7 @@ export class PushMessageError extends WalletError {
 
   constructor(
     reason: Values<typeof PushMessageError.reasons>,
-    public readonly data: {thisWalletVersion: string; payloadWalletVersion: string; cause: Error}
+    public readonly data: { thisWalletVersion: string; payloadWalletVersion: string; cause: Error }
   ) {
     super(reason);
   }

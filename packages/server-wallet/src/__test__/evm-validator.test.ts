@@ -1,9 +1,9 @@
-import {utils} from 'ethers';
-import {toNitroState} from '@statechannels/wallet-core';
+import { utils } from 'ethers';
+import { toNitroState } from '@statechannels/wallet-core';
 
-import {appBytecode, COUNTING_APP_DEFINITION} from '../models/__test__/fixtures/app-bytecode';
-import {createState} from '../wallet/__test__/fixtures/states';
-import {validateTransitionWithEVM} from '../evm-validator';
+import { appBytecode, COUNTING_APP_DEFINITION } from '../models/__test__/fixtures/app-bytecode';
+import { createState } from '../wallet/__test__/fixtures/states';
+import { validateTransitionWithEVM } from '../evm-validator';
 
 const UNDEFINED_APP_DEFINITION = '0x88c26ec40DC653973C599A1a0762678e795F879F';
 

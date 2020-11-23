@@ -1,14 +1,14 @@
 import _ from 'lodash';
-import {SignedState, StateVariables} from '@statechannels/wallet-core';
+import { SignedState, StateVariables } from '@statechannels/wallet-core';
 
-import {Channel, ChannelError} from '../../models/channel';
-import {withSupportedState} from '../../models/__test__/fixtures/channel';
-import {Store} from '../store';
-import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import { Channel, ChannelError } from '../../models/channel';
+import { withSupportedState } from '../../models/__test__/fixtures/channel';
+import { Store } from '../store';
+import { seedAlicesSigningWallet } from '../../db/seeds/1_signing_wallet_seeds';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { defaultTestConfig } from '../../config';
 
-import {stateVars} from './fixtures/state-vars';
+import { stateVars } from './fixtures/state-vars';
 
 jest.setTimeout(10_000);
 
@@ -25,17 +25,17 @@ beforeAll(async () => {
 
 it('works', async () => {
   await seedAlicesSigningWallet(knex);
-  const c = withSupportedState()({vars: [stateVars({turnNum: 5})]});
+  const c = withSupportedState()({ vars: [stateVars({ turnNum: 5 })] });
   await Channel.query(knex).insert(c);
 
-  const {channelId, latest} = c;
+  const { channelId, latest } = c;
   await expect(
     store.lockApp(channelId, async tx =>
-      store.signState(c, {...latest, turnNum: latest.turnNum + 1}, tx)
+      store.signState(c, { ...latest, turnNum: latest.turnNum + 1 }, tx)
     )
-  ).resolves.toMatchObject({turnNum: 6});
+  ).resolves.toMatchObject({ turnNum: 6 });
 });
-const next = ({turnNum, appData, isFinal, outcome}: StateVariables): StateVariables => ({
+const next = ({ turnNum, appData, isFinal, outcome }: StateVariables): StateVariables => ({
   turnNum: turnNum + 1,
   appData,
   isFinal,
@@ -56,14 +56,14 @@ describe('concurrency', () => {
 
   beforeEach(async () => {
     await seedAlicesSigningWallet(knex);
-    c = withSupportedState()({vars: [stateVars({turnNum: 5})]});
+    c = withSupportedState()({ vars: [stateVars({ turnNum: 5 })] });
     await Channel.query(knex).insert(c);
     channelId = c.channelId;
 
     numResolved = 0;
     numRejected = 0;
     numSettled = 0;
-    countResolvedPromise = ({turnNum}: SignedState): any => {
+    countResolvedPromise = ({ turnNum }: SignedState): any => {
       expect(turnNum).toBe(6);
       numResolved += 1;
     };
@@ -94,7 +94,7 @@ describe('concurrency', () => {
     expect(numSettled).toEqual(numAttempts);
 
     await expect(store.getChannel(channelId)).resolves.toMatchObject({
-      latest: {turnNum: 6},
+      latest: { turnNum: 6 },
     });
   });
 
@@ -111,7 +111,7 @@ describe('concurrency', () => {
 
       const channels = await Promise.all(
         _.range(NUM_ATTEMPTS).map(async channelNonce => {
-          const c = withSupportedState()({vars: [stateVars({turnNum: 5})], channelNonce});
+          const c = withSupportedState()({ vars: [stateVars({ turnNum: 5 })], channelNonce });
 
           await Channel.query(knex).insert(c);
           return c;
@@ -136,7 +136,7 @@ describe('concurrency', () => {
       expect([numResolved, numRejected, numSettled]).toMatchObject([NUM_ATTEMPTS, 0, NUM_ATTEMPTS]);
 
       await expect(store.getChannel(channels[1].channelId)).resolves.toMatchObject({
-        latest: {turnNum: 6},
+        latest: { turnNum: 6 },
       });
     },
     MANY_INSERTS_TIMEOUT
@@ -167,7 +167,7 @@ describe('concurrency', () => {
 describe('Missing channels', () => {
   it('throws a ChannelError by default', () =>
     expect(store.lockApp('foo', _.noop)).rejects.toThrow(
-      new ChannelError(ChannelError.reasons.channelMissing, {channelId: 'foo'})
+      new ChannelError(ChannelError.reasons.channelMissing, { channelId: 'foo' })
     ));
 
   it('calls the onChannelMissing handler when given', () =>

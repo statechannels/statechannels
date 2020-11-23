@@ -4,15 +4,15 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, ethers, constants} from 'ethers';
+import { makeAddress, makeDestination } from '@statechannels/wallet-core';
+import { BigNumber, ethers, constants } from 'ethers';
 
-import {defaultTestConfig} from '../../config';
-import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import { defaultTestConfig } from '../../config';
+import { Wallet } from '../../wallet';
+import { getChannelResultFor, getPayloadFor } from '../test-helpers';
 
-const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
-const b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'});
+const a = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_A' });
+const b = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_B' });
 
 let channelId: string;
 let participantA: Participant;
@@ -49,7 +49,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   const aBal = BigNumber.from(1).toHexString();
 
   const allocation: Allocation = {
-    allocationItems: [{destination: participantA.destination, amount: aBal}],
+    allocationItems: [{ destination: participantA.destination, amount: aBal }],
     assetHolderAddress,
   };
 
@@ -83,7 +83,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // after joinChannel, B signs PreFund1 and PostFund3
-  const bJoinChannelOutput = await b.joinChannel({channelId});
+  const bJoinChannelOutput = await b.joinChannel({ channelId });
 
   expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
     status: 'opening',

@@ -6,24 +6,26 @@ import {
   StateChannelsRequest,
   StateChannelsResponse,
   StateChannelsNotification,
-  StateChannelsErrorResponse
+  StateChannelsErrorResponse,
 } from './types';
 
 // You need to pass `jsonPointers: true`
-const ajv = new Ajv({jsonPointers: true, verbose: true});
+const ajv = new Ajv({ jsonPointers: true, verbose: true });
 
 // eslint-disable-next-line
 const apiSchema = require('./generated-schema.json'); // because https://github.com/TypeStrong/ts-loader/issues/905
 
 ajv.addSchema(apiSchema, 'api.json');
 
-export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/StateChannelsRequest'});
-export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/StateChannelsResponse'});
+export const validateRequest = ajv.compile({ $ref: 'api.json#/definitions/StateChannelsRequest' });
+export const validateResponse = ajv.compile({
+  $ref: 'api.json#/definitions/StateChannelsResponse',
+});
 export const validateErrorResponse = ajv.compile({
-  $ref: 'api.json#/definitions/StateChannelsErrorResponse'
+  $ref: 'api.json#/definitions/StateChannelsErrorResponse',
 });
 export const validateNotification = ajv.compile({
-  $ref: 'api.json#/definitions/StateChannelsNotification'
+  $ref: 'api.json#/definitions/StateChannelsNotification',
 });
 
 function prettyPrintError(e: Ajv.ErrorObject): string {
@@ -57,7 +59,7 @@ export function parseRequest(jsonBlob: object): StateChannelsRequest {
   const valid = validateRequest(jsonBlob);
   if (!valid) {
     throw new Error(
-      `Validation Error: ${validateRequest.errors?.map(e => prettyPrintError(e)).join(`;\n`)}`
+      `Validation Error: ${validateRequest.errors?.map((e) => prettyPrintError(e)).join(`;\n`)}`
     );
   }
   return jsonBlob as StateChannelsRequest;
@@ -77,7 +79,7 @@ export function parseResponse(jsonBlob: object): StateChannelsResponse {
       `
       Validation Error:
         input: ${JSON.stringify(jsonBlob)};\n
-        ${validateResponse.errors?.map(e => prettyPrintError(e)).join(`;\n`)}
+        ${validateResponse.errors?.map((e) => prettyPrintError(e)).join(`;\n`)}
       `
     );
   }
@@ -98,7 +100,7 @@ export function parseNotification(jsonBlob: object): StateChannelsNotification {
       `
       Validation Error:
         input: ${JSON.stringify(jsonBlob)};\n
-        ${validateNotification.errors?.map(e => prettyPrintError(e)).join(`;\n`)}
+        ${validateNotification.errors?.map((e) => prettyPrintError(e)).join(`;\n`)}
       `
     );
   }
@@ -119,7 +121,7 @@ export function parseErrorResponse(jsonBlob: object): StateChannelsErrorResponse
       `
       Validation Error:
         input: ${JSON.stringify(jsonBlob)};\n
-        ${validateNotification.errors?.map(e => prettyPrintError(e)).join(`;\n`)}
+        ${validateNotification.errors?.map((e) => prettyPrintError(e)).join(`;\n`)}
       `
     );
   }

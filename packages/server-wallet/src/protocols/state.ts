@@ -8,11 +8,11 @@ import {
   Address,
   Destination,
 } from '@statechannels/wallet-core';
-import {ChannelResult, ChannelStatus, FundingStrategy} from '@statechannels/client-api-schema';
+import { ChannelResult, ChannelStatus, FundingStrategy } from '@statechannels/client-api-schema';
 
-import {Bytes32, Uint256} from '../type-aliases';
+import { Bytes32, Uint256 } from '../type-aliases';
 
-import {ProtocolAction} from './actions';
+import { ProtocolAction } from './actions';
 
 export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
 /**
@@ -25,7 +25,7 @@ export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
 export type ChainServiceRequests = ChainServiceApi[];
 export type ChannelStateFunding = {
   amount: Uint256;
-  transferredOut: {toAddress: Destination; amount: Uint256}[];
+  transferredOut: { toAddress: Destination; amount: Uint256 }[];
 };
 
 /*
@@ -46,8 +46,8 @@ export type ChannelState = {
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
 };
 
-type WithSupported = {supported: SignedStateWithHash};
-type SignedByMe = {latestSignedByMe: SignedStateWithHash};
+type WithSupported = { supported: SignedStateWithHash };
+type SignedByMe = { latestSignedByMe: SignedStateWithHash };
 
 export type ChannelStateWithMe = ChannelState & SignedByMe;
 export type ChannelStateWithSupported = ChannelState & SignedByMe & WithSupported;
@@ -72,9 +72,9 @@ export const stage = (state: State | undefined): Stage =>
     : 'Running';
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
-  const {channelId, supported, latest, latestSignedByMe, support} = channelState;
+  const { channelId, supported, latest, latestSignedByMe, support } = channelState;
 
-  const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
+  const { outcome, appData, turnNum, participants, appDefinition } = supported ?? latest;
 
   const status: ChannelStatus = ((): ChannelStatus => {
     switch (stage(supported)) {
@@ -92,7 +92,7 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
 
   const allocations = serializeAllocation(checkThat(outcome, isAllocation));
 
-  return {appData, appDefinition, channelId, participants, turnNum, allocations, status};
+  return { appData, appDefinition, channelId, participants, turnNum, allocations, status };
 };
 
 /*

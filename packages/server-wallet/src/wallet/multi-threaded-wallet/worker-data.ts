@@ -1,4 +1,4 @@
-import {UpdateChannelParams} from '@statechannels/client-api-schema';
+import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
 type UpdateChannelRequest = {
   operation: 'UpdateChannel';

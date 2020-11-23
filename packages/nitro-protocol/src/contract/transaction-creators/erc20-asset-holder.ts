@@ -1,7 +1,7 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 import Erc20AssetHolderArtifact from '../../../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
-import {Allocation, Guarantee, Outcome} from '../outcome';
+import { Allocation, Guarantee, Outcome } from '../outcome';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
@@ -51,5 +51,5 @@ export function createDepositTransaction(
     amount,
   ]);
 
-  return {data};
+  return { data };
 }

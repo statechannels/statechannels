@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import {addAddressCheck, addBytes32CheckOld, addUint48Check, dropConstraint} from '../utils';
+import { addAddressCheck, addBytes32CheckOld, addUint48Check, dropConstraint } from '../utils';
 
 const channels = 'channels';
 const signingWallets = 'signing_wallets';
@@ -20,24 +20,15 @@ export async function dropByteConstraints(knex: Knex): Promise<void> {
 }
 
 export async function up(knex: Knex): Promise<void> {
-  await knex.schema.createTable(signingWallets, function(table) {
+  await knex.schema.createTable(signingWallets, function (table) {
     table.increments('id');
-    table
-      .string('private_key')
-      .notNullable()
-      .unique();
-    table
-      .string('address')
-      .notNullable()
-      .unique();
+    table.string('private_key').notNullable().unique();
+    table.string('address').notNullable().unique();
   });
 
-  await knex.schema.createTable(channels, function(table) {
+  await knex.schema.createTable(channels, function (table) {
     table.increments('id');
-    table
-      .string('channel_id')
-      .notNullable()
-      .unique();
+    table.string('channel_id').notNullable().unique();
     table.string('signing_address').notNullable();
     table.foreign('signing_address').references('signing_wallets.address');
     table.string('chain_id').notNullable();

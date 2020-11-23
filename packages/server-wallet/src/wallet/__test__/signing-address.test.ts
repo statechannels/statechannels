@@ -1,12 +1,12 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
-import {Store} from '../store';
-import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
-import {DBAdmin} from '../../db-admin/db-admin';
+import { Store } from '../store';
+import { seedAlicesSigningWallet } from '../../db/seeds/1_signing_wallet_seeds';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { defaultTestConfig } from '../../config';
+import { DBAdmin } from '../../db-admin/db-admin';
 
-import {alice} from './fixtures/participants';
+import { alice } from './fixtures/participants';
 
 let store: Store;
 

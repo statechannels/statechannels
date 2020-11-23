@@ -1,6 +1,6 @@
-import {Nonce} from '../../nonce';
-import {alice, bob} from '../../../wallet/__test__/fixtures/participants';
-import {fixture} from '../../../wallet/__test__/fixtures/utils';
+import { Nonce } from '../../nonce';
+import { alice, bob } from '../../../wallet/__test__/fixtures/participants';
+import { fixture } from '../../../wallet/__test__/fixtures/utils';
 
 const defaultValue: Nonce = Nonce.fromJson({
   value: 0,

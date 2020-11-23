@@ -1,5 +1,5 @@
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
+import { ETHERLIME_ACCOUNTS } from '@statechannels/devtools';
+import { ContractArtifacts, getChannelId, randomChannelId } from '@statechannels/nitro-protocol';
 import {
   Address,
   BN,
@@ -9,16 +9,16 @@ import {
   simpleTokenAllocation,
   State,
 } from '@statechannels/wallet-core';
-import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
+import { BigNumber, constants, Contract, providers, Wallet } from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig} from '../../config';
+import { defaultTestConfig } from '../../config';
 import {
   alice as aliceParticipant,
   bob as bobParticipant,
 } from '../../wallet/__test__/fixtures/participants';
-import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
-import {AssetTransferredArg, ChainService, HoldingUpdatedArg} from '../chain-service';
+import { alice as aWallet, bob as bWallet } from '../../wallet/__test__/fixtures/signing-wallets';
+import { AssetTransferredArg, ChainService, HoldingUpdatedArg } from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -96,7 +96,7 @@ function fundChannel(
     expectedHeld: BN.from(expectedHeld),
     amount: BN.from(amount),
   });
-  return {channelId, request};
+  return { channelId, request };
 }
 
 async function waitForChannelFunding(
@@ -114,16 +114,16 @@ async function setUpConclude(isEth = true) {
   const aEthWallet = Wallet.createRandom();
   const bEthWallet = Wallet.createRandom();
 
-  const alice = aliceParticipant({destination: makeDestination(aEthWallet.address)});
-  const bob = bobParticipant({destination: makeDestination(bEthWallet.address)});
+  const alice = aliceParticipant({ destination: makeDestination(aEthWallet.address) });
+  const bob = bobParticipant({ destination: makeDestination(bEthWallet.address) });
   const outcome = isEth
     ? simpleEthAllocation([
-        {destination: alice.destination, amount: BN.from(1)},
-        {destination: bob.destination, amount: BN.from(3)},
+        { destination: alice.destination, amount: BN.from(1) },
+        { destination: bob.destination, amount: BN.from(3) },
       ])
     : simpleTokenAllocation(erc20AssetHolderAddress, [
-        {destination: alice.destination, amount: BN.from(1)},
-        {destination: bob.destination, amount: BN.from(3)},
+        { destination: alice.destination, amount: BN.from(1) },
+        { destination: bob.destination, amount: BN.from(3) },
       ]);
   const state1: State = {
     appData: constants.HashZero,
@@ -164,7 +164,7 @@ describe('fundChannel', () => {
     const channelId = await waitForChannelFunding(0, 5);
     await waitForChannelFunding(5, 5, channelId);
 
-    const {request: fundChannelPromise} = fundChannel(5, 5, channelId);
+    const { request: fundChannelPromise } = fundChannel(5, 5, channelId);
     await expect(fundChannelPromise).rejects.toThrow(
       'cannot estimate gas; transaction may fail or may require manual gas limit'
     );
@@ -282,7 +282,7 @@ describe('registerChannel', () => {
 
 describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
-    const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
+    const { channelId, aAddress, bAddress, state, signatures } = await setUpConclude();
 
     let counter = 0;
     const p = new Promise(resolve =>
@@ -313,7 +313,7 @@ describe('concludeAndWithdraw', () => {
       })
     );
 
-    const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
+    const transactionResponse = await chainService.concludeAndWithdraw([{ ...state, signatures }]);
     if (!transactionResponse) throw 'Expected transaction response';
     await transactionResponse.wait();
 
@@ -323,7 +323,7 @@ describe('concludeAndWithdraw', () => {
   });
 
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
-    const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
+    const { channelId, aAddress, bAddress, state, signatures } = await setUpConclude(false);
 
     let counter = 0;
     const p = new Promise(resolve =>
@@ -354,7 +354,7 @@ describe('concludeAndWithdraw', () => {
       })
     );
 
-    const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
+    const transactionResponse = await chainService.concludeAndWithdraw([{ ...state, signatures }]);
     if (!transactionResponse) throw 'Expected transaction response';
     await transactionResponse.wait();
 

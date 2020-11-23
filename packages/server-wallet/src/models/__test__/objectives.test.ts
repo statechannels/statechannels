@@ -1,11 +1,11 @@
-import {OpenChannel} from '@statechannels/wallet-core';
+import { OpenChannel } from '@statechannels/wallet-core';
 
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {Channel} from '../channel';
-import {ObjectiveModel, ObjectiveChannelModel} from '../objective';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { seedAlicesSigningWallet } from '../../db/seeds/1_signing_wallet_seeds';
+import { Channel } from '../channel';
+import { ObjectiveModel, ObjectiveChannelModel } from '../objective';
 
-import {channel} from './fixtures/channel';
+import { channel } from './fixtures/channel';
 
 const c = channel();
 const objective: OpenChannel = {
@@ -24,7 +24,9 @@ beforeEach(async () => {
 describe('Objective > insert', () => {
   it('fails to insert / associate an objective when it references a channel that does not exist', async () => {
     // For some reason this does not catch the error :/
-    await expect(ObjectiveModel.insert({...objective, status: 'pending'}, knex)).rejects.toThrow();
+    await expect(
+      ObjectiveModel.insert({ ...objective, status: 'pending' }, knex)
+    ).rejects.toThrow();
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([]);
 
@@ -32,32 +34,28 @@ describe('Objective > insert', () => {
   });
 
   it('inserts and associates an objective with all channels that it references (channels exist)', async () => {
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    await ObjectiveModel.insert({ ...objective, status: 'pending' }, knex);
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([
-      {objectiveId: `OpenChannel-${c.channelId}`},
+      { objectiveId: `OpenChannel-${c.channelId}` },
     ]);
 
     expect(await ObjectiveChannelModel.query(knex).select()).toMatchObject([
-      {objectiveId: `OpenChannel-${c.channelId}`, channelId: c.channelId},
+      { objectiveId: `OpenChannel-${c.channelId}`, channelId: c.channelId },
     ]);
   });
 });
 
 describe('Objective > forChannelIds', () => {
   it('retrieves objectives associated with a given channelId', async () => {
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    await ObjectiveModel.insert({ ...objective, status: 'pending' }, knex);
 
     expect(await ObjectiveModel.forChannelIds([c.channelId], knex)).toMatchObject([
-      {objectiveId: `OpenChannel-${c.channelId}`},
+      { objectiveId: `OpenChannel-${c.channelId}` },
     ]);
   });
 });

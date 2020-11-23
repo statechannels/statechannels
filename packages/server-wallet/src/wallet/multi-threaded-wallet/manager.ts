@@ -1,21 +1,21 @@
-import {Worker} from 'worker_threads';
+import { Worker } from 'worker_threads';
 import path from 'path';
 
-import {Pool} from 'tarn';
-import {UpdateChannelParams} from '@statechannels/client-api-schema';
-import {Either} from 'fp-ts/lib/Either';
-import {isLeft} from 'fp-ts/lib/These';
+import { Pool } from 'tarn';
+import { UpdateChannelParams } from '@statechannels/client-api-schema';
+import { Either } from 'fp-ts/lib/Either';
+import { isLeft } from 'fp-ts/lib/These';
 import _ from 'lodash';
 
-import {ServerWalletConfig} from '../../config';
-import {logger as parentLogger} from '../../logger';
-import {MultipleChannelOutput, SingleChannelOutput} from '../wallet';
+import { ServerWalletConfig } from '../../config';
+import { logger as parentLogger } from '../../logger';
+import { MultipleChannelOutput, SingleChannelOutput } from '../wallet';
 
-import {StateChannelWorkerData} from './worker-data';
+import { StateChannelWorkerData } from './worker-data';
 
 const ONE_DAY = 86400000;
 
-const logger = parentLogger.child({module: 'Worker-Manager'});
+const logger = parentLogger.child({ module: 'Worker-Manager' });
 
 export class WorkerManager {
   private pool?: Pool<Worker>;
@@ -60,7 +60,7 @@ export class WorkerManager {
     logger.trace('PushMessage called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'PushMessage', args};
+    const data: StateChannelWorkerData = { operation: 'PushMessage', args };
     const resultPromise = new Promise<MultipleChannelOutput>((resolve, reject) =>
       worker.once('message', (response: Either<Error, MultipleChannelOutput>) => {
         this.pool?.release(worker);
@@ -82,7 +82,7 @@ export class WorkerManager {
     logger.trace('UpdateChannel called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
+    const data: StateChannelWorkerData = { operation: 'UpdateChannel', args };
     const resultPromise = new Promise<SingleChannelOutput>((resolve, reject) =>
       worker.once('message', (response: Either<Error, SingleChannelOutput>) => {
         this.pool?.release(worker);

@@ -1,10 +1,10 @@
-import {Contract, Wallet, ethers, utils} from 'ethers';
+import { Contract, Wallet, ethers, utils } from 'ethers';
 
 import TrivialAppArtifact from '../../../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
-import {Channel} from '../../../src/contract/channel';
-import {validTransition} from '../../../src/contract/force-move-app';
-import {State, VariablePart} from '../../../src/contract/state';
-import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
+import { Channel } from '../../../src/contract/channel';
+import { validTransition } from '../../../src/contract/force-move-app';
+import { State, VariablePart } from '../../../src/contract/state';
+import { getRandomNonce, getTestProvider, setupContracts } from '../../test-helpers';
 
 const provider = getTestProvider();
 let trivialApp: Contract;
@@ -55,7 +55,7 @@ describe('validTransition', () => {
       appDefinition: trivialApp.address,
       appData: '0x00',
     };
-    const toState: State = {...fromState, turnNum: 2};
+    const toState: State = { ...fromState, turnNum: 2 };
 
     expect(
       // Use the helper function, which accepts States instead of VariableParts

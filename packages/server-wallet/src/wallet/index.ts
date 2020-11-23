@@ -5,10 +5,10 @@ export {
   ObjectiveSucceededValue,
 } from './wallet';
 
-import {ServerWalletConfig} from '../config';
+import { ServerWalletConfig } from '../config';
 
-import {MultiThreadedWallet} from './multi-threaded-wallet';
-import {SingleThreadedWallet} from './wallet';
+import { MultiThreadedWallet } from './multi-threaded-wallet';
+import { SingleThreadedWallet } from './wallet';
 
 export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
 
@@ -22,4 +22,4 @@ export const Wallet = {
   },
 };
 
-export {ServerWalletConfig};
+export { ServerWalletConfig };

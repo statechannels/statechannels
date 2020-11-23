@@ -1,8 +1,8 @@
-import {ethers, Wallet} from 'ethers';
+import { ethers, Wallet } from 'ethers';
 
-import {SignedState} from '../../src';
-import {Channel} from '../../src/contract/channel';
-import {signState} from '../../src/signatures';
+import { SignedState } from '../../src';
+import { Channel } from '../../src/contract/channel';
+import { signState } from '../../src/signatures';
 import {
   createCheckpointTransaction,
   createConcludeTransaction,
@@ -85,9 +85,9 @@ describe('transaction-generators', () => {
     ${[1, 2]} | ${[1, 0]}
   `(
     'creates a correct signature arguments when handling multiple states',
-    async ({turnNum, expectedWhoSignedWhat}) => {
+    async ({ turnNum, expectedWhoSignedWhat }) => {
       const wallet2 = Wallet.createRandom();
-      const twoPlayerChannel = {...channel, participants: [wallet.address, wallet2.address]};
+      const twoPlayerChannel = { ...channel, participants: [wallet.address, wallet2.address] };
 
       const signedStates = [
         await signState(
@@ -115,7 +115,7 @@ describe('transaction-generators', () => {
           turnNum[1] % 2 === 0 ? wallet.privateKey : wallet2.privateKey
         ),
       ];
-      const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+      const { states, signatures, whoSignedWhat } = createSignatureArguments(signedStates);
 
       expect(states).toHaveLength(2);
       expect(signatures).toHaveLength(2);

@@ -11,23 +11,23 @@ import {
   Zero,
   Address,
 } from '@statechannels/wallet-core';
-import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
-import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
+import { JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex } from 'objection';
+import { ChannelResult, FundingStrategy } from '@statechannels/client-api-schema';
 
-import {Bytes32, Uint48} from '../type-aliases';
+import { Bytes32, Uint48 } from '../type-aliases';
 import {
   ChannelState,
   toChannelResult,
   ChainServiceRequests,
   ChannelStateFunding,
 } from '../protocols/state';
-import {WalletError, Values} from '../errors/wallet-error';
-import {dropNonVariables} from '../state-utils';
+import { WalletError, Values } from '../errors/wallet-error';
+import { dropNonVariables } from '../state-utils';
 
-import {SigningWallet} from './signing-wallet';
-import {Funding} from './funding';
-import {ObjectiveModel} from './objective';
-import {LedgerRequest} from './ledger-request';
+import { SigningWallet } from './signing-wallet';
+import { Funding } from './funding';
+import { ObjectiveModel } from './objective';
+import { LedgerRequest } from './ledger-request';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -130,7 +130,7 @@ export class Channel extends Model implements RequiredColumns {
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     return Channel.query(txOrKnex)
-      .where({channelId})
+      .where({ channelId })
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
       .first();
@@ -141,15 +141,13 @@ export class Channel extends Model implements RequiredColumns {
     assetHolderAddress: Address,
     txOrKnex: TransactionOrKnex
   ): Promise<void> {
-    await Channel.query(txOrKnex)
-      .findOne({channelId})
-      .patch({assetHolderAddress});
+    await Channel.query(txOrKnex).findOne({ channelId }).patch({ assetHolderAddress });
   }
 
   static async isLedger(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<boolean> {
     return !!(await Channel.query(txOrKnex)
       .whereNotNull('assetHolderAddress')
-      .findOne({channelId}));
+      .findOne({ channelId }));
   }
 
   static getLedgerChannels(
@@ -159,7 +157,7 @@ export class Channel extends Model implements RequiredColumns {
   ): Promise<Channel[]> {
     return Channel.query(txOrKnex)
       .select()
-      .where({assetHolderAddress, participants: JSON.stringify(participants)});
+      .where({ assetHolderAddress, participants: JSON.stringify(participants) });
   }
 
   static allChannelsWithPendingLedgerRequests(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
@@ -195,7 +193,7 @@ export class Channel extends Model implements RequiredColumns {
     this.vars = this.vars.map(sv => dropNonVariables(sv));
 
     this.vars.map(sv => {
-      const correctHash = hashState({...this.channelConstants, ...sv});
+      const correctHash = hashState({ ...this.channelConstants, ...sv });
       sv.stateHash = sv.stateHash ?? correctHash;
       if (sv.stateHash !== correctHash) {
         throw new ChannelError(ChannelError.reasons.incorrectHash, {
@@ -221,10 +219,10 @@ export class Channel extends Model implements RequiredColumns {
       fundingLedgerChannelId,
     } = this;
     const funding = (assetHolder: Address): ChannelStateFunding => {
-      const noFunding = {amount: Zero, transferredOut: []};
+      const noFunding = { amount: Zero, transferredOut: [] };
       if (!this.funding) return noFunding;
       const result = this.funding.find(f => f.assetHolder === assetHolder);
-      return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
+      return result ? { amount: result.amount, transferredOut: result.transferredOut } : noFunding;
     };
     return {
       myIndex: myIndex as 0 | 1,
@@ -252,7 +250,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get channelConstants(): ChannelConstants {
-    const {channelNonce, challengeDuration, chainId, participants, appDefinition} = this;
+    const { channelNonce, challengeDuration, chainId, participants, appDefinition } = this;
     return {
       channelNonce,
       challengeDuration,
@@ -264,7 +262,7 @@ export class Channel extends Model implements RequiredColumns {
 
   public get sortedStates(): Array<SignedStateWithHash> {
     return this.vars
-      .map(s => ({...this.channelConstants, ...s}))
+      .map(s => ({ ...this.channelConstants, ...s }))
       .sort((s1, s2) => s2.turnNum - s1.turnNum);
   }
 
@@ -285,7 +283,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get support(): Array<SignedStateWithHash> {
-    return this._support.map(s => ({...this.channelConstants, ...s}));
+    return this._support.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   get hasConclusionProof(): boolean {
@@ -294,7 +292,7 @@ export class Channel extends Model implements RequiredColumns {
 
   get supported(): SignedStateWithHash | undefined {
     const vars = this._supported;
-    if (vars) return {...this.channelConstants, ...vars};
+    if (vars) return { ...this.channelConstants, ...vars };
     else return undefined;
   }
 
@@ -304,18 +302,18 @@ export class Channel extends Model implements RequiredColumns {
 
   get latestSignedByMe(): SignedStateWithHash | undefined {
     return this._latestSupportedByMe
-      ? {...this.channelConstants, ...this._latestSupportedByMe}
+      ? { ...this.channelConstants, ...this._latestSupportedByMe }
       : undefined;
   }
 
   get latest(): SignedStateWithHash {
-    return {...this.channelConstants, ...this.signedStates[0]};
+    return { ...this.channelConstants, ...this.signedStates[0] };
   }
 
   get latestNotSignedByMe(): SignedStateWithHash | undefined {
     const signed = this.signedStates.find(s => !this.mySignature(s.signatures));
     if (!signed) return undefined;
-    return {...this.channelConstants, ...signed};
+    return { ...this.channelConstants, ...signed };
   }
 
   private get _supported(): SignedStateWithHash | undefined {
@@ -332,7 +330,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get signedStates(): Array<SignedStateWithHash> {
-    return this.vars.map(s => ({...this.channelConstants, ...s}));
+    return this.vars.map(s => ({ ...this.channelConstants, ...s }));
   }
 
   public get isLedger(): boolean {

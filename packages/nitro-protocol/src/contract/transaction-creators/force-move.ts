@@ -1,9 +1,9 @@
-import {Signature, ethers} from 'ethers';
+import { Signature, ethers } from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/ForceMove.sol/ForceMove.json';
-import {signChallengeMessage} from '../../signatures';
-import {hashOutcome} from '../outcome';
-import {getFixedPart, getVariablePart, hashAppPart, State} from '../state';
+import { signChallengeMessage } from '../../signatures';
+import { hashOutcome } from '../outcome';
+import { getFixedPart, getVariablePart, hashAppPart, State } from '../state';
 
 // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 export const ForceMoveContractInterface = new ethers.utils.Interface(ForceMoveArtifact.abi);
@@ -25,26 +25,26 @@ export function createChallengeTransaction(
   if (states.length === 0) {
     throw new Error('No states provided');
   }
-  const {participants} = states[0].channel;
+  const { participants } = states[0].channel;
   if (participants.length !== signatures.length) {
     throw new Error(
       `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`
     );
   }
 
-  const variableParts = states.map(s => getVariablePart(s));
+  const variableParts = states.map((s) => getVariablePart(s));
   const fixedPart = getFixedPart(states[0]);
 
   // Get the largest turn number from the states
-  const largestTurnNum = Math.max(...states.map(s => s.turnNum));
-  const isFinalCount = states.filter(s => s.isFinal === true).length;
+  const largestTurnNum = Math.max(...states.map((s) => s.turnNum));
+  const isFinalCount = states.filter((s) => s.isFinal === true).length;
   // Q: Is there a reason why createForceMoveTransaction accepts a State[] and a Signature[]
   // Argument rather than a SignedState[] argument?
   // A: Yes, because the signatures must be passed in participant order: [sig-from-p0, sig-from-p1, ...]
   // and SignedStates[] won't comply with that in general. This function accetps the re-ordered sigs.
-  const signedStates = states.map(s => ({
+  const signedStates = states.map((s) => ({
     state: s,
-    signature: {v: 0, r: '', s: '', _vs: '', recoveryParam: 0},
+    signature: { v: 0, r: '', s: '', _vs: '', recoveryParam: 0 },
   }));
   const challengerSignature = signChallengeMessage(signedStates, challengerPrivateKey);
 
@@ -57,7 +57,7 @@ export function createChallengeTransaction(
     whoSignedWhat,
     challengerSignature,
   ]);
-  return {data};
+  return { data };
 }
 
 interface RespondArgs {
@@ -70,7 +70,7 @@ export function respondArgs({
   responseState,
   responseSignature,
 }: RespondArgs): any[] {
-  const {participants} = challengeState.channel;
+  const { participants } = challengeState.channel;
   const challengerAddress = participants[challengeState.turnNum % participants.length];
   const isFinalAB = [challengeState.isFinal, responseState.isFinal];
   const fixedPart = getFixedPart(responseState);
@@ -80,7 +80,7 @@ export function respondArgs({
 
 export function createRespondTransaction(args: RespondArgs): ethers.providers.TransactionRequest {
   const data = ForceMoveContractInterface.encodeFunctionData('respond', respondArgs(args));
-  return {data};
+  return { data };
 }
 
 export function createCheckpointTransaction({
@@ -90,17 +90,17 @@ export function createCheckpointTransaction({
 }: CheckpointData): ethers.providers.TransactionRequest {
   const data = ForceMoveContractInterface.encodeFunctionData(
     'checkpoint',
-    checkpointArgs({states, signatures, whoSignedWhat})
+    checkpointArgs({ states, signatures, whoSignedWhat })
   );
 
-  return {data};
+  return { data };
 }
 
-export function checkpointArgs({states, signatures, whoSignedWhat}: CheckpointData): any[] {
-  const largestTurnNum = Math.max(...states.map(s => s.turnNum));
+export function checkpointArgs({ states, signatures, whoSignedWhat }: CheckpointData): any[] {
+  const largestTurnNum = Math.max(...states.map((s) => s.turnNum));
   const fixedPart = getFixedPart(states[0]);
-  const variableParts = states.map(s => getVariablePart(s));
-  const isFinalCount = states.filter(s => s.isFinal).length;
+  const variableParts = states.map((s) => getVariablePart(s));
+  const isFinalCount = states.filter((s) => s.isFinal).length;
 
   return [fixedPart, largestTurnNum, variableParts, isFinalCount, signatures, whoSignedWhat];
 }
@@ -114,7 +114,7 @@ export function createConcludeTransaction(
     'conclude',
     concludeArgs(states, signatures, whoSignedWhat)
   );
-  return {data};
+  return { data };
 }
 
 export function concludeArgs(
@@ -126,7 +126,7 @@ export function concludeArgs(
   if (states.length === 0) {
     throw new Error('No states provided');
   }
-  const {participants} = states[0].channel;
+  const { participants } = states[0].channel;
   if (participants.length !== signatures.length) {
     throw new Error(
       `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`

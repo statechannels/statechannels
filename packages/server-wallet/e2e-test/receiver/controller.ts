@@ -1,12 +1,12 @@
-import {makeDestination} from '@statechannels/wallet-core';
-import {Participant} from '@statechannels/client-api-schema';
+import { makeDestination } from '@statechannels/wallet-core';
+import { Participant } from '@statechannels/client-api-schema';
 
-import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {Wallet, Message as Payload} from '../../src';
-import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
-import {receiverConfig} from '../e2e-utils';
-import {defaultConfig} from '../../src/config';
-import {WALLET_VERSION} from '../../src/version';
+import { bob } from '../../src/wallet/__test__/fixtures/signing-wallets';
+import { Wallet, Message as Payload } from '../../src';
+import { timerFactory, recordFunctionMetrics } from '../../src/metrics';
+import { receiverConfig } from '../e2e-utils';
+import { defaultConfig } from '../../src/config';
+import { WALLET_VERSION } from '../../src/version';
 
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(

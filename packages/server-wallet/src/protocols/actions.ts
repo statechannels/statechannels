@@ -1,14 +1,14 @@
-import {MessageQueuedNotification} from '@statechannels/client-api-schema';
-import {Address, StateVariables} from '@statechannels/wallet-core';
+import { MessageQueuedNotification } from '@statechannels/client-api-schema';
+import { Address, StateVariables } from '@statechannels/wallet-core';
 
-import {Bytes32, Uint256} from '../type-aliases';
+import { Bytes32, Uint256 } from '../type-aliases';
 
 /*
 Actions that protocols can declare.
 */
 
 export type Notice = Omit<MessageQueuedNotification, 'jsonrpc'>;
-export type SignState = {type: 'SignState'; channelId: Bytes32} & StateVariables;
+export type SignState = { type: 'SignState'; channelId: Bytes32 } & StateVariables;
 export type FundChannel = {
   type: 'FundChannel';
   channelId: Bytes32;
@@ -16,7 +16,7 @@ export type FundChannel = {
   expectedHeld: Uint256;
   amount: Uint256;
 };
-export type Withdraw = {type: 'Withdraw'; channelId: Bytes32};
+export type Withdraw = { type: 'Withdraw'; channelId: Bytes32 };
 export type CompleteObjective = {
   type: 'CompleteObjective';
   /* TODO: (Stored Objectives) put objective id here? */ channelId: Bytes32;
@@ -51,7 +51,7 @@ export const noAction = undefined;
 
 const actionConstructor = <A extends ProtocolAction = ProtocolAction>(type: A['type']) => (
   props: Omit<A, 'type'>
-): A => ({...props, type} as A);
+): A => ({ ...props, type } as A);
 export const requestLedgerFunding = actionConstructor<RequestLedgerFunding>('RequestLedgerFunding');
 export const requestLedgerDefunding = actionConstructor<RequestLedgerDefunding>(
   'RequestLedgerDefunding'

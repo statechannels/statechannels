@@ -1,10 +1,10 @@
 import Objection from 'objection';
-import {SignedState as WireSignedState} from '@statechannels/wire-format';
+import { SignedState as WireSignedState } from '@statechannels/wire-format';
 
-import {Store} from '../store';
-import {Channel} from '../../models/channel';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import { Store } from '../store';
+import { Channel } from '../../models/channel';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
+import { defaultTestConfig } from '../../config';
 
 let store: Store;
 
@@ -40,7 +40,7 @@ describe('addSignedState', () => {
         {
           assetHolderAddress: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
           allocationItems: [
-            {destination: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9', amount: '0x00'},
+            { destination: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9', amount: '0x00' },
           ],
         },
       ],

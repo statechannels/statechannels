@@ -1,7 +1,7 @@
-import {FundingStrategy} from '@statechannels/client-api-schema';
-import {utils} from 'ethers';
+import { FundingStrategy } from '@statechannels/client-api-schema';
+import { utils } from 'ethers';
 
-export type Uint256 = string & {_isUint256: void};
+export type Uint256 = string & { _isUint256: void };
 // These "integers" have "type-safe" addition:
 // const a: Uint256 = '0xa' as Uint256;
 // const b: Uint256 = '0xb' as Uint256;
@@ -36,7 +36,7 @@ export interface StateVariables {
   isFinal: boolean;
 }
 export type StateVariablesWithHash = StateVariables & Hashed;
-export type Destination = string & {_isDestination: void};
+export type Destination = string & { _isDestination: void };
 export interface AllocationItem {
   destination: Destination;
   amount: Uint256;
@@ -168,7 +168,7 @@ export function objectiveId(objective: Objective): string {
   }
 }
 
-type GetChannel = {type: 'GetChannel'; channelId: string};
+type GetChannel = { type: 'GetChannel'; channelId: string };
 export type ChannelRequest = GetChannel;
 
 export interface Payload {
@@ -242,10 +242,10 @@ const makeBytesCurried: <T extends string>(length: number) => (bytes: string) =>
   length: number
 ) => (bytes: string) => makeBytes(length, bytes);
 
-export type PrivateKey = string & {_isPrivateKey: void};
+export type PrivateKey = string & { _isPrivateKey: void };
 export const makePrivateKey: (input: string) => PrivateKey = makeBytesCurried<PrivateKey>(64);
 
-export type Address = string & {_isAddressKey: void};
+export type Address = string & { _isAddressKey: void };
 export function makeAddress(input: string): Address {
   return utils.getAddress(input) as Address;
 }

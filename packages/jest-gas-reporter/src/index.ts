@@ -1,8 +1,8 @@
 import fs from 'fs';
 import path from 'path';
 
-import {utils, providers} from 'ethers';
-import {Config, Reporter} from '@jest/reporters';
+import { utils, providers } from 'ethers';
+import { Config, Reporter } from '@jest/reporters';
 import linker from 'solc/linker';
 import easyTable from 'easy-table';
 
@@ -35,7 +35,7 @@ interface ParsedArtifact {
   // eslint-disable-next-line @typescript-eslint/ban-types
   deployedBytecode: object;
   contractName: string;
-  networks: {[networkName: string]: {address: string}};
+  networks: { [networkName: string]: { address: string } };
 }
 
 interface GasConsumed {
@@ -44,7 +44,7 @@ interface GasConsumed {
 
 interface ContractStats {
   deployment: number;
-  methods: {[method: string]: Stats};
+  methods: { [method: string]: Stats };
 }
 
 interface Stats {
@@ -100,7 +100,7 @@ export class GasReporter implements Reporter {
         .then(() => {
           resolve();
         })
-        .catch(e => {
+        .catch((e) => {
           reject(e);
         });
     });
@@ -171,7 +171,7 @@ export class GasReporter implements Reporter {
       contractCalls[parsedArtifact.contractName] = {
         methodCalls: {},
         code: '',
-        interface: contractInterface
+        interface: contractInterface,
       };
 
       if (parsedArtifact.networks[networkId]) {
@@ -185,7 +185,7 @@ export class GasReporter implements Reporter {
     for (const contractName of Object.keys(contractCalls)) {
       const contractStats: ContractStats = {
         deployment: 0,
-        methods: {}
+        methods: {},
       };
       if (contractCalls[contractName].deploy) {
         const deployGas = contractCalls[contractName].deploy.gasData;
@@ -197,14 +197,14 @@ export class GasReporter implements Reporter {
         contractStats.deployment = deployGas[0];
       }
       const methodCalls = contractCalls[contractName].methodCalls;
-      Object.keys(methodCalls).forEach(methodName => {
+      Object.keys(methodCalls).forEach((methodName) => {
         const method = methodCalls[methodName];
         const total = method.gasData.reduce((acc, datum) => acc + datum, 0);
         const average = Math.round(total / method.gasData.length);
         const min = Math.min(...method.gasData);
         const max = Math.max(...method.gasData);
 
-        const stats: Stats = {calls: method.calls, min: min, max: max, avg: average};
+        const stats: Stats = { calls: method.calls, min: min, max: max, avg: average };
         contractStats.methods[methodName] = stats;
       });
 
@@ -243,7 +243,7 @@ export class GasReporter implements Reporter {
       addCell(table, 'Max', '---');
       table.newRow();
     }
-    Object.keys(gasConsumed).forEach(contract => {
+    Object.keys(gasConsumed).forEach((contract) => {
       const contractStats = gasConsumed[contract];
       addCell(table, 'Contract', contract);
       addCell(table, 'Deployment', contractStats.deployment);
@@ -253,7 +253,7 @@ export class GasReporter implements Reporter {
       addCell(table, 'Avg', '*');
       addCell(table, 'Max', '*');
       table.newRow();
-      Object.keys(contractStats.methods).forEach(method => {
+      Object.keys(contractStats.methods).forEach((method) => {
         addCell(table, 'Contract', '*');
         addCell(table, 'Deployment', '*');
         addCell(table, 'Method', method);
@@ -279,14 +279,14 @@ export class GasReporter implements Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, {sensitivity: 'base'}) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, { sensitivity: 'base' }) === 0) {
             const details = contractCall.interface.parseTransaction(transaction);
 
             if (details != null) {
               if (!contractCall.methodCalls[details.name]) {
                 contractCall.methodCalls[details.name] = {
                   gasData: [],
-                  calls: 0
+                  calls: 0,
                 };
               }
               contractCall.methodCalls[details.name].gasData.push(
@@ -301,9 +301,9 @@ export class GasReporter implements Reporter {
 
         for (const contractName of Object.keys(contractCalls)) {
           const contractCall = contractCalls[contractName];
-          if (contractCall.code.localeCompare(code, undefined, {sensitivity: 'base'}) === 0) {
+          if (contractCall.code.localeCompare(code, undefined, { sensitivity: 'base' }) === 0) {
             if (!contractCall.deploy) {
-              contractCall.deploy = {calls: 0, gasData: []};
+              contractCall.deploy = { calls: 0, gasData: [] };
             }
             contractCall.deploy.calls++;
             contractCall.deploy.gasData.push(transactionReceipt.gasUsed.toNumber());
@@ -318,10 +318,10 @@ export class GasReporter implements Reporter {
       date: Date.now(),
       networkName: this.provider.network.name,
       revision: hash,
-      gasConsumed
+      gasConsumed,
     };
     const resultsString = JSON.stringify(results, null, 4) + '\n';
-    await fs.appendFile('./gas.json', resultsString, err => {
+    await fs.appendFile('./gas.json', resultsString, (err) => {
       if (err) throw err;
       console.log('Wrote json to gas.json');
     });
@@ -335,10 +335,8 @@ export class GasReporter implements Reporter {
         '\nrevision: ' +
         hash +
         '\n' +
-        this.objectToEasyTable(gasConsumed, true)
-          .print()
-          .toString(),
-      err => {
+        this.objectToEasyTable(gasConsumed, true).print().toString(),
+      (err) => {
         if (err) throw err;
         console.log('Wrote table to gas.md');
       }

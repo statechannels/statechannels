@@ -12,14 +12,14 @@ import {
   wireStateToNitroState,
   makeAddress,
 } from '@statechannels/wallet-core';
-import {hashState} from '@statechannels/wasm-utils';
+import { hashState } from '@statechannels/wasm-utils';
 import _ from 'lodash';
-import {SignedState as WireSignedState} from '@statechannels/wire-format';
+import { SignedState as WireSignedState } from '@statechannels/wire-format';
 
-import {recoverAddress as wasmRecoverAddress} from './utilities/signatures';
-import {Bytes32} from './type-aliases';
-import {Channel} from './models/channel';
-import {recordFunctionMetrics} from './metrics';
+import { recoverAddress as wasmRecoverAddress } from './utilities/signatures';
+import { Bytes32 } from './type-aliases';
+import { Channel } from './models/channel';
+import { recordFunctionMetrics } from './metrics';
 
 export const dropNonVariables = (s: SignedStateVarsWithHash): SignedStateVarsWithHash =>
   _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
@@ -32,11 +32,11 @@ export const addHash = <T extends State = State>(s: T): T & Hashed => ({
   stateHash: recordFunctionMetrics(hashState(toNitroState(s))),
 });
 export const addHashes = (c: Channel): Channel =>
-  _.assign(c, {vars: c.vars.map(v => addHash({...c.channelConstants, ...v})) as any});
+  _.assign(c, { vars: c.vars.map(v => addHash({ ...c.channelConstants, ...v })) as any });
 
 export const addChannelId = <T extends ChannelConstants = ChannelConstants>(
   c: T
-): T & {channelId: Bytes32} => {
+): T & { channelId: Bytes32 } => {
   (c as any).channelId = calculateChannelId(c);
 
   return c as any;
@@ -58,7 +58,7 @@ export function addState(
   vars: SignedStateVarsWithHash[],
   signedState: SignedStateWithHash
 ): SignedStateVarsWithHash[] {
-  const {stateHash, signatures} = signedState;
+  const { stateHash, signatures } = signedState;
 
   const ret = _.cloneDeep(vars);
 
@@ -91,7 +91,7 @@ export function clearOldStates(
   if (support && support.length > 0) {
     // The support is returned in descending turn number so we need to grab
     // the last element to find the earliest state
-    const {stateHash: firstSupportStateHash} = support[support.length - 1];
+    const { stateHash: firstSupportStateHash } = support[support.length - 1];
 
     // Find where the first support state is in our current state array
     const supportIndex = sorted.findIndex(sv => sv.stateHash === firstSupportStateHash);
@@ -108,7 +108,7 @@ export function clearOldStates(
  * package. This, as opposed to the JS implementation inside wallet-core.
  */
 export function fastDeserializeState(channelId: Bytes32, state: WireSignedState): SignedState {
-  const {outcome, participants, signatures} = state;
+  const { outcome, participants, signatures } = state;
 
   const nitroState = wireStateToNitroState(state);
 
@@ -118,7 +118,7 @@ export function fastDeserializeState(channelId: Bytes32, state: WireSignedState)
     if (!nitroState.channel.participants.includes(signer))
       throw new Error(`Recovered address ${signer} is not a participant in channel ${channelId}`);
 
-    return {signature, signer};
+    return { signature, signer };
   });
 
   return {

@@ -1,6 +1,6 @@
-import {constants} from 'ethers';
+import { constants } from 'ethers';
 
-import {Address, Destination, makeAddress} from './types';
+import { Address, Destination, makeAddress } from './types';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -64,7 +64,7 @@ export const LOG_LEVEL = ADD_LOGS
 export const HUB = {
   destination: HUB_DESTINATION,
   signingAddress: HUB_ADDRESS,
-  participantId: 'firebase:simple-hub'
+  participantId: 'firebase:simple-hub',
 };
 
 export const TARGET_NETWORK = process.env.TARGET_NETWORK || 'development';

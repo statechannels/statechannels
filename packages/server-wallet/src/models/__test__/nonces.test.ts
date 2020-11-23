@@ -1,11 +1,11 @@
 import _ from 'lodash';
-import {Address} from '@statechannels/wallet-core';
+import { Address } from '@statechannels/wallet-core';
 
-import {Nonce} from '../nonce';
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import { Nonce } from '../nonce';
+import { alice, bob } from '../../wallet/__test__/fixtures/participants';
+import { testKnex as knex } from '../../../jest/knex-setup-teardown';
 
-import {nonce} from './fixtures/nonces';
+import { nonce } from './fixtures/nonces';
 
 afterEach(async () => knex('nonces').truncate());
 
@@ -37,13 +37,13 @@ describe('using a given nonce', () => {
   it('works when there is no existing nonce', () => expect(nonce().use(knex)).resolves.toEqual(0));
 
   it('works the value exceeds the existing nonce', async () => {
-    await expect(nonce({value: 1}).use(knex)).resolves.toEqual(1);
-    await expect(nonce({value: 3}).use(knex)).resolves.toEqual(3);
+    await expect(nonce({ value: 1 }).use(knex)).resolves.toEqual(1);
+    await expect(nonce({ value: 3 }).use(knex)).resolves.toEqual(3);
   });
 
   it('rejects when the value does not exceed the existing nonce', async () => {
-    await expect(nonce({value: 3}).use(knex)).resolves.toEqual(3);
-    await expect(nonce({value: 1}).use(knex)).resolves.toEqual(3);
-    await expect(nonce({value: 4}).use(knex)).resolves.toEqual(4);
+    await expect(nonce({ value: 3 }).use(knex)).resolves.toEqual(3);
+    await expect(nonce({ value: 1 }).use(knex)).resolves.toEqual(3);
+    await expect(nonce({ value: 4 }).use(knex)).resolves.toEqual(4);
   });
 });

@@ -1,4 +1,4 @@
-import createTimer, {Timer} from 'unitimer';
+import createTimer, { Timer } from 'unitimer';
 import Table from 'cli-table3';
 
 export interface TimingResult {
@@ -55,7 +55,7 @@ export class PerformanceTimer {
   }
 
   static formatResults(results: TimingResult): string {
-    const table = new Table({head: ['Action', 'Min (MS)', 'Max (MS)', 'Avg (MS)']});
+    const table = new Table({ head: ['Action', 'Min (MS)', 'Max (MS)', 'Avg (MS)'] });
 
     table.push(
       ['Individual makePayment call', results.minPayment, results.maxPayment, results.meanPayment],

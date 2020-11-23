@@ -4,15 +4,15 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, ethers, constants} from 'ethers';
+import { makeAddress, makeDestination } from '@statechannels/wallet-core';
+import { BigNumber, ethers, constants } from 'ethers';
 
-import {defaultTestConfig} from '../../config';
-import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
+import { defaultTestConfig } from '../../config';
+import { Wallet } from '../../wallet';
+import { getChannelResultFor, getPayloadFor, crashAndRestart } from '../test-helpers';
 
-const a = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_A'});
-let b = Wallet.create({...defaultTestConfig, postgresDBName: 'TEST_B'}); // Wallet that will "crash"
+const a = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_A' });
+let b = Wallet.create({ ...defaultTestConfig, postgresDBName: 'TEST_B' }); // Wallet that will "crash"
 
 let channelId: string;
 let participantA: Participant;
@@ -49,8 +49,8 @@ afterAll(async () => {
 it('Create a directly-funded channel between two wallets, of which one crashes midway through ', async () => {
   const allocation: Allocation = {
     allocationItems: [
-      {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
-      {destination: participantB.destination, amount: BigNumber.from(1).toHexString()},
+      { destination: participantA.destination, amount: BigNumber.from(1).toHexString() },
+      { destination: participantB.destination, amount: BigNumber.from(1).toHexString() },
     ],
     assetHolderAddress: makeAddress(constants.AddressZero), // must be even length
   };
@@ -86,7 +86,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   b = await crashAndRestart(b);
 
   //      PreFund0B
-  const resultB1 = await b.joinChannel({channelId});
+  const resultB1 = await b.joinChannel({ channelId });
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 1,

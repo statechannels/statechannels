@@ -1,1 +1,1 @@
-export {ObjectiveManager} from './objective-manager';
+export { ObjectiveManager } from './objective-manager';

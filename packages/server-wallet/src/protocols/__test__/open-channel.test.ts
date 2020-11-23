@@ -1,39 +1,39 @@
-import {simpleEthAllocation, BN, State, makeAddress} from '@statechannels/wallet-core';
+import { simpleEthAllocation, BN, State, makeAddress } from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
-import {protocol} from '../open-channel';
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {SignState, fundChannel} from '../actions';
-import {channel} from '../../models/__test__/fixtures/channel';
+import { protocol } from '../open-channel';
+import { alice, bob } from '../../wallet/__test__/fixtures/participants';
+import { SignState, fundChannel } from '../actions';
+import { channel } from '../../models/__test__/fixtures/channel';
 
-import {applicationProtocolState} from './fixtures/protocol-state';
+import { applicationProtocolState } from './fixtures/protocol-state';
 
 expect.extend(matchers);
 
-const outcome = simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]);
+const outcome = simpleEthAllocation([{ amount: BN.from(5), destination: alice().destination }]);
 const outcome2 = simpleEthAllocation([
-  {amount: BN.from(5), destination: bob().destination},
-  {amount: BN.from(5), destination: alice().destination},
+  { amount: BN.from(5), destination: bob().destination },
+  { amount: BN.from(5), destination: alice().destination },
 ]);
 const participants = [alice(), bob()];
 
-const prefundState0 = {outcome, turnNum: 0, participants};
-const prefundState1 = {outcome, turnNum: 1, participants};
-const postfundState2 = {outcome, turnNum: 2, participants};
-const postfundState3 = {outcome, turnNum: 3, participants};
+const prefundState0 = { outcome, turnNum: 0, participants };
+const prefundState1 = { outcome, turnNum: 1, participants };
+const postfundState2 = { outcome, turnNum: 2, participants };
+const postfundState3 = { outcome, turnNum: 3, participants };
 
-const altPrefundState0 = {outcome: outcome2, turnNum: 0, participants};
+const altPrefundState0 = { outcome: outcome2, turnNum: 0, participants };
 
-const reversedPFState0 = {outcome, turnNum: 0, participants: [bob(), alice()]};
-const reversedPFState1 = {outcome, turnNum: 1, participants: [bob(), alice()]};
+const reversedPFState0 = { outcome, turnNum: 0, participants: [bob(), alice()] };
+const reversedPFState1 = { outcome, turnNum: 1, participants: [bob(), alice()] };
 
 const funded = () => ({
   amount: BN.from(5),
 });
-const notFunded = () => ({amount: BN.from(0)});
+const notFunded = () => ({ amount: BN.from(0) });
 
-const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
+const signState = (state: Partial<State>): Partial<SignState> => ({ type: 'SignState', ...state });
 const fundChannelAction1 = fundChannel({
   channelId: channel().channelId,
   assetHolderAddress: makeAddress(ethers.constants.AddressZero),
@@ -41,7 +41,7 @@ const fundChannelAction1 = fundChannel({
   amount: BN.from(5),
 });
 
-const fundChannelAction2 = {...fundChannelAction1, expectedHeld: BN.from(5)};
+const fundChannelAction2 = { ...fundChannelAction1, expectedHeld: BN.from(5) };
 
 test.each`
   supported           | myIndex | latestSignedByMe    | latest              | funding      | action                         | cond                                                                     | result
@@ -52,9 +52,9 @@ test.each`
   ${prefundState1}    | ${1}    | ${prefundState1}    | ${prefundState1}    | ${funded}    | ${signState(postfundState3)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
   ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${notFunded} | ${fundChannelAction1}          | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
   ${altPrefundState0} | ${0}    | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is secont to deposit'} | ${'submits transaction'}
-`('$result $cond', ({supported, latest, latestSignedByMe, funding, action, myIndex}) => {
+`('$result $cond', ({ supported, latest, latestSignedByMe, funding, action, myIndex }) => {
   const ps = applicationProtocolState({
-    app: {supported, latest, latestSignedByMe, funding, myIndex},
+    app: { supported, latest, latestSignedByMe, funding, myIndex },
   });
   expect(protocol(ps)).toMatchObject(action);
 });
@@ -66,15 +66,15 @@ test.each`
   ${prefundState0}    | ${postfundState2}   | ${postfundState2}   | ${funded}    | ${'when the prefund state is supported, and I have signed the postfund state'}
   ${altPrefundState0} | ${altPrefundState0} | ${altPrefundState0} | ${notFunded} | ${'when the prefund state is supported, and alice is second to deposit'}
   ${postfundState2}   | ${postfundState2}   | ${postfundState2}   | ${funded}    | ${'when the first postfund state is supported'}
-`('takes no action $cond', ({supported, latest, latestSignedByMe, funding}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
+`('takes no action $cond', ({ supported, latest, latestSignedByMe, funding }) => {
+  const ps = applicationProtocolState({ app: { supported, latest, latestSignedByMe, funding } });
   expect(protocol(ps)).toBeUndefined();
 });
 
 test.each`
   supported         | latestSignedByMe  | latest            | funding   | cond
   ${postfundState3} | ${postfundState3} | ${postfundState3} | ${funded} | ${'when the last postfund state is supported'}
-`('completes the objective $cond', ({supported, latest, latestSignedByMe, funding}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
-  expect(protocol(ps)).toMatchObject({channelId: ps.app.channelId, type: 'CompleteObjective'});
+`('completes the objective $cond', ({ supported, latest, latestSignedByMe, funding }) => {
+  const ps = applicationProtocolState({ app: { supported, latest, latestSignedByMe, funding } });
+  expect(protocol(ps)).toMatchObject({ channelId: ps.app.channelId, type: 'CompleteObjective' });
 });

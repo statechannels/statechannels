@@ -1,7 +1,7 @@
-import {ethers} from 'ethers';
+import { ethers } from 'ethers';
 
 import EthAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
-import {Allocation, Guarantee, Outcome} from '../outcome';
+import { Allocation, Guarantee, Outcome } from '../outcome';
 
 import * as assetHolderTransactionCreator from './asset-holder';
 
@@ -51,5 +51,5 @@ export function createDepositTransaction(
     expectedHeld,
     amount,
   ]);
-  return {data};
+  return { data };
 }

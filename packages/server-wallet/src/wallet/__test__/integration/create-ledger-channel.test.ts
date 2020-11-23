@@ -1,11 +1,11 @@
-import {constants} from 'ethers';
+import { constants } from 'ethers';
 
-import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
-import {createChannelArgs} from '../fixtures/create-channel';
-import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import { Channel } from '../../../models/channel';
+import { Wallet } from '../..';
+import { createChannelArgs } from '../fixtures/create-channel';
+import { seedAlicesSigningWallet } from '../../../db/seeds/1_signing_wallet_seeds';
+import { defaultTestConfig } from '../../../config';
+import { DBAdmin } from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -23,9 +23,9 @@ describe('happy path', () => {
   it('creates a ledger channel', async () => {
     expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
-    const {participants, allocations} = createChannelArgs();
+    const { participants, allocations } = createChannelArgs();
 
-    const createPromise = w.createLedgerChannel({participants, allocations});
+    const createPromise = w.createLedgerChannel({ participants, allocations });
 
     await expect(createPromise).resolves.toMatchObject({
       outbox: [
@@ -34,7 +34,7 @@ describe('happy path', () => {
             recipient: 'bob',
             sender: 'alice',
             data: {
-              signedStates: [{turnNum: 0}],
+              signedStates: [{ turnNum: 0 }],
               objectives: [
                 {
                   participants: [], // TODO: remove when fully deprecated
@@ -48,10 +48,10 @@ describe('happy path', () => {
           },
         },
       ],
-      channelResult: {channelId: expect.any(String), turnNum: 0},
+      channelResult: { channelId: expect.any(String), turnNum: 0 },
     });
 
-    const {channelId} = (await createPromise).channelResult;
+    const { channelId } = (await createPromise).channelResult;
 
     expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 

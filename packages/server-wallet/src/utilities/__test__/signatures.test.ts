@@ -1,4 +1,4 @@
-import {Wallet, ethers} from 'ethers';
+import { Wallet, ethers } from 'ethers';
 import {
   State,
   simpleEthAllocation,
@@ -9,19 +9,19 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {participant} from '../../wallet/__test__/fixtures/participants';
-import {recoverAddress, signState as wasmSignState} from '../signatures';
-import {logger} from '../../logger';
-import {addHash} from '../../state-utils';
+import { participant } from '../../wallet/__test__/fixtures/participants';
+import { recoverAddress, signState as wasmSignState } from '../signatures';
+import { logger } from '../../logger';
+import { addHash } from '../../state-utils';
 
 it('sign vs wasmSign', async () => {
   const promises = _.range(5).map(async channelNonce => {
-    const {address: ethAddress, privateKey} = Wallet.createRandom();
+    const { address: ethAddress, privateKey } = Wallet.createRandom();
     const address = makeAddress(ethAddress);
     const state: State = {
       chainId: '0x1',
       channelNonce,
-      participants: [participant({signingAddress: address})],
+      participants: [participant({ signingAddress: address })],
       outcome: simpleEthAllocation([]),
       turnNum: 1,
       isFinal: false,
@@ -35,7 +35,7 @@ it('sign vs wasmSign', async () => {
     try {
       expect(signedState).toEqual((await wasmSignedState).signature);
     } catch (error) {
-      logger.info({error, state, privateKey});
+      logger.info({ error, state, privateKey });
       throw error;
     }
   });
@@ -44,13 +44,13 @@ it('sign vs wasmSign', async () => {
 
 it('getSignerAddress vs fastRecover', async () => {
   const promises = _.range(5).map(async channelNonce => {
-    const {address: ethAddress, privateKey} = Wallet.createRandom();
+    const { address: ethAddress, privateKey } = Wallet.createRandom();
     const address = makeAddress(ethAddress);
 
     const state: State = {
       chainId: '0x1',
       channelNonce,
-      participants: [participant({signingAddress: address})],
+      participants: [participant({ signingAddress: address })],
       outcome: simpleEthAllocation([]),
       turnNum: 1,
       isFinal: false,
@@ -65,7 +65,7 @@ it('getSignerAddress vs fastRecover', async () => {
       const wasmRecovered = recoverAddress(signedState.signature, toNitroState(signedState.state));
       expect(recovered).toEqual(wasmRecovered);
     } catch (error) {
-      logger.info({error, state, privateKey});
+      logger.info({ error, state, privateKey });
       throw error;
     }
   });

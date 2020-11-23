@@ -1,5 +1,5 @@
-import {Participant, Address, Uint256, DomainBudget} from '../data-types';
-import {JsonRpcRequest, JsonRpcResponse} from '../jsonrpc-header-types';
+import { Participant, Address, Uint256, DomainBudget } from '../data-types';
+import { JsonRpcRequest, JsonRpcResponse } from '../jsonrpc-header-types';
 
 export interface ApproveBudgetAndFundParams {
   hub: Participant;

@@ -1,7 +1,7 @@
-import {Bytes32} from '../type-aliases';
-import {Store} from '../wallet/store';
-import {WalletError, Values} from '../errors/wallet-error';
-import {WalletResponse} from '../wallet/response-builder';
+import { Bytes32 } from '../type-aliases';
+import { Store } from '../wallet/store';
+import { WalletError, Values } from '../errors/wallet-error';
+import { WalletResponse } from '../wallet/response-builder';
 
 export class CloseChannelObjective {
   public static async commence(
@@ -16,7 +16,7 @@ export class CloseChannelObjective {
           {
             type: 'CloseChannel',
             participants: [],
-            data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
+            data: { targetChannelId: channelId, fundingStrategy: channel.fundingStrategy },
           },
           tx
         );
@@ -24,7 +24,7 @@ export class CloseChannelObjective {
         response.queueCreatedObjective(dbObjective, channel.myIndex, channel.participants);
       },
       () => {
-        throw new CloseChannelError(CloseChannelError.reasons.channelMissing, {channelId});
+        throw new CloseChannelError(CloseChannelError.reasons.channelMissing, { channelId });
       }
     );
   }

@@ -1,9 +1,9 @@
-import {UpdateChannelParams} from '@statechannels/client-api-schema';
+import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
-import {ServerWalletConfig} from '../../config';
-import {MultipleChannelOutput, SingleChannelOutput, SingleThreadedWallet} from '../wallet';
+import { ServerWalletConfig } from '../../config';
+import { MultipleChannelOutput, SingleChannelOutput, SingleThreadedWallet } from '../wallet';
 
-import {WorkerManager} from './manager';
+import { WorkerManager } from './manager';
 
 export class MultiThreadedWallet extends SingleThreadedWallet {
   private workerManager: WorkerManager;

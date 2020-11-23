@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-import {dropConstraint} from '../utils';
+import { dropConstraint } from '../utils';
 
 const channels = 'channels';
 const chainServiceRequests = 'chain_service_requests';
@@ -24,14 +24,8 @@ export async function dropValidChainServiceRequests(knex: Knex): Promise<any> {
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table => {
-    table
-      .specificType(chainServiceRequests, 'text[]')
-      .notNullable()
-      .defaultTo('{}');
-    table
-      .string(fundingStrategy)
-      .notNullable()
-      .defaultTo(defaultFundingStrategy);
+    table.specificType(chainServiceRequests, 'text[]').notNullable().defaultTo('{}');
+    table.string(fundingStrategy).notNullable().defaultTo(defaultFundingStrategy);
   });
 
   await addValidChainServiceRequests(knex, "'fund'");

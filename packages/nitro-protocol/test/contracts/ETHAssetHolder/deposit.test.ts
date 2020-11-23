@@ -1,9 +1,9 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, BigNumber, ethers} from 'ethers';
-const {parseUnits} = ethers.utils;
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet, BigNumber, ethers } from 'ethers';
+const { parseUnits } = ethers.utils;
 
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
+import { Channel, getChannelId } from '../../../src/contract/channel';
 import {
   getRandomNonce,
   getTestProvider,
@@ -49,14 +49,22 @@ describe('deposit', () => {
     ${description3} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}          | ${undefined}
   `(
     '$description',
-    async ({description, held, expectedHeld, amount, msgValue, reasonString, heldAfterString}) => {
+    async ({
+      description,
+      held,
+      expectedHeld,
+      amount,
+      msgValue,
+      reasonString,
+      heldAfterString,
+    }) => {
       held = parseUnits(held, 'wei');
       expectedHeld = parseUnits(expectedHeld, 'wei');
       amount = parseUnits(amount, 'wei');
       msgValue = parseUnits(msgValue, 'wei');
       const heldAfter = parseUnits(heldAfterString, 'wei');
 
-      const destinationChannel: Channel = {chainId, channelNonce, participants};
+      const destinationChannel: Channel = { chainId, channelNonce, participants };
       const destination = getChannelId(destinationChannel);
 
       if (held > 0) {
@@ -64,7 +72,7 @@ describe('deposit', () => {
         const tx0 = ETHAssetHolder.deposit(destination, '0x00', held, {
           value: held,
         });
-        const {events} = await (await tx0).wait();
+        const { events } = await (await tx0).wait();
         const depositedEvent = getDepositedEvent(events);
 
         expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
@@ -81,7 +89,7 @@ describe('deposit', () => {
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
-        const {gasUsed, events} = await (await tx).wait();
+        const { gasUsed, events } = await (await tx).wait();
         await writeGasConsumption('./deposit.gas.md', description, gasUsed);
         const event = getDepositedEvent(events);
         expect(event).toMatchObject({
@@ -97,4 +105,4 @@ describe('deposit', () => {
   );
 });
 
-const getDepositedEvent = events => events.find(({event}) => event === 'Deposited').args;
+const getDepositedEvent = (events) => events.find(({ event }) => event === 'Deposited').args;

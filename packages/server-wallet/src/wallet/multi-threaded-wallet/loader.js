@@ -15,7 +15,7 @@ if (fs.existsSync(JS_WORKER_PATH)) {
   require(BUILT_JS_WORKER_PATH);
 } else if (fs.existsSync(TS_WORKER_PATH)) {
   console.warn('Using ts-node to load the worker script, things may be slow!');
-  require('ts-node').register({typeCheck: false});
+  require('ts-node').register({ typeCheck: false });
   require(TS_WORKER_PATH);
 } else {
   throw new Error('Could not find worker.ts or worker.js');

@@ -1,7 +1,7 @@
 /* eslint-disable jest/no-try-expect */
 import _ from 'lodash';
 
-import {messageIsValid, validateMessage, validateState} from '../validator';
+import { messageIsValid, validateMessage, validateState } from '../validator';
 
 import * as good from './good_sample_messages';
 import * as bad from './bad_sample_messages';
@@ -37,19 +37,19 @@ describe('validate message', () => {
           return {
             pass: false,
             message: () =>
-              `expected function to throw WireFormatValidationError, threw ${err.constructor.name}`
+              `expected function to throw WireFormatValidationError, threw ${err.constructor.name}`,
           };
 
         if (err.message !== message) {
           return {
             pass: false,
-            message: () => `expected message ${message}, received ${err.message}`
+            message: () => `expected message ${message}, received ${err.message}`,
           };
         }
         if (!_.isEqual(err.jsonBlob, jsonBlob)) {
           return {
             pass: false,
-            message: () => `incorrect json blob`
+            message: () => `incorrect json blob`,
           };
         }
 
@@ -59,15 +59,15 @@ describe('validate message', () => {
             message: () =>
               `expected validation error ${validationError}, received array ${JSON.stringify(
                 err.errorMessages
-              )}`
+              )}`,
           };
         }
 
-        return {pass: true, message: () => 'passed'};
+        return { pass: true, message: () => 'passed' };
       }
 
-      return {pass: false, message: () => 'expected to throw error'};
-    }
+      return { pass: false, message: () => 'expected to throw error' };
+    },
   });
 
   it('returns helpful errors', () => {
@@ -103,9 +103,9 @@ describe('validate message', () => {
       'Property at root.data.objectives should be array'
     );
 
-    expect(() => validateState({turnNum: 3})).toThrowValidationError(
+    expect(() => validateState({ turnNum: 3 })).toThrowValidationError(
       'Invalid state',
-      {turnNum: 3},
+      { turnNum: 3 },
       "Missing required property 'appData' at root"
     );
   });

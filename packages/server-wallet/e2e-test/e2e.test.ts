@@ -1,13 +1,13 @@
-import {Participant} from '@statechannels/client-api-schema';
-import {validatePayload} from '@statechannels/wallet-core';
+import { Participant } from '@statechannels/client-api-schema';
+import { validatePayload } from '@statechannels/wallet-core';
 
-import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
-import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
-import {Channel} from '../src/models/channel';
-import {withSupportedState} from '../src/models/__test__/fixtures/channel';
-import {SigningWallet} from '../src/models/signing-wallet';
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
-import {DBAdmin} from '../src/db-admin/db-admin';
+import { alice, bob } from '../src/wallet/__test__/fixtures/signing-wallets';
+import { alice as aliceP, bob as bobP } from '../src/wallet/__test__/fixtures/participants';
+import { Channel } from '../src/models/channel';
+import { withSupportedState } from '../src/models/__test__/fixtures/channel';
+import { SigningWallet } from '../src/models/signing-wallet';
+import { stateVars } from '../src/wallet/__test__/fixtures/state-vars';
+import { DBAdmin } from '../src/db-admin/db-admin';
 
 import PayerClient from './payer/client';
 import {
@@ -34,8 +34,8 @@ beforeAll(async () => {
 
   await waitForServerToStart(receiverServer);
 
-  await knexPayer.migrate.latest({directory: './src/db/migrations'});
-  await knexReceiver.migrate.latest({directory: './src/db/migrations'});
+  await knexPayer.migrate.latest({ directory: './src/db/migrations' });
+  await knexReceiver.migrate.latest({ directory: './src/db/migrations' });
 
   [ChannelPayer, ChannelReceiver] = [knexPayer, knexReceiver].map(knex => Channel.bindKnex(knex));
 
@@ -79,7 +79,7 @@ describe('e2e', () => {
 
   it('can do a simple end-to-end flow with no signed states', async () => {
     const response = await payerClient.emptyMessage();
-    const {signedStates, objectives} = validatePayload(response);
+    const { signedStates, objectives } = validatePayload(response);
     expect(signedStates?.length).toBe(0);
     expect(objectives?.length).toBe(0);
   });
@@ -94,7 +94,7 @@ describe('e2e', () => {
     expect(
       (await ChannelPayer.forId(channel.channelId, ChannelPayer.knex())).protocolState
     ).toMatchObject({
-      supported: {turnNum: 3},
+      supported: { turnNum: 3 },
     });
   });
 });
@@ -107,18 +107,18 @@ describe('payments', () => {
     const seed = withSupportedState()({
       channelNonce: 123456789, // something unique for this test
       participants: [payer, receiver],
-      vars: [stateVars({turnNum: 3})],
+      vars: [stateVars({ turnNum: 3 })],
     });
 
     await ChannelPayer.query().insert([seed]); // Fixture uses alice() default
-    await ChannelReceiver.query().insert([{...seed, signingAddress: receiver.signingAddress}]);
+    await ChannelReceiver.query().insert([{ ...seed, signingAddress: receiver.signingAddress }]);
 
     channelId = seed.channelId;
   });
 
   const expectSupportedState = async (C: typeof Channel, turnNum: number): Promise<any> =>
     expect(C.forId(channelId, C.knex()).then(c => c.protocolState)).resolves.toMatchObject({
-      latest: {turnNum},
+      latest: { turnNum },
     });
 
   it('can update pre-existing channel, send signed state via http', async () => {

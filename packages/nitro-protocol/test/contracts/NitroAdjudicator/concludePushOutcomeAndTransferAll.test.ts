@@ -1,16 +1,16 @@
-import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, BigNumber} from 'ethers';
+import { expectRevert } from '@statechannels/devtools';
+import { Contract, Wallet, ethers, BigNumber } from 'ethers';
 
 import AssetHolderArtifact1 from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import AssetHolderArtifact2 from '../../../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
-import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
-import {AllocationAssetOutcome} from '../../../src/contract/outcome';
-import {State} from '../../../src/contract/state';
-import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
+import { Channel, getChannelId } from '../../../src/contract/channel';
+import { channelDataToChannelStorageHash } from '../../../src/contract/channel-storage';
+import { AllocationAssetOutcome } from '../../../src/contract/outcome';
+import { State } from '../../../src/contract/state';
+import { concludePushOutcomeAndTransferAllArgs } from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
   assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
@@ -28,7 +28,7 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {signStates} from '../../../src';
+import { signStates } from '../../../src';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -60,9 +60,9 @@ const addresses = {
   ERC20: undefined,
 };
 
-const tenPayouts = {ERC20: {}};
-const fiftyPayouts = {ERC20: {}};
-const oneHundredPayouts = {ERC20: {}};
+const tenPayouts = { ERC20: {} };
+const fiftyPayouts = { ERC20: {} };
+const oneHundredPayouts = { ERC20: {} };
 
 for (let i = 0; i < 100; i++) {
   const destination = randomExternalDestination();
@@ -126,15 +126,15 @@ let channelNonce = getRandomNonce('concludePushOutcomeAndTransferAll');
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | outcomeShortHand               | heldBefore                     | heldAfter                      | newOutcome | payouts                        | reasonString
-    ${accepts1} | ${{ETH: {A: 1}}}               | ${{ETH: {c: 1}}}               | ${{ETH: {c: 0}}}               | ${{}}      | ${{ETH: {A: 1}}}               | ${undefined}
-    ${accepts2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
-    ${accepts3} | ${{ETH2: {A: 1, B: 1}}}        | ${{ETH2: {c: 2}}}              | ${{ETH2: {c: 0}}}              | ${{}}      | ${{ETH2: {A: 1, B: 1}}}        | ${undefined}
-    ${accepts4} | ${{ERC20: {A: 1, B: 1}}}       | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {A: 1, B: 1}}}       | ${undefined}
-    ${accepts5} | ${{ERC20: {At: 1, Bt: 1}}}     | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {At: 1, Bt: 1}}}     | ${undefined}
-    ${accepts6} | ${tenPayouts}                  | ${{ERC20: {c: 10}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${tenPayouts}                  | ${undefined}
-    ${accepts7} | ${fiftyPayouts}                | ${{ERC20: {c: 50}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${fiftyPayouts}                | ${undefined}
-    ${accepts8} | ${oneHundredPayouts}           | ${{ERC20: {c: 100}}}           | ${{ERC20: {c: 0}}}             | ${{}}      | ${oneHundredPayouts}           | ${undefined}
+    description | outcomeShortHand                     | heldBefore                           | heldAfter                            | newOutcome | payouts                              | reasonString
+    ${accepts1} | ${{ ETH: { A: 1 } }}                 | ${{ ETH: { c: 1 } }}                 | ${{ ETH: { c: 0 } }}                 | ${{}}      | ${{ ETH: { A: 1 } }}                 | ${undefined}
+    ${accepts2} | ${{ ETH: { A: 1 }, ETH2: { A: 2 } }} | ${{ ETH: { c: 1 }, ETH2: { c: 2 } }} | ${{ ETH: { c: 0 }, ETH2: { c: 0 } }} | ${{}}      | ${{ ETH: { A: 1 }, ETH2: { A: 2 } }} | ${undefined}
+    ${accepts3} | ${{ ETH2: { A: 1, B: 1 } }}          | ${{ ETH2: { c: 2 } }}                | ${{ ETH2: { c: 0 } }}                | ${{}}      | ${{ ETH2: { A: 1, B: 1 } }}          | ${undefined}
+    ${accepts4} | ${{ ERC20: { A: 1, B: 1 } }}         | ${{ ERC20: { c: 2 } }}               | ${{ ERC20: { c: 0 } }}               | ${{}}      | ${{ ERC20: { A: 1, B: 1 } }}         | ${undefined}
+    ${accepts5} | ${{ ERC20: { At: 1, Bt: 1 } }}       | ${{ ERC20: { c: 2 } }}               | ${{ ERC20: { c: 0 } }}               | ${{}}      | ${{ ERC20: { At: 1, Bt: 1 } }}       | ${undefined}
+    ${accepts6} | ${tenPayouts}                        | ${{ ERC20: { c: 10 } }}              | ${{ ERC20: { c: 0 } }}               | ${{}}      | ${tenPayouts}                        | ${undefined}
+    ${accepts7} | ${fiftyPayouts}                      | ${{ ERC20: { c: 50 } }}              | ${{ ERC20: { c: 0 } }}               | ${{}}      | ${fiftyPayouts}                      | ${undefined}
+    ${accepts8} | ${oneHundredPayouts}                 | ${{ ERC20: { c: 100 } }}             | ${{ ERC20: { c: 0 } }}               | ${{}}      | ${oneHundredPayouts}                 | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -155,11 +155,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString;
     }) => {
-      const channel: Channel = {chainId, participants, channelNonce};
+      const channel: Channel = { chainId, participants, channelNonce };
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const support = oneState;
-      const {appData, whoSignedWhat} = support;
+      const { appData, whoSignedWhat } = support;
       const numStates = appData.length;
       const largestTurnNum = turnNumRecord + 1;
       const initialChannelStorageHash = ethers.constants.HashZero;
@@ -179,7 +179,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         newOutcome,
         heldAfter,
         payouts,
-      ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
+      ].map((object) => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
       resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2, ERC20AssetHolder]);
@@ -215,7 +215,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       // Form transaction
       const tx = NitroAdjudicator.concludePushOutcomeAndTransferAll(
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
-        {gasLimit: 3000000}
+        { gasLimit: 3000000 }
       );
 
       // Switch on overall test expectation
@@ -243,7 +243,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         );
 
         // Extract logs
-        const {logs} = await (await tx).wait();
+        const { logs } = await (await tx).wait();
 
         // Compile events from logs
         const events = compileEventsFromLogs(logs, [
@@ -260,11 +260,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expectedEvents.push({
           contract: NitroAdjudicator.address,
           name: 'Concluded',
-          args: {channelId},
+          args: { channelId },
         });
 
         // Add AssetTransferred events to expectations
-        Object.keys(payouts).forEach(assetHolder => {
+        Object.keys(payouts).forEach((assetHolder) => {
           expectedEvents = expectedEvents.concat(
             assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
           );

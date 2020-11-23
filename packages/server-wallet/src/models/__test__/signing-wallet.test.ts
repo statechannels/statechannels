@@ -1,8 +1,8 @@
-import {makeAddress} from '@statechannels/wallet-core';
+import { makeAddress } from '@statechannels/wallet-core';
 
-import {addHash} from '../../state-utils';
-import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
-import {createState} from '../../wallet/__test__/fixtures/states';
+import { addHash } from '../../state-utils';
+import { alice } from '../../wallet/__test__/fixtures/signing-wallets';
+import { createState } from '../../wallet/__test__/fixtures/states';
 
 const signingWallet = alice();
 

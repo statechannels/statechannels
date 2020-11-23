@@ -1,9 +1,9 @@
-import {utils, providers, Signature} from 'ethers';
+import { utils, providers, Signature } from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
-import {getChannelId} from '../channel';
-import {encodeOutcome, Outcome} from '../outcome';
-import {getFixedPart, hashAppPart, hashState, State} from '../state';
+import { getChannelId } from '../channel';
+import { encodeOutcome, Outcome } from '../outcome';
+import { getFixedPart, hashAppPart, hashState, State } from '../state';
 
 // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const NitroAdjudicatorContractInterface = new utils.Interface(NitroAdjudicatorArtifact.abi);
@@ -16,7 +16,7 @@ export function createPushOutcomeTransaction(
 ): providers.TransactionRequest {
   const channelId = getChannelId(state.channel);
   const stateHash = hashState(state);
-  const {participants} = state.channel;
+  const { participants } = state.channel;
   const challengerAddress = participants[state.turnNum % participants.length];
   const encodedOutcome = encodeOutcome(outcome);
 
@@ -29,7 +29,7 @@ export function createPushOutcomeTransaction(
     encodedOutcome,
   ]);
 
-  return {data};
+  return { data };
 }
 
 export function concludePushOutcomeAndTransferAllArgs(
@@ -41,7 +41,7 @@ export function concludePushOutcomeAndTransferAllArgs(
   if (states.length === 0) {
     throw new Error('No states provided');
   }
-  const {participants} = states[0].channel;
+  const { participants } = states[0].channel;
   if (participants.length !== signatures.length) {
     throw new Error(
       `Participants (length:${participants.length}) and signatures (length:${signatures.length}) need to be the same length`

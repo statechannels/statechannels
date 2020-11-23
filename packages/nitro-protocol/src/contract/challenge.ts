@@ -1,13 +1,13 @@
-import {ethers, BigNumber, utils, Signature} from 'ethers';
-const {Interface, keccak256, defaultAbiCoder} = utils;
+import { ethers, BigNumber, utils, Signature } from 'ethers';
+const { Interface, keccak256, defaultAbiCoder } = utils;
 
 import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
-import {SignedState} from '../signatures';
-import {Channel} from '..';
+import { SignedState } from '../signatures';
+import { Channel } from '..';
 
-import {decodeOutcome} from './outcome';
-import {FixedPart, hashState, State, VariablePart} from './state';
-import {Address, Bytes32, Uint8, Uint48} from './types';
+import { decodeOutcome } from './outcome';
+import { FixedPart, hashState, State, VariablePart } from './state';
+import { Address, Bytes32, Uint8, Uint48 } from './types';
 
 export function hashChallengeMessage(challengeState: State): Bytes32 {
   return keccak256(
@@ -45,19 +45,19 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
 
   // Fixed part
   const chainId = BigNumber.from(fixedPart[0]).toHexString();
-  const participants = fixedPart[1].map(p => BigNumber.from(p).toHexString());
+  const participants = fixedPart[1].map((p) => BigNumber.from(p).toHexString());
   const channelNonce = fixedPart[2];
   const appDefinition = fixedPart[3];
   const challengeDuration = BigNumber.from(fixedPart[4]).toNumber();
 
   // Variable part
-  const variableParts: VariablePart[] = variablePartsUnstructured.map(v => {
+  const variableParts: VariablePart[] = variablePartsUnstructured.map((v) => {
     const outcome = v[0];
     const appData = v[1];
-    return {outcome, appData};
+    return { outcome, appData };
   });
 
-  const channel: Channel = {chainId, channelNonce, participants};
+  const channel: Channel = { chainId, channelNonce, participants };
   const challengeStates: SignedState[] = variableParts.map((v, i) => {
     const turnNum = turnNumRecord - (variableParts.length - i - 1);
     const signature = sigs[i];
@@ -70,9 +70,9 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
       appDefinition,
       isFinal,
     };
-    return {state, signature};
+    return { state, signature };
   });
-  return {challengeStates, finalizesAt, challengerAddress: challenger};
+  return { challengeStates, finalizesAt, challengerAddress: challenger };
 }
 
 export interface ChallengeClearedEvent {
@@ -94,7 +94,7 @@ export function getChallengeClearedEvent(
   tx: ethers.Transaction,
   eventResult: any[]
 ): ChallengeClearedEvent {
-  const {newTurnNumRecord}: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
+  const { newTurnNumRecord }: ChallengeClearedStruct = eventResult.slice(-1)[0].args;
 
   // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
   const decodedTransaction = new Interface(NitroAdjudicatorArtifact.abi).parseTransaction(tx);
@@ -123,7 +123,7 @@ export function getChallengeClearedEvent(
         isFinal,
         outcome,
         appData,
-        channel: {chainId: BigNumber.from(chainId).toHexString(), channelNonce, participants},
+        channel: { chainId: BigNumber.from(chainId).toHexString(), channelNonce, participants },
         turnNum: BigNumber.from(newTurnNumRecord).toNumber(),
       },
     };

@@ -1,10 +1,10 @@
-import {JSONSchema, Model} from 'objection';
-import {Address, Destination, Zero} from '@statechannels/wallet-core';
+import { JSONSchema, Model } from 'objection';
+import { Address, Destination, Zero } from '@statechannels/wallet-core';
 import Knex from 'knex';
 
-import {Uint256, Bytes32} from '../type-aliases';
+import { Uint256, Bytes32 } from '../type-aliases';
 
-type TransferredOutEntry = {toAddress: Destination; amount: Uint256};
+type TransferredOutEntry = { toAddress: Destination; amount: Uint256 };
 
 export const REQUIRED_COLUMNS = ['channelId', 'amount', 'assetHolder', 'transferredOut'] as const;
 export interface RequiredColumns {
@@ -31,7 +31,7 @@ export class Funding extends Model implements RequiredColumns {
       properties: {
         transferredOut: {
           type: 'array',
-          items: {type: 'object'},
+          items: { type: 'object' },
         },
       },
     };
@@ -42,9 +42,7 @@ export class Funding extends Model implements RequiredColumns {
     channelId: Bytes32,
     assetHolder: Address
   ): Promise<Uint256> {
-    const result = await Funding.query(knex)
-      .where({channelId, assetHolder})
-      .first();
+    const result = await Funding.query(knex).where({ channelId, assetHolder }).first();
 
     return result ? result.amount : Zero;
   }
@@ -55,9 +53,7 @@ export class Funding extends Model implements RequiredColumns {
     amount: Uint256,
     assetHolder: Address
   ): Promise<Funding> {
-    const existing = await Funding.query(knex)
-      .where({channelId, assetHolder})
-      .first();
+    const existing = await Funding.query(knex).where({ channelId, assetHolder }).first();
 
     if (!existing) {
       return await Funding.query(knex).insert({
@@ -68,8 +64,8 @@ export class Funding extends Model implements RequiredColumns {
       });
     } else {
       return await Funding.query(knex)
-        .patch({amount})
-        .where({channelId, assetHolder})
+        .patch({ amount })
+        .where({ channelId, assetHolder })
         .returning('*')
         .first();
     }
@@ -85,17 +81,17 @@ export class Funding extends Model implements RequiredColumns {
     return knex.transaction(async tx => {
       const errorMessage = `Expected for funding row to exists with channelId ${channelId}, assetHolder ${assetHolder}`;
       const existing = await Funding.query(tx)
-        .where({channelId, assetHolder})
+        .where({ channelId, assetHolder })
         .first()
         .throwIfNotFound({
           message: errorMessage,
-          data: {channelId, assetHolder, toAddress, amount},
+          data: { channelId, assetHolder, toAddress, amount },
         });
 
-      const transferredOut = existing.transferredOut.concat({toAddress, amount});
+      const transferredOut = existing.transferredOut.concat({ toAddress, amount });
       return await Funding.query(tx)
-        .patch({transferredOut})
-        .where({channelId, assetHolder})
+        .patch({ transferredOut })
+        .where({ channelId, assetHolder })
         .returning('*')
         .first();
     });

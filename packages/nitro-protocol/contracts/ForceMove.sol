@@ -63,21 +63,23 @@ contract ForceMove is IForceMove {
             // This should revert.
             _requireChannelNotFinalized(channelId);
         }
-        bytes32 supportedStateHash = _requireStateSupportedBy(
-            largestTurnNum,
-            variableParts,
-            isFinalCount,
-            channelId,
-            fixedPart,
-            sigs,
-            whoSignedWhat
-        );
+        bytes32 supportedStateHash =
+            _requireStateSupportedBy(
+                largestTurnNum,
+                variableParts,
+                isFinalCount,
+                channelId,
+                fixedPart,
+                sigs,
+                whoSignedWhat
+            );
 
-        address challenger = _requireChallengerIsParticipant(
-            supportedStateHash,
-            fixedPart.participants,
-            challengerSig
-        );
+        address challenger =
+            _requireChallengerIsParticipant(
+                supportedStateHash,
+                fixedPart.participants,
+                challengerSig
+            );
 
         // effects
 
@@ -127,23 +129,25 @@ contract ForceMove is IForceMove {
 
         bytes32 challengeOutcomeHash = _hashOutcome(variablePartAB[0].outcome);
         bytes32 responseOutcomeHash = _hashOutcome(variablePartAB[1].outcome);
-        bytes32 challengeStateHash = _hashState(
-            turnNumRecord,
-            isFinalAB[0],
-            channelId,
-            fixedPart,
-            variablePartAB[0].appData,
-            challengeOutcomeHash
-        );
+        bytes32 challengeStateHash =
+            _hashState(
+                turnNumRecord,
+                isFinalAB[0],
+                channelId,
+                fixedPart,
+                variablePartAB[0].appData,
+                challengeOutcomeHash
+            );
 
-        bytes32 responseStateHash = _hashState(
-            turnNumRecord + 1,
-            isFinalAB[1],
-            channelId,
-            fixedPart,
-            variablePartAB[1].appData,
-            responseOutcomeHash
-        );
+        bytes32 responseStateHash =
+            _hashState(
+                turnNumRecord + 1,
+                isFinalAB[1],
+                channelId,
+                fixedPart,
+                variablePartAB[1].appData,
+                responseOutcomeHash
+            );
 
         // checks
 
@@ -420,13 +424,14 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
     ) internal pure returns (bytes32) {
-        bytes32[] memory stateHashes = _requireValidTransitionChain(
-            largestTurnNum,
-            variableParts,
-            isFinalCount,
-            channelId,
-            fixedPart
-        );
+        bytes32[] memory stateHashes =
+            _requireValidTransitionChain(
+                largestTurnNum,
+                variableParts,
+                isFinalCount,
+                channelId,
+                fixedPart
+            );
 
         require(
             _validSignatures(

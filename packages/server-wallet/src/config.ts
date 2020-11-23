@@ -2,8 +2,8 @@
  * This should be the only file that reads from the environment.
  */
 
-import {Config} from 'knex';
-import {knexSnakeCaseMappers} from 'objection';
+import { Config } from 'knex';
+import { knexSnakeCaseMappers } from 'objection';
 import * as pino from 'pino';
 
 export interface ServerWalletConfig {
@@ -28,7 +28,7 @@ export interface ServerWalletConfig {
   workerThreadAmount: number;
   logLevel: pino.Level;
   logDestination?: string; // console or undefined will log to console
-  postgresPoolSize?: {max: number; min: number};
+  postgresPoolSize?: { max: number; min: number };
 }
 
 // TODO: Nest configuration options inside keys like db, server, wallet, debug, etc
@@ -63,7 +63,7 @@ export const defaultConfig: ServerWalletConfig = {
 export const defaultTestConfig = {
   ...defaultConfig,
   skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
-  postgresPoolSize: {max: 1, min: 0},
+  postgresPoolSize: { max: 1, min: 0 },
 };
 
 export function extractDBConfigFromServerWalletConfig(
