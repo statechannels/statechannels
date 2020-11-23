@@ -23,7 +23,7 @@ import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {LedgerRequest} from '../../../models/ledger-request';
@@ -32,7 +32,7 @@ import {PushMessageError} from '../../../errors/wallet-error';
 
 jest.setTimeout(20_000);
 
-const wallet = Wallet.create(defaultTestConfig);
+const wallet = Wallet.create(overwriteConfigWithEnvVars(defaultTestConfig));
 
 beforeAll(async () => {
   await wallet.dbAdmin().migrateDB();

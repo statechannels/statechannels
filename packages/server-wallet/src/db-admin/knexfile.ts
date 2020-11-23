@@ -3,8 +3,9 @@ import * as path from 'path';
 import {Config} from 'knex';
 
 import {
+  defaultTestConfig,
   extractDBConfigFromServerWalletConfig,
-  getConfigFromEnvVars,
+  overwriteConfigWithEnvVars,
   ServerWalletConfig,
 } from '../config';
 
@@ -49,5 +50,5 @@ export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> 
 }
 
 export const {client, connection, debug, migrations, seeds, pool} = createKnexConfig(
-  getConfigFromEnvVars() // respect env vars so the migration command can make use of them
+  overwriteConfigWithEnvVars(defaultTestConfig)
 );

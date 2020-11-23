@@ -4,12 +4,7 @@ import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
 import {Level} from 'pino';
 
-import {
-  defaultDatabaseConfiguration,
-  defaultConfig,
-  defaultTestConfig,
-  DEFAULT_DB_NAME,
-} from './defaults';
+import {defaultDatabaseConfiguration, defaultTestConfig, DEFAULT_DB_NAME} from './defaults';
 import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
 
 function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
@@ -20,7 +15,8 @@ function readInt(envValue: string | undefined, defaultValue?: number): number {
   if (!envValue) return defaultValue || 0;
   return Number.parseInt(envValue);
 }
-export function getConfigFromEnvVars(): ServerWalletConfig {
+
+export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWalletConfig {
   return {
     databaseConfiguration: {
       connection: process.env.SERVER_URL || {
@@ -30,19 +26,18 @@ export function getConfigFromEnvVars(): ServerWalletConfig {
         user: process.env.SERVER_DB_USER,
         password: process.env.SERVER_DB_PASSWORD,
       },
-      debug: readBoolean(process.env.DEBUG_KNEX, defaultConfig.databaseConfiguration.debug),
+      debug: readBoolean(process.env.DEBUG_KNEX, config.databaseConfiguration.debug),
     },
     metricConfiguration: {
       timingMetrics: readBoolean(
         process.env.TIMING_METRICS,
-        defaultConfig.metricConfiguration.timingMetrics
+        config.metricConfiguration.timingMetrics
       ),
       metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
     },
 
-    stateChannelPrivateKey:
-      process.env.STATE_CHANNEL_PRIVATE_KEY || defaultConfig.stateChannelPrivateKey,
-    ethereumPrivateKey: process.env.ETHEREUM_PRIVATE_KEY || defaultConfig.ethereumPrivateKey,
+    stateChannelPrivateKey: process.env.STATE_CHANNEL_PRIVATE_KEY || config.stateChannelPrivateKey,
+    ethereumPrivateKey: process.env.ETHEREUM_PRIVATE_KEY || config.ethereumPrivateKey,
     networkConfiguration: {
       rpcEndpoint: process.env.RPC_ENDPOINT,
       chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x00',
@@ -53,14 +48,10 @@ export function getConfigFromEnvVars(): ServerWalletConfig {
 
     skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'false').toLowerCase() === 'true',
 
-    workerThreadAmount: readInt(
-      process.env.AMOUNT_OF_WORKER_THREADS,
-      defaultConfig.workerThreadAmount
-    ),
+    workerThreadAmount: readInt(process.env.AMOUNT_OF_WORKER_THREADS, config.workerThreadAmount),
     loggingConfiguration: {
-      logLevel: (process.env.LOG_LEVEL as Level) || defaultConfig.loggingConfiguration.logLevel,
-      logDestination:
-        process.env.LOG_DESTINATION || defaultConfig.loggingConfiguration.logDestination,
+      logLevel: (process.env.LOG_LEVEL as Level) || config.loggingConfiguration.logLevel,
+      logDestination: process.env.LOG_DESTINATION || config.loggingConfiguration.logDestination,
     },
   };
 }
