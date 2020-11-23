@@ -135,6 +135,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, preFundA.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 0,
+    fundingStatus: 'Uncategorized',
   });
 
   const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, preFundA.outbox));
@@ -142,12 +143,14 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
     status: 'proposed',
     turnNum: 0,
+    fundingStatus: 'Uncategorized',
   });
 
   const prefundB = await b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [prefundB.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 1,
+    fundingStatus: 'Uncategorized',
   });
 
   const resultA0 = await a.pushMessage(getPayloadFor(participantA.participantId, prefundB.outbox));
@@ -155,6 +158,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
     status: 'opening',
     turnNum: 1,
+    fundingStatus: 'ReadyToFund',
   });
 
   const postFundA = await postFundAPromise;
@@ -164,12 +168,14 @@ it('Create a directly funded channel between two wallets ', async () => {
     channelId,
     status: 'opening',
     turnNum: 2,
+    fundingStatus: 'Funded',
   });
 
   expect(postFundB.channelResult).toMatchObject({
     channelId,
     status: 'opening',
     turnNum: 1,
+    fundingStatus: 'Funded',
   });
 
   await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
@@ -178,12 +184,16 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
+    fundingStatus: 'Funded',
   });
 
   const resultB1 = await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
   expect(getChannelResultFor(channelId, resultB1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
+    // TODO: the fundingStatus is incorrect as the funding table is not joined with channels table
+    //  when processing the pushMessage above
+    // fundingStatus: 'Funded',
   });
 
   const closeA = await a.closeChannel({channelId});
@@ -212,10 +222,10 @@ it('Create a directly funded channel between two wallets ', async () => {
   // then the updated holdings would have been processed by the wallet.
   await mineBlocks(3);
   await new Promise(r => setTimeout(r, 500));
-  expect(getChannelResultFor(channelId, (await a.getChannels()).channelResults)).toMatchObject({
+  expect((await a.getState({channelId})).channelResult).toMatchObject({
     status: 'closed',
     turnNum: 4,
-    //fundingStatus: 'Funded',
+    fundingStatus: 'Funded',
   });
 
   await mineBlocks(2);
