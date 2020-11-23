@@ -14,6 +14,7 @@ import { CreateChannelParams } from '@statechannels/client-api-schema';
 import { Destination } from '@statechannels/wallet-core';
 import { ethers } from 'ethers';
 import EventEmitter from 'eventemitter3';
+import { FundingStatus } from '@statechannels/client-api-schema';
 import { FundingStrategy } from '@statechannels/client-api-schema';
 import { GetStateParams } from '@statechannels/client-api-schema';
 import { JoinChannelParams } from '@statechannels/client-api-schema';
