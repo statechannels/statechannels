@@ -31,7 +31,7 @@
     "hardhat-deploy-ethers": "^0.3.0-beta.5",
     "jest": "26.4.2",
     "lint-staged": "10.0.4",
-    "prettier": "1.19.1",
+    "prettier": "2.2.0",
     "prettier-plugin-solidity": "1.0.0-beta.1",
     "solidoc": "https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd",
     "ts-jest": "26.4.1",

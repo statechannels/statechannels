@@ -11,7 +11,7 @@
     "lerna": "3.16.4",
     "npm-normalize-package-bin": "1.0.1",
     "postinstall-postinstall": "2.0.0",
-    "prettier": "1.19.1",
+    "prettier": "2.2.0",
     "typesync": "0.7.0"
   },
   "engines": {
