@@ -3,22 +3,11 @@ import {
   Allocations as AppAllocations,
   AllocationItem as AppAllocationItem,
   DomainBudget as AppDomainBudget,
-  TokenBudget,
-  ChannelResult,
-  ChannelStatus
+  TokenBudget
 } from '@statechannels/client-api-schema';
 import {constants} from 'ethers';
 
-import {
-  Allocation,
-  AllocationItem,
-  SimpleAllocation,
-  DomainBudget,
-  AssetBudget,
-  isAllocation,
-  SignedState,
-  ChannelConstants
-} from '../../types';
+import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
 import {checkThat, exists, formatAmount} from '../../utils';
 import {BN} from '../../bignumber';
 
@@ -64,47 +53,5 @@ function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationI
   return {
     destination: allocationItem.destination,
     amount: formatAmount(allocationItem.amount)
-  };
-}
-
-type ChannelStoreEntry = {
-  supported: SignedState;
-  latest: SignedState;
-  channelConstants: ChannelConstants;
-  channelId: string;
-  hasConclusionProof: boolean;
-  isSupported: boolean;
-};
-
-export function serializeChannelEntry(channelEntry: ChannelStoreEntry): ChannelResult {
-  const {
-    latest: {appData, turnNum, outcome}, // TODO: This should be supported
-    channelConstants: {participants, appDefinition},
-    channelId
-  } = channelEntry;
-
-  if (!isAllocation(outcome)) {
-    throw new Error('Can only send allocations to the app');
-  }
-
-  let status: ChannelStatus = 'running';
-  if (turnNum == 0) {
-    status = 'proposed';
-  } else if (turnNum < 2 * participants.length - 1) {
-    status = 'opening';
-  } else if (channelEntry.hasConclusionProof) {
-    status = 'closed';
-  } else if (channelEntry.isSupported && channelEntry.supported.isFinal) {
-    status = 'closing';
-  }
-
-  return {
-    participants,
-    allocations: serializeAllocation(outcome),
-    appDefinition,
-    appData,
-    status,
-    turnNum,
-    channelId
   };
 }
