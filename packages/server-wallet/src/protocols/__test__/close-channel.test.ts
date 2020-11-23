@@ -46,7 +46,7 @@ test('when I have signed a final state, unfunded', () => {
       supported: closingState,
       latest: closingState,
       latestSignedByMe: closingState,
-      directFundingStatus: 'NotDirectlyFunded',
+      directFundingStatus: 'Uncategorized',
     },
   });
   ps.app.fundingStrategy = 'Fake';
