@@ -158,7 +158,6 @@ contract AssetHolder is IAssetHolder {
         uint256 balance = holdings[fromChannelId];
         uint256 affordsForDestination;
         uint256 residualAllocationAmount;
-        uint256 _amount;
         uint256 i;
         bool deleteHash = false;
 
@@ -167,7 +166,7 @@ contract AssetHolder is IAssetHolder {
             if (balance == 0) {
                 revert('_transfer | fromChannel affords 0 for destination');
             }
-            _amount = allocation[i].amount;
+            uint256 _amount = allocation[i].amount;
             if (allocation[i].destination == destination) {
                 if (balance < _amount) {
                     affordsForDestination = balance;
@@ -353,7 +352,6 @@ contract AssetHolder is IAssetHolder {
         bytes memory allocationBytes,
         bytes32 destination
     ) internal {
-
         Outcome.AllocationItem[] memory allocation = abi.decode(
         allocationBytes,
         (Outcome.AllocationItem[])
@@ -361,43 +359,45 @@ contract AssetHolder is IAssetHolder {
         uint256 balance = holdings[guarantorChannelId];
         uint256 affordsForDestination;
         uint256 residualAllocationAmount;
-        uint256 _amount;
-        uint256 j; // indexes guarantee 
         uint256 i; // indexes target allocations
 
-        for (j = 0; j < guarantee.destinations.length; j++) {
-            // for each _destination in the guarantee
-            bytes32 _destination = guarantee.destinations[j];
-            // if destination matches the one that is passed in
-            // loop over allocations in the target channel and decrease balance until we hit the specified destination
-            if (_destination == destination) {
-                for (i = 0; i < allocation.length; i++) {
-                    if (balance == 0) {
-                        revert('_claim | guarantorChannel affords 0 for destination');
-                    }
-                    _amount = allocation[i].amount;
-                    if (allocation[i].destination == destination) {
+        for (uint256 j = 0; j < guarantee.destinations.length; j++) {
+            if (balance == 0) {
+                revert('_claim | guarantorChannel affords 0 for destination');
+            }
+            // for each _destination in the guarantee,
+            // find the first corresponding allocationItem in the target allocation
+            bytes32 guaranteeDestination = guarantee.destinations[j];
+            for (i = 0; i < allocation.length; i++) {
+                if (allocation[i].destination == guaranteeDestination) {
+                    // decrease balance
+                    uint256 _amount = allocation[i].amount;
                         if (balance < _amount) {
-                            affordsForDestination = balance;
-                            residualAllocationAmount = _amount - balance;
-                            balance = 0;
+                            if (guaranteeDestination == destination) {
+                                affordsForDestination = balance;
+                                residualAllocationAmount = _amount - balance;
+                                break;
+                                // i will point to index that should be modified or removed in the target outcome
+                            }
+                            balance = 0; // this isn't used after we break
                         } else {
-                            affordsForDestination = _amount;
-                            residualAllocationAmount = 0;
-                            balance = balance.sub(_amount);
+                            if (guaranteeDestination == destination) {
+                                affordsForDestination = _amount;
+                                residualAllocationAmount = 0;
+                                break;
+                                // i will point to index that should be modified or removed in the target outcome
+                            }
+                            balance = balance.sub(_amount); // this isn't used after we break
                         }
-                    break; // means that i holds the index of the destination that may need to be altered or removed for the target channel
-                    }
-                    if (balance < _amount) {
-                        balance = 0;
-                    } else {
-                        balance = balance.sub(_amount);
-                    }
+                    
                 }
-                break; // means that j holds the index of the destination that may need to be removed for the guarantor channel
+            }
+            if (affordsForDestination > 0) {
+                // stop lopping as soon as we found the destination in both outcomes such that we can pay something out
+                break;
             }
         }
-
+        
         require(affordsForDestination > 0, '_claim | guarantor affords 0 for destination');
         
         // effects
@@ -430,6 +430,7 @@ contract AssetHolder is IAssetHolder {
             if (allocation.length == 1) {
                 // special case there are no allocations left in the target's outcome
                 delete assetOutcomeHashes[guarantee.targetChannelId];
+                delete assetOutcomeHashes[guarantorChannelId];
             } else {
                 Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
                     allocation.length - 1
@@ -448,23 +449,6 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 );
-            }
-
-            if (guarantee.destinations.length == 1) {
-                // special case there are no destinations left in the guarantee
-                delete assetOutcomeHashes[guarantorChannelId];
-            } else {
-                // we want to splice a shorter guarantee
-                bytes32[] memory newDestinations = new bytes32[](
-                    guarantee.destinations.length - 1
-                );
-                for (uint256 k = 0; k < j; k++) {
-                    newDestinations[k] = guarantee.destinations[k];
-                }
-                for (uint256 k = j + 1; k < allocation.length; k++) {
-                    newDestinations[k - 1] = guarantee.destinations[k];
-                }
-                assetOutcomeHashes[guarantorChannelId] = keccak256(abi.encode(Outcome.Guarantee(guarantee.targetChannelId, newDestinations)));
             }
         }
 
