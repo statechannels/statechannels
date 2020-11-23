@@ -469,6 +469,44 @@ export class Store {
     return LedgerRequest.getRequest(channelId, type, tx || this.knex);
   }
 
+  async getChannelIdsPendingLedgerFundingFrom(
+    ledgerChannelIds: Bytes32[],
+    tx?: Transaction
+  ): Promise<Bytes32[]> {
+    const query = await LedgerRequest.query(tx || this.knex)
+      .whereIn('ledgerChannelId', ledgerChannelIds)
+      .where({status: 'pending'})
+      .distinct('channelToBeFunded')
+      .select('channelToBeFunded');
+
+    return _.map(query, 'channelToBeFunded');
+  }
+
+  async getLedgerChannelIdsFundingChannels(
+    channelToBeFunded: Bytes32[],
+    tx?: Transaction
+  ): Promise<Bytes32[]> {
+    const query = await LedgerRequest.query(tx || this.knex)
+      .whereIn('channelToBeFunded', channelToBeFunded)
+      .where({status: 'pending'})
+      .distinct('ledgerChannelId')
+      .select('ledgerChannelId');
+
+    return _.map(query, 'ledgerChannelId');
+  }
+
+  async filterChannelIdsByIsLedger(
+    maybeLedgerChannelIds: Bytes32[],
+    tx?: Transaction
+  ): Promise<Bytes32[]> {
+    const query = await Channel.query(tx || this.knex)
+      .whereIn('channelId', maybeLedgerChannelIds)
+      .whereNotNull('assetHolderAddress')
+      .select('channelId');
+
+    return _.map(query, 'channelId');
+  }
+
   async getAllPendingLedgerRequests(tx?: Transaction): Promise<LedgerRequestType[]> {
     return LedgerRequest.getAllPendingRequests(tx || this.knex);
   }
