@@ -164,6 +164,9 @@
         "channelId": {
           "$ref": "#/definitions/ChannelId"
         },
+        "fundingStatus": {
+          "$ref": "#/definitions/FundingStatus"
+        },
         "participants": {
           "items": {
             "$ref": "#/definitions/Participant"
@@ -184,7 +187,8 @@
         "appDefinition",
         "channelId",
         "status",
-        "turnNum"
+        "turnNum",
+        "fundingStatus"
       ],
       "type": "object"
     },
@@ -338,6 +342,15 @@
     "EnableEthereumResponse": {
       "$ref": "#/definitions/JsonRpcResponse%3Cstructure-152724555-354-440-152724555-337-441-152724555-300-442-152724555-0-574%3E"
     },
+    "FundingStatus": {
+      "enum": [
+        "Uncategorized",
+        "ReadyToFund",
+        "Funded",
+        "Defunded"
+      ],
+      "type": "string"
+    },
     "FundingStrategy": {
       "enum": [
         "Direct",
@@ -370,7 +383,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-1978982097-247-273-1978982097-217-274-1978982097-184-275-1978982097-0-344%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-2793-3089-src_data-types.ts-0-3507%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-2930-3207-src_data-types.ts-0-3626%5B%5D%3E"
     },
     "GetStateError": {
       "$ref": "#/definitions/JsonRpcError%3C1200%2C%22Could%20not%20find%20channel%22%3E"
@@ -1662,7 +1675,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src_data-types.ts-2793-3089-src_data-types.ts-0-3507[]>": {
+    "JsonRpcResponse<def-interface-src_data-types.ts-2930-3207-src_data-types.ts-0-3626[]>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {

@@ -15,7 +15,7 @@ import {
   checkThat,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
-import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
+import {ChannelResult, FundingStatus, FundingStrategy} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {Bytes32, Uint48} from '../type-aliases';
@@ -63,8 +63,6 @@ export interface RequiredColumns {
 export type ComputedColumns = {
   readonly channelId: Bytes32;
 };
-
-export type DirectFundingStatus = 'Uncategorized' | 'ReadyToFund' | 'Funded' | 'Defunded';
 
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
@@ -184,7 +182,7 @@ export class Channel extends Model implements RequiredColumns {
     fundingFn: (address: Address) => ChannelStateFunding,
     myParticipant: Participant,
     fundingStrategy: FundingStrategy
-  ): DirectFundingStatus {
+  ): FundingStatus {
     if (fundingStrategy !== 'Direct') {
       return 'Uncategorized';
     }

@@ -8,10 +8,14 @@ import {
   Address,
   Destination,
 } from '@statechannels/wallet-core';
-import {ChannelResult, ChannelStatus, FundingStrategy} from '@statechannels/client-api-schema';
+import {
+  ChannelResult,
+  ChannelStatus,
+  FundingStatus,
+  FundingStrategy,
+} from '@statechannels/client-api-schema';
 
 import {Bytes32, Uint256} from '../type-aliases';
-import {DirectFundingStatus} from '../models/channel';
 
 import {ProtocolAction} from './actions';
 
@@ -45,7 +49,7 @@ export type ChannelState = {
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
-  directFundingStatus: DirectFundingStatus;
+  directFundingStatus: FundingStatus;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
@@ -74,7 +78,14 @@ export const stage = (state: State | undefined): Stage =>
     : 'Running';
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
-  const {channelId, supported, latest, latestSignedByMe, support} = channelState;
+  const {
+    channelId,
+    supported,
+    latest,
+    latestSignedByMe,
+    support,
+    directFundingStatus,
+  } = channelState;
 
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
 
@@ -94,7 +105,16 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
 
   const allocations = serializeAllocation(checkThat(outcome, isAllocation));
 
-  return {appData, appDefinition, channelId, participants, turnNum, allocations, status};
+  return {
+    appData,
+    appDefinition,
+    channelId,
+    participants,
+    turnNum,
+    allocations,
+    status,
+    fundingStatus: directFundingStatus,
+  };
 };
 
 /*

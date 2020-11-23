@@ -114,6 +114,8 @@ export type ChannelStatus =
   | 'closing' // You cannot use the channel anymore, but your funds are still locked up.
   | 'closed'; // Your funds have been released from the channel.
 
+export type FundingStatus = 'Uncategorized' | 'ReadyToFund' | 'Funded' | 'Defunded';
+
 export interface ChannelResult {
   participants: Participant[];
   allocations: Allocation[];
@@ -123,7 +125,9 @@ export interface ChannelResult {
   status: ChannelStatus;
   turnNum: Uint48;
   challengeExpirationTime?: number;
+  fundingStatus: FundingStatus;
 }
+
 /**
  * Format of message sent from the wallet to the app
  *
