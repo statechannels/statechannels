@@ -17,7 +17,6 @@ contract AssetHolder is IAssetHolder {
 
     mapping(bytes32 => bytes32) public assetOutcomeHashes;
 
-
     // **************
     // Public methods
     // **************
@@ -29,7 +28,11 @@ contract AssetHolder is IAssetHolder {
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      * @param destination External destination or channel to transfer funds *to*.
      */
-    function transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) public {
+    function transfer(
+        bytes32 fromChannelId,
+        bytes memory allocationBytes,
+        bytes32 destination
+    ) public {
         // checks
         _requireCorrectAllocationHash(fromChannelId, allocationBytes);
         // effects and interactions
@@ -66,11 +69,9 @@ contract AssetHolder is IAssetHolder {
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
         _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
         // effects and interactions
-        _claimAll(guarantorChannelId,guarantee, allocationBytes);
+        _claimAll(guarantorChannelId, guarantee, allocationBytes);
     }
 
-
-    
     // **************
     // Permissioned methods
     // **************
@@ -80,7 +81,7 @@ contract AssetHolder is IAssetHolder {
         _;
     }
 
-        /**
+    /**
      * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
      * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
      * @param channelId Unique identifier for a state channel.
@@ -96,7 +97,6 @@ contract AssetHolder is IAssetHolder {
         // effects and interactions
         _transferAll(channelId, allocationBytes);
     }
-
 
     /**
      * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
@@ -116,7 +116,7 @@ contract AssetHolder is IAssetHolder {
     // **************
     // Internal methods
     // **************
-    
+
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
@@ -124,7 +124,11 @@ contract AssetHolder is IAssetHolder {
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      * @param destination External destination or channel to transfer funds *to*.
      */
-    function _transfer(bytes32 fromChannelId, bytes memory allocationBytes, bytes32 destination) internal {
+    function _transfer(
+        bytes32 fromChannelId,
+        bytes memory allocationBytes,
+        bytes32 destination
+    ) internal {
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
             (Outcome.AllocationItem[])
@@ -143,7 +147,7 @@ contract AssetHolder is IAssetHolder {
             }
             _amount = allocation[i].amount;
             if (allocation[i].destination == destination) {
-                 if (balance < _amount) {
+                if (balance < _amount) {
                     affordsForDestination = balance;
                     residualAllocationAmount = _amount - balance;
                     balance = 0;
@@ -152,7 +156,7 @@ contract AssetHolder is IAssetHolder {
                     residualAllocationAmount = 0;
                     balance = balance.sub(_amount);
                 }
-            break; // means that i holds the index of the destination that may need to be altered or removed
+                break; // means that i holds the index of the destination that may need to be altered or removed
             }
             if (balance < _amount) {
                 balance = 0;
@@ -162,16 +166,16 @@ contract AssetHolder is IAssetHolder {
         }
 
         require(affordsForDestination > 0, '_transfer fromChannel allocates 0 to destination');
-        
+
         // effects
         holdings[fromChannelId] -= affordsForDestination;
 
         // construct new outcome
 
-        bytes memory encodedAllocation; 
+        bytes memory encodedAllocation;
 
         if (residualAllocationAmount > 0) {
-            // new allocation identical save for a single entry 
+            // new allocation identical save for a single entry
             Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
                 allocation.length
             );
@@ -213,19 +217,16 @@ contract AssetHolder is IAssetHolder {
                     )
                 )
             );
-        } 
-
+        }
 
         // storage updated BEFORE external contracts called (prevent reentrancy attacks)
         if (_isExternalDestination(destination)) {
-            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);    
+            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
         } else {
             holdings[destination] += affordsForDestination;
         }
         // Event emitted regardless of success of external calls
         emit AssetTransferred(fromChannelId, destination, affordsForDestination);
-
-        
     }
 
     /**
@@ -298,7 +299,6 @@ contract AssetHolder is IAssetHolder {
             delete assetOutcomeHashes[channelId];
         }
 
-
         // holdings updated BEFORE asset transferred (prevent reentrancy attacks)
         uint256 payoutAmount;
         for (uint256 m = 0; m < numPayouts; m++) {
@@ -316,7 +316,6 @@ contract AssetHolder is IAssetHolder {
             emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
         }
     }
-
 
     /**
      * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Does not check allocationBytes against on chain storage.
@@ -385,10 +384,10 @@ contract AssetHolder is IAssetHolder {
                     balance = balance.sub(_amount);
                     allocation[j].amount = 0; // subtract _amount;
                     newAllocationLength = newAllocationLength.sub(1);
-                    payouts[j]+= _amount;
+                    payouts[j] += _amount;
                 } else {
                     allocation[j].amount = _amount.sub(balance);
-                    payouts[j]+= balance;
+                    payouts[j] += balance;
                     balance = 0;
                 }
             }
@@ -396,7 +395,6 @@ contract AssetHolder is IAssetHolder {
 
         // EFFECTS
         holdings[guarantorChannelId] = balance;
-       
 
         // at this point have payouts array of uint256s, each corresponding to original destinations
         // and allocations has some zero amounts which we want to prune
@@ -439,15 +437,10 @@ contract AssetHolder is IAssetHolder {
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
-            emit AssetTransferred(
-                        guarantorChannelId,
-                        allocation[j].destination,
-                        payouts[j]
-                    );
+                emit AssetTransferred(guarantorChannelId, allocation[j].destination, payouts[j]);
             }
         }
     }
-   
 
     /**
      * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
@@ -502,7 +495,10 @@ contract AssetHolder is IAssetHolder {
     // Requirers
     // **************
 
-    function _requireCorrectAllocationHash(bytes32 channelId, bytes memory allocationBytes) internal view {
+    function _requireCorrectAllocationHash(bytes32 channelId, bytes memory allocationBytes)
+        internal
+        view
+    {
         require(
             assetOutcomeHashes[channelId] ==
                 keccak256(
@@ -517,7 +513,10 @@ contract AssetHolder is IAssetHolder {
         );
     }
 
-    function _requireCorrectGuaranteeHash(bytes32 guarantorChannelId, bytes memory guaranteeBytes) internal view {
+    function _requireCorrectGuaranteeHash(bytes32 guarantorChannelId, bytes memory guaranteeBytes)
+        internal
+        view
+    {
         require(
             assetOutcomeHashes[guarantorChannelId] ==
                 keccak256(
