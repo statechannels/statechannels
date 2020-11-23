@@ -179,6 +179,58 @@ export class Channel extends Model implements RequiredColumns {
     });
   }
 
+  public static directFundingStatus(
+    supported: SignedStateVarsWithHash | undefined,
+    fundingFn: (address: Address) => ChannelStateFunding,
+    myParticipant: Participant
+  ): DirectFundingStatus {
+    const outcome = supported?.outcome;
+    if (!outcome) {
+      return 'Unfunded';
+    }
+
+    const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
+
+    // Collapse all allocation items with my destination into one
+    const myAllocation = allocationItems
+      .filter(ai => ai.destination === myParticipant.destination)
+      .reduce(
+        (soFar, currentAi) => ({
+          ...soFar,
+          amount: BN.add(soFar.amount, currentAi.amount),
+        }),
+        {
+          destination: myParticipant.destination,
+          amount: BN.from(0),
+        }
+      );
+
+    const funding = fundingFn(assetHolderAddress);
+
+    const amountTransferredToMe = funding.transferredOut
+      .filter(tf => tf.toAddress === myAllocation.destination)
+      .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+    if (BN.gte(amountTransferredToMe, myAllocation.amount)) {
+      return 'Defunded';
+    }
+
+    const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fullFunding)) {
+      return 'Funded';
+    }
+
+    const allocationsBeforeMe = _.takeWhile(
+      allocationItems,
+      a => a.destination !== myAllocation.destination
+    );
+    const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
+    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
+      return 'ReadyToFund';
+    }
+
+    return 'Unfunded';
+  }
+
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
@@ -232,10 +284,9 @@ export class Channel extends Model implements RequiredColumns {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
-    const directFundingStatus = this._directFundingStatus(
+    const directFundingStatus = Channel.directFundingStatus(
       supported,
       funding,
-      myIndex,
       participants[myIndex]
     );
     return {
@@ -358,59 +409,6 @@ export class Channel extends Model implements RequiredColumns {
 
   private nParticipants(): number {
     return this.participants.length;
-  }
-
-  private _directFundingStatus(
-    supported: SignedStateVarsWithHash | undefined,
-    fundingFn: (address: Address) => ChannelStateFunding,
-    myIndex: number,
-    myParticipant: Participant
-  ): DirectFundingStatus {
-    const outcome = supported?.outcome;
-    if (!outcome) {
-      return 'Unfunded';
-    }
-
-    const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
-
-    // Collapse all allocation items with my destination into one
-    const myAllocation = allocationItems
-      .filter(ai => ai.destination === myParticipant.destination)
-      .reduce(
-        (soFar, currentAi) => ({
-          ...soFar,
-          amount: BN.add(soFar.amount, currentAi.amount),
-        }),
-        {
-          destination: myParticipant.destination,
-          amount: BN.from(0),
-        }
-      );
-
-    const funding = fundingFn(assetHolderAddress);
-
-    const amountTransferredToMe = funding.transferredOut
-      .filter(tf => tf.toAddress === myAllocation.destination)
-      .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
-    if (BN.gte(amountTransferredToMe, myAllocation.amount)) {
-      return 'Defunded';
-    }
-
-    const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fullFunding)) {
-      return 'Funded';
-    }
-
-    const allocationsBeforeMe = _.takeWhile(
-      allocationItems,
-      a => a.destination !== myAllocation.destination
-    );
-    const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
-    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
-      return 'ReadyToFund';
-    }
-
-    return 'Unfunded';
   }
 
   private get _support(): Array<SignedStateWithHash> {
