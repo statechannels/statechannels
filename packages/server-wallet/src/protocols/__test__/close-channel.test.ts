@@ -42,7 +42,12 @@ test('when I have signed a final state, direct funding', () => {
 
 test('when I have signed a final state, unfunded', () => {
   const ps = applicationProtocolState({
-    app: {supported: closingState, latest: closingState, latestSignedByMe: closingState},
+    app: {
+      supported: closingState,
+      latest: closingState,
+      latestSignedByMe: closingState,
+      directFundingStatus: 'NotDirectlyFunded',
+    },
   });
   ps.app.fundingStrategy = 'Fake';
   expect(protocol(ps)).toMatchObject({

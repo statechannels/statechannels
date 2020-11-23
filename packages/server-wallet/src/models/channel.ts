@@ -64,7 +64,12 @@ export type ComputedColumns = {
   readonly channelId: Bytes32;
 };
 
-export type DirectFundingStatus = 'Funded' | 'Unfunded' | 'Defunded' | 'ReadyToFund';
+export type DirectFundingStatus =
+  | 'NotDirectlyFunded'
+  | 'Unfunded'
+  | 'ReadyToFund'
+  | 'Funded'
+  | 'Defunded';
 
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
@@ -182,8 +187,13 @@ export class Channel extends Model implements RequiredColumns {
   public static directFundingStatus(
     supported: SignedStateVarsWithHash | undefined,
     fundingFn: (address: Address) => ChannelStateFunding,
-    myParticipant: Participant
+    myParticipant: Participant,
+    fundingStrategy: FundingStrategy
   ): DirectFundingStatus {
+    if (fundingStrategy !== 'Direct') {
+      return 'NotDirectlyFunded';
+    }
+
     const outcome = supported?.outcome;
     if (!outcome) {
       return 'Unfunded';
@@ -287,7 +297,8 @@ export class Channel extends Model implements RequiredColumns {
     const directFundingStatus = Channel.directFundingStatus(
       supported,
       funding,
-      participants[myIndex]
+      participants[myIndex],
+      fundingStrategy
     );
     return {
       myIndex: myIndex as 0 | 1,
