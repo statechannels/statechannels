@@ -75,27 +75,15 @@ export type MultipleChannelOutput = {
 export type Message = SingleChannelOutput | MultipleChannelOutput;
 
 type ChannelUpdatedEventName = 'channelUpdated';
-type ObjectiveSucceededEventName = 'objectiveSucceeded';
 type ChannelUpdatedEvent = {
   type: ChannelUpdatedEventName;
   value: SingleChannelOutput;
 };
-export type ObjectiveSucceededValue = {
-  channelId: string;
-  objectiveType: 'OpenChannel' | 'CloseChannel';
+
+export type WalletEvent = ChannelUpdatedEvent;
+type EventEmitterType = {
+  [key in ChannelUpdatedEvent['type']]: ChannelUpdatedEvent['value'];
 };
-type ObjectiveSucceededEvent = {
-  type: ObjectiveSucceededEventName;
-  value: ObjectiveSucceededValue;
-};
-export type WalletEvent = ChannelUpdatedEvent | ObjectiveSucceededEvent;
-type EventEmitterType =
-  | {
-      [key in ChannelUpdatedEvent['type']]: ChannelUpdatedEvent['value'];
-    }
-  | {
-      [key in ObjectiveSucceededEvent['type']]: ObjectiveSucceededEvent['value'];
-    };
 
 const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
   'channelResult' in message;
@@ -655,7 +643,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       const objective = objectives[0];
 
       await this.objectiveManager.crank(objective.objectiveId, response);
-      response.objectiveSucceededEvents().map(event => this.emit(event.type, event.value));
 
       // remove objective from list
       objectives.shift();

@@ -12,7 +12,7 @@ import {
   overwriteConfigWithDatabaseConnection,
   overwriteConfigWithEnvVars,
 } from '../config';
-import {ObjectiveSucceededValue, SingleChannelOutput, Wallet} from '../wallet';
+import {Wallet, SingleChannelOutput} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
@@ -118,12 +118,12 @@ it('Create a directly funded channel between two wallets ', async () => {
     .pipe(take(2))
     .toPromise();
 
-  const closeCompletedA = fromEvent<ObjectiveSucceededValue>(a as any, 'objectiveSucceeded')
-    .pipe(take(2))
+  const assetTransferredAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
+    .pipe(take(3))
     .toPromise();
 
-  const closeCompletedB = fromEvent<ObjectiveSucceededValue>(b as any, 'objectiveSucceeded')
-    .pipe(take(2))
+  const assetTransferredBPromise = fromEvent<SingleChannelOutput>(b as any, 'channelUpdated')
+    .pipe(take(3))
     .toPromise();
 
   //        A <> B
@@ -209,13 +209,18 @@ it('Create a directly funded channel between two wallets ', async () => {
     turnNum: 4,
   });
 
-  expect(await closeCompletedA).toMatchObject({
-    channelId,
-    objectiveType: 'CloseChannel',
+  const assetTransferredA = await assetTransferredAPromise;
+  const assetTransferredB = await assetTransferredBPromise;
+
+  expect(assetTransferredA.channelResult).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+    fundingStatus: 'Defunded',
   });
-  expect(await closeCompletedB).toMatchObject({
-    channelId,
-    objectiveType: 'CloseChannel',
+  expect(assetTransferredB.channelResult).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+    fundingStatus: 'Defunded',
   });
 
   const aBalanceFinal = await getBalance(aAddress);

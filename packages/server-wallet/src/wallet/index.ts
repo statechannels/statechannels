@@ -1,9 +1,4 @@
-export {
-  WalletEvent,
-  SingleChannelOutput,
-  MultipleChannelOutput,
-  ObjectiveSucceededValue,
-} from './wallet';
+export {WalletEvent, SingleChannelOutput, MultipleChannelOutput} from './wallet';
 
 import {IncomingServerWalletConfig, ServerWalletConfig} from '../config';
 

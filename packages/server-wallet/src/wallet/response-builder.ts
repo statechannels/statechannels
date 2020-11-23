@@ -174,16 +174,6 @@ export class WalletResponse {
     return this.channelResults;
   }
 
-  objectiveSucceededEvents(): WalletEvent[] {
-    return this.succeededObjectives.map(objective => ({
-      type: 'objectiveSucceeded' as const,
-      value: {
-        channelId: objective.data.targetChannelId,
-        objectiveType: objective.type,
-      },
-    }));
-  }
-
   channelUpdatedEvents(): WalletEvent[] {
     return this.channelResults.map(channelResult => ({
       type: 'channelUpdated' as const,
