@@ -1,13 +1,13 @@
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
 import * as pino from 'pino';
-
+import {parse} from 'pg-connection-string';
 /**
  * Database config
  */
 
 export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration &
-  Partial<OptionalDatabaseConfiguration>;
+  Partial<OptionalConnectionConfiguration>;
 
 export type RequiredConnectionConfiguration = {dbName: string} | string;
 export type OptionalConnectionConfiguration =
@@ -29,7 +29,7 @@ export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
 } = {
   pool: undefined,
   debug: false,
-  connection: {host: 'localhost', port: 5432},
+  connection: {host: 'localhost', port: 5432, user: 'postgres'},
 };
 
 /**
@@ -159,14 +159,17 @@ export const configFromEnvVars: ServerWalletConfig = {
 type HasDatabaseConnectionConfigObject = {
   databaseConfiguration: {connection: {host: string; port: number; dbName: string}};
 };
+const DEFAULT_DB_NAME = 'server_wallet_test';
 export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfigObject = {
   ...defaultConfig,
   skipEvmValidation: readBoolean(process.env.SKIP_EVM_VALIDATION, true),
+  workerThreadAmount: 0, // Disable threading for tests
   databaseConfiguration: {
     connection: {
       host: defaultDatabaseConfiguration.connection.host,
       port: defaultDatabaseConfiguration.connection.port,
-      dbName: 'server_wallet_test',
+      dbName: DEFAULT_DB_NAME,
+      user: 'postgres',
     },
   },
 };
@@ -174,9 +177,12 @@ export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfig
 export function extractDBConfigFromServerWalletConfig(
   serverWalletConfig: ServerWalletConfig
 ): Config {
+  const connectionConfig = getDatabaseConnectionConfig(serverWalletConfig);
+
   return {
     client: 'postgres',
-    connection: serverWalletConfig.databaseConfiguration.connection,
+    // TODO: Might make sense to use `database` instead of `dbName` so its consitent with knex
+    connection: {...connectionConfig, database: connectionConfig.dbName},
     ...knexSnakeCaseMappers(),
     pool: serverWalletConfig.databaseConfiguration.pool || {},
   };
@@ -189,17 +195,26 @@ export function createTestConfig(databaseName: string): ServerWalletConfig {
     ...defaultTestConfig,
     databaseConfiguration: {
       ...defaultTestConfig.databaseConfiguration,
-      connection: {host, port, dbName: databaseName},
+      connection: {host, port, dbName: databaseName || DEFAULT_DB_NAME},
     },
   };
 }
-
-export function getDbName(config: ServerWalletConfig): string {
+type DatabaseConnectionConfigObject = Exclude<DatabaseConnectionConfiguration, string>;
+export function getDatabaseConnectionConfig(
+  config: ServerWalletConfig
+): DatabaseConnectionConfigObject {
   if (typeof config.databaseConfiguration.connection === 'string') {
-    // TODO: parse out the db name from the connection string
-    return config.databaseConfiguration.connection;
+    const {connection: defaultConnection} = defaultDatabaseConfiguration;
+    const {port, host, user, database, password} = parse(config.databaseConfiguration.connection);
+    return {
+      port: port ? parseInt(port) : defaultConnection.port,
+      host: host || defaultConnection.host,
+      dbName: database || '',
+      user,
+      password,
+    };
   } else {
     // TODO: Sort out the typing
-    return (config.databaseConfiguration.connection as {dbName: string}).dbName;
+    return config.databaseConfiguration.connection as DatabaseConnectionConfigObject;
   }
 }

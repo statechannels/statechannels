@@ -1,6 +1,6 @@
 import pino from 'pino';
 
-import {getDbName, ServerWalletConfig} from './config';
+import {getDatabaseConnectionConfig, ServerWalletConfig} from './config';
 import {WALLET_VERSION} from './version';
 
 export function createLogger(config: ServerWalletConfig): pino.Logger {
@@ -13,7 +13,7 @@ export function createLogger(config: ServerWalletConfig): pino.Logger {
     ? pino({level: config.loggingConfiguration.logLevel}, destination)
     : pino({level: config.loggingConfiguration.logLevel})
   ).child({
-    dbName: getDbName(config),
+    dbName: getDatabaseConnectionConfig(config).dbName,
     walletVersion: WALLET_VERSION,
   });
 }
