@@ -10,9 +10,13 @@ import {
   outcomesEqual,
   Zero,
   Address,
+  isSimpleAllocation,
+  BN,
+  checkThat,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
+import _ from 'lodash';
 
 import {Bytes32, Uint48} from '../type-aliases';
 import {
@@ -59,6 +63,8 @@ export interface RequiredColumns {
 export type ComputedColumns = {
   readonly channelId: Bytes32;
 };
+
+export type DirectFundingStatus = 'Funded' | 'Unfunded' | 'Defunded' | 'ReadyToFund';
 
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
@@ -345,6 +351,41 @@ export class Channel extends Model implements RequiredColumns {
 
   private nParticipants(): number {
     return this.participants.length;
+  }
+
+  public directFundingStatus(channelState: ChannelState): DirectFundingStatus {
+    const outcome = channelState.supported?.outcome;
+    if (!outcome) {
+      return 'Unfunded';
+    }
+
+    const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
+
+    const myItem = allocationItems[channelState.myIndex];
+    const funding = channelState.funding(assetHolderAddress);
+
+    const amountTransferredToMe = funding.transferredOut
+      .filter(tf => tf.toAddress === myItem.destination)
+      .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+    if (BN.gte(amountTransferredToMe, myItem.amount)) {
+      return 'Defunded';
+    }
+
+    const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+    if (BN.eq(amountTransferredToMe, 0) && BN.gte(fullFunding, funding.amount)) {
+      return 'Funded';
+    }
+
+    const allocationsBeforeMe = _.takeWhile(
+      allocationItems,
+      a => a.destination !== myItem.destination
+    );
+    const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
+    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
+      return 'ReadyToFund';
+    }
+
+    return 'Unfunded';
   }
 
   private get _support(): Array<SignedStateWithHash> {
