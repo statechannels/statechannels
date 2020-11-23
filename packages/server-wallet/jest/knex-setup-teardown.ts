@@ -1,15 +1,22 @@
 import {configureEnvVariables} from '@statechannels/devtools';
 import Knex from 'knex';
+import _ from 'lodash';
 
 configureEnvVariables();
 
-import {extractDBConfigFromServerWalletConfig, defaultTestConfig} from '../src/config';
+import {
+  extractDBConfigFromServerWalletConfig,
+  defaultTestConfig,
+  configFromEnvVars,
+} from '../src/config';
 import {DBAdmin} from '../src/db-admin/db-admin';
 
 export let testKnex: Knex;
 
 beforeAll(async () => {
-  testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultTestConfig));
+  testKnex = Knex(
+    extractDBConfigFromServerWalletConfig(_.assign({}, defaultTestConfig, configFromEnvVars))
+  );
   await new DBAdmin(testKnex).truncateDB();
 });
 
