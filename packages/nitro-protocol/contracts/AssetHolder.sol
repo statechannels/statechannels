@@ -367,7 +367,7 @@ contract AssetHolder is IAssetHolder {
 
         for (j = 0; j < guarantee.destinations.length; j++) {
             // for each _destination in the guarantee
-            bytes32 _destination = guarantee.destinations[i];
+            bytes32 _destination = guarantee.destinations[j];
             // if destination matches the one that is passed in
             // loop over allocations in the target channel and decrease balance until we hit the specified destination
             if (_destination == destination) {
