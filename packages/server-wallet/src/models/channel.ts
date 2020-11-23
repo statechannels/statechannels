@@ -64,12 +64,7 @@ export type ComputedColumns = {
   readonly channelId: Bytes32;
 };
 
-export type DirectFundingStatus =
-  | 'NotDirectlyFunded'
-  | 'Unfunded'
-  | 'ReadyToFund'
-  | 'Funded'
-  | 'Defunded';
+export type DirectFundingStatus = 'Uncategorized' | 'ReadyToFund' | 'Funded' | 'Defunded';
 
 export class Channel extends Model implements RequiredColumns {
   readonly id!: number;
@@ -191,12 +186,12 @@ export class Channel extends Model implements RequiredColumns {
     fundingStrategy: FundingStrategy
   ): DirectFundingStatus {
     if (fundingStrategy !== 'Direct') {
-      return 'NotDirectlyFunded';
+      return 'Uncategorized';
     }
 
     const outcome = supported?.outcome;
     if (!supported || !outcome) {
-      return 'Unfunded';
+      return 'Uncategorized';
     }
 
     const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
@@ -242,7 +237,7 @@ export class Channel extends Model implements RequiredColumns {
       return 'ReadyToFund';
     }
 
-    return 'Unfunded';
+    return 'Uncategorized';
   }
 
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
