@@ -100,8 +100,6 @@ export interface ServerWalletConfig {
     // (undocumented)
     skipEvmValidation: boolean;
     // (undocumented)
-    stateChannelPrivateKey: string;
-    // (undocumented)
     timingMetrics: boolean;
     // (undocumented)
     workerThreadAmount: number;
