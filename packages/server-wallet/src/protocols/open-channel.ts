@@ -187,21 +187,14 @@ function ledgerFundedThisChannel(ledger: ChannelState, app: ChannelState): boole
 }
 
 function isFunded(ps: ProtocolState): boolean {
-  const {funding, supported, fundingStrategy} = ps.app;
+  const {fundingStrategy, directFundingStatus} = ps.app;
 
   switch (fundingStrategy) {
     case 'Fake':
       return true;
 
     case 'Direct': {
-      if (!supported) return false;
-      const allocation = checkThat(supported?.outcome, isSimpleAllocation);
-      const currentFunding = funding(allocation.assetHolderAddress).amount;
-      const targetFunding = allocation.allocationItems
-        .map(a => a.amount)
-        .reduce(BN.add, BN.from(0));
-      const funded = BN.gte(currentFunding, targetFunding) ? true : false;
-      return funded;
+      return directFundingStatus === 'Funded';
     }
 
     case 'Ledger': {
