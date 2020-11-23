@@ -590,6 +590,39 @@ describe('Funding multiple channels syncronously without enough funds', () => {
       });
     }
   });
+
+  it(`can simply not fund a single channel requesting way too much`, async () => {
+    const LEDGER_HAS = 2;
+    const APP_WANTS = 10000000; // > 2
+
+    const ledgerChannelId = await createLedgerChannel(LEDGER_HAS, LEDGER_HAS);
+    const params = testCreateChannelParams(APP_WANTS, APP_WANTS, ledgerChannelId);
+
+    const resultA = await a.createChannel(params);
+    const channelId = resultA.channelResults[0].channelId;
+    await b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
+    const resultB = await b.joinChannel({channelId});
+
+    await exchangeMessagesBetweenAandB([resultB.outbox], []);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const {
+      allocations: [{allocationItems}],
+    } = getChannelResultFor(ledgerChannelId, channelResults);
+
+    expect(allocationItems).toHaveLength(2);
+
+    const unfundedChannels = channelResults.filter(c => c.channelId === channelId);
+
+    expect(unfundedChannels).toMatchObject([{turnNum: 1, status: 'opening'}]);
+    expect(allocationItems).not.toContainAllocationItem({
+      destination: makeDestination(channelId),
+      amount: BN.from(2),
+    });
+  });
 });
 
 describe('Funding multiple channels concurrently (one sided)', () => {
