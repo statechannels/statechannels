@@ -3,8 +3,8 @@ import * as path from 'path';
 import {Config} from 'knex';
 
 import {
-  configFromEnvVars,
   extractDBConfigFromServerWalletConfig,
+  getConfigFromEnvVars,
   ServerWalletConfig,
 } from '../config';
 
@@ -49,5 +49,5 @@ export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> 
 }
 
 export const {client, connection, debug, migrations, seeds, pool} = createKnexConfig(
-  configFromEnvVars
+  getConfigFromEnvVars() // respect env vars so the migration command can make use of them
 );

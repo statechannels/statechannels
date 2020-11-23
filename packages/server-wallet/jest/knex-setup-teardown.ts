@@ -7,7 +7,7 @@ configureEnvVariables();
 import {
   extractDBConfigFromServerWalletConfig,
   defaultTestConfig,
-  configFromEnvVars,
+  getConfigFromEnvVars,
 } from '../src/config';
 import {DBAdmin} from '../src/db-admin/db-admin';
 
@@ -15,7 +15,7 @@ export let testKnex: Knex;
 
 beforeAll(async () => {
   testKnex = Knex(
-    extractDBConfigFromServerWalletConfig(_.assign({}, defaultTestConfig, configFromEnvVars))
+    extractDBConfigFromServerWalletConfig(_.assign({}, defaultTestConfig, getConfigFromEnvVars()))
   );
   await new DBAdmin(testKnex).truncateDB();
 });
