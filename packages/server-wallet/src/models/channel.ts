@@ -220,6 +220,10 @@ export class Channel extends Model implements RequiredColumns {
     const amountTransferredToMe = funding.transferredOut
       .filter(tf => tf.toAddress === myAllocation.destination)
       .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+    // Note that following case:
+    // - The total amount allocated to me are zero
+    // - Only one final state is signed, and that state is supported.
+    // This channel is categorized as Defunded even though all final states might not be signed yet.
     if (supported.isFinal && BN.gte(amountTransferredToMe, myAllocation.amount)) {
       return 'Defunded';
     }
