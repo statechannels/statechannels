@@ -193,12 +193,14 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(closeA.channelResult).toMatchObject({
     status: 'closing',
     turnNum: 4,
+    fundingStatus: 'Funded',
   });
 
   const closeB = await b.pushMessage(getPayloadFor(participantB.participantId, closeA.outbox));
   expect(getChannelResultFor(channelId, closeB.channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 4,
+    fundingStatus: 'Defunded',
   });
 
   const close2A = await a.pushMessage(getPayloadFor(participantA.participantId, closeB.outbox));
