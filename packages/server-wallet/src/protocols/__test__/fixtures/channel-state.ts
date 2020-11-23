@@ -13,7 +13,7 @@ const defaultChannelState: ChannelStateWithSupported = {
   funding: (): ChannelStateFunding => ({amount: '0x00', transferredOut: []}),
   chainServiceRequests: [],
   fundingStrategy: 'Direct',
-  directFundingStatus: 'Unfunded',
+  directFundingStatus: 'Uncategorized',
 };
 
 export const channelStateFixture = fixture(defaultChannelState);
