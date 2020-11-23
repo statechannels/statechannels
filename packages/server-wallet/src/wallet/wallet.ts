@@ -563,18 +563,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     // Fetch ledger channels related to the channels argument where related means, either:
     // - The ledger channel is in the channels array
     // - The ledger channel is funding one of the channels in the channels array
-    const ledgersToProcess = _.chain(await this.store.getAllPendingLedgerRequests())
-      .filter(({channelToBeFunded, ledgerChannelId}) =>
-        _.some(
-          channels,
-          channelId => channelId === channelToBeFunded || channelId === ledgerChannelId
-        )
-      )
-      .uniqBy('ledgerChannelId')
-      .value();
+    const ledgerIdsFundingChannels = await this.store.getLedgerChannelIdsFundingChannels(channels);
+    const ledgerIdsFromChannels = await this.store.filterChannelIdsByIsLedger(channels);
+
+    const ledgersToProcess = _.uniq(ledgerIdsFromChannels.concat(ledgerIdsFundingChannels));
 
     while (ledgersToProcess.length) {
-      const {ledgerChannelId} = ledgersToProcess[0];
+      const ledgerChannelId = ledgersToProcess[0];
 
       await this.store.lockApp(ledgerChannelId, async tx => {
         const setError = async (e: Error): Promise<void> => {
@@ -638,10 +633,9 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     // Fetch channels related to the channels argument where related means, either:
     // - The channel is in the channels array
     // - The channel is being funded by one of the channels in the channels array
-    const ledgerRequests = await this.store.getAllPendingLedgerRequests();
-    const channelsWithRelevantPendingReqs = ledgerRequests
-      .filter(req => channels.includes(req.ledgerChannelId))
-      .map(req => req.channelToBeFunded);
+    const channelsWithRelevantPendingReqs = await this.store.getChannelIdsPendingLedgerFundingFrom(
+      channels
+    );
 
     const objectives = (
       await this.store.getObjectives(channels.concat(channelsWithRelevantPendingReqs))
