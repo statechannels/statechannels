@@ -232,6 +232,7 @@ export class Channel extends Model implements RequiredColumns {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
+    const directFundingStatus = this._directFundingStatus(supported, funding, myIndex);
     return {
       myIndex: myIndex as 0 | 1,
       participants,
@@ -245,6 +246,7 @@ export class Channel extends Model implements RequiredColumns {
       chainServiceRequests,
       fundingStrategy,
       fundingLedgerChannelId,
+      directFundingStatus,
     };
   }
 
@@ -353,16 +355,20 @@ export class Channel extends Model implements RequiredColumns {
     return this.participants.length;
   }
 
-  public directFundingStatus(channelState: ChannelState): DirectFundingStatus {
-    const outcome = channelState.supported?.outcome;
+  private _directFundingStatus(
+    supported: SignedStateVarsWithHash | undefined,
+    fundingFn: (address: Address) => ChannelStateFunding,
+    myIndex: number
+  ): DirectFundingStatus {
+    const outcome = supported?.outcome;
     if (!outcome) {
       return 'Unfunded';
     }
 
     const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
 
-    const myItem = allocationItems[channelState.myIndex];
-    const funding = channelState.funding(assetHolderAddress);
+    const myItem = allocationItems[myIndex];
+    const funding = fundingFn(assetHolderAddress);
 
     const amountTransferredToMe = funding.transferredOut
       .filter(tf => tf.toAddress === myItem.destination)

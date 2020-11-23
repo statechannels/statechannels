@@ -11,6 +11,7 @@ import {
 import {ChannelResult, ChannelStatus, FundingStrategy} from '@statechannels/client-api-schema';
 
 import {Bytes32, Uint256} from '../type-aliases';
+import {DirectFundingStatus} from '../models/channel';
 
 import {ProtocolAction} from './actions';
 
@@ -44,6 +45,7 @@ export type ChannelState = {
   chainServiceRequests: ChainServiceRequests;
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
+  directFundingStatus: DirectFundingStatus;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
