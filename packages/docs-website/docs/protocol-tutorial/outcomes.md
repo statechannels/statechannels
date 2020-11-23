@@ -67,6 +67,10 @@ A channel that has a guarantee outcome is said to be a guarantor channel.
 
 Now while we can _transfer_ assets out of a channel, the terminology is instead to _claim_ on a guarantor channel. Assets will be paid to beneficiaries of the _target_ channel, but in an order of precedence defined by the guarantor. More on this later.
 
+:::warning
+For simplicity, the on-chain code assumes that neither kind of allocation has any repeated entries.
+:::
+
 Constructing the right kind of object in typescript is straightforward:
 
 ```typescript
