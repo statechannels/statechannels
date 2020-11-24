@@ -32,8 +32,6 @@ export class WorkerManager {
             workerData: walletConfig,
           });
 
-          worker.stdout.on('data', data => this.logger.info(data.toString()));
-          worker.stderr.on('data', data => this.logger.error(data.toString()));
           worker.on('error', err => {
             throw err;
           });
