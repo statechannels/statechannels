@@ -11,6 +11,8 @@ export const WHO_SIGNED_WHAT_WRONG_LENGTH =
   '_validSignatures: whoSignedWhat must be the same length as participants';
 export const WRONG_CHANNEL_STORAGE = 'Channel storage does not match stored version.';
 export const INVALID_SIGNATURE = 'Invalid signature';
+export const INVALID_NUMBER_OF_STATES =
+  'You must submit at least one but no more than numParticipants states';
 
 // Function-specific messages
 export const CHALLENGER_NON_PARTICIPANT = 'Challenger is not a participant';
