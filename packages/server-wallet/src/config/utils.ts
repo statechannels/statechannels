@@ -4,7 +4,7 @@ import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
 import {Level} from 'pino';
 
-import {defaultDatabaseConfiguration, DEFAULT_DB_NAME, DEFAULT_DB_USER} from './defaults';
+import {defaultDatabaseConfiguration, DEFAULT_DB_USER} from './defaults';
 import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
 
 function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
@@ -72,26 +72,34 @@ export function extractDBConfigFromServerWalletConfig(
     pool: serverWalletConfig.databaseConfiguration.pool || {},
   };
 }
+type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
 
-export function overwriteConfigWithDatabaseName(
-  defaultTestConfig: ServerWalletConfig,
-  databaseName: string
+export function overwriteConfigWithDatabaseConnection(
+  config: ServerWalletConfig,
+  databaseConnectionConfig: DatabaseConnectionConfiguration
 ): ServerWalletConfig {
-  const {host, port} = getDatabaseConnectionConfig(defaultTestConfig);
-
   return {
-    ...defaultTestConfig,
+    ...config,
     databaseConfiguration: {
-      ...defaultTestConfig.databaseConfiguration,
-      connection: {
-        host: host || 'localhost',
-        port: port || 5432,
-        dbName: databaseName || DEFAULT_DB_NAME,
-      },
+      ...config.databaseConfiguration,
+      connection: isDatabaseConfigObject(databaseConnectionConfig)
+        ? {
+            host: databaseConnectionConfig.host || defaultDatabaseConfiguration.connection.host,
+            port: databaseConnectionConfig.port || defaultDatabaseConfiguration.connection.port,
+            dbName: databaseConnectionConfig.dbName,
+            user: databaseConnectionConfig.user || defaultDatabaseConfiguration.connection.user,
+            password: databaseConnectionConfig.password || '',
+          }
+        : (databaseConnectionConfig as string),
     },
   };
 }
-type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
+
+function isDatabaseConfigObject(
+  connectionConfig: DatabaseConnectionConfiguration
+): connectionConfig is DatabaseConnectionConfigObject {
+  return typeof connectionConfig !== 'string';
+}
 
 export function getDatabaseConnectionConfig(
   config: ServerWalletConfig

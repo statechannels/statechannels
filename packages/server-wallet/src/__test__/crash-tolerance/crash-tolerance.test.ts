@@ -7,12 +7,14 @@ import {
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
-import {defaultTestConfig, overwriteConfigWithDatabaseName} from '../../config';
+import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
 
-const a = Wallet.create(overwriteConfigWithDatabaseName(defaultTestConfig, 'TEST_A'));
-let b = Wallet.create(overwriteConfigWithDatabaseName(defaultTestConfig, 'TEST_B')); // Wallet that will "crash"
+const a = Wallet.create(
+  overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_A'})
+);
+let b = Wallet.create(overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_B'})); // Wallet that will "crash"
 
 let channelId: string;
 let participantA: Participant;

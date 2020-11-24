@@ -7,14 +7,18 @@ import {
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
-import {defaultTestConfig, overwriteConfigWithDatabaseName} from '../../config';
+import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const {AddressZero} = ethers.constants;
 
-const a = Wallet.create(overwriteConfigWithDatabaseName(defaultTestConfig, 'TEST_A'));
-const b = Wallet.create(overwriteConfigWithDatabaseName(defaultTestConfig, 'TEST_B'));
+const a = Wallet.create(
+  overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_A'})
+);
+const b = Wallet.create(
+  overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_B'})
+);
 
 let channelId: string;
 let participantA: Participant;

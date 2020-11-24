@@ -39,7 +39,7 @@ export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> 
     },
     /**
      * To safely run migrations, we cannot use knexSnakeCaseMappers in the knex config
-     * https://github.com/Vincit/objection.js/issues/1144
+     * https://github.com/Vinci≠t/objection.js/issues/1144
      * So, in our admin knex config, which is used for running migrations, we
      * overwrite the two config options set by knexSnakeCaseMappers
      */

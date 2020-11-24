@@ -9,7 +9,7 @@ import {take} from 'rxjs/operators';
 
 import {
   defaultTestConfig,
-  overwriteConfigWithDatabaseName,
+  overwriteConfigWithDatabaseConnection,
   overwriteConfigWithEnvVars,
 } from '../config';
 import {ObjectiveSucceededValue, SingleChannelOutput, Wallet} from '../wallet';
@@ -22,12 +22,12 @@ if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must
 const {rpcEndpoint} = config.networkConfiguration;
 let provider: providers.JsonRpcProvider;
 const b = Wallet.create({
-  ...overwriteConfigWithDatabaseName(config, 'TEST_B'),
+  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_B'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
 });
 const a = Wallet.create({
-  ...overwriteConfigWithDatabaseName(config, 'TEST_A'),
+  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_A'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
 });
