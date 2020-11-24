@@ -107,7 +107,7 @@ contract ForceMove is IForceMove {
                 uint48(block.timestamp) + fixedPart.challengeDuration,
                 supportedStateHash,
                 challenger,
-                keccak256(abi.encode(variableParts[variableParts.length - 1].outcome))
+                keccak256(variableParts[variableParts.length - 1].outcome)
             )
         );
     }
@@ -135,8 +135,8 @@ contract ForceMove is IForceMove {
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getChannelStorage(channelId);
 
-        bytes32 challengeOutcomeHash = _hashOutcome(variablePartAB[0].outcome);
-        bytes32 responseOutcomeHash = _hashOutcome(variablePartAB[1].outcome);
+        bytes32 challengeOutcomeHash = keccak256(variablePartAB[0].outcome);
+        bytes32 responseOutcomeHash = keccak256(variablePartAB[1].outcome);
         bytes32 challengeStateHash = _hashState(
             turnNumRecord,
             isFinalAB[0],
@@ -268,7 +268,7 @@ contract ForceMove is IForceMove {
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
-     * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+     * @param outcomeHash The keccak256 of the `outcome`. Applies to all stats in the finalization proof.
      * @param numStates The number of states in the finalization proof.
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      * @param sigs An array of signatures that support the state with the `largestTurnNum`.
@@ -533,7 +533,7 @@ contract ForceMove is IForceMove {
                 channelId,
                 fixedPart,
                 variableParts[i].appData,
-                _hashOutcome(variableParts[i].outcome)
+                keccak256(variableParts[i].outcome)
             );
             if (turnNum < largestTurnNum) {
                 _requireValidTransition(
@@ -872,16 +872,6 @@ contract ForceMove is IForceMove {
                     )
                 )
             );
-    }
-
-    /**
-     * @notice Computes the hash of a given outcome.
-     * @dev Computes the hash of a given outcome.
-     * @param outcome An outcome
-     * @return The outcomeHash
-     */
-    function _hashOutcome(bytes memory outcome) internal pure returns (bytes32) {
-        return keccak256(abi.encode(outcome));
     }
 
     function getChainID() public pure returns (uint256) {

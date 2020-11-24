@@ -143,7 +143,7 @@ export type Outcome = AssetOutcome[];
 
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
-  return utils.keccak256(utils.defaultAbiCoder.encode(['bytes'], [encodedOutcome]));
+  return utils.keccak256(encodedOutcome);
 }
 
 export function decodeOutcome(encodedOutcome: Bytes): Outcome {
