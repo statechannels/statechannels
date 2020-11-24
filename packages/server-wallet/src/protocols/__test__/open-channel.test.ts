@@ -6,7 +6,7 @@ import {protocol} from '../open-channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {SignState, fundChannel} from '../actions';
 import {channel} from '../../models/__test__/fixtures/channel';
-import {directFundingStatus} from '../state';
+import {directFundingStatus as directFundingStatusFn} from '../state';
 
 import {applicationProtocolState} from './fixtures/protocol-state';
 
@@ -55,6 +55,12 @@ test.each`
   ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${notFunded} | ${fundChannelAction1}          | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
   ${altPrefundState0} | ${0}    | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is second to deposit'} | ${'submits transaction'}
 `('$result $cond', ({supported, latest, latestSignedByMe, funding, action, myIndex}) => {
+  const directFundingStatus = directFundingStatusFn(
+    supported,
+    funding,
+    participants[myIndex],
+    'Direct'
+  );
   const ps = applicationProtocolState({
     app: {
       supported,
@@ -62,7 +68,7 @@ test.each`
       latestSignedByMe,
       funding,
       myIndex,
-      directFundingStatus: directFundingStatus(supported, funding, participants[myIndex], 'Direct'),
+      directFundingStatus,
     },
   });
   expect(protocol(ps)).toMatchObject(action);
