@@ -411,8 +411,9 @@ contract AssetHolder is IAssetHolder {
             );
             for (uint256 k = 0; k < allocation.length; k++) {
                 newAllocation[k] = allocation[k];
-                if (allocation[k].destination == destination) {
+                if (k == i) {
                     newAllocation[k].amount = residualAllocationAmount;
+                    break;
                 }
             }
             assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
