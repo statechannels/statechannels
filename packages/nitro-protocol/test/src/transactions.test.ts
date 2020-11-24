@@ -6,7 +6,7 @@ import {signState} from '../../src/signatures';
 import {
   createCheckpointTransaction,
   createConcludeTransaction,
-  createForceMoveTransaction,
+  createChallengeTransaction,
   createRespondTransaction,
   createSignatureArguments,
 } from '../../src/transactions';
@@ -55,7 +55,7 @@ beforeAll(async () => {
 
 describe('transaction-generators', () => {
   it('creates a force move transaction', async () => {
-    const transactionRequest: ethers.providers.TransactionRequest = createForceMoveTransaction(
+    const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [signedState],
       wallet.privateKey
     );

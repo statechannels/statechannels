@@ -30,7 +30,7 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {createForceMoveTransaction} from '../../../src/transactions';
+import {createChallengeTransaction} from '../../../src/transactions';
 import {hashChallengeMessage} from '../../../src/contract/challenge';
 
 const provider = getTestProvider();
@@ -262,7 +262,7 @@ describe('challenge', () => {
   );
 });
 
-describe('forceMove with transaction generator', () => {
+describe('challenge with transaction generator', () => {
   beforeEach(async () => {
     await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
   });
@@ -274,7 +274,7 @@ describe('forceMove with transaction generator', () => {
     ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
     ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
   `('$description', async ({description, appData, turnNums, challenger}) => {
-    const transactionRequest: ethers.providers.TransactionRequest = createForceMoveTransaction(
+    const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [
         await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
         await createSignedCountingAppState(twoPartyChannel, appData[1], turnNums[1]),

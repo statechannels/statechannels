@@ -55,7 +55,10 @@ contract ForceMove is IForceMove {
     ) public override {
         bytes32 channelId = _getChannelId(fixedPart);
 
-        require((fixedPart.participants.length >= variableParts.length) && (variableParts.length > 0), 'challenge | You must submit at least one but no more than numParticipants states');
+        require(
+            (fixedPart.participants.length >= variableParts.length) && (variableParts.length > 0),
+            'challenge | You must submit at least one but no more than numParticipants states'
+        );
 
         if (_mode(channelId) == ChannelMode.Open) {
             _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
