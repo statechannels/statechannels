@@ -11,6 +11,7 @@ import {getFixedPart, getVariablePart, State} from '../../../src/contract/state'
 import {
   CHALLENGER_NON_PARTICIPANT,
   CHANNEL_FINALIZED,
+  INVALID_NUMBER_OF_STATES,
   INVALID_SIGNATURE,
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
@@ -104,9 +105,11 @@ const reverts3 = revertsWhenOpenIf + 'the states do not form a validTransition c
 
 const reverts4 = 'It reverts when a challenge is present if the turnNumRecord does not increase';
 const reverts5 = 'It reverts when the channel is finalized';
+const reverts6 = 'It reverts when too many states are submitted';
 
 describe('challenge', () => {
   const threeStates = {appDatas: [0, 1, 2], whoSignedWhat: [0, 1, 2]};
+  const fourStates = {appDatas: [0, 1, 2, 3], whoSignedWhat: [0, 1, 2, 0]};
   const oneState = {appDatas: [2], whoSignedWhat: [0, 0, 0]};
   const invalid = {appDatas: [0, 2, 1], whoSignedWhat: [0, 1, 2]};
   const largestTurnNum = 8;
@@ -139,6 +142,7 @@ describe('challenge', () => {
     ${reverts4}  | ${challengeAtTwenty}         | ${oneState}    | ${'correct'}           | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts4}  | ${challengeAtLargestTurnNum} | ${oneState}    | ${'correct'}           | ${TURN_NUM_RECORD_NOT_INCREASED}
     ${reverts5}  | ${finalizedAtFive}           | ${oneState}    | ${'correct'}           | ${CHANNEL_FINALIZED}
+    ${reverts6}  | ${finalizedAtFive}           | ${fourStates}  | ${'correct'}           | ${INVALID_NUMBER_OF_STATES}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
