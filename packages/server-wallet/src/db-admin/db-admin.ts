@@ -24,7 +24,7 @@ export class DBAdmin {
   }
 
   async dropDB(): Promise<void> {
-    await exec(`dropdb ${this.dbName} $PSQL_ARGS`);
+    await exec(`dropdb ${this.dbName} --if-exists $PSQL_ARGS`);
   }
 
   async migrateDB(): Promise<void> {
