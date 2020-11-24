@@ -19,7 +19,7 @@ export async function getChannelStorage(
   return await forceMove.getChannelStorage(channelId);
 }
 
-export function createForceMoveTransaction(
+export function createChallengeTransaction(
   signedStates: SignedState[],
   challengePrivateKey: string
 ): providers.TransactionRequest {
