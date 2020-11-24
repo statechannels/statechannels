@@ -4,7 +4,12 @@ import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
 import {Level} from 'pino';
 
-import {defaultDatabaseConfiguration, defaultTestConfig, DEFAULT_DB_NAME} from './defaults';
+import {
+  defaultDatabaseConfiguration,
+  defaultTestConfig,
+  DEFAULT_DB_NAME,
+  DEFAULT_DB_USER,
+} from './defaults';
 import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
 
 function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
@@ -64,7 +69,11 @@ export function extractDBConfigFromServerWalletConfig(
   return {
     client: 'postgres',
     // TODO: Might make sense to use `database` instead of `dbName` so its consitent with knex
-    connection: {...connectionConfig, database: connectionConfig.dbName},
+    connection: {
+      ...connectionConfig,
+      database: connectionConfig.dbName,
+      user: connectionConfig.user || DEFAULT_DB_USER,
+    },
     ...knexSnakeCaseMappers(),
     pool: serverWalletConfig.databaseConfiguration.pool || {},
   };

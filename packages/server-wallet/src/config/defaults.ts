@@ -57,7 +57,7 @@ export const defaultConfig: OptionalServerWalletConfig = {
 };
 
 export const DEFAULT_DB_NAME = 'server_wallet_test';
-
+export const DEFAULT_DB_USER = 'postgres';
 type HasDatabaseConnectionConfigObject = {
   databaseConfiguration: {connection: {host: string; port: number; dbName: string}};
 };
@@ -70,7 +70,7 @@ export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfig
       host: defaultDatabaseConfiguration.connection.host,
       port: defaultDatabaseConfiguration.connection.port,
       dbName: DEFAULT_DB_NAME,
-      user: 'postgres',
+      user: DEFAULT_DB_USER,
     },
   },
 };
