@@ -5,7 +5,11 @@ import {parse} from 'pg-connection-string';
 import {Level} from 'pino';
 
 import {defaultDatabaseConfiguration, DEFAULT_DB_USER} from './defaults';
-import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
+import {
+  ServerWalletConfig,
+  DatabaseConnectionConfiguration,
+  OptionalServerWalletConfig,
+} from './types';
 
 function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
   if (!envValue) return defaultValue || false;
@@ -75,7 +79,7 @@ export function extractDBConfigFromServerWalletConfig(
 type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
 
 export function overwriteConfigWithDatabaseConnection(
-  config: ServerWalletConfig,
+  config: OptionalServerWalletConfig,
   databaseConnectionConfig: DatabaseConnectionConfiguration
 ): ServerWalletConfig {
   return {
