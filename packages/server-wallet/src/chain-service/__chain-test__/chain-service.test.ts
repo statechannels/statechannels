@@ -12,7 +12,7 @@ import {
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig} from '../../config';
+import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../config';
 import {
   alice as aliceParticipant,
   bob as bobParticipant,
@@ -25,10 +25,9 @@ const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!)
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
-
-if (!defaultTestConfig.networkConfiguration.rpcEndpoint)
-  throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultTestConfig.networkConfiguration.rpcEndpoint;
+const config = overwriteConfigWithEnvVars(defaultTestConfig);
+if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const {rpcEndpoint} = config.networkConfiguration;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
 let chainService: ChainService;
