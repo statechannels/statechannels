@@ -45,10 +45,30 @@ export const wireStateFormat: WireState = {
   ],
   turnNum: 1,
   signatures: [
-    '0xef7e226a43c52d4b8f7b14f13acdf9e75d871ea5c51235fbc4d538acf84c61c4727431f0cc83d0f566e222a21d35ae4d8d2a0dd4428cba7bf95bf7b3f11ad0c61c'
+    '0x59069c99dd52a7766e439ef9344e5cee7a51625ec366095cbd7bad66075a54e924ab48b08a683deff7e3642d8017178e55990b2073d169eec64a7fef60648a6a1b'
   ]
 };
 
+console.log(
+  joinSignature(
+    signState(
+      {
+        turnNum: wireStateFormat.turnNum,
+        isFinal: wireStateFormat.isFinal,
+        channel: {
+          chainId: wireStateFormat.chainId,
+          channelNonce: wireStateFormat.channelNonce,
+          participants: wireStateFormat.participants.map(p => p.signingAddress)
+        },
+        challengeDuration: wireStateFormat.challengeDuration,
+        outcome: wireStateFormat.outcome as [SimpleAllocation],
+        appDefinition: wireStateFormat.appDefinition,
+        appData: wireStateFormat.appData
+      },
+      '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727'
+    ).signature
+  )
+);
 const wireStateFormat2: WireState = {
   ...wireStateFormat,
   channelNonce: 124,
@@ -105,7 +125,7 @@ export const internalStateFormat: SignedState = {
   signatures: [
     {
       signature:
-        '0xef7e226a43c52d4b8f7b14f13acdf9e75d871ea5c51235fbc4d538acf84c61c4727431f0cc83d0f566e222a21d35ae4d8d2a0dd4428cba7bf95bf7b3f11ad0c61c',
+        '0x59069c99dd52a7766e439ef9344e5cee7a51625ec366095cbd7bad66075a54e924ab48b08a683deff7e3642d8017178e55990b2073d169eec64a7fef60648a6a1b',
       signer: makeAddress('0x2222e21c8019b14da16235319d34b5dd83e644a9')
     }
   ]
