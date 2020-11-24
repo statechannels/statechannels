@@ -71,7 +71,7 @@ contract AssetHolder is IAssetHolder {
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
         _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
         // effects and interactions
-        _claim(guarantorChannelId,guarantee, allocationBytes, destination);
+        _claim(guarantorChannelId, guarantee, allocationBytes, destination);
     }
 
     /**
@@ -238,7 +238,7 @@ contract AssetHolder is IAssetHolder {
                     )
                 )
             );
-        } 
+        }
 
         // storage updated BEFORE external contracts called (prevent reentrancy attacks)
         if (_isExternalDestination(destination)) {
@@ -247,7 +247,7 @@ contract AssetHolder is IAssetHolder {
             holdings[destination] += affordsForDestination;
         }
         // Event emitted
-        emit AssetTransferred(fromChannelId, destination, affordsForDestination);        
+        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
     }
 
     /**
@@ -333,7 +333,7 @@ contract AssetHolder is IAssetHolder {
             } else {
                 holdings[allocation[m].destination] += payoutAmount;
             }
-            // Event emitted 
+            // Event emitted
             emit AssetTransferred(channelId, allocation[m].destination, payoutAmount);
         }
     }
@@ -353,8 +353,8 @@ contract AssetHolder is IAssetHolder {
         bytes32 destination
     ) internal {
         Outcome.AllocationItem[] memory allocation = abi.decode(
-        allocationBytes,
-        (Outcome.AllocationItem[])
+            allocationBytes,
+            (Outcome.AllocationItem[])
         );
         uint256 balance = holdings[guarantorChannelId];
         uint256 affordsForDestination;
@@ -372,23 +372,23 @@ contract AssetHolder is IAssetHolder {
                 if (allocation[i].destination == guaranteeDestination) {
                     // decrease balance
                     uint256 _amount = allocation[i].amount;
-                        if (balance < _amount) {
-                            if (guaranteeDestination == destination) {
-                                affordsForDestination = balance;
-                                residualAllocationAmount = _amount - balance;
-                                break;
-                                // i will point to index that should be modified or removed in the target outcome
-                            }
-                            balance = 0; // this isn't used after we break
-                        } else {
-                            if (guaranteeDestination == destination) {
-                                affordsForDestination = _amount;
-                                residualAllocationAmount = 0;
-                                break;
-                                // i will point to index that should be modified or removed in the target outcome
-                            }
-                            balance = balance.sub(_amount); // this isn't used after we break
+                    if (balance < _amount) {
+                        if (guaranteeDestination == destination) {
+                            affordsForDestination = balance;
+                            residualAllocationAmount = _amount - balance;
+                            break;
+                            // i will point to index that should be modified or removed in the target outcome
                         }
+                        balance = 0; // this isn't used after we break
+                    } else {
+                        if (guaranteeDestination == destination) {
+                            affordsForDestination = _amount;
+                            residualAllocationAmount = 0;
+                            break;
+                            // i will point to index that should be modified or removed in the target outcome
+                        }
+                        balance = balance.sub(_amount); // this isn't used after we break
+                    }
                     break;
                 }
             }
@@ -397,15 +397,15 @@ contract AssetHolder is IAssetHolder {
                 break;
             }
         }
-        
+
         require(affordsForDestination > 0, '_claim | guarantor affords 0 for destination');
-        
+
         // effects
         holdings[guarantorChannelId] -= affordsForDestination;
 
         // construct new outcome for target
         if (residualAllocationAmount > 0) {
-            // new allocation identical save for a single entry 
+            // new allocation identical save for a single entry
             Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
                 allocation.length
             );
@@ -454,12 +454,12 @@ contract AssetHolder is IAssetHolder {
 
         // storage updated BEFORE external contracts called (prevent reentrancy attacks)
         if (_isExternalDestination(destination)) {
-            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);    
+            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
         } else {
             holdings[destination] += affordsForDestination;
         }
         // Event emitted
-        emit AssetTransferred(guarantorChannelId, destination, affordsForDestination);        
+        emit AssetTransferred(guarantorChannelId, destination, affordsForDestination);
     }
 
     /**
