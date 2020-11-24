@@ -48,7 +48,6 @@ interface IForceMove {
     enum ChannelMode {Open, Challenge, Finalized}
 
     /**
-    
      * @notice Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
      * @dev Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
@@ -67,7 +66,7 @@ interface IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
-    ) external ;
+    ) external;
 
     /**
      * @notice Repsonds to an ongoing challenge registered against a state channel.
@@ -86,7 +85,7 @@ interface IForceMove {
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) external ;
+    ) external;
 
     /**
      * @notice Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
@@ -105,7 +104,7 @@ interface IForceMove {
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) external ;
+    ) external;
 
     /**
      * @notice Finalizes a channel by providing a finalization proof.
@@ -126,7 +125,7 @@ interface IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) external ;
+    ) external;
 
     // events
 
