@@ -237,8 +237,8 @@ contract ForceMove is IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) external override {
-        bytes32 channelId = _getChannelId(fixedPart);
+    ) public override returns (bytes32 channelId) {
+        channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
         require(

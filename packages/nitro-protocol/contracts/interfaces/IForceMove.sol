@@ -123,9 +123,9 @@ interface IForceMove {
         bytes32 appPartHash,
         bytes32 outcomeHash,
         uint8 numStates,
-        uint8[] calldata whoSignedWhat,
-        Signature[] calldata sigs
-    ) external;
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs
+    ) external returns (bytes32);
 
     // events
 

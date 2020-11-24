@@ -102,47 +102,16 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
     ) public {
-        // requirements
-        bytes32 channelId = _getChannelId(fixedPart);
-
-        _requireChannelNotFinalized(channelId);
-
-        // By construction, the following states form a valid transition
-        bytes32[] memory stateHashes = new bytes32[](numStates);
-
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
-        for (uint48 i = 0; i < numStates; i++) {
-            stateHashes[i] = keccak256(
-                abi.encode(
-                    State(
-                        largestTurnNum + (i + 1) - numStates, // turnNum
-                        true, // isFinal
-                        channelId,
-                        appPartHash,
-                        outcomeHash
-                    )
-                )
-            );
-        }
-
-        require(
-            _validSignatures(
-                largestTurnNum,
-                fixedPart.participants,
-                stateHashes,
-                sigs,
-                whoSignedWhat
-            ),
-            'Invalid signatures'
+        bytes32 channelId = conclude(
+            largestTurnNum,
+            fixedPart,
+            appPartHash,
+            outcomeHash,
+            numStates,
+            whoSignedWhat,
+            sigs
         );
-
-        // effects
-
-        channelStorageHashes[channelId] = _hashChannelData(
-            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash)
-        );
-        emit Concluded(channelId);
-
         _transferAllFromAllAssetHolders(channelId, outcomeBytes);
     }
 
