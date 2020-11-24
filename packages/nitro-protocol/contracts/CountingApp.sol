@@ -39,6 +39,7 @@ contract CountingApp is IForceMoveApp {
             appData(b.appData).counter == appData(a.appData).counter + 1,
             'CountingApp: Counter must be incremented'
         );
+        // Note this is gas inefficient, and inferior to _bytesEqual in use elsewhere
         require(
             keccak256(b.outcome) == keccak256(a.outcome),
             'CountingApp: Outcome must not change'
