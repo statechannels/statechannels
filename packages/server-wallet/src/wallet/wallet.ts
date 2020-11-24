@@ -128,7 +128,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     this.logger = createLogger({...this.walletConfig});
     this.store = new Store(
       this.knex,
-      this.walletConfig.metricConfiguration.timingMetrics,
+      this.walletConfig.metricsConfiguration.timingMetrics,
       this.walletConfig.skipEvmValidation,
       this.walletConfig.networkConfiguration.chainNetworkID,
       this.logger
@@ -136,11 +136,11 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     // TODO: This should probably be in validation
     // set up timing metrics
-    if (this.walletConfig.metricConfiguration.timingMetrics) {
-      if (!this.walletConfig.metricConfiguration.metricsOutputFile) {
+    if (this.walletConfig.metricsConfiguration.timingMetrics) {
+      if (!this.walletConfig.metricsConfiguration.metricsOutputFile) {
         throw Error('You must define a metrics output file');
       }
-      setupMetrics(this.walletConfig.metricConfiguration.metricsOutputFile);
+      setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile);
     }
 
     if (this.walletConfig.networkConfiguration.rpcEndpoint) {
@@ -159,7 +159,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       store: this.store,
       chainService: this.chainService,
       logger: this.logger,
-      timingMetrics: this.walletConfig.metricConfiguration.timingMetrics,
+      timingMetrics: this.walletConfig.metricsConfiguration.timingMetrics,
     });
   }
 
@@ -410,7 +410,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     appData,
   }: UpdateChannelParams): Promise<SingleChannelOutput> {
     const timer = timerFactory(
-      this.walletConfig.metricConfiguration.timingMetrics,
+      this.walletConfig.metricsConfiguration.timingMetrics,
       `updateChannel ${channelId}`
     );
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
@@ -425,13 +425,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
-        this.walletConfig.metricConfiguration.timingMetrics
+        this.walletConfig.metricsConfiguration.timingMetrics
       );
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
           UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
-          this.walletConfig.metricConfiguration.timingMetrics
+          this.walletConfig.metricsConfiguration.timingMetrics
         )
       );
       const signedState = await timer('signing state', async () => {
@@ -596,7 +596,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         );
         const action = recordFunctionMetrics(
           ProcessLedgerQueue.protocol(protocolState),
-          this.walletConfig.metricConfiguration.timingMetrics
+          this.walletConfig.metricsConfiguration.timingMetrics
         );
 
         if (!action) {

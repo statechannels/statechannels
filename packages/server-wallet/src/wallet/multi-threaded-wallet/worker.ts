@@ -35,7 +35,7 @@ parentPort?.on('message', async (message: any) => {
   }
 
   const timer = timerFactory(
-    walletConfig.metricConfiguration?.timingMetrics || false,
+    walletConfig.metricsConfiguration?.timingMetrics || false,
     `Thread ${threadId}`
   );
   try {

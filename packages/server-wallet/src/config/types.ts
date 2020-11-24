@@ -46,7 +46,7 @@ export type LoggingConfiguration = {logLevel: Level; logDestination: string};
 /**
  * Metrics configuration options
  */
-export type MetricConfiguration = {timingMetrics: boolean; metricsOutputFile?: string};
+export type MetricsConfiguration = {timingMetrics: boolean; metricsOutputFile?: string};
 
 /**
  * The minimum required configuration to use the server wallet.
@@ -65,7 +65,7 @@ export interface OptionalServerWalletConfig {
   skipEvmValidation: boolean;
   workerThreadAmount: number;
   loggingConfiguration: LoggingConfiguration;
-  metricConfiguration: MetricConfiguration;
+  metricsConfiguration: MetricsConfiguration;
 }
 
 /**

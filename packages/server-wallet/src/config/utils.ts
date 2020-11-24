@@ -32,10 +32,10 @@ export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWa
       },
       debug: readBoolean(process.env.DEBUG_KNEX, config.databaseConfiguration.debug),
     },
-    metricConfiguration: {
+    metricsConfiguration: {
       timingMetrics: readBoolean(
         process.env.TIMING_METRICS,
-        config.metricConfiguration.timingMetrics
+        config.metricsConfiguration.timingMetrics
       ),
       metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
     },

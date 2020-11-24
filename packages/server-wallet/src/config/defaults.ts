@@ -34,7 +34,7 @@ export const defaultLoggingConfiguration: LoggingConfiguration = {
   logDestination: 'console',
 };
 
-export const defaultMetricConfiguration = {timingMetrics: false};
+export const defaultMetricsConfiguration = {timingMetrics: false};
 
 /**
  * Server Wallet config
@@ -48,7 +48,7 @@ export const defaultConfig: OptionalServerWalletConfig = {
   databaseConfiguration: defaultDatabaseConfiguration,
   networkConfiguration: defaultNetworkConfiguration,
   loggingConfiguration: defaultLoggingConfiguration,
-  metricConfiguration: defaultMetricConfiguration,
+  metricsConfiguration: defaultMetricsConfiguration,
   // TODO: List addresses this corresponds to
   ethereumPrivateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
   skipEvmValidation: false,
