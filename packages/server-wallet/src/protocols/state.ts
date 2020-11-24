@@ -139,29 +139,24 @@ export function directFundingStatus(
   const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
 
   // Collapse all allocation items with my destination into one
-  const myAllocation = allocationItems
-    .filter(ai => ai.destination === myParticipant.destination)
-    .reduce(
-      (soFar, currentAi) => ({
-        ...soFar,
-        amount: BN.add(soFar.amount, currentAi.amount),
-      }),
-      {
-        destination: myParticipant.destination,
-        amount: BN.from(0),
-      }
-    );
+  const myDestination = myParticipant.destination;
+  const myAmount = allocationItems
+    .filter(ai => ai.destination === myDestination)
+    .map(ai => ai.amount)
+    .reduce(BN.add, BN.from(0));
 
   const funding = fundingFn(assetHolderAddress);
 
   const amountTransferredToMe = funding.transferredOut
-    .filter(tf => tf.toAddress === myAllocation.destination)
-    .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+    .filter(tf => tf.toAddress === myDestination)
+    .map(ai => ai.amount)
+    .reduce(BN.add, BN.from(0));
+
   // Note that following case:
   // - The total amount allocated to me are zero
   // - Only one final state is signed, and that state is supported.
   // This channel is categorized as Defunded even though all final states might not be signed yet.
-  if (supported.isFinal && BN.gte(amountTransferredToMe, myAllocation.amount)) {
+  if (supported.isFinal && BN.gte(amountTransferredToMe, myAmount)) {
     return 'Defunded';
   }
 
@@ -170,10 +165,7 @@ export function directFundingStatus(
     return 'Funded';
   }
 
-  const allocationsBeforeMe = _.takeWhile(
-    allocationItems,
-    a => a.destination !== myAllocation.destination
-  );
+  const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
   const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
   if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
     return 'ReadyToFund';
