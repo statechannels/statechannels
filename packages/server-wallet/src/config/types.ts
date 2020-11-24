@@ -32,7 +32,7 @@ export type RequiredServerWalletConfig = {
  */
 export interface OptionalServerWalletConfig {
   databaseConfiguration: OptionalDatabaseConfiguration;
-  stateChannelPrivateKey: string;
+
   ethereumPrivateKey: string;
   networkConfiguration: NetworkConfiguration;
   skipEvmValidation: boolean;

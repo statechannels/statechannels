@@ -41,7 +41,6 @@ export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWa
       metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
     },
 
-    stateChannelPrivateKey: process.env.STATE_CHANNEL_PRIVATE_KEY || config.stateChannelPrivateKey,
     ethereumPrivateKey: process.env.ETHEREUM_PRIVATE_KEY || config.ethereumPrivateKey,
     networkConfiguration: {
       rpcEndpoint: process.env.RPC_ENDPOINT,
