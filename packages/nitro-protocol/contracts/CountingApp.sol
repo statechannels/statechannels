@@ -2,12 +2,12 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
-import './interfaces/ForceMoveApp.sol';
+import './interfaces/IForceMoveApp.sol';
 
 /**
  * @dev The CountingApp contracts complies with the ForceMoveApp interface and allows only for a simple counter to be incremented. Used for testing purposes.
  */
-contract CountingApp is ForceMoveApp {
+contract CountingApp is IForceMoveApp {
     struct CountingAppData {
         uint256 counter;
     }

@@ -3,9 +3,9 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 /**
- * @dev An Adjudicator Interface calls for a method that allows a finalized outcome to be pushed to an asset holder.
+ * @dev The IAdjudicator Interface calls for a method that allows a finalized outcome to be pushed to an asset holder.
  */
-interface Adjudicator {
+interface IAdjudicator {
     /**
      * @notice Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
      * @dev Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.

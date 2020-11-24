@@ -3,9 +3,9 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 /**
- * @dev The ForceMoveApp interface calls for its children to implement an application-specific validTransition function, defining the state machine of a ForceMove state channel DApp.
+ * @dev The IForceMoveApp interface calls for its children to implement an application-specific validTransition function, defining the state machine of a ForceMove state channel DApp.
  */
-interface ForceMoveApp {
+interface IForceMoveApp {
     struct VariablePart {
         bytes outcome;
         bytes appData;

@@ -57,16 +57,16 @@ click IERC20 "/contract-api/natspec/IERC20";
 graph TD
 linkStyle default interpolate basis
 Outcome([Outcome])
-Adjudicator
+IAdjudicator
 IForceMove
 ForceMove
 NitroAdjudicator
 TESTForceMove
 TESTNitroAdjudicator
-ForceMoveApp-.-> ForceMove
+IForceMoveApp-.-> ForceMove
 IForceMove--> ForceMove
 Outcome--> NitroAdjudicator
-Adjudicator--> NitroAdjudicator
+IAdjudicator--> NitroAdjudicator
 ForceMove--> NitroAdjudicator
 ForceMove-->TESTForceMove
 NitroAdjudicator--> TESTNitroAdjudicator
@@ -77,15 +77,14 @@ classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
 classDef TestContract fill:#fafe4f,stroke-width:0px;
 classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 class Outcome,SafeMath Library;
-class IForceMove Abstraction;
-class Adjudicator,ForceMoveApp Interface;
+class IAdjudicator,IForceMoveApp, IForceMove Interface;
 class ForceMove Contract;
 class TESTForceMove,TESTNitroAdjudicator TestContract;
 class NitroAdjudicator DeployedContract;
-click ForceMoveApp "/contract-api/natspec/ForceMoveApp";
+click IForceMoveApp "/contract-api/natspec/IForceMoveApp";
 click SafeMath "/contract-api/natspec/SafeMath";
 click Outcome "/contract-api/natspec/Outcome";
-click Adjudicator "/contract-api/natspec/Adjudicator";
+click IAdjudicator "/contract-api/natspec/IAdjudicator";
 click ForceMove "/contract-api/natspec/ForceMove";
 click IForceMove "/contract-api/natspec/IForceMove";
 click NitroAdjudicator "/contract-api/natspec/NitroAdjudicator";
@@ -106,12 +105,12 @@ ERC20
 IERC20
 Token
 CountingApp
-ForceMoveApp
+IForceMoveApp
 SingleAssetPayments
 TrivialApp
-ForceMoveApp-->CountingApp
-ForceMoveApp-->TrivialApp
-ForceMoveApp-->SingleAssetPayments
+IForceMoveApp-->CountingApp
+IForceMoveApp-->TrivialApp
+IForceMoveApp-->SingleAssetPayments
 IERC20-->ERC20
 ERC20-->Token
 classDef Contract fill:#ffffff,stroke:#656664;
@@ -121,12 +120,12 @@ classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
 classDef TestContract fill:#fafe4f,stroke-width:0px;
 classDef fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 class Outcome,SafeMath Library;
-class ForceMoveApp,IERC20 Interface;
+class IForceMoveApp,IERC20 Interface;
 class SingleAssetPayments,TrivialApp,CountingApp,ERC20 Contract;
 class Token TestContract;
 click CountingApp "/contract-api/natspec/CountingApp";
 click ERC20 "/contract-api/natspec/ERC20";
-click ForceMoveApp "/contract-api/natspec/ForceMoveApp";
+click IForceMoveApp "/contract-api/natspec/IForceMoveApp";
 click IERC20 "/contract-api/natspec/IERC20";
 click Outcome "/contract-api/natspec/Outcome";
 click SafeMath "/contract-api/natspec/SafeMath";
@@ -150,13 +149,11 @@ Interface-->|Inherited by| Contract
 Library([Library])-.->|Imported by| Contract
 DeployedContract
 classDef Contract fill:#ffffff,stroke:#656664;
-classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
 classDef TestContract fill:#fafe4f,stroke-width:0px;
 classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
 classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
 class Library Library;
-class Abstraction Abstraction;
 class Contract Contract;
 class TESTContract TestContract;
 class Interface Interface;

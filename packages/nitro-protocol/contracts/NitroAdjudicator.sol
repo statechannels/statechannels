@@ -2,7 +2,7 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
-import './interfaces/Adjudicator.sol';
+import './interfaces/IAdjudicator.sol';
 import './ForceMove.sol';
 import './Outcome.sol';
 import './AssetHolder.sol';
@@ -10,7 +10,7 @@ import './AssetHolder.sol';
 /**
  * @dev The NitroAdjudicator contract extends ForceMove and hence inherits all ForceMove methods, and also extends and implements the Adjudicator interface, allowing for a finalized outcome to be pushed to an asset holder.
  */
-contract NitroAdjudicator is Adjudicator, ForceMove {
+contract NitroAdjudicator is IAdjudicator, ForceMove {
     /**
      * @notice Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
      * @dev Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
@@ -187,7 +187,7 @@ contract NitroAdjudicator is Adjudicator, ForceMove {
     function validTransition(
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
-        ForceMoveApp.VariablePart[2] memory ab, // [a,b]
+        IForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint48 turnNumB,
         address appDefinition
     ) public pure returns (bool) {

@@ -2,12 +2,12 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
-import './ForceMoveApp.sol';
+import './IForceMoveApp.sol';
 
 /**
- * @dev The IForceMove contract abstraction defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.
+ * @dev The IForceMove interface defines the interface that an implementation of ForceMove should implement. ForceMove protocol allows state channels to be adjudicated and finalized.
  */
-abstract contract IForceMove {
+interface IForceMove {
     struct Signature {
         uint8 v;
         bytes32 r;
@@ -48,6 +48,7 @@ abstract contract IForceMove {
     enum ChannelMode {Open, Challenge, Finalized}
 
     /**
+    
      * @notice Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
      * @dev Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
@@ -61,12 +62,12 @@ abstract contract IForceMove {
     function challenge(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
-    ) public virtual;
+    ) external ;
 
     /**
      * @notice Repsonds to an ongoing challenge registered against a state channel.
@@ -81,11 +82,11 @@ abstract contract IForceMove {
         address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
-        ForceMoveApp.VariablePart[2] memory variablePartAB,
+        IForceMoveApp.VariablePart[2] memory variablePartAB,
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
-    ) public virtual;
+    ) external ;
 
     /**
      * @notice Overwrites the `turnNumRecord` stored against a channel by providing a state with higher turn number, supported by a signature from each participant.
@@ -100,11 +101,11 @@ abstract contract IForceMove {
     function checkpoint(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
-    ) public virtual;
+    ) external ;
 
     /**
      * @notice Finalizes a channel by providing a finalization proof.
@@ -125,7 +126,7 @@ abstract contract IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public virtual;
+    ) external ;
 
     // events
 
@@ -149,7 +150,7 @@ abstract contract IForceMove {
         address challenger,
         bool isFinal,
         FixedPart fixedPart,
-        ForceMoveApp.VariablePart[] variableParts,
+        IForceMoveApp.VariablePart[] variableParts,
         Signature[] sigs,
         uint8[] whoSignedWhat
     );
