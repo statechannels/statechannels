@@ -28,7 +28,11 @@ contract AssetHolder is IAssetHolder {
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      * @param destination External destination or channel to transfer funds *to*.
      */
-    function transfer(bytes32 fromChannelId, bytes calldata allocationBytes, bytes32 destination) external {
+    function transfer(
+        bytes32 fromChannelId,
+        bytes calldata allocationBytes,
+        bytes32 destination
+    ) external {
         // checks
         _requireCorrectAllocationHash(fromChannelId, allocationBytes);
         // effects and interactions
