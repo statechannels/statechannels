@@ -159,7 +159,7 @@ describe('claim', () => {
 
         // Extract logs
         const {logs, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('./claim.gas.md', name, gasUsed);
+        await writeGasConsumption('claim.gas.md', name, gasUsed);
 
         // Compile events from logs
         const eventsFromLogs = compileEventsFromLogs(logs, [AssetHolder]);

@@ -53,9 +53,6 @@ junit.xml
 **/deployment/network-map.json
 **/.etherlime-store/
 **/.outputParameter
-**/gas.json
-**/gas.md
-**/*.gas.md
 storybook-static
 
 

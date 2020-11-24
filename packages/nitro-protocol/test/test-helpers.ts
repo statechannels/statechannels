@@ -381,7 +381,14 @@ export async function writeGasConsumption(
   description: string,
   gas: BigNumberish
 ): Promise<void> {
-  await fs.appendFile(filename, description + ':\n' + gas.toString() + ' gas\n\n', err => {
+  const dir = './gas-artifacts';
+
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir);
+  }
+
+  const path = dir + '/' + filename;
+  await fs.appendFile(path, description + ':\n' + gas.toString() + ' gas\n\n', err => {
     if (err) throw err;
   });
 }

@@ -100,7 +100,7 @@ describe('transferAll', () => {
         await expectRevert(() => tx, reason);
       } else {
         const {events: eventsFromLogs, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('./transferAll.gas.md', name, gasUsed);
+        await writeGasConsumption('transferAll.gas.md', name, gasUsed);
         const expectedEvents = [];
         Object.keys(events).forEach(destination => {
           if (events[destination] && events[destination].gt(0)) {

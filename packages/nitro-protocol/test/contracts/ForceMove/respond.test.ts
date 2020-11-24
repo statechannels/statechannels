@@ -136,7 +136,7 @@ describe('respond', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('./respond.gas.md', description, receipt.gasUsed);
+        await writeGasConsumption('respond.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         expect(event.args).toMatchObject({
