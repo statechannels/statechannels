@@ -76,11 +76,7 @@ commands:
         type: string
     steps:
       - store_artifacts:
-          path: /home/circleci/project/packages/<< parameters.package >>/gas.json
-          destination: << parameters.package >>-gas.json
-      - store_artifacts:
-          path: /home/circleci/project/packages/<< parameters.package >>/gas.md
-          destination: << parameters.package >>-gas.md
+          path: /home/circleci/project/packages/<< parameters.package >>/gas-artifacts
 
   upload_artifacts:
     description: 'Upload generic artifacts'
