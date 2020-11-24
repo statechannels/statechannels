@@ -82,7 +82,7 @@ describe('deposit', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const {gasUsed, events} = await (await tx).wait();
-        await writeGasConsumption('./deposit.gas.md', description, gasUsed);
+        await writeGasConsumption('deposit.gas.md', description, gasUsed);
         const event = getDepositedEvent(events);
         expect(event).toMatchObject({
           destination,

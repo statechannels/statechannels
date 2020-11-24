@@ -209,7 +209,7 @@ describe('challenge', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('./challenge.gas.md', description, receipt.gasUsed);
+        await writeGasConsumption('challenge.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         // Catch ChallengeRegistered event
