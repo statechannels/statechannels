@@ -6,7 +6,7 @@ import {protocol} from '../open-channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {SignState, fundChannel} from '../actions';
 import {channel} from '../../models/__test__/fixtures/channel';
-import {Channel} from '../../models/channel';
+import {directFundingStatus} from '../state';
 
 import {applicationProtocolState} from './fixtures/protocol-state';
 
@@ -62,12 +62,7 @@ test.each`
       latestSignedByMe,
       funding,
       myIndex,
-      directFundingStatus: Channel.directFundingStatus(
-        supported,
-        funding,
-        participants[myIndex],
-        'Direct'
-      ),
+      directFundingStatus: directFundingStatus(supported, funding, participants[myIndex], 'Direct'),
     },
   });
   expect(protocol(ps)).toMatchObject(action);

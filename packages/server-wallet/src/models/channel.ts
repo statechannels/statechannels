@@ -10,12 +10,9 @@ import {
   outcomesEqual,
   Zero,
   Address,
-  isSimpleAllocation,
-  BN,
-  checkThat,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
-import {ChannelResult, FundingStatus, FundingStrategy} from '@statechannels/client-api-schema';
+import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {Bytes32, Uint48} from '../type-aliases';
@@ -24,6 +21,7 @@ import {
   toChannelResult,
   ChainServiceRequests,
   ChannelStateFunding,
+  directFundingStatus,
 } from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {dropNonVariables} from '../state-utils';
@@ -177,67 +175,6 @@ export class Channel extends Model implements RequiredColumns {
     });
   }
 
-  public static directFundingStatus(
-    supported: SignedStateVarsWithHash | undefined,
-    fundingFn: (address: Address) => ChannelStateFunding,
-    myParticipant: Participant,
-    fundingStrategy: FundingStrategy
-  ): FundingStatus {
-    if (fundingStrategy !== 'Direct') {
-      return 'Uncategorized';
-    }
-
-    const outcome = supported?.outcome;
-    if (!supported || !outcome) {
-      return 'Uncategorized';
-    }
-
-    const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
-
-    // Collapse all allocation items with my destination into one
-    const myAllocation = allocationItems
-      .filter(ai => ai.destination === myParticipant.destination)
-      .reduce(
-        (soFar, currentAi) => ({
-          ...soFar,
-          amount: BN.add(soFar.amount, currentAi.amount),
-        }),
-        {
-          destination: myParticipant.destination,
-          amount: BN.from(0),
-        }
-      );
-
-    const funding = fundingFn(assetHolderAddress);
-
-    const amountTransferredToMe = funding.transferredOut
-      .filter(tf => tf.toAddress === myAllocation.destination)
-      .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
-    // Note that following case:
-    // - The total amount allocated to me are zero
-    // - Only one final state is signed, and that state is supported.
-    // This channel is categorized as Defunded even though all final states might not be signed yet.
-    if (supported.isFinal && BN.gte(amountTransferredToMe, myAllocation.amount)) {
-      return 'Defunded';
-    }
-
-    const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fullFunding)) {
-      return 'Funded';
-    }
-
-    const allocationsBeforeMe = _.takeWhile(
-      allocationItems,
-      a => a.destination !== myAllocation.destination
-    );
-    const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
-    if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
-      return 'ReadyToFund';
-    }
-
-    return 'Uncategorized';
-  }
-
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
     super.$beforeValidate(jsonSchema, json, _opt);
 
@@ -291,12 +228,7 @@ export class Channel extends Model implements RequiredColumns {
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
-    const directFundingStatus = Channel.directFundingStatus(
-      supported,
-      funding,
-      participants[myIndex],
-      fundingStrategy
-    );
+    const dfs = directFundingStatus(supported, funding, participants[myIndex], fundingStrategy);
     return {
       myIndex: myIndex as 0 | 1,
       participants,
@@ -310,7 +242,7 @@ export class Channel extends Model implements RequiredColumns {
       chainServiceRequests,
       fundingStrategy,
       fundingLedgerChannelId,
-      directFundingStatus,
+      directFundingStatus: dfs,
     };
   }
 

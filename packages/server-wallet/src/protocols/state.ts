@@ -7,6 +7,9 @@ import {
   Participant,
   Address,
   Destination,
+  SignedStateVarsWithHash,
+  isSimpleAllocation,
+  BN,
 } from '@statechannels/wallet-core';
 import {
   ChannelResult,
@@ -14,6 +17,7 @@ import {
   FundingStatus,
   FundingStrategy,
 } from '@statechannels/client-api-schema';
+import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
 
@@ -116,6 +120,67 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
     fundingStatus: directFundingStatus,
   };
 };
+
+export function directFundingStatus(
+  supported: SignedStateVarsWithHash | undefined,
+  fundingFn: (address: Address) => ChannelStateFunding,
+  myParticipant: Participant,
+  fundingStrategy: FundingStrategy
+): FundingStatus {
+  if (fundingStrategy !== 'Direct') {
+    return 'Uncategorized';
+  }
+
+  const outcome = supported?.outcome;
+  if (!supported || !outcome) {
+    return 'Uncategorized';
+  }
+
+  const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
+
+  // Collapse all allocation items with my destination into one
+  const myAllocation = allocationItems
+    .filter(ai => ai.destination === myParticipant.destination)
+    .reduce(
+      (soFar, currentAi) => ({
+        ...soFar,
+        amount: BN.add(soFar.amount, currentAi.amount),
+      }),
+      {
+        destination: myParticipant.destination,
+        amount: BN.from(0),
+      }
+    );
+
+  const funding = fundingFn(assetHolderAddress);
+
+  const amountTransferredToMe = funding.transferredOut
+    .filter(tf => tf.toAddress === myAllocation.destination)
+    .reduce((soFar, currentAi) => BN.add(soFar, currentAi.amount), BN.from(0));
+  // Note that following case:
+  // - The total amount allocated to me are zero
+  // - Only one final state is signed, and that state is supported.
+  // This channel is categorized as Defunded even though all final states might not be signed yet.
+  if (supported.isFinal && BN.gte(amountTransferredToMe, myAllocation.amount)) {
+    return 'Defunded';
+  }
+
+  const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+  if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fullFunding)) {
+    return 'Funded';
+  }
+
+  const allocationsBeforeMe = _.takeWhile(
+    allocationItems,
+    a => a.destination !== myAllocation.destination
+  );
+  const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
+  if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
+    return 'ReadyToFund';
+  }
+
+  return 'Uncategorized';
+}
 
 /*
 A protocol should accept a "protocol state", and return or resolve to
