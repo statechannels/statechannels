@@ -3,7 +3,7 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 import './interfaces/IForceMove.sol';
-import './interfaces/ForceMoveApp.sol';
+import './interfaces/IForceMoveApp.sol';
 
 /**
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
@@ -47,7 +47,7 @@ contract ForceMove is IForceMove {
     function challenge(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat,
@@ -117,7 +117,7 @@ contract ForceMove is IForceMove {
         address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
-        ForceMoveApp.VariablePart[2] memory variablePartAB,
+        IForceMoveApp.VariablePart[2] memory variablePartAB,
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
@@ -189,7 +189,7 @@ contract ForceMove is IForceMove {
     function checkpoint(
         FixedPart memory fixedPart,
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
@@ -413,7 +413,7 @@ contract ForceMove is IForceMove {
      */
     function _requireStateSupportedBy(
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
         bytes32 channelId,
         FixedPart memory fixedPart,
@@ -456,7 +456,7 @@ contract ForceMove is IForceMove {
         // returns stateHashes array if valid
         // else, reverts
         uint48 largestTurnNum,
-        ForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
         bytes32 channelId,
         FixedPart memory fixedPart
@@ -502,7 +502,7 @@ contract ForceMove is IForceMove {
     function _requireValidTransition(
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
-        ForceMoveApp.VariablePart[2] memory ab, // [a,b]
+        IForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint48 turnNumB,
         address appDefinition
     ) internal pure returns (bool) {
@@ -530,7 +530,7 @@ contract ForceMove is IForceMove {
                 );
             } else {
                 require(
-                    ForceMoveApp(appDefinition).validTransition(
+                    IForceMoveApp(appDefinition).validTransition(
                         ab[0],
                         ab[1],
                         turnNumB,

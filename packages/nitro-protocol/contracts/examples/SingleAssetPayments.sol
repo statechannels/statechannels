@@ -2,13 +2,13 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
-import '../interfaces/ForceMoveApp.sol';
+import '../interfaces/IForceMoveApp.sol';
 import '../Outcome.sol';
 
 /**
  * @dev The SingleAssetPayments contract complies with the ForceMoveApp interface and implements a simple payment channel with a single asset type only.
  */
-contract SingleAssetPayments is ForceMoveApp {
+contract SingleAssetPayments is IForceMoveApp {
     /**
      * @notice Encodes the payment channel update rules.
      * @dev Encodes the payment channel update rules.
