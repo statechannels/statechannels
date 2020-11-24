@@ -8,7 +8,7 @@ import {
 } from './types';
 
 export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
-  connection: {host: string; port: number};
+  connection: {host: string; port: number; user: string};
 } = {
   pool: undefined,
   debug: false,

@@ -11,13 +11,20 @@ import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {
-  createTestConfig,
+  overwriteConfigWithDatabaseName,
   extractDBConfigFromServerWalletConfig,
   ServerWalletConfig,
+  defaultTestConfig,
 } from '../src/config';
 
-export const payerConfig: ServerWalletConfig = createTestConfig('payer');
-export const receiverConfig: ServerWalletConfig = createTestConfig('receiver');
+export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseName(
+  defaultTestConfig,
+  'payer'
+);
+export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseName(
+  defaultTestConfig,
+  'receiver'
+);
 
 import {PerformanceTimer} from './payer/timers';
 

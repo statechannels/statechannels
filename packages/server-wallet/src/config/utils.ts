@@ -4,12 +4,7 @@ import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
 import {Level} from 'pino';
 
-import {
-  defaultDatabaseConfiguration,
-  defaultTestConfig,
-  DEFAULT_DB_NAME,
-  DEFAULT_DB_USER,
-} from './defaults';
+import {defaultDatabaseConfiguration, DEFAULT_DB_NAME, DEFAULT_DB_USER} from './defaults';
 import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
 
 function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
@@ -78,21 +73,29 @@ export function extractDBConfigFromServerWalletConfig(
   };
 }
 
-export function createTestConfig(databaseName: string): ServerWalletConfig {
-  const {host, port} = defaultTestConfig.databaseConfiguration.connection;
+export function overwriteConfigWithDatabaseName(
+  defaultTestConfig: ServerWalletConfig,
+  databaseName: string
+): ServerWalletConfig {
+  const {host, port} = getDatabaseConnectionConfig(defaultTestConfig);
 
   return {
     ...defaultTestConfig,
     databaseConfiguration: {
       ...defaultTestConfig.databaseConfiguration,
-      connection: {host, port, dbName: databaseName || DEFAULT_DB_NAME},
+      connection: {
+        host: host || 'localhost',
+        port: port || 5432,
+        dbName: databaseName || DEFAULT_DB_NAME,
+      },
     },
   };
 }
-type DatabaseConnectionConfigObject = Exclude<DatabaseConnectionConfiguration, string>;
+type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
+
 export function getDatabaseConnectionConfig(
   config: ServerWalletConfig
-): DatabaseConnectionConfigObject {
+): DatabaseConnectionConfigObject & {host: string; port: number} {
   if (typeof config.databaseConfiguration.connection === 'string') {
     const {connection: defaultConnection} = defaultDatabaseConfiguration;
     const {port, host, user, database, password} = parse(config.databaseConfiguration.connection);
@@ -100,8 +103,8 @@ export function getDatabaseConnectionConfig(
       port: port ? parseInt(port) : defaultConnection.port,
       host: host || defaultConnection.host,
       dbName: database || '',
-      user,
-      password,
+      user: user || defaultConnection.user,
+      password: password || '',
     };
   } else {
     // TODO: Sort out the typing
