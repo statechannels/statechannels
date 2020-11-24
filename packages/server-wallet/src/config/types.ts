@@ -9,14 +9,14 @@ export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration &
 /**
  * Either a database connection string or a config object specifying the database name
  */
-export type RequiredConnectionConfiguration = {dbName: string} | string;
+export type RequiredConnectionConfiguration =
+  | {dbName: string; host: string; user: string; password?: string}
+  | string;
 
 /**
  * Optional database config properties.
  */
-export type OptionalConnectionConfiguration =
-  | {host: string; port: number; user?: string; password?: string}
-  | string;
+export type OptionalConnectionConfiguration = {port: number} | string;
 
 /**
  * Database pool size options
@@ -53,6 +53,9 @@ export type MetricsConfiguration = {timingMetrics: boolean; metricsOutputFile?: 
  */
 export type RequiredServerWalletConfig = {
   databaseConfiguration: RequiredDatabaseConfiguration;
+  workerThreadAmount: number;
+  networkConfiguration: NetworkConfiguration;
+  ethereumPrivateKey: string;
 };
 
 /**
@@ -60,10 +63,7 @@ export type RequiredServerWalletConfig = {
  */
 export interface OptionalServerWalletConfig {
   databaseConfiguration: OptionalDatabaseConfiguration;
-  ethereumPrivateKey: string;
-  networkConfiguration: NetworkConfiguration;
   skipEvmValidation: boolean;
-  workerThreadAmount: number;
   loggingConfiguration: LoggingConfiguration;
   metricsConfiguration: MetricsConfiguration;
 }
@@ -84,9 +84,9 @@ export type IncomingServerWalletConfig = RequiredServerWalletConfig &
  * Various network configuration options
  */
 export type NetworkConfiguration = {
-  erc20Address?: string;
-  ethAssetHolderAddress?: string;
-  erc20AssetHolderAddress?: string;
+  erc20Address: string;
+  ethAssetHolderAddress: string;
+  erc20AssetHolderAddress: string;
   rpcEndpoint?: string;
   chainNetworkID: string;
 };

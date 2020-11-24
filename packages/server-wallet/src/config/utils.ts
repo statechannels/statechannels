@@ -1,15 +1,12 @@
 /* eslint-disable no-process-env */
+import {constants} from 'ethers';
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
 import {Level} from 'pino';
 
-import {defaultDatabaseConfiguration, DEFAULT_DB_USER} from './defaults';
-import {
-  ServerWalletConfig,
-  DatabaseConnectionConfiguration,
-  OptionalServerWalletConfig,
-} from './types';
+import {defaultDatabaseConfiguration} from './defaults';
+import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
 
 function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
   if (!envValue) return defaultValue || false;
@@ -21,15 +18,20 @@ function readInt(envValue: string | undefined, defaultValue?: number): number {
 }
 
 export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWalletConfig {
+  const connection = process.env.SERVER_URL || {
+    host: process.env.SERVER_HOST || defaultDatabaseConfiguration.connection.host,
+    port: Number(process.env.SERVER_PORT) || defaultDatabaseConfiguration.connection.port,
+    dbName: process.env.SERVER_DB_NAME || '',
+    user: process.env.SERVER_DB_USER || '',
+    password: process.env.SERVER_DB_PASSWORD,
+  };
+  // TODO: This belongs with other validation when we add it
+  if (!connection) {
+    throw new Error('No database configuration provided by env vars');
+  }
   return {
     databaseConfiguration: {
-      connection: process.env.SERVER_URL || {
-        host: process.env.SERVER_HOST || defaultDatabaseConfiguration.connection.host,
-        port: Number(process.env.SERVER_PORT) || defaultDatabaseConfiguration.connection.port,
-        dbName: process.env.SERVER_DB_NAME || '',
-        user: process.env.SERVER_DB_USER,
-        password: process.env.SERVER_DB_PASSWORD,
-      },
+      connection,
       debug: readBoolean(process.env.DEBUG_KNEX, config.databaseConfiguration.debug),
     },
     metricsConfiguration: {
@@ -44,9 +46,9 @@ export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWa
     networkConfiguration: {
       rpcEndpoint: process.env.RPC_ENDPOINT,
       chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x00',
-      ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
-      erc20Address: process.env.ERC20_ADDRESS,
-      erc20AssetHolderAddress: process.env.ERC20_ASSET_HOLDER_ADDRESS,
+      ethAssetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero,
+      erc20Address: process.env.ERC20_ADDRESS || constants.AddressZero,
+      erc20AssetHolderAddress: process.env.ERC20_ASSET_HOLDER_ADDRESS || constants.AddressZero,
     },
 
     skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
@@ -70,7 +72,7 @@ export function extractDBConfigFromServerWalletConfig(
     connection: {
       ...connectionConfig,
       database: connectionConfig.dbName,
-      user: connectionConfig.user || DEFAULT_DB_USER,
+      user: connectionConfig.user || '',
     },
     ...knexSnakeCaseMappers(),
     pool: serverWalletConfig.databaseConfiguration.pool || {},
@@ -78,15 +80,17 @@ export function extractDBConfigFromServerWalletConfig(
 }
 type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
 
+type PartialConfigObject = Partial<DatabaseConnectionConfigObject> &
+  Required<Pick<DatabaseConnectionConfigObject, 'dbName'>>;
 export function overwriteConfigWithDatabaseConnection(
-  config: OptionalServerWalletConfig,
-  databaseConnectionConfig: DatabaseConnectionConfiguration
+  config: ServerWalletConfig,
+  databaseConnectionConfig: PartialConfigObject | string
 ): ServerWalletConfig {
   return {
     ...config,
     databaseConfiguration: {
       ...config.databaseConfiguration,
-      connection: isDatabaseConfigObject(databaseConnectionConfig)
+      connection: isPartialDatabaseConfigObject(databaseConnectionConfig)
         ? {
             host: databaseConnectionConfig.host || defaultDatabaseConfiguration.connection.host,
             port: databaseConnectionConfig.port || defaultDatabaseConfiguration.connection.port,
@@ -99,9 +103,9 @@ export function overwriteConfigWithDatabaseConnection(
   };
 }
 
-function isDatabaseConfigObject(
-  connectionConfig: DatabaseConnectionConfiguration
-): connectionConfig is DatabaseConnectionConfigObject {
+function isPartialDatabaseConfigObject(
+  connectionConfig: PartialConfigObject | string
+): connectionConfig is PartialConfigObject {
   return typeof connectionConfig !== 'string';
 }
 

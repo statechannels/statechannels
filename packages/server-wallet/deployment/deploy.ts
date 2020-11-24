@@ -1,8 +1,9 @@
 import {Address} from '@statechannels/client-api-schema';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {GanacheDeployer} from '@statechannels/devtools';
-import {defaultConfig} from '../src/config';
 import {Wallet} from 'ethers';
+
+import {defaultTestConfig} from '../src/config';
 
 // NOTE: deploying contracts like this allows the onchain service package to
 // be easily extracted
@@ -16,7 +17,7 @@ export type TestNetworkContext = {
 
 export async function deploy(): Promise<TestNetworkContext> {
   // TODO: best way to configure this?
-  const deployer = new GanacheDeployer(8545, defaultConfig.ethereumPrivateKey);
+  const deployer = new GanacheDeployer(8545, defaultTestConfig.ethereumPrivateKey);
   const {
     EthAssetHolderArtifact,
     TokenArtifact,
@@ -28,7 +29,7 @@ export async function deploy(): Promise<TestNetworkContext> {
   const ERC20_ADDRESS = await deployer.deploy(
     TokenArtifact as any,
     {},
-    new Wallet(defaultConfig.ethereumPrivateKey).address
+    new Wallet(defaultTestConfig.ethereumPrivateKey).address
   );
   const ERC20_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     Erc20AssetHolderArtifact as any,
