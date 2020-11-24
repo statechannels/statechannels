@@ -61,11 +61,11 @@ interface IForceMove {
     function challenge(
         FixedPart calldata fixedPart,
         uint48 largestTurnNum,
-        IForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] calldata variableParts,
         uint8 isFinalCount, // how many of the states are final
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat,
-        Signature memory challengerSig
+        Signature[] calldata sigs,
+        uint8[] calldata whoSignedWhat,
+        Signature calldata challengerSig
     ) external;
 
     /**
@@ -79,12 +79,12 @@ interface IForceMove {
      */
     function respond(
         address challenger,
-        bool[2] memory isFinalAB,
-        FixedPart memory fixedPart,
-        IForceMoveApp.VariablePart[2] memory variablePartAB,
+        bool[2] calldata isFinalAB,
+        FixedPart calldata fixedPart,
+        IForceMoveApp.VariablePart[2] calldata variablePartAB,
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
-        Signature memory sig
+        Signature calldata sig
     ) external;
 
     /**
@@ -100,10 +100,10 @@ interface IForceMove {
     function checkpoint(
         FixedPart calldata fixedPart,
         uint48 largestTurnNum,
-        IForceMoveApp.VariablePart[] memory variableParts,
+        IForceMoveApp.VariablePart[] calldata variableParts,
         uint8 isFinalCount, // how many of the states are final
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat
+        Signature[] calldata sigs,
+        uint8[] calldata whoSignedWhat
     ) external;
 
     /**
@@ -123,8 +123,8 @@ interface IForceMove {
         bytes32 appPartHash,
         bytes32 outcomeHash,
         uint8 numStates,
-        uint8[] memory whoSignedWhat,
-        Signature[] memory sigs
+        uint8[] calldata whoSignedWhat,
+        Signature[] calldata sigs
     ) external;
 
     // events
