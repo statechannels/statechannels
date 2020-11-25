@@ -681,6 +681,8 @@ class StoreError extends WalletError {
     channelMissing: 'Channel not found',
     unimplementedObjective: 'Unimplemented objective',
     unimplementedFundingStrategy: 'Unimplemented funding strategy',
+    invalidFundingLedgerChannelId: 'Ledger channel intended to fund channel does not exist',
+    closedFundingLedgerChannelId: 'Ledger channel intended to fund channel has already been closed',
   } as const;
   constructor(reason: Values<typeof StoreError.reasons>, public readonly data: any = undefined) {
     super(reason);
@@ -697,6 +699,13 @@ async function createChannel(
   fundingLedgerChannelId: Bytes32 | undefined,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
+  if (fundingLedgerChannelId) {
+    const ledger = await Channel.forId(fundingLedgerChannelId, txOrKnex);
+    if (!ledger) throw new StoreError(StoreError.reasons.invalidFundingLedgerChannelId);
+    if (ledger.supported && ledger.supported.isFinal)
+      throw new StoreError(StoreError.reasons.closedFundingLedgerChannelId);
+  }
+
   const addresses = constants.participants.map(p => p.signingAddress);
 
   const signingWallet = await SigningWallet.query(txOrKnex)
