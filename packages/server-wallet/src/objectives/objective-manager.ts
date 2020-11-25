@@ -1,5 +1,5 @@
 import {Logger} from 'pino';
-import {BN} from '@statechannels/wallet-core';
+import {BN, unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 
 import {Bytes32} from '../type-aliases';
@@ -13,7 +13,6 @@ import {
   ProtocolState as CloseChannelProtocolState,
   protocol as closeChannelProtocol,
 } from '../protocols/close-channel';
-import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
@@ -21,7 +20,7 @@ import {FundChannel, SignState, Withdraw} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WalletResponse} from '../wallet/response-builder';
 import {Channel} from '../models/channel';
-import {DBObjective} from '../models/objective';
+import {DBCloseChannelObjective, DBObjective, DBOpenChannelObjective} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -55,38 +54,36 @@ export class ObjectiveManager {
    */
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     const objective = await this.store.getObjective(objectiveId);
+
+    switch (objective.type) {
+      case 'OpenChannel':
+        return this.crankOpenChannel(objective, response);
+      case 'CloseChannel':
+        return this.crankCloseChannel(objective, response);
+      default:
+        throw new Error(`ObjectiveManager.crank(): unsupported objective`);
+    }
+  }
+
+  async crankOpenChannel(
+    objective: DBOpenChannelObjective,
+    response: WalletResponse
+  ): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
     let attemptAnotherProtocolStep = true;
 
     while (attemptAnotherProtocolStep) {
       await this.store.lockApp(channelToLock, async tx => {
-        let nextAction: ChannelState.ProtocolResult;
-        let protocolState: SupportedProtocolState;
-
-        if (objective.type === 'OpenChannel') {
-          protocolState = await getOpenChannelProtocolState(
-            this.store,
-            objective.data.targetChannelId,
-            tx
-          );
-          nextAction = recordFunctionMetrics(
-            openChannelProtocol(protocolState as OpenChannelProtocolState),
-            this.timingMetrics
-          );
-        } else if (objective.type === 'CloseChannel') {
-          protocolState = await getCloseChannelProtocolState(
-            this.store,
-            objective.data.targetChannelId,
-            tx
-          );
-          nextAction = recordFunctionMetrics(
-            closeChannelProtocol(protocolState as OpenChannelProtocolState),
-            this.timingMetrics
-          );
-        } else {
-          throw new Error('Unexpected objective');
-        }
+        const protocolState = await getOpenChannelProtocolState(
+          this.store,
+          objective.data.targetChannelId,
+          tx
+        );
+        const nextAction = recordFunctionMetrics(
+          openChannelProtocol(protocolState),
+          this.timingMetrics
+        );
 
         if (nextAction) {
           try {
@@ -101,17 +98,63 @@ export class ObjectiveManager {
                 attemptAnotherProtocolStep = false;
                 await this.completeObjective(objective, protocolState, tx, response);
                 break;
-              case 'Withdraw':
-                await this.withdraw(nextAction, protocolState, tx);
-                break;
               case 'RequestLedgerFunding':
                 await this.requestLedgerFunding(protocolState, tx);
+                break;
+              default:
+                unreachable(nextAction);
+            }
+          } catch (error) {
+            this.logger.error({error}, 'Error handling action');
+            await tx.rollback(error);
+            attemptAnotherProtocolStep = false;
+          }
+        } else {
+          response.queueChannelState(protocolState.app);
+          attemptAnotherProtocolStep = false;
+        }
+      });
+    }
+  }
+
+  async crankCloseChannel(
+    objective: DBCloseChannelObjective,
+    response: WalletResponse
+  ): Promise<void> {
+    const channelToLock = objective.data.targetChannelId;
+
+    let attemptAnotherProtocolStep = true;
+
+    while (attemptAnotherProtocolStep) {
+      await this.store.lockApp(channelToLock, async tx => {
+        const protocolState = await getCloseChannelProtocolState(
+          this.store,
+          objective.data.targetChannelId,
+          tx
+        );
+        const nextAction = recordFunctionMetrics(
+          closeChannelProtocol(protocolState),
+          this.timingMetrics
+        );
+
+        if (nextAction) {
+          try {
+            switch (nextAction.type) {
+              case 'SignState':
+                await this.signState(nextAction, protocolState, tx, response);
+                break;
+              case 'CompleteObjective':
+                attemptAnotherProtocolStep = false;
+                await this.completeObjective(objective, protocolState, tx, response);
+                break;
+              case 'Withdraw':
+                await this.withdraw(nextAction, protocolState, tx);
                 break;
               case 'RequestLedgerDefunding':
                 await this.requestLedgerDefunding(protocolState, tx);
                 break;
               default:
-                throw 'Unimplemented';
+                unreachable(nextAction);
             }
           } catch (error) {
             this.logger.error({error}, 'Error handling action');
