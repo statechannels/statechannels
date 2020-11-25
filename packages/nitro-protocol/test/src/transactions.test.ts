@@ -54,7 +54,7 @@ beforeAll(async () => {
 });
 
 describe('transaction-generators', () => {
-  it('creates a force move transaction', async () => {
+  it('creates a challenge transaction', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [signedState],
       wallet.privateKey
