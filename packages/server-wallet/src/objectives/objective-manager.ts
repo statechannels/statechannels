@@ -55,12 +55,7 @@ export class ObjectiveManager {
    */
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     const objective = await this.store.getObjective(objectiveId);
-
-    let channelToLock;
-
-    if (objective.type === 'OpenChannel' || objective.type === 'CloseChannel')
-      channelToLock = objective.data.targetChannelId;
-    else throw new Error('ObjectiveManager.crank(): unsupported objective');
+    const channelToLock = objective.data.targetChannelId;
 
     let attemptAnotherProtocolStep = true;
 
