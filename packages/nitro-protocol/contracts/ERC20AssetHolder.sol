@@ -16,11 +16,11 @@ contract ERC20AssetHolder is AssetHolder {
      * @notice Constructor function storing the AdjudicatorAddress and instantiating an interface to an ERC20 Token contract.
      * @dev Constructor function storing the AdjudicatorAddress and instantiating an interface to an ERC20 Token contract.
      * @param _AdjudicatorAddress Address of an Adjudicator  contract, supplied at deploy-time.
-     * @param _TokenAddress Address of an ERC20 Token  contract, supplied at deploy-time.
+     * @param _Token An ERC20 Token  contract, supplied at deploy-time.
      */
-    constructor(address _AdjudicatorAddress, address _TokenAddress) {
+    constructor(address _AdjudicatorAddress, IERC20 _Token) {
         AdjudicatorAddress = _AdjudicatorAddress;
-        Token = IERC20(_TokenAddress);
+        Token = _Token;
     }
 
     /**
