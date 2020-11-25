@@ -45,7 +45,7 @@ contract ForceMove is IForceMove {
      * @param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
      */
     function challenge(
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         uint48 largestTurnNum,
         IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
@@ -121,7 +121,7 @@ contract ForceMove is IForceMove {
     function respond(
         address challenger,
         bool[2] memory isFinalAB,
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         IForceMoveApp.VariablePart[2] memory variablePartAB,
         // variablePartAB[0] = challengeVariablePart
         // variablePartAB[1] = responseVariablePart
@@ -192,7 +192,7 @@ contract ForceMove is IForceMove {
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      */
     function checkpoint(
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         uint48 largestTurnNum,
         IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount, // how many of the states are final
@@ -231,7 +231,7 @@ contract ForceMove is IForceMove {
      */
     function conclude(
         uint48 largestTurnNum,
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         bytes32 appPartHash,
         bytes32 outcomeHash,
         uint8 numStates,
@@ -421,7 +421,7 @@ contract ForceMove is IForceMove {
         IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
         bytes32 channelId,
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
     ) internal pure returns (bytes32) {
@@ -464,7 +464,7 @@ contract ForceMove is IForceMove {
         IForceMoveApp.VariablePart[] memory variableParts,
         uint8 isFinalCount,
         bytes32 channelId,
-        FixedPart memory fixedPart
+        FixedPart calldata fixedPart
     ) internal pure returns (bytes32[] memory) {
         bytes32[] memory stateHashes = new bytes32[](variableParts.length);
         uint48 firstFinalTurnNum = largestTurnNum - isFinalCount + 1;
@@ -795,7 +795,7 @@ contract ForceMove is IForceMove {
         uint48 turnNum,
         bool isFinal,
         bytes32 channelId,
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         bytes memory appData,
         bytes32 outcomeHash
     ) internal pure returns (bytes32) {
@@ -843,7 +843,7 @@ contract ForceMove is IForceMove {
      * @param fixedPart Part of the state that does not change
      * @return channelId
      */
-    function _getChannelId(FixedPart memory fixedPart) internal pure returns (bytes32 channelId) {
+    function _getChannelId(FixedPart calldata fixedPart) internal pure returns (bytes32 channelId) {
         require(fixedPart.chainId == getChainID(), 'Incorrect chainId');
         channelId = keccak256(
             abi.encode(getChainID(), fixedPart.participants, fixedPart.channelNonce)

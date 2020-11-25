@@ -95,13 +95,13 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
      */
     function concludePushOutcomeAndTransferAll(
         uint48 largestTurnNum,
-        FixedPart memory fixedPart,
+        FixedPart calldata fixedPart,
         bytes32 appPartHash,
         bytes memory outcomeBytes,
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public {
+    ) external {
         // requirements
         bytes32 channelId = _getChannelId(fixedPart);
 
