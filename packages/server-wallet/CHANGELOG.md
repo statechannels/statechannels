@@ -3,6 +3,38 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.12.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.12.0...@statechannels/server-wallet@1.12.1) (2020-11-25)
+
+
+### Bug Fixes
+
+* allow optional config in overwrite ([d5b9fb8](https://github.com/statechannels/statechannels/commit/d5b9fb858ae35fdb4a07033fbfc4f06ec8617023))
+* default amount of worker threads ([98f17c2](https://github.com/statechannels/statechannels/commit/98f17c202c72e07dd6f03b4832a03d31f25fc830))
+* default to skipEvmValidation=true ([a08cb95](https://github.com/statechannels/statechannels/commit/a08cb950214e3633f88cdb4c6528fde298ee3d5b))
+* drop db only if exists ([45d2e12](https://github.com/statechannels/statechannels/commit/45d2e12ddab743e62af916a6d193aeed34df6c25))
+* fix chain tests ([08d0bc4](https://github.com/statechannels/statechannels/commit/08d0bc41c54345586c6c788c74385d0ef444df7f))
+* fix directly funded test ([035c4f7](https://github.com/statechannels/statechannels/commit/035c4f75850dd208cd512ab0aa585beb0dc6a3d5))
+* fix incorrect ledger funding insufficient funds error string equality check ([b71c1bc](https://github.com/statechannels/statechannels/commit/b71c1bc95182d65df67c0d5362fb830da8feb83a))
+* fix wallet create typing ([77f5513](https://github.com/statechannels/statechannels/commit/77f55134aa87c6b1776aa4732c44bdfa80eba750))
+* get tests passing ([21bafa1](https://github.com/statechannels/statechannels/commit/21bafa187c209fb879aecb0c9c52f420fe82d295))
+* move more fields  into Required ([9ff7acd](https://github.com/statechannels/statechannels/commit/9ff7acd6bb623c71e95c980b38553a170394eb81))
+* overwrite with env vars to support ci ([e740762](https://github.com/statechannels/statechannels/commit/e740762f192417044036af149baecb6474a508d6))
+* remove unused stateChannelPrivateKey config entry ([fd4d47a](https://github.com/statechannels/statechannels/commit/fd4d47a4ed939f26f81205210f337626b501fb61))
+* respect env vars for db config ([e9e50f8](https://github.com/statechannels/statechannels/commit/e9e50f84cc72adba030b823bf928bd9b809955cc))
+* set default db user ([551dd00](https://github.com/statechannels/statechannels/commit/551dd00c739b7858cc7012edc67b0662f51db535))
+* typo ([85e2adc](https://github.com/statechannels/statechannels/commit/85e2adc67b4abe1eacb9b07a078e3b66cfa935ed))
+* unbreak migrations ([762f9ec](https://github.com/statechannels/statechannels/commit/762f9ec0ae266c2a5d69333eb6417150a7e2b2c7))
+
+
+### Performance Improvements
+
+* add index on ledger_channel_id ([69033f4](https://github.com/statechannels/statechannels/commit/69033f4f61606b7f5f027f85802b498c4d5fda80))
+* optimize queries for ledger requests on run loop ([98f7c7c](https://github.com/statechannels/statechannels/commit/98f7c7c29516ac538524b82447950f442680fe5f))
+
+
+
+
+
 # [1.12.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.11.8...@statechannels/server-wallet@1.12.0) (2020-11-21)
 
 
