@@ -11,16 +11,20 @@ import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {
+  overwriteConfigWithDatabaseConnection,
   extractDBConfigFromServerWalletConfig,
   ServerWalletConfig,
   defaultTestConfig,
 } from '../src/config';
 
-export const payerConfig: ServerWalletConfig = {...defaultTestConfig, postgresDBName: 'payer'};
-export const receiverConfig: ServerWalletConfig = {
-  ...defaultTestConfig,
-  postgresDBName: 'receiver',
-};
+export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
+  defaultTestConfig,
+  {dbName: 'payer'}
+);
+export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
+  defaultTestConfig,
+  {dbName: 'receiver'}
+);
 
 import {PerformanceTimer} from './payer/timers';
 

@@ -6,7 +6,7 @@ configureEnvVariables();
 import PayerClient from '../payer/client';
 import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {recordFunctionMetrics} from '../../src/metrics';
-import {defaultTestConfig} from '../../src/config';
+import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../src/config';
 
 import {PerformanceTimer} from './timers';
 
@@ -41,10 +41,11 @@ export default {
     const {database, numPayments, channels} = argv;
 
     const payerClient = recordFunctionMetrics(
-      new PayerClient(alice().privateKey, `http://127.0.0.1:65535`, {
-        ...defaultTestConfig,
-        postgresDBName: database,
-      })
+      new PayerClient(
+        alice().privateKey,
+        `http://127.0.0.1:65535`,
+        overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: database})
+      )
     );
 
     const performanceTimer = new PerformanceTimer(channels || [], numPayments);

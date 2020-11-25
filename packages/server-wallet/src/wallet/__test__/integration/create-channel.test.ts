@@ -2,12 +2,12 @@ import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(overwriteConfigWithEnvVars(defaultTestConfig));
   await new DBAdmin(w.knex).truncateDB();
 });
 

@@ -6,16 +6,16 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
-import {channel} from '../../../models/__test__/fixtures/channel';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {channel} from '../../../models/__test__/fixtures/channel';
 
 let w: Wallet;
 beforeEach(async () => {
   await new DBAdmin(knex).truncateDB();
 
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(overwriteConfigWithEnvVars(defaultTestConfig));
 });
 
 afterEach(async () => {

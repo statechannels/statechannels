@@ -12,7 +12,10 @@ import {isStateChannelWorkerData} from './worker-data';
 // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
 const walletConfig: ServerWalletConfig = {
   ...(workerData as ServerWalletConfig),
-  postgresPoolSize: {min: 0, max: 1},
+  databaseConfiguration: {
+    connection: workerData.databaseConfiguration.connection,
+    pool: {min: 0, max: 1},
+  },
   workerThreadAmount: 0, // don't want workers to start more workers
 };
 
@@ -31,7 +34,10 @@ parentPort?.on('message', async (message: any) => {
     parentPort?.postMessage(left(new Error('Incorrect worker data')));
   }
 
-  const timer = timerFactory(walletConfig.timingMetrics, `Thread ${threadId}`);
+  const timer = timerFactory(
+    walletConfig.metricsConfiguration?.timingMetrics || false,
+    `Thread ${threadId}`
+  );
   try {
     switch (message.operation) {
       case 'UpdateChannel':

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 import {SignedState, StateWithHash, toNitroState} from '@statechannels/wallet-core';
 import {constants} from 'ethers';
+import {Logger} from 'pino';
 
-import {logger} from '../logger';
 import {validateTransitionWithEVM} from '../evm-validator';
 import {Bytes} from '../type-aliases';
 import {Channel} from '../models/channel';
@@ -29,6 +29,7 @@ export function validateTransition(
   fromState: SignedState,
   toState: SignedState,
   bytecode: Bytes = '0x',
+  logger: Logger,
   skipEvmValidation = false
 ): boolean {
   const fromMoverIndex = fromState.turnNum % fromState.participants.length;

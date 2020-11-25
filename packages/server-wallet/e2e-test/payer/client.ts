@@ -19,7 +19,7 @@ export default class PayerClient {
   ) {
     this.wallet = recordFunctionMetrics(
       ServerWallet.create(this.config || payerConfig),
-      payerConfig.timingMetrics
+      payerConfig.metricsConfiguration.timingMetrics
     );
   }
   public async warmup(): Promise<void> {
@@ -28,7 +28,7 @@ export default class PayerClient {
   public async destroy(): Promise<void> {
     await this.wallet.destroy();
   }
-  private time = timerFactory(defaultConfig.timingMetrics, 'payerClient');
+  private time = timerFactory(defaultConfig.metricsConfiguration.timingMetrics, 'payerClient');
 
   public readonly participantId = 'payer';
 

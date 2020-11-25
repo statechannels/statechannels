@@ -7,25 +7,27 @@ import _ from 'lodash';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
-import {defaultTestConfig} from '../config';
+import {
+  defaultTestConfig,
+  overwriteConfigWithDatabaseConnection,
+  overwriteConfigWithEnvVars,
+} from '../config';
 import {ObjectiveSucceededValue, SingleChannelOutput, Wallet} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-
-if (!defaultTestConfig.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const rpcEndpoint = defaultTestConfig.rpcEndpoint;
+const config = overwriteConfigWithEnvVars(defaultTestConfig);
+if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
+const {rpcEndpoint} = config.networkConfiguration;
 let provider: providers.JsonRpcProvider;
 const b = Wallet.create({
-  ...defaultTestConfig,
-  postgresDBName: 'TEST_B',
+  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_B'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
 });
 const a = Wallet.create({
-  ...defaultTestConfig,
-  postgresDBName: 'TEST_A',
+  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_A'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
 });

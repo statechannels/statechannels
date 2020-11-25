@@ -6,37 +6,36 @@ import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {Either} from 'fp-ts/lib/Either';
 import {isLeft} from 'fp-ts/lib/These';
 import _ from 'lodash';
+import {Logger} from 'pino';
 
 import {ServerWalletConfig} from '../../config';
-import {logger as parentLogger} from '../../logger';
+import {createLogger} from '../../logger';
 import {MultipleChannelOutput, SingleChannelOutput} from '../wallet';
 
 import {StateChannelWorkerData} from './worker-data';
 
 const ONE_DAY = 86400000;
 
-const logger = parentLogger.child({module: 'Worker-Manager'});
-
 export class WorkerManager {
   private pool?: Pool<Worker>;
   private threadAmount: number;
+  private logger: Logger;
   constructor(walletConfig: ServerWalletConfig) {
+    this.logger = createLogger(walletConfig).child({module: 'Worker-Manager'});
     this.threadAmount = walletConfig.workerThreadAmount;
     if (this.threadAmount > 0) {
       this.pool = new Pool({
         create: (): Worker => {
-          logger.trace('Starting worker');
+          this.logger.trace('Starting worker');
 
           const worker = new Worker(path.resolve(__dirname, './loader.js'), {
             workerData: walletConfig,
           });
 
-          worker.stdout.on('data', data => logger.info(data.toString()));
-          worker.stderr.on('data', data => logger.error(data.toString()));
           worker.on('error', err => {
             throw err;
           });
-          logger.trace('Started worker %o', worker.threadId);
+          this.logger.trace('Started worker %o', worker.threadId);
           return worker;
         },
         destroy: (worker: Worker): Promise<number> => worker.terminate(),
@@ -48,7 +47,7 @@ export class WorkerManager {
     }
   }
   public async warmUpThreads(): Promise<void> {
-    logger.trace('Warming up threads');
+    this.logger.trace('Warming up threads');
     const acquire = _.range(this.threadAmount).map(() => this.pool?.acquire().promise);
     const workers = await Promise.all(acquire);
     workers.forEach(w => {
@@ -57,7 +56,7 @@ export class WorkerManager {
     });
   }
   public async pushMessage(args: unknown): Promise<MultipleChannelOutput> {
-    logger.trace('PushMessage called');
+    this.logger.trace('PushMessage called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'PushMessage', args};
@@ -79,7 +78,7 @@ export class WorkerManager {
   }
 
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
-    logger.trace('UpdateChannel called');
+    this.logger.trace('UpdateChannel called');
     if (!this.pool) throw new Error(`Worker threads are disabled`);
     const worker = await this.pool.acquire().promise;
     const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
@@ -87,7 +86,7 @@ export class WorkerManager {
       worker.once('message', (response: Either<Error, SingleChannelOutput>) => {
         this.pool?.release(worker);
         if (isLeft(response)) {
-          logger.error(response);
+          this.logger.error(response);
           reject(response.left);
         } else {
           resolve(response.right);

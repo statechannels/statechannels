@@ -11,7 +11,7 @@ import {WALLET_VERSION} from '../../src/version';
 export default class ReceiverController {
   private readonly wallet: Wallet = recordFunctionMetrics(
     Wallet.create(receiverConfig),
-    defaultConfig.timingMetrics
+    defaultConfig.metricsConfiguration.timingMetrics
   );
 
   public async warmup(): Promise<void> {
@@ -19,7 +19,7 @@ export default class ReceiverController {
   }
 
   private readonly myParticipantID: string = 'receiver';
-  private time = timerFactory(defaultConfig.timingMetrics, 'controller');
+  private time = timerFactory(defaultConfig.metricsConfiguration.timingMetrics, 'controller');
   public get participantInfo(): Participant {
     return {
       participantId: this.myParticipantID,

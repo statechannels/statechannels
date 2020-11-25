@@ -1,20 +1,19 @@
 import pino from 'pino';
 
-import {defaultConfig, ServerWalletConfig} from './config';
+import {getDatabaseConnectionConfig, ServerWalletConfig} from './config';
 import {WALLET_VERSION} from './version';
 
 export function createLogger(config: ServerWalletConfig): pino.Logger {
   const destination =
-    config.logDestination && config.logDestination.toLocaleLowerCase() !== 'console'
-      ? pino.destination(config.logDestination)
+    config.loggingConfiguration.logLevel &&
+    config.loggingConfiguration.logDestination.toLocaleLowerCase() !== 'console'
+      ? pino.destination(config.loggingConfiguration.logDestination)
       : undefined;
   return (destination
-    ? pino({level: config.logLevel}, destination)
-    : pino({level: config.logLevel})
+    ? pino({level: config.loggingConfiguration.logLevel}, destination)
+    : pino({level: config.loggingConfiguration.logLevel})
   ).child({
-    dbName: config.postgresDBName,
+    dbName: getDatabaseConnectionConfig(config).dbName,
     walletVersion: WALLET_VERSION,
   });
 }
-
-export const logger = createLogger(defaultConfig);

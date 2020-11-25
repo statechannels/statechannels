@@ -19,6 +19,7 @@ import { GetStateParams } from '@statechannels/client-api-schema';
 import { JoinChannelParams } from '@statechannels/client-api-schema';
 import { JSONSchema } from 'objection';
 import Knex from 'knex';
+import { Level } from 'pino';
 import { Logger } from 'pino';
 import { Payload as Message } from '@statechannels/wallet-core';
 import { MessageQueuedNotification } from '@statechannels/client-api-schema';
@@ -30,7 +31,6 @@ import { Outcome } from '@statechannels/wallet-core';
 import { Participant } from '@statechannels/wallet-core';
 import { Participant as Participant_2 } from '@statechannels/client-api-schema';
 import { Payload } from '@statechannels/wire-format';
-import * as pino from 'pino';
 import { Pojo } from 'objection';
 import { PrivateKey } from '@statechannels/wallet-core';
 import { providers } from 'ethers';
@@ -56,54 +56,11 @@ export { Message }
 // @public (undocumented)
 export type Outgoing = Notice;
 
+// Warning: (ae-forgotten-export) The symbol "RequiredServerWalletConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "OptionalServerWalletConfig" needs to be exported by the entry point index.d.ts
+//
 // @public (undocumented)
-export interface ServerWalletConfig {
-    // (undocumented)
-    chainNetworkID: string;
-    // (undocumented)
-    debugKnex?: string;
-    // (undocumented)
-    erc20Address?: string;
-    // (undocumented)
-    erc20AssetHolderAddress?: string;
-    // (undocumented)
-    ethAssetHolderAddress?: string;
-    // (undocumented)
-    ethereumPrivateKey: string;
-    // (undocumented)
-    logDestination?: string;
-    // (undocumented)
-    logLevel: pino.Level;
-    // (undocumented)
-    metricsOutputFile?: string;
-    // (undocumented)
-    nodeEnv?: 'test' | 'development' | 'production';
-    // (undocumented)
-    postgresDatabaseUrl?: string;
-    // (undocumented)
-    postgresDBName?: string;
-    // (undocumented)
-    postgresDBPassword?: string;
-    // (undocumented)
-    postgresDBUser?: string;
-    // (undocumented)
-    postgresHost?: string;
-    // (undocumented)
-    postgresPoolSize?: {
-        max: number;
-        min: number;
-    };
-    // (undocumented)
-    postgresPort?: string;
-    // (undocumented)
-    rpcEndpoint?: string;
-    // (undocumented)
-    skipEvmValidation: boolean;
-    // (undocumented)
-    timingMetrics: boolean;
-    // (undocumented)
-    workerThreadAmount: number;
-}
+export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWalletConfig;
 
 // @public (undocumented)
 export type SingleChannelOutput = {
@@ -119,9 +76,13 @@ export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
 
 // @public (undocumented)
 export const Wallet: {
-    create(walletConfig?: ServerWalletConfig | undefined): Wallet;
+    create(walletConfig: IncomingServerWalletConfig): Wallet;
 };
 
+
+// Warnings were encountered during analysis:
+//
+// src/wallet/index.ts:15:20 - (ae-forgotten-export) The symbol "IncomingServerWalletConfig" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

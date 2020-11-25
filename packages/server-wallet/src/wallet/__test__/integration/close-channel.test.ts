@@ -4,12 +4,12 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../../config';
 import {Bytes32} from '../../../type-aliases';
 
 let w: Wallet;
 beforeAll(async () => {
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(overwriteConfigWithEnvVars(defaultTestConfig));
   await seedAlicesSigningWallet(w.knex);
 });
 

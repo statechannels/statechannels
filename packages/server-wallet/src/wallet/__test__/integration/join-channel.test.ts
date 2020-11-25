@@ -18,14 +18,14 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob, alice} from '../fixtures/signing-wallets';
 import {bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {ObjectiveModel} from '../../../models/objective';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(overwriteConfigWithEnvVars(defaultTestConfig));
   await new DBAdmin(w.knex).truncateDB();
   await seedBobsSigningWallet(w.knex);
 });
