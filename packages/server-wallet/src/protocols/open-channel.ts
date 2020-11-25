@@ -5,7 +5,7 @@ import {Transaction} from 'knex';
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import {ChannelState, stage, Stage} from './state';
 import {
   signState,
   noAction,
@@ -15,9 +15,17 @@ import {
   RequestLedgerFunding,
   completeObjective,
   CompleteObjective,
+  SignState,
 } from './actions';
 
-export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
+type OpenChannelProtocolResult =
+  | FundChannel
+  | SignState
+  | CompleteObjective
+  | RequestLedgerFunding
+  | undefined;
+
+export const protocol = (ps: ProtocolState): OpenChannelProtocolResult =>
   signPreFundSetup(ps) ||
   signPostFundSetup(ps) ||
   fundChannel(ps) ||
@@ -165,12 +173,12 @@ const fundViaLedger = (ps: ProtocolState): RequestLedgerFunding | false => {
   );
 };
 
-const fundChannel = (ps: ProtocolState): ProtocolResult | false =>
+const fundChannel = (ps: ProtocolState): OpenChannelProtocolResult | false =>
   isPrefundSetup(ps.app.supported) &&
   isPrefundSetup(ps.app.latestSignedByMe) &&
   (fundDirectly(ps) || fundViaLedger(ps));
 
-const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
+const signPreFundSetup = (ps: ProtocolState): SignState | false =>
   !ps.app.latestSignedByMe &&
   !!ps.app.latest &&
   ps.app.latest.turnNum < ps.app.participants.length &&
@@ -180,7 +188,7 @@ const signPreFundSetup = (ps: ProtocolState): ProtocolResult | false =>
     turnNum: ps.app.myIndex,
   });
 
-const signPostFundSetup = (ps: ProtocolState): ProtocolResult | false =>
+const signPostFundSetup = (ps: ProtocolState): SignState | undefined | false =>
   ps.app.supported &&
   ps.app.latestSignedByMe &&
   ps.app.latestSignedByMe.turnNum < ps.app.participants.length &&
