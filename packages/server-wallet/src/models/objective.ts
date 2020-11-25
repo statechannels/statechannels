@@ -19,20 +19,22 @@ function extractReferencedChannels(objective: Objective): string[] {
 }
 
 type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+
 /**
  * Objectives that are currently supported by the server wallet (wire format)
  */
 export type SupportedWireObjective = OpenChannel | CloseChannel;
+
+export type DBOpenChannelObjective = OpenChannel & {objectiveId: string; status: ObjectiveStatus};
+export type DBCloseChannelObjective = CloseChannel & {objectiveId: string; status: ObjectiveStatus};
+
 /**
  * A DBObjective is a wire objective with a status and an objectiveId
  *
  * Limited to 'OpenChannel' and 'CloseChannel', which are the only objectives
  * that are currently supported by the server wallet
  */
-export type DBObjective = SupportedWireObjective & {
-  objectiveId: string;
-  status: ObjectiveStatus;
-};
+export type DBObjective = DBOpenChannelObjective | DBCloseChannelObjective;
 
 export const toWireObjective = (dbObj: DBObjective): Objective => {
   return _.omit(dbObj, ['objectiveId', 'status']);

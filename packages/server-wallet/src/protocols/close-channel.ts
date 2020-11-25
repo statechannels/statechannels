@@ -4,7 +4,7 @@ import {Transaction} from 'knex';
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 
-import {Protocol, ChannelState, stage, Stage} from './state';
+import {ChannelState, stage, Stage} from './state';
 import {
   completeObjective,
   Withdraw,
