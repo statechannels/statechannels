@@ -1,9 +1,16 @@
-import {BN, isSimpleAllocation, checkThat, State} from '@statechannels/wallet-core';
+import {Logger} from 'pino';
+import {BN, isSimpleAllocation, checkThat, State, unreachable} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
+import {DBOpenChannelObjective} from '../models/objective';
+import {WalletResponse} from '../wallet/response-builder';
+import {recordFunctionMetrics} from '../metrics';
+import {Channel} from '../models/channel';
+import {ChainServiceInterface} from '../chain-service';
+import {LedgerRequest} from '../models/ledger-request';
 
 import {ChannelState, stage, Stage} from './state';
 import {
@@ -17,6 +24,112 @@ import {
   CompleteObjective,
   SignState,
 } from './actions';
+
+export class ChannelOpener {
+  constructor(
+    private store: Store,
+    private chainService: ChainServiceInterface,
+    private logger: Logger,
+    private timingMetrics = false
+  ) {}
+
+  public static create(
+    store: Store,
+    chainService: ChainServiceInterface,
+    logger: Logger,
+    timingMetrics = false
+  ): ChannelOpener {
+    return new ChannelOpener(store, chainService, logger, timingMetrics);
+  }
+
+  public async crank(objective: DBOpenChannelObjective, response: WalletResponse): Promise<void> {
+    const channelToLock = objective.data.targetChannelId;
+
+    let attemptAnotherProtocolStep = true;
+
+    while (attemptAnotherProtocolStep) {
+      await this.store.lockApp(channelToLock, async tx => {
+        const protocolState = await getOpenChannelProtocolState(
+          this.store,
+          objective.data.targetChannelId,
+          tx
+        );
+        const nextAction = recordFunctionMetrics(protocol(protocolState), this.timingMetrics);
+
+        if (nextAction) {
+          try {
+            switch (nextAction.type) {
+              case 'SignState':
+                await this.signState(nextAction, protocolState, tx, response);
+                break;
+              case 'FundChannel':
+                await this.fundChannel(nextAction, tx);
+                break;
+              case 'CompleteObjective':
+                attemptAnotherProtocolStep = false;
+                await this.completeObjective(objective, protocolState, tx, response);
+                break;
+              case 'RequestLedgerFunding':
+                await this.requestLedgerFunding(protocolState, tx);
+                break;
+              default:
+                unreachable(nextAction);
+            }
+          } catch (error) {
+            this.logger.error({error}, 'Error handling action');
+            await tx.rollback(error);
+            attemptAnotherProtocolStep = false;
+          }
+        } else {
+          response.queueChannelState(protocolState.app);
+          attemptAnotherProtocolStep = false;
+        }
+      });
+    }
+  }
+
+  private async signState(
+    action: SignState,
+    protocolState: ProtocolState,
+    tx: Transaction,
+    response: WalletResponse
+  ): Promise<void> {
+    const {myIndex, channelId} = protocolState.app;
+    const channel = await Channel.forId(channelId, tx);
+    const signedState = await this.store.signState(channel, action, tx);
+    response.queueState(signedState, myIndex, channelId);
+  }
+
+  private async fundChannel(action: FundChannel, tx: Transaction): Promise<void> {
+    await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+    // Note, we are not awaiting transaction submission
+    this.chainService.fundChannel({
+      ...action,
+      expectedHeld: BN.from(action.expectedHeld),
+      amount: BN.from(action.amount),
+    });
+  }
+
+  private async completeObjective(
+    objective: DBOpenChannelObjective,
+    protocolState: ProtocolState,
+    tx: Transaction,
+    response: WalletResponse
+  ): Promise<void> {
+    await this.store.markObjectiveAsSucceeded(objective, tx);
+
+    response.queueChannelState(protocolState.app);
+    response.queueSucceededObjective(objective);
+  }
+
+  private async requestLedgerFunding(protocolState: ProtocolState, tx: Transaction): Promise<void> {
+    await LedgerRequest.requestLedgerFunding(
+      protocolState.app.channelId,
+      protocolState.app.fundingLedgerChannelId as string,
+      tx
+    );
+  }
+}
 
 type OpenChannelProtocolResult =
   | FundChannel
