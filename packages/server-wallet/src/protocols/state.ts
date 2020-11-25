@@ -121,6 +121,10 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
   };
 };
 
+/* 
+Note that this function does not take into consideration state turn numbers. Do not rely
+on ReadyToFund status as the sole criteria for determening if a channel is ready to be funded
+*/
 export function directFundingStatus(
   supported: SignedStateVarsWithHash | undefined,
   fundingFn: (address: Address) => ChannelStateFunding,
