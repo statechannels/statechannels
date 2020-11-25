@@ -3,6 +3,30 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.9.1...@statechannels/nitro-protocol@0.10.0) (2020-11-25)
+
+
+### Bug Fixes
+
+* consistently break loops ([c5bc0da](https://github.com/statechannels/monorepo/commit/c5bc0da6ea46bd82caa15e9e8214b924c662883d))
+* deal with single-destination guarantees ([d49832f](https://github.com/statechannels/monorepo/commit/d49832f360595fc12c0d3502f0f188a5652aeab4))
+* refactor claim method ([f4d5146](https://github.com/statechannels/monorepo/commit/f4d51467be7ca690375e8cb99d1b000aab68d082))
+* typo ([99da224](https://github.com/statechannels/monorepo/commit/99da224e2c01c3e926125297bd8f03b119ad49f4))
+
+
+### Features
+
+* add claim method to AssetHolder ([91923de](https://github.com/statechannels/monorepo/commit/91923de6448d74b92ed6c5645c7b3e0b532d03c0))
+
+
+### Performance Improvements
+
+* safer construction of new outcome ([8f17cb1](https://github.com/statechannels/monorepo/commit/8f17cb1df4bdad5664018da460332e02acd7f470))
+
+
+
+
+
 ## [0.9.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.9.0...@statechannels/nitro-protocol@0.9.1) (2020-11-21)
 
 
