@@ -11,6 +11,10 @@ import {ChannelState, toChannelResult} from '../protocols/state';
 
 import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '.';
 
+/**
+ * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
+ * to be returned to the user after a call.
+ */
 export class WalletResponse {
   _channelResults: Record<string, ChannelResult> = {};
   private queuedMessages: WireMessage[] = [];
