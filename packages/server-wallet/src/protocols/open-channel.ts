@@ -200,6 +200,7 @@ function isFunded(ps: ProtocolState): boolean {
     case 'Ledger': {
       if (ps.type !== 'LedgerFundingProtocolState') return false;
       if (!ps.ledger) return false;
+      if (!isRunning(ps.ledger.latest)) return false;
       // TODO: in the future check "funding table"
       if (!isFunded({type: 'DirectFundingProtocolState', app: ps.ledger})) return false;
       return ledgerFundedThisChannel(ps.ledger, ps.app);
