@@ -151,6 +151,9 @@ export function directFundingStatus(
     .filter(tf => tf.toAddress === myDestination)
     .map(ai => ai.amount)
     .reduce(BN.add, BN.from(0));
+  const amountTransferredToAll = funding.transferredOut
+    .map(ai => ai.amount)
+    .reduce(BN.add, BN.from(0));
 
   // Note that following case:
   // - The total amount allocated to me are zero
@@ -165,9 +168,17 @@ export function directFundingStatus(
     return 'Funded';
   }
 
-  const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
+  const myAllocationIndex = _.findIndex(allocationItems, ai => ai.destination === myDestination);
+  const allocationsBeforeMe = allocationItems.slice(0, myAllocationIndex);
+  const allocationsWithMe = allocationItems.slice(0, myAllocationIndex + 1);
   const fundingBeforeMe = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
-  if (BN.eq(amountTransferredToMe, 0) && BN.gte(funding.amount, fundingBeforeMe)) {
+  const fundingWithMe = allocationsWithMe.map(a => a.amount).reduce(BN.add, BN.from(0));
+
+  if (
+    BN.eq(amountTransferredToAll, 0) &&
+    BN.gte(funding.amount, fundingBeforeMe) &&
+    BN.lt(funding.amount, fundingWithMe)
+  ) {
     return 'ReadyToFund';
   }
 
