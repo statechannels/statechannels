@@ -3,13 +3,14 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 import '../ERC20AssetHolder.sol';
 import './TESTAssetHolder.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 /**
  * @dev This contract is a clone of the ERC20AssetHolder contract. It will be initialized to point to the TestNitroAdjudicator.
  */
 contract TestErc20AssetHolder is ERC20AssetHolder {
-    constructor(address _AdjudicatorAddress, address _TokenAddress)
-        ERC20AssetHolder(_AdjudicatorAddress, _TokenAddress)
+    constructor(address _AdjudicatorAddress, IERC20 _Token)
+        ERC20AssetHolder(_AdjudicatorAddress, _Token)
     {}
 
     /**
