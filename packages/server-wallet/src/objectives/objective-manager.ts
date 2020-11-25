@@ -17,7 +17,7 @@ import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
-import {FundChannel, ProtocolAction, SignState, Withdraw} from '../protocols/actions';
+import {FundChannel, SignState, Withdraw} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WalletResponse} from '../wallet/response-builder';
 import {Channel} from '../models/channel';
@@ -66,7 +66,7 @@ export class ObjectiveManager {
 
     while (attemptAnotherProtocolStep) {
       await this.store.lockApp(channelToLock, async tx => {
-        let executeProtocol: () => ChannelState.ProtocolResult;
+        let nextAction: ChannelState.ProtocolResult;
         let protocolState: SupportedProtocolState;
 
         if (objective.type === 'OpenChannel') {
@@ -75,43 +75,49 @@ export class ObjectiveManager {
             objective.data.targetChannelId,
             tx
           );
-          executeProtocol = () => openChannelProtocol(protocolState as OpenChannelProtocolState);
+          nextAction = recordFunctionMetrics(
+            openChannelProtocol(protocolState as OpenChannelProtocolState),
+            this.timingMetrics
+          );
         } else if (objective.type === 'CloseChannel') {
           protocolState = await getCloseChannelProtocolState(
             this.store,
             objective.data.targetChannelId,
             tx
           );
-          executeProtocol = () => closeChannelProtocol(protocolState as CloseChannelProtocolState);
+          nextAction = recordFunctionMetrics(
+            closeChannelProtocol(protocolState as OpenChannelProtocolState),
+            this.timingMetrics
+          );
         } else {
           throw new Error('Unexpected objective');
         }
 
-        const doAction = async (action: ProtocolAction): Promise<any> => {
-          switch (action.type) {
-            case 'SignState':
-              return this.signState(action, protocolState, tx, response);
-            case 'FundChannel':
-              return this.fundChannel(action, tx);
-            case 'CompleteObjective':
-              attemptAnotherProtocolStep = false;
-              return this.completeObjective(objective, protocolState, tx, response);
-            case 'Withdraw':
-              return this.withdraw(action, protocolState, tx);
-            case 'RequestLedgerFunding':
-              return this.requestLedgerFunding(protocolState, tx);
-            case 'RequestLedgerDefunding':
-              return this.requestLedgerDefunding(protocolState, tx);
-            default:
-              throw 'Unimplemented';
-          }
-        };
-
-        const nextAction = recordFunctionMetrics(executeProtocol(), this.timingMetrics);
-
         if (nextAction) {
           try {
-            await doAction(nextAction);
+            switch (nextAction.type) {
+              case 'SignState':
+                await this.signState(nextAction, protocolState, tx, response);
+                break;
+              case 'FundChannel':
+                await this.fundChannel(nextAction, tx);
+                break;
+              case 'CompleteObjective':
+                attemptAnotherProtocolStep = false;
+                await this.completeObjective(objective, protocolState, tx, response);
+                break;
+              case 'Withdraw':
+                await this.withdraw(nextAction, protocolState, tx);
+                break;
+              case 'RequestLedgerFunding':
+                await this.requestLedgerFunding(protocolState, tx);
+                break;
+              case 'RequestLedgerDefunding':
+                await this.requestLedgerDefunding(protocolState, tx);
+                break;
+              default:
+                throw 'Unimplemented';
+            }
           } catch (error) {
             this.logger.error({error}, 'Error handling action');
             await tx.rollback(error);
