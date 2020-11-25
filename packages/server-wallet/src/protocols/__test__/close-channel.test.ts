@@ -1,13 +1,10 @@
 import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
-import matchers from '@pacote/jest-either';
 
 import {protocol} from '../close-channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {SignState} from '../actions';
 
 import {applicationProtocolState} from './fixtures/protocol-state';
-
-expect.extend(matchers);
 
 const outcome = simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]);
 
