@@ -2,8 +2,16 @@ import {Logger} from 'pino';
 import {BN} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
-import * as OpenChannelProtocol from '../protocols/open-channel';
-import * as CloseChannelProtocol from '../protocols/close-channel';
+import {
+  getOpenChannelProtocolState,
+  ProtocolState as OpenChannelProtocolState,
+  protocol as openChannelProtocol,
+} from '../protocols/open-channel';
+import {
+  getCloseChannelProtocolState,
+  ProtocolState as CloseChannelProtocolState,
+  protocol as closeChannelProtocol,
+} from '../protocols/close-channel';
 import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
@@ -15,6 +23,8 @@ import {Channel} from '../models/channel';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
+
+type SupportedProtocolState = OpenChannelProtocolState | CloseChannelProtocolState;
 
 export class ObjectiveManager {
   private store: Store;
@@ -55,24 +65,22 @@ export class ObjectiveManager {
     while (attemptAnotherProtocolStep) {
       await this.store.lockApp(channelToLock, async tx => {
         let executeProtocol: () => ChannelState.ProtocolResult;
-        let protocolState: OpenChannelProtocol.ProtocolState | CloseChannelProtocol.ProtocolState;
+        let protocolState: SupportedProtocolState;
 
         if (objective.type === 'OpenChannel') {
-          protocolState = await OpenChannelProtocol.getOpenChannelProtocolState(
+          protocolState = await getOpenChannelProtocolState(
             this.store,
             objective.data.targetChannelId,
             tx
           );
-          executeProtocol = () =>
-            OpenChannelProtocol.protocol(protocolState as OpenChannelProtocol.ProtocolState);
+          executeProtocol = () => openChannelProtocol(protocolState as OpenChannelProtocolState);
         } else if (objective.type === 'CloseChannel') {
-          protocolState = await CloseChannelProtocol.getCloseChannelProtocolState(
+          protocolState = await getCloseChannelProtocolState(
             this.store,
             objective.data.targetChannelId,
             tx
           );
-          executeProtocol = () =>
-            CloseChannelProtocol.protocol(protocolState as CloseChannelProtocol.ProtocolState);
+          executeProtocol = () => closeChannelProtocol(protocolState as CloseChannelProtocolState);
         } else {
           throw new Error('Unexpected objective');
         }
