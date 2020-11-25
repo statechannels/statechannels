@@ -41,6 +41,7 @@ describe('Only Alice funds channel', () =>
     ${closeState}    | ${partTransferred}  | ${participants[1]} | ${'Direct'}     | ${'Defunded'}
     ${closeState}    | ${fullyTransferred} | ${participants[0]} | ${'Direct'}     | ${'Defunded'}
     ${closeState}    | ${fullyTransferred} | ${participants[1]} | ${'Direct'}     | ${'Defunded'}
+    ${preFundState1} | ${hasFunding5}      | ${participants[0]} | ${'Ledger'}     | ${'Uncategorized'}
   `(
     'Turn: $supported.desc, funding $fundingFn.name for $myParticipant.participantId results in $result',
     ({supported, fundingFn, myParticipant, fundingStrategy, result}) => {
