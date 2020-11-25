@@ -77,8 +77,8 @@
   },
   "main": "lib/src/index.js",
   "scripts": {
-    "db:create": "createdb server_wallet_${NODE_ENV}",
-    "db:drop": "dropdb server_wallet_${NODE_ENV}",
+    "db:create": "createdb $SERVER_DB_NAME",
+    "db:drop": "dropdb $SERVER_DB_NAME",
     "db:migrate": "npx knex migrate:latest --cwd src/db-admin",
     "db:rollback": "npx knex migrate:rollback --cwd src/db-admin",
     "db:seed": "npx knex seed:run --cwd src/db-admin",
@@ -93,12 +93,12 @@
     "prestart": "yarn prepare && npm run db:rollback && npm run db:migrate && npm run db:seed",
     "prettier:check": "npx prettier --check 'src/**/*.{ts,tsx}'",
     "prettier:write": "npx prettier --write 'src/**/*.{ts,tsx}'",
-    "profile": "TIMING_METRICS=ON METRICS_OUTPUT_FILE=metrics.log ./e2e-test/scripts/profile.sh",
+    "profile": "./e2e-test/scripts/profile.sh",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "test:chain": "jest -c ./jest/jest.chain.config.js --runInBand",
     "test:ci": "yarn test --bail && yarn test:chain --bail",
-    "test:e2e": "yarn tsc; SERVER_DB_NAME=payer yarn jest -c ./jest/jest.e2e.config.js",
+    "test:e2e": "yarn tsc;  yarn jest -c ./jest/jest.e2e.config.js",
     "test:stress": "yarn tsc;NODE_ENV=test npx ts-node ./e2e-test/scripts/stress-test.ts"
   },
   "types": "lib/src/index.d.ts"

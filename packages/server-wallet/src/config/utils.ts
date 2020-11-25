@@ -1,62 +1,9 @@
-/* eslint-disable no-process-env */
-import {BigNumber} from 'ethers';
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
-import {Level} from 'pino';
 
 import {defaultDatabaseConfiguration} from './defaults';
 import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
-
-function readBoolean(envValue: string | undefined, defaultValue?: boolean): boolean {
-  if (!envValue) return defaultValue || false;
-  return envValue?.toLowerCase() === 'true';
-}
-function readInt(envValue: string | undefined, defaultValue?: number): number {
-  if (!envValue) return defaultValue || 0;
-  return Number.parseInt(envValue);
-}
-
-export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWalletConfig {
-  const connection = process.env.SERVER_URL || {
-    host: process.env.SERVER_HOST || defaultDatabaseConfiguration.connection.host,
-    port: Number(process.env.SERVER_PORT) || defaultDatabaseConfiguration.connection.port,
-    dbName: process.env.SERVER_DB_NAME || '',
-    user: process.env.SERVER_DB_USER || '',
-    password: process.env.SERVER_DB_PASSWORD,
-  };
-  // TODO: This belongs with other validation when we add it
-  if (!connection) {
-    throw new Error('No database configuration provided by env vars');
-  }
-  return {
-    databaseConfiguration: {
-      connection,
-      debug: readBoolean(process.env.DEBUG_KNEX, config.databaseConfiguration.debug),
-    },
-    metricsConfiguration: {
-      timingMetrics: readBoolean(
-        process.env.TIMING_METRICS,
-        config.metricsConfiguration.timingMetrics
-      ),
-      metricsOutputFile: process.env.METRICS_OUTPUT_FILE,
-    },
-
-    ethereumPrivateKey: process.env.ETHEREUM_PRIVATE_KEY || config.ethereumPrivateKey,
-    networkConfiguration: {
-      rpcEndpoint: process.env.RPC_ENDPOINT,
-      chainNetworkID: BigNumber.from(process.env.CHAIN_NETWORK_ID || '0x00').toNumber(),
-    },
-
-    skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',
-
-    workerThreadAmount: readInt(process.env.AMOUNT_OF_WORKER_THREADS, config.workerThreadAmount),
-    loggingConfiguration: {
-      logLevel: (process.env.LOG_LEVEL as Level) || config.loggingConfiguration.logLevel,
-      logDestination: process.env.LOG_DESTINATION || config.loggingConfiguration.logDestination,
-    },
-  };
-}
 
 export function extractDBConfigFromServerWalletConfig(
   serverWalletConfig: ServerWalletConfig

@@ -4,16 +4,17 @@ import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../config';
+import {defaultTestConfig} from '../../config';
 import {ChainService} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
-const config = overwriteConfigWithEnvVars(defaultTestConfig);
-if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const {rpcEndpoint} = config.networkConfiguration;
+
+if (!defaultTestConfig.networkConfiguration.rpcEndpoint)
+  throw new Error('rpc endpoint must be defined');
+const {rpcEndpoint} = defaultTestConfig.networkConfiguration;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 // This is the private key for which ERC20 tokens are allocated on contract creation
 const ethWalletWithTokens = new Wallet(defaultTestConfig.ethereumPrivateKey, provider);

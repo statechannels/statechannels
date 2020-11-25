@@ -12,7 +12,7 @@ defaults: &defaults
   environment:
     NODE_ENV: test
 
-postgres: &postgres  
+postgres: &postgres
   <<: *defaults
   docker:
     - image: cimg/node:12.18.0
@@ -20,9 +20,7 @@ postgres: &postgres
   environment:
     NODE_ENV: test
     PSQL_ARGS: -p 5432 -h localhost -U postgres
-    SERVER_DB_USER: postgres
-    POSTGRES_USER: postgres     
-    AMOUNT_OF_WORKER_THREADS: 0
+    POSTGRES_USER: postgres
 
 # MACROS
 
@@ -143,8 +141,8 @@ jobs:
           name: wallet setup
           working_directory: packages/server-wallet
           command: |
-            yarn db:create $PSQL_ARGS
-            yarn db:migrate
+            SERVER_DB_NAME=server_wallet_test yarn db:create $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_test yarn db:migrate
       - run:
           name: test
           command: |
@@ -190,7 +188,7 @@ jobs:
       NODE_ENV: test
       PSQL_ARGS: -p 5432 -h localhost -U postgres
       SERVER_DB_USER: postgres
-      POSTGRES_USER: postgres     
+      POSTGRES_USER: postgres
       AMOUNT_OF_WORKER_THREADS: 6
       LOG_DESTINATION: /home/circleci/project/artifacts/wallet.log
     steps:
