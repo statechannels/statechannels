@@ -114,7 +114,23 @@ export type ChannelStatus =
   | 'closing' // You cannot use the channel anymore, but your funds are still locked up.
   | 'closed'; // Your funds have been released from the channel.
 
-export type FundingStatus = 'Uncategorized' | 'ReadyToFund' | 'Funded' | 'Defunded';
+/*
+At the moment, the following caveats apply:
+- Only works with Outcomes with one AssetHolder
+- For any funding other than 'Direct', 'Uncategorized' is always returned
+*/
+export type FundingStatus =
+  | 'Uncategorized' // Does not fit into any categories below
+  /*
+  Means the following conditions hold:
+   - AssetHolder has A deposited.
+   - Participants before me should deposit B.
+   - I should deposit M
+   - B <= A < A+M
+   */
+  | 'ReadyToFund'
+  | 'Funded' // AssetHolder holds funds from all participants
+  | 'Defunded'; // MY funds have been withdrawn from AssetHolder
 
 export interface ChannelResult {
   participants: Participant[];
