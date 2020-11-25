@@ -1,5 +1,6 @@
 import {Logger} from 'pino';
 import {BN} from '@statechannels/wallet-core';
+import {Transaction} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 import {
@@ -16,10 +17,11 @@ import * as ChannelState from '../protocols/state';
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
-import {ProtocolAction} from '../protocols/actions';
+import {FundChannel, ProtocolAction, SignState, Withdraw} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WalletResponse} from '../wallet/response-builder';
 import {Channel} from '../models/channel';
+import {DBObjective} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -87,52 +89,19 @@ export class ObjectiveManager {
 
         const doAction = async (action: ProtocolAction): Promise<any> => {
           switch (action.type) {
-            case 'SignState': {
-              const {myIndex, channelId} = protocolState.app;
-              const channel = await Channel.forId(channelId, tx);
-              const signedState = await this.store.signState(channel, action, tx);
-              response.queueState(signedState, myIndex, channelId);
-              return;
-            }
+            case 'SignState':
+              return this.signState(action, protocolState, tx, response);
             case 'FundChannel':
-              await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-              // Note, we are not awaiting transaction submission
-              this.chainService.fundChannel({
-                ...action,
-                expectedHeld: BN.from(action.expectedHeld),
-                amount: BN.from(action.amount),
-              });
-              return;
+              return this.fundChannel(action, tx);
             case 'CompleteObjective':
-              await this.store.markObjectiveAsSucceeded(objective, tx);
-
-              response.queueChannelState(protocolState.app);
-              response.queueSucceededObjective(objective);
               attemptAnotherProtocolStep = false;
-              return;
+              return this.completeObjective(objective, protocolState, tx, response);
             case 'Withdraw':
-              await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
-              // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
-              // Note, we are not awaiting transaction submission
-              // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-              await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
-              return;
-            case 'RequestLedgerFunding': {
-              await LedgerRequest.requestLedgerFunding(
-                protocolState.app.channelId,
-                protocolState.app.fundingLedgerChannelId as string,
-                tx
-              );
-              return;
-            }
-            case 'RequestLedgerDefunding': {
-              await LedgerRequest.requestLedgerDefunding(
-                protocolState.app.channelId,
-                protocolState.app.fundingLedgerChannelId as string,
-                tx
-              );
-              return;
-            }
+              return this.withdraw(action, protocolState, tx);
+            case 'RequestLedgerFunding':
+              return this.requestLedgerFunding(protocolState, tx);
+            case 'RequestLedgerDefunding':
+              return this.requestLedgerDefunding(protocolState, tx);
             default:
               throw 'Unimplemented';
           }
@@ -158,5 +127,77 @@ export class ObjectiveManager {
 
   public async commenceCloseChannel(channelId: Bytes32, response: WalletResponse): Promise<void> {
     return CloseChannelObjective.commence(channelId, response, this.store);
+  }
+
+  // -------
+  // Actions
+  // -------
+
+  private async signState(
+    action: SignState,
+    protocolState: SupportedProtocolState,
+    tx: Transaction,
+    response: WalletResponse
+  ): Promise<void> {
+    const {myIndex, channelId} = protocolState.app;
+    const channel = await Channel.forId(channelId, tx);
+    const signedState = await this.store.signState(channel, action, tx);
+    response.queueState(signedState, myIndex, channelId);
+  }
+
+  private async fundChannel(action: FundChannel, tx: Transaction): Promise<void> {
+    await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+    // Note, we are not awaiting transaction submission
+    this.chainService.fundChannel({
+      ...action,
+      expectedHeld: BN.from(action.expectedHeld),
+      amount: BN.from(action.amount),
+    });
+  }
+
+  private async completeObjective(
+    objective: DBObjective,
+    protocolState: SupportedProtocolState,
+    tx: Transaction,
+    response: WalletResponse
+  ): Promise<void> {
+    await this.store.markObjectiveAsSucceeded(objective, tx);
+
+    response.queueChannelState(protocolState.app);
+    response.queueSucceededObjective(objective);
+  }
+
+  private async withdraw(
+    action: Withdraw,
+    protocolState: SupportedProtocolState,
+    tx: Transaction
+  ): Promise<void> {
+    await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
+    // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
+    // Note, we are not awaiting transaction submission
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
+  }
+
+  private async requestLedgerFunding(
+    protocolState: SupportedProtocolState,
+    tx: Transaction
+  ): Promise<void> {
+    await LedgerRequest.requestLedgerFunding(
+      protocolState.app.channelId,
+      protocolState.app.fundingLedgerChannelId as string,
+      tx
+    );
+  }
+
+  private async requestLedgerDefunding(
+    protocolState: SupportedProtocolState,
+    tx: Transaction
+  ): Promise<void> {
+    await LedgerRequest.requestLedgerDefunding(
+      protocolState.app.channelId,
+      protocolState.app.fundingLedgerChannelId as string,
+      tx
+    );
   }
 }
