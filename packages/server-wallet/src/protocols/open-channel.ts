@@ -6,7 +6,7 @@ import {Transaction} from 'knex';
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 import {DBOpenChannelObjective} from '../models/objective';
-import {WalletResponse} from '../wallet/response-builder';
+import {WalletResponse} from '../wallet/wallet-response';
 import {recordFunctionMetrics} from '../metrics';
 import {Channel} from '../models/channel';
 import {ChainServiceInterface} from '../chain-service';
