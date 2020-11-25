@@ -83,7 +83,7 @@ export const Wallet: {
 
 // Warnings were encountered during analysis:
 //
-// src/wallet/index.ts:15:20 - (ae-forgotten-export) The symbol "IncomingServerWalletConfig" needs to be exported by the entry point index.d.ts
+// src/wallet/index.ts:10:20 - (ae-forgotten-export) The symbol "IncomingServerWalletConfig" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
