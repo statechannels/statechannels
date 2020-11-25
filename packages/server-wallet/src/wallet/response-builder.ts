@@ -1,5 +1,6 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
+import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 
 import {Channel} from '../models/channel';
 import {DBObjective, toWireObjective} from '../models/objective';
@@ -12,7 +13,7 @@ import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '.';
 
 export class WalletResponse {
   _channelResults: Record<string, ChannelResult> = {};
-  outbox: Outgoing[] = [];
+  private queuedMessages: WireMessage[] = [];
   objectivesToSend: DBObjective[] = [];
   objectivesToApprove: DBObjective[] = [];
   succeededObjectives: DBObjective[] = [];
@@ -54,9 +55,8 @@ export class WalletResponse {
     const myParticipantId = state.participants[myIndex].participantId;
     state.participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.outbox.push({
-          method: 'MessageQueued' as const,
-          params: serializeMessage(
+        this.queuedMessages.push(
+          serializeMessage(
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
@@ -65,8 +65,8 @@ export class WalletResponse {
             p.participantId,
             myParticipantId,
             channelId
-          ),
-        });
+          )
+        );
       }
     });
   }
@@ -83,9 +83,8 @@ export class WalletResponse {
 
     participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.outbox.push({
-          method: 'MessageQueued' as const,
-          params: serializeMessage(
+        this.queuedMessages.push(
+          serializeMessage(
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
@@ -93,8 +92,8 @@ export class WalletResponse {
             },
             p.participantId,
             myParticipantId
-          ),
-        });
+          )
+        );
       }
     });
   }
@@ -121,9 +120,8 @@ export class WalletResponse {
 
     participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.outbox.push({
-          method: 'MessageQueued' as const,
-          params: serializeMessage(
+        this.queuedMessages.push(
+          serializeMessage(
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
@@ -132,8 +130,8 @@ export class WalletResponse {
             p.participantId,
             myParticipantId,
             channelId
-          ),
-        });
+          )
+        );
       }
     });
   }
@@ -186,5 +184,20 @@ export class WalletResponse {
 
   private get channelResults(): ChannelResult[] {
     return Object.values(this._channelResults);
+  }
+
+  private get outbox(): Outgoing[] {
+    return this.queuedMessages.map(m => ({
+      method: 'MessageQueued' as const,
+      params: m,
+    }));
+  }
+
+  // -------------------------------
+  // Convenience methods for testing
+  // -------------------------------
+
+  public get _signedStates(): WireState[] {
+    return this.queuedMessages.flatMap(wireMessage => wireMessage.data.signedStates || []);
   }
 }
