@@ -361,8 +361,8 @@ describe('Closing a ledger channel and preventing it from being used again', () 
       status: 'closed',
     });
     const params = testCreateChannelParams(10, 10, ledgerChannelId);
-    await expect(a.createChannel(params)).rejects.toThrow(/already been closed/);
-    await expect(a.createChannels(params, 1)).rejects.toThrow(/already been closed/);
+    await expect(a.createChannel(params)).rejects.toThrow(/closed/);
+    await expect(a.createChannels(params, 1)).rejects.toThrow(/closed/);
   });
 });
 
