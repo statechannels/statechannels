@@ -4,7 +4,7 @@ import {Transaction} from 'knex';
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 
-import {Protocol, ProtocolResult, ChannelState, stage, Stage} from './state';
+import {Protocol, ChannelState, stage, Stage} from './state';
 import {
   completeObjective,
   Withdraw,
@@ -14,9 +14,17 @@ import {
   CompleteObjective,
   RequestLedgerDefunding,
   requestLedgerDefunding,
+  SignState,
 } from './actions';
 
-export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
+type CloseChannelProtocolResult =
+  | Withdraw
+  | SignState
+  | CompleteObjective
+  | RequestLedgerDefunding
+  | undefined;
+
+export const protocol = (ps: ProtocolState): CloseChannelProtocolResult =>
   chainWithdraw(ps) ||
   completeCloseChannel(ps) ||
   defundIntoLedger(ps) ||
@@ -71,7 +79,7 @@ const isMyTurn = (ps: ProtocolState): boolean =>
 //    - there's an existing final state (in which case I double sign)
 //    - or it's my turn (in which case I craft the final state)
 //
-const signFinalState = (ps: ProtocolState): ProtocolResult | false =>
+const signFinalState = (ps: ProtocolState): SignState | false =>
   !!ps.app.supported && // there is a supported state
   !isFinal(ps.app.latestSignedByMe) && // I haven't yet signed a final state
   // if there's an existing final state double-sign it
