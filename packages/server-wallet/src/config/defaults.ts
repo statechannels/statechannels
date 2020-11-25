@@ -44,6 +44,7 @@ export const defaultConfig: OptionalServerWalletConfig = {
   loggingConfiguration: defaultLoggingConfiguration,
   metricsConfiguration: defaultMetricsConfiguration,
   skipEvmValidation: false,
+  workerThreadAmount: 0,
 };
 
 export const DEFAULT_DB_NAME = 'server_wallet_test';

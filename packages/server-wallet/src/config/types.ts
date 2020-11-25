@@ -53,7 +53,6 @@ export type MetricsConfiguration = {timingMetrics: boolean; metricsOutputFile?: 
  */
 export type RequiredServerWalletConfig = {
   databaseConfiguration: RequiredDatabaseConfiguration;
-  workerThreadAmount: number;
   networkConfiguration: NetworkConfiguration;
   ethereumPrivateKey: string;
 };
@@ -63,6 +62,7 @@ export type RequiredServerWalletConfig = {
  */
 export interface OptionalServerWalletConfig {
   databaseConfiguration: OptionalDatabaseConfiguration;
+  workerThreadAmount: number;
   skipEvmValidation: boolean;
   loggingConfiguration: LoggingConfiguration;
   metricsConfiguration: MetricsConfiguration;
