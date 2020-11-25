@@ -17,6 +17,13 @@ import {
   CompleteObjective,
 } from './actions';
 
+export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
+  signPreFundSetup(ps) ||
+  signPostFundSetup(ps) ||
+  fundChannel(ps) ||
+  completeOpenChannel(ps) ||
+  noAction;
+
 export type AppState = {
   app: ChannelState;
 };
@@ -188,13 +195,6 @@ const completeOpenChannel = (ps: ProtocolState): CompleteObjective | false =>
   (ps.app.supported?.turnNum === ps.app.participants.length * 2 - 1 ||
     isRunning(ps.app.supported)) &&
   completeObjective({channelId: ps.app.channelId});
-
-export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  signPreFundSetup(ps) ||
-  signPostFundSetup(ps) ||
-  fundChannel(ps) ||
-  completeOpenChannel(ps) ||
-  noAction;
 
 /**
  * Helper method to retrieve scoped data needed for OpenChannel protocol.

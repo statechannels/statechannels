@@ -16,6 +16,13 @@ import {
   requestLedgerDefunding,
 } from './actions';
 
+export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
+  chainWithdraw(ps) ||
+  completeCloseChannel(ps) ||
+  defundIntoLedger(ps) ||
+  signFinalState(ps) ||
+  noAction;
+
 export type ProtocolState = {
   app: ChannelState;
   ledgerDefundingRequested?: boolean;
@@ -111,13 +118,6 @@ function chainWithdraw(ps: ProtocolState): Withdraw | false {
     withdraw(ps.app)
   );
 }
-
-export const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult =>
-  chainWithdraw(ps) ||
-  completeCloseChannel(ps) ||
-  defundIntoLedger(ps) ||
-  signFinalState(ps) ||
-  noAction;
 
 /**
  * Helper method to retrieve scoped data needed for CloseChannel protocol.
