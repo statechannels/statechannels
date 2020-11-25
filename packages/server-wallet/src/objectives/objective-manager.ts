@@ -1,13 +1,9 @@
 import {Logger} from 'pino';
-import {BN, unreachable} from '@statechannels/wallet-core';
+import {unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 
 import {Bytes32} from '../type-aliases';
-import {
-  getOpenChannelProtocolState,
-  ProtocolState as OpenChannelProtocolState,
-  protocol as openChannelProtocol,
-} from '../protocols/open-channel';
+import {ProtocolState as OpenChannelProtocolState, ChannelOpener} from '../protocols/open-channel';
 import {
   getCloseChannelProtocolState,
   ProtocolState as CloseChannelProtocolState,
@@ -16,11 +12,11 @@ import {
 import {Store} from '../wallet/store';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceInterface} from '../chain-service';
-import {FundChannel, SignState, Withdraw} from '../protocols/actions';
+import {SignState, Withdraw} from '../protocols/actions';
 import {recordFunctionMetrics} from '../metrics';
 import {WalletResponse} from '../wallet/response-builder';
 import {Channel} from '../models/channel';
-import {DBCloseChannelObjective, DBObjective, DBOpenChannelObjective} from '../models/objective';
+import {DBCloseChannelObjective, DBObjective} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -57,7 +53,7 @@ export class ObjectiveManager {
 
     switch (objective.type) {
       case 'OpenChannel':
-        return this.crankOpenChannel(objective, response);
+        return this.channelOpener.crank(objective, response);
       case 'CloseChannel':
         return this.crankCloseChannel(objective, response);
       default:
@@ -65,56 +61,8 @@ export class ObjectiveManager {
     }
   }
 
-  async crankOpenChannel(
-    objective: DBOpenChannelObjective,
-    response: WalletResponse
-  ): Promise<void> {
-    const channelToLock = objective.data.targetChannelId;
-
-    let attemptAnotherProtocolStep = true;
-
-    while (attemptAnotherProtocolStep) {
-      await this.store.lockApp(channelToLock, async tx => {
-        const protocolState = await getOpenChannelProtocolState(
-          this.store,
-          objective.data.targetChannelId,
-          tx
-        );
-        const nextAction = recordFunctionMetrics(
-          openChannelProtocol(protocolState),
-          this.timingMetrics
-        );
-
-        if (nextAction) {
-          try {
-            switch (nextAction.type) {
-              case 'SignState':
-                await this.signState(nextAction, protocolState, tx, response);
-                break;
-              case 'FundChannel':
-                await this.fundChannel(nextAction, tx);
-                break;
-              case 'CompleteObjective':
-                attemptAnotherProtocolStep = false;
-                await this.completeObjective(objective, protocolState, tx, response);
-                break;
-              case 'RequestLedgerFunding':
-                await this.requestLedgerFunding(protocolState, tx);
-                break;
-              default:
-                unreachable(nextAction);
-            }
-          } catch (error) {
-            this.logger.error({error}, 'Error handling action');
-            await tx.rollback(error);
-            attemptAnotherProtocolStep = false;
-          }
-        } else {
-          response.queueChannelState(protocolState.app);
-          attemptAnotherProtocolStep = false;
-        }
-      });
-    }
+  private get channelOpener(): ChannelOpener {
+    return ChannelOpener.create(this.store, this.chainService, this.logger, this.timingMetrics);
   }
 
   async crankCloseChannel(
@@ -189,16 +137,6 @@ export class ObjectiveManager {
     response.queueState(signedState, myIndex, channelId);
   }
 
-  private async fundChannel(action: FundChannel, tx: Transaction): Promise<void> {
-    await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
-    // Note, we are not awaiting transaction submission
-    this.chainService.fundChannel({
-      ...action,
-      expectedHeld: BN.from(action.expectedHeld),
-      amount: BN.from(action.amount),
-    });
-  }
-
   private async completeObjective(
     objective: DBObjective,
     protocolState: SupportedProtocolState,
@@ -221,17 +159,6 @@ export class ObjectiveManager {
     // Note, we are not awaiting transaction submission
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
-  }
-
-  private async requestLedgerFunding(
-    protocolState: SupportedProtocolState,
-    tx: Transaction
-  ): Promise<void> {
-    await LedgerRequest.requestLedgerFunding(
-      protocolState.app.channelId,
-      protocolState.app.fundingLedgerChannelId as string,
-      tx
-    );
   }
 
   private async requestLedgerDefunding(
