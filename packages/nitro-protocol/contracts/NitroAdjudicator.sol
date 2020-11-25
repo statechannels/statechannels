@@ -28,7 +28,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         bytes32 stateHash,
         address challengerAddress,
         bytes memory outcomeBytes
-    ) public override {
+    ) external override {
         // requirements
         _requireChannelFinalized(channelId);
 
@@ -68,7 +68,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         bytes32 stateHash,
         address challengerAddress,
         bytes memory outcomeBytes
-    ) public {
+    ) external {
         // requirements
         _requireChannelFinalized(channelId);
 
@@ -174,8 +174,8 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
     }
 
     /**
-    * @notice Check that the submitted pair of states form a valid transition (public wrapper for internal function _requireValidTransition)
-    * @dev Check that the submitted pair of states form a valid transition (public wrapper for internal function _requireValidTransition)
+    * @notice Check that the submitted pair of states form a valid transition (external wrapper for internal function _requireValidTransition)
+    * @dev Check that the submitted pair of states form a valid transition (external wrapper for internal function _requireValidTransition)
     * @param nParticipants Number of participants in the channel.
     transition
     * @param isFinalAB Pair of booleans denoting whether the first and second state (resp.) are final.
@@ -190,7 +190,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         IForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint48 turnNumB,
         address appDefinition
-    ) public pure returns (bool) {
+    ) external pure returns (bool) {
         return _requireValidTransition(nParticipants, isFinalAB, ab, turnNumB, appDefinition);
     }
 }
