@@ -1,6 +1,6 @@
 import {ethers, Wallet} from 'ethers';
 
-import {SignedState} from '../../src';
+import {Outcome, randomExternalDestination, SignedState} from '../../src';
 import {Channel} from '../../src/contract/channel';
 import {signState} from '../../src/signatures';
 import {
@@ -53,7 +53,40 @@ beforeAll(async () => {
   );
 });
 
+const MAX_OUTCOME_ITEMS = 2025;
+const MAX_TX_DATA_SIZE = 128 * 1024; // (bytes) https://github.com/ethereum/go-ethereum/blob/f59ed3565d18c1fa676fd34f4fd41ecccad707e8/core/tx_pool.go#L51
+
+const randomDestination = randomExternalDestination();
+const largeOutcome = (number: number): Outcome => [
+  {
+    allocationItems: Array(number).fill({destination: randomDestination, amount: '0x01'}),
+    assetHolderAddress: Wallet.createRandom().address,
+  },
+];
+
 describe('transaction-generators', () => {
+  it('creates a challenge transaction with MAX_OUTCOME_ITEMS outcome items that is less than MAX_TX_DATA_SIZE', async () => {
+    const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
+      [
+        await signState(
+          {
+            turnNum: 0,
+            isFinal: false,
+            appDefinition: ethers.constants.AddressZero,
+            appData: '0x00',
+            outcome: largeOutcome(MAX_OUTCOME_ITEMS),
+            channel,
+            challengeDuration: 0x0,
+          },
+          wallet.privateKey
+        ),
+      ],
+      wallet.privateKey
+    );
+
+    expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
+  });
+
   it('creates a challenge transaction', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [signedState],
