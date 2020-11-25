@@ -59,7 +59,7 @@ import {Channel} from '../models/channel';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
-import {WalletResponse} from './response-builder';
+import {WalletResponse} from './wallet-response';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.

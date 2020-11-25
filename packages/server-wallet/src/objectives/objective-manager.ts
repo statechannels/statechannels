@@ -6,7 +6,7 @@ import {ChannelOpener} from '../protocols/open-channel';
 import {ChannelCloser} from '../protocols/close-channel';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
-import {WalletResponse} from '../wallet/response-builder';
+import {WalletResponse} from '../wallet/wallet-response';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';

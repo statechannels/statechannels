@@ -1,7 +1,7 @@
 import {Bytes32} from '../type-aliases';
 import {Store} from '../wallet/store';
 import {WalletError, Values} from '../errors/wallet-error';
-import {WalletResponse} from '../wallet/response-builder';
+import {WalletResponse} from '../wallet/wallet-response';
 
 export class CloseChannelObjective {
   public static async commence(
