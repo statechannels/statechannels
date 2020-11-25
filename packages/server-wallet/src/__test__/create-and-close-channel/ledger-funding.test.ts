@@ -342,6 +342,35 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   });
 });
 
+describe('Closing a ledger channel and preventing it from being used again', () => {
+  let ledgerChannelId: Bytes32;
+
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+  });
+
+  it('can close the ledger channel', async () => {
+    ledgerChannelId = await createLedgerChannel(10, 10);
+    const {outbox} = await a.closeChannel({channelId: ledgerChannelId});
+    const {outbox: close} = await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
+    await exchangeMessagesBetweenAandB([close], []);
+    const {channelResults} = await a.getChannels();
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+    expect(ledger).toMatchObject({
+      turnNum: 4,
+      status: 'closed',
+    });
+  });
+
+  it('fails to fund a new channel with this ledger', async () => {
+    const params = testCreateChannelParams(10, 10, ledgerChannelId);
+    await expect(a.createChannel(params)).rejects.toThrow(/already been closed/);
+    await expect(a.createChannels(params, 1)).rejects.toThrow(/already been closed/);
+  });
+});
+
 describe('Funding multiple channels syncronously (in bulk)', () => {
   const N = 4;
   let ledgerChannelId: Bytes32;
