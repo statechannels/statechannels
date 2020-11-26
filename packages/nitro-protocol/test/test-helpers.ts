@@ -402,14 +402,15 @@ export const largeOutcome = (
   assetHolderAddress: string = ethers.Wallet.createRandom().address
 ): AllocationAssetOutcome[] => {
   const randomDestination = randomExternalDestination();
-
-  return [
-    {
-      allocationItems: Array(numAllocationItems).fill({
-        destination: randomDestination,
-        amount: '0x01',
-      }),
-      assetHolderAddress,
-    },
-  ];
+  return numAllocationItems > 0
+    ? [
+        {
+          allocationItems: Array(numAllocationItems).fill({
+            destination: randomDestination,
+            amount: '0x01',
+          }),
+          assetHolderAddress,
+        },
+      ]
+    : [];
 };
