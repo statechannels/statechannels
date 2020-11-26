@@ -20,7 +20,7 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              name: ':carrot: conventional'
+              name: ':memo: conventional'
             })
       - uses: actions/github-script@v3
         continue-on-error: true
@@ -31,5 +31,5 @@ jobs:
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              labels: [':carrot: conventional']
+              labels: [':memo: conventional']
             })
