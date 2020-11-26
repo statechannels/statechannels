@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.13.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.13.0...@statechannels/server-wallet@1.13.1) (2020-11-26)
+
+
+### Bug Fixes
+
+* add a check inside open channel protocol for ledger channel running status ([47240ce](https://github.com/statechannels/statechannels/commit/47240ce1d70918c0760c2d948de323c7fdf4c70b))
+* add error within Store when createChannel specified invalid funding ledger channel ([5b5f87d](https://github.com/statechannels/statechannels/commit/5b5f87db98d4c6a5245143a73be3013756199530))
+* check for closing or closed ledger states before creating channel ([9136d74](https://github.com/statechannels/statechannels/commit/9136d741943f791a5bedd40f0e5fbc0cbd3a4dd4))
+
+
+
+
+
 # [1.13.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.12.1...@statechannels/server-wallet@1.13.0) (2020-11-26)
 
 
