@@ -1,6 +1,3 @@
-/* eslint-disable no-process-env */
-import {constants} from 'ethers';
-
 import {
   LoggingConfiguration,
   NetworkConfiguration,
@@ -54,9 +51,6 @@ type HasDatabaseConnectionConfigObject = {
 };
 export const defaultTestNetworkConfiguration: NetworkConfiguration = {
   chainNetworkID: '0x00',
-  erc20Address: constants.AddressZero,
-  ethAssetHolderAddress: constants.AddressZero,
-  erc20AssetHolderAddress: constants.AddressZero,
 };
 export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfigObject = {
   ...defaultConfig,

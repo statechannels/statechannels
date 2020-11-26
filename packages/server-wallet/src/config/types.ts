@@ -84,9 +84,6 @@ export type IncomingServerWalletConfig = RequiredServerWalletConfig &
  * Various network configuration options
  */
 export type NetworkConfiguration = {
-  erc20Address: string;
-  ethAssetHolderAddress: string;
-  erc20AssetHolderAddress: string;
   rpcEndpoint?: string;
   chainNetworkID: string;
 };
