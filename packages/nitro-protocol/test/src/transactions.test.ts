@@ -30,13 +30,6 @@ const challengeState = {
   outcome: [],
   challengeDuration: 0x0,
 };
-// Const challengeChannelStorage: ChannelData = {
-//   TurnNumRecord: 0,
-//   FinalizesAt: 1e12,
-//   StateHash: HashZero,
-//   ChallengerAddress: ethers.constants.AddressZero,
-//   OutcomeHash: HashZero,
-// };
 
 let signedState: SignedState;
 
