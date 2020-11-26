@@ -6,6 +6,9 @@ import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress, SignedState} from './signatures';
 
+// CONSTANTS
+export const MAX_TX_DATA_SIZE = 128 * 1024; // (bytes) https://github.com/ethereum/go-ethereum/blob/f59ed3565d18c1fa676fd34f4fd41ecccad707e8/core/tx_pool.go#L51
+
 export async function getChannelStorage(
   provider: providers.Provider,
   contractAddress: string,

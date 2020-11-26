@@ -2,6 +2,7 @@ import {ethers, Wallet} from 'ethers';
 
 import {Outcome, randomExternalDestination, SignedState} from '../../src';
 import {Channel} from '../../src/contract/channel';
+import {MAX_OUTCOME_ITEMS} from '../../src/contract/outcome';
 import {signState} from '../../src/signatures';
 import {
   createCheckpointTransaction,
@@ -9,6 +10,7 @@ import {
   createChallengeTransaction,
   createRespondTransaction,
   createSignatureArguments,
+  MAX_TX_DATA_SIZE,
 } from '../../src/transactions';
 
 const wallet = Wallet.createRandom();
@@ -52,9 +54,6 @@ beforeAll(async () => {
     wallet.privateKey
   );
 });
-
-const MAX_OUTCOME_ITEMS = 2025;
-const MAX_TX_DATA_SIZE = 128 * 1024; // (bytes) https://github.com/ethereum/go-ethereum/blob/f59ed3565d18c1fa676fd34f4fd41ecccad707e8/core/tx_pool.go#L51
 
 const randomDestination = randomExternalDestination();
 const largeOutcome = (number: number): Outcome => [
