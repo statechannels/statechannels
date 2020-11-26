@@ -396,3 +396,13 @@ export async function writeGasConsumption(
 export function getRandomNonce(seed: string): number {
   return Number.parseInt(ethers.utils.id(seed).slice(2, 11), 16);
 }
+
+export const largeOutcome = (number: number): Outcome => {
+  const randomDestination = randomExternalDestination();
+  return [
+    {
+      allocationItems: Array(number).fill({destination: randomDestination, amount: '0x01'}),
+      assetHolderAddress: ethers.Wallet.createRandom().address,
+    },
+  ];
+};

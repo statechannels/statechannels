@@ -12,6 +12,7 @@ import {
   createSignatureArguments,
   MAX_TX_DATA_SIZE,
 } from '../../src/transactions';
+import {largeOutcome} from '../test-helpers';
 
 const wallet = Wallet.createRandom();
 
@@ -47,14 +48,6 @@ beforeAll(async () => {
     wallet.privateKey
   );
 });
-
-const randomDestination = randomExternalDestination();
-const largeOutcome = (number: number): Outcome => [
-  {
-    allocationItems: Array(number).fill({destination: randomDestination, amount: '0x01'}),
-    assetHolderAddress: Wallet.createRandom().address,
-  },
-];
 
 describe('transaction-generators', () => {
   it('creates a challenge transaction with MAX_OUTCOME_ITEMS outcome items that is less than MAX_TX_DATA_SIZE', async () => {
