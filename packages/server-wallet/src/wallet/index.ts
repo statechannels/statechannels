@@ -1,6 +1,6 @@
 export {WalletEvent, SingleChannelOutput, MultipleChannelOutput} from './wallet';
 
-import {IncomingServerWalletConfig, ServerWalletConfig} from '../config';
+import {IncomingServerWalletConfig} from '../config';
 
 import {MultiThreadedWallet} from './multi-threaded-wallet';
 import {SingleThreadedWallet} from './wallet';
@@ -17,4 +17,4 @@ export const Wallet = {
   },
 };
 
-export {ServerWalletConfig};
+export * from '../config';
