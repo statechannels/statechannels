@@ -19,6 +19,8 @@ const config = {
     ...defaultTestConfig.networkConfiguration,
     // eslint-disable-next-line no-process-env
     rpcEndpoint: process.env.RPC_ENDPOINT,
+    // eslint-disable-next-line no-process-env
+    chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID || '0'),
   },
 };
 if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
