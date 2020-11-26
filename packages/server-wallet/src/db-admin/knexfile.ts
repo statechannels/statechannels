@@ -2,7 +2,6 @@
 import * as path from 'path';
 
 import {Config} from 'knex';
-import {constants} from 'ethers';
 
 import {
   defaultConfig,
@@ -66,9 +65,6 @@ export const {client, connection, debug, migrations, seeds, pool} = createKnexCo
   databaseConfiguration: {debug: dbDebug, connection: dbConnectionConfig},
   ethereumPrivateKey: '0x0',
   networkConfiguration: {
-    chainNetworkID: '0x0',
-    erc20Address: constants.AddressZero,
-    erc20AssetHolderAddress: constants.AddressZero,
-    ethAssetHolderAddress: constants.AddressZero,
+    chainNetworkID: 0,
   },
 });
