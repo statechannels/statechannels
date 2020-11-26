@@ -399,7 +399,7 @@ export function getRandomNonce(seed: string): number {
 
 export const largeOutcome = (
   numAllocationItems: number,
-  assetHolderAddress: string = randomExternalDestination()
+  assetHolderAddress: string = ethers.Wallet.createRandom().address
 ): AllocationAssetOutcome[] => {
   const randomDestination = randomExternalDestination();
 
