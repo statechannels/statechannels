@@ -3,6 +3,22 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.10.0...@statechannels/nitro-protocol@0.10.1) (2020-11-26)
+
+
+### Performance Improvements
+
+* convert ForceMove methods to external ([c7b02fc](https://github.com/statechannels/monorepo/commit/c7b02fc151c8110b03a1b1931833828d5befdd09))
+* convert public methods to external ([2a5d3d2](https://github.com/statechannels/monorepo/commit/2a5d3d23cdf3bc672a009efac7b94efe0810e381))
+* IForceMove methods external, not public ([63169a0](https://github.com/statechannels/monorepo/commit/63169a0e97e617cf6ffedaf5da8cf1886c055f13))
+* make ERC20AssetHolder.deposit external ([c929f28](https://github.com/statechannels/monorepo/commit/c929f2824fdf644797be8ab11edfeaa177591763))
+* make ETHAssetHolder.deposit external ([4f0158f](https://github.com/statechannels/monorepo/commit/4f0158f24400508e40cf938b2b3cc6a642049888))
+* use calldata, not memory ([52c2c60](https://github.com/statechannels/monorepo/commit/52c2c601230c9076e7237aeef6b2776e537f071b))
+
+
+
+
+
 # [0.10.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.9.1...@statechannels/nitro-protocol@0.10.0) (2020-11-25)
 
 

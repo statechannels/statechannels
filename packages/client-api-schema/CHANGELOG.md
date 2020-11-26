@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.5.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.4.9...@statechannels/client-api-schema@0.5.0) (2020-11-26)
+
+
+### Features
+
+* add fundingStatus to ChannelResult ([fd8e64b](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/fd8e64be2534e1e405b4d789f758359c60ebe5da))
+
+
+
+
+
 ## [0.4.9](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.4.8...@statechannels/client-api-schema@0.4.9) (2020-11-20)
 
 **Note:** Version bump only for package @statechannels/client-api-schema
