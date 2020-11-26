@@ -57,6 +57,8 @@ beforeAll(async () => {
 });
 
 // Scenarios are synonymous with channelNonce:
+const description0 =
+  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly with MAX_OUTCOME_ITEMS';
 
 const description1 =
   'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly';
@@ -72,7 +74,8 @@ describe('pushOutcome', () => {
   });
   it.each`
     description     | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | numAllocations | reasonString
-    ${description1} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${undefined}
+    ${description0} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${undefined}
+    ${description1} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[100, 0]}    | ${undefined}
     ${description2} | ${5}                | ${5}                  | ${false}  | ${false}         | ${[2, 2]}      | ${CHANNEL_NOT_FINALIZED}
     ${description3} | ${4}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${WRONG_CHANNEL_STORAGE}
     ${description4} | ${5}                | ${5}                  | ${true}   | ${true}          | ${[2, 2]}      | ${'Outcome hash already exists'}
@@ -116,8 +119,15 @@ describe('pushOutcome', () => {
         challengerAddress
       );
 
-      // Call public wrapper to set state (only works on test contract)
-      // This may cause memory issues when using a large outcome
+      // Use public wrapper to set state (only works on test contract)
+      const txRequest = {
+        data: TestNitroAdjudicator.interface.encodeFunctionData('setChannelStorageHash', [
+          channelId,
+          initialChannelStorageHash,
+        ]),
+      };
+      await sendTransaction(provider, TestNitroAdjudicator.address, txRequest);
+
       const tx = await TestNitroAdjudicator.setChannelStorageHash(
         channelId,
         initialChannelStorageHash
