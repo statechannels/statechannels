@@ -58,7 +58,7 @@ beforeAll(async () => {
 
 // Scenarios are synonymous with channelNonce:
 const description0 =
-  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly with MAX_OUTCOME_ITEMS';
+  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly with 100 allocationItems';
 
 const description1 =
   'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly';
@@ -165,12 +165,12 @@ describe('pushOutcome', () => {
         // Ensure we aren't using too much gas
         expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
         // Check 2x AssetHolder storage against the expected value
-        if (outcome[0].allocationItems.length > 0) {
+        if (outcome[0]) {
           expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
             hashAssetOutcome(outcome[0].allocationItems)
           );
         }
-        if (outcome[1].allocationItems.length > 0) {
+        if (outcome[1]) {
           expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
             hashAssetOutcome(outcome[1].allocationItems)
           );
