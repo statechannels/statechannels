@@ -3,7 +3,7 @@ import {utils} from 'ethers';
 import {Address, Bytes, Bytes32, Uint256} from './types';
 
 // CONSTANTS
-export const MAX_OUTCOME_ITEMS = 2025;
+export const MAX_OUTCOME_ITEMS = 2000;
 
 export enum AssetOutcomeType {
   AllocationOutcomeType = 0,
