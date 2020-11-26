@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.13.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.12.1...@statechannels/server-wallet@1.13.0) (2020-11-26)
+
+
+### Bug Fixes
+
+* add conditions to ReadyToFund state ([cc43066](https://github.com/statechannels/statechannels/commit/cc43066e3c87baa98f6f2441e3f0cda2c318821a))
+* directFundingStatus is defunded only when supported state is final ([dbe2291](https://github.com/statechannels/statechannels/commit/dbe229163178572b5e313c8b2efa736befd4f761))
+* remove unused addresses ([bb8fa4c](https://github.com/statechannels/statechannels/commit/bb8fa4cf7405c5ae6f2a0e58fa9beb49442cedab))
+* switch chain id to number ([2750f92](https://github.com/statechannels/statechannels/commit/2750f92bc9183e61a14060c19584b1733676b24a))
+
+
+### Features
+
+* add fundingStatus to ChannelResult ([fd8e64b](https://github.com/statechannels/statechannels/commit/fd8e64be2534e1e405b4d789f758359c60ebe5da))
+
+
+
+
+
 ## [1.12.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.12.0...@statechannels/server-wallet@1.12.1) (2020-11-25)
 
 
