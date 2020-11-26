@@ -57,7 +57,7 @@
       "internalConsoleOptions": "neverOpen",
       "env": {
         "NODE_ENV": "test",
-        "SERVER_DB_NAME": "payer"
+        "SERVER_DB_NAME": "server_wallet_payer"
       }
     }
   ]

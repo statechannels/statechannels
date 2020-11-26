@@ -170,10 +170,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: server-wallet-e2e-test
           working_directory: packages/server-wallet
@@ -200,10 +200,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: server-wallet-stress-test
           working_directory: packages/server-wallet
@@ -223,10 +223,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: server-wallet-stress-test
           working_directory: packages/server-wallet
@@ -245,10 +245,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: profile
           working_directory: packages/server-wallet
