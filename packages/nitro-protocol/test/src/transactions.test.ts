@@ -50,7 +50,7 @@ beforeAll(async () => {
 });
 
 describe('transaction-generators', () => {
-  it('creates a challenge transaction with MAX_OUTCOME_ITEMS outcome items that is less than MAX_TX_DATA_SIZE', async () => {
+  it('creates a challenge transaction with MAX_OUTCOME_ITEMS outcome items that is smaller than MAX_TX_DATA_SIZE', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [
         await signState(

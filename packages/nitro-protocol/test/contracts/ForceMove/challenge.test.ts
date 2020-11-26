@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, Signature} from 'ethers';
+import {Contract, Wallet, ethers, Signature, BigNumber} from 'ethers';
 
 const {HashZero} = ethers.constants;
 const {defaultAbiCoder} = ethers.utils;
@@ -16,7 +16,7 @@ import {
   TURN_NUM_RECORD_DECREASED,
   TURN_NUM_RECORD_NOT_INCREASED,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {SignedState} from '../../../src/index';
+import {Outcome, SignedState} from '../../../src/index';
 import {signChallengeMessage, signData, signState, signStates} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
@@ -25,13 +25,15 @@ import {
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
+  largeOutcome,
   nonParticipant,
   ongoingChallengeHash,
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {createChallengeTransaction} from '../../../src/transactions';
+import {createChallengeTransaction, NITRO_MAX_GAS} from '../../../src/transactions';
 import {hashChallengeMessage} from '../../../src/contract/challenge';
+import {MAX_OUTCOME_ITEMS} from '../../../src/contract/outcome';
 
 const provider = getTestProvider();
 
@@ -62,14 +64,19 @@ const twoPartyChannel: Channel = {
   participants: [wallets[0].address, wallets[1].address],
 };
 
-async function createSignedCountingAppState(channel: Channel, appData: number, turnNum: number) {
+async function createSignedCountingAppState(
+  channel: Channel,
+  appData: number,
+  turnNum: number,
+  outcome: Outcome = []
+) {
   return await signState(
     {
       turnNum,
       isFinal: false,
       appDefinition: getPlaceHolderContractAddress(),
       appData: defaultAbiCoder.encode(['uint256'], [appData]),
-      outcome: [],
+      outcome,
       channel,
       challengeDuration: 0xfff,
     },
@@ -266,13 +273,11 @@ describe('challenge with transaction generator', () => {
   beforeEach(async () => {
     await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
   });
-  afterEach(async () => {
-    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
-  });
   it.each`
-    description                  | appData   | turnNums  | challenger
-    ${'forceMove(0,1) accepted'} | ${[0, 0]} | ${[0, 1]} | ${1}
-    ${'forceMove(1,2) accepted'} | ${[0, 0]} | ${[1, 2]} | ${0}
+    description                                     | appData   | outcome                            | turnNums  | challenger
+    ${'forceMove(0,1) accepted'}                    | ${[0, 0]} | ${[]}                              | ${[0, 1]} | ${1}
+    ${'forceMove(1,2) accepted'}                    | ${[0, 0]} | ${[]}                              | ${[1, 2]} | ${0}
+    ${'forceMove(1,2) accepted, MAX_OUTCOME_ITEMS'} | ${[0, 0]} | ${largeOutcome(MAX_OUTCOME_ITEMS)} | ${[1, 2]} | ${0}
   `('$description', async ({description, appData, turnNums, challenger}) => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [
@@ -282,12 +287,13 @@ describe('challenge with transaction generator', () => {
       wallets[challenger].privateKey
     );
     const signer = provider.getSigner();
-    const transaction = {data: transactionRequest.data, gasLimit: 3000000};
     const response = await signer.sendTransaction({
       to: ForceMove.address,
-      ...transaction,
+      ...transactionRequest,
     });
-    expect(response).toBeDefined();
+    expect(BigNumber.from((await response.wait()).gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(
+      true
+    );
   });
 });
 
