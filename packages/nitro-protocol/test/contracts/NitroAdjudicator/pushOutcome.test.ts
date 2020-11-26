@@ -5,7 +5,7 @@ import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc2
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
+import {hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
@@ -16,6 +16,7 @@ import {
   finalizedOutcomeHash,
   getRandomNonce,
   getTestProvider,
+  largeOutcome,
   randomExternalDestination,
   sendTransaction,
   setupContracts,
@@ -88,26 +89,9 @@ describe('pushOutcome', () => {
       const channelId = getChannelId(channel);
       const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
 
-      const A = randomExternalDestination();
-      const B = randomExternalDestination();
-      const C = randomExternalDestination();
-      const D = randomExternalDestination();
-
-      const outcome: AllocationAssetOutcome[] = [
-        {
-          assetHolderAddress: ETHAssetHolder.address,
-          allocationItems: [
-            {destination: A, amount: '1'},
-            {destination: B, amount: '2'},
-          ],
-        },
-        {
-          assetHolderAddress: ERC20AssetHolder.address,
-          allocationItems: [
-            {destination: C, amount: '3'},
-            {destination: D, amount: '4'},
-          ],
-        },
+      const outcome = [
+        ...largeOutcome(2, ETHAssetHolder.address),
+        ...largeOutcome(2, ERC20AssetHolder.address),
       ];
 
       // We don't care about the actual values in the state
@@ -163,12 +147,16 @@ describe('pushOutcome', () => {
       } else {
         await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
         // Check 2x AssetHolder storage against the expected value
-        expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[0].allocationItems)
-        );
-        expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[1].allocationItems)
-        );
+        if (outcome[0].allocationItems.length > 0) {
+          expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
+            hashAssetOutcome(outcome[0].allocationItems)
+          );
+        }
+        if (outcome[1].allocationItems.length > 0) {
+          expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
+            hashAssetOutcome(outcome[1].allocationItems)
+          );
+        }
       }
     }
   );
