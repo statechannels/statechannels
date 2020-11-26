@@ -1,4 +1,5 @@
 /* eslint-disable no-process-env */
+import {BigNumber} from 'ethers';
 import {Config} from 'knex';
 import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
@@ -44,7 +45,7 @@ export function overwriteConfigWithEnvVars(config: ServerWalletConfig): ServerWa
     ethereumPrivateKey: process.env.ETHEREUM_PRIVATE_KEY || config.ethereumPrivateKey,
     networkConfiguration: {
       rpcEndpoint: process.env.RPC_ENDPOINT,
-      chainNetworkID: process.env.CHAIN_NETWORK_ID || '0x00',
+      chainNetworkID: BigNumber.from(process.env.CHAIN_NETWORK_ID || '0x00').toNumber(),
     },
 
     skipEvmValidation: (process.env.SKIP_EVM_VALIDATION || 'true').toLowerCase() === 'true',

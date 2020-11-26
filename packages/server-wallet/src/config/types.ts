@@ -85,5 +85,5 @@ export type IncomingServerWalletConfig = RequiredServerWalletConfig &
  */
 export type NetworkConfiguration = {
   rpcEndpoint?: string;
-  chainNetworkID: string;
+  chainNetworkID: number;
 };

@@ -24,7 +24,7 @@ import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {ethers, constants} from 'ethers';
+import {ethers, constants, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 
@@ -118,7 +118,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       this.knex,
       this.walletConfig.metricsConfiguration.timingMetrics,
       this.walletConfig.skipEvmValidation,
-      this.walletConfig.networkConfiguration.chainNetworkID,
+      utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
       this.logger
     );
 
@@ -158,7 +158,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(
-      this.walletConfig.networkConfiguration.chainNetworkID,
+      utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
       makeAddress(appDefinition),
       bytecode
     );
@@ -166,7 +166,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
     return this.store.upsertBytecode(
-      this.walletConfig.networkConfiguration.chainNetworkID,
+      utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
       makeAddress(appDefinition),
       bytecode
     );
@@ -323,7 +323,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     const constants = {
       appDefinition: makeAddress(appDefinition),
-      chainId: this.walletConfig.networkConfiguration.chainNetworkID,
+      chainId: BigNumber.from(this.walletConfig.networkConfiguration.chainNetworkID).toHexString(),
       challengeDuration: 9001,
       channelNonce,
       participants,

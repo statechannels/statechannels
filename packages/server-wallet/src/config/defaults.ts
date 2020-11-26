@@ -50,7 +50,7 @@ type HasDatabaseConnectionConfigObject = {
   databaseConfiguration: {connection: {host: string; port: number; dbName: string}};
 };
 export const defaultTestNetworkConfiguration: NetworkConfiguration = {
-  chainNetworkID: '0x00',
+  chainNetworkID: 0,
 };
 export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfigObject = {
   ...defaultConfig,
