@@ -355,9 +355,7 @@ describe('Closing a ledger channel and preventing it from being used again', () 
     const {outbox} = await a.closeChannel({channelId: ledgerChannelId});
     const {outbox: close} = await b.pushMessage(getPayloadFor(participantB.participantId, outbox));
     await exchangeMessagesBetweenAandB([close], []);
-    const {channelResults} = await a.getChannels();
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
-    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+    const {channelResult: ledger} = await a.getState({channelId: ledgerChannelId});
     expect(ledger).toMatchObject({
       turnNum: 4,
       status: 'closed',
