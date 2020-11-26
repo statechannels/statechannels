@@ -1,6 +1,6 @@
 import {ethers, Wallet} from 'ethers';
 
-import {SignedState} from '../../src';
+import {SignedState, State} from '../../src';
 import {Channel} from '../../src/contract/channel';
 import {MAX_OUTCOME_ITEMS} from '../../src/contract/outcome';
 import {createPushOutcomeTransaction} from '../../src/contract/transaction-creators/nitro-adjudicator';
@@ -15,12 +15,15 @@ import {
 } from '../../src/transactions';
 import {largeOutcome} from '../test-helpers';
 
-const wallet = Wallet.createRandom();
+const walletA = Wallet.createRandom();
+const walletB = Wallet.createRandom();
+
+// TODO use 3x participants to match other tests
 
 const channel: Channel = {
   chainId: '0x1',
   channelNonce: 0x1,
-  participants: [wallet.address],
+  participants: [walletA.address, walletB.address], // 2 participants is the most common usecase
 };
 
 const challengeState = {
@@ -33,49 +36,40 @@ const challengeState = {
   challengeDuration: 0x0,
 };
 
-let signedState: SignedState;
+const state: State = {
+  turnNum: 0,
+  isFinal: false,
+  appDefinition: ethers.constants.AddressZero,
+  appData: '0x00',
+  outcome: [],
+  channel,
+  challengeDuration: 0x0,
+};
+let signedStateA: SignedState;
+let signedStateB: SignedState;
+const largestOutcome = largeOutcome(MAX_OUTCOME_ITEMS);
+const stateWithLargeOutcome = {...state, outcome: largeOutcome(MAX_OUTCOME_ITEMS)};
 
 beforeAll(async () => {
-  signedState = await signState(
-    {
-      turnNum: 0,
-      isFinal: false,
-      appDefinition: ethers.constants.AddressZero,
-      appData: '0x00',
-      outcome: [],
-      channel,
-      challengeDuration: 0x0,
-    },
-    wallet.privateKey
-  );
+  signedStateA = signState(state, walletA.privateKey);
+  signedStateB = signState(state, walletB.privateKey);
 });
-
 describe('transaction-generators', () => {
   it('creates a challenge transaction with MAX_OUTCOME_ITEMS outcome items that is smaller than MAX_TX_DATA_SIZE', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [
-        await signState(
-          {
-            turnNum: 0,
-            isFinal: false,
-            appDefinition: ethers.constants.AddressZero,
-            appData: '0x00',
-            outcome: largeOutcome(MAX_OUTCOME_ITEMS),
-            channel,
-            challengeDuration: 0x0,
-          },
-          wallet.privateKey
-        ),
+        await signState(stateWithLargeOutcome, walletA.privateKey),
+        await signState(stateWithLargeOutcome, walletB.privateKey),
       ],
-      wallet.privateKey
+      walletA.privateKey
     );
     expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
 
   it('creates a challenge transaction', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
-      [signedState],
-      wallet.privateKey
+      [signedStateA, signedStateB],
+      walletA.privateKey
     );
 
     expect(transactionRequest.data).toBeDefined();
@@ -83,7 +77,8 @@ describe('transaction-generators', () => {
 
   it('creates a conclude from open transaction', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createConcludeTransaction([
-      signedState,
+      signedStateA,
+      signedStateB,
     ]);
 
     expect(transactionRequest.data).toBeDefined();
@@ -91,27 +86,19 @@ describe('transaction-generators', () => {
 
   it('creates a conclude from challenged transaction', async () => {
     const transactionRequest: ethers.providers.TransactionRequest = createConcludeTransaction([
-      signedState,
+      signedStateA,
+      signedStateB,
     ]);
 
     expect(transactionRequest.data).toBeDefined();
   });
 
   it('creates a pushOutcome transaction with MAX_OUTCOME_ITEMS outcome items that is smaller than MAX_TX_DATA_SIZE', async () => {
-    const outcome = largeOutcome(MAX_OUTCOME_ITEMS);
     const transactionRequest: ethers.providers.TransactionRequest = createPushOutcomeTransaction(
       1,
       1606389728,
-      {
-        turnNum: 0,
-        isFinal: false,
-        appDefinition: ethers.constants.AddressZero,
-        appData: '0x00',
-        outcome,
-        channel,
-        challengeDuration: 0x0,
-      },
-      outcome
+      stateWithLargeOutcome,
+      largestOutcome
     );
     expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
@@ -124,7 +111,7 @@ describe('transaction-generators', () => {
     'creates a correct signature arguments when handling multiple states',
     async ({turnNum, expectedWhoSignedWhat}) => {
       const wallet2 = Wallet.createRandom();
-      const twoPlayerChannel = {...channel, participants: [wallet.address, wallet2.address]};
+      const twoPlayerChannel = {...channel, participants: [walletA.address, wallet2.address]};
 
       const signedStates = [
         await signState(
@@ -137,7 +124,7 @@ describe('transaction-generators', () => {
             channel: twoPlayerChannel,
             challengeDuration: 0x0,
           },
-          turnNum[0] % 2 === 0 ? wallet.privateKey : wallet2.privateKey
+          turnNum[0] % 2 === 0 ? walletA.privateKey : wallet2.privateKey
         ),
         await signState(
           {
@@ -149,7 +136,7 @@ describe('transaction-generators', () => {
             channel: twoPlayerChannel,
             challengeDuration: 0x0,
           },
-          turnNum[1] % 2 === 0 ? wallet.privateKey : wallet2.privateKey
+          turnNum[1] % 2 === 0 ? walletA.privateKey : wallet2.privateKey
         ),
       ];
       const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
@@ -164,7 +151,7 @@ describe('transaction-generators', () => {
     it('creates a transaction', async () => {
       const transactionRequest: ethers.providers.TransactionRequest = createRespondTransaction(
         challengeState,
-        signedState
+        signedStateA
       );
 
       expect(transactionRequest.data).toBeDefined();
@@ -172,7 +159,7 @@ describe('transaction-generators', () => {
 
     it('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondTransaction(null, signedState);
+        createRespondTransaction(null, signedStateA);
       }).toThrow();
     });
   });
@@ -180,7 +167,8 @@ describe('transaction-generators', () => {
   describe('respond with checkpoint transactions', () => {
     it('creates a transaction when there is a challenge state', async () => {
       const transactionRequest: ethers.providers.TransactionRequest = createCheckpointTransaction([
-        signedState,
+        signedStateA,
+        signedStateB,
       ]);
 
       expect(transactionRequest.data).toBeDefined();
@@ -188,7 +176,8 @@ describe('transaction-generators', () => {
 
     it('creates a transaction when the channel is open', async () => {
       const transactionRequest: ethers.providers.TransactionRequest = createCheckpointTransaction([
-        signedState,
+        signedStateA,
+        signedStateB,
       ]);
 
       expect(transactionRequest.data).toBeDefined();
