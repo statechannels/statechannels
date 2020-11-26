@@ -13,7 +13,7 @@ import {
   createSignatureArguments,
   MAX_TX_DATA_SIZE,
 } from '../../src/transactions';
-import {largeOutcome} from '../test-helpers';
+import {getRandomNonce, largeOutcome} from '../test-helpers';
 
 const walletA = Wallet.createRandom();
 const walletB = Wallet.createRandom();
@@ -22,7 +22,7 @@ const walletB = Wallet.createRandom();
 
 const channel: Channel = {
   chainId: '0x1',
-  channelNonce: 0x1,
+  channelNonce: getRandomNonce('transactions'),
   participants: [walletA.address, walletB.address], // 2 participants is the most common usecase
 };
 
@@ -43,7 +43,7 @@ const state: State = {
   appData: '0x00',
   outcome: [],
   channel,
-  challengeDuration: 0x0,
+  challengeDuration: 0x1,
 };
 let signedStateA: SignedState;
 let signedStateB: SignedState;
