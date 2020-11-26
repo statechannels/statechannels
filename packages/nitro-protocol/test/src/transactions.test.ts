@@ -1,8 +1,9 @@
 import {ethers, Wallet} from 'ethers';
 
-import {Outcome, randomExternalDestination, SignedState} from '../../src';
+import {SignedState} from '../../src';
 import {Channel} from '../../src/contract/channel';
 import {MAX_OUTCOME_ITEMS} from '../../src/contract/outcome';
+import {createPushOutcomeTransaction} from '../../src/contract/transaction-creators/nitro-adjudicator';
 import {signState} from '../../src/signatures';
 import {
   createCheckpointTransaction,
@@ -68,7 +69,6 @@ describe('transaction-generators', () => {
       ],
       wallet.privateKey
     );
-
     expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
 
@@ -95,6 +95,25 @@ describe('transaction-generators', () => {
     ]);
 
     expect(transactionRequest.data).toBeDefined();
+  });
+
+  it('creates a pushOutcome transaction with MAX_OUTCOME_ITEMS outcome items that is smaller than MAX_TX_DATA_SIZE', async () => {
+    const outcome = largeOutcome(MAX_OUTCOME_ITEMS);
+    const transactionRequest: ethers.providers.TransactionRequest = createPushOutcomeTransaction(
+      1,
+      1606389728,
+      {
+        turnNum: 0,
+        isFinal: false,
+        appDefinition: ethers.constants.AddressZero,
+        appData: '0x00',
+        outcome,
+        channel,
+        challengeDuration: 0x0,
+      },
+      outcome
+    );
+    expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
 
   it.each`
@@ -167,7 +186,7 @@ describe('transaction-generators', () => {
       expect(transactionRequest.data).toBeDefined();
     });
 
-    it('creates a transaction when the chabbnel is open', async () => {
+    it('creates a transaction when the channel is open', async () => {
       const transactionRequest: ethers.providers.TransactionRequest = createCheckpointTransaction([
         signedState,
       ]);
