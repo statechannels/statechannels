@@ -1,22 +1,23 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import {Contract, Wallet, ethers, BigNumber} from 'ethers';
 
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, hashAssetOutcome} from '../../../src/contract/outcome';
+import {hashAssetOutcome, MAX_OUTCOME_ITEMS} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
   CHANNEL_NOT_FINALIZED,
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
+import {NITRO_MAX_GAS} from '../../../src/transactions';
 import {
   finalizedOutcomeHash,
   getRandomNonce,
   getTestProvider,
-  randomExternalDestination,
+  largeOutcome,
   sendTransaction,
   setupContracts,
 } from '../../test-helpers';
@@ -55,7 +56,14 @@ beforeAll(async () => {
   );
 });
 
-// Scenarios are synonymous with channelNonce:
+// NOTE ABOUT PUSHING A LARGE OUTCOME
+// We run our tests against ganache, which cannot seem to handle a pushOutcome transaction with 2000
+// allocation items (it consumes excessive memory). This is despite the tx being less than 128KB
+// However, such an outcome was pushed successfully on rinkeby https://rinkeby.etherscan.io/tx/0xcc892796857ea8d52d88ed747dd587a91cfd172d384b79f42cfc583f047f6f55
+// It consumed 2,054,158 gas
+// This test falls back to 100 allocation items.
+const description0 =
+  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly with 100 allocationItems';
 
 const description1 =
   'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly';
@@ -70,11 +78,12 @@ describe('pushOutcome', () => {
     channelNonce++;
   });
   it.each`
-    description     | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | reasonString
-    ${description1} | ${5}                | ${5}                  | ${true}   | ${false}         | ${undefined}
-    ${description2} | ${5}                | ${5}                  | ${false}  | ${false}         | ${CHANNEL_NOT_FINALIZED}
-    ${description3} | ${4}                | ${5}                  | ${true}   | ${false}         | ${WRONG_CHANNEL_STORAGE}
-    ${description4} | ${5}                | ${5}                  | ${true}   | ${true}          | ${'Outcome hash already exists'}
+    description     | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | numAllocations | reasonString
+    ${description0} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${undefined}
+    ${description1} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[100, 0]}    | ${undefined}
+    ${description2} | ${5}                | ${5}                  | ${false}  | ${false}         | ${[2, 2]}      | ${CHANNEL_NOT_FINALIZED}
+    ${description3} | ${4}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${WRONG_CHANNEL_STORAGE}
+    ${description4} | ${5}                | ${5}                  | ${true}   | ${true}          | ${[2, 2]}      | ${'Outcome hash already exists'}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -82,32 +91,16 @@ describe('pushOutcome', () => {
       declaredTurnNumRecord,
       finalized,
       outcomeHashExits,
+      numAllocations,
       reasonString,
     }) => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
       const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
 
-      const A = randomExternalDestination();
-      const B = randomExternalDestination();
-      const C = randomExternalDestination();
-      const D = randomExternalDestination();
-
-      const outcome: AllocationAssetOutcome[] = [
-        {
-          assetHolderAddress: ETHAssetHolder.address,
-          allocationItems: [
-            {destination: A, amount: '1'},
-            {destination: B, amount: '2'},
-          ],
-        },
-        {
-          assetHolderAddress: ERC20AssetHolder.address,
-          allocationItems: [
-            {destination: C, amount: '3'},
-            {destination: D, amount: '4'},
-          ],
-        },
+      const outcome = [
+        ...largeOutcome(numAllocations[0], ETHAssetHolder.address),
+        ...largeOutcome(numAllocations[1], ERC20AssetHolder.address),
       ];
 
       // We don't care about the actual values in the state
@@ -131,7 +124,15 @@ describe('pushOutcome', () => {
         challengerAddress
       );
 
-      // Call public wrapper to set state (only works on test contract)
+      // Use public wrapper to set state (only works on test contract)
+      const txRequest = {
+        data: TestNitroAdjudicator.interface.encodeFunctionData('setChannelStorageHash', [
+          channelId,
+          initialChannelStorageHash,
+        ]),
+      };
+      await sendTransaction(provider, TestNitroAdjudicator.address, txRequest);
+
       const tx = await TestNitroAdjudicator.setChannelStorageHash(
         channelId,
         initialChannelStorageHash
@@ -161,14 +162,24 @@ describe('pushOutcome', () => {
           regex
         );
       } else {
-        await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
+        const receipt = await sendTransaction(
+          provider,
+          TestNitroAdjudicator.address,
+          transactionRequest
+        );
+        // Ensure we aren't using too much gas
+        expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
         // Check 2x AssetHolder storage against the expected value
-        expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[0].allocationItems)
-        );
-        expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
-          hashAssetOutcome(outcome[1].allocationItems)
-        );
+        if (outcome[0]) {
+          expect(await ETHAssetHolder.assetOutcomeHashes(channelId)).toEqual(
+            hashAssetOutcome(outcome[0].allocationItems)
+          );
+        }
+        if (outcome[1]) {
+          expect(await ERC20AssetHolder.assetOutcomeHashes(channelId)).toEqual(
+            hashAssetOutcome(outcome[1].allocationItems)
+          );
+        }
       }
     }
   );

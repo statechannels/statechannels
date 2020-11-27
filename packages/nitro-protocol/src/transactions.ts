@@ -6,6 +6,15 @@ import * as forceMoveTrans from './contract/transaction-creators/force-move';
 import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress, SignedState} from './signatures';
 
+// CONSTANTS
+export const MAX_TX_DATA_SIZE = 128 * 1024; // (bytes) https://github.com/ethereum/go-ethereum/blob/f59ed3565d18c1fa676fd34f4fd41ecccad707e8/core/tx_pool.go#L51
+export const NITRO_MAX_GAS = 6_000_000; // should be below the block gas limit, which can change over time and is generally different on mainnet, testnet and ganache.
+// sampling some recent blocks on 26/11/2020:
+// mainnet  12505858
+// ropsten:  8000029
+// rinkeby: 10000000
+// ganache:  6721975 (hardcoded but can be overriden via config)
+
 export async function getChannelStorage(
   provider: providers.Provider,
   contractAddress: string,
