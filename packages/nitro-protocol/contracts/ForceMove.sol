@@ -54,7 +54,7 @@ contract ForceMove is IForceMove {
         Signature memory challengerSig
     ) external override {
         // input type validation
-        _requireValidInput(
+        requireValidInput(
             fixedPart.participants.length,
             variableParts.length,
             sigs.length,
@@ -205,7 +205,7 @@ contract ForceMove is IForceMove {
         uint8[] memory whoSignedWhat
     ) external override {
         // input type validation
-        _requireValidInput(
+        requireValidInput(
             fixedPart.participants.length,
             variableParts.length,
             sigs.length,
@@ -286,7 +286,7 @@ contract ForceMove is IForceMove {
         _requireChannelNotFinalized(channelId);
 
         // input type validation
-        _requireValidInput(
+        requireValidInput(
             fixedPart.participants.length,
             numStates,
             sigs.length,
@@ -913,12 +913,12 @@ contract ForceMove is IForceMove {
      * @param numSigs Number of signatures submitted
      * @param numWhoSignedWhats whoSignedWhat.length
      */
-    function _requireValidInput(
+    function requireValidInput(
         uint256 numParticipants,
         uint256 numStates,
         uint256 numSigs,
         uint256 numWhoSignedWhats
-    ) internal pure {
+    ) public pure returns (bool) {
         require(
             (numParticipants >= numStates) && (numStates > 0),
             'ForceMove | You must submit at least one but no more than numParticipants states'
@@ -928,5 +928,6 @@ contract ForceMove is IForceMove {
             'ForceMove | You must provide exactly one signature per participant, and assert who signed what for all participants'
         );
         require(numParticipants < type(uint8).max, 'ForceMove | Too many participants!');
+        return true;
     }
 }
