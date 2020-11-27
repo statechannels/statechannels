@@ -22,7 +22,7 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
-import {signStates} from '../../../src';
+import {signState, signStates} from '../../../src';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -154,23 +154,24 @@ describe('conclude', () => {
 
   it('Reverts to prevent an underflow', async () => {
     const channel: Channel = {chainId, participants, channelNonce};
-
+    const state: State = {
+      isFinal: true,
+      channel,
+      outcome,
+      appDefinition,
+      appData: '0x00',
+      challengeDuration,
+      turnNum: 99,
+    };
+    const signature = signState(state, wallets[0].privateKey).signature;
     const tx = ForceMove.conclude(
+      0,
+      getFixedPart(state),
+      ethers.constants.HashZero,
+      ethers.constants.HashZero,
       2,
-      getFixedPart({
-        isFinal: true,
-        channel,
-        outcome,
-        appDefinition,
-        appData: '0x00',
-        challengeDuration,
-        turnNum: 99,
-      }),
-      ethers.constants.HashZero,
-      ethers.constants.HashZero,
-      4,
-      [],
-      []
+      [0, 0, 0],
+      [signature, signature, signature] // enough to clear the input type validation
     );
     await expect(() => tx).rejects.toThrow(
       'largestTurnNum + 1 must be greater than or equal to numStates'
