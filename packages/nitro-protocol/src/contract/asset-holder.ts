@@ -33,7 +33,7 @@ export function getAssetTransferredEvent(eventResult: any[]): AssetTransferredEv
 }
 
 export function convertBytes32ToAddress(bytes32: string): string {
-  const normalized = BigNumber.from(bytes32).toHexString();
+  const normalized = utils.hexZeroPad(bytes32, 32);
   return utils.getAddress(`0x${normalized.slice(-40)}`);
 }
 
