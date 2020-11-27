@@ -15,8 +15,12 @@ import {
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
-let a = Wallet.create(overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_A'}));
-let b = Wallet.create(overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_B'}));
+let a = Wallet.create(
+  overwriteConfigWithDatabaseConnection(defaultTestConfig, {database: 'TEST_A'})
+);
+let b = Wallet.create(
+  overwriteConfigWithDatabaseConnection(defaultTestConfig, {database: 'TEST_B'})
+);
 
 let participantA: Participant;
 let participantB: Participant;

@@ -53,7 +53,7 @@ export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> 
 const dbConnectionConfig = process.env.SERVER_URL || {
   host: process.env.SERVER_HOST || defaultDatabaseConfiguration.connection.host,
   port: Number(process.env.SERVER_PORT) || defaultDatabaseConfiguration.connection.port,
-  dbName: process.env.SERVER_DB_NAME || '',
+  database: process.env.SERVER_DB_NAME || '',
   user: process.env.SERVER_DB_USER || 'postgres', // Default to postgres so the command will work in most cases without specifying a user
   password: process.env.SERVER_DB_PASSWORD,
 };

@@ -27,12 +27,12 @@ if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must
 const {rpcEndpoint} = config.networkConfiguration;
 let provider: providers.JsonRpcProvider;
 const b = Wallet.create({
-  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_B'}),
+  ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
 });
 const a = Wallet.create({
-  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_A'}),
+  ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
 });

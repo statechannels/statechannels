@@ -19,11 +19,11 @@ import {
 
 export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
   defaultTestConfig,
-  {dbName: 'server_wallet_payer'}
+  {database: 'server_wallet_payer'}
 );
 export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
   defaultTestConfig,
-  {dbName: 'server_wallet_receiver'}
+  {database: 'server_wallet_receiver'}
 );
 
 import {PerformanceTimer} from './payer/timers';

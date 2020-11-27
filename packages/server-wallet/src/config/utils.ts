@@ -12,10 +12,9 @@ export function extractDBConfigFromServerWalletConfig(
 
   return {
     client: 'postgres',
-    // TODO: Might make sense to use `database` instead of `dbName` so its consitent with knex
+
     connection: {
       ...connectionConfig,
-      database: connectionConfig.dbName,
       user: connectionConfig.user || '',
     },
     ...knexSnakeCaseMappers(),
@@ -25,7 +24,7 @@ export function extractDBConfigFromServerWalletConfig(
 type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
 
 type PartialConfigObject = Partial<DatabaseConnectionConfigObject> &
-  Required<Pick<DatabaseConnectionConfigObject, 'dbName'>>;
+  Required<Pick<DatabaseConnectionConfigObject, 'database'>>;
 export function overwriteConfigWithDatabaseConnection(
   config: ServerWalletConfig,
   databaseConnectionConfig: PartialConfigObject | string
@@ -38,7 +37,7 @@ export function overwriteConfigWithDatabaseConnection(
         ? {
             host: databaseConnectionConfig.host || defaultDatabaseConfiguration.connection.host,
             port: databaseConnectionConfig.port || defaultDatabaseConfiguration.connection.port,
-            dbName: databaseConnectionConfig.dbName,
+            database: databaseConnectionConfig.database,
             user: databaseConnectionConfig.user || defaultDatabaseConfiguration.connection.user,
             password: databaseConnectionConfig.password || '',
           }
@@ -62,7 +61,7 @@ export function getDatabaseConnectionConfig(
     return {
       port: port ? parseInt(port) : defaultConnection.port,
       host: host || defaultConnection.host,
-      dbName: database || '',
+      database: database || '',
       user: user || defaultConnection.user,
       password: password || '',
     };

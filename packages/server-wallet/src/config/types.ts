@@ -10,7 +10,7 @@ export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration &
  * Either a database connection string or a config object specifying the database name
  */
 export type RequiredConnectionConfiguration =
-  | {dbName: string; host: string; user: string; password?: string}
+  | {database: string; host: string; user: string; password?: string}
   | string;
 
 /**
