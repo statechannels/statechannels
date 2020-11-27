@@ -56,7 +56,12 @@ beforeAll(async () => {
   );
 });
 
-// Scenarios are synonymous with channelNonce:
+// NOTE ABOUT PUSHING A LARGE OUTCOME
+// We run our tests against ganache, which cannot seem to handle a pushOutcome transaction with 2000
+// allocation items (it consumes excessive memory). This is despite the tx being less than 128KB
+// However, such an outcome was pushed successfully on rinkeby https://rinkeby.etherscan.io/tx/0xcc892796857ea8d52d88ed747dd587a91cfd172d384b79f42cfc583f047f6f55
+// It consumed 2,054,158 gas
+// This test falls back to 100 allocation items.
 const description0 =
   'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly with 100 allocationItems';
 
