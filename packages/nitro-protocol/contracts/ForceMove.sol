@@ -53,14 +53,13 @@ contract ForceMove is IForceMove {
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
     ) external override {
-
         // input type validation
-        require(
-            (fixedPart.participants.length >= variableParts.length) && (variableParts.length > 0),
-            'challenge | You must submit at least one but no more than numParticipants states'
+        _requireValidInput(
+            fixedPart.participants.length,
+            variableParts.length,
+            sigs.length,
+            whoSignedWhat.length
         );
-        require((sigs.length == fixedPart.participants.length) && (whoSignedWhat.length == fixedPart.participants.length), 'challenge | You must provide exactly one signature per participant, and assert who signed what for all participants');
-        require(fixedPart.participants.length < type(uint8).max, 'challenge | Too many participants!');
 
         bytes32 channelId = _getChannelId(fixedPart);
 
@@ -131,7 +130,6 @@ contract ForceMove is IForceMove {
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
     ) external override {
-
         // No need to validate fixedPart.participants.length here, as that validation would have happened during challenge
 
         bytes32 channelId = _getChannelId(fixedPart);
@@ -206,14 +204,13 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
     ) external override {
-
         // input type validation
-        require(
-            (fixedPart.participants.length >= variableParts.length) && (variableParts.length > 0),
-            'checkpoint | You must submit at least one but no more than numParticipants states'
+        _requireValidInput(
+            fixedPart.participants.length,
+            variableParts.length,
+            sigs.length,
+            whoSignedWhat.length
         );
-        require((sigs.length == fixedPart.participants.length) && (whoSignedWhat.length == fixedPart.participants.length), 'checkpoint | You must provide exactly one signature per participant, and assert who signed what for all participants');
-        require(fixedPart.participants.length < type(uint8).max, 'checkpoint | Too many participants!');
 
         bytes32 channelId = _getChannelId(fixedPart);
 
@@ -289,12 +286,12 @@ contract ForceMove is IForceMove {
         _requireChannelNotFinalized(channelId);
 
         // input type validation
-        require(
-            (fixedPart.participants.length >= numStates) && (numStates > 0),
-            'conclude | You must submit at least one but no more than numParticipants states'
+        _requireValidInput(
+            fixedPart.participants.length,
+            numStates,
+            sigs.length,
+            whoSignedWhat.length
         );
-        require((sigs.length == fixedPart.participants.length) && (whoSignedWhat.length == fixedPart.participants.length), 'challenge | You must provide exactly one signature per participant, and assert who signed what for all participants');
-        require(fixedPart.participants.length < type(uint8).max, 'conclude | Too many participants!');
 
         require(
             largestTurnNum + 1 >= numStates,
@@ -302,7 +299,7 @@ contract ForceMove is IForceMove {
         );
         // ^^ SW-C101: prevent underflow
 
-        bytes32 channelId = _getChannelId(fixedPart);
+        channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
         // By construction, the following states form a valid transition
@@ -906,5 +903,30 @@ contract ForceMove is IForceMove {
         channelId = keccak256(
             abi.encode(getChainID(), fixedPart.participants, fixedPart.channelNonce)
         );
+    }
+
+    /**
+     * @notice Validates input for several external methods.
+     * @dev Validates input for several external methods.
+     * @param numParticipants Length of the participants array
+     * @param numStates Number of states submitted
+     * @param numSigs Number of signatures submitted
+     * @param numWhoSignedWhats whoSignedWhat.length
+     */
+    function _requireValidInput(
+        uint256 numParticipants,
+        uint256 numStates,
+        uint256 numSigs,
+        uint256 numWhoSignedWhats
+    ) internal pure {
+        require(
+            (numParticipants >= numStates) && (numStates > 0),
+            'ForceMove | You must submit at least one but no more than numParticipants states'
+        );
+        require(
+            (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
+            'ForceMove | You must provide exactly one signature per participant, and assert who signed what for all participants'
+        );
+        require(numParticipants < type(uint8).max, 'ForceMove | Too many participants!');
     }
 }
