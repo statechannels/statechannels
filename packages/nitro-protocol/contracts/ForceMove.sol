@@ -218,7 +218,7 @@ contract ForceMove is IForceMove {
         _clearChallenge(channelId, largestTurnNum);
     }
 
-     /**
+    /**
      * @notice Finalizes a channel by providing a finalization proof. External wrapper for _conclude.
      * @dev Finalizes a channel by providing a finalization proof. External wrapper for _conclude.
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
