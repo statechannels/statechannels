@@ -218,9 +218,9 @@ contract ForceMove is IForceMove {
         _clearChallenge(channelId, largestTurnNum);
     }
 
-    /**
-     * @notice Finalizes a channel by providing a finalization proof.
-     * @dev Finalizes a channel by providing a finalization proof.
+     /**
+     * @notice Finalizes a channel by providing a finalization proof. External wrapper for _conclude.
+     * @dev Finalizes a channel by providing a finalization proof. External wrapper for _conclude.
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
@@ -237,7 +237,38 @@ contract ForceMove is IForceMove {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
-    ) public override returns (bytes32 channelId) {
+    ) external override {
+        _conclude(
+            largestTurnNum,
+            fixedPart,
+            appPartHash,
+            outcomeHash,
+            numStates,
+            whoSignedWhat,
+            sigs
+        );
+    }
+
+    /**
+     * @notice Finalizes a channel by providing a finalization proof. Internal method.
+     * @dev Finalizes a channel by providing a finalization proof. Internal method.
+     * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+     * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
+     * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
+     * @param numStates The number of states in the finalization proof.
+     * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     */
+    function _conclude(
+        uint48 largestTurnNum,
+        FixedPart memory fixedPart,
+        bytes32 appPartHash,
+        bytes32 outcomeHash,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs
+    ) internal returns (bytes32 channelId) {
         channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 

@@ -103,7 +103,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         Signature[] memory sigs
     ) public {
         bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
-        bytes32 channelId = conclude(
+        bytes32 channelId = _conclude(
             largestTurnNum,
             fixedPart,
             appPartHash,
