@@ -18,7 +18,8 @@ import {
   bob as bobParticipant,
 } from '../../wallet/__test__/fixtures/participants';
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
-import {AssetTransferredArg, ChainService, HoldingUpdatedArg} from '../chain-service';
+import {ChainService} from '../chain-service';
+import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -52,10 +53,11 @@ beforeAll(() => {
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
   /* eslint-disable no-process-env */
-  chainService = new ChainService(
-    rpcEndpoint,
-    process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey
-  );
+  chainService = new ChainService({
+    provider: rpcEndpoint,
+    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
+    allowanceMode: 'MaxUint',
+  });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
   const ethHolder = new Contract(

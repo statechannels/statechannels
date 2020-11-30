@@ -24,6 +24,7 @@ import {Bytes32} from '../type-aliases';
 import {
   AssetTransferredArg,
   ChainEventSubscriberInterface,
+  ChainServiceArgs,
   ChainServiceInterface,
   FundChannelArg,
   HoldingUpdatedArg,
@@ -61,7 +62,7 @@ export class ChainService implements ChainServiceInterface {
 
   private transactionQueue = new PQueue({concurrency: 1});
 
-  constructor(provider: string, pk: string, pollingInterval?: number) {
+  constructor({provider, pk, pollingInterval}: ChainServiceArgs) {
     this.provider = new providers.JsonRpcProvider(provider);
     if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
       pollingInterval = pollingInterval ?? 50;

@@ -132,10 +132,11 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     }
 
     if (this.walletConfig.networkConfiguration.rpcEndpoint) {
-      this.chainService = new ChainService(
-        this.walletConfig.networkConfiguration.rpcEndpoint,
-        this.walletConfig.ethereumPrivateKey
-      );
+      this.chainService = new ChainService({
+        provider: this.walletConfig.networkConfiguration.rpcEndpoint,
+        pk: this.walletConfig.ethereumPrivateKey,
+        allowanceMode: 'MaxUint',
+      });
     } else {
       this.logger.debug(
         'rpcEndpoint and ethereumPrivateKey must be defined for the wallet to use chain service'

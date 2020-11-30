@@ -49,3 +49,11 @@ interface ChainModifierInterface {
 }
 
 export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
+
+export type AllowanceMode = 'PerDeposit' | 'MaxUint';
+export type ChainServiceArgs = {
+  provider: string;
+  pk: string;
+  allowanceMode: AllowanceMode;
+  pollingInterval?: number;
+};
