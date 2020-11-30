@@ -60,8 +60,8 @@ export type ChainServiceConfig = {
   provider: string;
   pk: string;
   pollingInterval?: number;
-  logger: Logger;
   allowanceMode: AllowanceMode;
+  logger?: Logger;
 };
 
 export class ChainService implements ChainServiceInterface {
@@ -77,7 +77,9 @@ export class ChainService implements ChainServiceInterface {
   private transactionQueue = new PQueue({concurrency: 1});
 
   constructor({provider, pk, pollingInterval, logger, allowanceMode}: ChainServiceConfig) {
-    this.logger = logger ?? createLogger(defaultTestConfig());
+    this.logger = logger
+      ? logger.child({module: 'ChainService'})
+      : createLogger(defaultTestConfig());
     this.provider = new providers.JsonRpcProvider(provider);
     this.allowanceMode = allowanceMode;
     if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
@@ -138,16 +140,20 @@ export class ChainService implements ChainServiceInterface {
   ): Promise<providers.TransactionResponse> {
     return this.transactionQueue.add(async () => {
       try {
+        this.logger.debug({...transactionRequest}, 'Submitting transaction to the blockchain');
         return await this.ethWallet.sendTransaction(transactionRequest);
-      } catch (e) {
+      } catch (err) {
         // https://github.com/ethers-io/ethers.js/issues/972
         this.ethWallet.incrementTransactionCount(-1);
-        throw e;
+        this.logger.error({err}, 'Transaction failed');
+        throw err;
       }
     });
   }
 
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
+    this.logger.info({...arg}, 'Attempting to fund channel');
+
     const assetHolderAddress = arg.assetHolderAddress;
     const isEthFunding = isEthAssetHolder(assetHolderAddress);
 
@@ -163,7 +169,21 @@ export class ChainService implements ChainServiceInterface {
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
-    return this.sendTransaction(depositRequest);
+
+    const tx = await this.sendTransaction(depositRequest);
+
+    if (!tx) throw new Error('fundChannel failed to submit deposit transaction');
+
+    this.logger.info(
+      {
+        channelId: arg.channelId,
+        assetHolderAddress,
+        tx: tx.hash,
+      },
+      'Finished funding channel'
+    );
+
+    return tx;
   }
 
   async concludeAndWithdraw(
@@ -328,7 +348,20 @@ export class ChainService implements ChainServiceInterface {
           to: tokenContract.address,
         };
 
-        await this.sendTransaction(increaseAllowanceRequest);
+        const tx = await this.sendTransaction(increaseAllowanceRequest);
+
+        if (!tx) throw new Error('fundChannel failed to increase allowance');
+
+        this.logger.info(
+          {
+            assetHolderAddress,
+            tokenAddress,
+            amount,
+            tx: tx.hash,
+          },
+          'Increased asset holder token allowance'
+        );
+
         break;
       }
       case 'MaxUint': {
@@ -347,7 +380,20 @@ export class ChainService implements ChainServiceInterface {
             to: tokenContract.address,
           };
 
-          await this.sendTransaction(approveAllowanceRequest);
+          const tx = await this.sendTransaction(approveAllowanceRequest);
+
+          if (!tx) throw new Error('fundChannel failed to call approve');
+
+          this.logger.info(
+            {
+              assetHolderAddress,
+              tokenAddress,
+              amount,
+              tx: tx.hash,
+            },
+            'Approved maximum amount of asset holder spending'
+          );
+
           break;
         }
       }
