@@ -65,11 +65,6 @@ module.exports = {
           to: '/typescript-api/index',
           label: 'Typescript API',
           position: 'left'
-        },
-        {
-          to: '/contract-api/contract-inheritance',
-          label: 'Contract API',
-          position: 'left'
         }
       ]
     },
