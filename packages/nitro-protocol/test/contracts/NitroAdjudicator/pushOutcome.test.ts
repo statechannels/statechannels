@@ -56,17 +56,18 @@ beforeAll(async () => {
   );
 });
 
+const description00 =
+  'TestNitroAdjudicator accepts a pushOutcome tx for a concluded channel, and 1x AssetHolder storage updated correctly';
+const description0 =
+  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly';
 // NOTE ABOUT PUSHING A LARGE OUTCOME
 // We run our tests against ganache, which cannot seem to handle a pushOutcome transaction with 2000
 // allocation items (it consumes excessive memory). This is despite the tx being less than 128KB
 // However, such an outcome was pushed successfully on rinkeby https://rinkeby.etherscan.io/tx/0xcc892796857ea8d52d88ed747dd587a91cfd172d384b79f42cfc583f047f6f55
 // It consumed 2,054,158 gas
 // This test falls back to 100 allocation items.
-const description0 =
-  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 1x AssetHolder storage updated correctly with 100 allocationItems';
-
 const description1 =
-  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly';
+  'TestNitroAdjudicator accepts a pushOutcome tx for a finalized channel, and 2x AssetHolder storage updated correctly with 100 allocationItems';
 const description2 = 'TestNitroAdjudicator rejects a pushOutcome tx for a not-finalized channel';
 const description3 =
   'TestNitroAdjudicator rejects a pushOutcome tx when declaredTurnNumRecord is incorrect';
@@ -78,15 +79,17 @@ describe('pushOutcome', () => {
     channelNonce++;
   });
   it.each`
-    description     | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | numAllocations | reasonString
-    ${description0} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${undefined}
-    ${description1} | ${5}                | ${5}                  | ${true}   | ${false}         | ${[100, 0]}    | ${undefined}
-    ${description2} | ${5}                | ${5}                  | ${false}  | ${false}         | ${[2, 2]}      | ${CHANNEL_NOT_FINALIZED}
-    ${description3} | ${4}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${WRONG_CHANNEL_STORAGE}
-    ${description4} | ${5}                | ${5}                  | ${true}   | ${true}          | ${[2, 2]}      | ${'Outcome hash already exists'}
+    description      | wasConcluded | storedTurnNumRecord | declaredTurnNumRecord | finalized | outcomeHashExits | numAllocations | reasonString
+    ${description00} | ${true}      | ${5}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${undefined}
+    ${description0}  | ${false}     | ${5}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${undefined}
+    ${description1}  | ${false}     | ${5}                | ${5}                  | ${true}   | ${false}         | ${[100, 0]}    | ${undefined}
+    ${description2}  | ${false}     | ${5}                | ${5}                  | ${false}  | ${false}         | ${[2, 2]}      | ${CHANNEL_NOT_FINALIZED}
+    ${description3}  | ${false}     | ${4}                | ${5}                  | ${true}   | ${false}         | ${[2, 2]}      | ${WRONG_CHANNEL_STORAGE}
+    ${description4}  | ${false}     | ${5}                | ${5}                  | ${true}   | ${true}          | ${[2, 2]}      | ${'Outcome hash already exists'}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
+      wasConcluded,
       storedTurnNumRecord,
       declaredTurnNumRecord,
       finalized,
@@ -117,11 +120,11 @@ describe('pushOutcome', () => {
       const challengerAddress = participants[state.turnNum % participants.length];
 
       const initialChannelStorageHash = finalizedOutcomeHash(
-        storedTurnNumRecord,
+        wasConcluded ? 0 : storedTurnNumRecord,
         finalizesAt,
         outcome,
-        state,
-        challengerAddress
+        wasConcluded ? undefined : state,
+        wasConcluded ? undefined : challengerAddress
       );
 
       // Use public wrapper to set state (only works on test contract)
@@ -142,10 +145,11 @@ describe('pushOutcome', () => {
         initialChannelStorageHash
       );
       const transactionRequest = createPushOutcomeTransaction(
-        declaredTurnNumRecord,
+        wasConcluded ? 0 : declaredTurnNumRecord,
         finalizesAt,
         state,
-        outcome
+        outcome,
+        wasConcluded
       );
 
       if (outcomeHashExits) {
