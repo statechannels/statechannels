@@ -8,12 +8,10 @@ import {
 import {
   Address,
   BN,
-  Destination,
   makeAddress,
   makeDestination,
   SignedState,
   toNitroSignedState,
-  Uint256,
 } from '@statechannels/wallet-core';
 import {Contract, ethers, Event, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
@@ -22,6 +20,20 @@ import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 
 import {Bytes32} from '../type-aliases';
+
+import {
+  AssetTransferredArg,
+  ChainEventSubscriberInterface,
+  ChainServiceInterface,
+  FundChannelArg,
+  HoldingUpdatedArg,
+} from './types';
+
+const Deposited = 'Deposited' as const;
+const AssetTransferred = 'AssetTransferred' as const;
+type DepositedEvent = {type: 'Deposited'; ethersEvent?: Event} & HoldingUpdatedArg;
+type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
+type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -32,59 +44,6 @@ const nitroAdjudicatorAddress = makeAddress(
   process.env.NITRO_ADJUDICATOR_ADDRESS! || ethers.constants.AddressZero
 );
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
-
-export type HoldingUpdatedArg = {
-  channelId: Bytes32;
-  assetHolderAddress: Address;
-  amount: Uint256;
-};
-
-export type AssetTransferredArg = {
-  channelId: Bytes32;
-  assetHolderAddress: Address;
-  to: Destination;
-  amount: Uint256;
-};
-
-export type FundChannelArg = {
-  channelId: Bytes32;
-  assetHolderAddress: Address;
-  expectedHeld: Uint256;
-  amount: Uint256;
-  allowanceAlreadyIncreased?: boolean;
-};
-
-export interface ChainEventSubscriberInterface {
-  holdingUpdated(arg: HoldingUpdatedArg): void;
-  assetTransferred(arg: AssetTransferredArg): void;
-}
-
-interface ChainEventEmitterInterface {
-  registerChannel(
-    channelId: Bytes32,
-    assetHolders: Address[],
-    listener: ChainEventSubscriberInterface
-  ): void;
-  unregisterChannel(channelId: Bytes32): void;
-  destructor(): void;
-}
-
-interface ChainModifierInterface {
-  // TODO: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
-  fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
-  concludeAndWithdraw(
-    finalizationProof: SignedState[]
-  ): Promise<providers.TransactionResponse | void>;
-  fetchBytecode(address: string): Promise<string>;
-}
-
-export type ChainServiceInterface = ChainModifierInterface & ChainEventEmitterInterface;
-
-const Deposited = 'Deposited' as const;
-const AssetTransferred = 'AssetTransferred' as const;
-type DepositedEvent = {type: 'Deposited'; ethersEvent?: Event} & HoldingUpdatedArg;
-type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
-type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
 function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
@@ -204,11 +163,7 @@ export class ChainService implements ChainServiceInterface {
         return;
       }
       const firstState = finalizationProof[0];
-      const [
-        _turnNumRecord,
-        finalizesAt,
-        _fingerprint,
-      ] = await this.nitroAdjudicator.getChannelStorage(
+      const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(
         getChannelId({
           ...firstState,
           participants: firstState.participants.map(p => p.signingAddress),
