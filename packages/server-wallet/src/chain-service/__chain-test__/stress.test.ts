@@ -26,7 +26,11 @@ let chainService: ChainService;
 
 beforeEach(() => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
-  chainService = new ChainService(rpcEndpoint, privateKey);
+  chainService = new ChainService({
+    provider: rpcEndpoint,
+    pk: privateKey,
+    allowanceMode: 'MaxUint',
+  });
 });
 
 afterEach(() => chainService.destructor());
