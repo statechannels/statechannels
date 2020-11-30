@@ -18,8 +18,11 @@ import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
+import {Logger} from 'pino';
 
 import {Bytes32} from '../type-aliases';
+import {createLogger} from '../logger';
+import {defaultTestConfig} from '../config';
 
 import {
   AllowanceMode,
@@ -57,9 +60,12 @@ export type ChainServiceConfig = {
   provider: string;
   pk: string;
   pollingInterval?: number;
+  logger: Logger;
+  allowanceMode: AllowanceMode;
 };
 
 export class ChainService implements ChainServiceInterface {
+  private logger: Logger;
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private allowanceMode: AllowanceMode;
@@ -70,7 +76,8 @@ export class ChainService implements ChainServiceInterface {
 
   private transactionQueue = new PQueue({concurrency: 1});
 
-  constructor({provider, pk, allowanceMode, pollingInterval}: ChainServiceArgs) {
+  constructor({provider, pk, pollingInterval, logger, allowanceMode}: ChainServiceConfig) {
+    this.logger = logger ?? createLogger(defaultTestConfig());
     this.provider = new providers.JsonRpcProvider(provider);
     this.allowanceMode = allowanceMode;
     if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
