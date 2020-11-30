@@ -3,9 +3,7 @@ import {Address, SignedState} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
 
-import {ChainServiceInterface} from './chain-service';
-
-import {ChainEventSubscriberInterface, FundChannelArg} from './';
+import {ChainEventSubscriberInterface, ChainServiceInterface, FundChannelArg} from './';
 
 const mockTransactionReceipt: providers.TransactionReceipt = {
   to: '',
