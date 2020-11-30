@@ -53,6 +53,12 @@ function isEthAssetHolder(address: Address): boolean {
 
 const blockConfirmations = 5;
 
+export type ChainServiceConfig = {
+  provider: string;
+  pk: string;
+  pollingInterval?: number;
+};
+
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
