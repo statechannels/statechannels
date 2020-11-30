@@ -54,14 +54,13 @@ function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
 }
 
-const blockConfirmations = 5;
-
 export type ChainServiceConfig = {
   provider: string;
   pk: string;
   pollingInterval?: number;
   allowanceMode: AllowanceMode;
   logger?: Logger;
+  blockConfirmations?: number;
 };
 
 export class ChainService implements ChainServiceInterface {
@@ -74,9 +73,18 @@ export class ChainService implements ChainServiceInterface {
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
   private nitroAdjudicator: Contract;
 
+  private readonly blockConfirmations: number;
   private transactionQueue = new PQueue({concurrency: 1});
 
-  constructor({provider, pk, pollingInterval, logger, allowanceMode}: ChainServiceConfig) {
+  constructor({
+    provider,
+    pk,
+    pollingInterval,
+    logger,
+    blockConfirmations,
+    allowanceMode,
+  }: ChainServiceConfig) {
+    this.blockConfirmations = blockConfirmations || 5;
     this.logger = logger
       ? logger.child({module: 'ChainService'})
       : createLogger(defaultTestConfig());
@@ -296,7 +304,7 @@ export class ChainService implements ChainServiceInterface {
     if (event) {
       // `tx.wait(n)` resolves after n blocks are mined that include the given transaction `tx`
       // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse
-      await (await event.getTransaction()).wait(blockConfirmations + 1);
+      await (await event.getTransaction()).wait(this.blockConfirmations + 1);
       return;
     }
   }
