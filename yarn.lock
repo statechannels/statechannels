@@ -7240,7 +7240,7 @@ chokidar@^3.3.0, chokidar@^3.4.1:
   optionalDependencies:
     fsevents "~2.1.2"
 
-chokidar@^3.4.0:
+chokidar@^3.4.0, chokidar@^3.4.3:
   version "3.4.3"
   resolved "https://registry.npmjs.org/chokidar/-/chokidar-3.4.3.tgz#c1df38231448e45ca4ac588e6c79573ba6a57d5b"
   integrity sha512-DtM3g7juCXQxFVSNPNByEC2+NImtBuxQQvWlHunpJIS5Ocr0lG306cC7FCi7cEA0fzmybPUIl4txBIobk1gGOQ==
@@ -12057,6 +12057,13 @@ hardhat-deploy@^0.7.0-beta.28:
     match-all "^1.2.6"
     murmur-128 "^0.2.1"
     qs "^6.9.4"
+
+hardhat-watcher@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.npmjs.org/hardhat-watcher/-/hardhat-watcher-2.0.0.tgz#f9aa89565ced5f5c95919ee830e8c62b0de875e7"
+  integrity sha512-fdblFuPl0IctABaCTxrGnExdEfmLrt4Im1jCrYPTOgdKfTWcFC3n0+c0Q6vWDy+1rqyjMx6Fg4oXOvsDZfYvPQ==
+  dependencies:
+    chokidar "^3.4.3"
 
 hardhat@^2.0.3:
   version "2.0.3"
