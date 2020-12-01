@@ -54,15 +54,6 @@ function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
 }
 
-export type ChainServiceConfig = {
-  provider: string;
-  pk: string;
-  pollingInterval?: number;
-  allowanceMode: AllowanceMode;
-  logger?: Logger;
-  blockConfirmations?: number;
-};
-
 export class ChainService implements ChainServiceInterface {
   private logger: Logger;
   private readonly ethWallet: NonceManager;
@@ -83,7 +74,7 @@ export class ChainService implements ChainServiceInterface {
     logger,
     blockConfirmations,
     allowanceMode,
-  }: ChainServiceConfig) {
+  }: ChainServiceArgs) {
     this.blockConfirmations = blockConfirmations || 5;
     this.logger = logger
       ? logger.child({module: 'ChainService'})

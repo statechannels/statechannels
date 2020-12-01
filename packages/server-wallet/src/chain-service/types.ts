@@ -1,5 +1,6 @@
 import {Address, Destination, SignedState, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
+import {Logger} from 'pino';
 
 import {Bytes32} from '../type-aliases';
 
@@ -53,6 +54,8 @@ export type AllowanceMode = 'PerDeposit' | 'MaxUint';
 export type ChainServiceArgs = {
   provider: string;
   pk: string;
-  allowanceMode: AllowanceMode;
   pollingInterval?: number;
+  allowanceMode: AllowanceMode;
+  logger?: Logger;
+  blockConfirmations?: number;
 };
