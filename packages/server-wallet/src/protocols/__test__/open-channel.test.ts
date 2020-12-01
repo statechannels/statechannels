@@ -31,50 +31,57 @@ afterEach(async () => await store.dbAdmin().truncateDB());
 describe(`pre-fund-setup phase`, () => {
   describe(`as participant 0`, () => {
     it(`takes no action if I haven't received my opponent's state and I've already signed`, async () => {
-      await testCase({participant: 0, statesHeld: [0], statesToSign: []});
+      const obj = await setup({participant: 0, statesHeld: [0]});
+      await crankAndAssert(obj, {statesToSign: []});
     });
     it(`signs the pre-fund-setup if I have my opponent's state (and deposits)`, async () => {
-      await testCase({participant: 0, statesHeld: [1], statesToSign: [0], fundsToDeposit: 5});
+      const obj = await setup({participant: 0, statesHeld: [1], totalFunds: 0});
+      await crankAndAssert(obj, {statesToSign: [0], fundsToDeposit: 5});
     });
   });
   describe(`as participant 1`, () => {
     it(`takes no action if I haven't received my opponent's state and I've already signed`, async () => {
-      await testCase({participant: 1, statesHeld: [1], statesToSign: []});
+      const obj = await setup({participant: 1, statesHeld: [1], totalFunds: 0});
+      await crankAndAssert(obj, {statesToSign: []});
     });
     it(`signs the pre-fund-setup if I have my opponent's state`, async () => {
-      await testCase({participant: 1, statesHeld: [0], statesToSign: [1]});
+      const obj = await setup({participant: 1, statesHeld: [0], totalFunds: 0});
+      await crankAndAssert(obj, {statesToSign: [1]});
     });
   });
 });
 
 describe(`funding phase`, () => {
-  const statesHeld = [0, 1];
-
   describe(`as participant 0`, () => {
     it(`submits the transaction if it is my turn`, async () => {
-      const o = await testCase({participant: 0, statesHeld, totalFunds: 0, fundsToDeposit: 5});
+      const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 0});
+      await crankAndAssert(obj, {fundsToDeposit: 5});
       // and then doesn't submit it a second time
-      await crankAndAssert(o, {fundsToDeposit: 0});
+      await crankAndAssert(obj, {fundsToDeposit: 0});
     });
     it(`submits a top-up if there's a partial deposit`, async () => {
-      const o = await testCase({participant: 0, statesHeld, totalFunds: 2, fundsToDeposit: 3});
+      const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 2});
+      await crankAndAssert(obj, {fundsToDeposit: 3});
       // and then doesn't submit it a second time
-      await crankAndAssert(o, {fundsToDeposit: 0});
+      await crankAndAssert(obj, {fundsToDeposit: 0});
     });
     it(`does nothing if I've already deposited`, async () => {
-      await testCase({participant: 0, statesHeld, totalFunds: 5, fundsToDeposit: 0});
+      const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 5});
+      await crankAndAssert(obj, {fundsToDeposit: 0});
     });
   });
   describe(`as participant 1`, () => {
     it(`submits the transaction if it is my turn`, async () => {
-      const o = await testCase({participant: 1, statesHeld, totalFunds: 5, fundsToDeposit: 5});
+      const obj = await setup({participant: 1, statesHeld: [0, 1], totalFunds: 5});
+      await crankAndAssert(obj, {fundsToDeposit: 5});
       // and then doesn't submit it a second time
-      await crankAndAssert(o, {fundsToDeposit: 0});
+      await crankAndAssert(obj, {fundsToDeposit: 0});
     });
     it(`submits a top-up if there's a partial deposit`, async () => {
-      const o = await testCase({participant: 1, statesHeld, totalFunds: 7, fundsToDeposit: 3});
+      const obj = await setup({participant: 1, statesHeld: [0, 1], totalFunds: 7});
+      await crankAndAssert(obj, {fundsToDeposit: 3});
       // and then doesn't submit it a second time
-      await crankAndAssert(o, {fundsToDeposit: 0});
+      await crankAndAssert(obj, {fundsToDeposit: 0});
     });
 
     // note: no `does nothing if I've already deposited` test, as it should send the
@@ -85,53 +92,41 @@ describe(`funding phase`, () => {
 describe(`post-fund-setup phase`, () => {
   describe(`as participant 0`, () => {
     it(`signs the post-fund-setup if all funds are present`, async () => {
-      await testCase({participant: 0, statesHeld: [0, 1], totalFunds: 10, statesToSign: [2]});
+      const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 10});
+      await crankAndAssert(obj, {statesToSign: [2]});
     });
     it(`doesn't do anything if I've already signed`, async () => {
-      await testCase({participant: 0, statesHeld: [0, 1, 2], totalFunds: 10, statesToSign: []});
+      const obj = await setup({participant: 0, statesHeld: [0, 1, 2], totalFunds: 10});
+      await crankAndAssert(obj, {statesToSign: []});
     });
     it(`signs the post-fund-setup (and completes objective), when my opponent has signed`, async () => {
-      await testCase({
-        participant: 0,
-        statesHeld: [0, 1, 3],
-        totalFunds: 10,
-        statesToSign: [2],
-        completesObj: true,
-      });
+      const obj = await setup({participant: 0, statesHeld: [0, 1, 3], totalFunds: 10});
+      await crankAndAssert(obj, {statesToSign: [2], completesObj: true});
     });
     it(`marks the objective as complete if a full post-fund-setup exists`, async () => {
-      await testCase({participant: 0, statesHeld: [2, 3], totalFunds: 10, completesObj: true});
+      const obj = await setup({participant: 0, statesHeld: [2, 3], totalFunds: 10});
+      await crankAndAssert(obj, {completesObj: true});
     });
   });
   describe(`as participant 1`, () => {
     it(`signs the post-fund-setup if all funds are present`, async () => {
-      await testCase({participant: 1, statesHeld: [0, 1], totalFunds: 10, statesToSign: [3]});
+      const obj = await setup({participant: 1, statesHeld: [0, 1], totalFunds: 10});
+      await crankAndAssert(obj, {statesToSign: [3]});
     });
     it(`doesn't do anything if I've already signed`, async () => {
-      await testCase({participant: 1, statesHeld: [0, 1, 3], totalFunds: 10, statesToSign: []});
+      const obj = await setup({participant: 1, statesHeld: [0, 1, 3], totalFunds: 10});
+      await crankAndAssert(obj, {statesToSign: []});
     });
     it(`signs the post-fund-setup (and completes objective), when my opponent has signed`, async () => {
-      await testCase({
-        participant: 1,
-        statesHeld: [0, 1, 2],
-        totalFunds: 10,
-        statesToSign: [3],
-        completesObj: true,
-      });
+      const obj = await setup({participant: 1, statesHeld: [0, 1, 2], totalFunds: 10});
+      await crankAndAssert(obj, {statesToSign: [3], completesObj: true});
     });
     it(`marks the objective as complete if a full post-fund-setup exists`, async () => {
-      await testCase({participant: 1, statesHeld: [2, 3], totalFunds: 10, completesObj: true});
+      const obj = await setup({participant: 1, statesHeld: [2, 3], totalFunds: 10});
+      await crankAndAssert(obj, {completesObj: true});
     });
   });
 });
-
-type TestCaseParams = SetupParams & AssertionParams;
-
-const testCase = async (args: TestCaseParams): Promise<DBOpenChannelObjective> => {
-  const objective = await setup(args);
-  await crankAndAssert(objective, args);
-  return objective;
-};
 
 interface SetupParams {
   participant: 0 | 1;
