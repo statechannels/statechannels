@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.9.11](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.10...@statechannels/wallet-core@0.9.11) (2020-12-01)
+
+
+### Performance Improvements
+
+* remove unecessary abi.encode ([#2955](https://github.com/statechannels/statechannels/issues/2955)) ([4e623ee](https://github.com/statechannels/statechannels/commit/4e623ee8608d7cf021374bd8429e0cc4c44e5fab))
+
+
+
+
+
 ## [0.9.10](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.9...@statechannels/wallet-core@0.9.10) (2020-11-26)
 
 **Note:** Version bump only for package @statechannels/wallet-core
