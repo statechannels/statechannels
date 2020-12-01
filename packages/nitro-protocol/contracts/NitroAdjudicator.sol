@@ -32,7 +32,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         // requirements
         _requireChannelFinalized(channelId);
 
-        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+        bytes32 outcomeHash = keccak256(outcomeBytes);
 
         _requireMatchingStorage(
             ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash),
@@ -72,7 +72,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         // requirements
         _requireChannelFinalized(channelId);
 
-        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+        bytes32 outcomeHash = keccak256(outcomeBytes);
 
         _requireMatchingStorage(
             ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash),
@@ -102,7 +102,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
         uint8[] memory whoSignedWhat,
         Signature[] memory sigs
     ) public {
-        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+        bytes32 outcomeHash = keccak256(outcomeBytes);
         bytes32 channelId = _conclude(
             largestTurnNum,
             fixedPart,

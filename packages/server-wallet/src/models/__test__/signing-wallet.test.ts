@@ -11,7 +11,7 @@ const stateWithHash = addHash(state);
 
 const expectedResult = {
   signature:
-    '0xc822d44e1452d7d869bbf5ae1d274d01a6f8dee9cd9e7ddb4089882b911ef9bb7c30a36208e9088f9b96748b2aa345e523693cce5fde823c8ebab92db202275c1c',
+    '0x9bc711f3547842642e600120cd369631b5f78ac96bc905ea63503eb6604da7c450fb117ed25110e93a3b4e124baae36f0095224ede7ef225abff93c524399d321c',
   signer: makeAddress('0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'),
 };
 describe('SigningWallet class', () => {
