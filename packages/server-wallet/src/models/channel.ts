@@ -30,6 +30,7 @@ import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
 import {ObjectiveModel} from './objective';
 import {LedgerRequest} from './ledger-request';
+import {ChainTransaction} from './chain-transaction';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -124,6 +125,14 @@ export class Channel extends Model implements RequiredColumns {
           to: 'objectives_channels.objectiveId',
         },
         to: 'objectives.objectiveId',
+      },
+    },
+    chainTransactions: {
+      relation: Model.HasManyRelation,
+      modelClass: ChainTransaction,
+      join: {
+        from: 'channels.channelId',
+        to: 'chain_transactions.channelId',
       },
     },
   };

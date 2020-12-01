@@ -120,7 +120,9 @@ export class ChainService implements ChainServiceInterface {
     return obs;
   }
 
-  private async sendTransaction(transactionRequest: providers.TransactionRequest) {
+  private async sendTransaction(
+    transactionRequest: providers.TransactionRequest
+  ): Promise<providers.TransactionResponse> {
     return this.transactionQueue.add(async () => {
       try {
         return await this.ethWallet.sendTransaction(transactionRequest);
