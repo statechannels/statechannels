@@ -6,8 +6,8 @@ import {Uint256, Bytes32} from '../type-aliases';
 
 type TransferredOutEntry = {toAddress: Destination; amount: Uint256};
 
-export const REQUIRED_COLUMNS = ['channelId', 'amount', 'assetHolder', 'transferredOut'] as const;
-export interface RequiredColumns {
+const REQUIRED_COLUMNS = ['channelId', 'amount', 'assetHolder', 'transferredOut'] as const;
+interface RequiredColumns {
   readonly channelId: Bytes32;
   readonly amount: Uint256;
   readonly assetHolder: Address;

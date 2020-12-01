@@ -47,11 +47,6 @@ describe('fundChannel', () => {
         .connect(ethWalletWithTokens)
         .transfer(ethWallet.address, BN.from(totalTransferAmount))
     ).wait();
-    await (
-      await contract
-        .connect(ethWallet)
-        .increaseAllowance(erc20AssetHolderAddress, BN.from(totalTransferAmount))
-    ).wait();
 
     const promises = _.range(0, iterations).map(() =>
       chainService
@@ -65,5 +60,5 @@ describe('fundChannel', () => {
     );
 
     return Promise.all(promises);
-  }, 200_000);
+  }, 500_000);
 });
