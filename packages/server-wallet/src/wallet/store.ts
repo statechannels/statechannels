@@ -48,6 +48,7 @@ import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
+import {DBAdmin} from '../db-admin/db-admin';
 
 const defaultLogger = createLogger(defaultTestConfig);
 
@@ -160,6 +161,10 @@ export class Store {
       if (!channel) return onChannelMissing(channelId);
       return timer('critical code', async () => criticalCode(tx, channel));
     });
+  }
+
+  async transaction<T>(callback: (tx: Transaction) => T): Promise<T> {
+    return this.knex.transaction(async tx => callback(tx));
   }
 
   async signState(
@@ -663,6 +668,10 @@ export class Store {
 
   async nextNonce(signingAddresses: Address[]): Promise<number> {
     return await Nonce.next(this.knex, signingAddresses);
+  }
+
+  dbAdmin(): DBAdmin {
+    return new DBAdmin(this.knex);
   }
 }
 

@@ -1,95 +1,210 @@
-import {simpleEthAllocation, BN, State, makeAddress} from '@statechannels/wallet-core';
 import matchers from '@pacote/jest-either';
-import {ethers} from 'ethers';
+import {BN} from '@statechannels/wallet-core';
 
-import {protocol} from '../open-channel';
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {SignState, fundChannel} from '../actions';
-import {channel} from '../../models/__test__/fixtures/channel';
-import {directFundingStatus as directFundingStatusFn} from '../state';
-
-import {applicationProtocolState} from './fixtures/protocol-state';
+import {ChannelOpener} from '../open-channel';
+import {Store} from '../../wallet/store';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {defaultTestConfig} from '../../config';
+import {WalletResponse} from '../../wallet/wallet-response';
+import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {MockChainService} from '../../chain-service';
+import {createLogger} from '../../logger';
+import {DBOpenChannelObjective} from '../../models/objective';
 
 expect.extend(matchers);
 
-const outcome = simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]);
-const outcome2 = simpleEthAllocation([
-  {amount: BN.from(5), destination: bob().destination},
-  {amount: BN.from(5), destination: alice().destination},
-]);
-const participants = [alice(), bob()];
+const logger = createLogger(defaultTestConfig);
+const timingMetrics = false;
+const testChan = TestChannel.create(5, 5);
 
-const prefundState0 = {outcome, turnNum: 0, participants};
-const prefundState1 = {outcome, turnNum: 1, participants};
-const postfundState2 = {outcome, turnNum: 2, participants};
-const postfundState3 = {outcome, turnNum: 3, participants};
+let store: Store;
 
-const altPrefundState0 = {outcome: outcome2, turnNum: 0, participants};
-
-const reversedPFState0 = {outcome, turnNum: 0, participants: [bob(), alice()]};
-const reversedPFState1 = {outcome, turnNum: 1, participants: [bob(), alice()]};
-
-const funded = () => ({
-  amount: BN.from(5),
-  transferredOut: [],
-});
-const notFunded = () => ({amount: BN.from(0), transferredOut: []});
-
-const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
-const fundChannelAction1 = fundChannel({
-  channelId: channel().channelId,
-  assetHolderAddress: makeAddress(ethers.constants.AddressZero),
-  expectedHeld: BN.from(0),
-  amount: BN.from(5),
-});
-
-const fundChannelAction2 = {...fundChannelAction1, expectedHeld: BN.from(5)};
-
-test.each`
-  supported           | myIndex | latestSignedByMe    | latest              | funding      | action                         | cond                                                                     | result
-  ${undefined}        | ${0}    | ${undefined}        | ${prefundState1}    | ${notFunded} | ${signState(prefundState0)}    | ${'when the prefund state is not supported, and I am index 0'}           | ${'signs the prefund state'}
-  ${undefined}        | ${0}    | ${undefined}        | ${reversedPFState1} | ${notFunded} | ${signState(reversedPFState0)} | ${'when the prefund state is not supported, and I am index 1'}           | ${'signs the prefund state'}
-  ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the prefund state'}
-  ${prefundState1}    | ${0}    | ${prefundState0}    | ${prefundState1}    | ${funded}    | ${signState(postfundState2)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
-  ${prefundState1}    | ${1}    | ${prefundState1}    | ${prefundState1}    | ${funded}    | ${signState(postfundState3)}   | ${'when the prefund state is supported, and the channel is funded'}      | ${'signs the postfund state'}
-  ${prefundState0}    | ${0}    | ${prefundState0}    | ${prefundState0}    | ${notFunded} | ${fundChannelAction1}          | ${'when the prefund state is supported, and alice is first to deposit'}  | ${'submits transaction'}
-  ${altPrefundState0} | ${0}    | ${altPrefundState0} | ${altPrefundState0} | ${funded}    | ${fundChannelAction2}          | ${'when the prefund state is supported, and alice is second to deposit'} | ${'submits transaction'}
-`('$result $cond', ({supported, latest, latestSignedByMe, funding, action, myIndex}) => {
-  const directFundingStatus = directFundingStatusFn(
-    supported,
-    funding,
-    participants[myIndex],
-    'Direct'
+beforeEach(async () => {
+  store = new Store(
+    knex,
+    defaultTestConfig.metricsConfiguration.timingMetrics,
+    defaultTestConfig.skipEvmValidation,
+    '0'
   );
-  const ps = applicationProtocolState({
-    app: {
-      supported,
-      latest,
-      latestSignedByMe,
-      funding,
-      myIndex,
-      directFundingStatus,
-    },
+  await store.dbAdmin().truncateDB();
+});
+
+afterEach(async () => await store.dbAdmin().truncateDB());
+
+describe(`pre-fund-setup phase`, () => {
+  describe(`as participant 0`, () => {
+    it(`takes no action if I haven't received my opponent's state and I've already signed`, async () => {
+      await testCase({participant: 0, statesHeld: [0], statesToSign: []});
+    });
+    it(`signs the pre-fund-setup if I have my opponent's state (and deposits)`, async () => {
+      await testCase({participant: 0, statesHeld: [1], statesToSign: [0], fundsToDeposit: 5});
+    });
   });
-  expect(protocol(ps)).toMatchObject(action);
+  describe(`as participant 1`, () => {
+    it(`takes no action if I haven't received my opponent's state and I've already signed`, async () => {
+      await testCase({participant: 1, statesHeld: [1], statesToSign: []});
+    });
+    it(`signs the pre-fund-setup if I have my opponent's state`, async () => {
+      await testCase({participant: 1, statesHeld: [0], statesToSign: [1]});
+    });
+  });
 });
 
-test.each`
-  supported           | latestSignedByMe    | latest              | funding      | cond
-  ${undefined}        | ${prefundState0}    | ${prefundState0}    | ${funded}    | ${'when I have signed the prefund state, but it is not supported'}
-  ${undefined}        | ${undefined}        | ${undefined}        | ${funded}    | ${'when there is no state'}
-  ${prefundState0}    | ${postfundState2}   | ${postfundState2}   | ${funded}    | ${'when the prefund state is supported, and I have signed the postfund state'}
-  ${altPrefundState0} | ${altPrefundState0} | ${altPrefundState0} | ${notFunded} | ${'when the prefund state is supported, and alice is second to deposit'}
-  ${postfundState2}   | ${postfundState2}   | ${postfundState2}   | ${funded}    | ${'when the first postfund state is supported'}
-`('takes no action $cond', ({supported, latest, latestSignedByMe, funding}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
-  expect(protocol(ps)).toBeUndefined();
+describe(`funding phase`, () => {
+  const statesHeld = [0, 1];
+
+  describe(`as participant 0`, () => {
+    it(`submits the transaction if it is my turn`, async () => {
+      const o = await testCase({participant: 0, statesHeld, totalFunds: 0, fundsToDeposit: 5});
+      // and then doesn't submit it a second time
+      await testCrankOutcome(o, {fundsToDeposit: 0});
+    });
+    it(`submits a top-up if there's a partial deposit`, async () => {
+      const o = await testCase({participant: 0, statesHeld, totalFunds: 2, fundsToDeposit: 3});
+      // and then doesn't submit it a second time
+      await testCrankOutcome(o, {fundsToDeposit: 0});
+    });
+    it(`does nothing if I've already deposited`, async () => {
+      await testCase({participant: 0, statesHeld, totalFunds: 5, fundsToDeposit: 0});
+    });
+  });
+  describe(`as participant 1`, () => {
+    it(`submits the transaction if it is my turn`, async () => {
+      const o = await testCase({participant: 1, statesHeld, totalFunds: 5, fundsToDeposit: 5});
+      // and then doesn't submit it a second time
+      await testCrankOutcome(o, {fundsToDeposit: 0});
+    });
+    it(`submits a top-up if there's a partial deposit`, async () => {
+      const o = await testCase({participant: 1, statesHeld, totalFunds: 7, fundsToDeposit: 3});
+      // and then doesn't submit it a second time
+      await testCrankOutcome(o, {fundsToDeposit: 0});
+    });
+    it.skip(`does nothing if I've already deposited`, async () => {
+      // todo: this fails, as it sends the post-fund-setup (as it probably should)
+      await testCase({participant: 1, statesHeld, totalFunds: 10, fundsToDeposit: 0});
+    });
+  });
 });
 
-test.each`
-  supported         | latestSignedByMe  | latest            | funding   | cond
-  ${postfundState3} | ${postfundState3} | ${postfundState3} | ${funded} | ${'when the last postfund state is supported'}
-`('completes the objective $cond', ({supported, latest, latestSignedByMe, funding}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe, funding}});
-  expect(protocol(ps)).toMatchObject({channelId: ps.app.channelId, type: 'CompleteObjective'});
+describe(`post-fund-setup phase`, () => {
+  describe(`as participant 0`, () => {
+    it(`signs the post-fund-setup if all funds are present`, async () => {
+      await testCase({participant: 0, statesHeld: [0, 1], totalFunds: 10, statesToSign: [2]});
+    });
+    it(`doesn't do anything if I've already signed`, async () => {
+      await testCase({participant: 0, statesHeld: [0, 1, 2], totalFunds: 10, statesToSign: []});
+    });
+    it(`signs the post-fund-setup (and completes objective), when my opponent has signed`, async () => {
+      await testCase({
+        participant: 0,
+        statesHeld: [0, 1, 3],
+        totalFunds: 10,
+        statesToSign: [2],
+        completesObj: true,
+      });
+      // todo: and marks the objective as complete
+    });
+    it(`marks the objective as complete if a full post-fund-setup exists`, async () => {
+      await testCase({participant: 0, statesHeld: [2, 3], totalFunds: 10, completesObj: true});
+    });
+  });
+  describe(`as participant 1`, () => {
+    it(`signs the post-fund-setup if all funds are present`, async () => {
+      // todo: should it do this, or should it wait for my turn
+      await testCase({participant: 1, statesHeld: [0, 1], totalFunds: 10, statesToSign: [3]});
+    });
+    it(`doesn't do anything if I've already signed`, async () => {
+      await testCase({participant: 1, statesHeld: [0, 1, 3], totalFunds: 10, statesToSign: []});
+      // todo: and marks the objective as complete
+    });
+    it(`signs the post-fund-setup (and completes objective), when my opponent has signed`, async () => {
+      await testCase({
+        participant: 1,
+        statesHeld: [0, 1, 2],
+        totalFunds: 10,
+        statesToSign: [3],
+        completesObj: true,
+      });
+    });
+    it(`marks the objective as complete if a full post-fund-setup exists`, async () => {
+      await testCase({participant: 1, statesHeld: [2, 3], totalFunds: 10, completesObj: true});
+    });
+  });
 });
+
+type TestCaseParams = SetupParams & AssertionParams;
+
+const testCase = async (args: TestCaseParams): Promise<DBOpenChannelObjective> => {
+  const objective = await setup(args);
+  await testCrankOutcome(objective, args);
+  return objective;
+};
+
+interface SetupParams {
+  participant: 0 | 1;
+  statesHeld: number[];
+  totalFunds?: number;
+}
+const setup = async (args: SetupParams): Promise<DBOpenChannelObjective> => {
+  const {participant, statesHeld} = args;
+  const totalFunds = args.totalFunds || 0;
+
+  // load the signingKey for the appopriate participant
+  await store.addSigningKey(testChan.signingKeys[participant]);
+  // load in the states
+  for (const stateNum of statesHeld) {
+    await store.pushMessage(testChan.wirePayload(Number(stateNum)));
+  }
+  // set the funds as specified
+  if (totalFunds > 0) {
+    await store.updateFunding(testChan.channelId, BN.from(totalFunds), testChan.assetHolderAddress);
+  }
+
+  // add the openChannel objective and approve
+  const objective = await store.transaction(async tx => {
+    const o = await store.ensureObjective(testChan.openChannelObjective, tx);
+    await store.approveObjective(o.objectiveId, tx);
+    return o as DBOpenChannelObjective;
+  });
+
+  return objective;
+};
+
+interface AssertionParams {
+  statesToSign?: number[];
+  fundsToDeposit?: number;
+  completesObj?: boolean;
+}
+
+const testCrankOutcome = async (
+  objective: DBOpenChannelObjective,
+  args: AssertionParams
+): Promise<void> => {
+  const statesToSign = args.statesToSign || [];
+  const fundsToDeposit = args.fundsToDeposit || 0;
+  const completesObj = args.completesObj || false;
+
+  const chainService = new MockChainService();
+  const channelOpener = ChannelOpener.create(store, chainService, logger, timingMetrics);
+  const response = WalletResponse.initialize();
+  const spy = jest.spyOn(chainService, 'fundChannel');
+  await channelOpener.crank(objective, response);
+
+  // expect there to be an outgoing message in the response
+  expect(response._signedStates).toMatchObject(
+    statesToSign.map((n: number) => testChan.wireState(Number(n)))
+  );
+  // check that funds were deposited
+  if (fundsToDeposit > 0) {
+    expect(spy).toHaveBeenCalledWith(expect.objectContaining({amount: BN.from(fundsToDeposit)}));
+  } else {
+    expect(spy).not.toHaveBeenCalled();
+  }
+
+  const reloadedObjective = await store.getObjective(objective.objectiveId);
+  if (completesObj) {
+    expect(reloadedObjective.status).toEqual('succeeded');
+  } else {
+    expect(reloadedObjective.status).toEqual('approved');
+  }
+};
