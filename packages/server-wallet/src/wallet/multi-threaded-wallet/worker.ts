@@ -50,6 +50,11 @@ parentPort?.on('message', async (message: any) => {
         return parentPort?.postMessage(
           right(await timer('PushMessage', () => wallet.pushMessage(message.args)))
         );
+      case 'PushUpdate':
+        logger.debug(`Worker-%o handling PushUpdate`, threadId);
+        return parentPort?.postMessage(
+          right(await timer('PushUpdate', () => wallet.pushUpdate(message.args)))
+        );
       default:
         return parentPort?.postMessage(left(new Error('Unknown message type')));
     }

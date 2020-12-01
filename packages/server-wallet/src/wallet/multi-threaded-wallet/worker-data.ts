@@ -9,8 +9,12 @@ type PushMessageRequest = {
   operation: 'PushMessage';
   args: unknown;
 };
+type PushUpdateRequest = {
+  operation: 'PushUpdate';
+  args: unknown;
+};
 
-export type StateChannelWorkerData = UpdateChannelRequest | PushMessageRequest;
+export type StateChannelWorkerData = UpdateChannelRequest | PushMessageRequest | PushUpdateRequest;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isStateChannelWorkerData(data: any): data is StateChannelWorkerData {
