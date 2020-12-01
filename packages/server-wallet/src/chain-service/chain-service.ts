@@ -13,7 +13,7 @@ import {
   SignedState,
   toNitroSignedState,
 } from '@statechannels/wallet-core';
-import {Contract, ethers, Event, providers, utils, Wallet} from 'ethers';
+import {constants, Contract, ContractInterface, Event, providers, utils, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
@@ -22,6 +22,7 @@ import PQueue from 'p-queue';
 import {Bytes32} from '../type-aliases';
 
 import {
+  AllowanceMode,
   AssetTransferredArg,
   ChainEventSubscriberInterface,
   ChainServiceArgs,
@@ -39,10 +40,10 @@ type ContractEvent = DepositedEvent | AssetTransferredEvent;
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(
-  process.env.ETH_ASSET_HOLDER_ADDRESS || ethers.constants.AddressZero
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
 );
 const nitroAdjudicatorAddress = makeAddress(
-  process.env.NITRO_ADJUDICATOR_ADDRESS! || ethers.constants.AddressZero
+  process.env.NITRO_ADJUDICATOR_ADDRESS! || constants.AddressZero
 );
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
@@ -55,6 +56,7 @@ const blockConfirmations = 5;
 export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
+  private allowanceMode: AllowanceMode;
   private addressToObservable: Map<Address, Observable<ContractEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
@@ -62,8 +64,9 @@ export class ChainService implements ChainServiceInterface {
 
   private transactionQueue = new PQueue({concurrency: 1});
 
-  constructor({provider, pk, pollingInterval}: ChainServiceArgs) {
+  constructor({provider, pk, allowanceMode, pollingInterval}: ChainServiceArgs) {
     this.provider = new providers.JsonRpcProvider(provider);
+    this.allowanceMode = allowanceMode;
     if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
       pollingInterval = pollingInterval ?? 50;
     }
@@ -83,17 +86,28 @@ export class ChainService implements ChainServiceInterface {
     this.addressToContract.forEach(contract => contract.removeAllListeners());
   }
 
-  private addContractMapping(assetHolderAddress: Address): Contract {
-    const artifact = isEthAssetHolder(assetHolderAddress)
-      ? ContractArtifacts.EthAssetHolderArtifact
-      : ContractArtifacts.Erc20AssetHolderArtifact;
-    const contract: Contract = new Contract(assetHolderAddress, artifact.abi, this.ethWallet);
+  private addContractMapping(
+    assetHolderAddress: Address,
+    contractInterface?: ContractInterface
+  ): Contract {
+    const abi =
+      contractInterface ??
+      (isEthAssetHolder(assetHolderAddress)
+        ? ContractArtifacts.EthAssetHolderArtifact.abi
+        : ContractArtifacts.Erc20AssetHolderArtifact.abi);
+    const contract: Contract = new Contract(assetHolderAddress, abi, this.ethWallet);
     this.addressToContract.set(assetHolderAddress, contract);
     return contract;
   }
 
-  private getOrAddContractMapping(contractAddress: Address): Contract {
-    return this.addressToContract.get(contractAddress) ?? this.addContractMapping(contractAddress);
+  private getOrAddContractMapping(
+    contractAddress: Address,
+    contractInterface?: ContractInterface
+  ): Contract {
+    return (
+      this.addressToContract.get(contractAddress) ??
+      this.addContractMapping(contractAddress, contractInterface)
+    );
   }
 
   private getOrAddContractObservable(assetHolderAddress: Address): Observable<ContractEvent> {
@@ -121,13 +135,11 @@ export class ChainService implements ChainServiceInterface {
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     const assetHolderAddress = arg.assetHolderAddress;
     const isEthFunding = isEthAssetHolder(assetHolderAddress);
-    const createDepositTransaction = isEthFunding
-      ? createETHDepositTransaction
-      : createERC20DepositTransaction;
 
-    if (!isEthFunding && !arg.allowanceAlreadyIncreased) {
+    if (!isEthFunding && this.allowanceMode === 'PerDeposit') {
       const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
       const tokenAddress = await assetHolderContract.Token();
+
       const tokenContractInterface = new utils.Interface(ContractArtifacts.TokenArtifact.abi);
       const increaseAllowance = tokenContractInterface.encodeFunctionData('increaseAllowance', [
         assetHolderAddress,
@@ -138,9 +150,39 @@ export class ChainService implements ChainServiceInterface {
         to: tokenAddress,
       };
 
-      await (await this.sendTransaction(increaseAllowanceRequest)).wait();
+      await this.sendTransaction(increaseAllowanceRequest);
     }
 
+    if (!isEthFunding && this.allowanceMode === 'MaxUint') {
+      const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
+      const tokenAddress = await assetHolderContract.Token();
+      const tokenContract = this.getOrAddContractMapping(
+        tokenAddress,
+        ContractArtifacts.TokenArtifact.abi
+      );
+
+      const currentAllowance = await tokenContract.allowance(
+        await this.ethWallet.getAddress(),
+        assetHolderAddress
+      );
+      if (BN.gt(BN.div(constants.MaxUint256, 2), currentAllowance)) {
+        const tokenContractInterface = new utils.Interface(ContractArtifacts.TokenArtifact.abi);
+        const approveAllowance = tokenContractInterface.encodeFunctionData('approve', [
+          assetHolderAddress,
+          constants.MaxUint256,
+        ]);
+        const approveAllowanceRequest = {
+          data: approveAllowance,
+          to: tokenAddress,
+        };
+
+        await this.sendTransaction(approveAllowanceRequest);
+      }
+    }
+
+    const createDepositTransaction = isEthFunding
+      ? createETHDepositTransaction
+      : createERC20DepositTransaction;
     const depositRequest = {
       ...createDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
       to: assetHolderAddress,

@@ -21,7 +21,6 @@ export type FundChannelArg = {
   assetHolderAddress: Address;
   expectedHeld: Uint256;
   amount: Uint256;
-  allowanceAlreadyIncreased?: boolean;
 };
 
 export interface ChainEventSubscriberInterface {
