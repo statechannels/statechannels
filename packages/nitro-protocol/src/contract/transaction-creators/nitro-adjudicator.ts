@@ -1,4 +1,4 @@
-import {utils, providers, Signature} from 'ethers';
+import {utils, providers, Signature, constants} from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import {getChannelId} from '../channel';
@@ -12,12 +12,17 @@ export function createPushOutcomeTransaction(
   turnNumRecord: number,
   finalizesAt: number,
   state: State,
-  outcome: Outcome
+  outcome: Outcome,
+  channelWasConcluded = false
 ): providers.TransactionRequest {
+  if (channelWasConcluded && turnNumRecord !== 0)
+    throw Error('If the channel was concluded, you should use 0 for turnNumRecord');
   const channelId = getChannelId(state.channel);
-  const stateHash = hashState(state);
+  const stateHash = channelWasConcluded ? constants.HashZero : hashState(state);
   const {participants} = state.channel;
-  const challengerAddress = participants[state.turnNum % participants.length];
+  const challengerAddress = channelWasConcluded
+    ? constants.AddressZero
+    : participants[state.turnNum % participants.length];
   const encodedOutcome = encodeOutcome(outcome);
 
   const data = NitroAdjudicatorContractInterface.encodeFunctionData('pushOutcome', [

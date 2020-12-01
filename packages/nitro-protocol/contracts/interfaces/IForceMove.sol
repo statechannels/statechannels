@@ -164,6 +164,7 @@ interface IForceMove {
     /**
      * @dev Indicates that a challenge has been registered against `channelId`.
      * @param channelId Unique identifier for a state channel.
+     * @param finalizesAt The unix timestamp when `channelId` finalized.
      */
-    event Concluded(bytes32 indexed channelId);
+    event Concluded(bytes32 indexed channelId, uint48 finalizesAt);
 }

@@ -136,7 +136,8 @@ describe('conclude', () => {
         const receipt = await (await tx).wait();
         await writeGasConsumption('./conclude.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
-        expect(event.args).toMatchObject({channelId});
+        const finalizesAt = (await provider.getBlock(receipt.blockNumber)).timestamp;
+        expect(event.args).toMatchObject({channelId, finalizesAt});
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
