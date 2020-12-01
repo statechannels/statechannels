@@ -40,6 +40,7 @@ export type WalletInterface = {
   updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
+  pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 
   mergeMessages(messages: Message[]): MultipleChannelOutput;
 };
