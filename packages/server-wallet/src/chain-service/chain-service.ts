@@ -13,7 +13,7 @@ import {
   SignedState,
   toNitroSignedState,
 } from '@statechannels/wallet-core';
-import {constants, Contract, ContractInterface, Event, providers, utils, Wallet} from 'ethers';
+import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
@@ -136,48 +136,8 @@ export class ChainService implements ChainServiceInterface {
     const assetHolderAddress = arg.assetHolderAddress;
     const isEthFunding = isEthAssetHolder(assetHolderAddress);
 
-    if (!isEthFunding && this.allowanceMode === 'PerDeposit') {
-      const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
-      const tokenAddress = await assetHolderContract.Token();
-
-      const tokenContractInterface = new utils.Interface(ContractArtifacts.TokenArtifact.abi);
-      const increaseAllowance = tokenContractInterface.encodeFunctionData('increaseAllowance', [
-        assetHolderAddress,
-        arg.amount,
-      ]);
-      const increaseAllowanceRequest = {
-        data: increaseAllowance,
-        to: tokenAddress,
-      };
-
-      await this.sendTransaction(increaseAllowanceRequest);
-    }
-
-    if (!isEthFunding && this.allowanceMode === 'MaxUint') {
-      const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
-      const tokenAddress = await assetHolderContract.Token();
-      const tokenContract = this.getOrAddContractMapping(
-        tokenAddress,
-        ContractArtifacts.TokenArtifact.abi
-      );
-
-      const currentAllowance = await tokenContract.allowance(
-        await this.ethWallet.getAddress(),
-        assetHolderAddress
-      );
-      if (BN.gt(BN.div(constants.MaxUint256, 2), currentAllowance)) {
-        const tokenContractInterface = new utils.Interface(ContractArtifacts.TokenArtifact.abi);
-        const approveAllowance = tokenContractInterface.encodeFunctionData('approve', [
-          assetHolderAddress,
-          constants.MaxUint256,
-        ]);
-        const approveAllowanceRequest = {
-          data: approveAllowance,
-          to: tokenAddress,
-        };
-
-        await this.sendTransaction(approveAllowanceRequest);
-      }
+    if (!isEthFunding) {
+      await this.increaseAllowance(assetHolderAddress, arg.amount);
     }
 
     const createDepositTransaction = isEthFunding
@@ -332,6 +292,51 @@ export class ChainService implements ChainServiceInterface {
     });
 
     return obs.pipe(share());
+  }
+
+  private async increaseAllowance(assetHolderAddress: Address, amount: string): Promise<void> {
+    const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
+    const tokenAddress = await assetHolderContract.Token();
+    const tokenContract = this.getOrAddContractMapping(
+      tokenAddress,
+      ContractArtifacts.TokenArtifact.abi
+    );
+
+    switch (this.allowanceMode) {
+      case 'PerDeposit': {
+        const increaseAllowance = tokenContract.interface.encodeFunctionData('increaseAllowance', [
+          assetHolderAddress,
+          amount,
+        ]);
+        const increaseAllowanceRequest = {
+          data: increaseAllowance,
+          to: tokenContract.address,
+        };
+
+        await this.sendTransaction(increaseAllowanceRequest);
+        break;
+      }
+      case 'MaxUint': {
+        const currentAllowance = await tokenContract.allowance(
+          await this.ethWallet.getAddress(),
+          assetHolderAddress
+        );
+        // Half of MaxUint256 is the threshold for bumping up the allowance
+        if (BN.gt(BN.div(constants.MaxUint256, 2), currentAllowance)) {
+          const approveAllowance = tokenContract.interface.encodeFunctionData('approve', [
+            assetHolderAddress,
+            constants.MaxUint256,
+          ]);
+          const approveAllowanceRequest = {
+            data: approveAllowance,
+            to: tokenContract.address,
+          };
+
+          await this.sendTransaction(approveAllowanceRequest);
+          break;
+        }
+      }
+    }
   }
 
   /**
