@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.14.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.13.0...@statechannels/server-wallet@1.14.0) (2020-12-01)
+
+
+### Bug Fixes
+
+* add a check inside open channel protocol for ledger channel running status ([47240ce](https://github.com/statechannels/statechannels/commit/47240ce1d70918c0760c2d948de323c7fdf4c70b))
+* add error within Store when createChannel specified invalid funding ledger channel ([5b5f87d](https://github.com/statechannels/statechannels/commit/5b5f87db98d4c6a5245143a73be3013756199530))
+* check for closing or closed ledger states before creating channel ([9136d74](https://github.com/statechannels/statechannels/commit/9136d741943f791a5bedd40f0e5fbc0cbd3a4dd4))
+* correct import in mock-chain-service ([f17846c](https://github.com/statechannels/statechannels/commit/f17846c423f8471942dc9b670fb981ed2d950f99))
+* stop open channel sending multiple deposits ([312daa2](https://github.com/statechannels/statechannels/commit/312daa20797109fbadcde7227a9b90b011190563))
+
+
+### Features
+
+* add allowanceMode to chainService; remove allowanceAlreadyIncreased option ([ae39c9a](https://github.com/statechannels/statechannels/commit/ae39c9a6c7a212845ec665e05c403c608fd16302))
+
+
+### Performance Improvements
+
+* remove unecessary abi.encode ([#2955](https://github.com/statechannels/statechannels/issues/2955)) ([4e623ee](https://github.com/statechannels/statechannels/commit/4e623ee8608d7cf021374bd8429e0cc4c44e5fab))
+
+
+
+
+
 ## [1.13.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.13.0...@statechannels/server-wallet@1.13.1) (2020-11-26)
 
 

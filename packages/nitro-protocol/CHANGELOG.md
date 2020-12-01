@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.11.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.10.1...@statechannels/nitro-protocol@0.11.0) (2020-12-01)
+
+
+### Bug Fixes
+
+* add input validation to ForceMove functions ([1a43c65](https://github.com/statechannels/monorepo/commit/1a43c654fa0f687fe765971fa55d2239ddf911f2))
+* use hexZeroPad to normalize string as bytes32 versus BigNumber.from ([#2982](https://github.com/statechannels/monorepo/issues/2982)) ([4ed1b19](https://github.com/statechannels/monorepo/commit/4ed1b195a3f2a32cf470c4c73bd7c67fd40cbf00))
+
+
+### Features
+
+* emit finalizesAt in Conclude event ([a377031](https://github.com/statechannels/monorepo/commit/a377031e34278124423ce893ee58ea64042518d0))
+* make requireValidInput pubilc ([d7c0ce5](https://github.com/statechannels/monorepo/commit/d7c0ce5f90ccf02fcd531c0d95a750ff637e7011))
+* pushOutcomeTransaction.channelWasConcluded ([3c630fb](https://github.com/statechannels/monorepo/commit/3c630fb0837175be5705b11e3f8dfed76485ff87))
+
+
+### Performance Improvements
+
+* enable solidity compiler optimization ([#2985](https://github.com/statechannels/monorepo/issues/2985)) ([655ee75](https://github.com/statechannels/monorepo/commit/655ee758c4a3e176238585d4cc6a7610b4a06891))
+* remove unecessary abi.encode ([#2955](https://github.com/statechannels/monorepo/issues/2955)) ([4e623ee](https://github.com/statechannels/monorepo/commit/4e623ee8608d7cf021374bd8429e0cc4c44e5fab))
+
+
+
+
+
 ## [0.10.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.10.0...@statechannels/nitro-protocol@0.10.1) (2020-11-26)
 
 
