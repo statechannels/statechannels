@@ -1,4 +1,3 @@
-import matchers from '@pacote/jest-either';
 import {BN} from '@statechannels/wallet-core';
 
 import {ChannelOpener} from '../open-channel';
@@ -10,8 +9,6 @@ import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {DBOpenChannelObjective} from '../../models/objective';
-
-expect.extend(matchers);
 
 const logger = createLogger(defaultTestConfig);
 const timingMetrics = false;
@@ -57,12 +54,12 @@ describe(`funding phase`, () => {
     it(`submits the transaction if it is my turn`, async () => {
       const o = await testCase({participant: 0, statesHeld, totalFunds: 0, fundsToDeposit: 5});
       // and then doesn't submit it a second time
-      await testCrankOutcome(o, {fundsToDeposit: 0});
+      await crankAndAssert(o, {fundsToDeposit: 0});
     });
     it(`submits a top-up if there's a partial deposit`, async () => {
       const o = await testCase({participant: 0, statesHeld, totalFunds: 2, fundsToDeposit: 3});
       // and then doesn't submit it a second time
-      await testCrankOutcome(o, {fundsToDeposit: 0});
+      await crankAndAssert(o, {fundsToDeposit: 0});
     });
     it(`does nothing if I've already deposited`, async () => {
       await testCase({participant: 0, statesHeld, totalFunds: 5, fundsToDeposit: 0});
@@ -72,17 +69,16 @@ describe(`funding phase`, () => {
     it(`submits the transaction if it is my turn`, async () => {
       const o = await testCase({participant: 1, statesHeld, totalFunds: 5, fundsToDeposit: 5});
       // and then doesn't submit it a second time
-      await testCrankOutcome(o, {fundsToDeposit: 0});
+      await crankAndAssert(o, {fundsToDeposit: 0});
     });
     it(`submits a top-up if there's a partial deposit`, async () => {
       const o = await testCase({participant: 1, statesHeld, totalFunds: 7, fundsToDeposit: 3});
       // and then doesn't submit it a second time
-      await testCrankOutcome(o, {fundsToDeposit: 0});
+      await crankAndAssert(o, {fundsToDeposit: 0});
     });
-    it.skip(`does nothing if I've already deposited`, async () => {
-      // todo: this fails, as it sends the post-fund-setup (as it probably should)
-      await testCase({participant: 1, statesHeld, totalFunds: 10, fundsToDeposit: 0});
-    });
+
+    // note: no `does nothing if I've already deposited` test, as it should send the
+    // post-fund-setup, which is tested later
   });
 });
 
@@ -102,7 +98,6 @@ describe(`post-fund-setup phase`, () => {
         statesToSign: [2],
         completesObj: true,
       });
-      // todo: and marks the objective as complete
     });
     it(`marks the objective as complete if a full post-fund-setup exists`, async () => {
       await testCase({participant: 0, statesHeld: [2, 3], totalFunds: 10, completesObj: true});
@@ -110,12 +105,10 @@ describe(`post-fund-setup phase`, () => {
   });
   describe(`as participant 1`, () => {
     it(`signs the post-fund-setup if all funds are present`, async () => {
-      // todo: should it do this, or should it wait for my turn
       await testCase({participant: 1, statesHeld: [0, 1], totalFunds: 10, statesToSign: [3]});
     });
     it(`doesn't do anything if I've already signed`, async () => {
       await testCase({participant: 1, statesHeld: [0, 1, 3], totalFunds: 10, statesToSign: []});
-      // todo: and marks the objective as complete
     });
     it(`signs the post-fund-setup (and completes objective), when my opponent has signed`, async () => {
       await testCase({
@@ -136,7 +129,7 @@ type TestCaseParams = SetupParams & AssertionParams;
 
 const testCase = async (args: TestCaseParams): Promise<DBOpenChannelObjective> => {
   const objective = await setup(args);
-  await testCrankOutcome(objective, args);
+  await crankAndAssert(objective, args);
   return objective;
 };
 
@@ -176,7 +169,7 @@ interface AssertionParams {
   completesObj?: boolean;
 }
 
-const testCrankOutcome = async (
+const crankAndAssert = async (
   objective: DBOpenChannelObjective,
   args: AssertionParams
 ): Promise<void> => {
