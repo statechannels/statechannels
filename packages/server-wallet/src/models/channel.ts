@@ -343,6 +343,21 @@ export class Channel extends Model implements RequiredColumns {
     return !!this.assetHolderAddress;
   }
 
+  public get isAppChannel(): boolean {
+    return !this.isLedger;
+  }
+
+  public get isRunning(): boolean {
+    // running if:
+    //  1. the supported state implies a post-fund-setup
+    //  2. no isFinal states exist
+
+    const havePostFund = !!this.supported && this.supported.turnNum >= 2 * this.nParticipants() - 1;
+    const noFinalStates = _.every(this.sortedStates, s => !s.isFinal);
+
+    return havePostFund && noFinalStates;
+  }
+
   private mySignature(signatures: SignatureEntry[]): boolean {
     return signatures.some(sig => sig.signer === this.myAddress);
   }

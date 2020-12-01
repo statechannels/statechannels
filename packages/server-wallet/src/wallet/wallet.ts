@@ -56,6 +56,7 @@ import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {Channel} from '../models/channel';
+import {SingleAppUpdater} from '../handlers/single-app-updater';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {WalletInterface} from './types';
@@ -521,6 +522,20 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         cause: err,
       });
     }
+  }
+
+  /**
+   * For pushing a message containing a single update to a running application channel
+   */
+  async pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput> {
+    const wirePayload = validatePayload(rawPayload);
+
+    const response = WalletResponse.initialize();
+
+    const singleAppUpdater = SingleAppUpdater.create(this.store);
+    await singleAppUpdater.update(wirePayload, response);
+
+    return response.singleChannelOutput();
   }
 
   private async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
