@@ -60,7 +60,6 @@ describe('fundChannel', () => {
           assetHolderAddress: erc20AssetHolderAddress,
           expectedHeld: BN.from(0),
           amount: BN.from(depositAmount),
-          allowanceAlreadyIncreased: true,
         })
         .then(response => response.wait())
     );

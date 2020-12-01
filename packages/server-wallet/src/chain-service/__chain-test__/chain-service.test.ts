@@ -171,18 +171,18 @@ describe('fundChannel', () => {
       'cannot estimate gas; transaction may fail or may require manual gas limit'
     );
   });
-});
 
-it('Fund erc20', async () => {
-  const channelId = randomChannelId();
+  it('Fund erc20', async () => {
+    const channelId = randomChannelId();
 
-  await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
-  const contract: Contract = new Contract(
-    erc20AssetHolderAddress,
-    ContractArtifacts.Erc20AssetHolderArtifact.abi,
-    provider
-  );
-  expect(await contract.holdings(channelId)).toEqual(BigNumber.from(5));
+    await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
+    const contract: Contract = new Contract(
+      erc20AssetHolderAddress,
+      ContractArtifacts.Erc20AssetHolderArtifact.abi,
+      provider
+    );
+    expect(await contract.holdings(channelId)).toEqual(BigNumber.from(5));
+  });
 });
 
 describe('registerChannel', () => {
