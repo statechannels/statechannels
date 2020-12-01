@@ -234,18 +234,24 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
   );
 
   const currentFunding = app.funding(assetHolderAddress).amount;
+  const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
+  const targetBeforeMyDeposit = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
+  if (BN.lt(currentFunding, targetBeforeMyDeposit)) return false;
 
   const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
   if (!myAllocationItem) {
     throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
   }
   if (BN.eq(myAllocationItem.amount, 0)) return false;
+  const targetAfterMyDeposit = BN.add(targetBeforeMyDeposit, myAllocationItem.amount);
+  if (BN.gte(currentFunding, targetAfterMyDeposit)) return false;
+  const amountToDeposit = BN.sub(targetAfterMyDeposit, currentFunding); // previous line implies this is >0
 
   return requestFundChannel({
     channelId: app.channelId,
     assetHolderAddress: assetHolderAddress,
     expectedHeld: currentFunding,
-    amount: myAllocationItem.amount,
+    amount: amountToDeposit,
   });
 };
 
