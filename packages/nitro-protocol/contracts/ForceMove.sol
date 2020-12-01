@@ -53,12 +53,15 @@ contract ForceMove is IForceMove {
         uint8[] memory whoSignedWhat,
         Signature memory challengerSig
     ) external override {
-        bytes32 channelId = _getChannelId(fixedPart);
-
-        require(
-            (fixedPart.participants.length >= variableParts.length) && (variableParts.length > 0),
-            'challenge | You must submit at least one but no more than numParticipants states'
+        // input type validation
+        requireValidInput(
+            fixedPart.participants.length,
+            variableParts.length,
+            sigs.length,
+            whoSignedWhat.length
         );
+
+        bytes32 channelId = _getChannelId(fixedPart);
 
         if (_mode(channelId) == ChannelMode.Open) {
             _requireNonDecreasedTurnNumber(channelId, largestTurnNum);
@@ -127,6 +130,8 @@ contract ForceMove is IForceMove {
         // variablePartAB[1] = responseVariablePart
         Signature memory sig
     ) external override {
+        // No need to validate fixedPart.participants.length here, as that validation would have happened during challenge
+
         bytes32 channelId = _getChannelId(fixedPart);
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _getChannelStorage(channelId);
 
@@ -199,6 +204,14 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat
     ) external override {
+        // input type validation
+        requireValidInput(
+            fixedPart.participants.length,
+            variableParts.length,
+            sigs.length,
+            whoSignedWhat.length
+        );
+
         bytes32 channelId = _getChannelId(fixedPart);
 
         // checks
@@ -272,11 +285,22 @@ contract ForceMove is IForceMove {
         channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
 
+        // input type validation
+        requireValidInput(
+            fixedPart.participants.length,
+            numStates,
+            sigs.length,
+            whoSignedWhat.length
+        );
+
         require(
             largestTurnNum + 1 >= numStates,
             'largestTurnNum + 1 must be greater than or equal to numStates'
         );
         // ^^ SW-C101: prevent underflow
+
+        channelId = _getChannelId(fixedPart);
+        _requireChannelNotFinalized(channelId);
 
         // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
@@ -879,5 +903,31 @@ contract ForceMove is IForceMove {
         channelId = keccak256(
             abi.encode(getChainID(), fixedPart.participants, fixedPart.channelNonce)
         );
+    }
+
+    /**
+     * @notice Validates input for several external methods.
+     * @dev Validates input for several external methods.
+     * @param numParticipants Length of the participants array
+     * @param numStates Number of states submitted
+     * @param numSigs Number of signatures submitted
+     * @param numWhoSignedWhats whoSignedWhat.length
+     */
+    function requireValidInput(
+        uint256 numParticipants,
+        uint256 numStates,
+        uint256 numSigs,
+        uint256 numWhoSignedWhats
+    ) public pure returns (bool) {
+        require(
+            (numParticipants >= numStates) && (numStates > 0),
+            'ForceMove | You must submit at least one but no more than numParticipants states'
+        );
+        require(
+            (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
+            'ForceMove | You must provide exactly one signature per participant, and assert who signed what for all participants'
+        );
+        require(numParticipants < type(uint8).max, 'ForceMove | Too many participants!');
+        return true;
     }
 }
