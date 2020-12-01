@@ -25,6 +25,10 @@ export class MultiThreadedWallet extends SingleThreadedWallet {
     return this.workerManager.pushMessage(rawPayload);
   }
 
+  async pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput> {
+    return this.workerManager.pushUpdate(rawPayload);
+  }
+
   public async destroy(): Promise<void> {
     await this.workerManager.destroy();
     await super.destroy();
