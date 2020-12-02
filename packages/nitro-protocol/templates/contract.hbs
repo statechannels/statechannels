@@ -3,32 +3,29 @@ id: {{name}}
 title: {{name}}
 ---
 
-{{{natspec.userdoc}}}
+{{contract}}
+
 
 {{{natspec.devdoc}}}
 
 {{#each ownModifiers}}
 ### `{{name}}({{args}})`
 
-{{{natspec.userdoc}}}
-
 {{{natspec.devdoc}}}
 
 {{/each}}
-
+---
 {{#each ownFunctions}}
-### `{{name}}({{args}}){{#if outputs}} → {{outputs}}{{/if}}` ({{visibility}})
-
-{{{natspec.userdoc}}}
-
+### `{{name}}` ({{visibility}})
+```solidity
+{{name}}({{args}}){{#if outputs}} → {{outputs}}{{/if}}
+```
+---
 {{{natspec.devdoc}}}
-
 {{/each}}
 
 {{#each ownEvents}}
 ### `{{name}}({{args}})`
-
-{{{natspec.userdoc}}}
 
 {{{natspec.devdoc}}}
 
