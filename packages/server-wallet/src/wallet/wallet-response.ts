@@ -1,15 +1,15 @@
+import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 
+import {Notice, Outgoing} from '../protocols/actions';
 import {Channel} from '../models/channel';
 import {DBObjective, toWireObjective} from '../models/objective';
-import {Outgoing} from '../protocols/actions';
-import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
-import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '.';
+import {WalletEvent, MultipleChannelOutput, SingleChannelOutput, Output} from './types';
 
 /**
  * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
@@ -186,7 +186,7 @@ export class WalletResponse {
     }));
   }
 
-  private get channelResults(): ChannelResult[] {
+  public get channelResults(): ChannelResult[] {
     return Object.values(this._channelResults);
   }
 
@@ -197,6 +197,23 @@ export class WalletResponse {
     }));
   }
 
+  public static mergeOutgoing(outgoing: Notice[]): Notice[] {
+    return mergeOutgoing(outgoing);
+  }
+
+  public static mergeOutputs(
+    outputs: (SingleChannelOutput | MultipleChannelOutput)[]
+  ): MultipleChannelOutput {
+    const channelResults = mergeChannelResults(
+      outputs
+        .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
+        .reduce((cr1, cr2) => cr1.concat(cr2))
+    );
+
+    const outbox = mergeOutgoing(outputs.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
+    return {channelResults, outbox};
+  }
+
   // -------------------------------
   // Convenience methods for testing
   // -------------------------------
@@ -205,3 +222,60 @@ export class WalletResponse {
     return this.queuedMessages.flatMap(wireMessage => wireMessage.data.signedStates || []);
   }
 }
+
+// -----------
+// Utilities
+// -----------
+
+// Merges any messages to the same recipient into one message
+// This makes message delivery less painful with the request/response model
+export function mergeOutgoing(outgoing: Notice[]): Notice[] {
+  if (outgoing.length === 0) return outgoing;
+
+  const senders = outgoing.map(o => o.params.sender);
+  const differentSender = new Set(senders).size !== 1;
+  // This should never happen but it's nice to have a sanity
+  if (differentSender) {
+    throw new Error(`Trying to merge outgoing messages with multiple recipients ${senders}`);
+  }
+
+  const {sender} = outgoing[0].params;
+
+  const messages = outgoing.map(o => o.params as WireMessage);
+
+  return _.map(
+    _.groupBy(messages, o => o.recipient),
+    (rcptMsgs, recipient) => {
+      const states = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.signedStates || []));
+      const requests = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.requests || []));
+      const objectives = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.objectives || []));
+
+      return {
+        method: 'MessageQueued' as const,
+        params: {
+          sender,
+          recipient,
+          data: {
+            walletVersion: WALLET_VERSION,
+            signedStates: states.length > 0 ? states : undefined,
+            requests: requests.length > 0 ? requests : undefined,
+            objectives: objectives.length > 0 ? objectives : undefined,
+          },
+        },
+      };
+    }
+  );
+}
+
+function uniqueAndSorted<T>(array: T[]): T[] {
+  return _.orderBy(_.uniqWith(array, _.isEqual), ['channelId', 'turnNum'], ['desc', 'asc']);
+}
+
+function mergeChannelResults(channelResults: ChannelResult[]): ChannelResult[] {
+  const sorted = _.orderBy(channelResults, ['channelId', 'turnNum'], ['desc', 'desc']);
+
+  return _.sortedUniqBy(sorted, a => a.channelId);
+}
+
+const isSingleChannelMessage = (output: Output): output is SingleChannelOutput =>
+  'channelResult' in output;

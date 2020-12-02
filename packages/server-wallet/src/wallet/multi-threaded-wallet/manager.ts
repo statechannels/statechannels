@@ -10,7 +10,7 @@ import {Logger} from 'pino';
 
 import {ServerWalletConfig} from '../../config';
 import {createLogger} from '../../logger';
-import {MultipleChannelOutput, SingleChannelOutput} from '../wallet';
+import {MultipleChannelOutput, SingleChannelOutput} from '../types';
 
 import {StateChannelWorkerData} from './worker-data';
 
