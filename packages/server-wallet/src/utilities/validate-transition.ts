@@ -38,7 +38,9 @@ export function validateTransition(
   const toMoverIndex = toState.turnNum % toState.participants.length;
   const toMover = toState.participants[toMoverIndex].signingAddress;
 
-  if (fromState.appDefinition !== constants.AddressZero) {
+  const isInFundingStage = toState.turnNum < 2 * toState.participants.length;
+
+  if (!isInFundingStage && !toState.isFinal && fromState.appDefinition !== constants.AddressZero) {
     // turn numbers not relevant for the null app
     const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
     if (!turnNumCheck) {
@@ -84,7 +86,6 @@ export function validateTransition(
   }
 
   // Funding stage specific validation
-  const isInFundingStage = toState.turnNum < 2 * toState.participants.length;
   const fundingStageValidation =
     _.isEqual(fromState.isFinal, false) &&
     _.isEqual(toState.outcome, fromState.outcome) &&
