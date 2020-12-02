@@ -121,7 +121,7 @@ export default class PayerClient {
     const payload = await this.createPayment(channelId);
 
     const reply = await this.time(`send message ${channelId}`, async () =>
-      this.messageReceiverAndExpectReply(payload)
+      this.messageReceiverAndExpectReply(payload, '/payment')
     );
 
     await this.time(`push message ${channelId}`, async () => this.wallet.pushMessage(reply));
@@ -143,8 +143,11 @@ export default class PayerClient {
     });
   }
 
-  public async messageReceiverAndExpectReply(message: unknown): Promise<unknown> {
-    const {data: reply} = await axios.post(this.receiverHttpServerURL + '/inbox', {message});
+  public async messageReceiverAndExpectReply(
+    message: unknown,
+    endpoint: '/payment' | '/inbox' = '/inbox'
+  ): Promise<unknown> {
+    const {data: reply} = await axios.post(this.receiverHttpServerURL + endpoint, {message});
     return reply;
   }
 }

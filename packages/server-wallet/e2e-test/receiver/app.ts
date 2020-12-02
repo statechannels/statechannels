@@ -22,11 +22,20 @@ export async function startApp(): Promise<express.Application> {
       .send(controller.participantInfo)
   );
 
+  // endpoint for general state channel messages
   app.post('/inbox', bodyParser.json(), async (req, res) =>
     res
       .status(200)
       .contentType('application/json')
       .send(await controller.acceptMessageAndReturnReplies(req.body.message as Payload))
+  );
+
+  // endpoint for accepting single payment
+  app.post('/payment', bodyParser.json(), async (req, res) =>
+    res
+      .status(200)
+      .contentType('application/json')
+      .send(await controller.acceptPaymentAndReturnReplies(req.body.message as Payload))
   );
   return app;
 }
