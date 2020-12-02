@@ -5,9 +5,9 @@ import {addAddressCheck, addBytes32Check, addBytesCheck, dropConstraint} from '.
 import {
   dropByteConstraints as dropOldByteConstraints,
   addByteContraints as addOldByteContraints,
+  channels,
 } from './20200707165856_initial';
 
-const channels = 'channels';
 const signingWallets = 'signing_wallets';
 const app_bytecode = 'app_bytecode';
 const funding = 'funding';

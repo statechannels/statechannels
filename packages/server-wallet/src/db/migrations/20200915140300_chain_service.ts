@@ -2,8 +2,9 @@ import * as Knex from 'knex';
 
 import {dropConstraint} from '../utils';
 
-const channels = 'channels';
-const chainServiceRequests = 'chain_service_requests';
+import {channels} from './20200707165856_initial';
+
+export const chainServiceRequests = 'chain_service_requests';
 const fundingStrategy = 'funding_strategy';
 const defaultFundingStrategy = 'Unknown';
 const chainServiceRequestsConstraint = `valid_chain_service_requests`;
