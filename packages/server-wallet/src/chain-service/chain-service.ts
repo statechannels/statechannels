@@ -75,7 +75,7 @@ export class ChainService implements ChainServiceInterface {
     blockConfirmations,
     allowanceMode,
   }: ChainServiceArgs) {
-    this.blockConfirmations = blockConfirmations || 5;
+    this.blockConfirmations = blockConfirmations ?? 5;
     this.logger = logger
       ? logger.child({module: 'ChainService'})
       : createLogger(defaultTestConfig());
