@@ -6,7 +6,7 @@ import {Bytes} from './type-aliases';
 import {createLogger} from './logger';
 import {defaultTestConfig} from './config';
 
-const logger = createLogger(defaultTestConfig);
+const logger = createLogger(defaultTestConfig());
 /**
  * Takes two states and runs the validateTransition in an evm (pureevm).
  * Returns a promise that resolves to true if the validateTransition

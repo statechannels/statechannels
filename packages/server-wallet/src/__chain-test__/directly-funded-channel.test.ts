@@ -14,9 +14,9 @@ import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const config = {
-  ...defaultTestConfig,
+  ...defaultTestConfig(),
   networkConfiguration: {
-    ...defaultTestConfig.networkConfiguration,
+    ...defaultTestConfig().networkConfiguration,
     // eslint-disable-next-line no-process-env
     rpcEndpoint: process.env.RPC_ENDPOINT,
     // eslint-disable-next-line no-process-env

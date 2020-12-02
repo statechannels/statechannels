@@ -7,7 +7,7 @@ import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(defaultTestConfig());
   await new DBAdmin(w.knex).truncateDB();
 });
 

@@ -12,9 +12,9 @@ const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRE
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const config = {
-  ...defaultTestConfig,
+  ...defaultTestConfig(),
   networkConfiguration: {
-    ...defaultTestConfig.networkConfiguration,
+    ...defaultTestConfig().networkConfiguration,
     // eslint-disable-next-line no-process-env
     rpcEndpoint: process.env.RPC_ENDPOINT,
   },

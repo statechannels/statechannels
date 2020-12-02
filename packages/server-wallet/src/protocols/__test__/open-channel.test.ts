@@ -10,7 +10,7 @@ import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {DBOpenChannelObjective} from '../../models/objective';
 
-const logger = createLogger(defaultTestConfig);
+const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
 const testChan = TestChannel.create(5, 5);
 
@@ -19,8 +19,8 @@ let store: Store;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig.metricsConfiguration.timingMetrics,
-    defaultTestConfig.skipEvmValidation,
+    defaultTestConfig().metricsConfiguration.timingMetrics,
+    defaultTestConfig().skipEvmValidation,
     '0'
   );
   await store.dbAdmin().truncateDB();

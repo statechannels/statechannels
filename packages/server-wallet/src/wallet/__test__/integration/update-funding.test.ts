@@ -17,7 +17,7 @@ const AddressZero = makeAddress(ethers.constants.AddressZero);
 
 let w: Wallet;
 beforeEach(async () => {
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(defaultTestConfig());
   await new DBAdmin(w.knex).truncateDB();
 });
 afterEach(async () => {

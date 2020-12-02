@@ -10,7 +10,7 @@ import {DBAdmin} from '../src/db-admin/db-admin';
 export let testKnex: Knex;
 
 beforeAll(async () => {
-  testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultTestConfig));
+  testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultTestConfig()));
   await new DBAdmin(testKnex).truncateDB();
 });
 

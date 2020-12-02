@@ -15,7 +15,7 @@ let w: Wallet;
 beforeEach(async () => {
   await new DBAdmin(knex).truncateDB();
 
-  w = Wallet.create(defaultTestConfig);
+  w = Wallet.create(defaultTestConfig());
 });
 
 afterEach(async () => {

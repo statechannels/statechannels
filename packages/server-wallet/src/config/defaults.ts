@@ -1,4 +1,7 @@
+import _ from 'lodash';
+
 import {
+  DeepPartial,
   LoggingConfiguration,
   NetworkConfiguration,
   OptionalDatabaseConfiguration,
@@ -52,19 +55,25 @@ type HasDatabaseConnectionConfigObject = {
 export const defaultTestNetworkConfiguration: NetworkConfiguration = {
   chainNetworkID: 0,
 };
-export const defaultTestConfig: ServerWalletConfig & HasDatabaseConnectionConfigObject = {
-  ...defaultConfig,
-  networkConfiguration: defaultTestNetworkConfiguration,
-  skipEvmValidation: true,
-  workerThreadAmount: 0, // Disable threading for tests
-  // TODO: List addresses this corresponds to
-  ethereumPrivateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
-  databaseConfiguration: {
-    connection: {
-      host: defaultDatabaseConfiguration.connection.host,
-      port: defaultDatabaseConfiguration.connection.port,
-      database: DEFAULT_DB_NAME,
-      user: DEFAULT_DB_USER,
+
+export const defaultTestConfig = (
+  partialConfig: DeepPartial<ServerWalletConfig & HasDatabaseConnectionConfigObject> = {}
+): ServerWalletConfig & HasDatabaseConnectionConfigObject => {
+  const fullDefaultConfig = {
+    ...defaultConfig,
+    networkConfiguration: defaultTestNetworkConfiguration,
+    skipEvmValidation: true,
+    workerThreadAmount: 0, // Disable threading for tests
+    // 0xD9995BAE12FEe327256FFec1e3184d492bD94C31
+    ethereumPrivateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
+    databaseConfiguration: {
+      connection: {
+        host: defaultDatabaseConfiguration.connection.host,
+        port: defaultDatabaseConfiguration.connection.port,
+        database: DEFAULT_DB_NAME,
+        user: DEFAULT_DB_USER,
+      },
     },
-  },
+  };
+  return _.merge({}, fullDefaultConfig, partialConfig);
 };

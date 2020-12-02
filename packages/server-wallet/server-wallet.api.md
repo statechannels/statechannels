@@ -10,6 +10,7 @@ import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';
 import { CloseChannel } from '@statechannels/wallet-core';
 import { CloseChannelParams } from '@statechannels/client-api-schema';
+import { Config } from 'knex';
 import { CreateChannelParams } from '@statechannels/client-api-schema';
 import { Destination } from '@statechannels/wallet-core';
 import { ethers } from 'ethers';
@@ -50,16 +51,153 @@ import { TransactionOrKnex } from 'objection';
 import { Uint256 as Uint256_2 } from '@statechannels/wallet-core';
 import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
+// @public (undocumented)
+export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
+
+// @public (undocumented)
+export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration & Partial<OptionalConnectionConfiguration>;
+
+// @public (undocumented)
+export type DatabasePoolConfiguration = {
+    max?: number;
+    min?: number;
+};
+
+// @public (undocumented)
+export type DeepPartial<T> = {
+    [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+// @public (undocumented)
+export const DEFAULT_DB_NAME = "server_wallet_test";
+
+// @public (undocumented)
+export const DEFAULT_DB_USER = "postgres";
+
+// @public (undocumented)
+export const defaultConfig: OptionalServerWalletConfig;
+
+// @public (undocumented)
+export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
+    connection: {
+        host: string;
+        port: number;
+        user: string;
+    };
+};
+
+// @public (undocumented)
+export const defaultLoggingConfiguration: LoggingConfiguration;
+
+// @public (undocumented)
+export const defaultMetricsConfiguration: {
+    timingMetrics: boolean;
+};
+
+// Warning: (ae-forgotten-export) The symbol "HasDatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export const defaultTestConfig: (partialConfig?: DeepPartial<ServerWalletConfig & HasDatabaseConnectionConfigObject>) => ServerWalletConfig & HasDatabaseConnectionConfigObject;
+
+// @public (undocumented)
+export const defaultTestNetworkConfiguration: NetworkConfiguration;
+
+// @public (undocumented)
+export function extractDBConfigFromServerWalletConfig(serverWalletConfig: ServerWalletConfig): Config;
+
+// Warning: (ae-forgotten-export) The symbol "DatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export function getDatabaseConnectionConfig(config: ServerWalletConfig): DatabaseConnectionConfigObject & {
+    host: string;
+    port: number;
+};
+
+// @public (undocumented)
+export type IncomingServerWalletConfig = RequiredServerWalletConfig & Partial<OptionalServerWalletConfig>;
+
+// @public (undocumented)
+export type LoggingConfiguration = {
+    logLevel: Level;
+    logDestination: string;
+};
+
 export { Message }
+
+// @public (undocumented)
+export type MetricsConfiguration = {
+    timingMetrics: boolean;
+    metricsOutputFile?: string;
+};
+
+// @public (undocumented)
+export type MultipleChannelOutput = {
+    outbox: Outgoing[];
+    channelResults: ChannelResult[];
+};
+
+// @public (undocumented)
+export type NetworkConfiguration = {
+    rpcEndpoint?: string;
+    chainNetworkID: number;
+};
+
+// @public (undocumented)
+export type OptionalConnectionConfiguration = {
+    port: number;
+} | string;
+
+// @public (undocumented)
+export type OptionalDatabaseConfiguration = {
+    pool?: DatabasePoolConfiguration;
+    debug?: boolean;
+    connection: OptionalConnectionConfiguration;
+};
+
+// @public (undocumented)
+export interface OptionalServerWalletConfig {
+    // (undocumented)
+    databaseConfiguration: OptionalDatabaseConfiguration;
+    // (undocumented)
+    loggingConfiguration: LoggingConfiguration;
+    // (undocumented)
+    metricsConfiguration: MetricsConfiguration;
+    // (undocumented)
+    skipEvmValidation: boolean;
+    // (undocumented)
+    workerThreadAmount: number;
+}
 
 // Warning: (ae-forgotten-export) The symbol "Notice" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
 export type Outgoing = Notice;
 
-// Warning: (ae-forgotten-export) The symbol "RequiredServerWalletConfig" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "OptionalServerWalletConfig" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "PartialConfigObject" needs to be exported by the entry point index.d.ts
 //
+// @public (undocumented)
+export function overwriteConfigWithDatabaseConnection(config: ServerWalletConfig, databaseConnectionConfig: PartialConfigObject | string): ServerWalletConfig;
+
+// @public (undocumented)
+export type RequiredConnectionConfiguration = {
+    database: string;
+    host: string;
+    user: string;
+    password?: string;
+} | string;
+
+// @public (undocumented)
+export type RequiredDatabaseConfiguration = {
+    connection: RequiredConnectionConfiguration;
+};
+
+// @public (undocumented)
+export type RequiredServerWalletConfig = {
+    databaseConfiguration: RequiredDatabaseConfiguration;
+    networkConfiguration: NetworkConfiguration;
+    ethereumPrivateKey: string;
+};
+
 // @public (undocumented)
 export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWalletConfig;
 
@@ -80,10 +218,11 @@ export const Wallet: {
     create(walletConfig: IncomingServerWalletConfig): Wallet;
 };
 
-
-// Warnings were encountered during analysis:
+// Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
 //
-// src/wallet/index.ts:10:20 - (ae-forgotten-export) The symbol "IncomingServerWalletConfig" needs to be exported by the entry point index.d.ts
+// @public (undocumented)
+export type WalletEvent = ChannelUpdatedEvent;
+
 
 // (No @packageDocumentation comment for this package)
 

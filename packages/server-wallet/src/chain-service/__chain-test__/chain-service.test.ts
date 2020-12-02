@@ -27,9 +27,9 @@ const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRE
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 
 const config = {
-  ...defaultTestConfig,
+  ...defaultTestConfig(),
   networkConfiguration: {
-    ...defaultTestConfig.networkConfiguration,
+    ...defaultTestConfig().networkConfiguration,
     rpcEndpoint: process.env.RPC_ENDPOINT,
   },
 };

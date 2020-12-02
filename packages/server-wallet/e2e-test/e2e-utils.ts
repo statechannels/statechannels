@@ -18,11 +18,11 @@ import {
 } from '../src/config';
 
 export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
-  defaultTestConfig,
+  defaultTestConfig(),
   {database: 'server_wallet_payer'}
 );
 export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
-  defaultTestConfig,
+  defaultTestConfig(),
   {database: 'server_wallet_receiver'}
 );
 

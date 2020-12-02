@@ -35,7 +35,7 @@ describe('validate transition', () => {
         stateWithHashSignedBy([fromSigner])(fromState),
         stateWithHashSignedBy([toSigner])(toState),
         undefined,
-        createLogger(defaultTestConfig),
+        createLogger(defaultTestConfig()),
         true
       )
     ).toEqual(expectedResult);

@@ -50,7 +50,7 @@ import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 
-const defaultLogger = createLogger(defaultTestConfig);
+const defaultLogger = createLogger(defaultTestConfig());
 
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
