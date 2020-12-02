@@ -12,7 +12,7 @@ import {DBOpenChannelObjective} from '../../models/objective';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
-const testChan = TestChannel.create(5, 5);
+const testChan = TestChannel.create({aBal: 5, bBal: 5});
 
 let store: Store;
 
