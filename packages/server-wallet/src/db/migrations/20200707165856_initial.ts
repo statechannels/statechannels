@@ -2,7 +2,7 @@ import * as Knex from 'knex';
 
 import {addAddressCheck, addBytes32CheckOld, addUint48Check, dropConstraint} from '../utils';
 
-const channels = 'channels';
+export const channels = 'channels';
 const signingWallets = 'signing_wallets';
 
 export async function addByteContraints(knex: Knex): Promise<void> {
