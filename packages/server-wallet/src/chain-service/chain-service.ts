@@ -349,16 +349,9 @@ export class ChainService implements ChainServiceInterface {
 
         const tx = await this.sendTransaction(increaseAllowanceRequest);
 
-        if (!tx) throw new Error('fundChannel failed to increase allowance');
-
         this.logger.info(
-          {
-            assetHolderAddress,
-            tokenAddress,
-            amount,
-            tx: tx.hash,
-          },
-          'Increased asset holder token allowance'
+          {tx: tx.hash},
+          'Transaction to increase asset holder token allowance successfully mined'
         );
 
         break;
@@ -381,8 +374,6 @@ export class ChainService implements ChainServiceInterface {
 
           const tx = await this.sendTransaction(approveAllowanceRequest);
 
-          if (!tx) throw new Error('fundChannel failed to call approve');
-
           this.logger.info(
             {
               assetHolderAddress,
@@ -390,7 +381,12 @@ export class ChainService implements ChainServiceInterface {
               amount,
               tx: tx.hash,
             },
-            'Approved maximum amount of asset holder spending'
+            'Submitted transaction to approve maximum amount of asset holder spending'
+          );
+
+          this.logger.info(
+            {tx: tx.hash},
+            'Transaction to approve maximum amount of asset holder spending successfully mined'
           );
 
           break;
