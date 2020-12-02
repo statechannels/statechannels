@@ -719,7 +719,6 @@ async function createChannel(
       {
         ...constants,
         assetHolderAddress: undefined,
-        chainServiceRequests: [],
         channelId: calculateChannelId(constants),
         fundingLedgerChannelId,
         fundingStrategy,

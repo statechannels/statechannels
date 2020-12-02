@@ -20,7 +20,6 @@ export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) 
     participants,
     signingAddress: alice().address,
     vars: [],
-    chainServiceRequests: [],
     fundingStrategy: 'Direct',
   };
 

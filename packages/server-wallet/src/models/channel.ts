@@ -38,7 +38,6 @@ export const REQUIRED_COLUMNS = [
   'challengeDuration',
   'participants',
   'vars',
-  'chainServiceRequests',
   'fundingStrategy',
 ] as const;
 export const OPTIONAL_COLUMNS = ['assetHolderAddress', 'fundingLedgerChannelId'] as const;

@@ -196,7 +196,13 @@ describe('directly funded app', () => {
     expect(updated.protocolState).toMatchObject({
       latest: preFS1,
       supported: preFS1,
-      chainServiceRequests: ['fund'],
+      chainServiceRequests: [
+        {
+          request: 'fund',
+          attempts: 1,
+          channelId,
+        },
+      ],
     });
   });
 });
