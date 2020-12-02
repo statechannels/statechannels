@@ -26,17 +26,17 @@ contract AssetHolder is IAssetHolder {
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     * @param destination External destination or channel to transfer funds *to*.
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to.
      */
     function transfer(
         bytes32 fromChannelId,
         bytes calldata allocationBytes,
-        bytes32 destination
-    ) external {
+        uint[] memory indices
+    ) external override {
         // checks
         _requireCorrectAllocationHash(fromChannelId, allocationBytes);
         // effects and interactions
-        _transfer(fromChannelId, allocationBytes, destination);
+        _transfer(fromChannelId, allocationBytes, indices);
     }
 
     /**
@@ -45,11 +45,11 @@ contract AssetHolder is IAssetHolder {
      * @param channelId Unique identifier for a state channel.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
      */
-    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external override {
+    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external {
         // checks
         _requireCorrectAllocationHash(channelId, allocationBytes);
         // effects and interactions
-        _transferAll(channelId, allocationBytes);
+        _transfer(channelId, allocationBytes, new uint256[](0));
     }
 
     /**
@@ -117,7 +117,7 @@ contract AssetHolder is IAssetHolder {
         // no checks
         //
         // effects and interactions
-        _transferAll(channelId, allocationBytes);
+        _transfer(channelId, allocationBytes, new uint256[](0));
     }
 
     /**
@@ -139,115 +139,100 @@ contract AssetHolder is IAssetHolder {
     // Internal methods
     // **************
 
+    // function _shouldTransfer(uint index, uint[] indices) internal {
+    //     if (indices.length == 0) {
+    //         return (,true;  // [] implies all
+    //     }
+    //     for (uint k=0; k < indices.length; k++) {
+    //         if (indices[k] == index || indices.length == []) {
+    //             return k;
+    //         }
+    //     }
+    // }
+
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     * @param destination External destination or channel to transfer funds *to*.
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to. Should be in increasing order.
      */
     function _transfer(
         bytes32 fromChannelId,
         bytes memory allocationBytes,
-        bytes32 destination
+        uint[] memory indices
     ) internal {
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
             (Outcome.AllocationItem[])
         );
-        uint256 balance = holdings[fromChannelId];
-        uint256 affordsForDestination;
-        uint256 residualAllocationAmount;
-        uint256 i;
-        bool deleteHash = false;
+        uint256 initialHoldings = holdings[fromChannelId];
+        uint256 surplus = initialHoldings; // virtual funds available during calculation
+        uint k = 0; // indexes indices
+        uint256[] memory payouts = new uint256[](indices.length); // values default to 0
+        uint256 totalPayouts = 0;
 
-        // loop over allocations and decrease balance until we hit the specified destination
-        for (i = 0; i < allocation.length; i++) {
-            if (balance == 0) {
-                revert('_transfer | fromChannel affords 0 for destination');
+        // loop over allocations and decrease surplus
+        for (uint i = 0; i < allocation.length; i++) {
+            if (k >= indices.length) {
+                break;  // we have finished with the supplied indices
             }
-            uint256 _amount = allocation[i].amount;
-            if (allocation[i].destination == destination) {
-                if (balance < _amount) {
-                    affordsForDestination = balance;
-                    residualAllocationAmount = _amount - balance;
-                    balance = 0;
-                } else {
-                    affordsForDestination = _amount;
-                    residualAllocationAmount = 0;
-                    balance = balance.sub(_amount);
-                }
-                break; // means that i holds the index of the destination that may need to be altered or removed
+            if (surplus <= 0) {
+                break; // we ran out of funds
             }
-            if (balance < _amount) {
-                balance = 0;
-            } else {
-                balance = balance.sub(_amount);
+            uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus) ? surplus : allocation[i].amount;
+            if (indices[k] == i) { // found a match
+                // reduce the current allocationItem.amount
+                allocation[i].amount -= minimumOfAmountAndSurplus;
+                // increase the relevant payout
+                payouts[k] = minimumOfAmountAndSurplus;
+                totalPayouts += minimumOfAmountAndSurplus;
+                // move on to the next supplied index
+                ++k;
             }
+            // decrease surplus by the current amount if possible, else surplus goes to zero
+            surplus -= minimumOfAmountAndSurplus;
         }
+        
+        // *******
+        // EFFECTS
+        // *******
 
-        require(affordsForDestination > 0, '_transfer fromChannel allocates 0 to destination');
+        uint256 newHoldings = initialHoldings - totalPayouts;
 
-        // effects
-        holdings[fromChannelId] -= affordsForDestination;
-
-        // construct new outcome
-
-        bytes memory encodedAllocation;
-
-        if (residualAllocationAmount > 0) {
-            // new allocation identical save for a single entry
-            Outcome.AllocationItem[] memory newAllocation = new Outcome.AllocationItem[](
-                allocation.length
-            );
-            for (uint256 k = 0; k < allocation.length; k++) {
-                newAllocation[k] = allocation[k];
-                if (allocation[k].destination == destination) {
-                    newAllocation[k].amount = residualAllocationAmount;
-                }
-            }
-            encodedAllocation = abi.encode(newAllocation);
-        }
-
-        if (residualAllocationAmount == 0) {
-            Outcome.AllocationItem[] memory splicedAllocation = new Outcome.AllocationItem[](
-                allocation.length - 1
-            );
-            // full payout so we want to splice a shorter outcome
-            for (uint256 k = 0; k < i; k++) {
-                splicedAllocation[k] = allocation[k];
-            }
-            for (uint256 k = i + 1; k < allocation.length; k++) {
-                splicedAllocation[k - 1] = allocation[k];
-            }
-            if (splicedAllocation.length == 0) {
-                deleteHash = true;
-            }
-            encodedAllocation = abi.encode(splicedAllocation);
-        }
-
-        // replace or delete hash
-        if (deleteHash) {
-            delete assetOutcomeHashes[fromChannelId];
+        if (newHoldings == 0) {
+            delete holdings[fromChannelId];
         } else {
-            assetOutcomeHashes[fromChannelId] = keccak256(
-                abi.encode(
-                    Outcome.AssetOutcome(
-                        uint8(Outcome.AssetOutcomeType.Allocation),
-                        encodedAllocation
-                    )
+            holdings[fromChannelId] = newHoldings;
+        }
+
+        // replace hash (even if it only contains allocation[*].amount = 0, which we could delete in principle)
+        assetOutcomeHashes[fromChannelId] = keccak256(
+            abi.encode(
+                Outcome.AssetOutcome(
+                    uint8(Outcome.AssetOutcomeType.Allocation),
+                    abi.encode(allocation)
                 )
-            );
-        }
+            )
+        );
+    
+        // *******
+        // INTERACTIONS
+        // *******
 
-        // storage updated BEFORE external contracts called (prevent reentrancy attacks)
-        if (_isExternalDestination(destination)) {
-            _transferAsset(_bytes32ToAddress(destination), affordsForDestination);
-        } else {
-            holdings[destination] += affordsForDestination;
+        for (uint256 j=0; j<payouts.length; j++) {
+            bytes32 destination = allocation[indices[j]].destination;
+            if (payouts[j] > 0) {
+                // storage updated BEFORE external contracts called (prevent reentrancy attacks)
+                if (_isExternalDestination(destination)) {
+                    _transferAsset(_bytes32ToAddress(destination), payouts[j]);
+                } else {
+                    holdings[destination] += payouts[j];
+                }
+                // Event emitted
+                emit AssetTransferred(fromChannelId, destination, payouts[j]);
+            }
         }
-        // Event emitted
-        emit AssetTransferred(fromChannelId, destination, affordsForDestination);
     }
 
     /**

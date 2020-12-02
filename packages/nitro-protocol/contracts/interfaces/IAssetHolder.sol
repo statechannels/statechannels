@@ -7,12 +7,17 @@ pragma experimental ABIEncoderV2;
  */
 interface IAssetHolder {
     /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel.
-     * @param channelId Unique identifier for a state channel.
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to.
      */
-    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external;
+    function transfer(
+        bytes32 fromChannelId,
+        bytes calldata allocationBytes,
+        uint[] memory indices
+    ) external;
 
     /**
      * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
