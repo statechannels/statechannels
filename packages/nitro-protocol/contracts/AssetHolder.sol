@@ -169,7 +169,7 @@ contract AssetHolder is IAssetHolder {
         uint256 initialHoldings = holdings[fromChannelId];
         uint256 surplus = initialHoldings; // virtual funds available during calculation
         uint k = 0; // indexes indices
-        uint256[] memory payouts = new uint256[](indices.length); // values default to 0
+        uint256[] memory payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length); // [] means "all"; values default to 0
         uint256 totalPayouts = 0;
 
         // loop over allocations and decrease surplus
@@ -181,7 +181,7 @@ contract AssetHolder is IAssetHolder {
                 break; // we ran out of funds
             }
             uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus) ? surplus : allocation[i].amount;
-            if (indices[k] == i) { // found a match
+            if (indices[k] == i || indices.length ==0) { // found a match
                 // reduce the current allocationItem.amount
                 allocation[i].amount -= minimumOfAmountAndSurplus;
                 // increase the relevant payout
