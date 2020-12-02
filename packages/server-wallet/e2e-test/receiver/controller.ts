@@ -65,4 +65,42 @@ export default class ReceiverController {
 
     return reply;
   }
+
+  public async acceptPaymentAndReturnReplies(message: unknown): Promise<unknown> {
+    const reply: Payload = {
+      walletVersion: WALLET_VERSION,
+      signedStates: [],
+      objectives: [],
+    };
+
+    const {
+      channelResult,
+      outbox: [maybeSyncStateResponse],
+    } = await this.time('push message', async () => this.wallet.pushUpdate(message));
+
+    if (maybeSyncStateResponse) {
+      const syncResponse = maybeSyncStateResponse.params.data as Payload;
+      reply.signedStates = reply.signedStates?.concat(syncResponse.signedStates || []);
+      reply.objectives = reply.objectives?.concat(syncResponse.objectives || []);
+    }
+
+    if (channelResult && channelResult.turnNum % 2 === 0) {
+      const {
+        outbox: [messageToSendToPayer],
+      } = await this.time('react', async () => {
+        if (channelResult.status === 'proposed') {
+          return this.wallet.joinChannels([channelResult.channelId]);
+        } else {
+          return this.wallet.updateChannel(channelResult);
+        }
+      });
+
+      const walletResponse = messageToSendToPayer.params.data as Payload;
+
+      reply.signedStates = reply.signedStates?.concat(walletResponse.signedStates || []);
+      reply.objectives = reply.objectives?.concat(walletResponse.objectives || []);
+    }
+
+    return reply;
+  }
 }
