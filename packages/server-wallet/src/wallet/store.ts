@@ -35,7 +35,7 @@ import pMap from 'p-map';
 import {Channel, ChannelError, CHANNEL_COLUMNS} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash, addState, clearOldStates, fastDeserializeState} from '../state-utils';
-import {ChannelState, ChainServiceApi} from '../protocols/state';
+import {ChannelState} from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Uint256, Bytes} from '../type-aliases';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} from '../metrics';
@@ -247,18 +247,6 @@ export class Store {
     return result;
   }
 
-  async addChainServiceRequest(
-    channelId: Bytes32,
-    type: ChainServiceApi,
-    tx: Transaction
-  ): Promise<void> {
-    const channel = await Channel.forId(channelId, tx);
-
-    await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({chainServiceRequests: [...channel.chainServiceRequests, type]});
-  }
-
   async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
     // This is somewhat faster than Channel.forId for simply fetching a channel:
     // - the signingWallet isn't needed to construct the protocol state
@@ -267,6 +255,7 @@ export class Store {
       await Channel.query(tx ?? this.knex)
         .where({'channels.channel_id': channelId})
         .withGraphJoined('funding')
+        .withGraphJoined('chainServiceRequests')
         .first()
     )?.protocolState;
   }

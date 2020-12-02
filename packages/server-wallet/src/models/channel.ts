@@ -19,7 +19,6 @@ import {Bytes32, Uint48} from '../type-aliases';
 import {
   ChannelState,
   toChannelResult,
-  ChainServiceRequests,
   ChannelStateFunding,
   directFundingStatus,
 } from '../protocols/state';
@@ -30,7 +29,7 @@ import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
 import {ObjectiveModel} from './objective';
 import {LedgerRequest} from './ledger-request';
-import {ChainTransaction} from './chain-transaction';
+import {ChainServiceRequest} from './chain-service-request';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -55,7 +54,6 @@ export interface RequiredColumns {
   readonly participants: Participant[];
   readonly vars: SignedStateVarsWithHash[];
   readonly signingAddress: Address;
-  readonly chainServiceRequests: ChainServiceRequests;
   readonly fundingStrategy: FundingStrategy;
 }
 
@@ -78,7 +76,7 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
-  readonly chainServiceRequests!: ChainServiceRequests;
+  readonly chainServiceRequests!: ChainServiceRequest[];
   readonly fundingStrategy!: FundingStrategy;
 
   readonly assetHolderAddress!: string; // only Ledger channels have this
@@ -127,12 +125,12 @@ export class Channel extends Model implements RequiredColumns {
         to: 'objectives.objectiveId',
       },
     },
-    chainTransactions: {
+    chainServiceRequests: {
       relation: Model.HasManyRelation,
-      modelClass: ChainTransaction,
+      modelClass: ChainServiceRequest,
       join: {
         from: 'channels.channelId',
-        to: 'chain_transactions.channelId',
+        to: 'chain_service_requests.channelId',
       },
     },
   };
@@ -144,6 +142,7 @@ export class Channel extends Model implements RequiredColumns {
       .where({channelId})
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
+      .withGraphFetched('chainServiceRequests')
       .first();
   }
 
