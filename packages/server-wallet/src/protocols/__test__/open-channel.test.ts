@@ -59,11 +59,18 @@ describe(`funding phase`, () => {
       await crankAndAssert(obj, {fundsToDeposit: 5});
       // and then doesn't submit it a second time
       await crankAndAssert(obj, {fundsToDeposit: 0});
-      // but then let's "wait" for 10 minutes for the fund request to the chain service to get stale
+      // then let's "wait" for 10 minutes for the fund request to the chain service to get stale
       await ChainServiceRequest.query(knex)
         .findOne({channelId: testChan.channelId})
-        .patch({timestamp: new Date(Date.now() - requestTimeout - 1)});
+        .patch({timestamp: new Date(Date.now() - requestTimeout - 10)});
+      // we should see a second request to the chain service
       await crankAndAssert(obj, {fundsToDeposit: 5});
+      // then let's "wait" for 10 minutes for the fund request to the chain service to get stale
+      await ChainServiceRequest.query(knex)
+        .findOne({channelId: testChan.channelId})
+        .patch({timestamp: new Date(Date.now() - requestTimeout - 10)});
+      // we should not see a third request to the chain service as the wallet retries each request just once
+      await crankAndAssert(obj, {fundsToDeposit: 0});
     }, 10_000);
     it(`submits a top-up if there's a partial deposit`, async () => {
       const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 2});

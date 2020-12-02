@@ -55,6 +55,6 @@ export class ChainServiceRequest extends Model implements RequiredColumns {
   }
 
   isValid(): boolean {
-    return new Date().getTime() - this.timestamp.getTime() < requestTimeout;
+    return this.attempts >= 2 || new Date().getTime() - this.timestamp.getTime() < requestTimeout;
   }
 }
