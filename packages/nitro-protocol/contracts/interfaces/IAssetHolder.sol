@@ -16,7 +16,7 @@ interface IAssetHolder {
     function transfer(
         bytes32 fromChannelId,
         bytes calldata allocationBytes,
-        uint[] memory indices
+        uint256[] memory indices
     ) external;
 
     /**

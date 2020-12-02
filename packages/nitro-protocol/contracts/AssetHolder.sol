@@ -31,7 +31,7 @@ contract AssetHolder is IAssetHolder {
     function transfer(
         bytes32 fromChannelId,
         bytes calldata allocationBytes,
-        uint[] memory indices
+        uint256[] memory indices
     ) external override {
         // checks
         _requireCorrectAllocationHash(fromChannelId, allocationBytes);
@@ -160,7 +160,7 @@ contract AssetHolder is IAssetHolder {
     function _transfer(
         bytes32 fromChannelId,
         bytes memory allocationBytes,
-        uint[] memory indices
+        uint256[] memory indices
     ) internal {
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
@@ -168,20 +168,30 @@ contract AssetHolder is IAssetHolder {
         );
         uint256 initialHoldings = holdings[fromChannelId];
         uint256 surplus = initialHoldings; // virtual funds available during calculation
-        uint k = 0; // indexes indices
-        uint256[] memory payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length); // [] means "all"; values default to 0
+        uint256 k = 0; // indexes indices
+        uint256[] memory payouts = new uint256[](
+            indices.length > 0 ? indices.length : allocation.length
+        ); // [] means "all"; values default to 0
         uint256 totalPayouts = 0;
 
+        // TODO
+        // factor out into pure function so that we can compute changes to outcomes off chain
+        // this is important because clients need to track the outcome as it changes
+        // and emitting that information in an event will be too expensive.
+
         // loop over allocations and decrease surplus
-        for (uint i = 0; i < allocation.length; i++) {
+        for (uint256 i = 0; i < allocation.length; i++) {
             if (k >= indices.length) {
-                break;  // we have finished with the supplied indices
+                break; // we have finished with the supplied indices
             }
             if (surplus <= 0) {
                 break; // we ran out of funds
             }
-            uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus) ? surplus : allocation[i].amount;
-            if (indices[k] == i || indices.length ==0) { // found a match
+            uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus)
+                ? surplus
+                : allocation[i].amount;
+            if (indices[k] == i || indices.length == 0) {
+                // found a match
                 // reduce the current allocationItem.amount
                 allocation[i].amount -= minimumOfAmountAndSurplus;
                 // increase the relevant payout
@@ -193,7 +203,7 @@ contract AssetHolder is IAssetHolder {
             // decrease surplus by the current amount if possible, else surplus goes to zero
             surplus -= minimumOfAmountAndSurplus;
         }
-        
+
         // *******
         // EFFECTS
         // *******
@@ -215,12 +225,12 @@ contract AssetHolder is IAssetHolder {
                 )
             )
         );
-    
+
         // *******
         // INTERACTIONS
         // *******
 
-        for (uint256 j=0; j<payouts.length; j++) {
+        for (uint256 j = 0; j < payouts.length; j++) {
             bytes32 destination = allocation[indices[j]].destination;
             if (payouts[j] > 0) {
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
