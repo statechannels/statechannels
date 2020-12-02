@@ -120,6 +120,8 @@ export interface ChannelResult {
     // (undocumented)
     channelId: ChannelId;
     // (undocumented)
+    fundingStatus: FundingStatus;
+    // (undocumented)
     participants: Participant[];
     // (undocumented)
     status: ChannelStatus;
@@ -284,6 +286,9 @@ export type ErrorCodes = {
 
 // @public
 export type ExternalDestination = string;
+
+// @public (undocumented)
+export type FundingStatus = 'Uncategorized' | 'ReadyToFund' | 'Funded' | 'Defunded';
 
 // @public (undocumented)
 export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Fake' | 'Unknown';

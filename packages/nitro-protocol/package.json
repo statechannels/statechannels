@@ -71,7 +71,7 @@
     "build:webpack": "webpack",
     "contract:compile": "yarn hardhat compile --force",
     "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts",
-    "docgen": "yarn solidity-docgen --solc-module solc-0.7",
+    "docgen": "yarn solidity-docgen --solc-module solc-0.7 -o ../docs-website/docs/contract-api/natspec -t ./templates",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn prettier:check",
     "lint:write": "eslint \"*/**/*.ts\" --fix && yarn prettier:write",
