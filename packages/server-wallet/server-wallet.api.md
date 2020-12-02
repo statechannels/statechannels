@@ -139,6 +139,8 @@ export type MultipleChannelOutput = {
 // @public (undocumented)
 export type NetworkConfiguration = {
     chainNetworkID: number;
+    nitroAdjudicatorAddress?: Address;
+    ethAssetHolderAddress?: Address;
 };
 
 // @public (undocumented)

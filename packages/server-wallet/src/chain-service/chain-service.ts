@@ -13,7 +13,7 @@ import {
   SignedState,
   toNitroSignedState,
 } from '@statechannels/wallet-core';
-import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
+import {constants, Contract, ContractInterface, ethers, Event, providers, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
 import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
@@ -37,46 +37,55 @@ type DepositedEvent = {type: 'Deposited'; ethersEvent?: Event} & HoldingUpdatedA
 type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
 type ContractEvent = DepositedEvent | AssetTransferredEvent;
 
-// TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
-/* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = makeAddress(
-  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
-);
-const nitroAdjudicatorAddress = makeAddress(
-  process.env.NITRO_ADJUDICATOR_ADDRESS! || constants.AddressZero
-);
-/* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
-
-function isEthAssetHolder(address: Address): boolean {
-  return address === ethAssetHolderAddress;
-}
-
 const blockConfirmations = 5;
 
 export class ChainService implements ChainServiceInterface {
-  private readonly ethWallet: NonceManager;
-  private provider: providers.JsonRpcProvider;
-  private allowanceMode: AllowanceMode;
   private addressToObservable: Map<Address, Observable<ContractEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
-  private nitroAdjudicator: Contract;
 
   private transactionQueue = new PQueue({concurrency: 1});
 
-  constructor({provider, pk, allowanceMode, pollingInterval}: ChainServiceArgs) {
-    this.provider = new providers.JsonRpcProvider(provider);
-    this.allowanceMode = allowanceMode;
-    if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
-      pollingInterval = pollingInterval ?? 50;
-    }
-    if (pollingInterval) this.provider.pollingInterval = pollingInterval;
-    this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
-    this.nitroAdjudicator = new Contract(
-      nitroAdjudicatorAddress,
-      ContractArtifacts.NitroAdjudicatorArtifact.abi,
-      this.ethWallet
+  static async create({
+    provider,
+    pollingInterval,
+    pk,
+    allowanceMode,
+    nitroAdjudicatorAddress,
+    ethAssetHolderAddress,
+  }: ChainServiceArgs): Promise<ChainService> {
+    const jsonrpc = new providers.JsonRpcProvider(provider);
+
+    if (pollingInterval) jsonrpc.pollingInterval = pollingInterval;
+
+    if (provider.includes('0.0.0.0') || provider.includes('localhost'))
+      jsonrpc.pollingInterval = pollingInterval ?? 50;
+
+    const ethAssetHolder = await connectContract(
+      ethAssetHolderAddress,
+      ContractArtifacts.EthAssetHolderArtifact,
+      jsonrpc
     );
+
+    const nitroAdjudicator = await connectContract(
+      nitroAdjudicatorAddress,
+      ContractArtifacts.NitroAdjudicatorArtifact,
+      jsonrpc
+    );
+
+    const nonceManager = new NonceManager(new Wallet(pk, jsonrpc));
+
+    return new ChainService(jsonrpc, nonceManager, ethAssetHolder, nitroAdjudicator, allowanceMode);
+  }
+
+  private constructor(
+    private readonly provider: providers.JsonRpcProvider,
+    private readonly ethWallet: NonceManager,
+    private readonly ethAssetHolder: Contract,
+    private readonly nitroAdjudicator: Contract,
+    private readonly allowanceMode: AllowanceMode
+  ) {
+    this.addressToContract.set(makeAddress(ethAssetHolder.address), ethAssetHolder);
   }
 
   // Only used for unit tests
@@ -90,11 +99,7 @@ export class ChainService implements ChainServiceInterface {
     assetHolderAddress: Address,
     contractInterface?: ContractInterface
   ): Contract {
-    const abi =
-      contractInterface ??
-      (isEthAssetHolder(assetHolderAddress)
-        ? ContractArtifacts.EthAssetHolderArtifact.abi
-        : ContractArtifacts.Erc20AssetHolderArtifact.abi);
+    const abi = contractInterface ?? ContractArtifacts.Erc20AssetHolderArtifact.abi;
     const contract: Contract = new Contract(assetHolderAddress, abi, this.ethWallet);
     this.addressToContract.set(assetHolderAddress, contract);
     return contract;
@@ -134,7 +139,7 @@ export class ChainService implements ChainServiceInterface {
 
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     const assetHolderAddress = arg.assetHolderAddress;
-    const isEthFunding = isEthAssetHolder(assetHolderAddress);
+    const isEthFunding = assetHolderAddress === this.ethAssetHolder.address;
 
     if (!isEthFunding) {
       await this.increaseAllowance(assetHolderAddress, arg.amount);
@@ -158,7 +163,7 @@ export class ChainService implements ChainServiceInterface {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
-      to: nitroAdjudicatorAddress,
+      to: this.nitroAdjudicator.address,
     };
 
     const captureExpectedErrors = async (reason: any) => {
@@ -352,4 +357,28 @@ export class ChainService implements ChainServiceInterface {
 
     return result;
   }
+}
+
+async function connectContract(
+  address: Address,
+  {
+    deployedBytecode,
+    abi,
+    contractName,
+  }: {contractName: string; abi: ethers.ContractInterface; deployedBytecode: string},
+  provider: providers.JsonRpcProvider
+): Promise<Contract> {
+  const bytecode = await provider.getCode(address);
+
+  // TODO: Throw errors once we can be certain the bytecode being referenced is correct;
+  //       right now it may be incorrect since our ContractArtifacts refer to local deployments
+  //       and not deployed bytecode on various other chains e.g., rinkeby, mainnet, etc
+
+  if (BN.eq(bytecode, 0))
+    console.warn(`ChainService: ${contractName} does not reference a deployed contract`);
+
+  if (!BN.eq(bytecode, deployedBytecode))
+    console.warn(`ChainService: ${contractName} references contract with unexpected bytecode`);
+
+  return new Contract(address, abi, provider);
 }

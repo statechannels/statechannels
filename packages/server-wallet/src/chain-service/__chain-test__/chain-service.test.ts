@@ -21,6 +21,7 @@ import {ChainService} from '../chain-service';
 import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
@@ -45,16 +46,18 @@ function mineOnEvent(contract: Contract) {
 
 jest.setTimeout(20_000);
 
-beforeAll(() => {
+beforeAll(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
   /* eslint-disable no-process-env */
-  chainService = new ChainService({
+  chainService = await ChainService.create({
     provider: rpcEndpoint,
     pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
     allowanceMode: 'MaxUint',
+    nitroAdjudicatorAddress,
+    ethAssetHolderAddress,
   });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 

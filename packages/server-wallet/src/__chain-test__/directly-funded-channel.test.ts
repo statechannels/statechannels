@@ -12,11 +12,14 @@ import {ChainService} from '../chain-service';
 import {Wallet, SingleChannelOutput} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
-if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
+/* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
+if (!process.env.NITRO_ADJUDICATOR_ADDRESS) throw new Error('NITRO_ADJUDICATOR_ADDRESS undefined');
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS);
+
+if (!process.env.ETH_ASSET_HOLDER_ADDRESS) throw new Error('ETH_ASSET_HOLDER_ADDRESS undefined');
+const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS);
+
+if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT undefined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 
 const config = {
@@ -29,24 +32,9 @@ const config = {
 };
 
 let provider: providers.JsonRpcProvider;
-const b = Wallet.create(
-  new ChainService({
-    provider: rpcEndpoint,
-    /* eslint-disable-next-line no-process-env */
-    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
-    allowanceMode: 'MaxUint',
-  }),
-  overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'})
-);
-const a = Wallet.create(
-  new ChainService({
-    provider: rpcEndpoint,
-    /* eslint-disable-next-line no-process-env */
-    pk: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
-    allowanceMode: 'MaxUint',
-  }),
-  overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'})
-);
+
+let a: Wallet;
+let b: Wallet;
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
@@ -72,6 +60,31 @@ function mineOnEvent(contract: Contract) {
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
+
+  a = Wallet.create(
+    await ChainService.create({
+      provider: rpcEndpoint,
+      /* eslint-disable-next-line no-process-env */
+      pk: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
+      allowanceMode: 'MaxUint',
+      nitroAdjudicatorAddress,
+      ethAssetHolderAddress,
+    }),
+    overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'})
+  );
+
+  b = Wallet.create(
+    await ChainService.create({
+      provider: rpcEndpoint,
+      /* eslint-disable-next-line no-process-env */
+      pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
+      allowanceMode: 'MaxUint',
+      nitroAdjudicatorAddress,
+      ethAssetHolderAddress,
+    }),
+    overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'})
+  );
+
   await a.dbAdmin().createDB();
   await b.dbAdmin().createDB();
   await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);

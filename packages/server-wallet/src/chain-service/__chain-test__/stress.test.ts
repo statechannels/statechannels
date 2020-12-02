@@ -9,6 +9,8 @@ import {ChainService} from '../chain-service';
 const pk = ETHERLIME_ACCOUNTS[0].privateKey;
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
+const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
@@ -24,12 +26,14 @@ const ethWallet = new Wallet(privateKey, provider);
 
 let chainService: ChainService;
 
-beforeEach(() => {
+beforeEach(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
-  chainService = new ChainService({
+  chainService = await ChainService.create({
     provider: rpcEndpoint,
     pk: privateKey,
     allowanceMode: 'MaxUint',
+    nitroAdjudicatorAddress,
+    ethAssetHolderAddress,
   });
 });
 

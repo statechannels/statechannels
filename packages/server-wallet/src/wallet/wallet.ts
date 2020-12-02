@@ -96,7 +96,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
   knex: Knex;
   store: Store;
-  chainService: ChainServiceInterface;
   objectiveManager: ObjectiveManager;
   logger: Logger;
 
@@ -111,7 +110,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   // protected constructor to force consumers to initialize wallet via Wallet.create(..)
   protected constructor(
-    chainService: ChainServiceInterface,
+    private readonly chainService: ChainServiceInterface,
     walletConfig: IncomingServerWalletConfig
   ) {
     super();
@@ -134,8 +133,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       }
       setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile);
     }
-
-    this.chainService = chainService;
 
     this.objectiveManager = ObjectiveManager.create({
       store: this.store,

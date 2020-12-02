@@ -1,3 +1,4 @@
+import {Address} from '@statechannels/wallet-core';
 import {Level} from 'pino';
 
 /**
@@ -84,6 +85,8 @@ export type IncomingServerWalletConfig = RequiredServerWalletConfig &
  */
 export type NetworkConfiguration = {
   chainNetworkID: number;
+  nitroAdjudicatorAddress?: Address;
+  ethAssetHolderAddress?: Address;
 };
 
 export type DeepPartial<T> = {

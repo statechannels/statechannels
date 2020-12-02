@@ -55,4 +55,6 @@ export type ChainServiceArgs = {
   pk: string;
   allowanceMode: AllowanceMode;
   pollingInterval?: number;
+  nitroAdjudicatorAddress: Address;
+  ethAssetHolderAddress: Address;
 };
