@@ -4,19 +4,26 @@ import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig, overwriteConfigWithEnvVars} from '../../config';
+import {defaultTestConfig} from '../../config';
 import {ChainService} from '../chain-service';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
-const config = overwriteConfigWithEnvVars(defaultTestConfig);
+const config = {
+  ...defaultTestConfig(),
+  networkConfiguration: {
+    ...defaultTestConfig().networkConfiguration,
+    // eslint-disable-next-line no-process-env
+    rpcEndpoint: process.env.RPC_ENDPOINT,
+  },
+};
 if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const {rpcEndpoint} = config.networkConfiguration;
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 // This is the private key for which ERC20 tokens are allocated on contract creation
-const ethWalletWithTokens = new Wallet(defaultTestConfig.ethereumPrivateKey, provider);
+const ethWalletWithTokens = new Wallet(config.ethereumPrivateKey, provider);
 
 // Try to use a different private key for every chain service instantiation to avoid nonce errors
 const privateKey = ETHERLIME_ACCOUNTS[3].privateKey;

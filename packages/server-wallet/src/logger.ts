@@ -13,7 +13,7 @@ export function createLogger(config: ServerWalletConfig): pino.Logger {
     ? pino({level: config.loggingConfiguration.logLevel}, destination)
     : pino({level: config.loggingConfiguration.logLevel})
   ).child({
-    dbName: getDatabaseConnectionConfig(config).dbName,
+    dbName: getDatabaseConnectionConfig(config).database,
     walletVersion: WALLET_VERSION,
   });
 }

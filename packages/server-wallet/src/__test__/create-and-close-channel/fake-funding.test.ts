@@ -12,10 +12,10 @@ import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 const a = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_A'})
+  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
 );
 const b = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_B'})
+  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_B'})
 );
 
 let channelId: string;

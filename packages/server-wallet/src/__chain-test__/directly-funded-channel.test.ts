@@ -7,27 +7,32 @@ import _ from 'lodash';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
-import {
-  defaultTestConfig,
-  overwriteConfigWithDatabaseConnection,
-  overwriteConfigWithEnvVars,
-} from '../config';
+import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../config';
 import {Wallet, SingleChannelOutput} from '../wallet';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-const config = overwriteConfigWithEnvVars(defaultTestConfig);
+const config = {
+  ...defaultTestConfig(),
+  networkConfiguration: {
+    ...defaultTestConfig().networkConfiguration,
+    // eslint-disable-next-line no-process-env
+    rpcEndpoint: process.env.RPC_ENDPOINT,
+    // eslint-disable-next-line no-process-env
+    chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID || '0'),
+  },
+};
 if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
 const {rpcEndpoint} = config.networkConfiguration;
 let provider: providers.JsonRpcProvider;
 const b = Wallet.create({
-  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_B'}),
+  ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
 });
 const a = Wallet.create({
-  ...overwriteConfigWithDatabaseConnection(config, {dbName: 'TEST_A'}),
+  ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'}),
   /* eslint-disable-next-line no-process-env */
   ethereumPrivateKey: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
 });

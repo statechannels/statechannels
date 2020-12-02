@@ -16,8 +16,9 @@ export type TestNetworkContext = {
 };
 
 export async function deploy(): Promise<TestNetworkContext> {
+  const {ethereumPrivateKey} = defaultTestConfig();
   // TODO: best way to configure this?
-  const deployer = new GanacheDeployer(8545, defaultTestConfig.ethereumPrivateKey);
+  const deployer = new GanacheDeployer(8545, ethereumPrivateKey);
   const {
     EthAssetHolderArtifact,
     TokenArtifact,
@@ -29,7 +30,7 @@ export async function deploy(): Promise<TestNetworkContext> {
   const ERC20_ADDRESS = await deployer.deploy(
     TokenArtifact as any,
     {},
-    new Wallet(defaultTestConfig.ethereumPrivateKey).address
+    new Wallet(ethereumPrivateKey).address
   );
   const ERC20_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     Erc20AssetHolderArtifact as any,

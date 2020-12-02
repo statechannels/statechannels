@@ -27,7 +27,7 @@ module.exports = {
   overrides: [
     {
       // process.env allowed in some files
-      files: ['src/config.ts', 'scripts/*', 'e2e-test/jest/*'],
+      files: ['scripts/*', 'e2e-test/jest/*'],
       rules: {'no-process-env': 'off'},
     },
     {

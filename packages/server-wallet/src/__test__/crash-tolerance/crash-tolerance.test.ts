@@ -12,9 +12,11 @@ import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
 
 const a = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_A'})
+  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
 );
-let b = Wallet.create(overwriteConfigWithDatabaseConnection(defaultTestConfig, {dbName: 'TEST_B'})); // Wallet that will "crash"
+let b = Wallet.create(
+  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_B'})
+); // Wallet that will "crash"
 
 let channelId: string;
 let participantA: Participant;

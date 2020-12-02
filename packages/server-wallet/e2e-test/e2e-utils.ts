@@ -18,12 +18,12 @@ import {
 } from '../src/config';
 
 export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
-  defaultTestConfig,
-  {dbName: 'payer'}
+  defaultTestConfig(),
+  {database: 'server_wallet_payer'}
 );
 export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
-  defaultTestConfig,
-  {dbName: 'receiver'}
+  defaultTestConfig(),
+  {database: 'server_wallet_receiver'}
 );
 
 import {PerformanceTimer} from './payer/timers';
@@ -37,7 +37,7 @@ export const triggerPayments = async (
   channelIds: string[],
   numPayments?: number
 ): Promise<void> => {
-  let args = ['start', '--database', 'payer', '--channels', ...channelIds];
+  let args = ['start', '--database', 'server_wallet_payer', '--channels', ...channelIds];
 
   if (numPayments) args = args.concat(['--numPayments', numPayments.toString()]);
 

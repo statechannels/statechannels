@@ -1,11 +1,12 @@
+/* eslint-disable no-process-env */
 import * as path from 'path';
 
 import {Config} from 'knex';
 
 import {
-  defaultTestConfig,
+  defaultConfig,
+  defaultDatabaseConfiguration,
   extractDBConfigFromServerWalletConfig,
-  overwriteConfigWithEnvVars,
   ServerWalletConfig,
 } from '../config';
 
@@ -48,6 +49,22 @@ export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> 
   };
 }
 
-export const {client, connection, debug, migrations, seeds, pool} = createKnexConfig(
-  overwriteConfigWithEnvVars(defaultTestConfig)
-);
+// We use env vars here so the migration can be easily controlled from the console
+const dbConnectionConfig = process.env.SERVER_URL || {
+  host: process.env.SERVER_HOST || defaultDatabaseConfiguration.connection.host,
+  port: Number(process.env.SERVER_PORT) || defaultDatabaseConfiguration.connection.port,
+  database: process.env.SERVER_DB_NAME || '',
+  user: process.env.SERVER_DB_USER || 'postgres', // Default to postgres so the command will work in most cases without specifying a user
+  password: process.env.SERVER_DB_PASSWORD,
+};
+
+const dbDebug = process.env.DEBUG_KNEX?.toLowerCase() === 'true' || false;
+
+export const {client, connection, debug, migrations, seeds, pool} = createKnexConfig({
+  ...defaultConfig,
+  databaseConfiguration: {debug: dbDebug, connection: dbConnectionConfig},
+  ethereumPrivateKey: '0x0',
+  networkConfiguration: {
+    chainNetworkID: 0,
+  },
+});

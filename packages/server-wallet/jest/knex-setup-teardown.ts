@@ -4,19 +4,13 @@ import _ from 'lodash';
 
 configureEnvVariables();
 
-import {
-  extractDBConfigFromServerWalletConfig,
-  defaultTestConfig,
-  overwriteConfigWithEnvVars,
-} from '../src/config';
+import {extractDBConfigFromServerWalletConfig, defaultTestConfig} from '../src/config';
 import {DBAdmin} from '../src/db-admin/db-admin';
 
 export let testKnex: Knex;
 
 beforeAll(async () => {
-  testKnex = Knex(
-    extractDBConfigFromServerWalletConfig(overwriteConfigWithEnvVars(defaultTestConfig))
-  );
+  testKnex = Knex(extractDBConfigFromServerWalletConfig(defaultTestConfig()));
   await new DBAdmin(testKnex).truncateDB();
 });
 

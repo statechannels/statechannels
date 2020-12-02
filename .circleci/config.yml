@@ -12,7 +12,7 @@ defaults: &defaults
   environment:
     NODE_ENV: test
 
-postgres: &postgres  
+postgres: &postgres
   <<: *defaults
   docker:
     - image: cimg/node:12.18.0
@@ -20,9 +20,7 @@ postgres: &postgres
   environment:
     NODE_ENV: test
     PSQL_ARGS: -p 5432 -h localhost -U postgres
-    SERVER_DB_USER: postgres
-    POSTGRES_USER: postgres     
-    AMOUNT_OF_WORKER_THREADS: 0
+    POSTGRES_USER: postgres
 
 # MACROS
 
@@ -143,8 +141,8 @@ jobs:
           name: wallet setup
           working_directory: packages/server-wallet
           command: |
-            yarn db:create $PSQL_ARGS
-            yarn db:migrate
+            SERVER_DB_NAME=server_wallet_test yarn db:create $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_test yarn db:migrate
       - run:
           name: test
           command: |
@@ -172,10 +170,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: server-wallet-e2e-test
           working_directory: packages/server-wallet
@@ -190,7 +188,7 @@ jobs:
       NODE_ENV: test
       PSQL_ARGS: -p 5432 -h localhost -U postgres
       SERVER_DB_USER: postgres
-      POSTGRES_USER: postgres     
+      POSTGRES_USER: postgres
       AMOUNT_OF_WORKER_THREADS: 6
       LOG_DESTINATION: /home/circleci/project/artifacts/wallet.log
     steps:
@@ -202,10 +200,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: server-wallet-stress-test
           working_directory: packages/server-wallet
@@ -225,10 +223,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: server-wallet-stress-test
           working_directory: packages/server-wallet
@@ -247,10 +245,10 @@ jobs:
           name: server-wallet setup (postgresql migrations)
           working_directory: packages/server-wallet
           command: |
-            createdb payer $PSQL_ARGS
-            SERVER_DB_NAME=payer yarn db:migrate
-            createdb receiver $PSQL_ARGS
-            SERVER_DB_NAME=receiver yarn db:migrate
+            createdb server_wallet_payer $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_payer yarn db:migrate
+            createdb server_wallet_receiver $PSQL_ARGS
+            SERVER_DB_NAME=server_wallet_receiver yarn db:migrate
       - run:
           name: profile
           working_directory: packages/server-wallet
