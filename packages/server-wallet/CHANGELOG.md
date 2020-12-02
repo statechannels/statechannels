@@ -3,6 +3,26 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.15.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.1...@statechannels/server-wallet@1.15.0) (2020-12-02)
+
+
+### Bug Fixes
+
+* export everything from wallet ([b4c9429](https://github.com/statechannels/statechannels/commit/b4c94290910554807730c2c5ca576b57f1e82a1b))
+* fix chain tests ([3519315](https://github.com/statechannels/statechannels/commit/35193150dced8f5c3cd2730325a6a7412eb1cda1))
+* remove env vars config ([f9289bb](https://github.com/statechannels/statechannels/commit/f9289bb0cddb0e6ef72376b9961b3b154638d958))
+* set chain id ([d1877c8](https://github.com/statechannels/statechannels/commit/d1877c868d9c091b66dca8ccc35373062b720a04))
+* use distinct database names ([57894fb](https://github.com/statechannels/statechannels/commit/57894fbe8c82f2d845af929a73b6a53afc3fc5b7))
+
+
+### Features
+
+* defaultTestConfig is now a function ([365651b](https://github.com/statechannels/statechannels/commit/365651b0df58ae30b11e7ac07cf98d5d59473c2c))
+
+
+
+
+
 ## [1.14.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.0...@statechannels/server-wallet@1.14.1) (2020-12-02)
 
 
