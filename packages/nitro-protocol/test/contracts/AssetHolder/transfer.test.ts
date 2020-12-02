@@ -10,6 +10,7 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
+  writeGasConsumption,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
@@ -119,7 +120,8 @@ describe('transferAll', () => {
             });
           }
         });
-        const {events: eventsFromTx} = await (await tx).wait();
+        const {events: eventsFromTx, gasUsed} = await (await tx).wait();
+        await writeGasConsumption('transfer.gas.md', name, gasUsed);
         expect(eventsFromTx).toMatchObject(expectedEvents);
         // Check new holdings
         Object.keys(heldAfter).forEach(async key =>
