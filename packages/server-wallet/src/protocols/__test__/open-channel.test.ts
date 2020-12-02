@@ -9,6 +9,7 @@ import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {DBOpenChannelObjective} from '../../models/objective';
+import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -58,7 +59,12 @@ describe(`funding phase`, () => {
       await crankAndAssert(obj, {fundsToDeposit: 5});
       // and then doesn't submit it a second time
       await crankAndAssert(obj, {fundsToDeposit: 0});
-    });
+      // but then let's "wait" for 10 minutes for the fund request to the chain service to get stale
+      await ChainServiceRequest.query(knex)
+        .findOne({channelId: testChan.channelId})
+        .patch({timestamp: new Date(Date.now() - requestTimeout - 1)});
+      await crankAndAssert(obj, {fundsToDeposit: 5});
+    }, 10_000);
     it(`submits a top-up if there's a partial deposit`, async () => {
       const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 2});
       await crankAndAssert(obj, {fundsToDeposit: 3});
