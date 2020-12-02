@@ -3,6 +3,8 @@ import {JSONSchema, Model, TransactionOrKnex} from 'objection';
 import {Bytes32} from '../type-aliases';
 import {chain_service_requests} from '../db/migrations/20201201095500_chain_service_requests';
 
+export const requestTimeout = 10 * 60 * 1_000;
+
 const ID_COLUMN = ['channelId', 'request'] as const;
 const REQUIRED_COLUMNS = [...ID_COLUMN, 'timestamp'] as const;
 
@@ -53,6 +55,6 @@ export class ChainServiceRequest extends Model implements RequiredColumns {
   }
 
   isValid(): boolean {
-    return new Date().getTime() - this.timestamp.getTime() < 10 * 60 * 1_000;
+    return new Date().getTime() - this.timestamp.getTime() < requestTimeout;
   }
 }
