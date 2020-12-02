@@ -1,6 +1,6 @@
 import NitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import TrivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
-import TokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
+import TokenArtifact from '../artifacts/contracts/test/Token.sol/Token.json';
 import AssetHolderArtifact from '../artifacts/contracts/AssetHolder.sol/AssetHolder.json';
 import Erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
 import EthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
