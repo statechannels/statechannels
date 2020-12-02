@@ -30,7 +30,6 @@ const config = {
   ...defaultTestConfig,
   networkConfiguration: {
     ...defaultTestConfig.networkConfiguration,
-    // eslint-disable-next-line no-process-env
     rpcEndpoint: process.env.RPC_ENDPOINT,
   },
 };
