@@ -246,7 +246,7 @@ export class Channel extends Model implements RequiredColumns {
       latestSignedByMe,
       latestNotSignedByMe,
       funding,
-      chainServiceRequests,
+      chainServiceRequests: chainServiceRequests ?? [],
       fundingStrategy,
       fundingLedgerChannelId,
       directFundingStatus: dfs,
