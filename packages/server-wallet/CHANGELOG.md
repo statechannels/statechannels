@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.14.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.0...@statechannels/server-wallet@1.14.1) (2020-12-02)
+
+
+### Bug Fixes
+
+* do not do turn number check for funding or closing stage channels ([a11788a](https://github.com/statechannels/statechannels/commit/a11788a25b117048f3421de8a50f22a61e6bb57f))
+
+
+
+
+
 # [1.14.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.13.0...@statechannels/server-wallet@1.14.0) (2020-12-01)
 
 

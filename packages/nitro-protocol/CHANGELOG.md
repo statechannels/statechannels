@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.11.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.11.0...@statechannels/nitro-protocol@0.11.1) (2020-12-02)
+
+**Note:** Version bump only for package @statechannels/nitro-protocol
+
+
+
+
+
 # [0.11.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.10.1...@statechannels/nitro-protocol@0.11.0) (2020-12-01)
 
 
