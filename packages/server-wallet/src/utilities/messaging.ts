@@ -1,8 +1,8 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {Payload} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {Notice} from '../protocols/actions';
+import {WireMessage} from '../type-aliases';
 import {WALLET_VERSION} from '../version';
 
 // Merges any messages to the same recipient into one message
@@ -19,43 +19,34 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
 
   const {sender} = outgoing[0].params;
 
-  const mergedOutgoing: Record<string, Payload> = {};
+  const messages = outgoing.map(o => o.params as WireMessage);
 
-  for (const notice of outgoing) {
-    const {recipient, data} = notice.params as {recipient: string; data: Payload};
-    if (!mergedOutgoing[recipient]) {
-      mergedOutgoing[recipient] = {walletVersion: WALLET_VERSION};
+  return _.map(
+    _.groupBy(messages, o => o.recipient),
+    (rcptMsgs, recipient) => {
+      const states = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.signedStates || []));
+      const requests = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.requests || []));
+      const objectives = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.objectives || []));
+
+      return {
+        method: 'MessageQueued' as const,
+        params: {
+          sender,
+          recipient,
+          data: {
+            walletVersion: WALLET_VERSION,
+            signedStates: states.length > 0 ? states : undefined,
+            requests: requests.length > 0 ? requests : undefined,
+            objectives: objectives.length > 0 ? objectives : undefined,
+          },
+        },
+      };
     }
-
-    const {signedStates, requests, objectives} = mergedOutgoing[recipient];
-
-    mergedOutgoing[recipient] = {
-      walletVersion: WALLET_VERSION,
-      signedStates: mergeProp(signedStates, data.signedStates),
-      requests: mergeProp(requests, data.requests),
-      objectives: mergeProp(objectives, data.objectives),
-    };
-  }
-  return Object.keys(mergedOutgoing).map(k => ({
-    params: {sender, recipient: k, data: mergedOutgoing[k]},
-    method: 'MessageQueued' as const,
-  }));
+  );
 }
 
-function mergeProp<T>(a: T[] | undefined, b: T[] | undefined): T[] | undefined {
-  if (a && b) {
-    return _.orderBy(
-      _.uniqWith(_.concat(a, b), _.isEqual),
-      ['channelId', 'turnNum'],
-      ['desc', 'asc']
-    );
-  } else if (a) {
-    return a;
-  } else if (b) {
-    return b;
-  } else {
-    return undefined;
-  }
+function uniqueAndSorted<T>(array: T[]): T[] {
+  return _.orderBy(_.uniqWith(array, _.isEqual), ['channelId', 'turnNum'], ['desc', 'asc']);
 }
 
 export function mergeChannelResults(channelResults: ChannelResult[]): ChannelResult[] {
