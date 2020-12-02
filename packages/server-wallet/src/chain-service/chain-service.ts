@@ -188,6 +188,18 @@ export class ChainService implements ChainServiceInterface {
   async concludeAndWithdraw(
     finalizationProof: SignedState[]
   ): Promise<providers.TransactionResponse | void> {
+    if (finalizationProof.length === 0) {
+      this.logger.warn('ChainService: concludeAndWithdraw was called with an empty array?');
+      return;
+    }
+
+    const channelId = getChannelId({
+      ...finalizationProof[0],
+      participants: finalizationProof[0].participants.map(p => p.signingAddress),
+    });
+
+    this.logger.info({channelId}, 'Attempting to conclude and withdraw funds from channel');
+
     const transactionRequest = {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
@@ -197,24 +209,30 @@ export class ChainService implements ChainServiceInterface {
 
     const captureExpectedErrors = async (reason: any) => {
       if (reason.error?.message.includes('Channel finalized')) {
+        this.logger.warn(
+          {channelId, determinedBy: 'Revert reason'},
+          'Transaction to conclude channel failed: channel is already finalized'
+        );
         return;
       }
-      const firstState = finalizationProof[0];
-      const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(
-        getChannelId({
-          ...firstState,
-          participants: firstState.participants.map(p => p.signingAddress),
-        })
+
+      const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
+
+      const {timestamp: latestBlockTimestamp} = await this.provider.getBlock(
+        await this.provider.getBlockNumber()
       );
 
-      const latestBlockTimestamp = (
-        await this.provider.getBlock(await this.provider.getBlockNumber())
-      ).timestamp;
       // Check if the channel has been finalized in the past
-      if (latestBlockTimestamp >= Number(finalizesAt)) return;
+      if (latestBlockTimestamp >= Number(finalizesAt)) {
+        this.logger.warn(
+          {channelId, determinedBy: 'Javascript check'},
+          'Transaction to conclude channel failed: channel is already finalized'
+        );
+      }
 
       throw reason;
     };
+
     const transactionResponse = this.sendTransaction(transactionRequest).catch(
       captureExpectedErrors
     );
@@ -234,6 +252,11 @@ export class ChainService implements ChainServiceInterface {
     assetHolders: Address[],
     subscriber: ChainEventSubscriberInterface
   ): void {
+    this.logger.info(
+      {channelId, assetHolders},
+      'Registering channel with ChainService monitor for Deposited and AssetTransferred events'
+    );
+
     assetHolders.map(async assetHolder => {
       const obs = this.getOrAddContractObservable(assetHolder);
       // Fetch the current contract holding, and emit as an event
@@ -248,10 +271,18 @@ export class ChainService implements ChainServiceInterface {
         next: async event => {
           switch (event.type) {
             case Deposited:
+              this.logger.debug(
+                {channelId, tx: event.ethersEvent?.transactionHash},
+                'Observed Deposited event on-chain; beginning to wait for confirmations'
+              );
               await this.waitForConfirmations(event.ethersEvent);
               subscriber.holdingUpdated(event);
               break;
             case AssetTransferred:
+              this.logger.debug(
+                {channelId, tx: event.ethersEvent?.transactionHash},
+                'Observed AssetTransferred event on-chain; beginning to wait for confirmations'
+              );
               await this.waitForConfirmations(event.ethersEvent);
               subscriber.assetTransferred(event);
               break;
@@ -296,6 +327,10 @@ export class ChainService implements ChainServiceInterface {
       // `tx.wait(n)` resolves after n blocks are mined that include the given transaction `tx`
       // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse
       await (await event.getTransaction()).wait(this.blockConfirmations + 1);
+      this.logger.debug(
+        {tx: event.transactionHash},
+        'Finished waiting for confirmations; considering transaction finalized'
+      );
       return;
     }
   }
