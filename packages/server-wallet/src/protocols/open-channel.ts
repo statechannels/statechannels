@@ -11,6 +11,7 @@ import {recordFunctionMetrics} from '../metrics';
 import {Channel} from '../models/channel';
 import {ChainServiceInterface} from '../chain-service';
 import {LedgerRequest} from '../models/ledger-request';
+import {ChainServiceRequest} from '../models/chain-service-request';
 
 import {ChannelState, stage, Stage} from './state';
 import {
@@ -101,7 +102,7 @@ export class ChannelOpener {
   }
 
   private async fundChannel(action: FundChannel, tx: Transaction): Promise<void> {
-    await this.store.addChainServiceRequest(action.channelId, 'fund', tx);
+    await ChainServiceRequest.insertOrUpdate(action.channelId, 'fund', tx);
     // Note, we are not awaiting transaction submission
     this.chainService.fundChannel({
       ...action,
@@ -224,7 +225,10 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
    */
 
   if (!app.supported) return false;
-  if (app.chainServiceRequests.indexOf('fund') > -1) return false;
+  const existingRequest = app.chainServiceRequests.find(csr => csr.request === 'fund');
+  if (existingRequest?.isValid()) {
+    return false;
+  }
   if (app.directFundingStatus !== 'ReadyToFund') return false;
 
   const myDestination = app.participants[app.myIndex].destination;

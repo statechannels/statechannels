@@ -20,18 +20,10 @@ import {
 import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
+import {ChainServiceRequest} from '../models/chain-service-request';
 
 import {ProtocolAction} from './actions';
 
-export type ChainServiceApi = 'fund' | 'withdraw' | 'challenge';
-/**
- * TODO: This should be a dictionary instead of a list.
- * The values of this dictionary should represent the parameter with which the api is called.
- * - fund: the value is the asset holder address
- * - withdraw: might not need a value?
- * - challenge: the value is the state with which challenge is called.
- */
-export type ChainServiceRequests = ChainServiceApi[];
 export type ChannelStateFunding = {
   amount: Uint256;
   transferredOut: {toAddress: Destination; amount: Uint256}[];
@@ -50,7 +42,7 @@ export type ChannelState = {
   latestSignedByMe?: SignedStateWithHash;
   latestNotSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => ChannelStateFunding;
-  chainServiceRequests: ChainServiceRequests;
+  chainServiceRequests: ChainServiceRequest[];
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
   directFundingStatus: FundingStatus;

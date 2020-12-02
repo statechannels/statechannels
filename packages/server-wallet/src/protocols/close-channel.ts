@@ -10,6 +10,7 @@ import {WalletResponse} from '../wallet/wallet-response';
 import {recordFunctionMetrics} from '../metrics';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
+import {ChainServiceRequest} from '../models/chain-service-request';
 
 import {ChannelState, stage, Stage} from './state';
 import {
@@ -116,7 +117,8 @@ export class ChannelCloser {
     protocolState: ProtocolState,
     tx: Transaction
   ): Promise<void> {
-    await this.store.addChainServiceRequest(action.channelId, 'withdraw', tx);
+    await ChainServiceRequest.insertOrUpdate(action.channelId, 'withdraw', tx);
+
     // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
     // Note, we are not awaiting transaction submission
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -161,8 +163,8 @@ const stageGuard = (guardStage: Stage) => (s: State | undefined): s is State =>
 
 const isFinal = stageGuard('Final');
 
-function everyoneSignedFinalState(ps: ProtocolState): boolean {
-  return (ps.app.support || []).every(isFinal) && isFinal(ps.app.latestSignedByMe);
+function everyoneSignedFinalState(app: ChannelState): boolean {
+  return (app.support || []).every(isFinal) && isFinal(app.latestSignedByMe);
 }
 
 // TODO: where is the corresponding logic for ledger channels?
@@ -208,7 +210,7 @@ const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
   !ps.ledgerDefundingRequested &&
   !ps.ledgerDefundingSucceeded &&
   !!ps.app.supported &&
-  everyoneSignedFinalState(ps) &&
+  everyoneSignedFinalState(ps.app) &&
   requestLedgerDefunding({
     channelId: ps.app.channelId,
     assetHolderAddress: checkThat(ps.app.latest.outcome, isSimpleAllocation).assetHolderAddress,
@@ -217,17 +219,17 @@ const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
-  everyoneSignedFinalState(ps) &&
+  everyoneSignedFinalState(ps.app) &&
   ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
   successfulWithdraw(ps) &&
   completeObjective({channelId: ps.app.channelId});
 
-function chainWithdraw(ps: ProtocolState): Withdraw | false {
+function chainWithdraw({app}: ProtocolState): Withdraw | false {
   return (
-    everyoneSignedFinalState(ps) &&
-    ps.app.fundingStrategy === 'Direct' &&
-    ps.app.chainServiceRequests.indexOf('withdraw') === -1 &&
-    withdraw(ps.app)
+    everyoneSignedFinalState(app) &&
+    app.fundingStrategy === 'Direct' &&
+    !app.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid() &&
+    withdraw(app)
   );
 }
 
