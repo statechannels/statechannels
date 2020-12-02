@@ -35,7 +35,6 @@
     "prettier-plugin-solidity": "1.0.0-alpha.58",
     "solc-0.7": "npm:solc@0.7.4",
     "solidity-docgen": "^0.5.9",
-    "solidoc": "https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd",
     "ts-jest": "26.4.4",
     "typescript": "4.1.2",
     "webpack": "4.44.2"
