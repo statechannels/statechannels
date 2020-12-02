@@ -4,7 +4,6 @@ import {
   SyncChannelParams,
   JoinChannelParams,
   CloseChannelParams,
-  ChannelResult,
   GetStateParams,
   Participant as APIParticipant,
   ChannelId,
@@ -29,8 +28,7 @@ import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
 
-import {Bytes32, Uint256} from '../type-aliases';
-import {Outgoing} from '../protocols/actions';
+import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import * as ProcessLedgerQueue from '../protocols/process-ledger-queue';
 import * as UpdateChannel from '../handlers/update-channel';
@@ -38,7 +36,6 @@ import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {isWalletError, PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {mergeChannelResults, mergeOutgoing} from '../utilities/messaging';
 import {
   ServerWalletConfig,
   extractDBConfigFromServerWalletConfig,
@@ -61,41 +58,23 @@ import {Channel} from '../models/channel';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
-import {WalletInterface} from './types';
+import {
+  SingleChannelOutput,
+  MultipleChannelOutput,
+  Output,
+  WalletInterface,
+  UpdateChannelFundingParams,
+  WalletEvent,
+} from './types';
 import {WalletResponse} from './wallet-response';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-export type SingleChannelOutput = {
-  outbox: Outgoing[];
-  channelResult: ChannelResult;
-};
-export type MultipleChannelOutput = {
-  outbox: Outgoing[];
-  channelResults: ChannelResult[];
-};
-export type Message = SingleChannelOutput | MultipleChannelOutput;
 
-type ChannelUpdatedEventName = 'channelUpdated';
-type ChannelUpdatedEvent = {
-  type: ChannelUpdatedEventName;
-  value: SingleChannelOutput;
-};
-
-export type WalletEvent = ChannelUpdatedEvent;
 type EventEmitterType = {
-  [key in ChannelUpdatedEvent['type']]: ChannelUpdatedEvent['value'];
+  [key in WalletEvent['type']]: WalletEvent['value'];
 };
-
-const isSingleChannelMessage = (message: Message): message is SingleChannelOutput =>
-  'channelResult' in message;
-
-export interface UpdateChannelFundingParams {
-  channelId: ChannelId;
-  assetHolderAddress?: CoreAddress;
-  amount: Uint256;
-}
 
 export class ConfigValidationError extends Error {
   constructor(public errors: ValidationErrorItem[]) {
@@ -187,15 +166,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     );
   }
 
-  public mergeMessages(messages: Message[]): MultipleChannelOutput {
-    const channelResults = mergeChannelResults(
-      messages
-        .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
-        .reduce((cr1, cr2) => cr1.concat(cr2))
-    );
-
-    const outbox = mergeOutgoing(messages.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
-    return {channelResults, outbox};
+  public mergeMessages(output: Output[]): MultipleChannelOutput {
+    return WalletResponse.mergeOutputs(output);
   }
 
   public async destroy(): Promise<void> {

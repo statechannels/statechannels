@@ -4,8 +4,9 @@ import _ from 'lodash';
 import {channelWithVars} from '../../models/__test__/fixtures/channel';
 import {Notice} from '../../protocols/actions';
 import {addHash} from '../../state-utils';
-import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
-import {mergeChannelResults, mergeOutgoing} from '../messaging';
+import {WalletResponse} from '../wallet-response';
+
+import {stateSignedBy} from './fixtures/states';
 
 describe('mergeChannelResults', () => {
   test('it merges channel results with multiple channel id entries', () => {
@@ -13,7 +14,11 @@ describe('mergeChannelResults', () => {
       channelWithVars({vars: [addHash(stateSignedBy()({turnNum: 1}))]}).channelResult,
       channelWithVars({vars: [addHash(stateSignedBy()({turnNum: 2}))]}).channelResult,
     ];
-    const result = mergeChannelResults(duplicateChannelResult);
+    const response = WalletResponse.initialize();
+    for (const channelResult of duplicateChannelResult) {
+      response.queueChannelResult(channelResult);
+    }
+    const result = response.channelResults;
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({turnNum: 2});
   });
@@ -23,8 +28,11 @@ describe('mergeChannelResults', () => {
       channelWithVars({channelId: '0x123'}).channelResult,
       channelWithVars({channelId: '0xabc'}).channelResult,
     ];
-
-    const result = mergeChannelResults(duplicateChannelResult);
+    const response = WalletResponse.initialize();
+    for (const channelResult of duplicateChannelResult) {
+      response.queueChannelResult(channelResult);
+    }
+    const result = response.channelResults;
     expect(result).toHaveLength(2);
   });
 });
@@ -46,7 +54,7 @@ describe('mergeOutgoing', () => {
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state2]}},
     };
 
-    const merged = mergeOutgoing([message2, message1]);
+    const merged = WalletResponse.mergeOutgoing([message2, message1]);
     expect(merged).toHaveLength(1);
 
     expect((merged[0] as any).params.data.signedStates).toHaveLength(2);
@@ -64,7 +72,7 @@ describe('mergeOutgoing', () => {
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state]}},
     };
     // We perform a deep clone to avoid things passing due to object references being the same
-    const merged = mergeOutgoing([message, _.cloneDeep(message)]);
+    const merged = WalletResponse.mergeOutgoing([message, _.cloneDeep(message)]);
     expect(merged).toHaveLength(1);
 
     expect((merged[0] as any).params.data.signedStates).toHaveLength(1);

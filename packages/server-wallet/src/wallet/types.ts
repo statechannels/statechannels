@@ -5,17 +5,37 @@ import {
   CloseChannelParams,
   GetStateParams,
   ChannelId,
+  ChannelResult,
 } from '@statechannels/client-api-schema';
-import {Participant} from '@statechannels/wallet-core';
+import {Participant, Address as CoreAddress} from '@statechannels/wallet-core';
 
-import {Bytes32} from '../type-aliases';
+import {Outgoing} from '../protocols/actions';
+import {Bytes32, Uint256} from '../type-aliases';
 
-import {
-  MultipleChannelOutput,
-  SingleChannelOutput,
-  UpdateChannelFundingParams,
-  Message,
-} from './wallet';
+export interface UpdateChannelFundingParams {
+  channelId: ChannelId;
+  assetHolderAddress?: CoreAddress;
+  amount: Uint256;
+}
+
+export type SingleChannelOutput = {
+  outbox: Outgoing[];
+  channelResult: ChannelResult;
+};
+export type MultipleChannelOutput = {
+  outbox: Outgoing[];
+  channelResults: ChannelResult[];
+};
+
+export type Output = SingleChannelOutput | MultipleChannelOutput;
+
+type ChannelUpdatedEventName = 'channelUpdated';
+type ChannelUpdatedEvent = {
+  type: ChannelUpdatedEventName;
+  value: SingleChannelOutput;
+};
+
+export type WalletEvent = ChannelUpdatedEvent;
 
 export type WalletInterface = {
   // App utilities
@@ -42,5 +62,5 @@ export type WalletInterface = {
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 
-  mergeMessages(messages: Message[]): MultipleChannelOutput;
+  mergeMessages(messages: Output[]): MultipleChannelOutput;
 };
