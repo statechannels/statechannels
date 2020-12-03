@@ -3,6 +3,8 @@ import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
 import {protocol} from '../close-channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {SignState} from '../actions';
+import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
+import {channel} from '../../models/__test__/fixtures/channel';
 
 import {applicationProtocolState} from './fixtures/protocol-state';
 
@@ -16,25 +18,39 @@ const runningState = {outcome, turnNum: 7, participants};
 const closingState2 = {outcome, turnNum: 8, isFinal: true, participants};
 
 const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
-
-test.each`
-  supported        | latestSignedByMe | latest           | action                      | cond                                                                  | result
-  ${postFundState} | ${postFundState} | ${postFundState} | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
-  ${closingState}  | ${postFundState} | ${closingState}  | ${signState(closingState)}  | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
-  ${closingState2} | ${runningState}  | ${closingState2} | ${signState(closingState2)} | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
-`('$result $cond', ({supported, latest, latestSignedByMe, action}) => {
-  const ps = applicationProtocolState({app: {supported, latest, latestSignedByMe}});
-  expect(protocol(ps)).toMatchObject(action);
+const withdrawAction = {
+  type: 'Withdraw',
+  channelId: channel().channelId,
+};
+const validCSR = ChainServiceRequest.fromJson({
+  channelId: 0,
+  request: 'withdraw',
+  timestamp: new Date(),
 });
 
-test('when I have signed a final state, direct funding', () => {
+const staleCSR = ChainServiceRequest.fromJson({
+  channelId: 0,
+  request: 'withdraw',
+  timestamp: new Date(Date.now() - requestTimeout - 1),
+});
+
+test.each`
+  supported        | latestSignedByMe | latest           | chainServiceRequests | action                      | cond                                                                  | result
+  ${postFundState} | ${postFundState} | ${postFundState} | ${undefined}         | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
+  ${closingState}  | ${postFundState} | ${closingState}  | ${undefined}         | ${signState(closingState)}  | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
+  ${closingState2} | ${runningState}  | ${closingState2} | ${undefined}         | ${signState(closingState2)} | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
+  ${closingState}  | ${closingState}  | ${closingState}  | ${undefined}         | ${withdrawAction}           | ${'when the channel is closed'}                                       | ${'submits withdraw transaction'}
+  ${closingState}  | ${closingState}  | ${closingState}  | ${[validCSR]}        | ${undefined}                | ${'when the channel is closed + valid chain service request'}         | ${'no action'}
+  ${closingState}  | ${closingState}  | ${closingState}  | ${[staleCSR]}        | ${withdrawAction}           | ${'when the channel is closed + stale chain service request'}         | ${'sumbits a withdraw transaction'}
+`('$result $cond', ({supported, latest, latestSignedByMe, chainServiceRequests, action}) => {
   const ps = applicationProtocolState({
-    app: {supported: closingState, latest: closingState, latestSignedByMe: closingState},
+    app: {supported, latest, latestSignedByMe, chainServiceRequests},
   });
-  expect(protocol(ps)).toMatchObject({
-    type: 'Withdraw',
-    channelId: ps.app.channelId,
-  });
+  if (action) {
+    expect(protocol(ps)).toMatchObject(action);
+  } else {
+    expect(protocol(ps)).toBeUndefined();
+  }
 });
 
 test('when I have signed a final state, unfunded', () => {
