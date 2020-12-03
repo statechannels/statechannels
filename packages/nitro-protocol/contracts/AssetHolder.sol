@@ -139,6 +139,51 @@ contract AssetHolder is IAssetHolder {
     // Internal methods
     // **************
 
+    function _computeNewOutcome(
+        uint256 initialHoldings,
+        Outcome.AllocationItem[] memory allocation,
+        uint256[] memory indices
+    )
+        internal
+        pure
+        returns (
+            Outcome.AllocationItem[] memory newAllocation,
+            bool safeToDelete,
+            uint256[] memory payouts,
+            uint256 totalPayouts
+        )
+    {
+        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length); // [] means "all"; values default to 0
+        totalPayouts = 0;
+        newAllocation = new Outcome.AllocationItem[](allocation.length);
+        safeToDelete = true;
+        uint256 surplus = initialHoldings; // virtual funds available during calculation
+        uint256 k = 0; // indexes indices
+
+        // loop over allocations and decrease surplus
+        for (uint256 i = 0; i < allocation.length; i++) {
+            newAllocation[i].destination = allocation[i].destination;
+            uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus)
+                ? surplus
+                : allocation[i].amount;
+            if ((indices.length == 0) || (indices[k] == i)) {
+                // found a match
+                // reduce the current allocationItem.amount
+                newAllocation[i].amount -= minimumOfAmountAndSurplus;
+                // increase the relevant payout
+                payouts[k] = minimumOfAmountAndSurplus;
+                totalPayouts += minimumOfAmountAndSurplus;
+                // move on to the next supplied index
+                ++k;
+            } else {
+                newAllocation[i].amount = allocation[i].amount;
+                if (newAllocation[i].amount != 0) safeToDelete = false;
+            }
+            // decrease surplus by the current amount if possible, else surplus goes to zero
+            surplus -= minimumOfAmountAndSurplus;
+        }
+    }
+
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
@@ -156,48 +201,19 @@ contract AssetHolder is IAssetHolder {
             (Outcome.AllocationItem[])
         );
         uint256 initialHoldings = holdings[fromChannelId];
-        uint256 surplus = initialHoldings; // virtual funds available during calculation
-        uint256 k = 0; // indexes indices
-        uint256[] memory payouts = new uint256[](
-            indices.length > 0 ? indices.length : allocation.length
-        ); // [] means "all"; values default to 0
-        uint256 totalPayouts = 0;
 
-        // TODO
-        // factor out into pure function so that we can compute changes to outcomes off chain
-        // this is important because clients need to track the outcome as it changes
-        // and emitting that information in an event will be too expensive.
-
-        // loop over allocations and decrease surplus
-        for (uint256 i = 0; i < allocation.length; i++) {
-            if ((indices.length > 0) && (k >= indices.length)) {
-                break; // we have finished with the supplied indices
-            }
-            if (surplus <= 0) {
-                break; // we ran out of funds
-            }
-            uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus)
-                ? surplus
-                : allocation[i].amount;
-            if ((indices.length == 0) || (indices[k] == i)) {
-                // found a match
-                // reduce the current allocationItem.amount
-                allocation[i].amount -= minimumOfAmountAndSurplus;
-                // increase the relevant payout
-                payouts[k] = minimumOfAmountAndSurplus;
-                totalPayouts += minimumOfAmountAndSurplus;
-                // move on to the next supplied index
-                ++k;
-            }
-            // decrease surplus by the current amount if possible, else surplus goes to zero
-            surplus -= minimumOfAmountAndSurplus;
-        }
+        (
+            Outcome.AllocationItem[] memory newAllocation,
+            bool safeToDelete,
+            uint256[] memory payouts,
+            uint256 totalPayouts
+        ) = _computeNewOutcome(initialHoldings, allocation, indices);
 
         // *******
         // EFFECTS
         // *******
 
-        uint256 newHoldings = initialHoldings - totalPayouts;
+        uint256 newHoldings = initialHoldings.sub(totalPayouts);
 
         if (newHoldings == 0) {
             delete holdings[fromChannelId];
@@ -205,15 +221,18 @@ contract AssetHolder is IAssetHolder {
             holdings[fromChannelId] = newHoldings;
         }
 
-        // replace hash (even if it only contains allocation[*].amount = 0, which we could delete in principle)
-        assetOutcomeHashes[fromChannelId] = keccak256(
-            abi.encode(
-                Outcome.AssetOutcome(
-                    uint8(Outcome.AssetOutcomeType.Allocation),
-                    abi.encode(allocation)
+        if (safeToDelete) {
+            delete assetOutcomeHashes[fromChannelId];
+        } else {
+            assetOutcomeHashes[fromChannelId] = keccak256(
+                abi.encode(
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        abi.encode(newAllocation)
+                    )
                 )
-            )
-        );
+            );
+        }
 
         // *******
         // INTERACTIONS
