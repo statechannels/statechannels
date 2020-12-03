@@ -139,7 +139,7 @@ contract AssetHolder is IAssetHolder {
     // Internal methods
     // **************
 
-    function _computeNewOutcome(
+    function _computeNewAllocation(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
@@ -209,7 +209,7 @@ contract AssetHolder is IAssetHolder {
             bool safeToDelete,
             uint256[] memory payouts,
             uint256 totalPayouts
-        ) = _computeNewOutcome(initialHoldings, allocation, indices);
+        ) = _computeNewAllocation(initialHoldings, allocation, indices);
 
         // *******
         // EFFECTS
