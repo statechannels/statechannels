@@ -18,8 +18,8 @@ let response: WalletResponse;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig.metricsConfiguration.timingMetrics,
-    defaultTestConfig.skipEvmValidation,
+    defaultTestConfig().metricsConfiguration.timingMetrics,
+    defaultTestConfig().skipEvmValidation,
     '0'
   );
   await store.dbAdmin().truncateDB();
