@@ -220,8 +220,8 @@ contract AssetHolder is IAssetHolder {
         // *******
 
         for (uint256 j = 0; j < payouts.length; j++) {
-            bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
             if (payouts[j] > 0) {
+                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
                     _transferAsset(_bytes32ToAddress(destination), payouts[j]);
