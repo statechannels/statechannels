@@ -48,7 +48,7 @@ export const databaseConfigurationSchema = joi.object({
 
 export const metricsConfigurationSchema = joi.object({
   timingMetrics: joi.boolean().required(),
-  metricsOutputFile: joi.string().optional(),
+  metricsOutputFile: joi.string().when('timingMetrics', {is: true, then: joi.string().required()}),
 });
 
 export const loggingConfigurationSchema = joi.object({
