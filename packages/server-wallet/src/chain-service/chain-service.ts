@@ -171,8 +171,6 @@ export class ChainService implements ChainServiceInterface {
 
     const tx = await this.sendTransaction(depositRequest);
 
-    if (!tx) throw new Error('fundChannel failed to submit deposit transaction');
-
     this.logger.info(
       {
         channelId: arg.channelId,
