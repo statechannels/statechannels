@@ -170,7 +170,7 @@ contract AssetHolder is IAssetHolder {
 
         // loop over allocations and decrease surplus
         for (uint256 i = 0; i < allocation.length; i++) {
-            if (indices.length > 0 && k >= indices.length) {
+            if ((indices.length > 0) && (k >= indices.length)) {
                 break; // we have finished with the supplied indices
             }
             if (surplus <= 0) {
@@ -179,7 +179,7 @@ contract AssetHolder is IAssetHolder {
             uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus)
                 ? surplus
                 : allocation[i].amount;
-            if (indices[k] == i || indices.length == 0) {
+            if ((indices.length == 0) || (indices[k] == i)) {
                 // found a match
                 // reduce the current allocationItem.amount
                 allocation[i].amount -= minimumOfAmountAndSurplus;
@@ -220,7 +220,7 @@ contract AssetHolder is IAssetHolder {
         // *******
 
         for (uint256 j = 0; j < payouts.length; j++) {
-            bytes32 destination = allocation[indices.length > 0 ? indices[j]: j].destination;
+            bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
             if (payouts[j] > 0) {
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
