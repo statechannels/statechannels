@@ -43,6 +43,7 @@ import {
   extractDBConfigFromServerWalletConfig,
   defaultConfig,
   IncomingServerWalletConfig,
+  validateServerWalletConfig,
 } from '../config';
 import {
   ChainServiceInterface,
@@ -112,9 +113,24 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   // protected constructor to force consumers to initialize wallet via Wallet.create(..)
   protected constructor(walletConfig: IncomingServerWalletConfig) {
     super();
-    this.walletConfig = _.assign({}, defaultConfig, walletConfig);
+
+    const populatedConfig = _.assign({}, defaultConfig, walletConfig);
+    // Even though the config hasn't been validated we attempt to create a logger
+    // This allows us to log out any config validation errors
+    this.logger = createLogger(populatedConfig);
+
+    const {errors, valid} = validateServerWalletConfig(populatedConfig);
+
+    if (!valid) {
+      errors.forEach(error =>
+        this.logger.error({error}, `Validation error occured ${error.message}`)
+      );
+      throw new Error('Invalid configuration');
+    }
+    this.walletConfig = populatedConfig;
+
     this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
-    this.logger = createLogger({...this.walletConfig});
+
     this.store = new Store(
       this.knex,
       this.walletConfig.metricsConfiguration.timingMetrics,
@@ -123,13 +139,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       this.logger
     );
 
-    // TODO: This should probably be in validation
     // set up timing metrics
     if (this.walletConfig.metricsConfiguration.timingMetrics) {
-      if (!this.walletConfig.metricsConfiguration.metricsOutputFile) {
-        throw Error('You must define a metrics output file');
-      }
-      setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile);
+      // Validation ensures that the metricsOutputFile will be defined
+      setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile as string);
     }
 
     if (this.walletConfig.chainServiceConfiguration.attachChainService) {
