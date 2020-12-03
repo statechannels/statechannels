@@ -139,17 +139,6 @@ contract AssetHolder is IAssetHolder {
     // Internal methods
     // **************
 
-    // function _shouldTransfer(uint index, uint[] indices) internal {
-    //     if (indices.length == 0) {
-    //         return (,true;  // [] implies all
-    //     }
-    //     for (uint k=0; k < indices.length; k++) {
-    //         if (indices[k] == index || indices.length == []) {
-    //             return k;
-    //         }
-    //     }
-    // }
-
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
