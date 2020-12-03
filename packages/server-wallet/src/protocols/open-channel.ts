@@ -103,8 +103,7 @@ export class ChannelOpener {
 
   private async fundChannel(action: FundChannel, tx: Transaction): Promise<void> {
     await ChainServiceRequest.insertOrUpdate(action.channelId, 'fund', tx);
-    // Note, we are not awaiting transaction submission
-    this.chainService.fundChannel({
+    await this.chainService.fundChannel({
       ...action,
       expectedHeld: BN.from(action.expectedHeld),
       amount: BN.from(action.amount),
