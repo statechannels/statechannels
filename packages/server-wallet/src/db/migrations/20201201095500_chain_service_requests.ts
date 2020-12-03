@@ -23,7 +23,7 @@ export async function up(knex: Knex): Promise<any> {
     ALTER TABLE ${chainServiceRequests}
     ADD CONSTRAINT ${requestsConstraint}
     CHECK (
-      request = 'fund' OR request = 'withdraw' OR request = 'challenge'
+      array_position (ARRAY['fund', 'withdraw', 'challenge']::VARCHAR[], request ) IS NOT NULL
     )
   `);
 }
