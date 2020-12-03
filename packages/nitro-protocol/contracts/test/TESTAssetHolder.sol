@@ -50,7 +50,7 @@ contract TESTAssetHolder is AssetHolder {
         external
         override
     {
-        _transferAll(channelId, allocationBytes);
+        _transfer(channelId, allocationBytes, new uint[](0));
     }
 
     /**
