@@ -71,7 +71,7 @@ describe(`funding phase`, () => {
         .patch({timestamp: new Date(Date.now() - requestTimeout - 10)});
       // we should not see a third request to the chain service as the wallet retries each request just once
       await crankAndAssert(obj, {fundsToDeposit: 0});
-    }, 10_000);
+    });
     it(`submits a top-up if there's a partial deposit`, async () => {
       const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 2});
       await crankAndAssert(obj, {fundsToDeposit: 3});
