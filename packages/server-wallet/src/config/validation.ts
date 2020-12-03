@@ -15,7 +15,10 @@ export const databaseObjectConfigurationSchema = joi.object({
   database: joi.string().required(),
   host: joi.string().required(),
   user: joi.string().required(),
-  password: joi.string().optional(),
+  password: joi
+    .string()
+    .allow('')
+    .optional(),
   port: joi
     .number()
     .integer()
