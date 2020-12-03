@@ -532,8 +532,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     const response = WalletResponse.initialize();
 
-    const singleAppUpdater = SingleAppUpdater.create(this.store);
-    await singleAppUpdater.update(wirePayload, response);
+    await SingleAppUpdater.create(this.store).update(wirePayload, response);
 
     return response.singleChannelOutput();
   }
