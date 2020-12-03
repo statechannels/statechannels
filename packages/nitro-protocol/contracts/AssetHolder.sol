@@ -156,7 +156,7 @@ contract AssetHolder is IAssetHolder {
         payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length); // [] means "all"; values default to 0
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
-        safeToDelete = true;
+        safeToDelete = true; // switched to false if there is an item with amount > 0
         uint256 surplus = initialHoldings; // virtual funds available during calculation
         uint256 k = 0; // indexes indices
 
@@ -168,7 +168,7 @@ contract AssetHolder is IAssetHolder {
             uint256 affordsForDestination = (allocation[i].amount > surplus)
                 ? surplus
                 : allocation[i].amount; // min(amount,surplus)
-            if ((indices.length == 0) || (indices[k] == i)) {
+            if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
                 // found a match
                 // reduce the current allocationItem.amount
                 newAllocation[i].amount = allocation[i].amount - affordsForDestination;
