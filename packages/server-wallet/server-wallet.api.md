@@ -18,6 +18,7 @@ import EventEmitter from 'eventemitter3';
 import { FundingStatus } from '@statechannels/client-api-schema';
 import { FundingStrategy } from '@statechannels/client-api-schema';
 import { GetStateParams } from '@statechannels/client-api-schema';
+import joi from 'joi';
 import { JoinChannelParams } from '@statechannels/client-api-schema';
 import { JSONSchema } from 'objection';
 import Knex from 'knex';
@@ -50,6 +51,7 @@ import { Transaction } from 'objection';
 import { TransactionOrKnex } from 'objection';
 import { Uint256 as Uint256_2 } from '@statechannels/wallet-core';
 import { UpdateChannelParams } from '@statechannels/client-api-schema';
+import { ValidationErrorItem } from 'joi';
 
 // Warning: (ae-forgotten-export) The symbol "ChainServiceArgs" needs to be exported by the entry point index.d.ts
 //
@@ -62,13 +64,25 @@ export type ChainServiceConfiguration = {
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
 
 // @public (undocumented)
+export const databaseConfigurationSchema: joi.ObjectSchema<any>;
+
+// @public (undocumented)
 export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration & Partial<OptionalConnectionConfiguration>;
+
+// @public (undocumented)
+export const databaseConnectionConfigurationSchema: joi.AlternativesSchema;
+
+// @public (undocumented)
+export const databaseObjectConfigurationSchema: joi.ObjectSchema<any>;
 
 // @public (undocumented)
 export type DatabasePoolConfiguration = {
     max?: number;
     min?: number;
 };
+
+// @public (undocumented)
+export const databasePoolConfigurationSchema: joi.ObjectSchema<any>;
 
 // @public (undocumented)
 export type DeepPartial<T> = {
@@ -134,6 +148,9 @@ export type LoggingConfiguration = {
     logDestination: string;
 };
 
+// @public (undocumented)
+export const loggingConfigurationSchema: joi.ObjectSchema<any>;
+
 export { Message }
 
 // @public (undocumented)
@@ -141,6 +158,9 @@ export type MetricsConfiguration = {
     timingMetrics: boolean;
     metricsOutputFile?: string;
 };
+
+// @public (undocumented)
+export const metricsConfigurationSchema: joi.ObjectSchema<any>;
 
 // @public (undocumented)
 export type MultipleChannelOutput = {
@@ -152,6 +172,9 @@ export type MultipleChannelOutput = {
 export type NetworkConfiguration = {
     chainNetworkID: number;
 };
+
+// @public (undocumented)
+export const networkConfigurationSchema: joi.ObjectSchema<any>;
 
 // @public (undocumented)
 export type OptionalConnectionConfiguration = {
@@ -214,9 +237,19 @@ export type RequiredServerWalletConfig = {
 export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWalletConfig;
 
 // @public (undocumented)
+export const serverWalletConfigSchema: joi.ObjectSchema<any>;
+
+// @public (undocumented)
 export type SingleChannelOutput = {
     outbox: Outgoing[];
     channelResult: ChannelResult;
+};
+
+// @public (undocumented)
+export function validateServerWalletConfig(config: Record<string, any>): {
+    valid: boolean;
+    value: ServerWalletConfig | undefined;
+    errors: ValidationErrorItem[];
 };
 
 // Warning: (ae-forgotten-export) The symbol "SingleThreadedWallet" needs to be exported by the entry point index.d.ts
