@@ -186,7 +186,7 @@ export class ChainService implements ChainServiceInterface {
   async concludeAndWithdraw(
     finalizationProof: SignedState[]
   ): Promise<providers.TransactionResponse | void> {
-    if (finalizationProof.length === 0) {
+    if (!finalizationProof.length) {
       this.logger.warn('ChainService: concludeAndWithdraw was called with an empty array?');
       return;
     }
@@ -226,6 +226,7 @@ export class ChainService implements ChainServiceInterface {
           {channelId, determinedBy: 'Javascript check'},
           'Transaction to conclude channel failed: channel is already finalized'
         );
+        return;
       }
 
       throw reason;
