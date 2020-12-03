@@ -76,7 +76,7 @@ export default class ReceiverController {
     const {
       channelResult,
       outbox: [maybeSyncStateResponse],
-    } = await this.time('push message', async () => this.wallet.pushUpdate(message));
+    } = await this.time('push update', async () => this.wallet.pushUpdate(message));
 
     if (maybeSyncStateResponse) {
       const syncResponse = maybeSyncStateResponse.params.data as Payload;
