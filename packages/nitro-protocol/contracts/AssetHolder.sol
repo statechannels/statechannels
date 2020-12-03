@@ -162,25 +162,27 @@ contract AssetHolder is IAssetHolder {
 
         // loop over allocations and decrease surplus
         for (uint256 i = 0; i < allocation.length; i++) {
+            // copy destination part
             newAllocation[i].destination = allocation[i].destination;
-            uint256 minimumOfAmountAndSurplus = (allocation[i].amount > surplus)
+            // compute new amount part
+            uint256 affordsForDestination = (allocation[i].amount > surplus)
                 ? surplus
-                : allocation[i].amount;
+                : allocation[i].amount; // min(amount,surplus)
             if ((indices.length == 0) || (indices[k] == i)) {
                 // found a match
                 // reduce the current allocationItem.amount
-                newAllocation[i].amount -= minimumOfAmountAndSurplus;
+                newAllocation[i].amount = allocation[i].amount - affordsForDestination;
                 // increase the relevant payout
-                payouts[k] = minimumOfAmountAndSurplus;
-                totalPayouts += minimumOfAmountAndSurplus;
+                payouts[k] = affordsForDestination;
+                totalPayouts += affordsForDestination;
                 // move on to the next supplied index
                 ++k;
             } else {
                 newAllocation[i].amount = allocation[i].amount;
-                if (newAllocation[i].amount != 0) safeToDelete = false;
             }
+            if (newAllocation[i].amount != 0) safeToDelete = false;
             // decrease surplus by the current amount if possible, else surplus goes to zero
-            surplus -= minimumOfAmountAndSurplus;
+            surplus -= affordsForDestination;
         }
     }
 
