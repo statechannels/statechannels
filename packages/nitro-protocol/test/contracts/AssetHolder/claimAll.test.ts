@@ -18,6 +18,8 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 
+jest.setTimeout(10_000);
+
 const provider = getTestProvider();
 const addresses = {
   // Channels
