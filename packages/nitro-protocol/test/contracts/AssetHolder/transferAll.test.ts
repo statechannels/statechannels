@@ -44,16 +44,16 @@ describe('transferAll', () => {
   it.each`
     name                              | heldBefore | setOutcome      | newOutcome      | heldAfter             | payouts         | events          | reason
     ${' 0. outcome not set         '} | ${{c: 1}}  | ${{}}           | ${{}}           | ${{}}                 | ${{A: 1}}       | ${{A: 1}}       | ${reason0}
-    ${' 1. funded          -> 1 EOA'} | ${{c: 1}}  | ${{A: 1}}       | ${{A: 0}}       | ${{}}                 | ${{A: 1}}       | ${{A: 1}}       | ${undefined}
-    ${' 2. overfunded      -> 1 EOA'} | ${{c: 2}}  | ${{A: 1}}       | ${{A: 0}}       | ${{c: 1}}             | ${{A: 1}}       | ${{A: 1}}       | ${undefined}
+    ${' 1. funded          -> 1 EOA'} | ${{c: 1}}  | ${{A: 1}}       | ${{}}           | ${{}}                 | ${{A: 1}}       | ${{A: 1}}       | ${undefined}
+    ${' 2. overfunded      -> 1 EOA'} | ${{c: 2}}  | ${{A: 1}}       | ${{}}           | ${{c: 1}}             | ${{A: 1}}       | ${{A: 1}}       | ${undefined}
     ${' 3. underfunded     -> 1 EOA'} | ${{c: 1}}  | ${{A: 2}}       | ${{A: 1}}       | ${{}}                 | ${{A: 1}}       | ${{A: 1}}       | ${undefined}
-    ${' 4. funded      -> 1 channel'} | ${{c: 1}}  | ${{C: 1}}       | ${{C: 0}}       | ${{c: 0, C: 1}}       | ${{}}           | ${{C: 1}}       | ${undefined}
-    ${' 5. overfunded  -> 1 channel'} | ${{c: 2}}  | ${{C: 1}}       | ${{C: 0}}       | ${{c: 1, C: 1}}       | ${{}}           | ${{C: 1}}       | ${undefined}
+    ${' 4. funded      -> 1 channel'} | ${{c: 1}}  | ${{C: 1}}       | ${{}}           | ${{c: 0, C: 1}}       | ${{}}           | ${{C: 1}}       | ${undefined}
+    ${' 5. overfunded  -> 1 channel'} | ${{c: 2}}  | ${{C: 1}}       | ${{}}           | ${{c: 1, C: 1}}       | ${{}}           | ${{C: 1}}       | ${undefined}
     ${' 6. underfunded -> 1 channel'} | ${{c: 1}}  | ${{C: 2}}       | ${{C: 1}}       | ${{c: 0, C: 1}}       | ${{}}           | ${{C: 1}}       | ${undefined}
-    ${' 7. -> 2 EOA       full/full'} | ${{c: 2}}  | ${{A: 1, B: 1}} | ${{A: 0, B: 0}} | ${{c: 0}}             | ${{A: 1, B: 1}} | ${{A: 1, B: 1}} | ${undefined}
+    ${' 7. -> 2 EOA       full/full'} | ${{c: 2}}  | ${{A: 1, B: 1}} | ${{}}           | ${{c: 0}}             | ${{A: 1, B: 1}} | ${{A: 1, B: 1}} | ${undefined}
     ${' 8. -> 2 EOA         full/no'} | ${{c: 1}}  | ${{A: 1, B: 1}} | ${{A: 0, B: 1}} | ${{c: 0}}             | ${{A: 1}}       | ${{A: 1}}       | ${undefined}
     ${' 9. -> 2 EOA    full/partial'} | ${{c: 3}}  | ${{A: 2, B: 2}} | ${{A: 0, B: 1}} | ${{c: 0}}             | ${{A: 2, B: 1}} | ${{A: 2, B: 1}} | ${undefined}
-    ${'10. -> 2 chan      full/full'} | ${{c: 2}}  | ${{C: 1, X: 1}} | ${{C: 0, X: 0}} | ${{c: 0, C: 1, X: 1}} | ${{}}           | ${{C: 1, X: 1}} | ${undefined}
+    ${'10. -> 2 chan      full/full'} | ${{c: 2}}  | ${{C: 1, X: 1}} | ${{}}           | ${{c: 0, C: 1, X: 1}} | ${{}}           | ${{C: 1, X: 1}} | ${undefined}
     ${'11. -> 2 chan        full/no'} | ${{c: 1}}  | ${{C: 1, X: 1}} | ${{C: 0, X: 1}} | ${{c: 0, C: 1, X: 0}} | ${{}}           | ${{C: 1}}       | ${undefined}
     ${'12. -> 2 chan   full/partial'} | ${{c: 3}}  | ${{C: 2, X: 2}} | ${{C: 0, X: 1}} | ${{c: 0, C: 2, X: 1}} | ${{}}           | ${{C: 2, X: 1}} | ${undefined}
   `(
