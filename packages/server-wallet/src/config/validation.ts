@@ -11,7 +11,7 @@ const validateConnectionString = (connection: string) => {
   }
   return parsed;
 };
-export const databaseObjectConfigurationSchema = joi.object({
+const databaseObjectConfigurationSchema = joi.object({
   database: joi.string().required(),
   host: joi.string().required(),
   user: joi.string().required(),
@@ -24,13 +24,13 @@ export const databaseObjectConfigurationSchema = joi.object({
     .integer()
     .optional(),
 });
-export const databaseConnectionConfigurationSchema = joi.alternatives().conditional('.', {
+const databaseConnectionConfigurationSchema = joi.alternatives().conditional('.', {
   is: joi.string(),
   then: joi.string().custom(validateConnectionString, 'The connection string is valid'),
   otherwise: databaseObjectConfigurationSchema,
 });
 
-export const databasePoolConfigurationSchema = joi.object({
+const databasePoolConfigurationSchema = joi.object({
   max: joi
     .number()
     .integer()
@@ -43,23 +43,23 @@ export const databasePoolConfigurationSchema = joi.object({
     .optional(),
 });
 
-export const databaseConfigurationSchema = joi.object({
+const databaseConfigurationSchema = joi.object({
   connection: databaseConnectionConfigurationSchema.required(),
   debug: joi.boolean().optional(),
   pool: databasePoolConfigurationSchema.optional(),
 });
 
-export const metricsConfigurationSchema = joi.object({
+const metricsConfigurationSchema = joi.object({
   timingMetrics: joi.boolean().required(),
   metricsOutputFile: joi.string().when('timingMetrics', {is: true, then: joi.string().required()}),
 });
 
-export const loggingConfigurationSchema = joi.object({
+const loggingConfigurationSchema = joi.object({
   logLevel: joi.string().valid('fatal', 'error', 'warn', 'info', 'debug', 'trace'),
   logDestination: joi.string().required(),
 });
 
-export const networkConfigurationSchema = joi.object({
+const networkConfigurationSchema = joi.object({
   rpcEndpoint: joi
     .string()
     .uri()
@@ -72,7 +72,7 @@ export const networkConfigurationSchema = joi.object({
     .required(),
 });
 
-export const serverWalletConfigSchema = joi.object({
+const serverWalletConfigSchema = joi.object({
   databaseConfiguration: databaseConfigurationSchema,
   networkConfiguration: networkConfigurationSchema,
   ethereumPrivateKey: joi
