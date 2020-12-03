@@ -38,6 +38,18 @@ describe('config validation', () => {
       expect(result.valid).toBe(false);
     });
   });
+  describe('metrics config', () => {
+    it('requires a metrics file when timingMetrics is enabled', () => {
+      const metricsConfiguration = {
+        timingMetrics: true,
+      };
+      const result = validateServerWalletConfig(defaultTestConfig({metricsConfiguration}));
+      expect(result.errors[0].message).toMatch(
+        '"metricsConfiguration.metricsOutputFile" is required'
+      );
+      expect(result.valid).toBe(false);
+    });
+  });
 
   describe('database config', () => {
     it('accepts a valid config', () => {
