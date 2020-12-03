@@ -27,6 +27,7 @@ import EventEmitter from 'eventemitter3';
 import {ethers, constants, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
+import {ValidationErrorItem} from 'joi';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {Outgoing} from '../protocols/actions';
@@ -96,6 +97,12 @@ export interface UpdateChannelFundingParams {
   amount: Uint256;
 }
 
+export class ConfigValidationError extends Error {
+  constructor(public errors: ValidationErrorItem[]) {
+    super('Server wallet configuration validation failed');
+  }
+}
+
 export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
   knex: Knex;
@@ -125,7 +132,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       errors.forEach(error =>
         this.logger.error({error}, `Validation error occured ${error.message}`)
       );
-      throw new Error('Invalid configuration');
+      throw new ConfigValidationError(errors);
     }
     this.walletConfig = populatedConfig;
 
