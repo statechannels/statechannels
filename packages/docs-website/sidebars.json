@@ -40,8 +40,8 @@
     "Base Contracts": [
       "contract-api/natspec/IForceMove",
       "contract-api/natspec/ForceMove",
-      "contract-api/natspec/Adjudicator",
-      "contract-api/natspec/ForceMoveApp",
+      "contract-api/natspec/IAdjudicator",
+      "contract-api/natspec/IForceMoveApp",
       "contract-api/natspec/IAssetHolder",
       "contract-api/natspec/AssetHolder",
       "contract-api/natspec/IERC20",
