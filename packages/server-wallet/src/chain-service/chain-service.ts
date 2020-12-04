@@ -407,16 +407,6 @@ export class ChainService implements ChainServiceInterface {
           const tx = await this.sendTransaction(approveAllowanceRequest);
 
           this.logger.info(
-            {
-              assetHolderAddress,
-              tokenAddress,
-              amount,
-              tx: tx.hash,
-            },
-            'Submitted transaction to approve maximum amount of asset holder spending'
-          );
-
-          this.logger.info(
             {tx: tx.hash},
             'Transaction to approve maximum amount of asset holder spending successfully submitted'
           );
