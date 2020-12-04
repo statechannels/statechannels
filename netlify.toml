@@ -1,2 +1,2 @@
 [build]
-  ignore = "git diff --quiet HEAD^ HEAD packages/docs-website/"
+  ignore = "git diff --quiet HEAD^ HEAD packages/docs-website/ packages/nitro-protocol"
