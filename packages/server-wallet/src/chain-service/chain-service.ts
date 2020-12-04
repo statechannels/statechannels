@@ -383,7 +383,7 @@ export class ChainService implements ChainServiceInterface {
 
         this.logger.info(
           {tx: tx.hash},
-          'Transaction to increase asset holder token allowance successfully mined'
+          'Transaction to increase asset holder token allowance successfully submitted'
         );
 
         break;
@@ -418,7 +418,7 @@ export class ChainService implements ChainServiceInterface {
 
           this.logger.info(
             {tx: tx.hash},
-            'Transaction to approve maximum amount of asset holder spending successfully mined'
+            'Transaction to approve maximum amount of asset holder spending successfully submitted'
           );
 
           break;
