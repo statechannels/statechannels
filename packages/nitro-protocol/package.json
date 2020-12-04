@@ -70,7 +70,7 @@
     "build:webpack": "webpack",
     "contract:compile": "yarn hardhat compile",
     "contract:compile:watch": "yarn hardhat watch compilation",
-    "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts --export-all addresses.json",
+    "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts --export-all addresses.json && ./scripts/postdeploy",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn prettier:check",
