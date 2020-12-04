@@ -164,7 +164,7 @@ contract AssetHolder is IAssetHolder {
         // loop over allocations and decrease balance until we hit the specified destination
         for (i = 0; i < allocation.length; i++) {
             if (balance == 0) {
-                revert('_transfer | fromChannel affords 0 for destination');
+                revert('affords 0 for destination');
             }
             uint256 _amount = allocation[i].amount;
             if (allocation[i].destination == destination) {
