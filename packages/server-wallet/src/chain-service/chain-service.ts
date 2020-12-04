@@ -186,10 +186,8 @@ export class ChainService implements ChainServiceInterface {
   async concludeAndWithdraw(
     finalizationProof: SignedState[]
   ): Promise<providers.TransactionResponse | void> {
-    if (!finalizationProof.length) {
-      this.logger.warn('ChainService: concludeAndWithdraw was called with an empty array?');
-      return;
-    }
+    if (!finalizationProof.length)
+      throw new Error('ChainService: concludeAndWithdraw was called with an empty array?');
 
     const channelId = getChannelId({
       ...finalizationProof[0],
