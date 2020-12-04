@@ -8,8 +8,10 @@ const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
     getNamedAccounts,
   } = hre;
 
-  if ((await getChainId()) === '4') {
-    console.info('Skipping deployment of Token for Rinkeby');
+  const chainId = await getChainId();
+
+  if (chainId !== '31337') {
+    console.info(`Skipping deployment of Token for chain with ID: ${chainId}`);
     return;
   }
 
