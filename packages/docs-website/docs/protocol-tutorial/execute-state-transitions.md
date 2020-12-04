@@ -117,7 +117,7 @@ There are also some limits to be aware of, which apply to the `VariablePart`.
 
 The constant `MAX_TX_DATA_SIZE` exported from `@statechannels/nitro-protocol` reflects the typical effective maximum size for ethereum transaction data. This is set by ethereum clients such as [geth](https://github.com/ethereum/go-ethereum). At the time of writing this is 128KB.
 
-The constant `NITRO_MAX_GAS`, also exported, is an upper limit on the gas consumed by a transaction that we consider "safe" in the sense that it is below the block gas limit on mainnet and most testnets. At the time of writing this is 6M gas.
+The constant `NITRO_MAX_GAS`, also exported, is an upper limit on the gas consumed by a transaction that we consider "safe" in the sense that it is below the block gas limit on mainnet and most testnets. At the time of writing this constant is set to 6M gas.
 
 The exported constant `MAX_OUTCOME_ITEMS` denotes a safe upper limit on the number of allocationItems that may be stored in an [outcome](protocol-tutorial/outcomes#outcomes-that-allocate). We deem this number safe because the resulting transaction size is less than `MAX_TX_DATA_SIZE` and the transaction consumes less than `NITRO_MAX_GAS` (as confirmed by our test suite). This is for the `challenge` and `pushOutcome` transactions, with the other fields in the state set to modest values (e.g. 2 participants). If those fields grow, the `MAX_OUTCOME_ITEMS` may no longer be safe.  At the time of writing this constant is set to 2000 allocation items.
 
