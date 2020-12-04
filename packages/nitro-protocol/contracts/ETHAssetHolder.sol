@@ -58,7 +58,7 @@ contract ETHAssetHolder is AssetHolder {
 
         // refund whatever wasn't deposited.
         uint256 refund = amount.sub(amountDeposited);
-        (bool success, ) = msg.sender.call{value: refund}('');
+        (bool success, ) = msg.sender.call{value: refund}(''); //solhint-disable-line avoid-low-level-calls
         require(success, 'Could not refund excess funds');
     }
 
@@ -69,7 +69,7 @@ contract ETHAssetHolder is AssetHolder {
      * @param amount Quantity of wei to be transferred.
      */
     function _transferAsset(address payable destination, uint256 amount) internal override {
-        (bool success, ) = destination.call{value: amount}('');
+        (bool success, ) = destination.call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
         require(success, 'Could not transfer ETH');
     }
 }
