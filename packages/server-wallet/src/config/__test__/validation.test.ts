@@ -7,28 +7,54 @@ describe('config validation', () => {
     it('validates the default test config', () => {
       expect(validateServerWalletConfig(defaultTestConfig()).valid).toBe(true);
     });
+  });
 
+  describe('chain service config', () => {
     it('rejects an invalid private key', () => {
       const {valid, errors} = validateServerWalletConfig(
-        defaultTestConfig({ethereumPrivateKey: 'bla'})
+        defaultTestConfig({
+          chainServiceConfiguration: {
+            pk: 'bla',
+          },
+        })
       );
 
       expect(valid).toBe(false);
       expect(errors[0].message).toMatch(
-        `"ethereumPrivateKey" with value "bla" fails to match the Hex value validator pattern`
+        `"chainServiceConfiguration.pk" with value "bla" fails to match the Hex value validator pattern`
       );
+    });
+    it('rejects an invalid rpc endpoint', () => {
+      const chainServiceConfiguration = {provider: 'badurl'};
+      const result = validateServerWalletConfig(defaultTestConfig({chainServiceConfiguration}));
+      expect(result.errors[0].message).toMatch(
+        '"chainServiceConfiguration.provider" must be a valid uri'
+      );
+      expect(result.valid).toBe(false);
+    });
+    it('rejects an invalid allowance mode', () => {
+      const chainServiceConfiguration = {allowanceMode: 'bad'};
+      const result = validateServerWalletConfig(
+        // eslint-disable-next-line
+        // @ts-ignore
+        defaultTestConfig({chainServiceConfiguration})
+      );
+      expect(result.errors[0].message).toMatch(
+        '"chainServiceConfiguration.allowanceMode" must be one of [MaxUint, PerDeposit]'
+      );
+      expect(result.valid).toBe(false);
+    });
+    it('rejects an invalid polling interval', () => {
+      const chainServiceConfiguration = {pollingInterval: 0};
+      const result = validateServerWalletConfig(defaultTestConfig({chainServiceConfiguration}));
+      expect(result.errors[0].message).toMatch(
+        '"chainServiceConfiguration.pollingInterval" must be a positive number'
+      );
+      expect(result.valid).toBe(false);
     });
   });
 
   describe('network config', () => {
-    it('rejects an invalid rpc endpoint', () => {
-      const networkConfiguration = {rpcEndpoint: 'badurl'};
-      const result = validateServerWalletConfig(defaultTestConfig({networkConfiguration}));
-      expect(result.errors[0].message).toMatch(
-        '"networkConfiguration.rpcEndpoint" must be a valid uri'
-      );
-      expect(result.valid).toBe(false);
-    });
     it('rejects an invalid chain id', () => {
       const networkConfiguration = {chainNetworkID: 0.5};
       const result = validateServerWalletConfig(defaultTestConfig({networkConfiguration}));

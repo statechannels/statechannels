@@ -60,10 +60,6 @@ const loggingConfigurationSchema = joi.object({
 });
 
 const networkConfigurationSchema = joi.object({
-  rpcEndpoint: joi
-    .string()
-    .uri()
-    .optional(),
   chainNetworkID: joi
     .number()
     .integer()
@@ -72,13 +68,35 @@ const networkConfigurationSchema = joi.object({
     .required(),
 });
 
+const chainServiceConfigurationSchema = joi.object({
+  attachChainService: joi.boolean().required(),
+  pk: joi
+    .string()
+    .pattern(/0[xX][0-9a-fA-F]{40}/, {name: 'Hex value validator'})
+    .optional(),
+  provider: joi
+    .string()
+    .uri()
+    .optional(),
+  pollingInterval: joi
+    .number()
+    .positive()
+    .optional(),
+  blockConfirmations: joi
+    .number()
+    .not()
+    .negative()
+    .optional(),
+  allowanceMode: joi
+    .string()
+    .valid('MaxUint', 'PerDeposit')
+    .optional(),
+});
+
 const serverWalletConfigSchema = joi.object({
   databaseConfiguration: databaseConfigurationSchema,
   networkConfiguration: networkConfigurationSchema,
-  ethereumPrivateKey: joi
-    .string()
-    .pattern(/0[xX][0-9a-fA-F]{40}/, {name: 'Hex value validator'})
-    .required(),
+  chainServiceConfiguration: chainServiceConfigurationSchema,
 
   workerThreadAmount: joi
     .number()
