@@ -67,7 +67,6 @@
   "repository": "statechannels/monorepo.git",
   "scripts": {
     "build:typescript": "rm -rf lib; yarn tsc -b .",
-    "build:webpack": "webpack",
     "contract:compile": "yarn hardhat compile",
     "contract:compile:watch": "yarn hardhat watch compilation",
     "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts",
