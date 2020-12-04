@@ -11,7 +11,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 contract TestErc20AssetHolder is ERC20AssetHolder {
     constructor(address _AdjudicatorAddress, IERC20 _Token)
         ERC20AssetHolder(_AdjudicatorAddress, _Token)
-    {}
+    {} // solhint-disable-line no-empty-blocks
 
     /**
      * @dev Manually set the holdings mapping to a given amount for a given channelId.  Shortcuts the deposit workflow (ONLY USE IN A TESTING ENVIRONMENT)

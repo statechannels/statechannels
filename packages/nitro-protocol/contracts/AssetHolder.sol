@@ -605,7 +605,7 @@ contract AssetHolder is IAssetHolder {
      * @param destination ethereum address to be credited.
      * @param amount Quantity of assets to be transferred.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal virtual {}
+    function _transferAsset(address payable destination, uint256 amount) internal virtual {} // solhint-disable-line no-empty-blocks
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
