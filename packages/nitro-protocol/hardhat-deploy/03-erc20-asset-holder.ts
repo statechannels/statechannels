@@ -5,8 +5,10 @@ const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
   const {deployments, getChainId, getNamedAccounts} = hre;
   const {deploy} = deployments;
 
-  if ((await getChainId()) === '4') {
-    console.info('Skipping deployment of ERC20AssetHolder for Rinkeby');
+  const chainId = await getChainId();
+
+  if (chainId !== '31337') {
+    console.info(`Skipping deployment of ERC20AssetHolder for chain with ID: ${chainId}`);
     return;
   }
 
