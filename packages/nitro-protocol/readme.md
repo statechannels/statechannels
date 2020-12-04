@@ -20,13 +20,13 @@ A full description of nitro protocol and it's capabilities can be found in a [wh
 ### Building your state channel application contract against our interface:
 
 ```solidity
-pragma solidity ^0.6.0;
+pragma solidity ^0.7.0;
 pragma experimental ABIEncoderV2;
 
-import '@statechannels/nitro-protocol/contracts/interfaces/ForceMoveApp.sol';
+import '@statechannels/nitro-protocol/contracts/interfaces/IForceMoveApp.sol';
 import '@statechannels/nitro-protocol/contracts/Outcome.sol';
 
-contract MyStateChannelApp is ForceMoveApp {
+contract MyStateChannelApp is IForceMoveApp {
   function validTransition(
     VariablePart memory a,
     VariablePart memory b,
