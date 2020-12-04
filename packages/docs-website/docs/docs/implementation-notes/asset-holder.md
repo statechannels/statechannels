@@ -176,7 +176,7 @@ The following function modifier restricts permission to a certain Adjudicator.
 
 ```solidity
     modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
+        require(msg.sender == AdjudicatorAddress, 'Only NitroAdjudicator authorized');
         _;
     }
 ```

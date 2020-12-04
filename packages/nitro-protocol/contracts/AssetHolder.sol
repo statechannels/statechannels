@@ -99,7 +99,7 @@ contract AssetHolder is IAssetHolder {
     // **************
 
     modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
+        require(msg.sender == AdjudicatorAddress, 'Only NitroAdjudicator authorized');
         _;
     }
 

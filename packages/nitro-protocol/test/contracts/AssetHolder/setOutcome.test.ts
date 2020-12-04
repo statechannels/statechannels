@@ -33,7 +33,7 @@ beforeAll(async () => {
 
 describe('setOutcome', () => {
   it('Reverts when called directly from an EOA', async () => {
-    const reasonString = 'Only the NitroAdjudicator is authorized';
+    const reasonString = 'Only NitroAdjudicator authorized';
     const regex = new RegExp(
       '(' + 'VM Exception while processing transaction: revert ' + reasonString + ')'
     );
