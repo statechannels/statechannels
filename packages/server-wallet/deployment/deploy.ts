@@ -1,9 +1,7 @@
 import {Address} from '@statechannels/client-api-schema';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
-import {GanacheDeployer} from '@statechannels/devtools';
+import {ETHERLIME_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
-
-import {defaultTestConfig} from '../src/config';
 
 // NOTE: deploying contracts like this allows the onchain service package to
 // be easily extracted
@@ -15,8 +13,10 @@ export type TestNetworkContext = {
   NITRO_ADJUDICATOR_ADDRESS: Address;
 };
 
+
 export async function deploy(): Promise<TestNetworkContext> {
-  const {ethereumPrivateKey} = defaultTestConfig();
+  const ethereumPrivateKey = ETHERLIME_ACCOUNTS[0].privateKey;
+
   // TODO: best way to configure this?
   const deployer = new GanacheDeployer(8545, ethereumPrivateKey);
   const {

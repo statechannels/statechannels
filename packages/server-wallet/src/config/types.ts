@@ -1,5 +1,7 @@
 import {Level} from 'pino';
 
+import {ChainServiceArgs} from '../chain-service';
+
 /**
  * Either a connection string or a config object with the dbName specified
  */
@@ -49,12 +51,16 @@ export type LoggingConfiguration = {logLevel: Level; logDestination: string};
 export type MetricsConfiguration = {timingMetrics: boolean; metricsOutputFile?: string};
 
 /**
+ * Chain service configuration options
+ */
+export type ChainServiceConfiguration = {attachChainService: boolean} & Partial<ChainServiceArgs>;
+
+/**
  * The minimum required configuration to use the server wallet.
  */
 export type RequiredServerWalletConfig = {
   databaseConfiguration: RequiredDatabaseConfiguration;
   networkConfiguration: NetworkConfiguration;
-  ethereumPrivateKey: string;
 };
 
 /**
@@ -64,6 +70,7 @@ export interface OptionalServerWalletConfig {
   databaseConfiguration: OptionalDatabaseConfiguration;
   workerThreadAmount: number;
   skipEvmValidation: boolean;
+  chainServiceConfiguration: ChainServiceConfiguration;
   loggingConfiguration: LoggingConfiguration;
   metricsConfiguration: MetricsConfiguration;
 }
@@ -84,7 +91,6 @@ export type IncomingServerWalletConfig = RequiredServerWalletConfig &
  * Various network configuration options
  */
 export type NetworkConfiguration = {
-  rpcEndpoint?: string;
   chainNetworkID: number;
 };
 

@@ -51,6 +51,13 @@ import { TransactionOrKnex } from 'objection';
 import { Uint256 as Uint256_2 } from '@statechannels/wallet-core';
 import { UpdateChannelParams } from '@statechannels/client-api-schema';
 
+// Warning: (ae-forgotten-export) The symbol "ChainServiceArgs" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type ChainServiceConfiguration = {
+    attachChainService: boolean;
+} & Partial<ChainServiceArgs>;
+
 // @public (undocumented)
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
 
@@ -73,6 +80,11 @@ export const DEFAULT_DB_NAME = "server_wallet_test";
 
 // @public (undocumented)
 export const DEFAULT_DB_USER = "postgres";
+
+// @public (undocumented)
+export const defaultChainServiceConfiguration: {
+    attachChainService: boolean;
+};
 
 // @public (undocumented)
 export const defaultConfig: OptionalServerWalletConfig;
@@ -138,7 +150,6 @@ export type MultipleChannelOutput = {
 
 // @public (undocumented)
 export type NetworkConfiguration = {
-    rpcEndpoint?: string;
     chainNetworkID: number;
 };
 
@@ -156,6 +167,8 @@ export type OptionalDatabaseConfiguration = {
 
 // @public (undocumented)
 export interface OptionalServerWalletConfig {
+    // (undocumented)
+    chainServiceConfiguration: ChainServiceConfiguration;
     // (undocumented)
     databaseConfiguration: OptionalDatabaseConfiguration;
     // (undocumented)
@@ -195,7 +208,6 @@ export type RequiredDatabaseConfiguration = {
 export type RequiredServerWalletConfig = {
     databaseConfiguration: RequiredDatabaseConfiguration;
     networkConfiguration: NetworkConfiguration;
-    ethereumPrivateKey: string;
 };
 
 // @public (undocumented)

@@ -13,28 +13,40 @@ import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
+// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
+if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
+// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
+const rpcEndpoint = process.env.RPC_ENDPOINT;
+
 const config = {
   ...defaultTestConfig(),
   networkConfiguration: {
     ...defaultTestConfig().networkConfiguration,
     // eslint-disable-next-line no-process-env
-    rpcEndpoint: process.env.RPC_ENDPOINT,
-    // eslint-disable-next-line no-process-env
     chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID || '0'),
   },
 };
-if (!config.networkConfiguration.rpcEndpoint) throw new Error('rpc endpoint must be defined');
-const {rpcEndpoint} = config.networkConfiguration;
+
 let provider: providers.JsonRpcProvider;
 const b = Wallet.create({
   ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'}),
-  /* eslint-disable-next-line no-process-env */
-  ethereumPrivateKey: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
+  chainServiceConfiguration: {
+    attachChainService: true,
+    provider: rpcEndpoint,
+    /* eslint-disable-next-line no-process-env */
+    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
+    allowanceMode: 'MaxUint',
+  },
 });
 const a = Wallet.create({
   ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'}),
-  /* eslint-disable-next-line no-process-env */
-  ethereumPrivateKey: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
+  chainServiceConfiguration: {
+    attachChainService: true,
+    provider: rpcEndpoint,
+    /* eslint-disable-next-line no-process-env */
+    pk: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
+    allowanceMode: 'MaxUint',
+  },
 });
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';

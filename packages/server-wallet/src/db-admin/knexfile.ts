@@ -63,7 +63,6 @@ const dbDebug = process.env.DEBUG_KNEX?.toLowerCase() === 'true' || false;
 export const {client, connection, debug, migrations, seeds, pool} = createKnexConfig({
   ...defaultConfig,
   databaseConfiguration: {debug: dbDebug, connection: dbConnectionConfig},
-  ethereumPrivateKey: '0x0',
   networkConfiguration: {
     chainNetworkID: 0,
   },

@@ -3,23 +3,27 @@ import {BN, makeAddress, makeDestination, Participant} from '@statechannels/wall
 import {ethers} from 'ethers';
 
 import {Outgoing} from '../..';
-import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Bytes32} from '../../type-aliases';
-import {Wallet} from '../../wallet';
 import {
   crashAndRestart,
   getChannelResultFor,
   getPayloadFor,
   interParticipantChannelResultsAreEqual,
 } from '../test-helpers';
+import {Wallet} from '../../wallet';
+import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
 let a = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
+  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
+    database: 'TEST_A',
+  })
 );
 let b = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_B'})
+  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
+    database: 'TEST_B',
+  })
 );
 
 let participantA: Participant;
