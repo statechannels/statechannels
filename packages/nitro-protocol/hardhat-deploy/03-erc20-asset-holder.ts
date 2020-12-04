@@ -2,8 +2,13 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, getChainId, getNamedAccounts} = hre;
   const {deploy} = deployments;
+
+  if ((await getChainId()) === '4') {
+    console.info('Skipping deployment of ERC20AssetHolder for Rinkeby');
+    return;
+  }
 
   const {deployer} = await getNamedAccounts();
 
