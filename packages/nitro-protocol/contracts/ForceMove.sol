@@ -92,7 +92,8 @@ contract ForceMove is IForceMove {
         emit ChallengeRegistered(
             channelId,
             largestTurnNum,
-            uint48(block.timestamp) + fixedPart.challengeDuration, // This could overflow, so don't join a channel with a huge challengeDuration
+            uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
+            // This could overflow, so don't join a channel with a huge challengeDuration
             challenger,
             isFinalCount > 0,
             fixedPart,
@@ -104,7 +105,7 @@ contract ForceMove is IForceMove {
         channelStorageHashes[channelId] = _hashChannelData(
             ChannelData(
                 largestTurnNum,
-                uint48(block.timestamp) + fixedPart.challengeDuration,
+                uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
                 supportedStateHash,
                 challenger,
                 keccak256(variableParts[variableParts.length - 1].outcome)
@@ -334,9 +335,9 @@ contract ForceMove is IForceMove {
 
         // effects
         channelStorageHashes[channelId] = _hashChannelData(
-            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash)
+            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash) //solhint-disable-line not-rely-on-time
         );
-        emit Concluded(channelId, uint48(block.timestamp));
+        emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
     }
 
     // Internal methods:
@@ -443,8 +444,6 @@ contract ForceMove is IForceMove {
         return true;
     }
 
-    bytes constant prefix = '\x19Ethereum Signed Message:\n32';
-
     /**
      * @notice Given a digest and ethereum digital signature, recover the signer
      * @dev Given a digest and digital signature, recover the signer
@@ -453,7 +452,7 @@ contract ForceMove is IForceMove {
      * @return signer
      */
     function _recoverSigner(bytes32 _d, Signature memory sig) internal pure returns (address) {
-        bytes32 prefixedHash = keccak256(abi.encodePacked(prefix, _d));
+        bytes32 prefixedHash = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', _d));
         address a = ecrecover(prefixedHash, sig.v, sig.r, sig.s);
         require(a != address(0), 'Invalid signature');
         return (a);
@@ -768,7 +767,7 @@ contract ForceMove is IForceMove {
         (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
         if (finalizesAt == 0) {
             return ChannelMode.Open;
-        } else if (finalizesAt <= block.timestamp) {
+        } else if (finalizesAt <= block.timestamp) { 
             return ChannelMode.Finalized;
         } else {
             return ChannelMode.Challenge;
