@@ -29,6 +29,7 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {signStates} from '../../../src';
+import {NITRO_MAX_GAS} from '../../../src/transactions';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -223,6 +224,9 @@ describe('concludePushOutcomeAndTransferAll', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
+
+        expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
+
         await writeGasConsumption(
           './concludePushOutcomeAndTransferAll.gas.md',
           description,
