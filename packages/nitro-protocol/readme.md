@@ -107,3 +107,5 @@ INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby
 ```
 
 The config extends from a minimal base config (`hardhat.config.ts`) that is used for other tasks such as compilation.
+
+After succesfully deploying, please  a) update `.env.testnet` if it exists, and raise a pull request with this file and the updated contract artifacts.
