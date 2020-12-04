@@ -3,6 +3,39 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.16.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.1...@statechannels/server-wallet@1.16.0) (2020-12-04)
+
+
+### Bug Fixes
+
+* add a constraint to chain_service_requests table, fix down migraion ([7aef458](https://github.com/statechannels/statechannels/commit/7aef458328a9461ff7743011665fabd195f78abd))
+* add default value of empty array to chainServiceRequests ([d68d998](https://github.com/statechannels/statechannels/commit/d68d99839f256a6ddb8c63e2654a801620256752))
+* allow empty password string ([abb67d9](https://github.com/statechannels/statechannels/commit/abb67d98ca733021e049b9f948379727c1a414e7))
+* await fundChannel chain service request ([56ef79e](https://github.com/statechannels/statechannels/commit/56ef79ecd54a59a4fed2f4dd1b4fd65c164e15ac))
+* convert ChainService constructor to accept config object ([fd1fcce](https://github.com/statechannels/statechannels/commit/fd1fcce1a581b6a60e1686e078dfb02870ba3d2b))
+* do not export schema ([a06105e](https://github.com/statechannels/statechannels/commit/a06105e357fc8b037b952af9580159c6b411042e))
+* export everything from wallet ([b4c9429](https://github.com/statechannels/statechannels/commit/b4c94290910554807730c2c5ca576b57f1e82a1b))
+* fix chain tests ([3519315](https://github.com/statechannels/statechannels/commit/35193150dced8f5c3cd2730325a6a7412eb1cda1))
+* remove env vars config ([f9289bb](https://github.com/statechannels/statechannels/commit/f9289bb0cddb0e6ef72376b9961b3b154638d958))
+* remove required chainServiceRequests property from Channel model and fix tests ([d20eae8](https://github.com/statechannels/statechannels/commit/d20eae80ce48dc53d013cecba95036ce6a28b846))
+* set chain id ([d1877c8](https://github.com/statechannels/statechannels/commit/d1877c868d9c091b66dca8ccc35373062b720a04))
+* use ?? instead of || for defaulting blockConfirmation ([94aaf0f](https://github.com/statechannels/statechannels/commit/94aaf0fa2b7f5bd7af4166351c614f125eff7953))
+* use distinct database names ([57894fb](https://github.com/statechannels/statechannels/commit/57894fbe8c82f2d845af929a73b6a53afc3fc5b7))
+* validate metrics ([2e6fc84](https://github.com/statechannels/statechannels/commit/2e6fc841e4a13cd4c8705e094d49bb1ad20f8f03))
+
+
+### Features
+
+* add chain transactions table ([4819b87](https://github.com/statechannels/statechannels/commit/4819b87667b4c05b843c0033a3b988f9cc697493))
+* add pushUpdate for messages updating a single, running app channel ([1a04384](https://github.com/statechannels/statechannels/commit/1a043848c1457ff7d854bf256252c59d9515dbc1))
+* basic config validation ([a971ccd](https://github.com/statechannels/statechannels/commit/a971ccd492a09a5b2e29d6fb9602d4ab31c57890))
+* defaultTestConfig is now a function ([365651b](https://github.com/statechannels/statechannels/commit/365651b0df58ae30b11e7ac07cf98d5d59473c2c))
+* multi-threaded wallet offloads pushUpdate to workers ([4891263](https://github.com/statechannels/statechannels/commit/489126323ec82bab4e2f5283d76c97200aeffbe7))
+
+
+
+
+
 # [1.15.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.1...@statechannels/server-wallet@1.15.0) (2020-12-02)
 
 
