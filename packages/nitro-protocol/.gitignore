@@ -26,3 +26,4 @@ gas-artifacts
 # hardhat directories
 cache
 solcInputs/
+hardhat-deployments
