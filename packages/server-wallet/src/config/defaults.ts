@@ -31,6 +31,10 @@ export const defaultLoggingConfiguration: LoggingConfiguration = {
 
 export const defaultMetricsConfiguration = {timingMetrics: false};
 
+export const defaultChainServiceConfiguration = {
+  attachChainService: false,
+};
+
 /**
  * Server Wallet config
  */
@@ -43,6 +47,7 @@ export const defaultConfig: OptionalServerWalletConfig = {
   databaseConfiguration: defaultDatabaseConfiguration,
   loggingConfiguration: defaultLoggingConfiguration,
   metricsConfiguration: defaultMetricsConfiguration,
+  chainServiceConfiguration: defaultChainServiceConfiguration,
   skipEvmValidation: false,
   workerThreadAmount: 0,
 };
@@ -64,8 +69,6 @@ export const defaultTestConfig = (
     networkConfiguration: defaultTestNetworkConfiguration,
     skipEvmValidation: true,
     workerThreadAmount: 0, // Disable threading for tests
-    // 0xD9995BAE12FEe327256FFec1e3184d492bD94C31
-    ethereumPrivateKey: '0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8',
     databaseConfiguration: {
       connection: {
         host: defaultDatabaseConfiguration.connection.host,

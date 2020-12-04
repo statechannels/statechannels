@@ -74,18 +74,19 @@ export class ChainService implements ChainServiceInterface {
     logger,
     blockConfirmations,
     allowanceMode,
-  }: ChainServiceArgs) {
+  }: Partial<ChainServiceArgs>) {
+    if (!pk) throw new Error('ChainService: Private key not provided');
+    this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
     this.blockConfirmations = blockConfirmations ?? 5;
     this.logger = logger
       ? logger.child({module: 'ChainService'})
       : createLogger(defaultTestConfig());
     this.provider = new providers.JsonRpcProvider(provider);
-    this.allowanceMode = allowanceMode;
-    if (provider.includes('0.0.0.0') || provider.includes('localhost')) {
+    this.allowanceMode = allowanceMode || 'MaxUint';
+    if (provider && (provider.includes('0.0.0.0') || provider.includes('localhost'))) {
       pollingInterval = pollingInterval ?? 50;
     }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
-    this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
     this.nitroAdjudicator = new Contract(
       nitroAdjudicatorAddress,
       ContractArtifacts.NitroAdjudicatorArtifact.abi,

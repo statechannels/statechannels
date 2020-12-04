@@ -132,16 +132,9 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile);
     }
 
-    if (this.walletConfig.networkConfiguration.rpcEndpoint) {
-      this.chainService = new ChainService({
-        provider: this.walletConfig.networkConfiguration.rpcEndpoint,
-        pk: this.walletConfig.ethereumPrivateKey,
-        allowanceMode: 'MaxUint',
-      });
+    if (this.walletConfig.chainServiceConfiguration.attachChainService) {
+      this.chainService = new ChainService(this.walletConfig.chainServiceConfiguration);
     } else {
-      this.logger.debug(
-        'rpcEndpoint and ethereumPrivateKey must be defined for the wallet to use chain service'
-      );
       this.chainService = new MockChainService();
     }
 
