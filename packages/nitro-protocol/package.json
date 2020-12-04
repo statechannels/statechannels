@@ -34,6 +34,8 @@
     "lint-staged": "10.0.4",
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.58",
+    "solhint": "^3.3.2",
+    "solhint-plugin-prettier": "^0.0.5",
     "solidoc": "https://github.com/statechannels/solidoc.git#3235c4f8be624a36710502c9021cfbd47a9a0f49",
     "ts-jest": "26.4.4",
     "typescript": "4.1.2",
