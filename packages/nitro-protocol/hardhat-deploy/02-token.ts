@@ -2,8 +2,16 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
-  const {deploy} = deployments;
+  const {
+    deployments: {deploy},
+    getChainId,
+    getNamedAccounts,
+  } = hre;
+
+  if ((await getChainId()) === '4') {
+    console.info('Skipping deployment of Token for Rinkeby');
+    return;
+  }
 
   const {deployer} = await getNamedAccounts();
 
