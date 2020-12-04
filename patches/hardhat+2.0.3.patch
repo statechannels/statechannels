@@ -1,0 +1,33 @@
+diff --git a/node_modules/hardhat/builtin-tasks/compile.js b/node_modules/hardhat/builtin-tasks/compile.js
+index ab562c3..bdf669f 100644
+--- a/node_modules/hardhat/builtin-tasks/compile.js
++++ b/node_modules/hardhat/builtin-tasks/compile.js
+@@ -448,12 +448,14 @@ config_env_1.subtask(task_names_1.TASK_COMPILE_SOLIDITY_EMIT_ARTIFACTS)
+             continue;
+         }
+         const artifactsEmitted = [];
++
+         for (const [contractName, contractOutput] of Object.entries((_b = (_a = output.contracts) === null || _a === void 0 ? void 0 : _a[file.sourceName]) !== null && _b !== void 0 ? _b : {})) {
+             log(`Emitting artifact for contract '${contractName}'`);
++            const richerOutput = {...contractOutput,ast: output.sources[file.sourceName].ast, sourcePath: file.absolutePath}
+             const artifact = await run(task_names_1.TASK_COMPILE_SOLIDITY_GET_ARTIFACT_FROM_COMPILATION_OUTPUT, {
+                 sourceName: file.sourceName,
+                 contractName,
+-                contractOutput,
++                contractOutput: richerOutput,
+             });
+             await artifacts.saveArtifactAndDebugFile(artifact, pathToBuildInfo);
+             artifactsEmitted.push(artifact.contractName);
+diff --git a/node_modules/hardhat/internal/artifacts.js b/node_modules/hardhat/internal/artifacts.js
+index 7ea612a..8d8e0d8 100644
+--- a/node_modules/hardhat/internal/artifacts.js
++++ b/node_modules/hardhat/internal/artifacts.js
+@@ -334,6 +334,8 @@ function getArtifactFromContractOutput(sourceName, contractName, contractOutput)
+         contractName,
+         sourceName,
+         abi: contractOutput.abi,
++        ast: contractOutput.ast,
++        sourcePath: contractOutput.sourcePath,
+         bytecode,
+         deployedBytecode,
+         linkReferences,

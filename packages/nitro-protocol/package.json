@@ -34,7 +34,7 @@
     "lint-staged": "10.0.4",
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.58",
-    "solidoc": "https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd",
+    "solidoc": "https://github.com/statechannels/solidoc.git#3235c4f8be624a36710502c9021cfbd47a9a0f49",
     "ts-jest": "26.4.4",
     "typescript": "4.1.2",
     "webpack": "4.44.2"
@@ -67,7 +67,6 @@
   "repository": "statechannels/monorepo.git",
   "scripts": {
     "build:typescript": "rm -rf lib; yarn tsc -b .",
-    "build:webpack": "webpack",
     "contract:compile": "yarn hardhat compile",
     "contract:compile:watch": "yarn hardhat watch compilation",
     "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts --export-all addresses.json && ./scripts/postdeploy",

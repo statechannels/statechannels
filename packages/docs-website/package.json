@@ -9,8 +9,6 @@
     "@docusaurus/preset-classic": "2.0.0-alpha.64",
     "@mdx-js/react": "1.6.18",
     "@microsoft/api-documenter": "7.8.21",
-    "@statechannels/channel-client": "0.4.6",
-    "@statechannels/iframe-channel-provider": "0.3.17",
     "@statechannels/nitro-protocol": "0.11.2",
     "@statechannels/server-wallet": "1.16.0",
     "clsx": "1.1.1",
@@ -34,7 +32,7 @@
   "private": true,
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
-    "build:netlify:disabled-for-now": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
+    "build": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
     "deploy": "docusaurus deploy",
     "docusaurus": "docusaurus",
     "examples": "docusaurus-examples",

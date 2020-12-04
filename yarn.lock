@@ -3912,36 +3912,6 @@
   resolved "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.8.1.tgz#1b606578af86b9ad10755409804a6ba83f9ce8a4"
   integrity sha512-DF7H6T8I4lo2IZOE2NZwt3631T8j1gjpQLjmvY2xBNK50c4ltslR4XPKwT6RkeSd4+xCAK0GHC/k7sbRDBE4Yw==
 
-"@statechannels/channel-client@0.4.6":
-  version "0.4.6"
-  resolved "https://registry.npmjs.org/@statechannels/channel-client/-/channel-client-0.4.6.tgz#5f61c73da0457a6ce46b46a0a5f4bb1728591be1"
-  integrity sha512-jlw5R7yeZN8KJvQ6hcDzp9NkVFSYZCWUFaQyu59A03yNxRIRyEO2U5741d/+2R43L0xU3Fak/EkFDdGz69iY7w==
-  dependencies:
-    "@statechannels/client-api-schema" "0.4.5"
-    "@statechannels/iframe-channel-provider" "0.3.17"
-    ethers "5.0.12"
-    eventemitter3 "4.0.7"
-    loglevel "1.6.8"
-
-"@statechannels/client-api-schema@0.4.5":
-  version "0.4.5"
-  resolved "https://registry.npmjs.org/@statechannels/client-api-schema/-/client-api-schema-0.4.5.tgz#bf293179008d136c833c6a1a8e06e4a814a9d656"
-  integrity sha512-gclJYSMF6OazrGM+Q/NbQqGR1qlQb2QrufHN43Dz8TR8McZdJOqg98J8b86oOasJ/T9ZfypP9uLapp4jQDyhLw==
-  dependencies:
-    ajv "6.11.0"
-
-"@statechannels/iframe-channel-provider@0.3.17":
-  version "0.3.17"
-  resolved "https://registry.npmjs.org/@statechannels/iframe-channel-provider/-/iframe-channel-provider-0.3.17.tgz#e0b335ce4db170aef2a9a0765903376155accc9a"
-  integrity sha512-xKDjPdRpdwqvykv/PYpNxT6wHo+lQ+SJNxqVhCKFMVPTlxZ5QR8+nhX9FLwqPCvG7G6XXM9/EbBKsc9ZbGtJjQ==
-  dependencies:
-    "@statechannels/client-api-schema" "0.4.5"
-    eventemitter3 "4.0.7"
-    guid-typescript "1.0.9"
-    lodash "4.17.20"
-    normalize-url "4.5.0"
-    pino "6.2.0"
-
 "@statechannels/wasm-utils@0.1.6":
   version "0.1.6"
   resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.6.tgz#2b0b7de5a63f158d4202718ebb5bdd3a910b0c6c"
@@ -11997,11 +11967,6 @@ growly@^1.3.0:
   resolved "https://registry.npmjs.org/growly/-/growly-1.3.0.tgz#f10748cbe76af964b7c96c93c6bcc28af120c081"
   integrity sha1-8QdIy+dq+WS3yWyTxrzCivEgwIE=
 
-guid-typescript@1.0.9:
-  version "1.0.9"
-  resolved "https://registry.npmjs.org/guid-typescript/-/guid-typescript-1.0.9.tgz#e35f77003535b0297ea08548f5ace6adb1480ddc"
-  integrity sha512-Y8T4vYhEfwJOTbouREvG+3XDsjr8E3kIr7uf+JZ0BYloFsttiHU0WfvANVsR7TxNUJa/WpCnw/Ino/p+DeBhBQ==
-
 gzip-size@5.1.1, gzip-size@^5.0.0:
   version "5.1.1"
   resolved "https://registry.npmjs.org/gzip-size/-/gzip-size-5.1.1.tgz#cb9bee692f87c0612b232840a873904e4c135274"
@@ -15356,11 +15321,6 @@ log-update@^2.3.0:
     cli-cursor "^2.0.0"
     wrap-ansi "^3.0.1"
 
-loglevel@1.6.8:
-  version "1.6.8"
-  resolved "https://registry.npmjs.org/loglevel/-/loglevel-1.6.8.tgz#8a25fb75d092230ecd4457270d80b54e28011171"
-  integrity sha512-bsU7+gc9AJ2SqpzxwU3+1fedl8zAntbtC5XYlt3s2j1hJcn2PsXSmgN8TaLG/J1/2mod4+cE/3vNL70/c1RNCA==
-
 loglevel@^1.6.8:
   version "1.7.0"
   resolved "https://registry.npmjs.org/loglevel/-/loglevel-1.7.0.tgz#728166855a740d59d38db01cf46f042caa041bb0"
@@ -16791,15 +16751,15 @@ normalize-url@1.9.1:
     query-string "^4.1.0"
     sort-keys "^1.0.0"
 
-normalize-url@4.5.0, normalize-url@^4.1.0:
-  version "4.5.0"
-  resolved "https://registry.npmjs.org/normalize-url/-/normalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
-  integrity sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==
-
 normalize-url@^3.0.0, normalize-url@^3.3.0:
   version "3.3.0"
   resolved "https://registry.npmjs.org/normalize-url/-/normalize-url-3.3.0.tgz#b2e1c4dc4f7c6d57743df733a4f5978d18650559"
   integrity sha512-U+JJi7duF1o+u2pynbp2zXDW2/PADgC30f0GsHZtRh+HOcXHnw137TrNlyxxRvWW5fjKd3bcLHPxofWuCjaeZg==
+
+normalize-url@^4.1.0:
+  version "4.5.0"
+  resolved "https://registry.npmjs.org/normalize-url/-/normalize-url-4.5.0.tgz#453354087e6ca96957bd8f5baf753f5982142129"
+  integrity sha512-2s47yzUxdexf1OhyRi4Em83iQk0aPvwTddtFz4hnSSw9dCEsLEGf6SwIO8ss/19S9iBb5sJaOuTvTGDeZI00BQ==
 
 npm-bundled@^1.0.1:
   version "1.1.1"
@@ -20891,9 +20851,9 @@ solc@0.7.3:
     semver "^5.5.0"
     tmp "0.0.33"
 
-"solidoc@https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd":
+"solidoc@https://github.com/statechannels/solidoc.git#3235c4f8be624a36710502c9021cfbd47a9a0f49":
   version "1.0.4"
-  resolved "https://github.com/statechannels/solidoc.git#839076945d906dcee02aa1c27460c670b7d373fd"
+  resolved "https://github.com/statechannels/solidoc.git#3235c4f8be624a36710502c9021cfbd47a9a0f49"
   dependencies:
     fs-extra "^7.0.0"
     glob "^7.1.3"
