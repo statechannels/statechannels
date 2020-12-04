@@ -617,6 +617,7 @@ contract ForceMove is IForceMove {
         // copied from https://www.npmjs.com/package/solidity-bytes-utils/v/0.1.1
         bool success = true;
 
+        /* solhint-disable no-inline-assembly */
         assembly {
             let length := mload(_preBytes)
 
@@ -653,6 +654,7 @@ contract ForceMove is IForceMove {
                     success := 0
                 }
         }
+        /* solhint-disable no-inline-assembly */
 
         return success;
     }
@@ -767,7 +769,8 @@ contract ForceMove is IForceMove {
         (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
         if (finalizesAt == 0) {
             return ChannelMode.Open;
-        } else if (finalizesAt <= block.timestamp) { 
+            // solhint-disable-next-line not-rely-on-time
+        } else if (finalizesAt <= block.timestamp) {
             return ChannelMode.Finalized;
         } else {
             return ChannelMode.Challenge;
@@ -875,9 +878,11 @@ contract ForceMove is IForceMove {
 
     function getChainID() public pure returns (uint256) {
         uint256 id;
+        /* solhint-disable no-inline-assembly */
         assembly {
             id := chainid()
         }
+        /* solhint-disable no-inline-assembly */
         return id;
     }
 
