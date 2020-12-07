@@ -153,9 +153,8 @@ export class WalletResponse {
 
     participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.outbox.push({
-          method: 'MessageQueued' as const,
-          params: serializeMessage(
+        this.queuedMessages.push(
+          serializeMessage(
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
@@ -164,8 +163,8 @@ export class WalletResponse {
             p.participantId,
             myParticipantId,
             channelId
-          ),
-        });
+          )
+        );
       }
     });
   }
