@@ -76,7 +76,7 @@ beforeAll(() => {
 
 afterAll(() => {
   chainService.destructor();
-  provider.polling = false;
+  provider.removeAllListeners();
 });
 
 function getChannelNonce() {
@@ -376,7 +376,6 @@ describe('concludeAndWithdraw', () => {
   });
 });
 
-// eslint-disable-next-line jest/no-focused-tests
 describe('challenge', () => {
   it('can challenge', async () => {
     const aDestinationAddress = Wallet.createRandom().address;

@@ -88,12 +88,13 @@ export class ChainService implements ChainServiceInterface {
     allowanceMode,
   }: Partial<ChainServiceArgs>) {
     if (!pk) throw new Error('ChainService: Private key not provided');
-    this.ethWallet = new NonceManager(new Wallet(pk, new providers.JsonRpcProvider(provider)));
+    this.provider = new providers.JsonRpcProvider(provider);
+    this.ethWallet = new NonceManager(new Wallet(pk, this.provider));
     this.blockConfirmations = blockConfirmations ?? 5;
     this.logger = logger
       ? logger.child({module: 'ChainService'})
       : createLogger(defaultTestConfig());
-    this.provider = new providers.JsonRpcProvider(provider);
+
     this.allowanceMode = allowanceMode || 'MaxUint';
     if (provider && (provider.includes('0.0.0.0') || provider.includes('localhost'))) {
       pollingInterval = pollingInterval ?? 50;
@@ -116,9 +117,8 @@ export class ChainService implements ChainServiceInterface {
   }
 
   // Only used for unit tests
-  async destructor(): Promise<void> {
+  destructor(): void {
     this.provider.removeAllListeners();
-    this.provider.polling = false;
     this.addressToContract.forEach(contract => contract.removeAllListeners());
   }
 
@@ -297,8 +297,6 @@ export class ChainService implements ChainServiceInterface {
       finalizesAt,
       _fingerprint,
     ] = await this.nitroAdjudicator.getChannelStorage(channelId);
-
-    await new Promise(r => setTimeout(r, 1_500));
 
     const pushTransactionRequest = {
       ...Transactions.createPushOutcomeTransaction(
