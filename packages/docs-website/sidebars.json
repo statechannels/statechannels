@@ -1,38 +1,38 @@
 {
   "docs": {
-    "Overview": ["overview", "products"],
+    "Overview": ["docs/overview", "docs/products"],
     "App Developers": [
-      "app-devs/app-devs-intro",
-      "app-devs/quick-start-contracts",
-      "app-devs/quick-start-dapp",
-      "app-devs/hook-up-messaging",
-      "app-devs/make-api-calls",
-      "app-devs/recommended-patterns"
+      "docs/app-devs/app-devs-intro",
+      "docs/app-devs/quick-start-contracts",
+      "docs/app-devs/quick-start-dapp",
+      "docs/app-devs/hook-up-messaging",
+      "docs/app-devs/make-api-calls",
+      "docs/app-devs/recommended-patterns"
     ],
     "Protocol Docs": [
-      "protocol-docs/wallet-devs-intro",
-      "protocol-docs/quick-start",
-      "protocol-docs/tutorial"
+      "docs/protocol-docs/wallet-devs-intro",
+      "docs/protocol-docs/quick-start",
+      "docs/protocol-docs/tutorial"
     ],
     "Protocol Tutorial": [
-      "protocol-tutorial/execute-state-transitions",
-      "protocol-tutorial/deposit-assets",
-      "protocol-tutorial/finalize-a-channel-happy",
-      "protocol-tutorial/finalize-a-channel-sad",
-      "protocol-tutorial/understand-channel-storage",
-      "protocol-tutorial/clear-a-challenge",
-      "protocol-tutorial/outcomes",
-      "protocol-tutorial/release-assets",
-      "protocol-tutorial/off-chain-funding",
-      "protocol-tutorial/precautions-and-limits"
+      "docs/protocol-tutorial/execute-state-transitions",
+      "docs/protocol-tutorial/deposit-assets",
+      "docs/protocol-tutorial/finalize-a-channel-happy",
+      "docs/protocol-tutorial/finalize-a-channel-sad",
+      "docs/protocol-tutorial/understand-channel-storage",
+      "docs/protocol-tutorial/clear-a-challenge",
+      "docs/protocol-tutorial/outcomes",
+      "docs/protocol-tutorial/release-assets",
+      "docs/protocol-tutorial/off-chain-funding",
+      "docs/protocol-tutorial/precautions-and-limits"
     ],
     "Implementation Notes": [
-      "implementation-notes/contract-devs-intro",
-      "implementation-notes/asset-holder",
-      "implementation-notes/force-move",
-      "implementation-notes/nitro-adjudicator",
-      "implementation-notes/null-app",
-      "implementation-notes/single-asset-payments"
+      "docs/implementation-notes/contract-devs-intro",
+      "docs/implementation-notes/asset-holder",
+      "docs/implementation-notes/force-move",
+      "docs/implementation-notes/nitro-adjudicator",
+      "docs/implementation-notes/null-app",
+      "docs/implementation-notes/single-asset-payments"
     ]
   },
   "Contract API": {

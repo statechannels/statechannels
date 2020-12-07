@@ -34,7 +34,6 @@ module.exports = {
       {
         docs: {
           routeBasePath: '/', // Set this value to '/'.
-          homePageId: 'overview',
           showLastUpdateAuthor: true,
           showLastUpdateTime: true,
           sidebarPath: require.resolve('./sidebars.json')
@@ -59,7 +58,8 @@ module.exports = {
         {
           to: '/',
           label: 'Docs',
-          position: 'left'
+          position: 'left',
+          activeBasePath: 'docs'
         },
         {
           to: '/typescript-api/index',
