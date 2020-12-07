@@ -1,2 +1,5 @@
+# See https://docs.netlify.com/configure-builds/file-based-configuration/#ignore-builds
+# The existence of this file is intended to let netlify skip build unless the docs-website OR one if its dependencies has changed.
+# It should prevent a lot of unnecessary deploy previews being built.
 [build]
-  ignore = "git diff --quiet HEAD^ HEAD packages/docs-website/ packages/nitro-protocol"
+  ignore = "git diff --quiet HEAD^ HEAD packages/docs-website/ packages/nitro-protocol packages/client-api-schema packages/server-wallet"
