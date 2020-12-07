@@ -9,6 +9,7 @@
     "@docusaurus/preset-classic": "2.0.0-alpha.64",
     "@mdx-js/react": "1.6.18",
     "@microsoft/api-documenter": "7.8.21",
+    "@statechannels/client-api-schema": "0.5.1",
     "@statechannels/nitro-protocol": "0.11.2",
     "@statechannels/server-wallet": "1.16.0",
     "clsx": "1.1.1",
