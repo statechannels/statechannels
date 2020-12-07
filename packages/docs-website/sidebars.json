@@ -23,7 +23,8 @@
       "protocol-tutorial/clear-a-challenge",
       "protocol-tutorial/outcomes",
       "protocol-tutorial/release-assets",
-      "protocol-tutorial/off-chain-funding"
+      "protocol-tutorial/off-chain-funding",
+      "protocol-tutorial/precautions-and-limits"
     ],
     "Implementation Notes": [
       "implementation-notes/contract-devs-intro",
