@@ -58,7 +58,8 @@ module.exports = {
         {
           to: '/',
           label: 'Docs',
-          position: 'left'
+          position: 'left',
+          activeBasePath: 'docs'
         },
         {
           to: '/typescript-api/index',
