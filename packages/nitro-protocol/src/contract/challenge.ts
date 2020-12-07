@@ -16,6 +16,7 @@ export function hashChallengeMessage(challengeState: State): Bytes32 {
 }
 
 export interface ChallengeRegisteredEvent {
+  channelId: Bytes32;
   challengerAddress: string;
   finalizesAt: number;
   challengeStates: SignedState[];
@@ -33,6 +34,7 @@ export interface ChallengeRegisteredStruct {
 }
 export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegisteredEvent {
   const {
+    channelId,
     turnNumRecord,
     finalizesAt,
     challenger,
@@ -72,7 +74,7 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
     };
     return {state, signature};
   });
-  return {challengeStates, finalizesAt, challengerAddress: challenger};
+  return {channelId, challengeStates, finalizesAt, challengerAddress: challenger};
 }
 
 export interface ChallengeClearedEvent {

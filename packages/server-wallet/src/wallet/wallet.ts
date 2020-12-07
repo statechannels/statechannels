@@ -50,6 +50,7 @@ import {
   AssetTransferredArg,
   ChainService,
   MockChainService,
+  ChannelFinalizedArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
@@ -671,6 +672,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     await this.takeActions([arg.channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+  }
+
+  async channelFinalized(_arg: ChannelFinalizedArg): Promise<void> {
+    return;
   }
 
   private async registerChannelWithChainService(channelId: string): Promise<void> {

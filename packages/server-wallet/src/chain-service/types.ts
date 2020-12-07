@@ -24,9 +24,14 @@ export type FundChannelArg = {
   amount: Uint256;
 };
 
+export type ChannelFinalizedArg = {
+  channelId: Bytes32;
+};
+
 export interface ChainEventSubscriberInterface {
   holdingUpdated(arg: HoldingUpdatedArg): void;
   assetTransferred(arg: AssetTransferredArg): void;
+  channelFinalized(arg: ChannelFinalizedArg): void;
 }
 
 interface ChainEventEmitterInterface {

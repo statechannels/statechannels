@@ -222,6 +222,7 @@ describe('registerChannel', () => {
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
       holdingUpdated,
       assetTransferred: _.noop,
+      channelFinalized: _.noop,
     });
     await p;
   });
@@ -241,6 +242,7 @@ describe('registerChannel', () => {
           resolve(true);
         },
         assetTransferred: _.noop,
+        channelFinalized: _.noop,
       })
     );
   });
@@ -274,6 +276,7 @@ describe('registerChannel', () => {
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       holdingUpdated,
       assetTransferred: _.noop,
+      channelFinalized: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);
@@ -289,6 +292,7 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
+        channelFinalized: _.noop,
         assetTransferred: (arg: AssetTransferredArg) => {
           switch (counter) {
             case 0:
@@ -330,6 +334,7 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         holdingUpdated: _.noop,
+        channelFinalized: _.noop,
         assetTransferred: (arg: AssetTransferredArg) => {
           switch (counter) {
             case 0:
@@ -372,11 +377,51 @@ describe('concludeAndWithdraw', () => {
 });
 
 // eslint-disable-next-line jest/no-focused-tests
-describe.only('challenge', () => {
+describe('challenge', () => {
   it('can challenge', async () => {
-    const state1 = stateSignedBy()({chainId, challengeDuration: 1});
-    const state2 = stateSignedBy([bWallet()])({chainId, turnNum: 1, challengeDuration: 1});
-    await (await chainService.challenge([state1, state2], aWallet().privateKey)).wait();
+    const aDestinationAddress = Wallet.createRandom().address;
+    const bDestinationAddress = Wallet.createRandom().address;
+    const aDestintination = makeDestination(aDestinationAddress);
+    const bDestintination = makeDestination(bDestinationAddress);
+    const channelNonce = getChannelNonce();
+
+    const outcome = simpleEthAllocation([
+      {destination: aDestintination, amount: BN.from(1)},
+      {destination: bDestintination, amount: BN.from(3)},
+    ]);
+    const state1 = stateSignedBy()({
+      chainId,
+      challengeDuration: 1,
+      outcome,
+      channelNonce,
+    });
+    const state2 = stateSignedBy([bWallet()])({
+      chainId,
+      turnNum: 1,
+      challengeDuration: 1,
+      outcome,
+      channelNonce,
+    });
+    const channelId = getChannelId({
+      channelNonce: state1.channelNonce,
+      chainId: state1.chainId,
+      participants: state1.participants.map(p => p.signingAddress),
+    });
+
+    const p = new Promise(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        holdingUpdated: _.noop,
+        assetTransferred: _.noop,
+        channelFinalized: resolve,
+      })
+    );
+    await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
+    await chainService.challenge([state1, state2], bWallet().privateKey);
+    await p;
+    await chainService.pushOutcome(state2);
+
+    expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(1));
+    expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(3));
   }, 30_000_000);
 });
 
