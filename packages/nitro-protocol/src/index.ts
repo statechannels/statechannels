@@ -73,6 +73,7 @@ export {
   createDepositTransaction as createETHDepositTransaction,
   createTransferAllTransaction,
 } from './contract/transaction-creators/eth-asset-holder';
+export {createPushOutcomeTransaction} from './contract/transaction-creators/nitro-adjudicator';
 
 export {
   signState,

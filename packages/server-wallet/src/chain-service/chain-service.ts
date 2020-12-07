@@ -6,6 +6,7 @@ import {
   getChannelId,
   Transactions,
   ChallengeRegisteredEvent as NitroChallengeRegisteredEvent,
+  createPushOutcomeTransaction,
 } from '@statechannels/nitro-protocol';
 import {
   Address,
@@ -299,7 +300,7 @@ export class ChainService implements ChainServiceInterface {
     ] = await this.nitroAdjudicator.getChannelStorage(channelId);
 
     const pushTransactionRequest = {
-      ...Transactions.createPushOutcomeTransaction(
+      ...createPushOutcomeTransaction(
         turnNumRecord,
         finalizesAt,
         lastState,
