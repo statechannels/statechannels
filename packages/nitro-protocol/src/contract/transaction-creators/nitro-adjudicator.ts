@@ -23,7 +23,8 @@ export function createPushOutcomeTransaction(
   const {participants} = state.channel;
   const challengerAddress = channelWasConcluded
     ? constants.AddressZero
-    : participants[state.turnNum % participants.length];
+    : // todo: this is not correct
+      participants[state.turnNum % participants.length];
   const encodedOutcome = encodeOutcome(outcome);
 
   const funcName = transferAll ? 'pushOutcomeAndTransferAll' : 'pushOutcome';
