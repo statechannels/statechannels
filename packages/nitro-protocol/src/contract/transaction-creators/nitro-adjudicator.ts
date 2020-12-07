@@ -13,7 +13,8 @@ export function createPushOutcomeTransaction(
   finalizesAt: number,
   state: State,
   outcome: Outcome,
-  channelWasConcluded = false
+  channelWasConcluded = false,
+  transferAll = false
 ): providers.TransactionRequest {
   if (channelWasConcluded && turnNumRecord !== 0)
     throw Error('If the channel was concluded, you should use 0 for turnNumRecord');
@@ -25,7 +26,8 @@ export function createPushOutcomeTransaction(
     : participants[state.turnNum % participants.length];
   const encodedOutcome = encodeOutcome(outcome);
 
-  const data = NitroAdjudicatorContractInterface.encodeFunctionData('pushOutcome', [
+  const funcName = transferAll ? 'pushOutcomeAndTransferAll' : 'pushOutcome';
+  const data = NitroAdjudicatorContractInterface.encodeFunctionData(funcName, [
     channelId,
     turnNumRecord,
     finalizesAt,

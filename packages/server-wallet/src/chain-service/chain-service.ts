@@ -10,8 +10,10 @@ import {
   BN,
   makeAddress,
   makeDestination,
+  PrivateKey,
   SignedState,
   toNitroSignedState,
+  toNitroState,
 } from '@statechannels/wallet-core';
 import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
 import {concat, from, Observable, Subscription} from 'rxjs';
@@ -19,6 +21,7 @@ import {filter, share} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
+import _ from 'lodash';
 
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
@@ -243,6 +246,49 @@ export class ChainService implements ChainServiceInterface {
       .catch(captureExpectedErrors);
 
     return transactionResponse;
+  }
+
+  async challenge(
+    challengeStates: SignedState[],
+    privateKey: PrivateKey
+  ): Promise<providers.TransactionResponse> {
+    if (!challengeStates.length) {
+      throw new Error('Must challenge with at least one state');
+    }
+
+    const challengeTransactionRequest = {
+      ...Transactions.createChallengeTransaction(
+        challengeStates.flatMap(toNitroSignedState),
+        privateKey
+      ),
+      to: nitroAdjudicatorAddress,
+    };
+    await (await this.sendTransaction(challengeTransactionRequest)).wait();
+
+    const lastState = toNitroState(
+      challengeStates.sort((a, b) => a.turnNum - b.turnNum)[challengeStates.length - 1]
+    );
+    const channelId = getChannelId(lastState.channel);
+    const [
+      turnNumRecord,
+      finalizesAt,
+      _fingerprint,
+    ] = await this.nitroAdjudicator.getChannelStorage(channelId);
+
+    await new Promise(r => setTimeout(r, 2_000));
+
+    const pushTransactionRequest = {
+      ...Transactions.createPushOutcomeTransaction(
+        turnNumRecord,
+        finalizesAt,
+        lastState,
+        lastState.outcome,
+        false,
+        true
+      ),
+      to: nitroAdjudicatorAddress,
+    };
+    return this.sendTransaction(pushTransactionRequest);
   }
 
   registerChannel(

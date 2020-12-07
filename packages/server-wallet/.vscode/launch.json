@@ -38,7 +38,8 @@
       "autoAttachChildProcesses": false,
       "internalConsoleOptions": "neverOpen",
       "env": {
-        "NODE_ENV": "test"
+        "NODE_ENV": "test",
+        "SHOW_VERBOSE_GANACHE_OUTPUT": "true"
       }
     },
     {
