@@ -40,14 +40,14 @@ beforeAll(async () => {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
     destination: makeDestination(
-      '0xaaaa000000000000000000000000000000000000000000000000000000000001'
+      '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
     ),
   };
   participantB = {
     signingAddress: await b.getSigningAddress(),
     participantId: 'b',
     destination: makeDestination(
-      '0xbbbb000000000000000000000000000000000000000000000000000000000002'
+      '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
     ),
   };
 });
