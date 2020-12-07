@@ -17,6 +17,7 @@ import {
   bob as bobParticipant,
 } from '../../wallet/__test__/fixtures/participants';
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
+import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
 import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
 
@@ -26,6 +27,7 @@ const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRE
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
+const chainId = process.env.CHAIN_NETWORK_ID || '9002';
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
@@ -133,8 +135,7 @@ async function setUpConclude(isEth = true) {
     outcome,
     participants: [alice, bob],
     channelNonce: getChannelNonce(),
-    // eslint-disable-next-line no-process-env
-    chainId: process.env.CHAIN_NETWORK_ID || '9002',
+    chainId,
     challengeDuration: 9001,
   };
   const channelId = getChannelId({
@@ -368,6 +369,15 @@ describe('concludeAndWithdraw', () => {
 
     await p;
   });
+});
+
+// eslint-disable-next-line jest/no-focused-tests
+describe.only('challenge', () => {
+  it('can challenge', async () => {
+    const state1 = stateSignedBy()({chainId, challengeDuration: 1});
+    const state2 = stateSignedBy([bWallet()])({chainId, turnNum: 1, challengeDuration: 1});
+    await (await chainService.challenge([state1, state2], aWallet().privateKey)).wait();
+  }, 30_000_000);
 });
 
 describe('getBytecode', () => {

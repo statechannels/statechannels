@@ -5,17 +5,17 @@ import {
   State,
   makeAddress,
   Address,
+  PrivateKey,
 } from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Bytes32} from '../type-aliases';
 import {Values} from '../errors/wallet-error';
 import {signState as wasmSignState} from '../utilities/signatures';
 import {addHash} from '../state-utils';
 
 export class SigningWallet extends Model {
   readonly id!: number;
-  readonly privateKey!: Bytes32;
+  readonly privateKey!: PrivateKey;
   readonly address!: Address;
 
   static tableName = 'signing_wallets';
