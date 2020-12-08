@@ -1,70 +1,151 @@
-import {simpleEthAllocation, BN, State} from '@statechannels/wallet-core';
-
-import {protocol} from '../close-channel';
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {SignState} from '../actions';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {MockChainService} from '../../chain-service';
+import {defaultTestConfig} from '../../config';
+import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
-import {channel} from '../../models/__test__/fixtures/channel';
+import {DBCloseChannelObjective} from '../../models/objective';
+import {Store} from '../../wallet/store';
+import {WalletResponse} from '../../wallet/wallet-response';
+import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {ChannelCloser} from '../close-channel';
 
-import {applicationProtocolState} from './fixtures/protocol-state';
+const FINAL = 10; // this will be A's state to sign
+const testChan = TestChannel.create({aBal: 5, bBal: 5, startClosingAt: FINAL});
 
-const outcome = simpleEthAllocation([{amount: BN.from(5), destination: alice().destination}]);
+let store: Store;
 
-const participants = [alice(), bob()];
-const postFundState = {outcome, turnNum: 3, participants};
-const closingState = {outcome, turnNum: 4, isFinal: true, participants};
+beforeEach(async () => {
+  store = new Store(
+    knex,
+    defaultTestConfig().metricsConfiguration.timingMetrics,
+    defaultTestConfig().skipEvmValidation,
+    '0'
+  );
+  await store.dbAdmin().truncateDB();
+});
 
-const runningState = {outcome, turnNum: 7, participants};
-const closingState2 = {outcome, turnNum: 8, isFinal: true, participants};
+afterEach(async () => await store.dbAdmin().truncateDB());
 
-const signState = (state: Partial<State>): Partial<SignState> => ({type: 'SignState', ...state});
-const withdrawAction = {
-  type: 'Withdraw',
-  channelId: channel().channelId,
+describe(`closing phase`, () => {
+  it(`waits, if it isn't my turn`, async () => {
+    const objective = await setup(testChan, {participant: 0, statesHeld: [7, 8]});
+    await crankAndAssert(objective, {statesToSign: []});
+  });
+  it(`creates and signs the closing state, if it is my turn`, async () => {
+    const objective = await setup(testChan, {participant: 0, statesHeld: [8, 9]});
+    await crankAndAssert(objective, {statesToSign: [FINAL]});
+  });
+  it(`double signs the closing state and withdraws, if my opponent has already signed a closing state`, async () => {
+    const objective = await setup(testChan, {participant: 1, statesHeld: [9, FINAL]});
+    await crankAndAssert(objective, {statesToSign: [FINAL + 1], withdraws: true});
+  });
+});
+
+describe(`defunding phase (when the channel is closed)`, () => {
+  describe(`direct funding`, () => {
+    it('submits the withdrawal transaction', async () => {
+      const objective = await setup(testChan, {participant: 0, statesHeld: [FINAL, FINAL + 1]});
+
+      // submit it once
+      await crankAndAssert(objective, {withdraws: true});
+
+      // don't submit again
+      await crankAndAssert(objective, {withdraws: false});
+
+      // then let's "wait" for 10 minutes for the fund request to the chain service to get stale
+      await ChainServiceRequest.query(knex)
+        .findOne({channelId: testChan.channelId})
+        .patch({timestamp: new Date(Date.now() - requestTimeout - 10)});
+
+      // it should submit again
+      await crankAndAssert(objective, {withdraws: true});
+
+      // wait until stale again
+      await ChainServiceRequest.query(knex)
+        .findOne({channelId: testChan.channelId})
+        .patch({timestamp: new Date(Date.now() - requestTimeout - 10)});
+
+      // we shouldn't see a third submission
+      await crankAndAssert(objective, {withdraws: false});
+    });
+  });
+  describe(`fake funding`, () => {
+    it('marks the objective as complete', async () => {
+      const testChan = TestChannel.create({startClosingAt: FINAL, fundingStrategy: 'Fake'});
+      const objective = await setup(testChan, {participant: 0, statesHeld: [FINAL, FINAL + 1]});
+
+      await crankAndAssert(objective, {completesObj: true});
+    });
+  });
+});
+
+// TODO: when should it complete the objective?
+
+interface SetupParams {
+  participant: 0 | 1;
+  statesHeld: number[];
+}
+const setup = async (
+  testChan: TestChannel,
+  args: SetupParams
+): Promise<DBCloseChannelObjective> => {
+  const {participant, statesHeld} = args;
+  const totalFunds = testChan.startBal;
+
+  await testChan.insertInto(store, {
+    participant,
+    states: statesHeld,
+    funds: totalFunds,
+  });
+
+  // add the closeChannel objective and approve
+  const objective = await store.transaction(async tx => {
+    const o = await store.ensureObjective(testChan.closeChannelObjective, tx);
+    await store.approveObjective(o.objectiveId, tx);
+    return o as DBCloseChannelObjective;
+  });
+
+  return objective;
 };
-const validCSR = ChainServiceRequest.fromJson({
-  channelId: 0,
-  request: 'withdraw',
-  timestamp: new Date(),
-});
 
-const staleCSR = ChainServiceRequest.fromJson({
-  channelId: 0,
-  request: 'withdraw',
-  timestamp: new Date(Date.now() - requestTimeout - 1),
-});
+interface AssertionParams {
+  statesToSign?: number[];
+  withdraws?: boolean;
+  completesObj?: boolean;
+}
 
-test.each`
-  supported        | latestSignedByMe | latest           | chainServiceRequests | action                      | cond                                                                  | result
-  ${postFundState} | ${postFundState} | ${postFundState} | ${undefined}         | ${signState(closingState)}  | ${'when the postfund state is supported, and the channel is closing'} | ${'signs the final state'}
-  ${closingState}  | ${postFundState} | ${closingState}  | ${undefined}         | ${signState(closingState)}  | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
-  ${closingState2} | ${runningState}  | ${closingState2} | ${undefined}         | ${signState(closingState2)} | ${'when the closing state is supported, and the channel is closing'}  | ${'signs the final state'}
-  ${closingState}  | ${closingState}  | ${closingState}  | ${undefined}         | ${withdrawAction}           | ${'when the channel is closed'}                                       | ${'submits withdraw transaction'}
-  ${closingState}  | ${closingState}  | ${closingState}  | ${[validCSR]}        | ${undefined}                | ${'when the channel is closed + valid chain service request'}         | ${'no action'}
-  ${closingState}  | ${closingState}  | ${closingState}  | ${[staleCSR]}        | ${withdrawAction}           | ${'when the channel is closed + stale chain service request'}         | ${'sumbits a withdraw transaction'}
-`('$result $cond', ({supported, latest, latestSignedByMe, chainServiceRequests, action}) => {
-  const ps = applicationProtocolState({
-    app: {supported, latest, latestSignedByMe, chainServiceRequests},
-  });
-  if (action) {
-    expect(protocol(ps)).toMatchObject(action);
+const crankAndAssert = async (
+  objective: DBCloseChannelObjective,
+  args: AssertionParams
+): Promise<void> => {
+  const statesToSign = args.statesToSign || [];
+  const withdraws = args.withdraws || false;
+  const completesObj = args.completesObj || false;
+
+  const chainService = new MockChainService();
+
+  const logger = createLogger(defaultTestConfig());
+  const timingMetrics = false;
+  const channelCloser = ChannelCloser.create(store, chainService, logger, timingMetrics);
+  const response = WalletResponse.initialize();
+  const spy = jest.spyOn(chainService, 'concludeAndWithdraw');
+  await channelCloser.crank(objective, response);
+
+  // expect there to be an outgoing message in the response
+  expect(response._signedStates).toMatchObject(
+    statesToSign.map((n: number) => testChan.wireState(Number(n)))
+  );
+  // check that funds were deposited
+  if (withdraws) {
+    expect(spy).toHaveBeenCalled();
   } else {
-    expect(protocol(ps)).toBeUndefined();
+    expect(spy).not.toHaveBeenCalled();
   }
-});
 
-test('when I have signed a final state, unfunded', () => {
-  const ps = applicationProtocolState({
-    app: {
-      supported: closingState,
-      latest: closingState,
-      latestSignedByMe: closingState,
-      directFundingStatus: 'Uncategorized',
-    },
-  });
-  ps.app.fundingStrategy = 'Fake';
-  expect(protocol(ps)).toMatchObject({
-    type: 'CompleteObjective',
-    channelId: ps.app.channelId,
-  });
-});
+  const reloadedObjective = await store.getObjective(objective.objectiveId);
+  if (completesObj) {
+    expect(reloadedObjective.status).toEqual('succeeded');
+  } else {
+    expect(reloadedObjective.status).toEqual('approved');
+  }
+};
