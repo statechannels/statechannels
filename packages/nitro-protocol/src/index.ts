@@ -36,7 +36,7 @@ export {
   getChallengeClearedEvent,
   ChallengeRegisteredEvent,
 } from './contract/challenge';
-export {Channel, getChannelId} from './contract/channel';
+export {Channel, getChannelId, isExternalDestination} from './contract/channel';
 export {
   validTransition,
   ForceMoveAppContractInterface,
