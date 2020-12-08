@@ -29,7 +29,6 @@ export const createPushOutcomeTransactionFactory = (transferAll: boolean) => (
     throw Error('If the channel was concluded, you should use 0 for turnNumRecord');
   const channelId = getChannelId(state.channel);
   const stateHash = channelWasConcluded ? constants.HashZero : hashState(state);
-  const {participants} = state.channel;
   const encodedOutcome = encodeOutcome(outcome);
 
   const funcName = transferAll ? 'pushOutcomeAndTransferAll' : 'pushOutcome';
