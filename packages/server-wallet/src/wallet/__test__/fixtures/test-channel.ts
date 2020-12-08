@@ -31,7 +31,7 @@ interface TestChannelArgs {
   aBal?: number;
   bBal?: number;
   channelNonce?: number;
-  startClosingAt?: number;
+  finalFrom?: number;
   fundingStrategy?: FundingStrategy;
 }
 
@@ -44,7 +44,7 @@ export class TestChannel {
   public signingWalletB: SigningWallet = bobWallet();
   public startBals: [number, number];
   public channelNonce: number;
-  public startClosingAt?: number;
+  public finalFrom?: number;
   public fundingStrategy: FundingStrategy;
 
   public get participants(): Participant[] {
@@ -62,7 +62,7 @@ export class TestChannel {
     this.fundingStrategy = args.fundingStrategy || 'Direct';
     this.startBals = [args.aBal || 5, args.bBal || 5];
     this.channelNonce = args.channelNonce || 5;
-    this.startClosingAt = args.startClosingAt;
+    this.finalFrom = args.finalFrom;
   }
 
   /**
@@ -77,8 +77,8 @@ export class TestChannel {
     return {
       ...this.channelConstants,
       appData: '0x',
-      isFinal: !!this.startClosingAt && n >= this.startClosingAt,
-      turnNum: Math.min(n, this.startClosingAt || n),
+      isFinal: !!this.finalFrom && n >= this.finalFrom,
+      turnNum: Math.min(n, this.finalFrom || n),
       outcome: bals ? this.toOutcome(bals) : this.startOutcome,
     };
   }

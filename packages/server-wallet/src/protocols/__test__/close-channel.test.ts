@@ -10,7 +10,7 @@ import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {ChannelCloser} from '../close-channel';
 
 const FINAL = 10; // this will be A's state to sign
-const testChan = TestChannel.create({aBal: 5, bBal: 5, startClosingAt: FINAL});
+const testChan = TestChannel.create({aBal: 5, bBal: 5, finalFrom: FINAL});
 
 let store: Store;
 
@@ -71,7 +71,7 @@ describe(`defunding phase (when the channel is closed)`, () => {
   });
   describe(`fake funding`, () => {
     it('marks the objective as complete', async () => {
-      const testChan = TestChannel.create({startClosingAt: FINAL, fundingStrategy: 'Fake'});
+      const testChan = TestChannel.create({finalFrom: FINAL, fundingStrategy: 'Fake'});
       const objective = await setup(testChan, {participant: 0, statesHeld: [FINAL, FINAL + 1]});
 
       await crankAndAssert(objective, {completesObj: true});
