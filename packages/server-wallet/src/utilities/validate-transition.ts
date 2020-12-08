@@ -3,7 +3,7 @@ import {SignedState, StateWithHash, toNitroState} from '@statechannels/wallet-co
 import {constants} from 'ethers';
 import {Logger} from 'pino';
 
-import {validateTransitionWithEVM} from '../evm-validator';
+import {validateAppTransitionWithEVM} from '../evm-validator';
 import {Bytes} from '../type-aliases';
 import {Channel} from '../models/channel';
 
@@ -103,7 +103,7 @@ export function validateTransition(
   // We only want to run the validation for states not in a funding or final stage
   // per the force move contract
   if (!skipEvmValidation && !isInFundingStage && !toState.isFinal) {
-    const evmValidation = validateTransitionWithEVM(
+    const evmValidation = validateAppTransitionWithEVM(
       toNitroState(fromState),
       toNitroState(toState),
       bytecode
