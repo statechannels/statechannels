@@ -65,10 +65,10 @@ export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private allowanceMode: AllowanceMode;
-  // Used for asset holders
-  private addressToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
+  private assetHolderToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscribers: Map<Bytes32, ChainEventSubscriberInterface[]> = new Map();
+  // For convinience, can also use addressToContract map
   private nitroAdjudicator: Contract;
 
   private readonly blockConfirmations: number;
@@ -135,16 +135,6 @@ export class ChainService implements ChainServiceInterface {
       this.addressToContract.get(contractAddress) ??
       this.addContractMapping(contractAddress, contractInterface)
     );
-  }
-
-  private getOrAddAssetHolderObservable(assetHolderAddress: Address): Observable<AssetHolderEvent> {
-    let obs = this.addressToObservable.get(assetHolderAddress);
-    if (!obs) {
-      const contract = this.getOrAddContractMapping(assetHolderAddress);
-      obs = this.addAssetHolderObservable(contract);
-      this.addressToObservable.set(assetHolderAddress, obs);
-    }
-    return obs;
   }
 
   private async sendTransaction(
@@ -314,7 +304,7 @@ export class ChainService implements ChainServiceInterface {
     ]);
 
     assetHolders.map(assetHolder => {
-      this.getOrAddAssetHolderObservable(assetHolder);
+      this.setUpAssetHolderListener(assetHolder);
       const contract = this.getOrAddContractMapping(assetHolder);
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
       // Fetch the current contract holding, and emit as an event
@@ -383,6 +373,14 @@ export class ChainService implements ChainServiceInterface {
       {tx: event.transactionHash},
       'Finished waiting for confirmations; considering transaction finalized'
     );
+  }
+
+  private setUpAssetHolderListener(assetHolderAddress: Address): void {
+    if (!this.assetHolderToObservable.get(assetHolderAddress)) {
+      const contract = this.getOrAddContractMapping(assetHolderAddress);
+      const obs = this.addAssetHolderObservable(contract);
+      this.assetHolderToObservable.set(assetHolderAddress, obs);
+    }
   }
 
   private addAssetHolderObservable(assetHolderContract: Contract): Observable<AssetHolderEvent> {
