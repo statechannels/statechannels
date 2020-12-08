@@ -99,7 +99,7 @@ contract AssetHolder is IAssetHolder {
     // **************
 
     modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only the NitroAdjudicator is authorized');
+        require(msg.sender == AdjudicatorAddress, 'Only NitroAdjudicator authorized');
         _;
     }
 
@@ -164,7 +164,7 @@ contract AssetHolder is IAssetHolder {
         // loop over allocations and decrease balance until we hit the specified destination
         for (i = 0; i < allocation.length; i++) {
             if (balance == 0) {
-                revert('_transfer | fromChannel affords 0 for destination');
+                revert('affords 0 for destination');
             }
             uint256 _amount = allocation[i].amount;
             if (allocation[i].destination == destination) {
@@ -605,7 +605,7 @@ contract AssetHolder is IAssetHolder {
      * @param destination ethereum address to be credited.
      * @param amount Quantity of assets to be transferred.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal virtual {}
+    function _transferAsset(address payable destination, uint256 amount) internal virtual {} // solhint-disable-line no-empty-blocks
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.

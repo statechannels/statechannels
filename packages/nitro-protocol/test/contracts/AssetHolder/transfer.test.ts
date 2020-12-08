@@ -38,7 +38,7 @@ beforeAll(async () => {
 
 const reason0 =
   'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash';
-const reason1 = '_transfer | fromChannel affords 0 for destination';
+const reason1 = 'affords 0 for destination';
 
 // c is the channel we are transferring from.
 describe('transferAll', () => {
