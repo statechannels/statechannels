@@ -38,6 +38,7 @@ beforeAll(async () => {
 
 const reason0 =
   'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash';
+const reason1 = 'Indices must be sorted';
 
 // c is the channel we are transferring from.
 describe('transfer', () => {
@@ -58,7 +59,7 @@ describe('transfer', () => {
     ${'12. -> 2 chan        partial'}  | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1]}       | ${{C: 2, X: 1}} | ${{c: 2, X: 1}} | ${{}}           | ${{X: 1}}             | ${undefined}
     ${'13. -> 2 indices'}              | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[0, 1]}    | ${{C: 0, X: 1}} | ${{c: 0, X: 1}} | ${{C: 2}}       | ${{C: 2, X: 1}}       | ${undefined}
     ${'14. -> 3 indices'}              | ${{c: 5}}  | ${{A: 1, C: 2, X: 2}} | ${[0, 1, 2]} | ${{}}           | ${{c: 0, X: 2}} | ${{A: 1, C: 2}} | ${{A: 1, C: 2, X: 2}} | ${undefined}
-    ${'15. -> reverse order (see 13)'} | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1, 0]}    | ${{C: 2, X: 1}} | ${{c: 2, X: 1}} | ${{}}           | ${{X: 1}}             | ${undefined}
+    ${'15. -> reverse order (see 13)'} | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1, 0]}    | ${{C: 2, X: 1}} | ${{c: 2, X: 1}} | ${{}}           | ${{X: 1}}             | ${reason1}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({
