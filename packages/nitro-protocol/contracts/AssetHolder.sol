@@ -167,9 +167,7 @@ contract AssetHolder is IAssetHolder {
             // copy destination part
             newAllocation[i].destination = allocation[i].destination;
             // compute new amount part
-            uint256 affordsForDestination = (allocation[i].amount > surplus)
-                ? surplus
-                : allocation[i].amount; // min(amount,surplus)
+            uint256 affordsForDestination = min(allocation[i].amount, surplus);
             if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
                 // found a match
                 // reduce the current allocationItem.amount
@@ -588,5 +586,9 @@ contract AssetHolder is IAssetHolder {
                 ),
             'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash'
         );
+    }
+
+    function min(uint256 a, uint256 b) internal pure returns (uint256) {
+        return a > b ? b : a;
     }
 }
