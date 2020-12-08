@@ -12,7 +12,7 @@ const logger = createLogger(defaultTestConfig());
  * Returns a promise that resolves to true if the validateTransition
  * returns true false otherwise
  */
-export const validateTransitionWithEVM = (
+export const validateAppTransitionWithEVM = (
   from: NitroState,
   to: NitroState,
   bytecode: Bytes
