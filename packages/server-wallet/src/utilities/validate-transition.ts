@@ -53,6 +53,7 @@ export function validateTransition(
     _.isEqual(toState.chainId, fromState.chainId) &&
     _.isEqual(toState.participants, fromState.participants) &&
     _.isEqual(toState.appDefinition, fromState.appDefinition) &&
+    _.isEqual(toState.channelNonce, fromState.channelNonce) &&
     _.isEqual(toState.challengeDuration, fromState.challengeDuration);
 
   if (!constantsCheck) {
