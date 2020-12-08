@@ -377,7 +377,7 @@ describe('concludeAndWithdraw', () => {
 });
 
 describe('challenge', () => {
-  it.skip('can challenge', async () => {
+  it('can challenge', async () => {
     const aDestinationAddress = Wallet.createRandom().address;
     const bDestinationAddress = Wallet.createRandom().address;
     const aDestintination = makeDestination(aDestinationAddress);
@@ -390,14 +390,14 @@ describe('challenge', () => {
     ]);
     const state1 = stateSignedBy()({
       chainId,
-      challengeDuration: 1,
+      challengeDuration: 2,
       outcome,
       channelNonce,
     });
     const state2 = stateSignedBy([bWallet()])({
       chainId,
       turnNum: 1,
-      challengeDuration: 1,
+      challengeDuration: 2,
       outcome,
       channelNonce,
     });
@@ -421,8 +421,7 @@ describe('challenge', () => {
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(3));
-    // todo: remove this
-  }, 30_000_000);
+  });
 });
 
 describe('getBytecode', () => {
