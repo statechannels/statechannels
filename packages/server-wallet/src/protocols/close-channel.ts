@@ -1,7 +1,7 @@
 import {checkThat, isSimpleAllocation, State, unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 import {Logger} from 'pino';
-import {isExternalDestination} from '@statechannels/nitro-protocol/src/contract/channel';
+import {isExternalDestination} from '@statechannels/nitro-protocol';
 
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
