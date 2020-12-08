@@ -20,8 +20,8 @@ import {
   toNitroState,
 } from '@statechannels/wallet-core';
 import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
-import {concat, from, Observable, Subscription} from 'rxjs';
-import {filter, share} from 'rxjs/operators';
+import {Observable, Subscription} from 'rxjs';
+import {filter} from 'rxjs/operators';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
@@ -44,7 +44,7 @@ import {
 const Deposited = 'Deposited' as const;
 const AssetTransferred = 'AssetTransferred' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
-type DepositedEvent = {type: 'Deposited'; ethersEvent?: Event} & HoldingUpdatedArg;
+type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
 type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
 type ChallengeRegisteredEvent = {
   type: 'ChallengeRegistered';
@@ -74,6 +74,7 @@ export class ChainService implements ChainServiceInterface {
   private addressToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
+  private channelToSubscriber: Map<Bytes32, ChainEventSubscriberInterface[]> = new Map();
   private nitroAdjudicator: Contract;
   private nitroAdjudicatorObservable: Observable<ChallengeRegisteredEvent>;
 
@@ -147,11 +148,11 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
-  private getOrAddContractObservable(assetHolderAddress: Address): Observable<AssetHolderEvent> {
+  private getOrAddAssetHolderObservable(assetHolderAddress: Address): Observable<AssetHolderEvent> {
     let obs = this.addressToObservable.get(assetHolderAddress);
     if (!obs) {
       const contract = this.getOrAddContractMapping(assetHolderAddress);
-      obs = this.addContractObservable(contract);
+      obs = this.addAssetHolderObservable(contract);
       this.addressToObservable.set(assetHolderAddress, obs);
     }
     return obs;
@@ -323,37 +324,19 @@ export class ChainService implements ChainServiceInterface {
       'Registering channel with ChainService monitor for Deposited and AssetTransferred events'
     );
 
-    assetHolders.map(async assetHolder => {
-      const obs = this.getOrAddContractObservable(assetHolder);
-      // Fetch the current contract holding, and emit as an event
+    this.channelToSubscriber.set(channelId, [
+      ...(this.channelToSubscriber.get(channelId) ?? []),
+      subscriber,
+    ]);
+
+    assetHolders.map(assetHolder => {
+      this.getOrAddAssetHolderObservable(assetHolder);
       const contract = this.getOrAddContractMapping(assetHolder);
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
-      const currentHolding = from(this.getInitialHoldings(contract, channelId));
-
-      const subscription = concat<AssetHolderEvent>(
-        currentHolding,
-        obs.pipe(filter(event => event.channelId === channelId))
-      ).subscribe({
-        next: async event => {
-          this.logger.debug(
-            {channelId, tx: event.ethersEvent?.transactionHash},
-            `Observed ${event.type} event on-chain; beginning to wait for confirmations`
-          );
-          switch (event.type) {
-            case Deposited:
-              await this.waitForConfirmations(event.ethersEvent);
-              subscriber.holdingUpdated(event);
-              break;
-            case AssetTransferred:
-              await this.waitForConfirmations(event.ethersEvent);
-              subscriber.assetTransferred(event);
-              break;
-            default:
-              throw new Error('Unexpected event from contract observable');
-          }
-        },
-      });
-      this.addSubscription(channelId, subscription);
+      // Fetch the current contract holding, and emit as an event
+      this.getInitialHoldings(contract, channelId).then(initialHoldings =>
+        subscriber.holdingUpdated(initialHoldings)
+      );
     });
 
     const subscription = this.nitroAdjudicatorObservable
@@ -397,31 +380,30 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
-  private async getInitialHoldings(contract: Contract, channelId: string): Promise<DepositedEvent> {
+  private async getInitialHoldings(
+    contract: Contract,
+    channelId: string
+  ): Promise<HoldingUpdatedArg> {
     const holding = BN.from(await contract.holdings(channelId));
 
     return {
-      type: Deposited,
       channelId,
       assetHolderAddress: makeAddress(contract.address),
       amount: BN.from(holding),
     };
   }
 
-  private async waitForConfirmations(event: Event | undefined): Promise<void> {
-    if (event) {
-      // `tx.wait(n)` resolves after n blocks are mined that include the given transaction `tx`
-      // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse
-      await (await event.getTransaction()).wait(this.blockConfirmations + 1);
-      this.logger.debug(
-        {tx: event.transactionHash},
-        'Finished waiting for confirmations; considering transaction finalized'
-      );
-      return;
-    }
+  private async waitForConfirmations(event: Event): Promise<void> {
+    // `tx.wait(n)` resolves after n blocks are mined that include the given transaction `tx`
+    // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse
+    await (await event.getTransaction()).wait(this.blockConfirmations + 1);
+    this.logger.debug(
+      {tx: event.transactionHash},
+      'Finished waiting for confirmations; considering transaction finalized'
+    );
   }
 
-  private addContractObservable(assetHolderContract: Contract): Observable<AssetHolderEvent> {
+  private addAssetHolderObservable(assetHolderContract: Contract): Observable<AssetHolderEvent> {
     // Create an observable that emits events on contract events
     const obs = new Observable<AssetHolderEvent>(subs => {
       // TODO: add other event types
@@ -447,8 +429,29 @@ export class ChainService implements ChainServiceInterface {
         })
       );
     });
+    obs.subscribe({
+      next: async event => {
+        this.logger.debug(
+          {channelId: event.channelId, tx: event.ethersEvent?.transactionHash},
+          `Observed ${event.type} event on-chain; beginning to wait for confirmations`
+        );
+        await this.waitForConfirmations(event.ethersEvent);
+        this.channelToSubscriber.get(event.channelId)?.forEach(subscriber => {
+          switch (event.type) {
+            case Deposited:
+              subscriber.holdingUpdated(event);
+              break;
+            case AssetTransferred:
+              subscriber.assetTransferred(event);
+              break;
+            default:
+              throw new Error('Unexpected event from contract observable');
+          }
+        });
+      },
+    });
 
-    return obs.pipe(share());
+    return obs;
   }
 
   private async increaseAllowance(assetHolderAddress: Address, amount: string): Promise<void> {
