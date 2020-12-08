@@ -73,6 +73,8 @@ export class ChainService implements ChainServiceInterface {
   private readonly blockConfirmations: number;
   private transactionQueue = new PQueue({concurrency: 1});
 
+  private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
+
   constructor({
     provider,
     pk,
@@ -102,8 +104,10 @@ export class ChainService implements ChainServiceInterface {
 
     this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
       const event = getChallengeRegisteredEvent(args);
-      this.whenFinalized(event.channelId, event.finalizesAt, 0);
+      this.addFinalizingChannel(event.channelId, event.finalizesAt);
     });
+
+    this.provider.on('block', this.onBlockMined.bind(this));
   }
 
   // Only used for unit tests
@@ -319,38 +323,39 @@ export class ChainService implements ChainServiceInterface {
     this.channelToSubscribers.set(channelId, []);
   }
 
-  private async whenFinalized(channelId: Bytes32, finalizesAtS: number, tryNum: number) {
-    if (tryNum > 4) return;
+  private async onBlockMined(blockTag: providers.BlockTag): Promise<void> {
+    this._onBlockMined(await this.provider.getBlock(blockTag));
+  }
 
-    const nowMs = Date.now();
-    const finalizesAtMs = finalizesAtS * 1_000;
-    if (nowMs < finalizesAtMs) {
-      setTimeout(() => this.whenFinalized(channelId, finalizesAtS, 0), nowMs - finalizesAtMs);
-      return;
-    }
-    const [, storageFinalizesAtS] = await this.nitroAdjudicator.getChannelStorage(channelId);
-    const blockTimeS = (await this.provider.getBlock(await this.provider.getBlockNumber()))
-      .timestamp;
-    if (blockTimeS >= storageFinalizesAtS) {
-      // Should we wait for 6 blocks before emitting the finalized event?
-      // Will the wallet sign new states or deposit into the channel based on this event?
-      // The answer is likely no.
-      // So we probably want to emit this event as soon as possible.
-      this.channelToSubscribers
-        .get(channelId)
-        ?.map(subscriber => subscriber.channelFinalized({channelId}));
-      return;
-    }
+  private async _onBlockMined(block: providers.Block): Promise<void> {
+    if (!this.finalizingChannels.length) return;
 
-    // In this scenario:
-    // 1. Our local clock is LATER than finalizesAt
-    // 2. The latest block timestamp is BEFORE finalizesAt
-    // Let's wait for a reasonable amount of time before querying the chain
-    setTimeout(
-      () => this.whenFinalized(channelId, finalizesAtS, 0),
-      2 * (storageFinalizesAtS - blockTimeS * 1_000),
-      tryNum + 1
-    );
+    const finalizingChannel = this.finalizingChannels[0];
+    if (finalizingChannel.finalizesAtS <= block.timestamp) {
+      const channelId = finalizingChannel.channelId;
+      const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
+      if (finalizesAt === finalizingChannel.finalizesAtS) {
+        // Should we wait for 6 blocks before emitting the finalized event?
+        // Will the wallet sign new states or deposit into the channel based on this event?
+        // The answer is likely no.
+        // So we probably want to emit this event as soon as possible.
+        this.channelToSubscribers.get(finalizingChannel.channelId)?.map(subscriber =>
+          subscriber.channelFinalized({
+            channelId,
+          })
+        );
+        // Chain storage has a new finalizesAt timestamp
+      } else if (finalizesAt) {
+        this.addFinalizingChannel(channelId, finalizesAt);
+      }
+      this.finalizingChannels = this.finalizingChannels.slice(1);
+      this._onBlockMined(block);
+    }
+  }
+
+  private addFinalizingChannel(channelId: string, finalizesAtS: number) {
+    this.finalizingChannels = [...this.finalizingChannels, {channelId, finalizesAtS: finalizesAtS}];
+    this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
   }
 
   private async getInitialHoldings(
