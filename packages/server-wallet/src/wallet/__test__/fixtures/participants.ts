@@ -6,21 +6,21 @@ import {fixture} from './utils';
 const _alice: Participant = {
   signingAddress: wallets.alice().address,
   destination: makeDestination(
-    '0xaaaa000000000000000000000000000000000000000000000000000000000001'
+    '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
   ),
   participantId: 'alice',
 };
 const _bob: Participant = {
   signingAddress: wallets.bob().address,
   destination: makeDestination(
-    '0xbbbb000000000000000000000000000000000000000000000000000000000002'
+    '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
   ),
   participantId: 'bob',
 };
 const _charlie: Participant = {
   signingAddress: wallets.charlie().address,
   destination: makeDestination(
-    '0xcccc000000000000000000000000000000000000000000000000000000000003'
+    '0x00000000000000000000000000000000000000000000000000000000000cccc3'
   ),
   participantId: 'charlie',
 };
