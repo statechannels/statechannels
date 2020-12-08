@@ -57,7 +57,10 @@ interface ChainModifierInterface {
   concludeAndWithdraw(
     finalizationProof: SignedState[]
   ): Promise<providers.TransactionResponse | void>;
-  pushOutcomeAndWithdraw(state: State): Promise<providers.TransactionResponse>;
+  pushOutcomeAndWithdraw(
+    state: State,
+    challengerAddress: Address
+  ): Promise<providers.TransactionResponse>;
   challenge(
     challengeStates: SignedState[],
     privateKey: PrivateKey

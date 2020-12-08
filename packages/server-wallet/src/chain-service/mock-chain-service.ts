@@ -56,7 +56,10 @@ export class MockChainService implements ChainServiceInterface {
     return Promise.resolve(mockTransactoinResponse);
   }
 
-  pushOutcomeAndWithdraw(_state: State): Promise<providers.TransactionResponse> {
+  pushOutcomeAndWithdraw(
+    _state: State,
+    _challengerAddress: Address
+  ): Promise<providers.TransactionResponse> {
     return Promise.resolve(mockTransactoinResponse);
   }
 

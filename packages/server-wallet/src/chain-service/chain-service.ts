@@ -264,7 +264,10 @@ export class ChainService implements ChainServiceInterface {
     return this.sendTransaction(challengeTransactionRequest);
   }
 
-  async pushOutcomeAndWithdraw(state: State): Promise<providers.TransactionResponse> {
+  async pushOutcomeAndWithdraw(
+    state: State,
+    challengerAddress: Address
+  ): Promise<providers.TransactionResponse> {
     const lastState = toNitroState(state);
     const channelId = getChannelId(lastState.channel);
     const [
@@ -274,12 +277,13 @@ export class ChainService implements ChainServiceInterface {
     ] = await this.nitroAdjudicator.getChannelStorage(channelId);
 
     const pushTransactionRequest = {
-      ...Transactions.createPushOutcomeAndTransferAllTransaction(
+      ...Transactions.createPushOutcomeAndTransferAllTransaction({
         turnNumRecord,
         finalizesAt,
-        lastState,
-        lastState.outcome
-      ),
+        state: lastState,
+        outcome: lastState.outcome,
+        challengerAddress,
+      }),
       to: nitroAdjudicatorAddress,
     };
     return this.sendTransaction(pushTransactionRequest);

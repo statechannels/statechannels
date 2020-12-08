@@ -87,21 +87,13 @@ export function createConcludeTransaction(
 }
 
 export const createPushOutcomeTransaction: (
-  turnNumRecord: number,
-  finalizesAt: number,
-  state: State,
-  outcome: Outcome,
-  channelWasConcluded?: boolean
+  arg: nitroAdjudicatorTrans.PushOutcomeTransactionArg
 ) => providers.TransactionRequest = nitroAdjudicatorTrans.createPushOutcomeTransactionFactory(
   false
 );
 
 export const createPushOutcomeAndTransferAllTransaction: (
-  turnNumRecord: number,
-  finalizesAt: number,
-  state: State,
-  outcome: Outcome,
-  channelWasConcluded?: boolean
+  arg: nitroAdjudicatorTrans.PushOutcomeTransactionArg
 ) => providers.TransactionRequest = nitroAdjudicatorTrans.createPushOutcomeTransactionFactory(true);
 
 // Currently we assume each signedState is a unique combination of state/signature
