@@ -107,7 +107,9 @@ export class ChainService implements ChainServiceInterface {
       this.addFinalizingChannel(event.channelId, event.finalizesAt);
     });
 
-    this.provider.on('block', this.onBlockMined.bind(this));
+    this.provider.on('block', async (blockTag: providers.BlockTag) =>
+      this.onBlockMined(await this.provider.getBlock(blockTag))
+    );
   }
 
   // Only used for unit tests
@@ -323,11 +325,7 @@ export class ChainService implements ChainServiceInterface {
     this.channelToSubscribers.set(channelId, []);
   }
 
-  private async onBlockMined(blockTag: providers.BlockTag): Promise<void> {
-    this._onBlockMined(await this.provider.getBlock(blockTag));
-  }
-
-  private async _onBlockMined(block: providers.Block): Promise<void> {
+  private async onBlockMined(block: providers.Block): Promise<void> {
     if (!this.finalizingChannels.length) return;
 
     const finalizingChannel = this.finalizingChannels[0];
@@ -349,7 +347,7 @@ export class ChainService implements ChainServiceInterface {
         this.addFinalizingChannel(channelId, finalizesAt);
       }
       this.finalizingChannels = this.finalizingChannels.slice(1);
-      this._onBlockMined(block);
+      this.onBlockMined(block);
     }
   }
 
