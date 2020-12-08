@@ -7,12 +7,11 @@ import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitr
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {hashAssetOutcome, MAX_OUTCOME_ITEMS} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
-import {createPushOutcomeTransaction} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
   CHANNEL_NOT_FINALIZED,
   WRONG_CHANNEL_STORAGE,
 } from '../../../src/contract/transaction-creators/revert-reasons';
-import {NITRO_MAX_GAS} from '../../../src/transactions';
+import {createPushOutcomeTransaction, NITRO_MAX_GAS} from '../../../src/transactions';
 import {
   finalizedOutcomeHash,
   getRandomNonce,
