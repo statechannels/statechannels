@@ -143,13 +143,13 @@ describe('pushOutcome', () => {
       expect(await TestNitroAdjudicator.channelStorageHashes(channelId)).toEqual(
         initialChannelStorageHash
       );
-      const transactionRequest = createPushOutcomeTransaction(
-        wasConcluded ? 0 : declaredTurnNumRecord,
+      const transactionRequest = createPushOutcomeTransaction({
+        turnNumRecord: wasConcluded ? 0 : declaredTurnNumRecord,
         finalizesAt,
         state,
         outcome,
-        wasConcluded
-      );
+        channelWasConcluded: wasConcluded,
+      });
 
       if (outcomeHashExits) {
         await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
