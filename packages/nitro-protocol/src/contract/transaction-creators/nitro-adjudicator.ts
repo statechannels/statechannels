@@ -8,14 +8,13 @@ import {getFixedPart, hashAppPart, hashState, State} from '../state';
 // https://github.com/ethers-io/ethers.js/issues/602#issuecomment-574671078
 const NitroAdjudicatorContractInterface = new utils.Interface(NitroAdjudicatorArtifact.abi);
 
-export function createPushOutcomeTransaction(
+export const createPushOutcomeTransactionFactory = (transferAll: boolean) => (
   turnNumRecord: number,
   finalizesAt: number,
   state: State,
   outcome: Outcome,
-  channelWasConcluded = false,
-  transferAll = false
-): providers.TransactionRequest {
+  channelWasConcluded = false
+): providers.TransactionRequest => {
   if (channelWasConcluded && turnNumRecord !== 0)
     throw Error('If the channel was concluded, you should use 0 for turnNumRecord');
   const channelId = getChannelId(state.channel);
@@ -38,7 +37,7 @@ export function createPushOutcomeTransaction(
   ]);
 
   return {data};
-}
+};
 
 export function concludePushOutcomeAndTransferAllArgs(
   states: State[],

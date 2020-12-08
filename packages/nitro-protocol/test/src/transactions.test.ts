@@ -3,7 +3,6 @@ import {ethers, Wallet} from 'ethers';
 import {SignedState, State} from '../../src';
 import {Channel} from '../../src/contract/channel';
 import {MAX_OUTCOME_ITEMS} from '../../src/contract/outcome';
-import {createPushOutcomeTransaction} from '../../src/contract/transaction-creators/nitro-adjudicator';
 import {signState} from '../../src/signatures';
 import {
   createCheckpointTransaction,
@@ -12,6 +11,7 @@ import {
   createRespondTransaction,
   createSignatureArguments,
   MAX_TX_DATA_SIZE,
+  createPushOutcomeTransaction,
 } from '../../src/transactions';
 import {getRandomNonce, largeOutcome} from '../test-helpers';
 
