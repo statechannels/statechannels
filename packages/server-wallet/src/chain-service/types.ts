@@ -1,4 +1,4 @@
-import {Address, Destination, SignedState, Uint256} from '@statechannels/wallet-core';
+import {Address, Destination, SignedState, State, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {Logger} from 'pino';
 
@@ -50,6 +50,7 @@ interface ChainModifierInterface {
   concludeAndWithdraw(
     finalizationProof: SignedState[]
   ): Promise<providers.TransactionResponse | void>;
+  pushOutcomeAndWithdraw(state: State): Promise<providers.TransactionResponse>;
   fetchBytecode(address: string): Promise<string>;
 }
 
