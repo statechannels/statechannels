@@ -217,13 +217,7 @@ contract AssetHolder is IAssetHolder {
         // EFFECTS
         // *******
 
-        uint256 newHoldings = initialHoldings.sub(totalPayouts);
-
-        if (newHoldings == 0) {
-            delete holdings[fromChannelId];
-        } else {
-            holdings[fromChannelId] = newHoldings;
-        }
+        holdings[fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
         if (safeToDelete) {
             delete assetOutcomeHashes[fromChannelId];
