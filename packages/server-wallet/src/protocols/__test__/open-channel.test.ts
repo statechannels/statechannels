@@ -146,29 +146,12 @@ interface SetupParams {
   statesHeld: number[];
   totalFunds?: number;
 }
+
 const setup = async (args: SetupParams): Promise<DBOpenChannelObjective> => {
   const {participant, statesHeld} = args;
   const totalFunds = args.totalFunds || 0;
 
-  // load the signingKey for the appopriate participant
-  await store.addSigningKey(testChan.signingKeys[participant]);
-  // load in the states
-  for (const stateNum of statesHeld) {
-    await store.pushMessage(testChan.wirePayload(Number(stateNum)));
-  }
-  // set the funds as specified
-  if (totalFunds > 0) {
-    await store.updateFunding(testChan.channelId, BN.from(totalFunds), testChan.assetHolderAddress);
-  }
-
-  // add the openChannel objective and approve
-  const objective = await store.transaction(async tx => {
-    const o = await store.ensureObjective(testChan.openChannelObjective, tx);
-    await store.approveObjective(o.objectiveId, tx);
-    return o as DBOpenChannelObjective;
-  });
-
-  return objective;
+  return testChan.insertInto(store, {participant, states: statesHeld, funds: totalFunds});
 };
 
 interface AssertionParams {
