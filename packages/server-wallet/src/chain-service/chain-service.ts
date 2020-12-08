@@ -355,6 +355,7 @@ export class ChainService implements ChainServiceInterface {
       });
       this.addSubscription(channelId, subscription);
     });
+
     const subscription = this.nitroAdjudicatorObservable
       .pipe(filter(event => event.channelId === channelId))
       .subscribe({
@@ -363,8 +364,7 @@ export class ChainService implements ChainServiceInterface {
             {channelId, tx: event.ethersEvent?.transactionHash},
             `Observed ${event.type} event on-chain; beginning to wait for confirmations`
           );
-          await new Promise(r => setTimeout(r, 1_500));
-          subscriber.channelFinalized({channelId});
+          this.whenFinalized(channelId, event.finalizesAt, 0);
         },
       });
     this.addSubscription(channelId, subscription);
@@ -372,6 +372,29 @@ export class ChainService implements ChainServiceInterface {
 
   unregisterChannel(channelId: Bytes32): void {
     this.channelToSubscription.get(channelId)?.map(s => s.unsubscribe());
+  }
+
+  private async whenFinalized(channelId: Bytes32, finalizesAt: number, tryNum: number) {
+    if (tryNum > 4) return;
+
+    const nowMs = Date.now();
+    const finalizesAtMs = finalizesAt * 1_000;
+    if (nowMs < finalizesAtMs) {
+      setTimeout(() => this.whenFinalized(channelId, finalizesAt, 0), nowMs - finalizesAt);
+      return;
+    }
+    const [, storageFinalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
+    const blockTime = (await this.provider.getBlock(await this.provider.getBlockNumber()))
+      .timestamp;
+    if (blockTime >= storageFinalizesAt) {
+      // emit event
+      return;
+    }
+    setTimeout(
+      () => this.whenFinalized(channelId, finalizesAt, 0),
+      2 * (storageFinalizesAt - blockTime * 1_000),
+      tryNum + 1
+    );
   }
 
   private async getInitialHoldings(contract: Contract, channelId: string): Promise<DepositedEvent> {
