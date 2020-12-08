@@ -243,6 +243,9 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
 
   const messages = outgoing.map(o => o.params as WireMessage);
 
+  // Note: performance is somewhat important here. A previous version of this added elements
+  // one-by-one, sorting at each step. That becomes too slow if you're processing a message
+  // with 1000s of states.
   return _.map(
     _.groupBy(messages, o => o.recipient),
     (rcptMsgs, recipient) => {
