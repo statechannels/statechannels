@@ -24,6 +24,7 @@ import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
@@ -43,6 +44,12 @@ async function mineBlocks() {
 function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocks);
   contract.on('AssetTransferred', mineBlocks);
+}
+
+async function mineBlockPeriodically(blocks: number) {
+  await provider.send('evm_mine', []);
+  if (blocks - 1 <= 0) return;
+  setTimeout(() => mineBlockPeriodically(blocks - 1), 500);
 }
 
 jest.setTimeout(20_000);
@@ -72,6 +79,12 @@ beforeAll(() => {
     provider
   );
   mineOnEvent(erc20Holder);
+  const adjudicator = new Contract(
+    nitroAdjudicatorAddress,
+    ContractArtifacts.NitroAdjudicatorArtifact.abi,
+    provider
+  );
+  adjudicator.on('ChallengeRegistered', () => mineBlockPeriodically(4));
 });
 
 afterAll(() => {
