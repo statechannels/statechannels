@@ -301,32 +301,34 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
 
-    let counter = 0;
-    const p = new Promise(resolve =>
+    const objectsToMatch = [
+      {
+        amount: BN.from(1),
+        assetHolderAddress: ethAssetHolderAddress,
+        to: makeDestination(aAddress),
+        channelId,
+      },
+      {
+        amount: BN.from(3),
+        assetHolderAddress: ethAssetHolderAddress,
+        to: makeDestination(bAddress),
+        channelId,
+      },
+    ];
+
+    const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
         channelFinalized: _.noop,
         assetTransferred: (arg: AssetTransferredArg) => {
-          switch (counter) {
-            case 0:
-              expect(arg).toMatchObject({
-                amount: BN.from(1),
-                assetHolderAddress: ethAssetHolderAddress,
-                to: makeDestination(aAddress),
-                channelId,
-              });
-              counter++;
-              break;
-            case 1:
-              expect(arg).toMatchObject({
-                amount: BN.from(3),
-                assetHolderAddress: ethAssetHolderAddress,
-                to: makeDestination(bAddress),
-                channelId,
-              });
-              resolve(true);
-              break;
-          }
+          const predicate = (elem: AssetTransferredArg) =>
+            arg.amount === elem.amount &&
+            arg.assetHolderAddress === elem.assetHolderAddress &&
+            arg.to === elem.to &&
+            arg.channelId === elem.channelId;
+          const removed = _.remove(objectsToMatch, predicate);
+          expect(removed).toHaveLength(1);
+          if (!objectsToMatch.length) resolve();
         },
       })
     );
@@ -343,32 +345,34 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
 
-    let counter = 0;
-    const p = new Promise(resolve =>
+    const objectsToMatch = [
+      {
+        amount: BN.from(1),
+        assetHolderAddress: erc20AssetHolderAddress,
+        to: makeDestination(aAddress),
+        channelId,
+      },
+      {
+        amount: BN.from(3),
+        assetHolderAddress: erc20AssetHolderAddress,
+        to: makeDestination(bAddress),
+        channelId,
+      },
+    ];
+
+    const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         holdingUpdated: _.noop,
         channelFinalized: _.noop,
         assetTransferred: (arg: AssetTransferredArg) => {
-          switch (counter) {
-            case 0:
-              expect(arg).toMatchObject({
-                amount: BN.from(1),
-                assetHolderAddress: erc20AssetHolderAddress,
-                to: makeDestination(aAddress),
-                channelId,
-              });
-              counter++;
-              break;
-            case 1:
-              expect(arg).toMatchObject({
-                amount: BN.from(3),
-                assetHolderAddress: erc20AssetHolderAddress,
-                to: makeDestination(bAddress),
-                channelId,
-              });
-              resolve(true);
-              break;
-          }
+          const predicate = (elem: AssetTransferredArg) =>
+            arg.amount === elem.amount &&
+            arg.assetHolderAddress === elem.assetHolderAddress &&
+            arg.to === elem.to &&
+            arg.channelId === elem.channelId;
+          const removed = _.remove(objectsToMatch, predicate);
+          expect(removed).toHaveLength(1);
+          if (!objectsToMatch.length) resolve();
         },
       })
     );
