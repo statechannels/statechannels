@@ -28,6 +28,7 @@ interface TestChannelArgs {
   aBal?: number;
   bBal?: number;
   channelNonce?: number;
+  startClosingAt?: number;
 }
 
 /** A two-party channel between Alice and Bob, with state history. For testing purposes. */
@@ -39,6 +40,7 @@ export class TestChannel {
   public signingWalletB: SigningWallet = bobWallet();
   public startBals: [number, number];
   public channelNonce: number;
+  public startClosingAt?: number;
 
   public get participants(): Participant[] {
     return [this.participantA, this.participantB];
@@ -52,9 +54,10 @@ export class TestChannel {
   }
 
   protected constructor(args: TestChannelArgs) {
-    const {aBal, bBal, channelNonce} = {aBal: 5, bBal: 5, channelNonce: 5, ...args};
+    const {aBal, bBal, channelNonce, startClosingAt} = {aBal: 5, bBal: 5, channelNonce: 5, ...args};
     this.startBals = [aBal, bBal];
     this.channelNonce = channelNonce;
+    this.startClosingAt = startClosingAt;
   }
 
   /**
@@ -65,31 +68,31 @@ export class TestChannel {
    * Note - in cases where participants double-sign the same states, n might _not_
    * be the turnNum
    */
-  public state(n: number, bals?: [number, number], final = ''): State {
+  public state(n: number, bals?: [number, number]): State {
     return {
       ...this.channelConstants,
       appData: '0x',
-      isFinal: final === 'final',
-      turnNum: n,
+      isFinal: !!this.startClosingAt && n >= this.startClosingAt,
+      turnNum: Math.min(n, this.startClosingAt || n),
       outcome: bals ? this.toOutcome(bals) : this.startOutcome,
     };
   }
 
-  public signedStateWithHash(n: number, bals?: [number, number], final = ''): SignedStateWithHash {
-    return stateWithHashSignedBy([this.signingWallets[n % 2]])(this.state(n, bals, final));
+  public signedStateWithHash(n: number, bals?: [number, number]): SignedStateWithHash {
+    return stateWithHashSignedBy([this.signingWallets[n % 2]])(this.state(n, bals));
   }
 
   /**
    * Gives the nth state in the history, signed by the correct participant
    */
-  public wireState(n: number, bals?: [number, number], final = ''): WireState {
-    return serializeState(this.signedStateWithHash(n, bals, final));
+  public wireState(n: number, bals?: [number, number]): WireState {
+    return serializeState(this.signedStateWithHash(n, bals));
   }
 
-  public wirePayload(n: number, bals?: [number, number], final = ''): Payload {
+  public wirePayload(n: number, bals?: [number, number]): Payload {
     return {
       walletVersion: WALLET_VERSION,
-      signedStates: [this.wireState(n, bals, final)],
+      signedStates: [this.wireState(n, bals)],
     };
   }
 

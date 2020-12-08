@@ -8,7 +8,8 @@ import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
 import {SingleAppUpdater} from '../single-app-updater';
 
-const testChan = TestChannel.create({channelNonce: 1});
+const FINAL = 8;
+const testChan = TestChannel.create({channelNonce: 1, startClosingAt: FINAL});
 const testChan2 = TestChannel.create({channelNonce: 2});
 
 let store: Store;
@@ -23,6 +24,7 @@ beforeEach(async () => {
     '0'
   );
   await store.dbAdmin().truncateDB();
+  await store.dbAdmin().migrateDB();
   singleAppUpdater = SingleAppUpdater.create(store);
   response = WalletResponse.initialize();
 });
@@ -70,21 +72,24 @@ describe('app channel not running', () => {
     );
   });
   it(`errors if the channel has a final state`, async () => {
-    // put state5 and state6final in the store
-    await setup({states: [testChan.wirePayload(5), testChan.wirePayload(6, [5, 5], 'final')]});
+    // put state7 and state8final in the store
+    await setup({
+      states: [testChan.wirePayload(FINAL - 1), testChan.wirePayload(FINAL, [5, 5])],
+    });
 
-    // send state7final
+    // send state9final
     await expect(
-      singleAppUpdater.update(testChan.wirePayload(7, [5, 5], 'final'), response)
+      singleAppUpdater.update(testChan.wirePayload(FINAL + 1, [5, 5]), response)
     ).rejects.toThrow('The update sent to pushUpdate must be for a running channel');
   });
-  it(`errors if given a final state`, async () => {
-    // put state5 and state6final in the store
-    await setup({states: [testChan.wirePayload(5), testChan.wirePayload(6, [5, 5], 'final')]});
+  it(`errors if given a first final state`, async () => {
+    await setup({
+      states: [testChan.wirePayload(FINAL - 2), testChan.wirePayload(FINAL - 1, [5, 5])],
+    });
 
     // send state7final
     await expect(
-      singleAppUpdater.update(testChan.wirePayload(7, [5, 5], 'final'), response)
+      singleAppUpdater.update(testChan.wirePayload(FINAL, [5, 5]), response)
     ).rejects.toThrow('The update sent to pushUpdate must be for a running channel');
   });
 });
