@@ -34,6 +34,7 @@ contract AssetHolder is IAssetHolder {
         uint256[] memory indices
     ) external override {
         // checks
+        _requireIncreasingIndices(indices);
         _requireCorrectAllocationHash(fromChannelId, allocationBytes);
         // effects and interactions
         _transfer(fromChannelId, allocationBytes, indices);
@@ -586,6 +587,12 @@ contract AssetHolder is IAssetHolder {
                 ),
             'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash'
         );
+    }
+
+    function _requireIncreasingIndices(uint256[] indices) internal pure {
+        for (uint256 i = 0; i < indices.length - 1; i++) {
+            require(indices[i] < indices[i + 1], 'Indices must be sorted');
+        }
     }
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
