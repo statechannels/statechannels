@@ -155,7 +155,7 @@ contract AssetHolder is IAssetHolder {
     {
         // `indices == []` means "pay out to all"
         // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length); 
+        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
         safeToDelete = true; // switched to false if there is an item remaining with amount > 0
