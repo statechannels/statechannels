@@ -417,7 +417,7 @@ describe('challenge', () => {
     await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
     await chainService.challenge([state1, state2], bWallet().privateKey);
     await p;
-    await chainService.pushOutcome(state2);
+    await chainService.pushOutcomeAndWithdraw(state2);
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(3));

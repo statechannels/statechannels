@@ -275,7 +275,7 @@ export class ChainService implements ChainServiceInterface {
     return this.sendTransaction(challengeTransactionRequest);
   }
 
-  async pushOutcome(state: State): Promise<providers.TransactionResponse> {
+  async pushOutcomeAndWithdraw(state: State): Promise<providers.TransactionResponse> {
     const lastState = toNitroState(state);
     const channelId = getChannelId(lastState.channel);
     const [
@@ -338,9 +338,9 @@ export class ChainService implements ChainServiceInterface {
       return;
     }
     const [, storageFinalizesAtS] = await this.nitroAdjudicator.getChannelStorage(channelId);
-    const blockTime = (await this.provider.getBlock(await this.provider.getBlockNumber()))
+    const blockTimeS = (await this.provider.getBlock(await this.provider.getBlockNumber()))
       .timestamp;
-    if (blockTime >= storageFinalizesAtS) {
+    if (blockTimeS >= storageFinalizesAtS) {
       // Should we wait for 6 blocks before emitting the finalized event?
       // Will the wallet sign new states or deposit into the channel based on this event?
       // The answer is likely no.
@@ -357,7 +357,7 @@ export class ChainService implements ChainServiceInterface {
     // Let's wait for a reasonable amount of time before querying the chain
     setTimeout(
       () => this.whenFinalized(channelId, finalizesAtS, 0),
-      2 * (storageFinalizesAtS - blockTime * 1_000),
+      2 * (storageFinalizesAtS - blockTimeS * 1_000),
       tryNum + 1
     );
   }
