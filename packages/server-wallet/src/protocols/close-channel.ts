@@ -224,13 +224,14 @@ const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
  * for funding.
  */
 const ensureAllAllocationItemsAreExternalDestinations = (ps: ProtocolState): boolean =>
-  !isDirectlyFunded(ps.app) ||
-  (isDirectlyFunded(ps.app) &&
+  (!isDirectlyFunded(ps.app) && !isFakeFunded(ps.app)) ||
+  ((isDirectlyFunded(ps.app) || isFakeFunded(ps.app)) &&
     !!ps.app.supported &&
     checkThat(ps.app.supported.outcome, isSimpleAllocation).allocationItems.every(({destination}) =>
       isExternalDestination(destination)
     ));
 
+const isFakeFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Fake';
 const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
