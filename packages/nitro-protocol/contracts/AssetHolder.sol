@@ -589,7 +589,7 @@ contract AssetHolder is IAssetHolder {
         );
     }
 
-    function _requireIncreasingIndices(uint256[] indices) internal pure {
+    function _requireIncreasingIndices(uint256[] memory indices) internal pure {
         for (uint256 i = 0; i < indices.length - 1; i++) {
             require(indices[i] < indices[i + 1], 'Indices must be sorted');
         }
