@@ -1,5 +1,5 @@
 import {providers, constants} from 'ethers';
-import {Address, SignedState} from '@statechannels/wallet-core';
+import {Address, SignedState, State} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
 
@@ -53,6 +53,10 @@ export class MockChainService implements ChainServiceInterface {
   }
 
   concludeAndWithdraw(_finalizationProof: SignedState[]): Promise<providers.TransactionResponse> {
+    return Promise.resolve(mockTransactoinResponse);
+  }
+
+  pushOutcomeAndWithdraw(_state: State): Promise<providers.TransactionResponse> {
     return Promise.resolve(mockTransactoinResponse);
   }
 
