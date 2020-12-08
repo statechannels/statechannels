@@ -5,7 +5,7 @@ import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc2
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {hashAssetOutcome, MAX_OUTCOME_ITEMS} from '../../../src/contract/outcome';
+import {hashAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {
   CHANNEL_NOT_FINALIZED,
@@ -20,6 +20,7 @@ import {
   sendTransaction,
   setupContracts,
 } from '../../test-helpers';
+import {PushOutcomeTransactionArg} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 
 const provider = getTestProvider();
 let TestNitroAdjudicator: Contract;
@@ -143,13 +144,19 @@ describe('pushOutcome', () => {
       expect(await TestNitroAdjudicator.channelStorageHashes(channelId)).toEqual(
         initialChannelStorageHash
       );
-      const transactionRequest = createPushOutcomeTransaction({
+
+      let arg: PushOutcomeTransactionArg = {
         turnNumRecord: wasConcluded ? 0 : declaredTurnNumRecord,
         finalizesAt,
         state,
         outcome,
         channelWasConcluded: wasConcluded,
-      });
+      };
+      if (!wasConcluded) {
+        arg = {...arg, challengerAddress: participants[state.turnNum % participants.length]};
+      }
+
+      const transactionRequest = createPushOutcomeTransaction(arg);
 
       if (outcomeHashExits) {
         await sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest);
