@@ -159,7 +159,7 @@ export class ChainService implements ChainServiceInterface {
   }
 
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
-    this.logger.info({...arg}, 'ChainService.fundChannel');
+    this.logger.info({...arg}, 'fundChannel: entry');
 
     const assetHolderAddress = arg.assetHolderAddress;
     const isEthFunding = isEthAssetHolder(assetHolderAddress);
@@ -202,7 +202,7 @@ export class ChainService implements ChainServiceInterface {
       participants: finalizationProof[0].participants.map(p => p.signingAddress),
     });
 
-    this.logger.info({channelId}, 'ChainService.concludeAndWithdraw');
+    this.logger.info({channelId}, 'concludeAndWithdraw: entry');
 
     const transactionRequest = {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
@@ -256,7 +256,7 @@ export class ChainService implements ChainServiceInterface {
     challengeStates: SignedState[],
     privateKey: PrivateKey
   ): Promise<providers.TransactionResponse> {
-    this.logger.info({challengeStates}, 'ChainService.challenge');
+    this.logger.info({challengeStates}, 'challenge: entry');
     if (!challengeStates.length) {
       throw new Error('Must challenge with at least one state');
     }
@@ -275,7 +275,7 @@ export class ChainService implements ChainServiceInterface {
     state: State,
     challengerAddress: Address
   ): Promise<providers.TransactionResponse> {
-    this.logger.info('ChainService.pushOutcomeAndWithdraw');
+    this.logger.info('pushOutcomeAndWithdraw: entry');
     const lastState = toNitroState(state);
     const channelId = getChannelId(lastState.channel);
     const [
@@ -302,7 +302,7 @@ export class ChainService implements ChainServiceInterface {
     assetHolders: Address[],
     subscriber: ChainEventSubscriberInterface
   ): void {
-    this.logger.info({channelId, assetHolders}, 'ChainService.registerChannel');
+    this.logger.info({channelId, assetHolders}, 'registerChannel: entry');
 
     this.channelToSubscribers.set(channelId, [
       ...(this.channelToSubscribers.get(channelId) ?? []),
@@ -321,7 +321,7 @@ export class ChainService implements ChainServiceInterface {
   }
 
   unregisterChannel(channelId: Bytes32): void {
-    this.logger.info({channelId}, 'ChainService.unregisterChannel');
+    this.logger.info({channelId}, 'unregisterChannel: entry');
     this.channelToSubscribers.set(channelId, []);
   }
 
