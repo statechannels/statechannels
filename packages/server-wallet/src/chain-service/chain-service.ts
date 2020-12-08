@@ -5,7 +5,6 @@ import {
   getChallengeRegisteredEvent,
   getChannelId,
   Transactions,
-  ChallengeRegisteredEvent as NitroChallengeRegisteredEvent,
   createPushOutcomeTransaction,
 } from '@statechannels/nitro-protocol';
 import {
@@ -20,8 +19,7 @@ import {
   toNitroState,
 } from '@statechannels/wallet-core';
 import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
-import {Observable, Subscription} from 'rxjs';
-import {filter} from 'rxjs/operators';
+import {Observable} from 'rxjs';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
@@ -46,10 +44,6 @@ const AssetTransferred = 'AssetTransferred' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
 type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
-type ChallengeRegisteredEvent = {
-  type: 'ChallengeRegistered';
-  ethersEvent: Event;
-} & NitroChallengeRegisteredEvent;
 type AssetHolderEvent = DepositedEvent | AssetTransferredEvent;
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
@@ -71,12 +65,11 @@ export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private allowanceMode: AllowanceMode;
+  // Used for asset holders
   private addressToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
-  private channelToSubscription: Map<Bytes32, Subscription[]> = new Map();
-  private channelToSubscriber: Map<Bytes32, ChainEventSubscriberInterface[]> = new Map();
+  private channelToSubscribers: Map<Bytes32, ChainEventSubscriberInterface[]> = new Map();
   private nitroAdjudicator: Contract;
-  private nitroAdjudicatorObservable: Observable<ChallengeRegisteredEvent>;
 
   private readonly blockConfirmations: number;
   private transactionQueue = new PQueue({concurrency: 1});
@@ -107,14 +100,10 @@ export class ChainService implements ChainServiceInterface {
       nitroAdjudicatorAddress,
       ContractArtifacts.NitroAdjudicatorArtifact.abi
     );
-    this.nitroAdjudicatorObservable = new Observable<ChallengeRegisteredEvent>(subs => {
-      this.nitroAdjudicator.on(ChallengeRegistered, (...args) =>
-        subs.next({
-          type: ChallengeRegistered,
-          ...getChallengeRegisteredEvent(args),
-          ethersEvent: args[args.length - 1],
-        })
-      );
+
+    this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
+      const event = getChallengeRegisteredEvent(args);
+      this.whenFinalized(event.channelId, event.finalizesAt, 0);
     });
   }
 
@@ -156,11 +145,6 @@ export class ChainService implements ChainServiceInterface {
       this.addressToObservable.set(assetHolderAddress, obs);
     }
     return obs;
-  }
-
-  private addSubscription(channelId: string, subscription: Subscription) {
-    const subscriptions = this.channelToSubscription.get(channelId) ?? [];
-    this.channelToSubscription.set(channelId, [...subscriptions, subscription]);
   }
 
   private async sendTransaction(
@@ -324,8 +308,8 @@ export class ChainService implements ChainServiceInterface {
       'Registering channel with ChainService monitor for Deposited and AssetTransferred events'
     );
 
-    this.channelToSubscriber.set(channelId, [
-      ...(this.channelToSubscriber.get(channelId) ?? []),
+    this.channelToSubscribers.set(channelId, [
+      ...(this.channelToSubscribers.get(channelId) ?? []),
       subscriber,
     ]);
 
@@ -338,44 +322,42 @@ export class ChainService implements ChainServiceInterface {
         subscriber.holdingUpdated(initialHoldings)
       );
     });
-
-    const subscription = this.nitroAdjudicatorObservable
-      .pipe(filter(event => event.channelId === channelId))
-      .subscribe({
-        next: async event => {
-          this.logger.debug(
-            {channelId, tx: event.ethersEvent?.transactionHash},
-            `Observed ${event.type} event on-chain; beginning to wait for confirmations`
-          );
-          this.whenFinalized(channelId, event.finalizesAt, 0);
-        },
-      });
-    this.addSubscription(channelId, subscription);
   }
 
   unregisterChannel(channelId: Bytes32): void {
-    this.channelToSubscription.get(channelId)?.map(s => s.unsubscribe());
+    this.channelToSubscribers.set(channelId, []);
   }
 
-  private async whenFinalized(channelId: Bytes32, finalizesAt: number, tryNum: number) {
+  private async whenFinalized(channelId: Bytes32, finalizesAtS: number, tryNum: number) {
     if (tryNum > 4) return;
 
     const nowMs = Date.now();
-    const finalizesAtMs = finalizesAt * 1_000;
+    const finalizesAtMs = finalizesAtS * 1_000;
     if (nowMs < finalizesAtMs) {
-      setTimeout(() => this.whenFinalized(channelId, finalizesAt, 0), nowMs - finalizesAt);
+      setTimeout(() => this.whenFinalized(channelId, finalizesAtS, 0), nowMs - finalizesAtMs);
       return;
     }
-    const [, storageFinalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
+    const [, storageFinalizesAtS] = await this.nitroAdjudicator.getChannelStorage(channelId);
     const blockTime = (await this.provider.getBlock(await this.provider.getBlockNumber()))
       .timestamp;
-    if (blockTime >= storageFinalizesAt) {
-      // emit event
+    if (blockTime >= storageFinalizesAtS) {
+      // Should we wait for 6 blocks before emitting the finalized event?
+      // Will the wallet sign new states or deposit into the channel based on this event?
+      // The answer is likely no.
+      // So we probably want to emit this event as soon as possible.
+      this.channelToSubscribers
+        .get(channelId)
+        ?.map(subscriber => subscriber.channelFinalized({channelId}));
       return;
     }
+
+    // In this scenario:
+    // 1. Our local clock is LATER than finalizesAt
+    // 2. The latest block timestamp is BEFORE finalizesAt
+    // Let's wait for a reasonable amount of time before querying the chain
     setTimeout(
-      () => this.whenFinalized(channelId, finalizesAt, 0),
-      2 * (storageFinalizesAt - blockTime * 1_000),
+      () => this.whenFinalized(channelId, finalizesAtS, 0),
+      2 * (storageFinalizesAtS - blockTime * 1_000),
       tryNum + 1
     );
   }
@@ -436,7 +418,7 @@ export class ChainService implements ChainServiceInterface {
           `Observed ${event.type} event on-chain; beginning to wait for confirmations`
         );
         await this.waitForConfirmations(event.ethersEvent);
-        this.channelToSubscriber.get(event.channelId)?.forEach(subscriber => {
+        this.channelToSubscribers.get(event.channelId)?.forEach(subscriber => {
           switch (event.type) {
             case Deposited:
               subscriber.holdingUpdated(event);
