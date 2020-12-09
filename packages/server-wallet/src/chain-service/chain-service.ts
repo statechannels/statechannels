@@ -361,6 +361,18 @@ export class ChainService implements ChainServiceInterface {
     this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
   }
 
+  // private async getExistingChallenge(
+  //   channelId: string
+  // ): Promise<ChallengeRegisteredEvent | undefined> {
+  //   const filter = this.nitroAdjudicator.filters.ChallengeRegistered(channelId);
+
+  //   const rawEvents = await this.nitroAdjudicator.queryFilter(filter, 0);
+  //   if (rawEvents.length === 0) return undefined;
+  //   // TODO: Assumes events come back sorted by date
+  //   const latestEvent = rawEvents.slice(-1)[0];
+  //   return getChallengeRegisteredEvent([latestEvent]);
+  // }
+
   private async registerFinalizationStatus(channelId: string): Promise<void> {
     const result = await this.getFinalizedStatus(channelId);
     if (result.status === 'In Progress') {
