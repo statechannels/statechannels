@@ -218,21 +218,16 @@ const defundIntoLedger = (ps: ProtocolState): RequestLedgerDefunding | false =>
   });
 
 /**
- * If the channel is directly funded, then ensure none of its allocation items are other
- * channels being funded by this channel (e.g., if it is a ledger channel). This should
- * cause the protocol to "pause" / "freeze" until no channel depends on this channel
- * for funding.
+ * Ensure none of its allocation items are other channels being funded by this channel
+ * (e.g., if it is a ledger channel). This should cause the protocol to "pause" / "freeze"
+ * until no channel depends on this channel for funding.
  */
 const ensureAllAllocationItemsAreExternalDestinations = (ps: ProtocolState): boolean =>
-  (!isDirectlyFunded(ps.app) && !isFakeFunded(ps.app)) ||
-  ((isDirectlyFunded(ps.app) || isFakeFunded(ps.app)) &&
-    !!ps.app.supported &&
-    checkThat(ps.app.supported.outcome, isSimpleAllocation).allocationItems.every(({destination}) =>
-      isExternalDestination(destination)
-    ));
+  !!ps.app.supported &&
+  checkThat(ps.app.supported.outcome, isSimpleAllocation).allocationItems.every(({destination}) =>
+    isExternalDestination(destination)
+  );
 
-const isFakeFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Fake';
-const isDirectlyFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Direct';
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
 const completeCloseChannel = (ps: ProtocolState): CompleteObjective | false =>
