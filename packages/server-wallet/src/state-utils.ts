@@ -106,6 +106,7 @@ export function clearOldStates(
 /**
  * Deserializes a state but uses the wasm utility method local to the server-wallet
  * package. This, as opposed to the JS implementation inside wallet-core.
+ * Throws if the recovered signer is not a participant.
  */
 export function fastDeserializeState(channelId: Bytes32, state: WireSignedState): SignedState {
   const {outcome, participants, signatures} = state;
