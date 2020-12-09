@@ -49,6 +49,11 @@ export type SignLedgerState = {
   stateToSign: StateVariables;
   channelsNotFunded: Bytes32[];
 };
+export type DismissLedgerProposals = {
+  type: 'DismissLedgerProposals';
+  channelId: Bytes32;
+  channelsNotFunded: Bytes32[];
+};
 
 /*
 Action creators
@@ -80,6 +85,7 @@ export type Outgoing = Notice;
 export type ProtocolAction =
   | SignState
   | ProposeLedgerState
+  | DismissLedgerProposals
   | SignLedgerState
   | FundChannel
   | Withdraw

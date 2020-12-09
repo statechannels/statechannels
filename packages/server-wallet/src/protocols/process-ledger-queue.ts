@@ -45,6 +45,7 @@ import {LedgerRequestType} from '../models/ledger-request';
 
 import {Protocol, ProtocolResult, ChannelState} from './state';
 import {
+  DismissLedgerProposals,
   MarkLedgerFundingRequestsAsComplete,
   noAction,
   ProposeLedgerState,
@@ -194,7 +195,7 @@ const exchangeReveals = ({
   counterpartyLedgerCommit,
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolState): SignLedgerState | ProposeLedgerState | false => {
+}: ProtocolState): DismissLedgerProposals | SignLedgerState | ProposeLedgerState | false => {
   // Sanity-checks
   if (!supported) return false;
   if (!latestSignedByMe) return false;
@@ -224,6 +225,13 @@ const exchangeReveals = ({
   if (receivedReveal && !_.isEqual(outcome, latest.outcome))
     // TODO: signals a corrupt / broken counterparty wallet, what do we want to do here?
     throw new Error('received a signed reveal that is _not_ what we agreed on :/');
+
+  if (_.isEqual(outcome, supportedOutcome))
+    return {
+      type: 'DismissLedgerProposals',
+      channelId,
+      channelsNotFunded: insufficientFunds,
+    };
 
   return {
     type: 'SignLedgerState',
