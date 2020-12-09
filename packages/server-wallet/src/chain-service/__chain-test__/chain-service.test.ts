@@ -1,5 +1,10 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
+import {
+  channelDataToChannelStorageHash,
+  ContractArtifacts,
+  getChannelId,
+  randomChannelId,
+} from '@statechannels/nitro-protocol';
 import {
   Address,
   BN,
@@ -11,6 +16,7 @@ import {
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
+import TestAdjudicatorArtifact from '@statechannels/nitro-protocol/lib/artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 
 import {
   alice as aliceParticipant,
@@ -20,7 +26,7 @@ import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/s
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
 import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
-
+// This is slightly hacky but it allows us to use the test adjudicator which makes testing easier
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
@@ -30,7 +36,7 @@ const rpcEndpoint = process.env.RPC_ENDPOINT;
 const chainId = process.env.CHAIN_NETWORK_ID || '9002';
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
-
+console.log(provider.getSigner());
 let chainService: ChainService;
 let channelNonce = 0;
 
@@ -53,8 +59,13 @@ async function mineBlockPeriodically(blocks: number) {
 }
 
 jest.setTimeout(20_000);
-
-beforeAll(() => {
+// The test nitro adjudicator allows us to set channel storage
+const testAdjudicator = new Contract(
+  nitroAdjudicatorAddress,
+  TestAdjudicatorArtifact.abi,
+  provider.getSigner()
+);
+beforeAll(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
   // - Deploys the token contract.
@@ -189,6 +200,27 @@ describe('fundChannel', () => {
     );
     expect(await contract.holdings(channelId)).toEqual(BigNumber.from(5));
   });
+});
+
+it('dipatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
+  const channelId = randomChannelId();
+  const {provider} = testAdjudicator;
+  const currentBlock = await provider.getBlock(provider.getBlockNumber());
+  await testAdjudicator.functions.setChannelStorageHash(
+    channelId,
+    channelDataToChannelStorageHash({turnNumRecord: 0, finalizesAt: currentBlock.timestamp - 1000})
+  );
+
+  await new Promise(resolve =>
+    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      holdingUpdated: _.noop,
+      assetTransferred: _.noop,
+      channelFinalized: arg => {
+        expect(arg.channelId).toEqual(channelId);
+        resolve(true);
+      },
+    })
+  );
 });
 
 describe('registerChannel', () => {
