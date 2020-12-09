@@ -4,6 +4,8 @@ import TokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import AssetHolderArtifact from '../artifacts/contracts/AssetHolder.sol/AssetHolder.json';
 import Erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
 import EthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
+import TestNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+import TestAssetHolderArtifact from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 
 export const ContractArtifacts = {
   NitroAdjudicatorArtifact,
@@ -12,6 +14,16 @@ export const ContractArtifacts = {
   EthAssetHolderArtifact,
   TokenArtifact, // TODO do we want to export this?
   AssetHolderArtifact, // TODO do we want to export this?
+};
+
+/**
+ * Various test contract artifacts used for testing
+ * They expose helper functions to allow for easier testing
+ * They should NEVER be used in a production environment.
+ */
+export const TestContractArtifacts = {
+  TestNitroAdjudicatorArtifact,
+  TestAssetHolderArtifact,
 };
 
 export {
