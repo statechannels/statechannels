@@ -63,7 +63,9 @@ jest.setTimeout(20_000);
 const testAdjudicator = new Contract(
   nitroAdjudicatorAddress,
   TestAdjudicatorArtifact.abi,
-  provider.getSigner()
+  // We use a separate signer address to avoid nonce issues
+  // eslint-disable-next-line no-process-env
+  new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)
 );
 beforeAll(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
