@@ -4,6 +4,7 @@ import {
   ContractArtifacts,
   getChannelId,
   randomChannelId,
+  TestContractArtifacts,
 } from '@statechannels/nitro-protocol';
 import {
   Address,
@@ -16,7 +17,6 @@ import {
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
-import TestAdjudicatorArtifact from '@statechannels/nitro-protocol/lib/artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 
 import {
   alice as aliceParticipant,
@@ -62,7 +62,7 @@ jest.setTimeout(20_000);
 // The test nitro adjudicator allows us to set channel storage
 const testAdjudicator = new Contract(
   nitroAdjudicatorAddress,
-  TestAdjudicatorArtifact.abi,
+  TestContractArtifacts.TestNitroAdjudicatorArtifact.abi,
   // We use a separate signer address to avoid nonce issues
   // eslint-disable-next-line no-process-env
   new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)

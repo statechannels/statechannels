@@ -1,10 +1,8 @@
 import {Address} from '@statechannels/client-api-schema';
-import {ContractArtifacts} from '@statechannels/nitro-protocol';
+import {ContractArtifacts, TestContractArtifacts} from '@statechannels/nitro-protocol';
 import {ETHERLIME_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
-// This is slightly hacky but it allows us to use the test adjudicator which makes testing easier
-import TestAdjudicatorArtifact from '@statechannels/nitro-protocol/lib/artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 // NOTE: deploying contracts like this allows the onchain service package to
 // be easily extracted
 
@@ -22,7 +20,7 @@ export async function deploy(): Promise<TestNetworkContext> {
   const deployer = new GanacheDeployer(8545, ethereumPrivateKey);
   const {EthAssetHolderArtifact, TokenArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
 
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(TestAdjudicatorArtifact as any);
+  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(TestContractArtifacts.TestNitroAdjudicatorArtifact as any);
   const ERC20_ADDRESS = await deployer.deploy(
     TokenArtifact as any,
     {},
