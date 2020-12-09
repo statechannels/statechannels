@@ -544,7 +544,7 @@ export class Store {
     const syncTimer = timerFactorySync(this.timingMetrics, `add signed state ${channelId}`);
     const asyncTimer = timerFactory(this.timingMetrics, `add signed state ${channelId}`);
 
-    // Deserialize (and validate signatures in the process)
+    // Deserialize (and throw if signer not a participant)
     const deserializedState = syncTimer('validating signatures', () =>
       fastDeserializeState(channelId, wireState)
     );
