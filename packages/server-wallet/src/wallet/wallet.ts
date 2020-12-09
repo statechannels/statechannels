@@ -639,6 +639,14 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         } else {
           try {
             switch (action.type) {
+              case 'DismissLedgerProposals': {
+                await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
+                await this.store.removeMyLedgerCommit(action.channelId, tx);
+                await this.store.removeTheirLedgerCommit(action.channelId, tx);
+                requiresAnotherCrankUponCompletion = true;
+                return;
+              }
+
               case 'SignLedgerState': {
                 const {myIndex, channelId} = protocolState.fundingChannel;
                 const channel = await Channel.forId(channelId, tx);
