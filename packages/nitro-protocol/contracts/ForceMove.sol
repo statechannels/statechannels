@@ -919,7 +919,7 @@ contract ForceMove is IForceMove {
         );
         require(
             (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
-            'ForceMove | You must provide exactly one signature per participant, and assert who signed what for all participants'
+            'ForceMove | Require exactly 1 signature per participant & who signed what for all participants'
         );
         require(numParticipants < type(uint8).max, 'ForceMove | Too many participants!');
         return true;
