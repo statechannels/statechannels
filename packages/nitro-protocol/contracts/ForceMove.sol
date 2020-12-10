@@ -594,9 +594,9 @@ contract ForceMove is IForceMove {
                         ab[1],
                         turnNumB,
                         nParticipants
-                    )
+                    ),
+                    'Invalid ForceMoveApp Transition'
                 );
-                // reason string not necessary (called function will provide reason for reverting)
             }
         }
         return true;
