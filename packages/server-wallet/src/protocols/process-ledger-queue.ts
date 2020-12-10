@@ -13,12 +13,12 @@
  *
  *  ii. Check if there is an existing proposal for a ledger update, O₂.
  *
- * iii. Compute O₁ ⋂ O₂ (NOTE: O₂ might be NULL i.e., not received yet)
+ * iii. If so, compute O₁ ⋂ O₂
  *
- *      a. If I haven't sent my proposal yet, propose O₁ ⋂ O₂.
+ *      a. If I haven't sent my proposal yet, propose O₁ (or O₁ ⋂ O₂ if O₂ exists)
  *
- *      b. If I have sent my proposal and received theirs sign O₁ ⋂ O₂ at
- *         the turn number 2 higher than the most recently supported one.
+ *      b. If I have sent my proposal and received theirs, sign O₁ ⋂ O₂ at
+ *         the turn number n higher than the most recently supported one.
  *
  *      c. If O₂ is NULL (not received a proposal), wait for the counterparty.
  *
