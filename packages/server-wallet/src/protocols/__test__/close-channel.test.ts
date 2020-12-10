@@ -24,7 +24,7 @@ beforeEach(async () => {
   await store.dbAdmin().truncateDB();
 });
 
-afterEach(async () => await store.dbAdmin().truncateDB());
+afterAll(async () => await store.dbAdmin().truncateDB());
 
 describe(`closing phase`, () => {
   it(`waits, if it isn't my turn`, async () => {
@@ -43,7 +43,7 @@ describe(`closing phase`, () => {
 
 describe(`defunding phase (when the channel is closed)`, () => {
   describe(`direct funding`, () => {
-    it('submits the withdrawal transaction', async () => {
+    it('submits the withdrawal transaction, and submits once again when it becomes stale, but not a third time', async () => {
       const objective = await setup(testChan, {participant: 0, statesHeld: [FINAL, FINAL + 1]});
 
       // submit it once
@@ -52,7 +52,7 @@ describe(`defunding phase (when the channel is closed)`, () => {
       // don't submit again
       await crankAndAssert(objective, {withdraws: false});
 
-      // then let's "wait" for 10 minutes for the fund request to the chain service to get stale
+      // then let's "wait" for the fund request to the chain service to get stale
       await ChainServiceRequest.query(knex)
         .findOne({channelId: testChan.channelId})
         .patch({timestamp: new Date(Date.now() - requestTimeout - 10)});
@@ -79,18 +79,17 @@ describe(`defunding phase (when the channel is closed)`, () => {
   });
 });
 
-// TODO: when should it complete the objective?
-
 interface SetupParams {
   participant: 0 | 1;
   statesHeld: number[];
+  totalFunds?: number;
 }
 const setup = async (
   testChan: TestChannel,
   args: SetupParams
 ): Promise<DBCloseChannelObjective> => {
   const {participant, statesHeld} = args;
-  const totalFunds = testChan.startBal;
+  const totalFunds = args.totalFunds !== undefined ? args.totalFunds : testChan.startBal;
 
   await testChan.insertInto(store, {
     participant,
