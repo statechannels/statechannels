@@ -130,10 +130,8 @@ contract AssetHolder is IAssetHolder {
     function setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash)
         external
         AdjudicatorOnly
-        returns (bool success)
     {
         _setAssetOutcomeHash(channelId, assetOutcomeHash);
-        return true;
     }
 
     // **************
@@ -275,7 +273,7 @@ contract AssetHolder is IAssetHolder {
 
         for (uint256 j = 0; j < guarantee.destinations.length; j++) {
             if (balance == 0) {
-                revert('_claim | guarantorChannel affords 0 for destination');
+                revert('_claim : guarantorChannel affords 0 for destination');
             }
             // for each destination in the guarantee,
             // find the first corresponding allocationItem in the target allocation
