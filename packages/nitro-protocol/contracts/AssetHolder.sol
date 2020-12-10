@@ -244,10 +244,9 @@ contract AssetHolder is IAssetHolder {
                 } else {
                     holdings[destination] += payouts[j];
                 }
-                // Event emitted
-                emit AssetTransferred(fromChannelId, destination, payouts[j]);
             }
         }
+        emit AssetsTransferred(fromChannelId, payouts);
     }
 
     /**
@@ -371,8 +370,11 @@ contract AssetHolder is IAssetHolder {
         } else {
             holdings[destination] += affordsForDestination;
         }
+
+        uint256[] memory payouts = new uint256[](1);
+        payouts[0] = affordsForDestination;
         // Event emitted
-        emit AssetTransferred(guarantorChannelId, destination, affordsForDestination);
+        emit AssetsTransferred(guarantorChannelId, payouts);
     }
 
     /**
@@ -495,9 +497,9 @@ contract AssetHolder is IAssetHolder {
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
-                emit AssetTransferred(guarantorChannelId, allocation[j].destination, payouts[j]);
             }
         }
+        emit AssetsTransferred(guarantorChannelId, payouts);
     }
 
     /**

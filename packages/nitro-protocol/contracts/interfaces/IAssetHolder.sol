@@ -45,10 +45,9 @@ interface IAssetHolder {
     );
 
     /**
-     * @dev Indicates that `amount` assets have been transferred (internally or externally) to the destination denoted by `destination`.
+     * @dev Indicates that `amounts` assets have been transferred (internally or externally) to the destinationss pecified the CALLDATA. allocation[indices[k]] was transferred amounts[k]
      * @param channelId The channelId of the funds being withdrawn.
-     * @param destination An internal destination (channelId) of external destination (padded ethereum address)
-     * @param amount Number of assets transferred (wei or tokens).
+     * @param amounts Number of assets transferred (e.g. wei or tokens) to the destinations specified in the calldata
      */
-    event AssetTransferred(bytes32 indexed channelId, bytes32 indexed destination, uint256 amount);
+    event AssetsTransferred(bytes32 indexed channelId, uint256[] amounts);
 }
