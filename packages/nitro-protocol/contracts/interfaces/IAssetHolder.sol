@@ -47,7 +47,7 @@ interface IAssetHolder {
     /**
      * @dev Indicates that `amounts` assets have been transferred (internally or externally) to the destinationss pecified the CALLDATA. allocation[indices[k]] was transferred amounts[k]
      * @param channelId The channelId of the funds being withdrawn.
-     * @param amounts Number of assets transferred (e.g. wei or tokens) to the destinations specified in the calldata
+     * @param initialHoldings initial holdings of the channel before transfer. Allows the client to compute the payouts from function calldata
      */
-    event AssetsTransferred(bytes32 indexed channelId, uint256[] amounts);
+    event AssetsTransferred(bytes32 indexed channelId, uint256 initialHoldings);
 }

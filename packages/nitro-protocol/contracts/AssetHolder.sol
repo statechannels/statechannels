@@ -204,6 +204,7 @@ contract AssetHolder is IAssetHolder {
             (Outcome.AllocationItem[])
         );
         uint256 initialHoldings = holdings[fromChannelId];
+        uint256 initialBalance = holdings[fromChannelId];
 
         (
             Outcome.AllocationItem[] memory newAllocation,
@@ -246,7 +247,7 @@ contract AssetHolder is IAssetHolder {
                 }
             }
         }
-        emit AssetsTransferred(fromChannelId, payouts);
+        emit AssetsTransferred(fromChannelId, initialBalance);
     }
 
     /**
@@ -268,6 +269,7 @@ contract AssetHolder is IAssetHolder {
             (Outcome.AllocationItem[])
         );
         uint256 balance = holdings[guarantorChannelId];
+        uint256 initialBalance = balance;
         uint256 affordsForDestination;
         uint256 residualAllocationAmount;
         uint256 i; // indexes target allocations
@@ -374,7 +376,7 @@ contract AssetHolder is IAssetHolder {
         uint256[] memory payouts = new uint256[](1);
         payouts[0] = affordsForDestination;
         // Event emitted
-        emit AssetsTransferred(guarantorChannelId, payouts);
+        emit AssetsTransferred(guarantorChannelId, initialBalance);
     }
 
     /**
@@ -390,6 +392,7 @@ contract AssetHolder is IAssetHolder {
         bytes memory allocationBytes
     ) internal {
         uint256 balance = holdings[guarantorChannelId];
+        uint256 initialBalance = holdings[guarantorChannelId];
 
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
@@ -499,7 +502,7 @@ contract AssetHolder is IAssetHolder {
                 }
             }
         }
-        emit AssetsTransferred(guarantorChannelId, payouts);
+        emit AssetsTransferred(guarantorChannelId, initialBalance);
     }
 
     /**
