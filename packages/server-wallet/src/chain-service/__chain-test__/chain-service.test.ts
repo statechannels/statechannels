@@ -35,8 +35,12 @@ const rpcEndpoint = process.env.RPC_ENDPOINT;
 const chainId = process.env.CHAIN_NETWORK_ID || '9002';
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
-
-let chainService: ChainService;
+class TestChainService extends ChainService {
+  getFinalizingChannels() {
+    return this.finalizingChannels;
+  }
+}
+let chainService: TestChainService;
 let channelNonce = 0;
 
 async function mineBlocks() {
@@ -72,7 +76,7 @@ beforeAll(async () => {
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
   /* eslint-disable no-process-env */
-  chainService = new ChainService({
+  chainService = new TestChainService({
     provider: rpcEndpoint,
     pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
     allowanceMode: 'MaxUint',
@@ -227,6 +231,35 @@ describe('registerChannel', () => {
       })
     );
   });
+
+  it('registers a channel in the finalizing channel list when if the channel is in the process of finalization', async () => {
+    const channelId = randomChannelId();
+    const {provider} = testAdjudicator;
+    const currentBlock = await provider.getBlock(provider.getBlockNumber());
+    // We use some finalization time way in the future so we can be sure that the finalization status is in progress
+    const finalizesAt = currentBlock.timestamp + 1000;
+    await testAdjudicator.functions.setChannelStorageHash(
+      channelId,
+      channelDataToChannelStorageHash({
+        turnNumRecord: 0,
+        finalizesAt,
+      })
+    );
+
+    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      holdingUpdated: _.noop,
+      assetTransferred: _.noop,
+      channelFinalized: _.noop,
+    });
+    // The channel can get added to the finalization list after registerChannel completes
+    // So we just wait a second to ensure that it's been added
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    expect(chainService.getFinalizingChannels()).toContainEqual({
+      channelId,
+      finalizesAtS: finalizesAt,
+    });
+  });
+
   it('Successfully registers channel and receives follow on funding event', async () => {
     const channelId = randomChannelId();
     const wrongChannelId = randomChannelId();

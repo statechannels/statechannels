@@ -73,7 +73,7 @@ export class ChainService implements ChainServiceInterface {
   private readonly blockConfirmations: number;
   private transactionQueue = new PQueue({concurrency: 1});
 
-  private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
+  protected finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
 
   constructor({
     provider,
