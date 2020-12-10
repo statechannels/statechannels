@@ -27,6 +27,11 @@ import {alice, bob} from './participants';
 import {alice as aliceWallet, bob as bobWallet} from './signing-wallets';
 import {stateWithHashSignedBy} from './states';
 
+/**
+ * Arguments for constructing a TestChannel
+ *
+ * @param finalFrom - a turnnumber where the channel bceoms finalized. All subsequent states willl be final and have this turn number
+ */
 interface TestChannelArgs {
   aBal?: number;
   bBal?: number;
@@ -78,6 +83,7 @@ export class TestChannel {
       ...this.channelConstants,
       appData: '0x',
       isFinal: !!this.finalFrom && n >= this.finalFrom,
+      // test channels adopt a countersigning strategy for final states, so the turn number doesn't progress after finalFrom.
       turnNum: Math.min(n, this.finalFrom || n),
       outcome: bals ? this.toOutcome(bals) : this.startOutcome,
     };
@@ -196,6 +202,9 @@ export class TestChannel {
     return this.startBals.reduce((s, n) => s + n);
   }
 
+  /**
+   * Calls addSigningKey, pushMessage, updateFunding, ensureObjective and approveObjective on the supplied store.
+   */
   public async insertInto(store: Store, args: InsertionParams): Promise<DBOpenChannelObjective> {
     const {states, participant} = args;
 
@@ -208,7 +217,8 @@ export class TestChannel {
     }
 
     // if no funds are passed in, fully fund the channel iff we're into post fund setup
-    const funds = args.funds || (Math.max(...states) > 1 ? this.startBal : 0);
+    const funds =
+      args.funds !== undefined ? args.funds : Math.max(...states) > 1 ? this.startBal : 0;
 
     // set the funds as specified
     if (funds > 0) {
