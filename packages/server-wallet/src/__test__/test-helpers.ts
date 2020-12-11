@@ -5,6 +5,8 @@ import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-cor
 import {Wallet} from '../wallet';
 import {Outgoing} from '..';
 
+export const ONE_DAY = 86400;
+
 export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {
   const filteredOutbox = outbox.filter(outboxItem => outboxItem.params.recipient === participantId);
   if (filteredOutbox.length != 1)

@@ -9,7 +9,7 @@ import {BigNumber, ethers, constants} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor, crashAndRestart} from '../test-helpers';
+import {getChannelResultFor, getPayloadFor, crashAndRestart, ONE_DAY} from '../test-helpers';
 
 const a = Wallet.create(
   overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
@@ -65,6 +65,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     appDefinition: ethers.constants.AddressZero,
     appData: makeAddress(constants.AddressZero), // must be even length
     fundingStrategy: 'Direct',
+    challengeDuration: ONE_DAY,
   };
 
   //        A <> B

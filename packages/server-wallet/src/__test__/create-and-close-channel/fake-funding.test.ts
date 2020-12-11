@@ -9,7 +9,7 @@ import {BigNumber, ethers, constants} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
 
 const a = Wallet.create(
   overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
@@ -63,6 +63,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
     appDefinition: ethers.constants.AddressZero,
     appData: '0x00', // must be even length
     fundingStrategy: 'Fake',
+    challengeDuration: ONE_DAY,
   };
 
   //        A <> B

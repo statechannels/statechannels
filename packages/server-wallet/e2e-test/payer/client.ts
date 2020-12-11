@@ -9,6 +9,7 @@ import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {defaultConfig, ServerWalletConfig} from '../../src/config';
+import {ONE_DAY} from '../../src/__test__/test-helpers';
 
 export default class PayerClient {
   private readonly wallet: ServerWallet;
@@ -76,6 +77,7 @@ export default class PayerClient {
         appData: '0x',
         appDefinition: AddressZero,
         fundingStrategy: 'Direct',
+        challengeDuration: ONE_DAY,
         participants: [this.me, receiver],
         allocations: [
           {

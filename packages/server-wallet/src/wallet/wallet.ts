@@ -250,7 +250,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   async createLedgerChannel(
-    args: Pick<CreateChannelParams, 'participants' | 'allocations'>,
+    args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
   ): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
@@ -302,6 +302,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       allocations,
       fundingStrategy,
       fundingLedgerChannelId,
+      challengeDuration,
     } = args;
 
     const participants = serializedParticipants.map(convertToParticipant);
@@ -312,7 +313,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const constants = {
       appDefinition: makeAddress(appDefinition),
       chainId: BigNumber.from(this.walletConfig.networkConfiguration.chainNetworkID).toHexString(),
-      challengeDuration: 9001,
+      challengeDuration,
       channelNonce,
       participants,
     };

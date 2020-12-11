@@ -9,7 +9,7 @@ import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
 
 const {AddressZero} = ethers.constants;
 
@@ -71,6 +71,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     appDefinition: ethers.constants.AddressZero,
     appData: makeAddress(AddressZero), // must be even length
     fundingStrategy: 'Direct',
+    challengeDuration: ONE_DAY,
   };
 
   //        A <> B

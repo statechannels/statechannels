@@ -9,6 +9,7 @@ import {
   getChannelResultFor,
   getPayloadFor,
   interParticipantChannelResultsAreEqual,
+  ONE_DAY,
 } from '../test-helpers';
 import {Wallet} from '../../wallet';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
@@ -67,6 +68,7 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   const aDepositAmtETH = BN.from(aDeposit);
   const bDepositAmtETH = BN.from(bDeposit);
   const ledgerChannelArgs = {
+    challengeDuration: ONE_DAY,
     participants: [participantA, participantB],
     allocations: [
       {
@@ -139,6 +141,7 @@ const testCreateChannelParams = (
   appData: '0x00', // must be even length
   fundingStrategy: 'Ledger',
   fundingLedgerChannelId: ledgerChannelId,
+  challengeDuration: ONE_DAY,
 });
 
 async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[][]) {
