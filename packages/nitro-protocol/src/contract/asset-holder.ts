@@ -10,27 +10,12 @@ export interface DepositedEvent {
   destinationHoldings: BigNumber;
 }
 
-export interface AssetTransferredEvent {
-  channelId: string;
-  destination: string;
-  amount: BigNumber;
-}
-
 export function getDepositedEvent(eventResult: any[]): DepositedEvent {
   const {destination, amountDeposited, destinationHoldings} = parseEventResult(eventResult);
   return {
     destination,
     amountDeposited: BigNumber.from(amountDeposited),
     destinationHoldings: BigNumber.from(destinationHoldings),
-  };
-}
-
-export function getAssetTransferredEvent(eventResult: any[]): AssetTransferredEvent {
-  const {channelId, destination, amount} = parseEventResult(eventResult);
-  return {
-    channelId,
-    destination,
-    amount: BigNumber.from(amount),
   };
 }
 

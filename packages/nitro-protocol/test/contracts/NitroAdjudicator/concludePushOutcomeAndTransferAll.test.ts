@@ -12,7 +12,6 @@ import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
-  assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
   checkMultipleHoldings,
   compileEventsFromLogs,
@@ -268,7 +267,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
           args: {channelId},
         });
 
-        // Add AssetTransferred events to expectations
+        // Add an AllocationUpdated event to expectations
 
         Object.keys(heldBefore).forEach(key => {
           expectedEvents.push({

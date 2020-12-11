@@ -8,7 +8,6 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
 import {
-  assetTransferredEventsFromPayouts,
   checkMultipleAssetOutcomeHashes,
   checkMultipleHoldings,
   compileEventsFromLogs,
@@ -183,7 +182,7 @@ describe('pushOutcomeAndTransferAll', () => {
         // Build up event expectations
         const expectedEvents = [];
 
-        // Add AssetTransferred events to expectations
+        // Add an AllocationUpdated event to expectations
         Object.keys(heldBefore).forEach(key => {
           expectedEvents.push({
             name: 'AllocationUpdated',

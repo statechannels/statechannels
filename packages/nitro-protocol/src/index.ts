@@ -25,8 +25,6 @@ export {
 } from '../test/test-helpers';
 export {
   DepositedEvent,
-  AssetTransferredEvent,
-  getAssetTransferredEvent,
   getDepositedEvent,
   convertBytes32ToAddress,
   convertAddressToBytes32,
