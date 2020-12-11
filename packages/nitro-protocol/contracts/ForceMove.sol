@@ -547,6 +547,8 @@ contract ForceMove is IForceMove {
         return stateHashes;
     }
 
+    enum IsValidTransition {True, NeedToCheckApp}
+
     /**
     * @notice Check that the submitted pair of states form a valid transition
     * @dev Check that the submitted pair of states form a valid transition
@@ -554,18 +556,16 @@ contract ForceMove is IForceMove {
     transition
     * @param isFinalAB Pair of booleans denoting whether the first and second state (resp.) are final.
     * @param ab Variable parts of each of the pair of states
-    * @param turnNumB turnNum of the later state of the pair.
-    * @param appDefinition Address of deployed contract containing application-specific validTransition function.
+    * @param turnNumB turnNum of the later state of the pair
     * @return true if the later state is a validTransition from its predecessor, false otherwise.
     */
-    function _requireValidTransition(
+    function _requireValidProtocolTransition(
         uint256 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         IForceMoveApp.VariablePart[2] memory ab, // [a,b]
-        uint48 turnNumB,
-        address appDefinition
-    ) internal pure returns (bool) {
-        // a prior check on the signatures for the submitted states implies that the following fields are equal for a and b:
+        uint48 turnNumB
+    ) internal pure returns (IsValidTransition) {
+        // a separate check on the signatures for the submitted states implies that the following fields are equal for a and b:
         // chainId, participants, channelNonce, appDefinition, challengeDuration
         // and that the b.turnNum = a.turnNum + 1
         if (isFinalAB[1]) {
@@ -588,17 +588,44 @@ contract ForceMove is IForceMove {
                     'InvalidTransitionError: Cannot change the appData during setup phase'
                 );
             } else {
-                require(
-                    IForceMoveApp(appDefinition).validTransition(
-                        ab[0],
-                        ab[1],
-                        turnNumB,
-                        nParticipants
-                    ),
-                    'Invalid ForceMoveApp Transition'
-                );
+                return IsValidTransition.NeedToCheckApp;
             }
         }
+        return IsValidTransition.True;
+    }
+
+    /**
+    * @notice Check that the submitted pair of states form a valid transition
+    * @dev Check that the submitted pair of states form a valid transition
+    * @param nParticipants Number of participants in the channel.
+    transition
+    * @param isFinalAB Pair of booleans denoting whether the first and second state (resp.) are final.
+    * @param ab Variable parts of each of the pair of states
+    * @param turnNumB turnNum of the later state of the pair.
+    * @param appDefinition Address of deployed contract containing application-specific validTransition function.
+    * @return true if the later state is a validTransition from its predecessor, false otherwise.
+    */
+    function _requireValidTransition(
+        uint256 nParticipants,
+        bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
+        IForceMoveApp.VariablePart[2] memory ab, // [a,b]
+        uint48 turnNumB,
+        address appDefinition
+    ) internal pure returns (bool) {
+        IsValidTransition isValidProtocolTransition = _requireValidProtocolTransition(
+            nParticipants,
+            isFinalAB, // [a.isFinal, b.isFinal]
+            ab, // [a,b]
+            turnNumB
+        );
+
+        if (isValidProtocolTransition == IsValidTransition.NeedToCheckApp) {
+            require(
+                IForceMoveApp(appDefinition).validTransition(ab[0], ab[1], turnNumB, nParticipants),
+                'Invalid ForceMoveApp Transition'
+            );
+        }
+
         return true;
     }
 
