@@ -11,5 +11,5 @@ module.exports = {
   transform: {'^.+\\.ts$': 'ts-jest'},
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|ts)$'],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
-  globals: {'ts-jest': {tsConfig: './tsconfig.json'}},
+  globals: {'ts-jest': {tsconfig: './tsconfig.json'}},
 };
