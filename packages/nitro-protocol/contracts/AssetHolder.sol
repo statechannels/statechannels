@@ -375,7 +375,7 @@ contract AssetHolder is IAssetHolder {
         uint256[] memory payouts = new uint256[](1);
         payouts[0] = affordsForDestination;
         // Event emitted
-        emit AllocationUpdated(guarantorChannelId, initialHoldings); 
+        emit AllocationUpdated(guarantorChannelId, initialHoldings);
     }
 
     /**
@@ -501,7 +501,7 @@ contract AssetHolder is IAssetHolder {
                 }
             }
         }
-        emit AllocationUpdated(guarantorChannelId, initialHoldings); 
+        emit AllocationUpdated(guarantorChannelId, initialHoldings);
     }
 
     /**

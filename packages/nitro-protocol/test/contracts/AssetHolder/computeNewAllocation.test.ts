@@ -1,7 +1,8 @@
 import {Contract, Wallet, BigNumber} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {getTestProvider, setupContracts, randomExternalDestination} from '../../test-helpers';
+// eslint-disable-next-line import/order
+import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 
 const provider = getTestProvider();
 
