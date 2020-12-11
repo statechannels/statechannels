@@ -181,13 +181,18 @@ describe('pushOutcomeAndTransferAll', () => {
         const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
 
         // Build up event expectations
-        let expectedEvents = [];
+        const expectedEvents = [];
 
         // Add AssetTransferred events to expectations
-        Object.keys(payouts).forEach(assetHolder => {
-          expectedEvents = expectedEvents.concat(
-            assetTransferredEventsFromPayouts(channelId, payouts[assetHolder], assetHolder)
-          );
+        Object.keys(heldBefore).forEach(key => {
+          expectedEvents.push({
+            name: 'AllocationUpdated',
+            contract: key,
+            args: {
+              channelId,
+              initialHoldings: heldBefore[key][channelId], // initialHoldings
+            },
+          });
         });
 
         // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
