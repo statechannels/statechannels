@@ -47,7 +47,7 @@ import {
   ChainServiceInterface,
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
-  AssetTransferredArg,
+  Arg,
   ChainService,
   MockChainService,
   ChannelFinalizedArg,
@@ -660,19 +660,20 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  async assetTransferred(arg: AssetTransferredArg): Promise<void> {
-    const response = WalletResponse.initialize();
-    // TODO: make sure that arg.to is checksummed
-    await this.store.updateTransferredOut(
-      arg.channelId,
-      arg.assetHolderAddress,
-      arg.to,
-      arg.amount
-    );
-    await this.takeActions([arg.channelId], response);
+  // TODO replace this with an AllocationUpdated solution (needs calldata)
+  // async assetTransferred(arg: AssetTransferredArg): Promise<void> {
+  //   const response = WalletResponse.initialize();
+  //   // TODO: make sure that arg.to is checksummed
+  //   await this.store.updateTransferredOut(
+  //     arg.channelId,
+  //     arg.assetHolderAddress,
+  //     arg.to,
+  //     arg.amount
+  //   );
+  //   await this.takeActions([arg.channelId], response);
 
-    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
-  }
+  //   response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+  // }
 
   async channelFinalized(_arg: ChannelFinalizedArg): Promise<void> {
     return;

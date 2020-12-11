@@ -19,7 +19,7 @@ import {
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
-import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
+import {HoldingUpdatedArg} from '../types';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -43,7 +43,7 @@ async function mineBlocks() {
 
 function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocks);
-  contract.on('AssetTransferred', mineBlocks);
+  contract.on('AllocationUpdated', mineBlocks);
 }
 
 async function mineBlockPeriodically(blocks: number) {
@@ -234,7 +234,6 @@ describe('registerChannel', () => {
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
       holdingUpdated,
-      assetTransferred: _.noop,
       channelFinalized: _.noop,
     });
     await p;
@@ -254,7 +253,6 @@ describe('registerChannel', () => {
           });
           resolve(true);
         },
-        assetTransferred: _.noop,
         channelFinalized: _.noop,
       })
     );
@@ -288,7 +286,7 @@ describe('registerChannel', () => {
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       holdingUpdated,
-      assetTransferred: _.noop,
+      // assetTransferred: _.noop,
       channelFinalized: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
@@ -320,16 +318,6 @@ describe('concludeAndWithdraw', () => {
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
         channelFinalized: _.noop,
-        assetTransferred: (arg: AssetTransferredArg) => {
-          const predicate = (elem: AssetTransferredArg) =>
-            arg.amount === elem.amount &&
-            arg.assetHolderAddress === elem.assetHolderAddress &&
-            arg.to === elem.to &&
-            arg.channelId === elem.channelId;
-          const removed = _.remove(objectsToMatch, predicate);
-          expect(removed).toHaveLength(1);
-          if (!objectsToMatch.length) resolve();
-        },
       })
     );
 
@@ -364,16 +352,6 @@ describe('concludeAndWithdraw', () => {
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         holdingUpdated: _.noop,
         channelFinalized: _.noop,
-        assetTransferred: (arg: AssetTransferredArg) => {
-          const predicate = (elem: AssetTransferredArg) =>
-            arg.amount === elem.amount &&
-            arg.assetHolderAddress === elem.assetHolderAddress &&
-            arg.to === elem.to &&
-            arg.channelId === elem.channelId;
-          const removed = _.remove(objectsToMatch, predicate);
-          expect(removed).toHaveLength(1);
-          if (!objectsToMatch.length) resolve();
-        },
       })
     );
 
@@ -427,7 +405,6 @@ describe('challenge', () => {
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
-        assetTransferred: _.noop,
         channelFinalized: resolve,
       })
     );

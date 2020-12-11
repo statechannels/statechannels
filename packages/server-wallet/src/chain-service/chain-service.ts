@@ -10,7 +10,7 @@ import {
   Address,
   BN,
   makeAddress,
-  makeDestination,
+  // makeDestination,
   PrivateKey,
   SignedState,
   State,
@@ -30,7 +30,7 @@ import {defaultTestConfig} from '../config';
 
 import {
   AllowanceMode,
-  AssetTransferredArg,
+  // AssetTransferredArg,
   ChainEventSubscriberInterface,
   ChainServiceArgs,
   ChainServiceInterface,
@@ -39,11 +39,11 @@ import {
 } from './types';
 
 const Deposited = 'Deposited' as const;
-const AssetTransferred = 'AssetTransferred' as const;
+// const AssetTransferred = 'AssetTransferred' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
-type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
-type AssetHolderEvent = DepositedEvent | AssetTransferredEvent;
+// type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
+type AssetHolderEvent = DepositedEvent;
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -402,16 +402,17 @@ export class ChainService implements ChainServiceInterface {
             ethersEvent: event,
           })
       );
-      assetHolderContract.on(AssetTransferred, (channelId, destination, payoutAmount, event) =>
-        subs.next({
-          type: AssetTransferred,
-          channelId,
-          assetHolderAddress: makeAddress(assetHolderContract.address),
-          to: makeDestination(destination),
-          amount: BN.from(payoutAmount),
-          ethersEvent: event,
-        })
-      );
+      // TODO replace with AllocationUpdated
+      // assetHolderContract.on(AssetTransferred, (channelId, destination, payoutAmount, event) =>
+      //   subs.next({
+      //     type: AssetTransferred,
+      //     channelId,
+      //     assetHolderAddress: makeAddress(assetHolderContract.address),
+      //     to: makeDestination(destination),
+      //     amount: BN.from(payoutAmount),
+      //     ethersEvent: event,
+      //   })
+      // );
     });
     obs.subscribe({
       next: async event => {
@@ -425,8 +426,8 @@ export class ChainService implements ChainServiceInterface {
             case Deposited:
               subscriber.holdingUpdated(event);
               break;
-            case AssetTransferred:
-              subscriber.assetTransferred(event);
+              // case AssetTransferred:
+              //   subscriber.assetTransferred(event);
               break;
             default:
               throw new Error('Unexpected event from contract observable');

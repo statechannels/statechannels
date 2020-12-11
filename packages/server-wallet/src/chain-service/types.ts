@@ -17,11 +17,9 @@ export type HoldingUpdatedArg = {
   amount: Uint256;
 };
 
-export type AssetTransferredArg = {
+export type AllocationupdatedArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
-  to: Destination;
-  amount: Uint256;
+  initialHoldings: Uint256;
 };
 
 export type FundChannelArg = {
@@ -37,7 +35,7 @@ export type ChannelFinalizedArg = {
 
 export interface ChainEventSubscriberInterface {
   holdingUpdated(arg: HoldingUpdatedArg): void;
-  assetTransferred(arg: AssetTransferredArg): void;
+  allocationUpdated(arg: AllocationupdatedArg): void;
   channelFinalized(arg: ChannelFinalizedArg): void;
 }
 
