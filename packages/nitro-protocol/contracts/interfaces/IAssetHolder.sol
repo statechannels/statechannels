@@ -45,9 +45,12 @@ interface IAssetHolder {
     );
 
     /**
-     * @dev Indicates that `amounts` assets have been transferred (internally or externally) to the destinationss pecified the CALLDATA. allocation[indices[k]] was transferred amounts[k]
+     * @dev Indicates the assetOutcomeHash for this channelId has changed due to a transfer or claim. Includes sufficient data to compute:
+     * + the preimage of this hash as well as 
+     * - the new holdings for this channelId and any others that were transferred to
+     * - the payouts to external destinations
      * @param channelId The channelId of the funds being withdrawn.
-     * @param amounts Number of assets transferred (e.g. wei or tokens) to the destinations specified in the calldata
+     * @param initialHoldings holdings[channelId] **before** the allocations were updated
      */
-    event AssetsTransferred(bytes32 indexed channelId, uint256[] amounts);
+    event AllocationUpdated(bytes32 indexed channelId, uint256 initialHoldings);
 }
