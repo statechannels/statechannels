@@ -88,3 +88,6 @@ export {Signatures, Transactions};
 
 // types
 export {Uint256, Bytes32} from './contract/types';
+
+// validTransition
+export * from './valid-transition';
