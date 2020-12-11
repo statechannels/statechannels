@@ -64,7 +64,7 @@ export function computeNewAllocation(
   allocation: AllocationItem[], // we must index this with a JS number that is less than 2**32 - 1
   indices: number[]
 ): {newAllocation: AllocationItem[]; deleted: boolean; payouts: string[]; totalPayouts: string} {
-  const payouts = Array(indices.length).fill(0);
+  const payouts: string[] = Array(indices.length).fill(BigNumber.from(0).toHexString());
   let totalPayouts = BigNumber.from(0);
   const newAllocation: AllocationItem[] = [];
   let safeToDelete = true;

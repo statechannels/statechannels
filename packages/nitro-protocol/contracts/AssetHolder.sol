@@ -145,7 +145,7 @@ contract AssetHolder is IAssetHolder {
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
     )
-        internal
+        public
         pure
         returns (
             Outcome.AllocationItem[] memory newAllocation,
