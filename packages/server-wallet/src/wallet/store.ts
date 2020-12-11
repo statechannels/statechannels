@@ -200,7 +200,7 @@ export class Store {
 
       if (
         !(await timer('validating transition', async () =>
-          validateTransition(supported, signedState, bytecode, this.logger, this.skipEvmValidation)
+          validateTransition(supported, signedState, this.logger, bytecode, this.skipEvmValidation)
         ))
       ) {
         throw new StoreError('Invalid state transition', {
@@ -561,13 +561,13 @@ export class Store {
     if (supported && shouldValidateTransition(state, channel)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
-      if (!this.skipEvmValidation && !bytecode)
+      if (bytecode == undefined)
         this.logger.error('Missing bytecode', {
           error: new Error(`No byte code for ${supported.appDefinition}`),
         });
 
       const isValidTransition = syncTimer('validating transition', () =>
-        validateTransition(supported, state, bytecode, this.logger, this.skipEvmValidation)
+        validateTransition(supported, state, this.logger, bytecode, this.skipEvmValidation)
       );
 
       if (!isValidTransition) {
