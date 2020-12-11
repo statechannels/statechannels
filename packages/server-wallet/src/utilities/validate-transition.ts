@@ -1,6 +1,6 @@
 import _ from 'lodash';
-import {SignedState, StateWithHash, toNitroState} from '@statechannels/wallet-core';
-import {constants} from 'ethers';
+import {SignedState, StateWithHash, toNitroState, unreachable} from '@statechannels/wallet-core';
+import {requireValidProtocolTransition, Status} from '@statechannels/nitro-protocol';
 import {Logger} from 'pino';
 
 import {validateAppTransitionWithEVM} from '../evm-validator';
@@ -21,100 +21,34 @@ export function shouldValidateTransition(incomingState: StateWithHash, channel: 
   // Ignore older states that may be added via syncing
   const isOldState = incomingState.turnNum < (supported?.turnNum || 0);
 
-  return !!supported && !isOldState && !alreadyHaveState && !isLedger;
+  // We do not always respect turn numbers in funding stage
+  const isInFundingStage = incomingState.turnNum < 2 * incomingState.participants.length;
+
+  return !!supported && !isOldState && !alreadyHaveState && !isLedger && !isInFundingStage;
 }
-// Port of the following solidity code
-// https://github.com/statechannels/statechannels/blob/a3d21827e340c0cc086f1abad7685345885bf245/packages/nitro-protocol/contracts/ForceMove.sol#L492-L534
+// Port of ForceMove#_requireValidTransition solidity code
 export function validateTransition(
   fromState: SignedState,
   toState: SignedState,
-  bytecode: Bytes = '0x',
   logger: Logger,
-  skipEvmValidation = false
+  bytecode?: Bytes,
+  skipAppTransitionCheck = false
 ): boolean {
-  const fromMoverIndex = fromState.turnNum % fromState.participants.length;
-  const fromMover = fromState.participants[fromMoverIndex].signingAddress;
-
-  const toMoverIndex = toState.turnNum % toState.participants.length;
-  const toMover = toState.participants[toMoverIndex].signingAddress;
-
-  const isInFundingStage = toState.turnNum < 2 * toState.participants.length;
-
-  if (!isInFundingStage && !toState.isFinal && fromState.appDefinition !== constants.AddressZero) {
-    // turn numbers not relevant for the null app
-    const turnNumCheck = _.isEqual(toState.turnNum, fromState.turnNum + 1);
-    if (!turnNumCheck) {
-      const VALIDATION_ERROR = `Turn number check failed.`;
-      logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
+  try {
+    const status = requireValidProtocolTransition(toNitroState(fromState), toNitroState(toState));
+    switch (status) {
+      case Status.True:
+        return true;
+      case Status.NeedToCheckApp:
+        return (
+          skipAppTransitionCheck || // TODO this should be removed as soon as possible
+          validateAppTransitionWithEVM(toNitroState(fromState), toNitroState(toState), bytecode)
+        );
+      default:
+        return unreachable(status);
     }
-  }
-
-  const constantsCheck =
-    _.isEqual(toState.chainId, fromState.chainId) &&
-    _.isEqual(toState.participants, fromState.participants) &&
-    _.isEqual(toState.appDefinition, fromState.appDefinition) &&
-    _.isEqual(toState.channelNonce, fromState.channelNonce) &&
-    _.isEqual(toState.challengeDuration, fromState.challengeDuration);
-
-  if (!constantsCheck) {
-    const VALIDATION_ERROR = `Constants check failed.`;
-    logger.error(
-      {
-        fromState,
-        toState,
-        error: Error(VALIDATION_ERROR),
-      },
-      VALIDATION_ERROR
-    );
+  } catch (err) {
+    logger.error(err);
     return false;
   }
-
-  const signatureValidation =
-    (fromState.signatures || []).some(s => s.signer === fromMover) &&
-    (toState.signatures || []).some(s => s.signer === toMover);
-
-  if (!signatureValidation) {
-    const VALIDATION_ERROR = `Signature validation failed.`;
-    logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-    return false;
-  }
-
-  // Final state specific validation
-  if (toState.isFinal && !_.isEqual(fromState.outcome, toState.outcome)) {
-    const VALIDATION_ERROR = `Outcome changed on a final state.`;
-    logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-    return false;
-  }
-
-  // Funding stage specific validation
-  const fundingStageValidation =
-    _.isEqual(fromState.isFinal, false) &&
-    _.isEqual(toState.outcome, fromState.outcome) &&
-    _.isEqual(toState.appData, fromState.appData);
-
-  if (isInFundingStage && !fundingStageValidation) {
-    const VALIDATION_ERROR = `Invalid setup state transition.`;
-
-    logger.error({fromState, toState, error: Error(VALIDATION_ERROR)}, VALIDATION_ERROR);
-
-    return false;
-  }
-
-  // Validates app specific rules by running the app rules contract in the EVM
-  // We only want to run the validation for states not in a funding or final stage
-  // per the force move contract
-  if (!skipEvmValidation && !isInFundingStage && !toState.isFinal) {
-    const evmValidation = validateAppTransitionWithEVM(
-      toNitroState(fromState),
-      toNitroState(toState),
-      bytecode
-    );
-
-    if (!evmValidation) {
-      logger.error({fromState, toState}, 'EVM Validation failure');
-      return false;
-    }
-  }
-
-  return true;
 }
