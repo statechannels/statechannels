@@ -867,3 +867,70 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     });
   });
 });
+
+describe('Automatic channel syncing on successive API calls', () => {
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+  });
+
+  it('can fund two channels in a situation where first proposal is dropped', async () => {
+    const ledgerChannelId = await createLedgerChannel(2, 2);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+
+    const {
+      channelResults: [{channelId: channelId1}],
+      outbox: proposeFirstChannel,
+    } = await a.createChannel(params);
+
+    await b.pushMessage(getPayloadFor(participantB.participantId, proposeFirstChannel));
+
+    const {outbox: joinAndProposeFirst} = await b.joinChannel({channelId: channelId1});
+
+    /* This message is ignored 👇
+    const {outbox: agreeToProposalAndSign} = */ await a.pushMessage(
+      getPayloadFor(participantA.participantId, joinAndProposeFirst)
+    );
+
+    const {
+      channelResults: [{channelId: channelId2}],
+      outbox: proposeSecondChannel,
+    } = await a.createChannel(params);
+
+    await b.pushMessage(getPayloadFor(participantB.participantId, proposeSecondChannel));
+
+    const {outbox: joinAndProposeSecond} = await b.joinChannel({channelId: channelId2});
+
+    await exchangeMessagesBetweenAandB([joinAndProposeSecond], []);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(getChannelResultFor(channelId1, channelResults)).toMatchObject({
+      turnNum: 3,
+      status: 'running',
+    });
+
+    expect(getChannelResultFor(channelId2, channelResults)).toMatchObject({
+      turnNum: 3,
+      status: 'running',
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: channelId1,
+      amount: BN.from(2),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: channelId2,
+      amount: BN.from(2),
+    });
+  });
+});

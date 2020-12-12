@@ -621,6 +621,25 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           ledgersToProcess.shift();
         };
 
+        const pessimisticallyAddStateAndProposalToOutbox = () => {
+          const {
+            fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
+            myProposedLedgerCommit,
+          } = protocolState;
+          if (latestSignedByMe && supported) {
+            /**
+             * Always re-send a proposal if I have one withstanding, just in case.
+             */
+            if (myProposedLedgerCommit)
+              response.queueProposeLedger(channelId, myIndex, participants, myProposedLedgerCommit);
+            /**
+             * Re-send my latest signed ledger state if it is not supported yet.
+             */
+            if (latestSignedByMe.turnNum > supported.turnNum)
+              response.queueState(latestSignedByMe, myIndex, channelId);
+          }
+        };
+
         const protocolState = await ProcessLedgerQueue.getProcessLedgerQueueProtocolState(
           this.store,
           ledgerChannelId,
@@ -633,6 +652,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
         if (!action) {
           markLedgerAsProcessed();
+          if (!requiresAnotherCrankUponCompletion) pessimisticallyAddStateAndProposalToOutbox();
           response.queueChannelState(protocolState.fundingChannel);
         } else {
           try {
@@ -646,36 +666,33 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
               }
 
               case 'SignLedgerState': {
-                const {myIndex, channelId} = protocolState.fundingChannel;
-                const channel = await Channel.forId(channelId, tx);
-                const signedState = await this.store.signState(channel, action.stateToSign, tx);
-
-                response.queueState(signedState, myIndex, channelId);
-
+                // NOTE: State added to response in pessimisticallyAddStateAndProposalToOutbox
+                const channel = await Channel.forId(action.channelId, tx);
+                await this.store.signState(channel, action.stateToSign, tx);
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-
-                await this.store.removeMyLedgerCommit(action.channelId, tx);
-                await this.store.removeTheirLedgerCommit(action.channelId, tx);
-
                 return;
               }
 
               case 'ProposeLedgerState': {
-                const {myIndex, participants, channelId} = protocolState.fundingChannel;
-
-                response.queueProposeLedger(channelId, myIndex, participants, action.outcome);
-
+                // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
                 await this.store.storeMyLedgerCommit(action.channelId, action.outcome, tx);
-
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-
                 return;
               }
 
               case 'MarkLedgerFundingRequestsAsComplete': {
-                const {fundedChannels, defundedChannels} = action;
+                const {fundedChannels, defundedChannels, ledgerChannelId} = action;
+
+                /**
+                 * After we have completed some funding requests (i.e., a new ledger state
+                 * has been signed), we can confidently clear now-stale proposals from the DB.
+                 */
+                await this.store.removeMyLedgerCommit(ledgerChannelId, tx);
+                await this.store.removeTheirLedgerCommit(ledgerChannelId, tx);
+
                 await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
                 await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
+
                 requiresAnotherCrankUponCompletion = true;
                 return;
               }
