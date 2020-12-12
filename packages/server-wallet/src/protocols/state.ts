@@ -40,7 +40,6 @@ export type ChannelState = {
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
-  latestNotSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => ChannelStateFunding;
   chainServiceRequests: ChainServiceRequest[];
   fundingStrategy: FundingStrategy;
@@ -142,7 +141,6 @@ export function directFundingStatus(
     .reduce(BN.add, BN.from(0));
 
   const funding = fundingFn(assetHolderAddress);
-  console.log('funding: ', funding);
 
   const amountTransferredToMe = funding.transferredOut
     .filter(tf => tf.toAddress === myDestination)
