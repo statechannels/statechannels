@@ -226,7 +226,7 @@ export class ChainService implements ChainServiceInterface {
       const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
 
       const {timestamp: latestBlockTimestamp} = await this.provider.getBlock(
-        await this.provider.getBlockNumber()
+        this.provider.getBlockNumber()
       );
 
       // Check if the channel has been finalized in the past
