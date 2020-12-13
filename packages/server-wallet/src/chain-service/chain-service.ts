@@ -74,6 +74,7 @@ export class ChainService implements ChainServiceInterface {
   private transactionQueue = new PQueue({concurrency: 1});
 
   private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
+  private onBlockCallbackQueue = new PQueue({concurrency: 1});
 
   constructor({
     provider,
@@ -108,7 +109,9 @@ export class ChainService implements ChainServiceInterface {
     });
 
     this.provider.on('block', async (blockTag: providers.BlockTag) =>
-      this.onBlockMined(await this.provider.getBlock(blockTag))
+      this.onBlockCallbackQueue.add(async () =>
+        this.onBlockMined(await this.provider.getBlock(blockTag))
+      )
     );
   }
 
@@ -325,19 +328,28 @@ export class ChainService implements ChainServiceInterface {
     this.channelToSubscribers.set(channelId, []);
   }
 
+  /**
+   * WARNING: potential for a race condition due to:
+   * 1. Read class state (this.finalizingChannels)
+   * 2. Await a promise (getChannelStorage)
+   * 3. Assume that the state in step 1 has not changed.
+   *
+   * If many onBlockMined are executed in parallel, step 3 assumption does not hold
+   * PQueue is used to avoid these race conditions.
+   */
   private async onBlockMined(block: providers.Block): Promise<void> {
     if (!this.finalizingChannels.length) return;
 
     const finalizingChannel = this.finalizingChannels[0];
     if (finalizingChannel.finalizesAtS <= block.timestamp) {
-      const channelId = finalizingChannel.channelId;
+      const {channelId} = finalizingChannel;
       const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
       if (finalizesAt === finalizingChannel.finalizesAtS) {
         // Should we wait for 6 blocks before emitting the finalized event?
         // Will the wallet sign new states or deposit into the channel based on this event?
         // The answer is likely no.
         // So we probably want to emit this event as soon as possible.
-        this.channelToSubscribers.get(finalizingChannel.channelId)?.map(subscriber =>
+        this.channelToSubscribers.get(channelId)?.map(subscriber =>
           subscriber.channelFinalized({
             channelId,
           })
@@ -347,7 +359,7 @@ export class ChainService implements ChainServiceInterface {
         this.addFinalizingChannel(channelId, finalizesAt);
       }
       this.finalizingChannels = this.finalizingChannels.slice(1);
-      this.onBlockMined(block);
+      this.onBlockCallbackQueue.add(async () => this.onBlockMined(block));
     }
   }
 

@@ -24,7 +24,6 @@ import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
-const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
@@ -47,9 +46,10 @@ function mineOnEvent(contract: Contract) {
 }
 
 async function mineBlockPeriodically(blocks: number) {
-  await provider.send('evm_mine', []);
-  if (blocks - 1 <= 0) return;
-  setTimeout(() => mineBlockPeriodically(blocks - 1), 500);
+  for (const _i in _.range(blocks)) {
+    await provider.send('evm_mine', []);
+    await new Promise(r => setTimeout(r, 100));
+  }
 }
 
 jest.setTimeout(20_000);
@@ -79,12 +79,6 @@ beforeAll(() => {
     provider
   );
   mineOnEvent(erc20Holder);
-  const adjudicator = new Contract(
-    nitroAdjudicatorAddress,
-    ContractArtifacts.NitroAdjudicatorArtifact.abi,
-    provider
-  );
-  adjudicator.on('ChallengeRegistered', () => mineBlockPeriodically(4));
 });
 
 afterAll(() => {
@@ -394,50 +388,69 @@ describe('concludeAndWithdraw', () => {
 });
 
 describe('challenge', () => {
-  it('can challenge', async () => {
+  it('two channels are challenged, funds are withdrawn -> final balances are correct', async () => {
     const aDestinationAddress = Wallet.createRandom().address;
     const bDestinationAddress = Wallet.createRandom().address;
     const aDestintination = makeDestination(aDestinationAddress);
     const bDestintination = makeDestination(bDestinationAddress);
-    const channelNonce = getChannelNonce();
+    const channelNonces = [0, 1].map(getChannelNonce);
 
     const outcome = simpleEthAllocation([
       {destination: aDestintination, amount: BN.from(1)},
       {destination: bDestintination, amount: BN.from(3)},
     ]);
-    const state1 = stateSignedBy()({
-      chainId,
-      challengeDuration: 2,
-      outcome,
-      channelNonce,
-    });
-    const state2 = stateSignedBy([bWallet()])({
-      chainId,
-      turnNum: 1,
-      challengeDuration: 2,
-      outcome,
-      channelNonce,
-    });
-    const channelId = getChannelId({
-      channelNonce: state1.channelNonce,
-      chainId: state1.chainId,
-      participants: state1.participants.map(p => p.signingAddress),
-    });
-
-    const p = new Promise(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
-        assetTransferred: _.noop,
-        channelFinalized: resolve,
+    const state0s = channelNonces.map((channelNonce, index) =>
+      stateSignedBy()({
+        chainId,
+        challengeDuration: index + 1,
+        outcome,
+        channelNonce,
       })
     );
-    await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
-    await chainService.challenge([state1, state2], aWallet().privateKey);
-    await p;
-    await chainService.pushOutcomeAndWithdraw(state2, aWallet().address);
+    const state1s = channelNonces.map((channelNonce, index) =>
+      stateSignedBy([bWallet()])({
+        chainId,
+        turnNum: 1,
+        challengeDuration: index + 1,
+        outcome,
+        channelNonce: channelNonce,
+      })
+    );
+    const channelIds = channelNonces.map(channelNonce =>
+      getChannelId({
+        channelNonce: channelNonce,
+        chainId: chainId,
+        participants: state0s[0].participants.map(p => p.signingAddress),
+      })
+    );
 
-    expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(1));
-    expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(3));
+    const channelsFinalized = channelIds.map(
+      channelId =>
+        new Promise(resolve =>
+          chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+            holdingUpdated: _.noop,
+            assetTransferred: _.noop,
+            channelFinalized: resolve,
+          })
+        )
+    );
+    await Promise.all(
+      channelIds.map(channelId => waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress))
+    );
+
+    await (await chainService.challenge([state0s[0], state1s[0]], aWallet().privateKey)).wait();
+    await (await chainService.challenge([state0s[1], state1s[1]], aWallet().privateKey)).wait();
+    await mineBlockPeriodically(20);
+    await Promise.all(channelsFinalized);
+    await Promise.all(
+      state1s.map(
+        async state1 =>
+          await (await chainService.pushOutcomeAndWithdraw(state1, aWallet().address)).wait()
+      )
+    );
+
+    expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(2));
+    expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(6));
   });
 });
 

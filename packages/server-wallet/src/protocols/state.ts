@@ -142,7 +142,6 @@ export function directFundingStatus(
     .reduce(BN.add, BN.from(0));
 
   const funding = fundingFn(assetHolderAddress);
-  console.log('funding: ', funding);
 
   const amountTransferredToMe = funding.transferredOut
     .filter(tf => tf.toAddress === myDestination)
