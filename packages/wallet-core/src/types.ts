@@ -169,7 +169,7 @@ export function objectiveId(objective: Objective): string {
 }
 
 type GetChannel = {type: 'GetChannel'; channelId: string};
-type ProposeLedger = {type: 'ProposeLedger'; channelId: string; outcome: Outcome};
+type ProposeLedger = {type: 'ProposeLedger'; nonce: number; channelId: string; outcome: Outcome};
 export type ChannelRequest = GetChannel | ProposeLedger;
 
 export interface Payload {

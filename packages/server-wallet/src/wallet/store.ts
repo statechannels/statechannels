@@ -528,39 +528,45 @@ export class Store {
 
   async getLedgerProposals(
     ledgerChannelId: Bytes32,
-    tx: Transaction
-  ): Promise<{mine?: Outcome; theirs?: Outcome}> {
-    const channel = await Channel.forId(ledgerChannelId, tx);
+    tx?: Transaction
+  ): Promise<{
+    mine: {outcome: Outcome | undefined; nonce: number};
+    theirs: {outcome: Outcome | undefined; nonce: number};
+  }> {
+    const channel = await Channel.forId(ledgerChannelId, tx || this.knex);
     return {
-      mine: channel.myUnsignedCommitment ?? undefined,
-      theirs: channel.theirUnsignedCommitment ?? undefined,
+      mine: {
+        outcome: channel.myUnsignedCommitment ?? undefined,
+        nonce: channel.myUnsignedCommitmentNonce ?? 0,
+      },
+      theirs: {
+        outcome: channel.theirUnsignedCommitment ?? undefined,
+        nonce: channel.theirUnsignedCommitmentNonce ?? 0,
+      },
     };
-  }
-
-  async getMyLedgerCommit(channelId: Bytes32, tx?: Transaction): Promise<Outcome | undefined> {
-    return (
-      await Channel.query(tx || this.knex)
-        .where({channelId})
-        .first()
-    ).myUnsignedCommitment;
   }
 
   async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx?: Transaction): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})
       .whereNull('myUnsignedCommitment')
-      .patch({myUnsignedCommitment: outcome});
+      .patch({
+        myUnsignedCommitment: outcome,
+        myUnsignedCommitmentNonce: this.knex.raw('my_unsigned_commitment_nonce + 1'),
+      });
   }
 
   async storeTheirLedgerCommit(
     channelId: Bytes32,
     outcome: Outcome,
+    nonce: number,
     tx?: Transaction
   ): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})
       .whereNull('theirUnsignedCommitment')
-      .patch({theirUnsignedCommitment: outcome});
+      .andWhere('theirUnsignedCommitmentNonce', '<', nonce)
+      .patch({theirUnsignedCommitment: outcome, theirUnsignedCommitmentNonce: nonce});
   }
 
   async removeMyLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {

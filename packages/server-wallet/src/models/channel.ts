@@ -83,7 +83,9 @@ export class Channel extends Model implements RequiredColumns {
   readonly fundingLedgerChannelId!: Bytes32; // only App channels funded by Ledger have this
 
   readonly myUnsignedCommitment: Outcome | undefined; // only Ledger channels have this
+  readonly myUnsignedCommitmentNonce!: number; // only Ledger channels have this
   readonly theirUnsignedCommitment: Outcome | undefined; // only Ledger channels have this
+  readonly theirUnsignedCommitmentNonce!: number; // only Ledger channels have this
 
   static get jsonSchema(): JSONSchema {
     return {

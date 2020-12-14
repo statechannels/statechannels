@@ -82,6 +82,9 @@
             "channelId": {
               "type": "string"
             },
+            "nonce": {
+              "type": "number"
+            },
             "outcome": {
               "$ref": "#/definitions/Outcome"
             },
@@ -92,6 +95,7 @@
           },
           "required": [
             "type",
+            "nonce",
             "channelId",
             "outcome"
           ],

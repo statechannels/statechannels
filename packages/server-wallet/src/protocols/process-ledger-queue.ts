@@ -57,6 +57,8 @@ export type ProtocolState = {
   fundingChannel: ChannelState;
   counterpartyLedgerCommit?: SimpleAllocation;
   myProposedLedgerCommit?: SimpleAllocation;
+  counterpartyLedgerCommitNonce: number;
+  myProposedLedgerCommitNonce: number;
   channelsRequestingFunds: ChannelState[];
   channelsReturningFunds: ChannelState[];
 };
@@ -267,7 +269,7 @@ const exchangeCommits = ({
 
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
-  let outcome: Outcome;
+  let outcome: Outcome | undefined;
   let insufficientFunds: Bytes32[] = [];
 
   ({outcome, insufficientFunds} = redistributeFunds(
@@ -288,6 +290,8 @@ const exchangeCommits = ({
     outcome = mergedLedgerUpdate.outcome;
     insufficientFunds = insufficientFunds.concat(mergedLedgerUpdate.insufficientFunds);
   }
+
+  if (_.isEqual(outcome, supportedOutcome)) outcome = undefined; // Don't propose the current state
 
   return {
     type: 'ProposeLedgerState',
@@ -350,8 +354,15 @@ export const getProcessLedgerQueueProtocolState = async (
   const {mine, theirs} = await store.getLedgerProposals(ledgerChannelId, tx);
   return {
     fundingChannel: await store.getChannel(ledgerChannelId, tx),
-    myProposedLedgerCommit: mine && checkThat(mine, isSimpleAllocation),
-    counterpartyLedgerCommit: theirs && checkThat(theirs, isSimpleAllocation),
+
+    myProposedLedgerCommit: mine.outcome ? checkThat(mine.outcome, isSimpleAllocation) : undefined,
+    counterpartyLedgerCommit: theirs.outcome
+      ? checkThat(theirs.outcome, isSimpleAllocation)
+      : undefined,
+
+    myProposedLedgerCommitNonce: mine.nonce,
+    counterpartyLedgerCommitNonce: theirs.nonce,
+
     channelsRequestingFunds: await Promise.all<ChannelState>(
       compose(
         map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
