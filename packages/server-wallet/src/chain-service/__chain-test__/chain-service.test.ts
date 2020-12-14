@@ -226,7 +226,7 @@ describe('registerChannel', () => {
         assetTransferred: _.noop,
         channelFinalized: arg => {
           expect(arg.channelId).toEqual(channelId);
-          resolve(true);
+          resolve();
         },
       })
     );
