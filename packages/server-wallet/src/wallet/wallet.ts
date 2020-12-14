@@ -18,6 +18,7 @@ import {
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
+  makeDestination,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -47,10 +48,10 @@ import {
   ChainServiceInterface,
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
-  Arg,
   ChainService,
   MockChainService,
   ChannelFinalizedArg,
+  AssetOutcomeUpdatedArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
@@ -651,6 +652,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   // ChainEventSubscriberInterface implementation
+  // TODO: should this methods be private? It seems a little weird to me that they are a part of the Wallet API
+  // We could nest them all in a chainEventSubscriber property and pass that object in to the chain service.
   async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
 
@@ -660,20 +663,31 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  // TODO replace this with an AllocationUpdated solution (needs calldata)
-  // async assetTransferred(arg: AssetTransferredArg): Promise<void> {
-  //   const response = WalletResponse.initialize();
-  //   // TODO: make sure that arg.to is checksummed
-  //   await this.store.updateTransferredOut(
-  //     arg.channelId,
-  //     arg.assetHolderAddress,
-  //     arg.to,
-  //     arg.amount
-  //   );
-  //   await this.takeActions([arg.channelId], response);
+  async assetOutcomeUpdated({
+    channelId,
+    assetHolderAddress,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    newAssetOutcome, // TODO currently unused
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    newHoldings, // TODO currently unused
+    externalPayouts,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    internalPayouts, // TODO currently unused
+  }: AssetOutcomeUpdatedArg): Promise<void> {
+    const response = WalletResponse.initialize();
+    externalPayouts.forEach(async payout => {
+      await this.store.updateTransferredOut(
+        channelId,
+        assetHolderAddress,
+        makeDestination(payout.destination),
+        payout.amount
+      );
+    });
 
-  //   response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
-  // }
+    await this.takeActions([channelId], response);
+
+    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+  }
 
   async channelFinalized(_arg: ChannelFinalizedArg): Promise<void> {
     return;
