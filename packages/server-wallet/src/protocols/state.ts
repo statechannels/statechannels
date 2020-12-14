@@ -21,6 +21,7 @@ import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {ChainServiceRequest} from '../models/chain-service-request';
+import {FinalizationStatusResult} from '../models/finalization-status';
 
 import {ProtocolAction} from './actions';
 
@@ -45,6 +46,7 @@ export type ChannelState = {
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
   directFundingStatus: FundingStatus;
+  onChainFinalizationStatus: FinalizationStatusResult['status'];
 };
 
 type WithSupported = {supported: SignedStateWithHash};
@@ -80,6 +82,7 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
     latestSignedByMe,
     support,
     directFundingStatus,
+    onChainFinalizationStatus,
   } = channelState;
 
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
@@ -109,6 +112,7 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
     allocations,
     status,
     fundingStatus: directFundingStatus,
+    onChainFinalizationStatus,
   };
 };
 

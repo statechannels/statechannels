@@ -50,6 +50,7 @@ import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
+import {FinalizationStatus} from '../models/finalization-status';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -262,10 +263,11 @@ export class Store {
     // This is somewhat faster than Channel.forId for simply fetching a channel:
     // - the signingWallet isn't needed to construct the protocol state
     // - withGraphJoined is slightly faster in this case
-    return Channel.query(tx ?? this.knex)
+    return await Channel.query(tx ?? this.knex)
       .where({'channels.channel_id': channelId})
       .withGraphJoined('funding')
       .withGraphJoined('chainServiceRequests')
+      .withGraphJoined('finalizationStatus')
       .first();
   }
 
@@ -677,6 +679,18 @@ export class Store {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
   }
 
+  async updateFinalizationStatus(
+    channelId: string,
+    finalizedAt: number,
+    finalizedBlockNumber: number
+  ): Promise<void> {
+    await FinalizationStatus.updateFinalizationStatus(
+      this.knex,
+      channelId,
+      finalizedAt,
+      finalizedBlockNumber
+    );
+  }
   async updateTransferredOut(
     channelId: string,
     assetHolder: Address,

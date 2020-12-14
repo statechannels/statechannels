@@ -356,6 +356,8 @@ export class ChainService implements ChainServiceInterface {
         this.channelToSubscribers.get(channelId)?.map(subscriber =>
           subscriber.channelFinalized({
             channelId,
+            blockNumber: block.number,
+            finalizedAt: finalizingChannel.finalizesAtS,
           })
         );
         // Chain storage has a new finalizesAt timestamp

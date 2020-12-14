@@ -31,6 +31,7 @@ import {Funding} from './funding';
 import {ObjectiveModel} from './objective';
 import {LedgerRequest} from './ledger-request';
 import {ChainServiceRequest} from './chain-service-request';
+import {FinalizationStatus} from './finalization-status';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -76,6 +77,7 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
+  readonly finalizationStatus!: FinalizationStatus;
   readonly chainServiceRequests!: ChainServiceRequest[];
   readonly fundingStrategy!: FundingStrategy;
 
@@ -113,6 +115,11 @@ export class Channel extends Model implements RequiredColumns {
         to: 'funding.channelId',
       },
     },
+    finalizationStatus: {
+      relation: Model.HasOneRelation,
+      modelClass: FinalizationStatus,
+      join: {from: 'channels.channelId', to: 'finalization_status.channelId'},
+    },
     objectivesChannels: {
       relation: Model.ManyToManyRelation,
       modelClass: ObjectiveModel,
@@ -143,6 +150,7 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
       .withGraphFetched('chainServiceRequests')
+      .withGraphFetched('finalizationStatus')
       .first();
   }
 
@@ -236,6 +244,10 @@ export class Channel extends Model implements RequiredColumns {
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
     const dfs = directFundingStatus(supported, funding, participants[myIndex], fundingStrategy);
+    const onChainFinalizationStatus = this.finalizationStatus
+      ? this.finalizationStatus.asResult().status
+      : 'Not Finalized';
+
     return {
       myIndex: myIndex as 0 | 1,
       participants,
@@ -249,6 +261,7 @@ export class Channel extends Model implements RequiredColumns {
       fundingStrategy,
       fundingLedgerChannelId,
       directFundingStatus: dfs,
+      onChainFinalizationStatus,
     };
   }
 
