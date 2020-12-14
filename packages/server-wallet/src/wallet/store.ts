@@ -810,7 +810,7 @@ function ensureNoDuplicateTurnNums(states: SignedStateVarsWithHash[]): void {
   const turnNums = _.map(states, 'turnNum');
   const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
   if (duplicateTurnNums) {
-    throw new StoreError(StoreError.reasons.duplicateTurnNums);
+    throw new StoreError(StoreError.reasons.duplicateTurnNums, {states});
   }
 }
 
