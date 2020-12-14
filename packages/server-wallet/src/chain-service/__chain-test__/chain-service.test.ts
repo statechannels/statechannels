@@ -220,7 +220,7 @@ describe('registerChannel', () => {
       })
     );
 
-    await new Promise(resolve =>
+    await new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
         assetTransferred: _.noop,
