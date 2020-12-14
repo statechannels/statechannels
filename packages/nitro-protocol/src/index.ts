@@ -17,7 +17,7 @@ export const ContractArtifacts = {
 };
 
 /**
- * Various test contract artifacts used for testing
+ * Various test contract artifacts used for testing.
  * They expose helper functions to allow for easier testing
  * They should NEVER be used in a production environment.
  */
