@@ -357,14 +357,20 @@ export class ChainService implements ChainServiceInterface {
 
   private addFinalizingChannel(arg: {channelId: string; finalizesAtS: number}) {
     const {channelId, finalizesAtS} = arg;
-    this.finalizingChannels = [...this.finalizingChannels, {channelId, finalizesAtS: finalizesAtS}];
-    this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
+    // Only add the finalizing channel if its not already there
+    if (!this.finalizingChannels.some(c => c.channelId === channelId)) {
+      this.finalizingChannels = [
+        ...this.finalizingChannels,
+        {channelId, finalizesAtS: finalizesAtS},
+      ];
+      this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
+    }
   }
 
   private async registerFinalizationStatus(channelId: string): Promise<void> {
-    const finalizedAt = await this.getFinalizedAt(channelId);
-    if (finalizedAt !== 0) {
-      this.addFinalizingChannel(channelId, finalizedAt);
+    const finalizesAtS = await this.getFinalizedAt(channelId);
+    if (finalizesAtS !== 0) {
+      this.addFinalizingChannel({channelId, finalizesAtS});
     }
   }
 
