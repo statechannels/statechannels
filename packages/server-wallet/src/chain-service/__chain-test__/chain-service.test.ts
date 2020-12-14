@@ -234,6 +234,7 @@ describe('registerChannel', () => {
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
       holdingUpdated,
+      assetOutcomeUpdated: _.noop,
       channelFinalized: _.noop,
     });
     await p;
@@ -253,6 +254,7 @@ describe('registerChannel', () => {
           });
           resolve(true);
         },
+        assetOutcomeUpdated: _.noop,
         channelFinalized: _.noop,
       })
     );
@@ -286,7 +288,7 @@ describe('registerChannel', () => {
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       holdingUpdated,
-      // assetTransferred: _.noop,
+      assetOutcomeUpdated: _.noop,
       channelFinalized: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
@@ -317,6 +319,7 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
+        assetOutcomeUpdated: _.noop,
         channelFinalized: _.noop,
       })
     );
@@ -351,6 +354,7 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         holdingUpdated: _.noop,
+        assetOutcomeUpdated: _.noop,
         channelFinalized: _.noop,
       })
     );
@@ -405,6 +409,7 @@ describe('challenge', () => {
     const p = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
+        assetOutcomeUpdated: _.noop,
         channelFinalized: resolve,
       })
     );
