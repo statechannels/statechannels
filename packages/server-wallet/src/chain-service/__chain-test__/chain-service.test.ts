@@ -208,7 +208,7 @@ describe('fundChannel', () => {
 });
 
 describe('registerChannel', () => {
-  it('dipatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
+  it('dispatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
     const channelId = randomChannelId();
     const {provider} = testAdjudicator;
     const currentBlock = await provider.getBlock(provider.getBlockNumber());
