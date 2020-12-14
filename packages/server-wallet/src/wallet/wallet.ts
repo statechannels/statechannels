@@ -794,8 +794,12 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  async channelFinalized(_arg: ChannelFinalizedArg): Promise<void> {
-    return;
+  async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
+    const response = WalletResponse.initialize();
+    await this.store.updateFinalizationStatus(arg.channelId, arg.finalizedAt, arg.blockNumber);
+
+    await this.takeActions([arg.channelId], response);
+    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
   private async registerChannelWithChainService(channelId: string): Promise<void> {

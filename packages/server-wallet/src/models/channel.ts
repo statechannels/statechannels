@@ -31,6 +31,7 @@ import {Funding} from './funding';
 import {ObjectiveModel} from './objective';
 import {LedgerRequest} from './ledger-request';
 import {ChainServiceRequest} from './chain-service-request';
+import {ChallengeStatus} from './challenge-status';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -76,6 +77,7 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
+  readonly challengeStatus!: ChallengeStatus;
   readonly chainServiceRequests!: ChainServiceRequest[];
   readonly fundingStrategy!: FundingStrategy;
 
@@ -113,6 +115,11 @@ export class Channel extends Model implements RequiredColumns {
         to: 'funding.channelId',
       },
     },
+    challengeStatus: {
+      relation: Model.HasOneRelation,
+      modelClass: ChallengeStatus,
+      join: {from: 'channels.channelId', to: 'challenge_status.channelId'},
+    },
     objectivesChannels: {
       relation: Model.ManyToManyRelation,
       modelClass: ObjectiveModel,
@@ -143,6 +150,7 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
       .withGraphFetched('chainServiceRequests')
+      .withGraphFetched('challengeStatus')
       .first();
   }
 
@@ -241,6 +249,10 @@ export class Channel extends Model implements RequiredColumns {
     const dfs = this.funding
       ? directFundingStatus(supported, funding, participants[myIndex], fundingStrategy)
       : undefined;
+    const challengeStatus = this.challengeStatus
+      ? this.challengeStatus.toResult().status
+      : 'No Challenge Detected';
+
     return {
       myIndex: myIndex as 0 | 1,
       participants,
@@ -254,6 +266,7 @@ export class Channel extends Model implements RequiredColumns {
       fundingStrategy,
       fundingLedgerChannelId,
       directFundingStatus: dfs,
+      challengeStatus,
     };
   }
 
