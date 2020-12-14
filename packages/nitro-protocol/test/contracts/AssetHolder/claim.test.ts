@@ -6,7 +6,6 @@ import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-hol
 import {
   allocationToParams,
   AssetOutcomeShortHand,
-  EventsFromPayouts,
   compileEventsFromLogs,
   getRandomNonce,
   getTestProvider,

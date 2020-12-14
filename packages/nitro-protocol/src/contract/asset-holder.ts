@@ -1,7 +1,7 @@
 import {utils, BigNumber, ethers} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
+import AssetHolderArtifact from '../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 
 import {AllocationAssetOutcome, AllocationItem, AssetOutcome, decodeAllocation} from './outcome';
 import {Address, Bytes32} from './types';
