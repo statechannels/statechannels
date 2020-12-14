@@ -83,10 +83,10 @@ function removeChannelFromAllocation(
     const idx = remainingItems.findIndex(to => destination === to.destination);
     return idx > -1
       ? _.update(remainingItems, idx, to => ({
-          destination,
           amount: BN.add(amount, to.amount),
+          destination,
         }))
-      : [...remainingItems, {destination, amount}];
+      : [...remainingItems, {amount, destination}];
   }, remaining);
 }
 

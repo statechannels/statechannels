@@ -92,7 +92,7 @@ export function allocateToTarget(
       if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
     });
 
-  currentItems.push({destination: makeDestination(targetChannelId), amount: total});
+  currentItems.push({amount: total, destination: makeDestination(targetChannelId)});
   currentItems = currentItems.filter(i => BN.gt(i.amount, 0));
 
   currentOutcome.allocationItems = currentItems;

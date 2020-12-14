@@ -159,5 +159,5 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
   const {amount, destination} = allocationItem;
-  return {destination: makeDestination(destination), amount: BN.from(amount)};
+  return {amount: BN.from(amount), destination: makeDestination(destination)};
 }
