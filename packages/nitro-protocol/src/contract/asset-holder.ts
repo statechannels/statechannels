@@ -1,8 +1,11 @@
-import {utils, BigNumber} from 'ethers';
+import {utils, BigNumber, ethers} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
+import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 
-import {AllocationItem} from './outcome';
+import {AllocationAssetOutcome, AllocationItem, AssetOutcome, decodeAllocation} from './outcome';
+import {Address, Bytes32} from './types';
+import {isExternalDestination} from './channel';
 
 export interface DepositedEvent {
   destination: string;
@@ -82,6 +85,55 @@ export function computeNewAllocation(
     payouts,
     totalPayouts: totalPayouts.toHexString(),
   };
+}
+
+/**
+ *
+ * Takes an AllocationUpdatedEvent and the transaction that emittted it, and returns updated information in a convenient format
+ * @param assetHolderAddress
+ * @param allocationUpdatedEvent
+ * @param tx Transaction which gave rise to the event
+ */
+export function computeNewAssetOutcome(
+  assetHolderAddress: Address,
+  allocationUpdatedEvent: {channelId: Bytes32; initialHoldings: string},
+  tx: ethers.Transaction
+): {
+  newAssetOutcome: AssetOutcome | '0x00'; // '0x00' if the outcome was deleted on chain
+  newHoldings: BigNumber;
+  externalPayouts: AllocationItem[];
+  internalPayouts: AllocationItem[];
+} {
+  const assetHolderContract = new ethers.Contract(assetHolderAddress, AssetHolderArtifact.abi);
+  const txDescription = assetHolderContract.interface.parseTransaction(tx);
+  const oldAllocation = decodeAllocation(txDescription.args.allocationBytes);
+
+  const {newAllocation, deleted, payouts, totalPayouts} = computeNewAllocation(
+    allocationUpdatedEvent.initialHoldings,
+    oldAllocation,
+    txDescription.args.indices
+  );
+  const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
+  const newAssetOutcome: AllocationAssetOutcome | '0x00' = deleted
+    ? '0x00'
+    : {
+        assetHolderAddress: assetHolderContract.address,
+        allocationItems: newAllocation,
+      };
+
+  const hydratedPayouts: AllocationItem[] = payouts.map((v, i) => ({
+    destination: oldAllocation[txDescription.args.indices[i]].destination,
+    amount: v,
+  }));
+
+  const externalPayouts = hydratedPayouts.filter(payout =>
+    isExternalDestination(payout.destination)
+  );
+
+  const internalPayouts = hydratedPayouts.filter(
+    payout => !isExternalDestination(payout.destination)
+  );
+  return {newAssetOutcome, newHoldings, externalPayouts, internalPayouts};
 }
 
 function min(a: BigNumber, b: BigNumber) {
