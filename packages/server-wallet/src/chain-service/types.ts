@@ -29,6 +29,8 @@ export type FundChannelArg = {
 
 export type ChannelFinalizedArg = {
   channelId: Bytes32;
+  blockNumber: number;
+  finalizedAt: number;
 };
 
 export interface ChainEventSubscriberInterface {
