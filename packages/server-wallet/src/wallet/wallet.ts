@@ -204,8 +204,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.queueChannelState(channelState);
 
     if (await this.store.isLedger(channelId)) {
-      const outcome = await this.store.getMyLedgerCommit(channelId);
-      if (outcome) response.queueProposeLedger(channelId, myIndex, participants, outcome);
+      const {
+        mine: {outcome, nonce},
+      } = await this.store.getLedgerProposals(channelId);
+      if (outcome) response.queueProposeLedger(channelId, myIndex, participants, outcome, nonce);
     }
   }
 
@@ -556,13 +558,17 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
 
           if (await this.store.isLedger(channelId)) {
-            const commit = await this.store.getMyLedgerCommit(channelId);
-            if (commit)
+            const {
+              mine: {outcome, nonce},
+            } = await this.store.getLedgerProposals(channelId);
+
+            if (outcome)
               response.queueProposeLedger(
                 channelId,
                 channelState.myIndex,
                 channelState.participants,
-                commit
+                outcome,
+                nonce
               );
           }
 
@@ -571,7 +577,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         case 'ProposeLedger':
           await store.storeTheirLedgerCommit(
             channelId,
-            checkThat(request.outcome, isSimpleAllocation)
+            checkThat(request.outcome, isSimpleAllocation),
+            request.nonce
           );
           continue;
         default:
@@ -624,14 +631,15 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         const pessimisticallyAddStateAndProposalToOutbox = () => {
           const {
             fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
-            myProposedLedgerCommit,
+            myProposedLedgerCommit: outcome,
+            myProposedLedgerCommitNonce: nonce,
           } = protocolState;
           if (latestSignedByMe && supported) {
             /**
              * Always re-send a proposal if I have one withstanding, just in case.
              */
-            if (myProposedLedgerCommit)
-              response.queueProposeLedger(channelId, myIndex, participants, myProposedLedgerCommit);
+            if (outcome)
+              response.queueProposeLedger(channelId, myIndex, participants, outcome, nonce);
             /**
              * Re-send my latest signed ledger state if it is not supported yet.
              */
@@ -666,17 +674,19 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
               }
 
               case 'SignLedgerState': {
-                // NOTE: State added to response in pessimisticallyAddStateAndProposalToOutbox
-                const channel = await Channel.forId(action.channelId, tx);
-                await this.store.signState(channel, action.stateToSign, tx);
+                const {myIndex, channelId} = protocolState.fundingChannel;
+                const channel = await Channel.forId(channelId, tx);
+                const signedState = await this.store.signState(channel, action.stateToSign, tx);
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
+                response.queueState(signedState, myIndex, channelId);
                 return;
               }
 
               case 'ProposeLedgerState': {
                 // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
-                await this.store.storeMyLedgerCommit(action.channelId, action.outcome, tx);
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
+                if (action.outcome)
+                  await this.store.storeMyLedgerCommit(action.channelId, action.outcome, tx);
                 return;
               }
 

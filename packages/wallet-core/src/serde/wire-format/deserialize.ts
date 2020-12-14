@@ -113,7 +113,8 @@ export function deserializeRequest(request: ChannelRequestWire): ChannelRequest 
   if (request.type === 'ProposeLedger')
     return {
       ...request,
-      outcome: deserializeOutcome(request.outcome)
+      outcome: deserializeOutcome(request.outcome),
+      nonce: request.nonce
     };
 
   return request;

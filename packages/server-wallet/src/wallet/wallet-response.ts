@@ -147,7 +147,8 @@ export class WalletResponse {
     channelId: string,
     myIndex: number,
     participants: Participant[],
-    outcome: Outcome
+    outcome: Outcome,
+    nonce: number
   ): void {
     const myParticipantId = participants[myIndex].participantId;
 
@@ -158,7 +159,7 @@ export class WalletResponse {
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
-              requests: [{type: 'ProposeLedger' as const, channelId, outcome}],
+              requests: [{type: 'ProposeLedger' as const, channelId, outcome, nonce}],
             },
             p.participantId,
             myParticipantId,

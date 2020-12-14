@@ -40,7 +40,7 @@ export type MarkLedgerFundingRequestsAsComplete = {
 export type ProposeLedgerState = {
   type: 'ProposeLedgerState';
   channelId: Bytes32;
-  outcome: SimpleAllocation;
+  outcome?: SimpleAllocation;
   channelsNotFunded: Bytes32[];
 };
 export type SignLedgerState = {

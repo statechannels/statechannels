@@ -557,6 +557,7 @@ describe('ledger funded app scenarios', () => {
           type: 'ProposeLedger',
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
+          nonce: 1,
         }),
       ],
     });
@@ -595,6 +596,7 @@ describe('ledger funded app scenarios', () => {
           type: 'ProposeLedger',
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
+          nonce: 1,
         }),
       ],
     });
@@ -630,6 +632,7 @@ describe('ledger funded app scenarios', () => {
           type: 'ProposeLedger',
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
+          nonce: 1,
         }),
       ],
     });
@@ -679,6 +682,7 @@ describe('ledger funded app scenarios', () => {
           type: 'ProposeLedger',
           channelId: ledger.channelId,
           outcome: conflictingUpdatedLedgerState.outcome,
+          nonce: 1,
         }),
       ],
     });
