@@ -35,14 +35,12 @@ const rpcEndpoint = process.env.RPC_ENDPOINT;
 const chainId = process.env.CHAIN_NETWORK_ID || '9002';
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
-class TestChainService extends ChainService {
-  getFinalizingChannels() {
-    return this.finalizingChannels;
-  }
-}
-let chainService: TestChainService;
-let channelNonce = 0;
 
+let chainService: ChainService;
+let channelNonce = 0;
+async function mineBlock(timestamp: number) {
+  await provider.send('evm_mine', [timestamp]);
+}
 async function mineBlocks() {
   for (const _i in _.range(5)) {
     await provider.send('evm_mine', []);
@@ -76,7 +74,7 @@ beforeAll(async () => {
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
   /* eslint-disable no-process-env */
-  chainService = new TestChainService({
+  chainService = new ChainService({
     provider: rpcEndpoint,
     pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
     allowanceMode: 'MaxUint',
@@ -210,54 +208,65 @@ describe('fundChannel', () => {
 describe('registerChannel', () => {
   it('dispatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
     const channelId = randomChannelId();
-    const {provider} = testAdjudicator;
-    const currentBlock = await provider.getBlock(provider.getBlockNumber());
-    await testAdjudicator.functions.setChannelStorageHash(
+    const CHALLENGE_EXPIRE_TIME = 6000;
+    const FUTURE_TIME = 7000;
+
+    const tx = await testAdjudicator.functions.setChannelStorageHash(
       channelId,
       channelDataToChannelStorageHash({
         turnNumRecord: 0,
-        finalizesAt: currentBlock.timestamp - 1000,
+        finalizesAt: CHALLENGE_EXPIRE_TIME,
       })
     );
-
-    await new Promise<void>(resolve =>
+    await tx.wait();
+    const channelFinalizedHandler = jest.fn();
+    const channelFinalizedPromise = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
         assetTransferred: _.noop,
         channelFinalized: arg => {
-          expect(arg.channelId).toEqual(channelId);
+          channelFinalizedHandler(arg);
           resolve();
         },
       })
     );
+    await mineBlock(FUTURE_TIME);
+    await channelFinalizedPromise;
+    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
   });
 
-  it('registers a channel in the finalizing channel list when if the channel is in the process of finalization', async () => {
+  it('registers a channel in the finalizing channel list and fires an event when that channel is fainlized', async () => {
     const channelId = randomChannelId();
-    const {provider} = testAdjudicator;
-    const currentBlock = await provider.getBlock(provider.getBlockNumber());
-    // We use some finalization time way in the future so we can be sure that the finalization status is in progress
-    const finalizesAt = currentBlock.timestamp + 1000;
-    await testAdjudicator.functions.setChannelStorageHash(
+    const CURRENT_TIME = 5000;
+    const CHALLENGE_EXPIRE_TIME = 6000;
+    const FUTURE_TIME = 7000;
+
+    const tx = await testAdjudicator.setChannelStorageHash(
       channelId,
       channelDataToChannelStorageHash({
         turnNumRecord: 0,
-        finalizesAt,
+        finalizesAt: CHALLENGE_EXPIRE_TIME,
+      })
+    );
+    await tx.wait();
+
+    const channelFinalizedHandler = jest.fn();
+    const channelFinalizedPromise = new Promise<void>(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        holdingUpdated: _.noop,
+        assetTransferred: _.noop,
+        channelFinalized: arg => {
+          channelFinalizedHandler(arg);
+          resolve();
+        },
       })
     );
 
-    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-      holdingUpdated: _.noop,
-      assetTransferred: _.noop,
-      channelFinalized: _.noop,
-    });
-    // The channel can get added to the finalization list after registerChannel completes
-    // So we just wait a second to ensure that it's been added
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    expect(chainService.getFinalizingChannels()).toContainEqual({
-      channelId,
-      finalizesAtS: finalizesAt,
-    });
+    await mineBlock(CURRENT_TIME);
+    expect(channelFinalizedHandler).not.toHaveBeenCalled();
+    await mineBlock(FUTURE_TIME);
+    await channelFinalizedPromise;
+    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
   });
 
   it('Successfully registers channel and receives follow on funding event', async () => {
