@@ -74,7 +74,6 @@ export class ChainService implements ChainServiceInterface {
   private transactionQueue = new PQueue({concurrency: 1});
 
   private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
-  private onBlockCallbackQueue = new PQueue({concurrency: 1});
 
   constructor({
     provider,
@@ -105,13 +104,11 @@ export class ChainService implements ChainServiceInterface {
 
     this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
       const event = getChallengeRegisteredEvent(args);
-      this.addFinalizingChannel(event.channelId, event.finalizesAt);
+      this.addFinalizingChannel({channelId: event.channelId, finalizesAtS: event.finalizesAt});
     });
 
     this.provider.on('block', async (blockTag: providers.BlockTag) =>
-      this.onBlockCallbackQueue.add(async () =>
-        this.onBlockMined(await this.provider.getBlock(blockTag))
-      )
+      this.onBlockMined(await this.provider.getBlock(blockTag))
     );
   }
 
@@ -338,9 +335,9 @@ export class ChainService implements ChainServiceInterface {
    * PQueue is used to avoid these race conditions.
    */
   private async onBlockMined(block: providers.Block): Promise<void> {
-    if (!this.finalizingChannels.length) return;
+    const finalizingChannel = this.finalizingChannels.shift();
+    if (!finalizingChannel) return;
 
-    const finalizingChannel = this.finalizingChannels[0];
     if (finalizingChannel.finalizesAtS <= block.timestamp) {
       const {channelId} = finalizingChannel;
       const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
@@ -356,14 +353,15 @@ export class ChainService implements ChainServiceInterface {
         );
         // Chain storage has a new finalizesAt timestamp
       } else if (finalizesAt) {
-        this.addFinalizingChannel(channelId, finalizesAt);
+        this.addFinalizingChannel({channelId, finalizesAtS: finalizesAt});
       }
-      this.finalizingChannels = this.finalizingChannels.slice(1);
-      this.onBlockCallbackQueue.add(async () => this.onBlockMined(block));
+      this.onBlockMined(block);
     }
+    this.addFinalizingChannel(finalizingChannel);
   }
 
-  private addFinalizingChannel(channelId: string, finalizesAtS: number) {
+  private addFinalizingChannel(arg: {channelId: string; finalizesAtS: number}) {
+    const {channelId, finalizesAtS} = arg;
     this.finalizingChannels = [...this.finalizingChannels, {channelId, finalizesAtS: finalizesAtS}];
     this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
   }
