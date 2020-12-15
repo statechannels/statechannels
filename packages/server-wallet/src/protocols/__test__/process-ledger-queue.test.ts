@@ -13,6 +13,7 @@ import {alice as aliceSW, bob as bobSW} from '../../wallet/__test__/fixtures/sig
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {protocol, ProtocolState} from '../process-ledger-queue';
 import {Fixture} from '../../wallet/__test__/fixtures/utils';
+import {ChannelStateWithSupported} from '../state';
 
 let i = 0;
 const prefundChannelWithAllocations = (allocations: AllocationItem[] = []) =>
@@ -32,7 +33,7 @@ const ledgerChannelWithAllocations = (allocations: AllocationItem[]) =>
     vars: [
       stateSignedBy([aliceSW(), bobSW()])({turnNum: 3, outcome: simpleEthAllocation(allocations)}),
     ],
-  }).protocolState;
+  }).protocolState as ChannelStateWithSupported;
 
 const defaultLedgerChannel = ledgerChannelWithAllocations([
   allocationItem(alice, 10),
@@ -303,7 +304,7 @@ describe('exchanging signed ledger state updates', () => {
         allocationItem(bob, 10),
         allocationItem(requestChannel.channelId, 1),
       ]);
-      const {protocolState: fundingChannel} = channel({
+      const fundingChannel = channel({
         vars: [
           stateSignedBy([aliceSW()])({
             turnNum: 5,
@@ -311,7 +312,7 @@ describe('exchanging signed ledger state updates', () => {
           }),
           defaultLedgerChannel.latest,
         ],
-      });
+      }).protocolState as ChannelStateWithSupported;
       const protocolArgs = {
         fundingChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
@@ -420,7 +421,7 @@ describe('exchanging signed ledger state updates', () => {
         allocationItem(requestChannel.channelId, 1),
       ]);
       const unexpectedOutcome = simpleEthAllocation([allocationItem(bob, 1337)]);
-      const {protocolState: fundingChannel} = channel({
+      const fundingChannel = channel({
         vars: [
           stateSignedBy([bobSW()])({
             turnNum: 5,
@@ -428,7 +429,7 @@ describe('exchanging signed ledger state updates', () => {
           }),
           defaultLedgerChannel.latest,
         ],
-      });
+      }).protocolState as ChannelStateWithSupported;
       const protocolArgs = {
         fundingChannel,
         channelsRequestingFunds: [requestChannel.protocolState],

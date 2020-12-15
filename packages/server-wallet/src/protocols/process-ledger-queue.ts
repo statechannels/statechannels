@@ -30,7 +30,6 @@ import {
   allocateToTarget,
   checkThat,
   isSimpleAllocation,
-  Outcome,
   SimpleAllocation,
   areAllocationItemsEqual,
   BN,
@@ -43,7 +42,7 @@ import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 import {LedgerRequestType} from '../models/ledger-request';
 
-import {Protocol, ProtocolResult, ChannelState} from './state';
+import {Protocol, ProtocolResult, ChannelState, ChannelStateWithSupported} from './state';
 import {
   DismissLedgerProposals,
   MarkLedgerFundingRequestsAsComplete,
@@ -54,13 +53,18 @@ import {
 } from './actions';
 
 export type ProtocolState = {
-  fundingChannel: ChannelState;
+  fundingChannel: ChannelStateWithSupported;
   counterpartyLedgerCommit?: SimpleAllocation;
   myProposedLedgerCommit?: SimpleAllocation;
   counterpartyLedgerCommitNonce: number;
   myProposedLedgerCommitNonce: number;
   channelsRequestingFunds: ChannelState[];
   channelsReturningFunds: ChannelState[];
+};
+
+type ProtocolStateWithCommits = ProtocolState & {
+  counterpartyLedgerCommit: SimpleAllocation;
+  myProposedLedgerCommit: SimpleAllocation;
 };
 
 function removeChannelFromAllocation(
@@ -106,9 +110,9 @@ const allocateFundsToChannels = (
   allocationTargets: ChannelState[]
 ): {
   outcome: SimpleAllocation;
-  insufficientFunds: Bytes32[];
+  channelsNotFunded: Bytes32[];
 } => {
-  const insufficientFunds: Bytes32[] = [];
+  const channelsNotFunded: Bytes32[] = [];
   const outcome = allocationTargets.reduce((outcome, {channelId, supported}) => {
     try {
       return allocateToTarget(
@@ -124,12 +128,12 @@ const allocateFundsToChannels = (
         // There is no participant balance at all (exactly 0 left)
         e.message.toString() === Errors.DestinationMissing
       )
-        insufficientFunds.push(channelId);
+        channelsNotFunded.push(channelId);
       return outcome;
     }
   }, original);
 
-  return {outcome, insufficientFunds};
+  return {outcome, channelsNotFunded};
 };
 
 const intersectOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
@@ -151,7 +155,7 @@ const redistributeFunds = (
   funding: ChannelState[]
 ): {
   outcome: SimpleAllocation;
-  insufficientFunds: Bytes32[];
+  channelsNotFunded: Bytes32[];
 } => allocateFundsToChannels(retrieveFundsFromClosedChannels(outcome, defunding), funding);
 
 const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
@@ -164,24 +168,20 @@ const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation 
   };
 };
 
+const channelIdMatchesDestination = ({channelId}: ChannelState, {destination}: AllocationItem) =>
+  channelId === destination;
+
 const mergeProposedLedgerUpdates = (
   mine: SimpleAllocation,
   theirs: SimpleAllocation,
   supportedOutcome: SimpleAllocation,
-  channelsRequestingFunds: ChannelState[],
-  channelsReturningFunds: ChannelState[]
+  requesting: ChannelState[],
+  returning: ChannelState[]
 ) => {
-  const merged = intersectOutcome(mine, theirs);
-  const xor = xorOutcome(mine, theirs);
-
-  const bothFunding = channelsRequestingFunds.filter(({channelId}) =>
-    _.some(merged.allocationItems, ['destination', channelId])
-  );
-
-  const bothDefunding = channelsReturningFunds.filter(
-    ({channelId}) => !_.some(xor.allocationItems, ['destination', channelId])
-  );
-
+  const {allocationItems: merged} = intersectOutcome(mine, theirs);
+  const {allocationItems: xor} = xorOutcome(mine, theirs);
+  const bothFunding = _.intersectionWith(requesting, merged, channelIdMatchesDestination);
+  const bothDefunding = _.differenceWith(returning, xor, channelIdMatchesDestination);
   return redistributeFunds(supportedOutcome, bothDefunding, bothFunding);
 };
 
@@ -197,89 +197,65 @@ const exchangeReveals = ({
   counterpartyLedgerCommit,
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolState): DismissLedgerProposals | SignLedgerState | ProposeLedgerState | false => {
-  // Sanity-checks
-  if (!supported) return false;
-  if (!latestSignedByMe) return false;
-  if (supported.turnNum < n) return false;
-  if (!myProposedLedgerCommit) return false;
-  if (!counterpartyLedgerCommit) return false;
+}: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerState | false => {
+  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Already signed something and waiting for reply
   if (latestSignedByMe.turnNum === supported.turnNum + n) return false;
 
-  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+  const {outcome, channelsNotFunded} = _.isEqual(counterpartyLedgerCommit, myProposedLedgerCommit)
+    ? {outcome: myProposedLedgerCommit, channelsNotFunded: []}
+    : mergeProposedLedgerUpdates(
+        myProposedLedgerCommit,
+        counterpartyLedgerCommit,
+        supportedOutcome,
+        channelsRequestingFunds,
+        channelsReturningFunds
+      );
 
   const receivedReveal = latest.turnNum === supported.turnNum + n;
-
-  let outcome: Outcome = myProposedLedgerCommit;
-  let insufficientFunds: Bytes32[] = [];
-
-  if (!_.isEqual(counterpartyLedgerCommit, myProposedLedgerCommit))
-    ({outcome, insufficientFunds} = mergeProposedLedgerUpdates(
-      myProposedLedgerCommit,
-      counterpartyLedgerCommit,
-      supportedOutcome,
-      channelsRequestingFunds,
-      channelsReturningFunds
-    ));
-
   if (receivedReveal && !_.isEqual(outcome, latest.outcome))
     // TODO: signals a corrupt / broken counterparty wallet, what do we want to do here?
     throw new Error('received a signed reveal that is _not_ what we agreed on :/');
 
-  if (_.isEqual(outcome, supportedOutcome))
-    return {
-      type: 'DismissLedgerProposals',
-      channelId,
-      channelsNotFunded: insufficientFunds,
-    };
-
-  return {
-    type: 'SignLedgerState',
-    channelId,
-    stateToSign: {
-      ...supported,
-      outcome,
-      turnNum: supported.turnNum + n,
-    },
-    channelsNotFunded: insufficientFunds,
-  };
+  return _.isEqual(outcome, supportedOutcome)
+    ? {
+        type: 'DismissLedgerProposals',
+        channelId,
+        channelsNotFunded,
+      }
+    : {
+        type: 'SignLedgerState',
+        channelId,
+        stateToSign: {
+          ...supported,
+          outcome,
+          turnNum: supported.turnNum + n,
+        },
+        channelsNotFunded,
+      };
 };
 
 const exchangeCommits = ({
-  fundingChannel: {supported, latestSignedByMe, channelId},
+  fundingChannel: {supported, channelId},
   myProposedLedgerCommit,
   counterpartyLedgerCommit,
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolState): ProposeLedgerState | false => {
-  // Sanity-checks
-  if (!supported) return false;
-  if (!latestSignedByMe) return false;
-
-  // Already signed something and waiting for reply (may have deleted commits already)
-  if (latestSignedByMe.turnNum > supported.turnNum) return false;
-
-  // Move to reveal phase
-  if (myProposedLedgerCommit && counterpartyLedgerCommit) return false;
+  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Don't propose another commit, wait for theirs
   if (myProposedLedgerCommit) return false;
 
-  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-
-  let outcome: Outcome | undefined;
-  let insufficientFunds: Bytes32[] = [];
-
-  ({outcome, insufficientFunds} = redistributeFunds(
+  let {outcome, channelsNotFunded} = redistributeFunds(
     supportedOutcome,
     channelsReturningFunds,
     channelsRequestingFunds
-  ));
+  );
 
   if (counterpartyLedgerCommit && !_.isEqual(counterpartyLedgerCommit, outcome))
-    ({outcome, insufficientFunds} = mergeProposedLedgerUpdates(
+    ({outcome, channelsNotFunded} = mergeProposedLedgerUpdates(
       outcome,
       counterpartyLedgerCommit,
       supportedOutcome,
@@ -287,72 +263,76 @@ const exchangeCommits = ({
       channelsReturningFunds
     ));
 
-  if (_.isEqual(outcome, supportedOutcome)) {
-    outcome = undefined; // Don't propose the current state
-    if (insufficientFunds.length === 0) return false;
-  }
+  const mergedProposalIdenticalToSupportedOutcome = _.isEqual(outcome, supportedOutcome);
+
+  if (mergedProposalIdenticalToSupportedOutcome && channelsNotFunded.length === 0) return false;
 
   return {
     type: 'ProposeLedgerState',
     channelId,
-    outcome,
-    channelsNotFunded: insufficientFunds,
+    outcome: mergedProposalIdenticalToSupportedOutcome ? undefined : outcome,
+    channelsNotFunded,
   };
 };
 
 const markRequestsAsComplete = ({
-  fundingChannel: {supported, channelId},
+  fundingChannel: {supported, channelId: ledgerChannelId},
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
-  if (!supported) return false;
-  if (channelsRequestingFunds.length === 0 && channelsReturningFunds.length === 0) return false;
+  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+  const supportedChannelIds = _.map(supportedOutcome.allocationItems, 'destination');
 
-  const fundedChannels = channelsRequestingFunds.filter(({channelId}) =>
-    _.some(
-      checkThat(supported.outcome, isSimpleAllocation).allocationItems,
-      allocationItem => allocationItem.destination === channelId
-    )
-  );
+  const fundedChannels = _.chain(channelsRequestingFunds)
+    .map('channelId')
+    .intersection(supportedChannelIds)
+    .value();
 
-  const defundedChannels = channelsReturningFunds.filter(
-    ({channelId}) =>
-      !_.some(
-        checkThat(supported.outcome, isSimpleAllocation).allocationItems,
-        allocationItem => allocationItem.destination === channelId
-      )
-  );
+  const defundedChannels = _.chain(channelsReturningFunds)
+    .map('channelId')
+    .difference(supportedChannelIds)
+    .value();
 
-  if (fundedChannels.length === 0 && defundedChannels.length === 0) return false;
+  if (fundedChannels.length + defundedChannels.length === 0) return false;
 
   return {
     type: 'MarkLedgerFundingRequestsAsComplete',
-    fundedChannels: fundedChannels.map(channel => channel.channelId),
-    defundedChannels: defundedChannels.map(channel => channel.channelId),
-    ledgerChannelId: channelId,
+    fundedChannels,
+    defundedChannels,
+    ledgerChannelId,
   };
 };
+
+const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
+  ps.channelsRequestingFunds.length + ps.channelsReturningFunds.length > 0;
+
+const finishedExchangingCommits = (ps: ProtocolState): ps is ProtocolStateWithCommits =>
+  Boolean(ps.myProposedLedgerCommit && ps.counterpartyLedgerCommit);
 
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
 ): ProtocolResult<ProtocolAction> =>
-  markRequestsAsComplete(ps) ||
-  ((ps.channelsRequestingFunds.length > 0 || ps.channelsReturningFunds.length) > 0 &&
-    (exchangeCommits(ps) || exchangeReveals(ps))) ||
+  (hasUnhandledLedgerRequests(ps) &&
+    (markRequestsAsComplete(ps) ||
+      (finishedExchangingCommits(ps) && exchangeReveals(ps)) ||
+      exchangeCommits(ps))) ||
   noAction;
 
 /**
  * Helper method to retrieve scoped data needed for ProcessLedger protocol.
+ *
+ * TODO: This can be heavily optimized by writing some manually crafted SQL
  */
 export const getProcessLedgerQueueProtocolState = async (
   store: Store,
   ledgerChannelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
+  const fundingChannel = await store.getChannel(ledgerChannelId, tx);
   const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
   const {mine, theirs} = await store.getLedgerProposals(ledgerChannelId, tx);
   return {
-    fundingChannel: await store.getChannel(ledgerChannelId, tx),
+    fundingChannel: runningOrError(fundingChannel),
 
     myProposedLedgerCommit: mine.outcome ? checkThat(mine.outcome, isSimpleAllocation) : undefined,
     counterpartyLedgerCommit: theirs.outcome
@@ -382,3 +362,9 @@ export const getProcessLedgerQueueProtocolState = async (
 
 const sortByNonce = (channelStates: ChannelState[]): ChannelState[] =>
   _.sortBy(channelStates, ({latest: {channelNonce}}) => channelNonce);
+
+const runningOrError = (cs: ChannelState): ChannelStateWithSupported => {
+  /* @ts-ignore */ // TODO: Figure out why TypeScript is not detecting latestSignedByMe
+  if (cs.supported && cs.latestSignedByMe && cs.supported.turnNum >= 3) return cs;
+  throw new Error('unreachable: ledger channel is not running');
+};

@@ -621,14 +621,16 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     while (ledgersToProcess.length) {
       const ledgerChannelId = ledgersToProcess[0];
 
-      await this.store.lockApp(ledgerChannelId, async tx => {
-        const setError = async (e: Error): Promise<void> => {
-          await tx.rollback(e);
-        };
+      await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
+        const setError = (e: Error) => tx.rollback(e);
 
-        const markLedgerAsProcessed = (): void => {
-          ledgersToProcess.shift();
-        };
+        const markLedgerAsProcessed = () => ledgersToProcess.shift();
+
+        // TODO: Move these checks inside the DB query when fetching ledgers to process
+        if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
+          markLedgerAsProcessed();
+          return;
+        }
 
         const pessimisticallyAddStateAndProposalToOutbox = () => {
           const {
