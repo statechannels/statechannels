@@ -95,10 +95,10 @@ it('returns an outgoing message with the latest proposed ledger update', async (
     appData,
   };
   const nextState = {turnNum: turnNum + 1, appData};
-  const myUnsignedCommitment = stateSignedBy([])(nextState).outcome;
+  const myLedgerProposal = stateSignedBy([])(nextState).outcome;
   const c = channel({
     assetHolderAddress: BN.from(1),
-    myUnsignedCommitment,
+    myLedgerProposal,
     vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
   });
 
@@ -118,7 +118,7 @@ it('returns an outgoing message with the latest proposed ledger update', async (
             signedStates: [runningState],
             requests: [
               {type: 'GetChannel', channelId},
-              {type: 'ProposeLedger', channelId, outcome: serializeOutcome(myUnsignedCommitment)},
+              {type: 'ProposeLedger', channelId, outcome: serializeOutcome(myLedgerProposal)},
             ],
           },
         },

@@ -435,7 +435,7 @@ describe('when there is a request provided', () => {
       wallet.knex
     );
 
-    // Store some outcome in the my_unsigned_commitment column
+    // Store some outcome in the my_ledger_proposal column
     const someArbitraryOutcome: SimpleAllocation = {
       type: 'SimpleAllocation',
       assetHolderAddress: makeAddress('0x0000000000000000000000000000000000001337'),

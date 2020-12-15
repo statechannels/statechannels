@@ -635,8 +635,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         const pessimisticallyAddStateAndProposalToOutbox = () => {
           const {
             fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
-            myProposedLedgerCommit: outcome,
-            myProposedLedgerCommitNonce: nonce,
+            myLedgerProposal: outcome,
+            myLedgerProposalNonce: nonce,
           } = protocolState;
           if (latestSignedByMe && supported) {
             /**

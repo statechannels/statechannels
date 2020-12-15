@@ -536,12 +536,12 @@ export class Store {
     const channel = await Channel.forId(ledgerChannelId, tx || this.knex);
     return {
       mine: {
-        outcome: channel.myUnsignedCommitment ?? undefined,
-        nonce: channel.myUnsignedCommitmentNonce ?? 0,
+        outcome: channel.myLedgerProposal ?? undefined,
+        nonce: channel.myLedgerProposalNonce ?? 0,
       },
       theirs: {
-        outcome: channel.theirUnsignedCommitment ?? undefined,
-        nonce: channel.theirUnsignedCommitmentNonce ?? 0,
+        outcome: channel.theirLedgerProposal ?? undefined,
+        nonce: channel.theirLedgerProposalNonce ?? 0,
       },
     };
   }
@@ -549,10 +549,10 @@ export class Store {
   async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx?: Transaction): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})
-      .whereNull('myUnsignedCommitment')
+      .whereNull('myLedgerProposal')
       .patch({
-        myUnsignedCommitment: outcome,
-        myUnsignedCommitmentNonce: this.knex.raw('my_unsigned_commitment_nonce + 1'),
+        myLedgerProposal: outcome,
+        myLedgerProposalNonce: this.knex.raw('my_ledger_proposal_nonce + 1'),
       });
   }
 
@@ -564,23 +564,23 @@ export class Store {
   ): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})
-      .whereNull('theirUnsignedCommitment')
-      .andWhere('theirUnsignedCommitmentNonce', '<', nonce)
-      .patch({theirUnsignedCommitment: outcome, theirUnsignedCommitmentNonce: nonce});
+      .whereNull('theirLedgerProposal')
+      .andWhere('theirLedgerProposalNonce', '<', nonce)
+      .patch({theirLedgerProposal: outcome, theirLedgerProposalNonce: nonce});
   }
 
   async removeMyLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
-      .whereNotNull('myUnsignedCommitment')
-      .patch({myUnsignedCommitment: this.knex.raw('NULL')});
+      .whereNotNull('myLedgerProposal')
+      .patch({myLedgerProposal: this.knex.raw('NULL')});
   }
 
   async removeTheirLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
-      .whereNotNull('theirUnsignedCommitment')
-      .patch({theirUnsignedCommitment: this.knex.raw('NULL')});
+      .whereNotNull('theirLedgerProposal')
+      .patch({theirLedgerProposal: this.knex.raw('NULL')});
   }
 
   /**

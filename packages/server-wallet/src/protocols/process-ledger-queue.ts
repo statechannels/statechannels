@@ -54,17 +54,17 @@ import {
 
 export type ProtocolState = {
   fundingChannel: ChannelStateWithSupported;
-  counterpartyLedgerCommit?: SimpleAllocation;
-  myProposedLedgerCommit?: SimpleAllocation;
-  counterpartyLedgerCommitNonce: number;
-  myProposedLedgerCommitNonce: number;
+  theirLedgerProposal?: SimpleAllocation;
+  myLedgerProposal?: SimpleAllocation;
+  theirLedgerProposalNonce: number;
+  myLedgerProposalNonce: number;
   channelsRequestingFunds: ChannelState[];
   channelsReturningFunds: ChannelState[];
 };
 
 type ProtocolStateWithCommits = ProtocolState & {
-  counterpartyLedgerCommit: SimpleAllocation;
-  myProposedLedgerCommit: SimpleAllocation;
+  theirLedgerProposal: SimpleAllocation;
+  myLedgerProposal: SimpleAllocation;
 };
 
 function removeChannelFromAllocation(
@@ -185,7 +185,7 @@ const mergeProposedLedgerUpdates = (
   return redistributeFunds(supportedOutcome, bothDefunding, bothFunding);
 };
 
-const exchangeReveals = ({
+const exchangeSignedLedgerStates = ({
   fundingChannel: {
     supported,
     latestSignedByMe,
@@ -193,8 +193,8 @@ const exchangeReveals = ({
     channelId,
     participants: {length: n},
   },
-  myProposedLedgerCommit,
-  counterpartyLedgerCommit,
+  myLedgerProposal,
+  theirLedgerProposal,
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerState | false => {
@@ -203,11 +203,11 @@ const exchangeReveals = ({
   // Already signed something and waiting for reply
   if (latestSignedByMe.turnNum === supported.turnNum + n) return false;
 
-  const {outcome, channelsNotFunded} = _.isEqual(counterpartyLedgerCommit, myProposedLedgerCommit)
-    ? {outcome: myProposedLedgerCommit, channelsNotFunded: []}
+  const {outcome, channelsNotFunded} = _.isEqual(theirLedgerProposal, myLedgerProposal)
+    ? {outcome: myLedgerProposal, channelsNotFunded: []}
     : mergeProposedLedgerUpdates(
-        myProposedLedgerCommit,
-        counterpartyLedgerCommit,
+        myLedgerProposal,
+        theirLedgerProposal,
         supportedOutcome,
         channelsRequestingFunds,
         channelsReturningFunds
@@ -236,17 +236,17 @@ const exchangeReveals = ({
       };
 };
 
-const exchangeCommits = ({
+const exchangeProposals = ({
   fundingChannel: {supported, channelId},
-  myProposedLedgerCommit,
-  counterpartyLedgerCommit,
+  myLedgerProposal,
+  theirLedgerProposal,
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolState): ProposeLedgerState | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Don't propose another commit, wait for theirs
-  if (myProposedLedgerCommit) return false;
+  if (myLedgerProposal) return false;
 
   let {outcome, channelsNotFunded} = redistributeFunds(
     supportedOutcome,
@@ -254,10 +254,10 @@ const exchangeCommits = ({
     channelsRequestingFunds
   );
 
-  if (counterpartyLedgerCommit && !_.isEqual(counterpartyLedgerCommit, outcome))
+  if (theirLedgerProposal && !_.isEqual(theirLedgerProposal, outcome))
     ({outcome, channelsNotFunded} = mergeProposedLedgerUpdates(
       outcome,
-      counterpartyLedgerCommit,
+      theirLedgerProposal,
       supportedOutcome,
       channelsRequestingFunds,
       channelsReturningFunds
@@ -306,16 +306,16 @@ const markRequestsAsComplete = ({
 const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
   ps.channelsRequestingFunds.length + ps.channelsReturningFunds.length > 0;
 
-const finishedExchangingCommits = (ps: ProtocolState): ps is ProtocolStateWithCommits =>
-  Boolean(ps.myProposedLedgerCommit && ps.counterpartyLedgerCommit);
+const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithCommits =>
+  Boolean(ps.myLedgerProposal && ps.theirLedgerProposal);
 
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
 ): ProtocolResult<ProtocolAction> =>
   (hasUnhandledLedgerRequests(ps) &&
     (markRequestsAsComplete(ps) ||
-      (finishedExchangingCommits(ps) && exchangeReveals(ps)) ||
-      exchangeCommits(ps))) ||
+      (finishedExchangingProposals(ps) && exchangeSignedLedgerStates(ps)) ||
+      exchangeProposals(ps))) ||
   noAction;
 
 /**
@@ -334,13 +334,11 @@ export const getProcessLedgerQueueProtocolState = async (
   return {
     fundingChannel: runningOrError(fundingChannel),
 
-    myProposedLedgerCommit: mine.outcome ? checkThat(mine.outcome, isSimpleAllocation) : undefined,
-    counterpartyLedgerCommit: theirs.outcome
-      ? checkThat(theirs.outcome, isSimpleAllocation)
-      : undefined,
+    myLedgerProposal: mine.outcome ? checkThat(mine.outcome, isSimpleAllocation) : undefined,
+    theirLedgerProposal: theirs.outcome ? checkThat(theirs.outcome, isSimpleAllocation) : undefined,
 
-    myProposedLedgerCommitNonce: mine.nonce,
-    counterpartyLedgerCommitNonce: theirs.nonce,
+    myLedgerProposalNonce: mine.nonce,
+    theirLedgerProposalNonce: theirs.nonce,
 
     channelsRequestingFunds: await Promise.all<ChannelState>(
       compose(

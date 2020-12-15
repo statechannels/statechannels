@@ -82,10 +82,10 @@ export class Channel extends Model implements RequiredColumns {
   readonly assetHolderAddress!: string; // only Ledger channels have this
   readonly fundingLedgerChannelId!: Bytes32; // only App channels funded by Ledger have this
 
-  readonly myUnsignedCommitment: Outcome | undefined; // only Ledger channels have this
-  readonly myUnsignedCommitmentNonce!: number; // only Ledger channels have this
-  readonly theirUnsignedCommitment: Outcome | undefined; // only Ledger channels have this
-  readonly theirUnsignedCommitmentNonce!: number; // only Ledger channels have this
+  readonly myLedgerProposal: Outcome | undefined; // only Ledger channels have this
+  readonly myLedgerProposalNonce!: number; // only Ledger channels have this
+  readonly theirLedgerProposal: Outcome | undefined; // only Ledger channels have this
+  readonly theirLedgerProposalNonce!: number; // only Ledger channels have this
 
   static get jsonSchema(): JSONSchema {
     return {
@@ -140,12 +140,7 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static jsonAttributes = [
-    'vars',
-    'participants',
-    'myUnsignedCommitment',
-    'theirUnsignedCommitment',
-  ];
+  static jsonAttributes = ['vars', 'participants', 'myLedgerProposal', 'theirLedgerProposal'];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     return Channel.query(txOrKnex)
