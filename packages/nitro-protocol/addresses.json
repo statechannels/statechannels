@@ -5,10 +5,10 @@
       "chainId": "4",
       "contracts": {
         "ETHAssetHolder": {
-          "address": "0xC53E99538D8069980dd62c7804fdaF7AE386C434"
+          "address": "0x8504FcA6e1e73947850D66D032435AC931892116"
         },
         "NitroAdjudicator": {
-          "address": "0x94Fca2E2F57B25b2D9eA5d4FCEd6c5d8d9ad3172"
+          "address": "0x7917b6f2C5deC4021Ed5D0ff3e5bb27A69B2eaCf"
         }
       }
     }

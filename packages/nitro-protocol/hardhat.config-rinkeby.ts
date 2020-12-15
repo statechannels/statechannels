@@ -23,8 +23,8 @@ export default {
       // Address used for the initial deploy of the contracts.
       // Ask @kerzhner for the private key if you would like to deploy from the same address
       // Otherwise uncomment the line below
-      //rinkeby: 0,
-      rinkeby: '0x87612aAD373586A38062c29F833A2AbC72038591',
+      rinkeby: 0,
+      // rinkeby: '0x87612aAD373586A38062c29F833A2AbC72038591',
     },
   },
   networks: {
