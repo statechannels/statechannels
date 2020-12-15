@@ -52,15 +52,15 @@ const reason6 =
 // Amounts are valueString representations of wei
 describe('claimAll', () => {
   it.each`
-    name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | tOutcomeAfter   | heldAfter | payouts          reason
-    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}               | ${undefined}
-    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}               | ${undefined}
-    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}               | ${undefined}
-    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}}               | ${undefined}
-    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}               | ${reason5}
-    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}               | ${reason6}
-    ${'7. swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{}}           | ${{g: 2}} | ${{A: 5, B: 5}}         | ${undefined}
-    ${'8. underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${{}}           | ${{g: 2}} | ${{A: 5, B: 5}}         | ${undefined}
+    name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | tOutcomeAfter   | heldAfter | payouts         | reason
+    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
+    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${undefined}
+    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
+    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}}       | ${undefined}
+    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${reason5}
+    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${reason6}
+    ${'7. swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${{}}           | ${{g: 2}} | ${{A: 5, B: 5}} | ${undefined}
+    ${'8. underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${{}}           | ${{g: 2}} | ${{A: 5, B: 5}} | ${undefined}
   `(
     '$name',
     async ({
@@ -150,14 +150,11 @@ describe('claimAll', () => {
         ];
 
         // Extract logs
-        const {logs, gasUsed} = await (await tx).wait();
+        const {events: eventsFromTx, gasUsed} = await (await tx).wait();
         await writeGasConsumption('claimAll.gas.md', name, gasUsed);
 
-        // Compile events from logs
-        const eventsFromLogs = compileEventsFromLogs(logs, [AssetHolder]);
-
         // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
-        expect(eventsFromLogs).toMatchObject(expectedEvents);
+        expect(eventsFromTx).toMatchObject(expectedEvents);
 
         // Check new holdings
         Object.keys(heldAfter).forEach(async key =>

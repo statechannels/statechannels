@@ -156,14 +156,11 @@ describe('claim', () => {
         ];
 
         // Extract logs
-        const {logs, gasUsed} = await (await tx).wait();
+        const {events: eventsFromTx, gasUsed} = await (await tx).wait();
         await writeGasConsumption('claim.gas.md', name, gasUsed);
 
-        // Compile events from logs
-        const eventsFromLogs = compileEventsFromLogs(logs, [AssetHolder]);
-
         // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
-        expect(eventsFromLogs).toMatchObject(expectedEvents);
+        expect(eventsFromTx).toMatchObject(expectedEvents);
 
         // Check new holdings
         Object.keys(heldAfter).forEach(async key =>
