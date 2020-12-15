@@ -108,4 +108,17 @@ INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby
 
 The config extends from a minimal base config (`hardhat.config.ts`) that is used for other tasks such as compilation.
 
-After succesfully deploying, please  a) update the addresses in `.env.testnet` (at the root of the monorepo) if they exists, and raise a pull request with this file and the updated deployment artifacts.
+After succesfully deploying you should see some changes to `addresses.json`. Please raise a pull request with this updated file.
+
+## Verifying on etherscan
+ This is a somewhat manual process, but easier than using the etherscan GUI. 
+ 
+ After deployment, run
+
+ ```
+ ETHERSCAN_API_KEY=<a-secret> INFURA_TOKEN=<another-secret> RINKEBY_DEPLOYER_PK=<yet-another-secret> yarn hardhat --network rinkeby --config ./hardhat.config-rinkeby.ts verify <DeployedContractAddress> 'ConstructorArgs'
+ ```
+ 
+ for each contract you wish to verify. 
+
+Rather awkwardly you still need to provide the `INFURA_TOKEN` and `RINKEBY_DEPLOYER_PK` even though they are not used. For more info, see the [docs](https://hardhat.org/plugins/nomiclabs-hardhat-etherscan.html).

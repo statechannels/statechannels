@@ -20,10 +20,10 @@ export default {
   ...baseconfig,
   namedAccounts: {
     deployer: {
-      // Address used for the initial deploy of the contracts.
-      // Ask @kerzhner for the private key if you would like to deploy from the same address
-      // Otherwise uncomment the line below
       rinkeby: 0,
+      // The below address was used for the initial deploy of the contracts.
+      // Ask @kerzhner for the private key if you would like to deploy from the same address
+      // And swap the line above for the line below:
       // rinkeby: '0x87612aAD373586A38062c29F833A2AbC72038591',
     },
   },
