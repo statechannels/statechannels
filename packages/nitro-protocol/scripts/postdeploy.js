@@ -1,15 +1,14 @@
 const {writeFileSync} = require('fs');
 
-const jq = require('node-jq');
-const filter = 'walk(if (type == "object" and .abi) then del(.abi) else . end )';
-const jsonPath = './addresses.json';
-const options = {};
+const jsonPath = __dirname + '/../addresses.json';
+const addresses = require(jsonPath);
 
-jq.run(filter, jsonPath, options)
-  .then(output => {
-    console.log(output);
-    writeFileSync(jsonPath, output);
-  })
-  .catch(err => {
-    console.error(err);
+function deepDelete(object, keyToDelete) {
+  Object.keys(object).forEach(key => {
+    if (key === keyToDelete) delete object[key];
+    else if (typeof object[key] === 'object') deepDelete(object[key], keyToDelete);
   });
+}
+const keyToDelete = 'abi';
+deepDelete(addresses, keyToDelete);
+writeFileSync(jsonPath, JSON.stringify(addresses, null, 2));
