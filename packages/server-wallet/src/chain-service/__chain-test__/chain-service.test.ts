@@ -1,3 +1,5 @@
+import {setTimeout} from 'timers';
+
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {
   channelDataToChannelStorageHash,
@@ -264,7 +266,10 @@ describe('registerChannel', () => {
     );
 
     await mineBlock(CURRENT_TIME);
+    // Wait a second to ensure that the channel finalized handler does not get triggered erroneously
+    await new Promise(resolve => setTimeout(resolve, 1000));
     expect(channelFinalizedHandler).not.toHaveBeenCalled();
+
     await mineBlock(FUTURE_TIME);
     await channelFinalizedPromise;
     expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
