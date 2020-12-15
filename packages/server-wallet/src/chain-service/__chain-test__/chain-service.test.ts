@@ -27,7 +27,8 @@ import {
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
-import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
+import {HoldingUpdatedArg} from '../types';
+
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
@@ -53,7 +54,7 @@ async function mineBlocks() {
 
 function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocks);
-  contract.on('AssetTransferred', mineBlocks);
+  contract.on('AllocationUpdated', mineBlocks);
 }
 
 async function mineBlockPeriodically(blocks: number) {
@@ -228,7 +229,7 @@ describe('registerChannel', () => {
     const channelFinalizedPromise = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
-        assetTransferred: _.noop,
+        assetOutcomeUpdated: _.noop,
         channelFinalized: arg => {
           channelFinalizedHandler(arg);
           resolve();
@@ -261,7 +262,7 @@ describe('registerChannel', () => {
     const channelFinalizedPromise = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
-        assetTransferred: _.noop,
+        assetOutcomeUpdated: _.noop,
         channelFinalized: arg => {
           channelFinalizedHandler(arg);
           resolve();
@@ -317,7 +318,7 @@ describe('registerChannel', () => {
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
       holdingUpdated,
-      assetTransferred: _.noop,
+      assetOutcomeUpdated: _.noop,
       channelFinalized: _.noop,
     });
     await p;
@@ -337,7 +338,7 @@ describe('registerChannel', () => {
           });
           resolve(true);
         },
-        assetTransferred: _.noop,
+        assetOutcomeUpdated: _.noop,
         channelFinalized: _.noop,
       })
     );
@@ -371,7 +372,7 @@ describe('registerChannel', () => {
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
       holdingUpdated,
-      assetTransferred: _.noop,
+      assetOutcomeUpdated: _.noop,
       channelFinalized: _.noop,
     });
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
@@ -387,32 +388,24 @@ describe('concludeAndWithdraw', () => {
     const objectsToMatch = [
       {
         amount: BN.from(1),
-        assetHolderAddress: ethAssetHolderAddress,
-        to: makeDestination(aAddress),
-        channelId,
+        destination: makeDestination(aAddress).toLowerCase(),
       },
       {
         amount: BN.from(3),
-        assetHolderAddress: ethAssetHolderAddress,
-        to: makeDestination(bAddress),
-        channelId,
+        destination: makeDestination(bAddress).toLowerCase(),
       },
     ];
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
-        channelFinalized: _.noop,
-        assetTransferred: (arg: AssetTransferredArg) => {
-          const predicate = (elem: AssetTransferredArg) =>
-            arg.amount === elem.amount &&
-            arg.assetHolderAddress === elem.assetHolderAddress &&
-            arg.to === elem.to &&
-            arg.channelId === elem.channelId;
-          const removed = _.remove(objectsToMatch, predicate);
-          expect(removed).toHaveLength(1);
-          if (!objectsToMatch.length) resolve();
+        assetOutcomeUpdated: arg => {
+          expect(arg.assetHolderAddress).toEqual(ethAssetHolderAddress);
+          expect(arg.channelId).toMatch(channelId);
+          expect(arg.externalPayouts).toMatchObject(expect.arrayContaining(objectsToMatch));
+          resolve();
         },
+        channelFinalized: _.noop,
       })
     );
 
@@ -431,32 +424,24 @@ describe('concludeAndWithdraw', () => {
     const objectsToMatch = [
       {
         amount: BN.from(1),
-        assetHolderAddress: erc20AssetHolderAddress,
-        to: makeDestination(aAddress),
-        channelId,
+        destination: makeDestination(aAddress).toLowerCase(),
       },
       {
         amount: BN.from(3),
-        assetHolderAddress: erc20AssetHolderAddress,
-        to: makeDestination(bAddress),
-        channelId,
+        destination: makeDestination(bAddress).toLowerCase(),
       },
     ];
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         holdingUpdated: _.noop,
-        channelFinalized: _.noop,
-        assetTransferred: (arg: AssetTransferredArg) => {
-          const predicate = (elem: AssetTransferredArg) =>
-            arg.amount === elem.amount &&
-            arg.assetHolderAddress === elem.assetHolderAddress &&
-            arg.to === elem.to &&
-            arg.channelId === elem.channelId;
-          const removed = _.remove(objectsToMatch, predicate);
-          expect(removed).toHaveLength(1);
-          if (!objectsToMatch.length) resolve();
+        assetOutcomeUpdated: arg => {
+          expect(arg.assetHolderAddress).toEqual(erc20AssetHolderAddress);
+          expect(arg.channelId).toMatch(channelId);
+          expect(arg.externalPayouts).toMatchObject(expect.arrayContaining(objectsToMatch));
+          resolve();
         },
+        channelFinalized: _.noop,
       })
     );
 
@@ -518,7 +503,7 @@ describe('challenge', () => {
         new Promise(resolve =>
           chainService.registerChannel(channelId, [ethAssetHolderAddress], {
             holdingUpdated: _.noop,
-            assetTransferred: _.noop,
+            assetOutcomeUpdated: _.noop,
             channelFinalized: resolve,
           })
         )
