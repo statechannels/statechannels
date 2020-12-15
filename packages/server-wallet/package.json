@@ -1,14 +1,14 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "1.16.0",
+  "version": "1.17.0",
   "author": "",
   "dependencies": {
     "@connext/pure-evm-wasm": "0.1.4",
     "@ethersproject/experimental": "5.0.5",
-    "@statechannels/client-api-schema": "0.5.1",
-    "@statechannels/nitro-protocol": "0.11.2",
-    "@statechannels/wallet-core": "0.9.13",
+    "@statechannels/client-api-schema": "0.6.0",
+    "@statechannels/nitro-protocol": "0.12.0",
+    "@statechannels/wallet-core": "0.9.14",
     "@statechannels/wasm-utils": "0.1.6",
     "@statechannels/wire-format": "0.8.4",
     "ethers": "5.0.12",

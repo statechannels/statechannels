@@ -3,6 +3,69 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.17.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.1...@statechannels/server-wallet@1.17.0) (2020-12-15)
+
+
+### Bug Fixes
+
+* add a constraint to chain_service_requests table, fix down migraion ([7aef458](https://github.com/statechannels/statechannels/commit/7aef458328a9461ff7743011665fabd195f78abd))
+* add challenge to ChainModifierInterface ([b2769b6](https://github.com/statechannels/statechannels/commit/b2769b6343f113aa773438f15fda956612580713))
+* add default value of empty array to chainServiceRequests ([d68d998](https://github.com/statechannels/statechannels/commit/d68d99839f256a6ddb8c63e2654a801620256752))
+* add missing address ([fc78143](https://github.com/statechannels/statechannels/commit/fc781432ac7b1fd037fe3231d3d0832984469b89))
+* allow empty password string ([abb67d9](https://github.com/statechannels/statechannels/commit/abb67d98ca733021e049b9f948379727c1a414e7))
+* await fundChannel chain service request ([56ef79e](https://github.com/statechannels/statechannels/commit/56ef79ecd54a59a4fed2f4dd1b4fd65c164e15ac))
+* chain service correctly emits the channelFinalized event ([ce9e03f](https://github.com/statechannels/statechannels/commit/ce9e03f72245725b5436f2db7d4f37919510de4a))
+* check channelNonce during state transition ([fdcb53b](https://github.com/statechannels/statechannels/commit/fdcb53b0228bb6b2a40bca404a2f3c84588e6ea9))
+* clean up a race conditions with finalizing channels ([de161d0](https://github.com/statechannels/statechannels/commit/de161d02c55d9389fe4fc381554c92d7f0c78c41))
+* convert ChainService constructor to accept config object ([fd1fcce](https://github.com/statechannels/statechannels/commit/fd1fcce1a581b6a60e1686e078dfb02870ba3d2b))
+* disable failing expect with comment for now ([3c8feb0](https://github.com/statechannels/statechannels/commit/3c8feb079ccd1720ec572ae6587b3f549348cad0))
+* do not export schema ([a06105e](https://github.com/statechannels/statechannels/commit/a06105e357fc8b037b952af9580159c6b411042e))
+* do not progress close channel objective unless it does not fund any other channels ([d3d5826](https://github.com/statechannels/statechannels/commit/d3d58266e85032a0faa7ca55199af8be3a0c1a3a))
+* ensure isExternalDestination is exported ([af4a741](https://github.com/statechannels/statechannels/commit/af4a74137ec5925fa1d300aa6a544950bf6d3730))
+* export everything from wallet ([b4c9429](https://github.com/statechannels/statechannels/commit/b4c94290910554807730c2c5ca576b57f1e82a1b))
+* fix chain tests ([3519315](https://github.com/statechannels/statechannels/commit/35193150dced8f5c3cd2730325a6a7412eb1cda1))
+* fix test failure ([95dc2cf](https://github.com/statechannels/statechannels/commit/95dc2cf5071f7b523602ddbad6d9bb821ae98036))
+* move expect extension ([562deb4](https://github.com/statechannels/statechannels/commit/562deb4261bbdb9a7c12615e13ad87fe024fd6cf))
+* only add channel if not already in queue ([13f6bdc](https://github.com/statechannels/statechannels/commit/13f6bdc066e8443288d491f76bc03524cc7fb8d6))
+* pushOutcome transaction creator should not assume challenger address ([4eb1114](https://github.com/statechannels/statechannels/commit/4eb1114b9a88320153107a5acf009e929af951e1))
+* pushOutcomeAndWithdraw to ChainModifierInterface ([a3765f3](https://github.com/statechannels/statechannels/commit/a3765f3dcaf4d0b356c459b0195695f91070e952))
+* remove env vars config ([f9289bb](https://github.com/statechannels/statechannels/commit/f9289bb0cddb0e6ef72376b9961b3b154638d958))
+* remove required chainServiceRequests property from Channel model and fix tests ([d20eae8](https://github.com/statechannels/statechannels/commit/d20eae80ce48dc53d013cecba95036ce6a28b846))
+* remove stale comment ([139f4be](https://github.com/statechannels/statechannels/commit/139f4be77e73c8e7bda91dfc428dca1ef021ccc5))
+* remove unneeded await ([c2db964](https://github.com/statechannels/statechannels/commit/c2db964993a5e49c22cda2693da99e23d2559325))
+* remove unneeded type conversion ([d753b8d](https://github.com/statechannels/statechannels/commit/d753b8d3027e56a3378f7bff252b87a18c1e508d))
+* set chain id ([d1877c8](https://github.com/statechannels/statechannels/commit/d1877c868d9c091b66dca8ccc35373062b720a04))
+* simply logic by removing status ([3a9fdf5](https://github.com/statechannels/statechannels/commit/3a9fdf5ba2b80bc3f1772448650413a3b546fb86))
+* standardize chain service public method logging ([10c4d75](https://github.com/statechannels/statechannels/commit/10c4d751fb4211d267d3f33cb445d137434f90c7))
+* use ?? instead of || for defaulting blockConfirmation ([94aaf0f](https://github.com/statechannels/statechannels/commit/94aaf0fa2b7f5bd7af4166351c614f125eff7953))
+* use distinct database names ([57894fb](https://github.com/statechannels/statechannels/commit/57894fbe8c82f2d845af929a73b6a53afc3fc5b7))
+* use pqueue to avoid onBlockMined race condition ([cd52339](https://github.com/statechannels/statechannels/commit/cd523397821c5e1852e02cbe946a7c8e9e259a6a))
+* user separate address for test adjudicator ([e837eaa](https://github.com/statechannels/statechannels/commit/e837eaa661bb1c3814bd3188f3fa6753cc03d4e5))
+* validate metrics ([2e6fc84](https://github.com/statechannels/statechannels/commit/2e6fc841e4a13cd4c8705e094d49bb1ad20f8f03))
+
+
+### Features
+
+* add a mocked out chain service channelFinalized API ([2e31d92](https://github.com/statechannels/statechannels/commit/2e31d92f8e0997cf9ca9924ff6f38d2ba9530dd4))
+* add chain transactions table ([4819b87](https://github.com/statechannels/statechannels/commit/4819b87667b4c05b843c0033a3b988f9cc697493))
+* add pushUpdate for messages updating a single, running app channel ([1a04384](https://github.com/statechannels/statechannels/commit/1a043848c1457ff7d854bf256252c59d9515dbc1))
+* basic chain service challenging ([0f7b66f](https://github.com/statechannels/statechannels/commit/0f7b66fa97fba539cf56837c9e68fe3013b979ae))
+* basic config validation ([a971ccd](https://github.com/statechannels/statechannels/commit/a971ccd492a09a5b2e29d6fb9602d4ab31c57890))
+* check channel finalization ([f2786ce](https://github.com/statechannels/statechannels/commit/f2786ce9afd0abf2888ea2b7a9fbaa5744ac2b37))
+* defaultTestConfig is now a function ([365651b](https://github.com/statechannels/statechannels/commit/365651b0df58ae30b11e7ac07cf98d5d59473c2c))
+* draft implementation of finalized event logic ([7e96d8f](https://github.com/statechannels/statechannels/commit/7e96d8fb8dd1c9d7a052cbb3268a91e1b37eeacf))
+* multi-threaded wallet offloads pushUpdate to workers ([4891263](https://github.com/statechannels/statechannels/commit/489126323ec82bab4e2f5283d76c97200aeffbe7))
+* require challenge duration ([ca92e6c](https://github.com/statechannels/statechannels/commit/ca92e6c6e0b2e019686ff1caf54f452f6e096fe5))
+
+
+### Performance Improvements
+
+* remove O(n^2) behaviour from mergeOutgoing ([3836ed2](https://github.com/statechannels/statechannels/commit/3836ed2562d994fc2246e93beccc4e6977f2f2e8))
+
+
+
+
+
 # [1.16.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.14.1...@statechannels/server-wallet@1.16.0) (2020-12-04)
 
 
