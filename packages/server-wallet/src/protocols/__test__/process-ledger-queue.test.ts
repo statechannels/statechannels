@@ -140,6 +140,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
       });
@@ -153,6 +154,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation(
           [alice, 5],
@@ -173,6 +175,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([requestChannel.channelId, 20]),
       });
@@ -188,6 +191,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([requestChannel.channelId, 10]),
       });
@@ -201,6 +205,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: undefined,
         channelsNotFunded: [requestChannel.channelId],
@@ -215,6 +220,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation(
           [bob, 10],
@@ -244,6 +250,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: protocolArgs.theirLedgerProposal,
       });
@@ -263,6 +270,7 @@ describe('exchanging ledger proposals', () => {
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
+        nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel1.channelId, 1]),
       });

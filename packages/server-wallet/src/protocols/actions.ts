@@ -41,6 +41,7 @@ export type ProposeLedgerState = {
   type: 'ProposeLedgerState';
   channelId: Bytes32;
   outcome?: SimpleAllocation;
+  nonce?: number;
   channelsNotFunded: Bytes32[];
 };
 export type SignLedgerState = {

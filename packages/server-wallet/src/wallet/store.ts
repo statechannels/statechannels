@@ -549,6 +549,7 @@ export class Store {
   async storeMyLedgerProposal(
     channelId: Bytes32,
     outcome: Outcome,
+    nonce: number,
     tx?: Transaction
   ): Promise<void> {
     await Channel.query(tx || this.knex)
@@ -556,7 +557,7 @@ export class Store {
       .whereNull('myLedgerProposal')
       .patch({
         myLedgerProposal: outcome,
-        myLedgerProposalNonce: this.knex.raw('my_ledger_proposal_nonce + 1'),
+        myLedgerProposalNonce: nonce,
       });
   }
 

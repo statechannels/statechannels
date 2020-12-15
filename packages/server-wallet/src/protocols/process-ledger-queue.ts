@@ -239,6 +239,7 @@ const exchangeSignedLedgerStates = ({
 const exchangeProposals = ({
   fundingChannel: {supported, channelId},
   myLedgerProposal,
+  myLedgerProposalNonce,
   theirLedgerProposal,
   channelsRequestingFunds,
   channelsReturningFunds,
@@ -271,6 +272,7 @@ const exchangeProposals = ({
     type: 'ProposeLedgerState',
     channelId,
     outcome: mergedProposalIdenticalToSupportedOutcome ? undefined : outcome,
+    nonce: myLedgerProposalNonce + 1,
     channelsNotFunded,
   };
 };

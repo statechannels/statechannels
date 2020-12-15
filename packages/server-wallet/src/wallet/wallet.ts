@@ -689,8 +689,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
               case 'ProposeLedgerState': {
                 // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-                if (action.outcome)
-                  await this.store.storeMyLedgerProposal(action.channelId, action.outcome, tx);
+                if (action.outcome && action.nonce)
+                  await this.store.storeMyLedgerProposal(
+                    action.channelId,
+                    action.outcome,
+                    action.nonce,
+                    tx
+                  );
                 return;
               }
 
