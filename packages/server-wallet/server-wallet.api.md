@@ -5,6 +5,8 @@
 ```ts
 
 import { Address } from '@statechannels/wallet-core';
+import { AllocationItem } from '@statechannels/nitro-protocol';
+import { AssetOutcome } from '@statechannels/nitro-protocol';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';

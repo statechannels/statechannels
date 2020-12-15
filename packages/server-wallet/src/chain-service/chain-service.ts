@@ -1,6 +1,4 @@
 import {
-  AllocationAssetOutcome,
-  AssetOutcome,
   ContractArtifacts,
   createERC20DepositTransaction,
   createETHDepositTransaction,
@@ -357,7 +355,7 @@ export class ChainService implements ChainServiceInterface {
           })
         );
         // Chain storage has a new finalizesAt timestamp
-      } else if (finalizesAt) {
+      } else {
         this.addFinalizingChannel(channelId, finalizesAt);
       }
       this.finalizingChannels = this.finalizingChannels.slice(1);
@@ -404,7 +402,6 @@ export class ChainService implements ChainServiceInterface {
   private addAssetHolderObservable(assetHolderContract: Contract): Observable<AssetHolderEvent> {
     // Create an observable that emits events on contract events
     const obs = new Observable<AssetHolderEvent>(subs => {
-      // TODO: subs has type any
       // TODO: add other event types
       assetHolderContract.on(
         Deposited,
@@ -419,13 +416,17 @@ export class ChainService implements ChainServiceInterface {
       );
       assetHolderContract.on(AllocationUpdated, async (channelId, initialHoldings, event) => {
         const tx = await this.provider.getTransaction(event.transactionHash);
-
         const {
           newAssetOutcome,
           newHoldings,
           externalPayouts,
           internalPayouts,
-        } = computeNewAssetOutcome(assetHolderContract.address, {channelId, initialHoldings}, tx);
+        } = computeNewAssetOutcome(
+          assetHolderContract.address,
+          nitroAdjudicatorAddress,
+          {channelId, initialHoldings},
+          tx
+        );
 
         return subs.next({
           type: AllocationUpdated,
@@ -451,8 +452,8 @@ export class ChainService implements ChainServiceInterface {
             case Deposited:
               subscriber.holdingUpdated(event);
               break;
-              // case AssetTransferred:
-              //   subscriber.assetTransferred(event);
+            case AllocationUpdated:
+              subscriber.assetOutcomeUpdated(event);
               break;
             default:
               throw new Error('Unexpected event from contract observable');

@@ -304,22 +304,23 @@ describe('concludeAndWithdraw', () => {
     const objectsToMatch = [
       {
         amount: BN.from(1),
-        assetHolderAddress: ethAssetHolderAddress,
-        to: makeDestination(aAddress),
-        channelId,
+        destination: makeDestination(aAddress),
       },
       {
         amount: BN.from(3),
-        assetHolderAddress: ethAssetHolderAddress,
-        to: makeDestination(bAddress),
-        channelId,
+        destination: makeDestination(bAddress),
       },
     ];
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         holdingUpdated: _.noop,
-        assetOutcomeUpdated: _.noop,
+        assetOutcomeUpdated: arg => {
+          expect(arg.assetHolderAddress).toEqual(ethAssetHolderAddress);
+          expect(arg.channelId).toMatch(channelId);
+          expect(arg.externalPayouts).toMatchObject(expect.arrayContaining(objectsToMatch));
+          resolve();
+        },
         channelFinalized: _.noop,
       })
     );
