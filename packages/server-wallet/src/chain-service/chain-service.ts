@@ -10,7 +10,6 @@ import {
   Address,
   BN,
   makeAddress,
-  // makeDestination,
   PrivateKey,
   SignedState,
   State,
