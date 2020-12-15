@@ -1,4 +1,18 @@
 {
+  "1": {
+    "mainnet": {
+      "name": "mainnet",
+      "chainId": "1",
+      "contracts": {
+        "NitroAdjudicator": {
+          "address": "0x7917b6f2C5deC4021Ed5D0ff3e5bb27A69B2eaCf"
+        },
+        "ETHAssetHolder": {
+          "address": "0x8504FcA6e1e73947850D66D032435AC931892116"
+        }
+      }
+    }
+  },
   "4": {
     "rinkeby": {
       "name": "rinkeby",
