@@ -3599,6 +3599,18 @@
     safe-buffer "^5.1.1"
     util.promisify "^1.0.0"
 
+"@nomiclabs/hardhat-etherscan@^2.1.0":
+  version "2.1.0"
+  resolved "https://registry.npmjs.org/@nomiclabs/hardhat-etherscan/-/hardhat-etherscan-2.1.0.tgz#08512c3e602155dc0d2becb193cd2e0155867839"
+  integrity sha512-YK9/UZI1Ct9TYfqZJnjIERlFC7bFrG0eUS2O0kFrH8RjLdcQXBI0GNpxXGAuDbotBg0t8wRKHibbK50TQu0ybA==
+  dependencies:
+    "@ethersproject/abi" "^5.0.2"
+    "@ethersproject/address" "^5.0.2"
+    cbor "^5.0.2"
+    fs-extra "^7.0.1"
+    node-fetch "^2.6.0"
+    semver "^6.3.0"
+
 "@npmcli/move-file@^1.0.1":
   version "1.0.1"
   resolved "https://registry.npmjs.org/@npmcli/move-file/-/move-file-1.0.1.tgz#de103070dac0f48ce49cf6693c23af59c0f70464"
@@ -4488,13 +4500,21 @@
   dependencies:
     "@types/react" "*"
 
-"@types/react@*", "@types/react@16.9.19", "@types/react@16.9.48":
+"@types/react@*":
   version "16.9.19"
   resolved "https://registry.npmjs.org/@types/react/-/react-16.9.19.tgz#c842aa83ea490007d29938146ff2e4d9e4360c40"
   integrity sha512-LJV97//H+zqKWMms0kvxaKYJDG05U2TtQB3chRLF8MPNs+MQh/H1aGlyDUxjaHvu08EAGerdX2z4LTBc7ns77A==
   dependencies:
     "@types/prop-types" "*"
     csstype "^2.2.0"
+
+"@types/react@16.9.48":
+  version "16.9.48"
+  resolved "https://registry.npmjs.org/@types/react/-/react-16.9.48.tgz#d3387329f070d1b1bc0ff4a54a54ceefd5a8485c"
+  integrity sha512-4ykBVswgYitPGMXFRxJCHkxJDU2rjfU3/zw67f8+dB7sNdVJXsrwqoYxz/stkAucymnEEbRPFmX7Ce5Mc/kJCw==
+  dependencies:
+    "@types/prop-types" "*"
+    csstype "^3.0.2"
 
 "@types/secp256k1@^4.0.1":
   version "4.0.1"
@@ -4565,10 +4585,10 @@
   resolved "https://registry.npmjs.org/@types/webgl-ext/-/webgl-ext-0.0.30.tgz#0ce498c16a41a23d15289e0b844d945b25f0fb9d"
   integrity sha512-LKVgNmBxN0BbljJrVUwkxwRYqzsAEPcZOe6S2T6ZaBDIrFp0qu4FNlpc5sM1tGbXUYFgdVQIoeLk1Y1UoblyEg==
 
-"@types/webgl2@0.0.4", "@types/webgl2@0.0.5":
-  version "0.0.5"
-  resolved "https://registry.npmjs.org/@types/webgl2/-/webgl2-0.0.5.tgz#dd925e20ab8ace80eb4b1e46fda5b109c508fb0d"
-  integrity sha512-oGaKsBbxQOY5+aJFV3KECDhGaXt+yZJt2y/OZsnQGLRkH6Fvr7rv4pCt3SRH1somIHfej/c4u7NSpCyd9x+1Ow==
+"@types/webgl2@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.npmjs.org/@types/webgl2/-/webgl2-0.0.4.tgz#c3b0f9d6b465c66138e84e64cb3bdf8373c2c279"
+  integrity sha512-PACt1xdErJbMUOUweSrbVM7gSIYm1vTncW2hF6Os/EeWi6TXYAYMPp+8v6rzHmypE5gHrxaxZNXgMkJVIdZpHw==
 
 "@types/webpack-sources@*":
   version "2.0.0"
@@ -7074,6 +7094,14 @@ caseless@~0.12.0:
   resolved "https://registry.npmjs.org/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
 
+cbor@^5.0.2:
+  version "5.1.0"
+  resolved "https://registry.npmjs.org/cbor/-/cbor-5.1.0.tgz#c3be220dcbbd96a338d279a664237aed3f596904"
+  integrity sha512-qzEc7kUShdMbWTaUH7X+aHW8owvBU3FS0dfYR1lGYpoZr0mGJhhojLlZJH653x/DfeMZ56h315FRNBUIG1R7qg==
+  dependencies:
+    bignumber.js "^9.0.0"
+    nofilter "^1.0.4"
+
 ccount@^1.0.0, ccount@^1.0.3:
   version "1.0.5"
   resolved "https://registry.npmjs.org/ccount/-/ccount-1.0.5.tgz#ac82a944905a65ce204eb03023157edf29425c17"
@@ -8449,6 +8477,11 @@ csstype@^2.2.0:
   version "2.6.13"
   resolved "https://registry.npmjs.org/csstype/-/csstype-2.6.13.tgz#a6893015b90e84dd6e85d0e3b442a1e84f2dbe0f"
   integrity sha512-ul26pfSQTZW8dcOnD2iiJssfXw0gdNVX9IJDH/X3K5DGPfj+fUYe3kB+swUY6BF3oZDxaID3AJt+9/ojSAE05A==
+
+csstype@^3.0.2:
+  version "3.0.5"
+  resolved "https://registry.npmjs.org/csstype/-/csstype-3.0.5.tgz#7fdec6a28a67ae18647c51668a9ff95bb2fa7bb8"
+  integrity sha512-uVDi8LpBUKQj6sdxNaTetL6FpeCqTjOvAQuQUa/qAqq8oOd4ivkbhgnqayl0dnPal8Tb/yB1tF+gOvCBiicaiQ==
 
 currently-unhandled@^0.4.1:
   version "0.4.1"
@@ -16783,6 +16816,11 @@ nodemon@1.19.4:
     touch "^3.1.0"
     undefsafe "^2.0.2"
     update-notifier "^2.5.0"
+
+nofilter@^1.0.4:
+  version "1.0.4"
+  resolved "https://registry.npmjs.org/nofilter/-/nofilter-1.0.4.tgz#78d6f4b6a613e7ced8b015cec534625f7667006e"
+  integrity sha512-N8lidFp+fCz+TD51+haYdbDGrcBWwuHX40F5+z0qkUjMJ5Tp+rdSuAkMJ9N9eoolDlEVTf6u5icM+cNKkKW2mA==
 
 nopt@^4.0.1:
   version "4.0.3"

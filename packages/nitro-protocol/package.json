@@ -11,6 +11,7 @@
     "lodash.isequal": "^4.5.0"
   },
   "devDependencies": {
+    "@nomiclabs/hardhat-etherscan": "^2.1.0",
     "@statechannels/devtools": "0.5.1",
     "@statechannels/jest-gas-reporter": "0.4.5",
     "@types/eslint": "7.2.3",
