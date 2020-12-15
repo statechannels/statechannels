@@ -325,15 +325,6 @@ export class ChainService implements ChainServiceInterface {
     this.channelToSubscribers.set(channelId, []);
   }
 
-  /**
-   * WARNING: potential for a race condition due to:
-   * 1. Read class state (this.finalizingChannels)
-   * 2. Await a promise (getChannelStorage)
-   * 3. Assume that the state in step 1 has not changed.
-   *
-   * If many onBlockMined are executed in parallel, step 3 assumption does not hold
-   * PQueue is used to avoid these race conditions.
-   */
   private async onBlockMined(block: providers.Block): Promise<void> {
     const finalizingChannel = this.finalizingChannels.shift();
     if (!finalizingChannel) return;
