@@ -213,8 +213,8 @@ describe('fundChannel', () => {
 describe('registerChannel', () => {
   it('dispatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
     const channelId = randomChannelId();
-    const CHALLENGE_EXPIRE_TIME = 6000;
-    const FUTURE_TIME = 7000;
+    const CHALLENGE_EXPIRE_TIME = 2_000_000_000;
+    const FUTURE_TIME = 2_000_500_000;
 
     const tx = await testAdjudicator.functions.setChannelStorageHash(
       channelId,
@@ -240,11 +240,13 @@ describe('registerChannel', () => {
     expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
   });
 
-  it('registers a channel in the finalizing channel list and fires an event when that channel is fainlized', async () => {
+  it('registers a channel in the finalizing channel list and fires an event when that channel is finalized', async () => {
     const channelId = randomChannelId();
-    const CURRENT_TIME = 5000;
-    const CHALLENGE_EXPIRE_TIME = 6000;
-    const FUTURE_TIME = 7000;
+    // We use large values so we don't have to worry about ganache
+    // mining a block with the current timestamp setting off the expiry
+    const CURRENT_TIME = 2_000_000_000;
+    const CHALLENGE_EXPIRE_TIME = 2_000_400_000;
+    const FUTURE_TIME = 2_000_800_000;
 
     const tx = await testAdjudicator.setChannelStorageHash(
       channelId,
