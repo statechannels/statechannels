@@ -278,20 +278,19 @@ const exchangeCommits = ({
     channelsRequestingFunds
   ));
 
-  if (counterpartyLedgerCommit && !_.isEqual(counterpartyLedgerCommit, outcome)) {
-    const mergedLedgerUpdate = mergeProposedLedgerUpdates(
+  if (counterpartyLedgerCommit && !_.isEqual(counterpartyLedgerCommit, outcome))
+    ({outcome, insufficientFunds} = mergeProposedLedgerUpdates(
       outcome,
       counterpartyLedgerCommit,
       supportedOutcome,
       channelsRequestingFunds,
       channelsReturningFunds
-    );
+    ));
 
-    outcome = mergedLedgerUpdate.outcome;
-    insufficientFunds = insufficientFunds.concat(mergedLedgerUpdate.insufficientFunds);
+  if (_.isEqual(outcome, supportedOutcome)) {
+    outcome = undefined; // Don't propose the current state
+    if (insufficientFunds.length === 0) return false;
   }
-
-  if (_.isEqual(outcome, supportedOutcome)) outcome = undefined; // Don't propose the current state
 
   return {
     type: 'ProposeLedgerState',
