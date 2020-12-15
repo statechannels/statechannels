@@ -97,6 +97,7 @@ beforeAll(async () => {
 
 afterAll(() => {
   chainService.destructor();
+  testAdjudicator.provider.removeAllListeners();
   provider.removeAllListeners();
 });
 
