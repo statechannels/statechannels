@@ -5,12 +5,17 @@ import {HardhatUserConfig} from 'hardhat/config';
 
 const infuraToken = process.env.INFURA_TOKEN;
 const rinkebyDeployerPK = process.env.RINKEBY_DEPLOYER_PK;
+const mainnetDeployerPK = process.env.MAINNET_DEPLOYER_PK;
 if (!infuraToken) {
   console.warn(`Invalid infura token ${infuraToken}`);
 }
 if (!rinkebyDeployerPK) {
-  console.warn(`Invalid deploy private key ${rinkebyDeployerPK}`);
+  console.warn(`Invalid rinkeby deploy private key ${rinkebyDeployerPK}`);
 }
+if (!mainnetDeployerPK) {
+  console.warn(`Invalid mainnet deploy private key ${mainnetDeployerPK}`);
+}
+
 const config: HardhatUserConfig = {
   solidity: {
     version: '0.7.4',
@@ -44,8 +49,14 @@ const config: HardhatUserConfig = {
   },
   networks: {
     rinkeby: {
-      url: infuraToken ? 'https://rinkeby.infura.io/v3/' + infuraToken : undefined,
+      url: infuraToken ? 'https://rinkeby.infura.io/v3/' + infuraToken : '',
       accounts: rinkebyDeployerPK ? [rinkebyDeployerPK] : undefined,
+      chainId: 4,
+    },
+    mainnet: {
+      url: infuraToken ? 'https://mainnet.infura.io/v3/' + infuraToken : '',
+      accounts: mainnetDeployerPK ? [mainnetDeployerPK] : undefined,
+      chainId: 1,
     },
   },
   etherscan: {
