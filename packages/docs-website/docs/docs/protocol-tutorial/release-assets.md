@@ -88,18 +88,13 @@ const assetOutcome: AllocationAssetOutcome = {
 const tx3 = ETHAssetHolder.transferAll(channelId, encodeAllocation(assetOutcome.allocationItems));
 
 /* 
-  Check that an AssetTransferred event was emitted.
+  Check that an AllocationUpdated event was emitted. 
 */
 const {events} = await(await tx3).wait();
-expect(events).toMatchObject([
+expect(events).toMatchObject(
   {
-    event: 'AssetTransferred',
-    args: {
-      channelId,
-      destination: destination.toLowerCase(),
-      amount: {_hex: amount}
-    }
-  }
+    event: 'AllocationUpdated',
+  },
 ]);
 
 expect(BigNumber.from(await provider.getBalance(EOA)).eq(BigNumber.from(amount)));
@@ -111,6 +106,10 @@ If the destination specified in the outcome is external, the asset holder pays o
 
 :::tip
 This method executes payouts that might benefit multiple participants. If multiple actors try and call this method, after the first transaction is confirmed the remaining ones may fail.
+:::
+
+:::tip
+It may be desirable to payout to a subset of destinations (or even a single one). The `transfer` method can be used to do this, and accepts a list of `indices` to transfer from. See the contract API for more information. More information coming soon, including how to track the updated allocation after a `transfer` is mined.
 :::
 
 ## Using `claimAll`
