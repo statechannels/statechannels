@@ -100,7 +100,7 @@ WalletA-->>ClientA: ChannelUpdated('closed')
 WalletA->>Chain: concludePushOutcomeAndTransferAll()
 deactivate WalletA
 deactivate WalletB
-Chain-->>WalletA: AssetTransferred x2
-Chain-->>WalletB: AssetTransferred x2
+Chain-->>WalletA: AllocationUpdated
+Chain-->>WalletB: AllocationUpdated
 end
 " />

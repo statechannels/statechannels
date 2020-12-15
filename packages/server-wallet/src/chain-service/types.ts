@@ -1,11 +1,5 @@
-import {
-  Address,
-  Destination,
-  PrivateKey,
-  SignedState,
-  State,
-  Uint256,
-} from '@statechannels/wallet-core';
+import {AllocationItem, AssetOutcome} from '@statechannels/nitro-protocol';
+import {Address, PrivateKey, SignedState, State, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {Logger} from 'pino';
 
@@ -17,11 +11,13 @@ export type HoldingUpdatedArg = {
   amount: Uint256;
 };
 
-export type AssetTransferredArg = {
+export type AssetOutcomeUpdatedArg = {
   channelId: Bytes32;
   assetHolderAddress: Address;
-  to: Destination;
-  amount: Uint256;
+  newHoldings: Uint256;
+  externalPayouts: AllocationItem[];
+  internalPayouts: AllocationItem[];
+  newAssetOutcome: AssetOutcome | '0x00'; // '0x00' in case the asset outcome hash was deleted on chain
 };
 
 export type FundChannelArg = {
@@ -37,7 +33,7 @@ export type ChannelFinalizedArg = {
 
 export interface ChainEventSubscriberInterface {
   holdingUpdated(arg: HoldingUpdatedArg): void;
-  assetTransferred(arg: AssetTransferredArg): void;
+  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg): void;
   channelFinalized(arg: ChannelFinalizedArg): void;
 }
 

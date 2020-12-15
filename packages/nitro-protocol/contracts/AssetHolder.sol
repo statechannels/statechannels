@@ -143,7 +143,7 @@ contract AssetHolder is IAssetHolder {
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
     )
-        internal
+        public
         pure
         returns (
             Outcome.AllocationItem[] memory newAllocation,
@@ -242,10 +242,9 @@ contract AssetHolder is IAssetHolder {
                 } else {
                     holdings[destination] += payouts[j];
                 }
-                // Event emitted
-                emit AssetTransferred(fromChannelId, destination, payouts[j]);
             }
         }
+        emit AllocationUpdated(fromChannelId, initialHoldings);
     }
 
     /**
@@ -266,7 +265,8 @@ contract AssetHolder is IAssetHolder {
             allocationBytes,
             (Outcome.AllocationItem[])
         );
-        uint256 balance = holdings[guarantorChannelId];
+        uint256 initialHoldings = holdings[guarantorChannelId];
+        uint256 balance = initialHoldings;
         uint256 affordsForDestination;
         uint256 residualAllocationAmount;
         uint256 i; // indexes target allocations
@@ -369,8 +369,11 @@ contract AssetHolder is IAssetHolder {
         } else {
             holdings[destination] += affordsForDestination;
         }
+
+        uint256[] memory payouts = new uint256[](1);
+        payouts[0] = affordsForDestination;
         // Event emitted
-        emit AssetTransferred(guarantorChannelId, destination, affordsForDestination);
+        emit AllocationUpdated(guarantorChannelId, initialHoldings);
     }
 
     /**
@@ -385,7 +388,8 @@ contract AssetHolder is IAssetHolder {
         Outcome.Guarantee memory guarantee,
         bytes memory allocationBytes
     ) internal {
-        uint256 balance = holdings[guarantorChannelId];
+        uint256 initialHoldings = holdings[guarantorChannelId];
+        uint256 balance = initialHoldings;
 
         Outcome.AllocationItem[] memory allocation = abi.decode(
             allocationBytes,
@@ -493,9 +497,9 @@ contract AssetHolder is IAssetHolder {
                 } else {
                     holdings[allocation[j].destination] += payouts[j];
                 }
-                emit AssetTransferred(guarantorChannelId, allocation[j].destination, payouts[j]);
             }
         }
+        emit AllocationUpdated(guarantorChannelId, initialHoldings);
     }
 
     /**

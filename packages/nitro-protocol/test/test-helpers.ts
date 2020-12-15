@@ -24,7 +24,7 @@ import {
   Allocation,
   AllocationItem,
 } from '../src/contract/outcome';
-import {AssetTransferredEvent, Bytes32, DepositedEvent} from '../src';
+import {Bytes32} from '../src';
 
 // Interfaces
 
@@ -174,29 +174,6 @@ export const newDepositedEvent = (
   });
 };
 
-export const newTransferEvent = (
-  contract: ethers.Contract,
-  to: string
-): Promise<AssetTransferredEvent[keyof AssetTransferredEvent]> => {
-  const filter = contract.filters.Transfer(null, to);
-  return new Promise((resolve, reject) => {
-    contract.on(filter, (eventFrom, eventTo, amountTransferred, event) => {
-      // Match event for this destination only
-      contract.removeAllListeners(filter);
-      resolve(amountTransferred);
-    });
-  });
-};
-
-export const newAssetTransferredEvent = (
-  destination: string,
-  payout: number
-): AssetTransferredEvent => ({
-  channelId: destination,
-  destination: destination.toLowerCase(),
-  amount: BigNumber.from(payout),
-});
-
 export function randomChannelId(channelNonce = 0): Bytes32 {
   // Populate participants array (every test run targets a unique channel)
   const participants = [];
@@ -344,24 +321,6 @@ export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAs
     outcome.push(assetOutcome);
   });
   return outcome;
-}
-
-export function assetTransferredEventsFromPayouts(
-  channelId: string,
-  singleAssetPayouts: AssetOutcomeShortHand,
-  assetHolder: string
-): AssetTransferredEvent[] {
-  const assetTransferredEvents = [];
-  Object.keys(singleAssetPayouts).forEach(destination => {
-    if (singleAssetPayouts[destination] && BigNumber.from(singleAssetPayouts[destination]).gt(0)) {
-      assetTransferredEvents.push({
-        contract: assetHolder,
-        name: 'AssetTransferred',
-        args: {channelId, destination, amount: singleAssetPayouts[destination]},
-      });
-    }
-  });
-  return assetTransferredEvents;
 }
 
 export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): Event[] {

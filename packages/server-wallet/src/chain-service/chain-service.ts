@@ -10,7 +10,6 @@ import {
   Address,
   BN,
   makeAddress,
-  makeDestination,
   PrivateKey,
   SignedState,
   State,
@@ -23,6 +22,7 @@ import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
 import _ from 'lodash';
+import {computeNewAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/asset-holder';
 
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
@@ -30,7 +30,7 @@ import {defaultTestConfig} from '../config';
 
 import {
   AllowanceMode,
-  AssetTransferredArg,
+  AssetOutcomeUpdatedArg,
   ChainEventSubscriberInterface,
   ChainServiceArgs,
   ChainServiceInterface,
@@ -39,11 +39,14 @@ import {
 } from './types';
 
 const Deposited = 'Deposited' as const;
-const AssetTransferred = 'AssetTransferred' as const;
+const AllocationUpdated = 'AllocationUpdated';
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
-type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & AssetTransferredArg;
-type AssetHolderEvent = DepositedEvent | AssetTransferredEvent;
+type AllocationUpdatedEvent = {
+  type: 'AllocationUpdated';
+  ethersEvent: Event;
+} & AssetOutcomeUpdatedArg;
+type AssetHolderEvent = DepositedEvent | AllocationUpdatedEvent;
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, */
@@ -297,6 +300,14 @@ export class ChainService implements ChainServiceInterface {
     return this.sendTransaction(pushTransactionRequest);
   }
 
+  // TODO add another public method for transferring from an channel that has already been concluded *and* pushed
+  // i.e. one that calls NitroAdjudicator.transfer. We could call the new method "withdraw" to match the other methods in this class
+  // The new method will uses the latest outcome that we know exists ON CHAIN, which can be "newer" than the latest OFF CHAIN outcome.
+  // Choices:
+  // - the chain service stores the latest outcome in it's own DB table
+  // - the wallet.store stores them
+  // - nothing is stored, and the chain service searches through historic transaction data that it pulls from the provider (seems riskier, but we may need to do this in case we are offline for a time, anyway)
+
   registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],
@@ -425,16 +436,31 @@ export class ChainService implements ChainServiceInterface {
             ethersEvent: event,
           })
       );
-      assetHolderContract.on(AssetTransferred, (channelId, destination, payoutAmount, event) =>
-        subs.next({
-          type: AssetTransferred,
+      assetHolderContract.on(AllocationUpdated, async (channelId, initialHoldings, event) => {
+        const tx = await this.provider.getTransaction(event.transactionHash);
+        const {
+          newAssetOutcome,
+          newHoldings,
+          externalPayouts,
+          internalPayouts,
+        } = computeNewAssetOutcome(
+          assetHolderContract.address,
+          nitroAdjudicatorAddress,
+          {channelId, initialHoldings},
+          tx
+        );
+
+        return subs.next({
+          type: AllocationUpdated,
           channelId,
           assetHolderAddress: makeAddress(assetHolderContract.address),
-          to: makeDestination(destination),
-          amount: BN.from(payoutAmount),
+          newAssetOutcome,
+          externalPayouts,
+          internalPayouts,
+          newHoldings: BN.from(newHoldings),
           ethersEvent: event,
-        })
-      );
+        });
+      });
     });
     obs.subscribe({
       next: async event => {
@@ -448,8 +474,8 @@ export class ChainService implements ChainServiceInterface {
             case Deposited:
               subscriber.holdingUpdated(event);
               break;
-            case AssetTransferred:
-              subscriber.assetTransferred(event);
+            case AllocationUpdated:
+              subscriber.assetOutcomeUpdated(event);
               break;
             default:
               throw new Error('Unexpected event from contract observable');
@@ -522,7 +548,7 @@ export class ChainService implements ChainServiceInterface {
    *
    * @param appDefinition Address of state channels app
    *
-   * Rejects with 'Bytecode missint' if there is no contract deployed at `appDefinition`.
+   * Rejects with 'Bytecode missing' if there is no contract deployed at `appDefinition`.
    */
   public async fetchBytecode(appDefinition: string): Promise<string> {
     const result = await this.provider.getCode(appDefinition);

@@ -45,10 +45,12 @@ interface IAssetHolder {
     );
 
     /**
-     * @dev Indicates that `amount` assets have been transferred (internally or externally) to the destination denoted by `destination`.
+     * @dev Indicates the assetOutcomeHash for this channelId has changed due to a transfer or claim. Includes sufficient data to compute:
+     * - the preimage of this hash as well as
+     * - the new holdings for this channelId and any others that were transferred to
+     * - the payouts to external destinations
      * @param channelId The channelId of the funds being withdrawn.
-     * @param destination An internal destination (channelId) of external destination (padded ethereum address)
-     * @param amount Number of assets transferred (wei or tokens).
+     * @param initialHoldings holdings[channelId] **before** the allocations were updated
      */
-    event AssetTransferred(bytes32 indexed channelId, bytes32 indexed destination, uint256 amount);
+    event AllocationUpdated(bytes32 indexed channelId, uint256 initialHoldings);
 }

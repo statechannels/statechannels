@@ -18,6 +18,7 @@ import {
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
+  makeDestination,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -47,10 +48,10 @@ import {
   ChainServiceInterface,
   ChainEventSubscriberInterface,
   HoldingUpdatedArg,
-  AssetTransferredArg,
   ChainService,
   MockChainService,
   ChannelFinalizedArg,
+  AssetOutcomeUpdatedArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
@@ -661,16 +662,28 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  async assetTransferred(arg: AssetTransferredArg): Promise<void> {
+  async assetOutcomeUpdated({
+    channelId,
+    assetHolderAddress,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    newAssetOutcome, // TODO currently unused
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    newHoldings, // TODO currently unused
+    externalPayouts,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    internalPayouts, // TODO currently unused
+  }: AssetOutcomeUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
-    // TODO: make sure that arg.to is checksummed
-    await this.store.updateTransferredOut(
-      arg.channelId,
-      arg.assetHolderAddress,
-      arg.to,
-      arg.amount
-    );
-    await this.takeActions([arg.channelId], response);
+    externalPayouts.forEach(async payout => {
+      await this.store.updateTransferredOut(
+        channelId,
+        assetHolderAddress,
+        makeDestination(payout.destination),
+        payout.amount
+      );
+    });
+
+    await this.takeActions([channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
