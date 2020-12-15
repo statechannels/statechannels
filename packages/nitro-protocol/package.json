@@ -74,7 +74,7 @@
     "build:typescript": "rm -rf lib; yarn tsc -b .",
     "contract:compile": "yarn hardhat compile",
     "contract:compile:watch": "yarn hardhat watch compilation",
-    "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --config ./hardhat.config-rinkeby.ts --export-all addresses.json && node ./scripts/postdeploy.js",
+    "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --export-all addresses.json && node ./scripts/postdeploy.js",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn solhint:check",
