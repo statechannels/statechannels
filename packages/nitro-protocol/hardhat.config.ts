@@ -1,5 +1,6 @@
 import 'hardhat-watcher';
 import 'hardhat-deploy';
+import '@nomiclabs/hardhat-etherscan';
 
 export default {
   chainId: 31337, // This is the default anyway https://hardhat.org/config/#hardhat-network
@@ -27,5 +28,10 @@ export default {
       tasks: ['compile'],
       verbose: true,
     },
+  },
+  etherscan: {
+    // Your API key for Etherscan
+    // Obtain one at https://etherscan.io/
+    apiKey: process.env.ETHERSCAN_API_KEY,
   },
 };
