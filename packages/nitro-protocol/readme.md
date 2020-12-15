@@ -116,9 +116,9 @@ After succesfully deploying you should see some changes to `addresses.json`. Ple
  After deployment, run
 
  ```
- ETHERSCAN_API_KEY=<a-secret> INFURA_TOKEN=<another-secret> RINKEBY_DEPLOYER_PK=<yet-another-secret> yarn hardhat --network rinkeby --config ./hardhat.config-rinkeby.ts verify <DeployedContractAddress> 'ConstructorArgs'
+ ETHERSCAN_API_KEY=<a-secret> INFURA_TOKEN=<another-secret> yarn hardhat --network rinkeby verify <DeployedContractAddress> 'ConstructorArgs'
  ```
  
  for each contract you wish to verify. 
 
-Rather awkwardly you still need to provide the `INFURA_TOKEN` and `RINKEBY_DEPLOYER_PK` even though they are not used. For more info, see the [docs](https://hardhat.org/plugins/nomiclabs-hardhat-etherscan.html).
+You need to provide both `ETHERSCAN_API_KEY` and `INFURA_TOKEN` for this to work. For more info, see the [docs](https://hardhat.org/plugins/nomiclabs-hardhat-etherscan.html).
