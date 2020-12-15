@@ -1,8 +1,8 @@
 diff --git a/node_modules/hardhat/builtin-tasks/compile.js b/node_modules/hardhat/builtin-tasks/compile.js
-index ab562c3..bdf669f 100644
+index 0c8ba03..4c943d4 100644
 --- a/node_modules/hardhat/builtin-tasks/compile.js
 +++ b/node_modules/hardhat/builtin-tasks/compile.js
-@@ -448,12 +448,14 @@ config_env_1.subtask(task_names_1.TASK_COMPILE_SOLIDITY_EMIT_ARTIFACTS)
+@@ -450,12 +450,14 @@ config_env_1.subtask(task_names_1.TASK_COMPILE_SOLIDITY_EMIT_ARTIFACTS)
              continue;
          }
          const artifactsEmitted = [];
