@@ -1,4 +1,0 @@
-#!/bin/bash
-
-cat addresses.json | jq 'walk(if (type == "object" and .abi) then del(.abi) else . end )' > addresses.json.tmp
-mv addresses.json.tmp addresses.json
