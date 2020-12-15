@@ -38,18 +38,26 @@ const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
 };
 
 const heldBefore = BigNumber.from(100).toHexString();
-const allocation = randomAllocation(10);
-const indices = [...Array(3)].map(e => ~~(Math.random() * 10));
+const allocation = randomAllocation(Math.floor(Math.random() * 20));
+const indices = [...Array(3)].map(e => Math.floor(Math.random() * 10));
 
 describe('AsserHolder._computeNewAllocation', () => {
-  it('matches on chain method', async () => {
+  it(`matches on chain method for input \n heldBefore: ${heldBefore}, \n allocation: ${JSON.stringify(
+    allocation,
+    null,
+    2
+  )}, \n indices: ${indices}`, async () => {
     // check local function works as expected
     const locallyComputedNewAllocation = computeNewAllocation(heldBefore, allocation, indices);
 
-    const result = await AssetHolder._computeNewAllocation(heldBefore, allocation, indices);
+    const result = (await AssetHolder._computeNewAllocation(
+      heldBefore,
+      allocation,
+      indices
+    )) as ReturnType<typeof computeNewAllocation>;
     expect(result).toBeDefined();
 
-    expect((result as ReturnType<typeof computeNewAllocation>).newAllocation).toMatchObject(
+    expect(result.newAllocation).toMatchObject(
       locallyComputedNewAllocation.newAllocation.map(a => ({
         ...a,
         amount: BigNumber.from(a.amount),
@@ -58,12 +66,10 @@ describe('AsserHolder._computeNewAllocation', () => {
 
     expect((result as any).safeToDelete).toEqual(locallyComputedNewAllocation.deleted);
 
-    expect((result as ReturnType<typeof computeNewAllocation>).payouts).toMatchObject(
+    expect(result.payouts).toMatchObject(
       locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))
     );
 
-    expect((result as ReturnType<typeof computeNewAllocation>).totalPayouts).toEqual(
-      BigNumber.from(locallyComputedNewAllocation.totalPayouts)
-    );
+    expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
   });
 });
