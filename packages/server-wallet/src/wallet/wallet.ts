@@ -577,7 +577,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           continue;
         }
         case 'ProposeLedger':
-          await store.storeTheirLedgerCommit(
+          await store.storeTheirLedgerProposal(
             channelId,
             checkThat(request.outcome, isSimpleAllocation),
             request.nonce
@@ -671,8 +671,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
             switch (action.type) {
               case 'DismissLedgerProposals': {
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-                await this.store.removeMyLedgerCommit(action.channelId, tx);
-                await this.store.removeTheirLedgerCommit(action.channelId, tx);
+                await this.store.removeMyLedgerProposal(action.channelId, tx);
+                await this.store.removeTheirLedgerProposal(action.channelId, tx);
                 requiresAnotherCrankUponCompletion = true;
                 return;
               }
@@ -690,7 +690,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                 // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
                 if (action.outcome)
-                  await this.store.storeMyLedgerCommit(action.channelId, action.outcome, tx);
+                  await this.store.storeMyLedgerProposal(action.channelId, action.outcome, tx);
                 return;
               }
 
@@ -701,8 +701,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                  * After we have completed some funding requests (i.e., a new ledger state
                  * has been signed), we can confidently clear now-stale proposals from the DB.
                  */
-                await this.store.removeMyLedgerCommit(ledgerChannelId, tx);
-                await this.store.removeTheirLedgerCommit(ledgerChannelId, tx);
+                await this.store.removeMyLedgerProposal(ledgerChannelId, tx);
+                await this.store.removeTheirLedgerProposal(ledgerChannelId, tx);
 
                 await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
                 await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);

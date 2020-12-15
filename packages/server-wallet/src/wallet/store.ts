@@ -546,7 +546,11 @@ export class Store {
     };
   }
 
-  async storeMyLedgerCommit(channelId: Bytes32, outcome: Outcome, tx?: Transaction): Promise<void> {
+  async storeMyLedgerProposal(
+    channelId: Bytes32,
+    outcome: Outcome,
+    tx?: Transaction
+  ): Promise<void> {
     await Channel.query(tx || this.knex)
       .where({channelId})
       .whereNull('myLedgerProposal')
@@ -556,7 +560,7 @@ export class Store {
       });
   }
 
-  async storeTheirLedgerCommit(
+  async storeTheirLedgerProposal(
     channelId: Bytes32,
     outcome: Outcome,
     nonce: number,
@@ -569,14 +573,14 @@ export class Store {
       .patch({theirLedgerProposal: outcome, theirLedgerProposalNonce: nonce});
   }
 
-  async removeMyLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
+  async removeMyLedgerProposal(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
       .whereNotNull('myLedgerProposal')
       .patch({myLedgerProposal: this.knex.raw('NULL')});
   }
 
-  async removeTheirLedgerCommit(channelId: Bytes32, tx: Transaction): Promise<void> {
+  async removeTheirLedgerProposal(channelId: Bytes32, tx: Transaction): Promise<void> {
     await Channel.query(tx)
       .where({channelId})
       .whereNotNull('theirLedgerProposal')

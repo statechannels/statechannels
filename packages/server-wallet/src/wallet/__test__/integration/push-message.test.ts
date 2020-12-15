@@ -441,7 +441,7 @@ describe('when there is a request provided', () => {
       assetHolderAddress: makeAddress('0x0000000000000000000000000000000000001337'),
       allocationItems: [],
     };
-    await wallet.store.storeMyLedgerCommit(channelId, someArbitraryOutcome);
+    await wallet.store.storeMyLedgerProposal(channelId, someArbitraryOutcome);
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(
@@ -623,7 +623,7 @@ describe('ledger funded app scenarios', () => {
       wallet.knex
     );
 
-    await wallet.store.storeMyLedgerCommit(ledger.channelId, expectedUpdatedLedgerState.outcome);
+    await wallet.store.storeMyLedgerProposal(ledger.channelId, expectedUpdatedLedgerState.outcome);
 
     const {outbox} = await wallet.pushMessage({
       walletVersion: WALLET_VERSION,
@@ -658,7 +658,7 @@ describe('ledger funded app scenarios', () => {
       wallet.knex
     );
 
-    await wallet.store.storeMyLedgerCommit(ledger.channelId, expectedUpdatedLedgerState.outcome);
+    await wallet.store.storeMyLedgerProposal(ledger.channelId, expectedUpdatedLedgerState.outcome);
 
     // Using spread syntax to do a deep copy essentially
     const conflictingUpdatedLedgerState = {
