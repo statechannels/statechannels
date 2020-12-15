@@ -1,11 +1,18 @@
 import _ from 'lodash';
-import {AllocationItem, BN, makeDestination, simpleEthAllocation} from '@statechannels/wallet-core';
+import {
+  AllocationItem,
+  BN,
+  makeDestination,
+  Participant,
+  simpleEthAllocation,
+} from '@statechannels/wallet-core';
 
 import {channel} from '../../models/__test__/fixtures/channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {alice as aliceSW, bob as bobSW} from '../../wallet/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {protocol, ProtocolState} from '../process-ledger-queue';
+import {Fixture} from '../../wallet/__test__/fixtures/utils';
 
 let i = 0;
 const prefundChannelWithAllocations = (allocations: AllocationItem[] = []) =>
@@ -28,14 +35,8 @@ const ledgerChannelWithAllocations = (allocations: AllocationItem[]) =>
   }).protocolState;
 
 const defaultLedgerChannel = ledgerChannelWithAllocations([
-  {
-    destination: alice().destination,
-    amount: BN.from(10),
-  },
-  {
-    destination: bob().destination,
-    amount: BN.from(10),
-  },
+  allocationItem(alice, 10),
+  allocationItem(bob, 10),
 ]);
 
 // const unfundedLedgerChannel = ledgerChannelWithAllocations([]);
@@ -63,12 +64,7 @@ describe('marking ledger requests as complete', () => {
   it('detects completed funding requests from the outcome of supported state', () => {
     const requestChannel = channel();
     const protocolArgs = {
-      fundingChannel: ledgerChannelWithAllocations([
-        {
-          destination: makeDestination(requestChannel.channelId),
-          amount: BN.from(10),
-        },
-      ]),
+      fundingChannel: ledgerChannelWithAllocations([allocationItem(requestChannel.channelId, 10)]),
       channelsRequestingFunds: [requestChannel.protocolState],
     };
     expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
@@ -94,6 +90,17 @@ describe('marking ledger requests as complete', () => {
   });
 });
 
+function allocationItem(
+  destinationOrSigningWalletFixture: string | Fixture<Participant>,
+  amount: number
+): AllocationItem {
+  const destination =
+    typeof destinationOrSigningWalletFixture === 'string'
+      ? makeDestination(destinationOrSigningWalletFixture)
+      : destinationOrSigningWalletFixture().destination;
+  return {destination, amount: BN.from(amount)};
+}
+
 describe('exchanging ledger proposals', () => {
   describe('as initial proposer', () => {
     it('takes no action if proposal is identical to existing supported outcome', () => {
@@ -106,25 +113,21 @@ describe('exchanging ledger proposals', () => {
     });
 
     it('takes no action if proposal exists but counterparties does not', () => {
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
         myProposedLedgerCommit: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(9)},
-          {destination: bob().destination, amount: BN.from(10)},
-          {destination: makeDestination(requestChannel.channelId), amount: BN.from(1)},
+          allocationItem(alice, 9),
+          allocationItem(bob, 10),
+          allocationItem(requestChannel.channelId, 1),
         ]),
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
     });
 
     it('proposes new outcome funding 1 channel', () => {
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
@@ -133,16 +136,16 @@ describe('exchanging ledger proposals', () => {
         type: 'ProposeLedgerState',
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(9)},
-          {destination: bob().destination, amount: BN.from(10)},
-          {destination: makeDestination(requestChannel.channelId), amount: BN.from(1)},
+          allocationItem(alice, 9),
+          allocationItem(bob, 10),
+          allocationItem(requestChannel.channelId, 1),
         ]),
       });
     });
 
     it('proposes new outcome funding many channels', () => {
       const requestChannels = _.range(5).map(() =>
-        prefundChannelWithAllocations([{destination: alice().destination, amount: BN.from(1)}])
+        prefundChannelWithAllocations([allocationItem(alice, 1)])
       );
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -152,20 +155,17 @@ describe('exchanging ledger proposals', () => {
         type: 'ProposeLedgerState',
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(5)},
-          {destination: bob().destination, amount: BN.from(10)},
-          ..._.map(requestChannels, requestChannel => ({
-            destination: makeDestination(requestChannel.channelId),
-            amount: BN.from(1),
-          })),
+          allocationItem(alice, 5),
+          allocationItem(bob, 10),
+          ..._.map(requestChannels, requestChannel => allocationItem(requestChannel.channelId, 1)),
         ]),
       });
     });
 
     it('proposes new outcome exhausting 100% of funds', () => {
       const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(10)},
-        {destination: bob().destination, amount: BN.from(10)},
+        allocationItem(alice, 10),
+        allocationItem(bob, 10),
       ]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -174,39 +174,29 @@ describe('exchanging ledger proposals', () => {
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
         channelId: protocolArgs.fundingChannel.channelId,
-        outcome: simpleEthAllocation([
-          {destination: makeDestination(requestChannel.channelId), amount: BN.from(20)},
-        ]),
+        outcome: simpleEthAllocation([allocationItem(requestChannel.channelId, 20)]),
       });
     });
 
     it('proposes new outcome requiring defund before having sufficient funds', () => {
-      const olderChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(10)},
-      ]);
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(10)},
-      ]);
+      const olderChannel = prefundChannelWithAllocations([allocationItem(alice, 10)]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 10)]);
       const protocolArgs = {
-        fundingChannel: ledgerChannelWithAllocations([
-          {destination: makeDestination(olderChannel.channelId), amount: BN.from(10)},
-        ]),
+        fundingChannel: ledgerChannelWithAllocations([allocationItem(olderChannel.channelId, 10)]),
         channelsRequestingFunds: [requestChannel.protocolState],
         channelsReturningFunds: [olderChannel.protocolState],
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
         channelId: protocolArgs.fundingChannel.channelId,
-        outcome: simpleEthAllocation([
-          {destination: makeDestination(requestChannel.channelId), amount: BN.from(10)},
-        ]),
+        outcome: simpleEthAllocation([allocationItem(requestChannel.channelId, 10)]),
       });
     });
 
     it('makes no proposal but identifies channel when ledger has insufficient funds', () => {
       const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(100)},
-        {destination: bob().destination, amount: BN.from(100)},
+        allocationItem(alice, 100),
+        allocationItem(bob, 100),
       ]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -222,7 +212,7 @@ describe('exchanging ledger proposals', () => {
 
     it('proposes outcome funding some channels, identifying insufficient funds for others', () => {
       const requestChannels = _.range(5).map(() =>
-        prefundChannelWithAllocations([{destination: alice().destination, amount: BN.from(5)}])
+        prefundChannelWithAllocations([allocationItem(alice, 5)])
       );
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -232,15 +222,9 @@ describe('exchanging ledger proposals', () => {
         type: 'ProposeLedgerState',
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([
-          {destination: bob().destination, amount: BN.from(10)},
-          {
-            destination: makeDestination(requestChannels[0].channelId),
-            amount: BN.from(5),
-          },
-          {
-            destination: makeDestination(requestChannels[1].channelId),
-            amount: BN.from(5),
-          },
+          allocationItem(bob, 10),
+          allocationItem(requestChannels[0].channelId, 5),
+          allocationItem(requestChannels[1].channelId, 5),
         ]),
         channelsNotFunded: [
           requestChannels[2].channelId,
@@ -253,16 +237,14 @@ describe('exchanging ledger proposals', () => {
 
   describe('as responding proposer', () => {
     it('will propose identical proposal to counterparty with same requests', () => {
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
         counterpartyLedgerCommit: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(9)},
-          {destination: bob().destination, amount: BN.from(10)},
-          {destination: makeDestination(requestChannel.channelId), amount: BN.from(1)},
+          allocationItem(alice, 9),
+          allocationItem(bob, 10),
+          allocationItem(requestChannel.channelId, 1),
         ]),
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
@@ -273,46 +255,38 @@ describe('exchanging ledger proposals', () => {
     });
 
     it('will propose intersected proposal to counterparty with superset of requests', () => {
-      const requestChannel1 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
-      const requestChannel2 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel1 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
+      const requestChannel2 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel1.protocolState, requestChannel2.protocolState],
         counterpartyLedgerCommit: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(9)},
-          {destination: bob().destination, amount: BN.from(10)},
-          {destination: makeDestination(requestChannel1.channelId), amount: BN.from(1)},
+          allocationItem(alice, 9),
+          allocationItem(bob, 10),
+          allocationItem(requestChannel1.channelId, 1),
         ]),
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(9)},
-          {destination: bob().destination, amount: BN.from(10)},
-          {destination: makeDestination(requestChannel1.channelId), amount: BN.from(1)},
+          allocationItem(alice, 9),
+          allocationItem(bob, 10),
+          allocationItem(requestChannel1.channelId, 1),
         ]),
       });
     });
 
     it('will not propose new state if intersection is identical to supported outcome', () => {
-      const requestChannel1 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
-      const requestChannel2 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel1 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
+      const requestChannel2 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel2.protocolState], // <-- requestChannel1 missing
         counterpartyLedgerCommit: simpleEthAllocation([
-          {destination: alice().destination, amount: BN.from(9)},
-          {destination: bob().destination, amount: BN.from(10)},
-          {destination: makeDestination(requestChannel1.channelId), amount: BN.from(1)},
+          allocationItem(alice, 9),
+          allocationItem(bob, 10),
+          allocationItem(requestChannel1.channelId, 1),
         ]),
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
@@ -323,13 +297,11 @@ describe('exchanging ledger proposals', () => {
 describe('exchanging signed ledger state updates', () => {
   describe('as initial signer', () => {
     it('does not sign ledger update if one has already been signed by me', () => {
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const proposal = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(9)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel.channelId), amount: BN.from(1)},
+        allocationItem(alice, 9),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel.channelId, 1),
       ]);
       const {protocolState: fundingChannel} = channel({
         vars: [
@@ -350,13 +322,11 @@ describe('exchanging signed ledger state updates', () => {
     });
 
     it('generates signed ledger update when proposals were identical', () => {
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const proposal = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(9)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel.channelId), amount: BN.from(1)},
+        allocationItem(alice, 9),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel.channelId, 1),
       ]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -375,31 +345,25 @@ describe('exchanging signed ledger state updates', () => {
     });
 
     it('generates signed ledger update when proposals were not identical but overlapped', () => {
-      const requestChannel1 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
-      const requestChannel2 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
-      const requestChannel3 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel1 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
+      const requestChannel2 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
+      const requestChannel3 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const proposal1 = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(8)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel1.channelId), amount: BN.from(1)},
-        {destination: makeDestination(requestChannel2.channelId), amount: BN.from(1)},
+        allocationItem(alice, 8),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel1.channelId, 1),
+        allocationItem(requestChannel2.channelId, 1),
       ]);
       const proposal2 = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(8)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel2.channelId), amount: BN.from(1)},
-        {destination: makeDestination(requestChannel3.channelId), amount: BN.from(1)},
+        allocationItem(alice, 8),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel2.channelId, 1),
+        allocationItem(requestChannel3.channelId, 1),
       ]);
       const expectedMerged = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(9)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel2.channelId), amount: BN.from(1)},
+        allocationItem(alice, 9),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel2.channelId, 1),
       ]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -422,21 +386,17 @@ describe('exchanging signed ledger state updates', () => {
     });
 
     it('dismisses proposals when the intersected result is identical to supported', () => {
-      const requestChannel1 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
-      const requestChannel2 = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel1 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
+      const requestChannel2 = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const proposal1 = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(9)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel1.channelId), amount: BN.from(1)},
+        allocationItem(alice, 9),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel1.channelId, 1),
       ]);
       const proposal2 = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(9)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel2.channelId), amount: BN.from(1)},
+        allocationItem(alice, 9),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel2.channelId, 1),
       ]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
@@ -453,17 +413,13 @@ describe('exchanging signed ledger state updates', () => {
 
   describe('as responding signer', () => {
     it('throws an error if counterparty signed update does not follow protocol', () => {
-      const requestChannel = prefundChannelWithAllocations([
-        {destination: alice().destination, amount: BN.from(1)},
-      ]);
+      const requestChannel = prefundChannelWithAllocations([allocationItem(alice, 1)]);
       const proposal = simpleEthAllocation([
-        {destination: alice().destination, amount: BN.from(9)},
-        {destination: bob().destination, amount: BN.from(10)},
-        {destination: makeDestination(requestChannel.channelId), amount: BN.from(1)},
+        allocationItem(alice, 9),
+        allocationItem(bob, 10),
+        allocationItem(requestChannel.channelId, 1),
       ]);
-      const unexpectedOutcome = simpleEthAllocation([
-        {destination: bob().destination, amount: BN.from(1337)},
-      ]);
+      const unexpectedOutcome = simpleEthAllocation([allocationItem(bob, 1337)]);
       const {protocolState: fundingChannel} = channel({
         vars: [
           stateSignedBy([bobSW()])({
