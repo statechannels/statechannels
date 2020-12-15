@@ -98,17 +98,22 @@ NB: you may run into difficulty running `docgen / solidoc` if you have the nativ
 
 To add a new version of the docs, follow the instructions at https://docusaurus.io/docs/en/tutorial-version. We try to keep the documentation version in sync with the @statechannels/nitro-protocol npm package.
 
-## Deploying contracts to a testnet
+## Deploying contracts
 
-The current [hardhat](https://www.npmjs.com/package/hardhat-deploy) config (`hardhat.config-rinkeby.ts`) works with Rinkeby testnet. It can be added on to for any other network.
+### For the rinkeby testnet:
+
+After succesfully deploying you should see some changes to `addresses.json`. Please raise a pull request with this updated file.
 
 ```
 INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] yarn contract:deploy-rinkeby
 ```
+### For mainnet
 
-The config extends from a minimal base config (`hardhat.config.ts`) that is used for other tasks such as compilation.
+WARNING: This can be expensive. Each contract will take several million gas to deploy.
 
-After succesfully deploying you should see some changes to `addresses.json`. Please raise a pull request with this updated file.
+```
+INFURA_TOKEN=[your token here] MAINNET_DEPLOYER_PK=[private key used for mainnet deploy] yarn contract:deploy-mainnet
+```
 
 ## Verifying on etherscan
  This is a somewhat manual process, but easier than using the etherscan GUI. 
@@ -119,6 +124,6 @@ After succesfully deploying you should see some changes to `addresses.json`. Ple
  ETHERSCAN_API_KEY=<a-secret> INFURA_TOKEN=<another-secret> yarn hardhat --network rinkeby verify <DeployedContractAddress> 'ConstructorArgs'
  ```
  
- for each contract you wish to verify. 
+ for each contract you wish to verify. Swap rinkeby for mainnet as appropriate.
 
 You need to provide both `ETHERSCAN_API_KEY` and `INFURA_TOKEN` for this to work. For more info, see the [docs](https://hardhat.org/plugins/nomiclabs-hardhat-etherscan.html).
