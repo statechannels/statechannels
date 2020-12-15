@@ -46,14 +46,14 @@ type AssetTransferredEvent = {type: 'AssetTransferred'; ethersEvent: Event} & As
 type AssetHolderEvent = DepositedEvent | AssetTransferredEvent;
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
-/* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
+/* eslint-disable no-process-env, */
 const ethAssetHolderAddress = makeAddress(
   process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
 );
 const nitroAdjudicatorAddress = makeAddress(
-  process.env.NITRO_ADJUDICATOR_ADDRESS! || constants.AddressZero
+  process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
 );
-/* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
+/* eslint-enable no-process-env */
 
 function isEthAssetHolder(address: Address): boolean {
   return address === ethAssetHolderAddress;
@@ -318,6 +318,10 @@ export class ChainService implements ChainServiceInterface {
         subscriber.holdingUpdated(initialHoldings)
       );
     });
+
+    // This method is async so it will continue to run after the method has been exited
+    // That's ok since we're just registering some things and/or dispatching some events
+    this.registerFinalizationStatus(channelId);
   }
 
   unregisterChannel(channelId: Bytes32): void {
@@ -353,8 +357,26 @@ export class ChainService implements ChainServiceInterface {
 
   private addFinalizingChannel(arg: {channelId: string; finalizesAtS: number}) {
     const {channelId, finalizesAtS} = arg;
-    this.finalizingChannels = [...this.finalizingChannels, {channelId, finalizesAtS: finalizesAtS}];
-    this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
+    // Only add the finalizing channel if its not already there
+    if (!this.finalizingChannels.some(c => c.channelId === channelId)) {
+      this.finalizingChannels = [
+        ...this.finalizingChannels,
+        {channelId, finalizesAtS: finalizesAtS},
+      ];
+      this.finalizingChannels.sort((a, b) => a.finalizesAtS - b.finalizesAtS);
+    }
+  }
+
+  private async registerFinalizationStatus(channelId: string): Promise<void> {
+    const finalizesAtS = await this.getFinalizedAt(channelId);
+    if (finalizesAtS !== 0) {
+      this.addFinalizingChannel({channelId, finalizesAtS});
+    }
+  }
+
+  private async getFinalizedAt(channelId: string): Promise<number> {
+    const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
+    return finalizesAt;
   }
 
   private async getInitialHoldings(

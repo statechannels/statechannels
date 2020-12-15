@@ -1,5 +1,13 @@
+import {setTimeout} from 'timers';
+
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ContractArtifacts, getChannelId, randomChannelId} from '@statechannels/nitro-protocol';
+import {
+  channelDataToChannelStorageHash,
+  ContractArtifacts,
+  getChannelId,
+  randomChannelId,
+  TestContractArtifacts,
+} from '@statechannels/nitro-protocol';
 import {
   Address,
   BN,
@@ -20,11 +28,12 @@ import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/s
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
 import {AssetTransferredArg, HoldingUpdatedArg} from '../types';
-
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
+
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const chainId = process.env.CHAIN_NETWORK_ID || '9002';
@@ -33,7 +42,9 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 
 let chainService: ChainService;
 let channelNonce = 0;
-
+async function mineBlock(timestamp: number) {
+  await provider.send('evm_mine', [timestamp]);
+}
 async function mineBlocks() {
   for (const _i in _.range(5)) {
     await provider.send('evm_mine', []);
@@ -53,8 +64,15 @@ async function mineBlockPeriodically(blocks: number) {
 }
 
 jest.setTimeout(20_000);
-
-beforeAll(() => {
+// The test nitro adjudicator allows us to set channel storage
+const testAdjudicator = new Contract(
+  nitroAdjudicatorAddress,
+  TestContractArtifacts.TestNitroAdjudicatorArtifact.abi,
+  // We use a separate signer address to avoid nonce issues
+  // eslint-disable-next-line no-process-env
+  new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)
+);
+beforeAll(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
   // - Deploys the token contract.
@@ -83,6 +101,7 @@ beforeAll(() => {
 
 afterAll(() => {
   chainService.destructor();
+  testAdjudicator.provider.removeAllListeners();
   provider.removeAllListeners();
 });
 
@@ -192,6 +211,76 @@ describe('fundChannel', () => {
 });
 
 describe('registerChannel', () => {
+  it('dispatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
+    const channelId = randomChannelId();
+    const CHALLENGE_EXPIRE_TIME = 2_000_000_000;
+    const FUTURE_TIME = 2_000_500_000;
+
+    const tx = await testAdjudicator.functions.setChannelStorageHash(
+      channelId,
+      channelDataToChannelStorageHash({
+        turnNumRecord: 0,
+        finalizesAt: CHALLENGE_EXPIRE_TIME,
+      })
+    );
+    await tx.wait();
+    const channelFinalizedHandler = jest.fn();
+    const channelFinalizedPromise = new Promise<void>(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        holdingUpdated: _.noop,
+        assetTransferred: _.noop,
+        channelFinalized: arg => {
+          channelFinalizedHandler(arg);
+          resolve();
+        },
+      })
+    );
+    await mineBlock(FUTURE_TIME);
+    await channelFinalizedPromise;
+    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
+  });
+
+  it('registers a channel in the finalizing channel list and fires an event when that channel is finalized', async () => {
+    const channelId = randomChannelId();
+    // We use large values so we don't have to worry about ganache
+    // mining a block with the current timestamp setting off the expiry
+    const CURRENT_TIME = 2_000_000_000;
+    const CHALLENGE_EXPIRE_TIME = 2_000_400_000;
+    const FUTURE_TIME = 2_000_800_000;
+
+    const tx = await testAdjudicator.setChannelStorageHash(
+      channelId,
+      channelDataToChannelStorageHash({
+        turnNumRecord: 0,
+        finalizesAt: CHALLENGE_EXPIRE_TIME,
+      })
+    );
+    await tx.wait();
+
+    const channelFinalizedHandler = jest.fn();
+    const channelFinalizedPromise = new Promise<void>(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        holdingUpdated: _.noop,
+        assetTransferred: _.noop,
+        channelFinalized: arg => {
+          channelFinalizedHandler(arg);
+          resolve();
+        },
+      })
+    );
+
+    await mineBlock(CURRENT_TIME);
+    // Wait a second to ensure that the channel finalized handler does not get triggered erroneously
+    await new Promise(resolve => setTimeout(resolve, 1000));
+
+    // TODO: Currently due to ganache mining blocks outside of our control we can't assert on this
+    // expect(channelFinalizedHandler).not.toHaveBeenCalled();
+
+    await mineBlock(FUTURE_TIME);
+    await channelFinalizedPromise;
+    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
+  });
+
   it('Successfully registers channel and receives follow on funding event', async () => {
     const channelId = randomChannelId();
     const wrongChannelId = randomChannelId();

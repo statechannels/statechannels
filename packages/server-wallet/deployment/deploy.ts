@@ -1,5 +1,5 @@
 import {Address} from '@statechannels/client-api-schema';
-import {ContractArtifacts} from '@statechannels/nitro-protocol';
+import {ContractArtifacts, TestContractArtifacts} from '@statechannels/nitro-protocol';
 import {ETHERLIME_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
@@ -13,20 +13,14 @@ export type TestNetworkContext = {
   NITRO_ADJUDICATOR_ADDRESS: Address;
 };
 
-
 export async function deploy(): Promise<TestNetworkContext> {
   const ethereumPrivateKey = ETHERLIME_ACCOUNTS[0].privateKey;
 
   // TODO: best way to configure this?
   const deployer = new GanacheDeployer(8545, ethereumPrivateKey);
-  const {
-    EthAssetHolderArtifact,
-    TokenArtifact,
-    Erc20AssetHolderArtifact,
-    NitroAdjudicatorArtifact,
-  } = ContractArtifacts;
+  const {EthAssetHolderArtifact, TokenArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
 
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact as any);
+  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(TestContractArtifacts.TestNitroAdjudicatorArtifact as any);
   const ERC20_ADDRESS = await deployer.deploy(
     TokenArtifact as any,
     {},
