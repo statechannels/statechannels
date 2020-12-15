@@ -136,10 +136,9 @@ it('Create a directly funded channel between two wallets ', async () => {
     .pipe(take(2))
     .toPromise();
 
-  // TODO replace with AllocationUpdated
-  // const assetTransferredAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
-  //   .pipe(take(3))
-  //   .toPromise();
+  const channelClosedAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
+    .pipe(take(3))
+    .toPromise();
 
   //        A <> B
   // PreFund0
@@ -247,14 +246,14 @@ it('Create a directly funded channel between two wallets ', async () => {
   });
 
   await mineBlocks(2);
-  // TODO
-  // const assetTransferredA = await assetTransferredAPromise;
 
-  // expect(assetTransferredA.channelResult).toMatchObject({
-  //   status: 'closed',
-  //   turnNum: 4,
-  //   fundingStatus: 'Defunded',
-  // });
+  const channelClosedA = await channelClosedAPromise;
+
+  expect(channelClosedA.channelResult).toMatchObject({
+    status: 'closed',
+    turnNum: 4,
+    fundingStatus: 'Defunded',
+  });
 
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);
