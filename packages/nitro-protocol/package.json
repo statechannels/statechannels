@@ -35,7 +35,6 @@
     "hardhat-watcher": "^2.0.0",
     "jest": "26.6.3",
     "lint-staged": "10.0.4",
-    "node-jq": "^1.11.3",
     "prettier": "1.19.1",
     "prettier-plugin-solidity": "1.0.0-alpha.58",
     "solhint": "^3.3.2",
