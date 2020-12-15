@@ -23,9 +23,9 @@ describe('happy path', () => {
   it('creates a ledger channel', async () => {
     expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
-    const {participants, allocations} = createChannelArgs();
+    const {participants, allocations, challengeDuration} = createChannelArgs();
 
-    const createPromise = w.createLedgerChannel({participants, allocations});
+    const createPromise = w.createLedgerChannel({participants, allocations, challengeDuration});
 
     await expect(createPromise).resolves.toMatchObject({
       outbox: [

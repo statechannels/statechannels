@@ -98,6 +98,7 @@ const createChannel = {
   id: 1581594378830,
   method: 'CreateChannel',
   params: {
+    challengeDuration: 100,
     participants: [
       {
         participantId: '0xAE363d29fc0f6A9bbBbEcC87751e518Cd9CA83C0',

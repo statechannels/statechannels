@@ -11,6 +11,7 @@ export interface CreateChannelParams {
   appData: string;
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Address;
+  challengeDuration: number;
 }
 export type CreateChannelRequest = JsonRpcRequest<'CreateChannel', CreateChannelParams>;
 export type CreateChannelResponse = JsonRpcResponse<ChannelResult>;

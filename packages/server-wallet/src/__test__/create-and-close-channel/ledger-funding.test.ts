@@ -1,5 +1,12 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
-import {BN, makeAddress, makeDestination, Participant} from '@statechannels/wallet-core';
+import {
+  AllocationItem,
+  areAllocationItemsEqual,
+  BN,
+  makeAddress,
+  makeDestination,
+  Participant,
+} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
 import {Outgoing} from '../..';
@@ -9,11 +16,44 @@ import {
   getChannelResultFor,
   getPayloadFor,
   interParticipantChannelResultsAreEqual,
+  ONE_DAY,
 } from '../test-helpers';
 import {Wallet} from '../../wallet';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
+
+// TODO: Extending expect should be probably done in a setup file
+// This is probably fine for now since we only use toContainAllocationItem in these tests
+// This was moved from test-helpers.ts where it was a bit of footgun.
+// If you loaded the test-helpers.ts for any reason it would try to extend expect
+// which blows up if there is no expect defined
+expect.extend({
+  toContainAllocationItem(received: AllocationItem[], argument: AllocationItem) {
+    const pass = received.some(areAllocationItemsEqual.bind(null, argument));
+    if (pass) {
+      return {
+        pass: true,
+        message: () =>
+          `expected ${JSON.stringify(received, null, 2)} to not contain ${JSON.stringify(
+            argument,
+            null,
+            2
+          )}`,
+      };
+    } else {
+      return {
+        pass: false,
+        message: () =>
+          `expected ${JSON.stringify(received, null, 2)} to contain ${JSON.stringify(
+            argument,
+            null,
+            2
+          )}`,
+      };
+    }
+  },
+});
 
 let a = Wallet.create(
   overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
@@ -67,6 +107,7 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   const aDepositAmtETH = BN.from(aDeposit);
   const bDepositAmtETH = BN.from(bDeposit);
   const ledgerChannelArgs = {
+    challengeDuration: ONE_DAY,
     participants: [participantA, participantB],
     allocations: [
       {
@@ -139,6 +180,7 @@ const testCreateChannelParams = (
   appData: '0x00', // must be even length
   fundingStrategy: 'Ledger',
   fundingLedgerChannelId: ledgerChannelId,
+  challengeDuration: ONE_DAY,
 });
 
 async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[][]) {

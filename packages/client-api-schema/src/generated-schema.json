@@ -282,6 +282,9 @@
         "appDefinition": {
           "$ref": "#/definitions/Address"
         },
+        "challengeDuration": {
+          "type": "number"
+        },
         "fundingLedgerChannelId": {
           "$ref": "#/definitions/Address"
         },
@@ -300,7 +303,8 @@
         "allocations",
         "appDefinition",
         "appData",
-        "fundingStrategy"
+        "fundingStrategy",
+        "challengeDuration"
       ],
       "type": "object"
     },

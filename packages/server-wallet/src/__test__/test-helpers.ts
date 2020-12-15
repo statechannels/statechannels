@@ -1,9 +1,10 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {Payload, SignedState} from '@statechannels/wire-format';
-import {AllocationItem, areAllocationItemsEqual} from '@statechannels/wallet-core';
 
 import {Wallet} from '../wallet';
 import {Outgoing} from '..';
+
+export const ONE_DAY = 86400;
 
 export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {
   const filteredOutbox = outbox.filter(outboxItem => outboxItem.params.recipient === participantId);
@@ -51,30 +52,3 @@ export async function interParticipantChannelResultsAreEqual(a: Wallet, b: Walle
   expect(aChannelResults).toEqual(bChannelResultsNoFunding);
   expect(bOutbox).toEqual([]);
 }
-
-expect.extend({
-  toContainAllocationItem(received: AllocationItem[], argument: AllocationItem) {
-    const pass = received.some(areAllocationItemsEqual.bind(null, argument));
-    if (pass) {
-      return {
-        pass: true,
-        message: () =>
-          `expected ${JSON.stringify(received, null, 2)} to not contain ${JSON.stringify(
-            argument,
-            null,
-            2
-          )}`,
-      };
-    } else {
-      return {
-        pass: false,
-        message: () =>
-          `expected ${JSON.stringify(received, null, 2)} to contain ${JSON.stringify(
-            argument,
-            null,
-            2
-          )}`,
-      };
-    }
-  },
-});
