@@ -46,7 +46,7 @@ interface IAssetHolder {
 
     /**
      * @dev Indicates the assetOutcomeHash for this channelId has changed due to a transfer or claim. Includes sufficient data to compute:
-     * + the preimage of this hash as well as
+     * - the preimage of this hash as well as
      * - the new holdings for this channelId and any others that were transferred to
      * - the payouts to external destinations
      * @param channelId The channelId of the funds being withdrawn.

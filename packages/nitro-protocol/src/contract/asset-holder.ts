@@ -1,5 +1,4 @@
 import {utils, BigNumber, ethers} from 'ethers';
-import {TransactionDescription} from 'ethers/lib/utils';
 
 import {parseEventResult} from '../ethers-utils';
 import AssetHolderArtifact from '../../artifacts/contracts/AssetHolder.sol/AssetHolder.json';
@@ -8,7 +7,6 @@ import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator
 import {
   AllocationAssetOutcome,
   AllocationItem,
-  AssetOutcome,
   decodeAllocation,
   decodeOutcome,
   isAllocationOutcome,
@@ -109,50 +107,28 @@ export function computeNewAssetOutcome(
   assetHolderAddress: Address,
   nitroAdjudicatorAddress: Address,
   allocationUpdatedEvent: {channelId: Bytes32; initialHoldings: string},
-  tx?: ethers.Transaction
+  tx: ethers.Transaction
 ): {
-  newAssetOutcome: AssetOutcome | '0x00'; // '0x00' if the outcome was deleted on chain
+  newAssetOutcome: AllocationAssetOutcome | '0x00'; // '0x00' if the outcome was deleted on chain
   newHoldings: BigNumber;
   externalPayouts: AllocationItem[];
   internalPayouts: AllocationItem[];
 } {
-  let oldAllocation;
-  let indices = [];
-  let txDescription: TransactionDescription;
-  if (tx.to === assetHolderAddress) {
-    txDescription = new ethers.Contract(
-      assetHolderAddress,
-      AssetHolderArtifact.abi
-    ).interface.parseTransaction(tx);
-    // originating tx may be on the supplied AssetHolder:
-    // all methods have a parameter allocationBytes
-    // transfer, transferAll, claim, claimAll
-    oldAllocation = decodeAllocation(txDescription.args.allocationBytes);
-    indices = txDescription.name == 'transfer' ? txDescription.args.indices : []; // TODO: claim does not use indices!
-  } else if (tx.to === nitroAdjudicatorAddress) {
-    // or it may have been on the NitroAdjudicator
-    indices = []; // all the adjudicator methods use 'all'.
-    // all methods have a parameter outcomeBytes
-    // pushOutcomeAndTransferAll, concludePushOutcomeAndTransferAll
-    txDescription = new ethers.Contract(
-      nitroAdjudicatorAddress,
-      NitroAdjudicatorArtifact.abi
-    ).interface.parseTransaction(tx);
-    const oldOutcome = decodeOutcome(txDescription.args.outcomeBytes); // We have the entire outcome here, extract the relevant AssetOutcome
-    const assetOutcome = oldOutcome.find(
-      outcome => outcome.assetHolderAddress === assetHolderAddress
-    );
-    if (isAllocationOutcome(assetOutcome)) {
-      oldAllocation = assetOutcome.allocationItems;
-    } else throw Error('No allocation for this asset holder');
-  } else
-    throw Error('transaction did not originate from either of the supplied contract addresses');
+  // Extract the calldata that we need
+  const {oldAllocation, indices} = extractOldAllocationAndIndices(
+    assetHolderAddress,
+    nitroAdjudicatorAddress,
+    tx
+  );
 
+  // Use the emulated, pure solidity function to figure out what the chain will have done
   const {newAllocation, deleted, payouts, totalPayouts} = computeNewAllocation(
     allocationUpdatedEvent.initialHoldings,
     oldAllocation,
     indices
   );
+
+  // Massage the output for convenience
   const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
   const newAssetOutcome: AllocationAssetOutcome | '0x00' = deleted
     ? '0x00'
@@ -161,19 +137,15 @@ export function computeNewAssetOutcome(
         allocationItems: newAllocation,
       };
 
-  let hydratedPayouts: AllocationItem[];
+  const longHandIndices =
+    indices.length === 0
+      ? Array.from(Array(payouts.length).keys()) // [0,1,2,...] all indices up to payouts.length
+      : indices;
 
-  if (indices.length === 0) {
-    hydratedPayouts = payouts.map((v, i) => ({
-      destination: oldAllocation[i].destination,
-      amount: v,
-    }));
-  } else {
-    hydratedPayouts = payouts.map((v, i) => ({
-      destination: oldAllocation[txDescription.args.indices[i]].destination,
-      amount: v,
-    }));
-  }
+  const hydratedPayouts: AllocationItem[] = payouts.map((v, i) => ({
+    destination: oldAllocation[longHandIndices[i]].destination,
+    amount: v,
+  }));
 
   const externalPayouts = hydratedPayouts.filter(payout =>
     isExternalDestination(payout.destination)
@@ -185,6 +157,64 @@ export function computeNewAssetOutcome(
   return {newAssetOutcome, newHoldings, externalPayouts, internalPayouts};
 }
 
+/**
+ *
+ * Extracts the allocation and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator or AssetHolder giving rise to an AllocationUpdated event.
+ * The address of the relevant contract must be passed in the correct position in the parameters list of this function.
+ * Requires both an adjudicator and asset holder address.
+ * @param assetHolderAddress
+ * @param nitroAdjudicatorAddress
+ * @param tx Transaction which contained the allocation and indices
+ */
+function extractOldAllocationAndIndices(
+  assetHolderAddress: Address,
+  nitroAdjudicatorAddress: Address,
+  tx: ethers.Transaction
+): {
+  oldAllocation: AllocationItem[];
+  indices: number[];
+} {
+  let oldAllocation;
+  let indices = [];
+  // First, deduce which contract the tx targeted:
+
+  if (tx.to === assetHolderAddress) {
+    // If the originating tx targeted the supplied AssetHolder...
+
+    const txDescription = new ethers.Contract(
+      assetHolderAddress,
+      AssetHolderArtifact.abi
+    ).interface.parseTransaction(tx);
+
+    // all methods (transfer, transferAll, claim, claimAll)
+    // have a parameter allocationBytes:
+    oldAllocation = decodeAllocation(txDescription.args.allocationBytes);
+    indices = txDescription.name == 'transfer' ? txDescription.args.indices : []; // TODO: claim does not use indices!
+  } else if (tx.to === nitroAdjudicatorAddress) {
+    // If the originating tx targeted the supplied NitroAdjudicator...
+
+    indices = []; // all the adjudicator methods use 'all'.
+
+    const txDescription = new ethers.Contract(
+      nitroAdjudicatorAddress,
+      NitroAdjudicatorArtifact.abi
+    ).interface.parseTransaction(tx);
+
+    // all methods (pushOutcomeAndTransferAll, concludePushOutcomeAndTransferAll) have a parameter outcomeByte:
+    const oldOutcome = decodeOutcome(txDescription.args.outcomeBytes);
+    // We have the entire outcome here: we need to extract the relevant AssetOutcome
+    const assetOutcome = oldOutcome.find(
+      outcome => outcome.assetHolderAddress === assetHolderAddress
+    );
+
+    if (isAllocationOutcome(assetOutcome)) {
+      oldAllocation = assetOutcome.allocationItems;
+    } else throw Error('No allocation for this asset holder');
+  } else
+    throw Error('transaction did not originate from either of the supplied contract addresses');
+
+  return {oldAllocation, indices};
+}
 function min(a: BigNumber, b: BigNumber) {
   return a.gt(b) ? b : a;
 }
