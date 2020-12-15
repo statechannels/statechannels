@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.6.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.5.1...@statechannels/client-api-schema@0.6.0) (2020-12-15)
+
+
+### Features
+
+* require challenge duration ([ca92e6c](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/ca92e6c6e0b2e019686ff1caf54f452f6e096fe5))
+
+
+
+
+
 ## [0.5.1](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.5.0...@statechannels/client-api-schema@0.5.1) (2020-12-01)
 
 **Note:** Version bump only for package @statechannels/client-api-schema

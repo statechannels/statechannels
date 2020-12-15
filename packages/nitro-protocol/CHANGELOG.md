@@ -3,6 +3,32 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.12.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.11.1...@statechannels/nitro-protocol@0.12.0) (2020-12-15)
+
+
+### Bug Fixes
+
+* ensure isExternalDestination is exported ([af4a741](https://github.com/statechannels/monorepo/commit/af4a74137ec5925fa1d300aa6a544950bf6d3730))
+* pushOutcome transaction creator should not assume challenger address ([4eb1114](https://github.com/statechannels/monorepo/commit/4eb1114b9a88320153107a5acf009e929af951e1))
+
+
+### Features
+
+* accept a list of indices in transfer method ([#3049](https://github.com/statechannels/monorepo/issues/3049)) ([30fdf52](https://github.com/statechannels/monorepo/commit/30fdf520b3890f4d22ef4bbb721580702192c5d0))
+* add a mocked out chain service channelFinalized API ([2e31d92](https://github.com/statechannels/monorepo/commit/2e31d92f8e0997cf9ca9924ff6f38d2ba9530dd4))
+* add requieValidProtocolTransition fn ([fdb8725](https://github.com/statechannels/monorepo/commit/fdb8725b6654b393413ebc14efd57d2036ac1bca))
+* basic chain service challenging ([0f7b66f](https://github.com/statechannels/monorepo/commit/0f7b66fa97fba539cf56837c9e68fe3013b979ae))
+* reason string if FMA.validTrans = false ([46d1503](https://github.com/statechannels/monorepo/commit/46d15035302a3ec28a24ce8d06089e41561f48b7))
+
+
+### Performance Improvements
+
+* shorten revert-reason ([5847227](https://github.com/statechannels/monorepo/commit/5847227a5d7c7590a73446968d09ce23c3d9fd43))
+
+
+
+
+
 ## [0.11.2](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.11.1...@statechannels/nitro-protocol@0.11.2) (2020-12-04)
 
 **Note:** Version bump only for package @statechannels/nitro-protocol
