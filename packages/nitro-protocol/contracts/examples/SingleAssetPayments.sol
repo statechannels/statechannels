@@ -58,8 +58,8 @@ contract SingleAssetPayments is IForceMoveApp {
             assetOutcomeB.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
-        require(allocationA.length == nParticipants, '|Allocation| ≠ |participants|');
-        require(allocationB.length == nParticipants, '|Allocation| ≠ |participants|');
+        require(allocationA.length == nParticipants, '|Allocation|!=|participants|');
+        require(allocationB.length == nParticipants, '|Allocation|!=|participants|');
 
         // Interprets the nth outcome as benefiting participant n
         // checks the destinations have not changed
