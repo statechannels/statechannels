@@ -109,10 +109,10 @@ INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby
 ```
 ### For mainnet
 
-WARNING: This can be expensive. Each contract will take several million gas to deploy.
+WARNING: This can be expensive. Each contract will take several million gas to deploy. Choose your moment and [gas price](https://ethgas.watch/) wisely!
 
 ```
-INFURA_TOKEN=[your token here] MAINNET_DEPLOYER_PK=[private key used for mainnet deploy] yarn contract:deploy-mainnet
+INFURA_TOKEN=[your token here] MAINNET_DEPLOYER_PK=[private key used for mainnet deploy] yarn contract:deploy-mainnet --gasprice [your-chosen-gasPrice-here]
 ```
 
 ## Verifying on etherscan
