@@ -12,10 +12,18 @@ const testForceMoveArtifact = require('../artifacts/contracts/test/TESTForceMove
 const testNitroAdjudicatorArtifact = require('../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json');
 const tokenArtifact = require('../artifacts/contracts/Token.sol/Token.json');
 const trivialAppArtifact = require('../artifacts/contracts/TrivialApp.sol/TrivialApp.json');
+const {writeGasConsumption} = require('../test/test-helpers');
 
 const deploy = async () => {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
 
+  const nitroAdjudicatorDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
+    nitroAdjudicatorArtifact
+  );
+  writeGasConsumption('NitroAdjudicator.gas.md', 'deployment', nitroAdjudicatorDeploymentGas);
+  console.log(
+    `\nDeploying NitroAdjudicator... (cost estimated to be ${nitroAdjudicatorDeploymentGas})\n`
+  );
   const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(nitroAdjudicatorArtifact);
 
   const COUNTING_APP_ADDRESS = await deployer.deploy(countingAppArtifact);
