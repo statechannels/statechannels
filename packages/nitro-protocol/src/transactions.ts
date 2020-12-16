@@ -1,11 +1,21 @@
 import {Contract, providers, Signature} from 'ethers';
 
-import {Outcome} from './contract/outcome';
 import {Uint256} from './contract/types';
 import {State} from './contract/state';
-import * as forceMoveTrans from './contract/transaction-creators/force-move';
-import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress, SignedState} from './signatures';
+import {ForceMoveAppContractInterface} from './contract/force-move-app';
+// https://github.com/microsoft/rushstack/issues/1029
+import {
+  createRespondTransaction as _createRespondTransaction,
+  createChallengeTransaction as _createChallengeTransaction,
+  createConcludeTransaction as _createConcludeTransaction,
+  createCheckpointTransaction as _createCheckpointTransaction,
+} from './contract/transaction-creators/force-move';
+import {
+  createPushOutcomeTransactionFactory,
+  PushOutcomeTransactionArg,
+  createConcludePushOutcomeAndTransferAllTransaction as _createConcludePushOutcomeAndTransferAllTransaction,
+} from './contract/transaction-creators/nitro-adjudicator';
 
 // CONSTANTS
 export const MAX_TX_DATA_SIZE = 128 * 1024; // (bytes) https://github.com/ethereum/go-ethereum/blob/f59ed3565d18c1fa676fd34f4fd41ecccad707e8/core/tx_pool.go#L51
@@ -21,11 +31,7 @@ export async function getChannelStorage(
   contractAddress: string,
   channelId: string
 ): Promise<[Uint256, Uint256, Uint256]> {
-  const forceMove = new Contract(
-    contractAddress,
-    forceMoveTrans.ForceMoveContractInterface,
-    provider
-  );
+  const forceMove = new Contract(contractAddress, ForceMoveAppContractInterface, provider);
   return await forceMove.getChannelStorage(channelId);
 }
 
@@ -35,12 +41,7 @@ export function createChallengeTransaction(
 ): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
 
-  return forceMoveTrans.createChallengeTransaction(
-    states,
-    signatures,
-    whoSignedWhat,
-    challengePrivateKey
-  );
+  return _createChallengeTransaction(states, signatures, whoSignedWhat, challengePrivateKey);
 }
 
 export function createRespondTransaction(
@@ -50,7 +51,7 @@ export function createRespondTransaction(
   if (!challengeState) {
     throw new Error('No active challenge in challenge state');
   }
-  return forceMoveTrans.createRespondTransaction({
+  return _createRespondTransaction({
     challengeState,
     responseState: response.state,
     responseSignature: response.signature,
@@ -61,7 +62,7 @@ export function createCheckpointTransaction(
   signedStates: SignedState[]
 ): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
-  return forceMoveTrans.createCheckpointTransaction({
+  return _createCheckpointTransaction({
     states,
     signatures,
     whoSignedWhat,
@@ -72,29 +73,23 @@ export function createConcludePushOutcomeAndTransferAllTransaction(
   signedStates: SignedState[]
 ): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
-  return nitroAdjudicatorTrans.createConcludePushOutcomeAndTransferAllTransaction(
-    states,
-    signatures,
-    whoSignedWhat
-  );
+  return _createConcludePushOutcomeAndTransferAllTransaction(states, signatures, whoSignedWhat);
 }
 
 export function createConcludeTransaction(
   conclusionProof: SignedState[]
 ): providers.TransactionRequest {
   const {states, signatures, whoSignedWhat} = createSignatureArguments(conclusionProof);
-  return forceMoveTrans.createConcludeTransaction(states, signatures, whoSignedWhat);
+  return _createConcludeTransaction(states, signatures, whoSignedWhat);
 }
 
 export const createPushOutcomeTransaction: (
-  arg: nitroAdjudicatorTrans.PushOutcomeTransactionArg
-) => providers.TransactionRequest = nitroAdjudicatorTrans.createPushOutcomeTransactionFactory(
-  false
-);
+  arg: PushOutcomeTransactionArg
+) => providers.TransactionRequest = createPushOutcomeTransactionFactory(false);
 
 export const createPushOutcomeAndTransferAllTransaction: (
-  arg: nitroAdjudicatorTrans.PushOutcomeTransactionArg
-) => providers.TransactionRequest = nitroAdjudicatorTrans.createPushOutcomeTransactionFactory(true);
+  arg: PushOutcomeTransactionArg
+) => providers.TransactionRequest = createPushOutcomeTransactionFactory(true);
 
 // Currently we assume each signedState is a unique combination of state/signature
 // So if multiple participants sign a state we expect a SignedState for each participant

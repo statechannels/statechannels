@@ -84,17 +84,8 @@ export {
   createTransferAllTransaction,
 } from './contract/transaction-creators/eth-asset-holder';
 
-export {
-  signState,
-  getStateSignerAddress,
-  signChallengeMessage,
-  signStates,
-  SignedState,
-} from './signatures';
-
-import * as Signatures from './signatures';
-import * as Transactions from './transactions';
-export {Signatures, Transactions};
+export * from './signatures';
+export * from './transactions';
 
 // types
 export {Uint256, Bytes32} from './contract/types';
