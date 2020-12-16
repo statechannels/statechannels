@@ -48,15 +48,15 @@ const reason6 = 'h(guarantee)!=assetOutcomeHash';
 // Amounts are valueString representations of wei
 describe('claim', () => {
   it.each`
-    name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | destination | tOutcomeAfter   | heldAfter | payouts   | reason
-    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${'I'}      | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
-    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${'B'}      | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${undefined}
-    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${'I'}      | ${{A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
-    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${'A'}      | ${{B: 5}}       | ${{g: 0}} | ${{A: 5}} | ${undefined}
-    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${'B'}      | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${reason5}
-    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${'B'}      | ${{A: 5}}       | ${{g: 0}} | ${{B: 5}} | ${reason6}
-    ${'7. swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${'B'}      | ${{A: 5}}       | ${{g: 7}} | ${{B: 5}} | ${undefined}
-    ${'8. underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${'B'}      | ${{A: 5}}       | ${{g: 7}} | ${{B: 5}} | ${undefined}
+    name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | indices | tOutcomeAfter         | heldAfter | payouts   | reason
+    ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${[0]}  | ${{I: 0, A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    ${'2. swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5, B: 0}}       | ${{g: 0}} | ${{B: 5}} | ${undefined}
+    ${'3. swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${[0]}  | ${{I: 0, A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}} | ${undefined}
+    ${'4. straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[0]}  | ${{A: 0, B: 5}}       | ${{g: 0}} | ${{A: 5}} | ${undefined}
+    ${'5. allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${[0]}  | ${{A: 5}}             | ${{g: 0}} | ${{B: 5}} | ${reason5}
+    ${'6. guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5}}             | ${{g: 0}} | ${{B: 5}} | ${reason6}
+    ${'7. swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{B: 5}} | ${undefined}
+    ${'8. underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{B: 5}} | ${undefined}
   `(
     '$name',
     async ({
@@ -64,7 +64,7 @@ describe('claim', () => {
       heldBefore,
       guaranteeDestinations,
       tOutcomeBefore,
-      destination,
+      indices,
       tOutcomeAfter,
       heldAfter,
       payouts,
@@ -74,7 +74,7 @@ describe('claim', () => {
       heldBefore: AssetOutcomeShortHand;
       guaranteeDestinations;
       tOutcomeBefore: AssetOutcomeShortHand;
-      destination: string;
+      indices: number[];
       tOutcomeAfter: AssetOutcomeShortHand;
       heldAfter: AssetOutcomeShortHand;
       payouts: AssetOutcomeShortHand;
@@ -97,7 +97,6 @@ describe('claim', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
-      destination = addresses[destination];
 
       // Set holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
@@ -135,10 +134,7 @@ describe('claim', () => {
         expect(await AssetHolder.assetOutcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
-      const tx = AssetHolder.claim(
-        ...claimAllArgs(guarantorId, guarantee, allocation),
-        destination
-      );
+      const tx = AssetHolder.claim(...claimAllArgs(guarantorId, guarantee, allocation), indices);
 
       // Call method in a slightly different way if expecting a revert
       if (reason) {
