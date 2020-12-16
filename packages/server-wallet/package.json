@@ -27,7 +27,7 @@
     "tarn": "3.0.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.11.2",
+    "@microsoft/api-extractor": "7.12.1",
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "0.5.1",
     "@types/autocannon": "4.1.0",

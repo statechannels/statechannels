@@ -11,7 +11,7 @@
     "lodash.isequal": "^4.5.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.11.2",
+    "@microsoft/api-extractor": "7.12.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
     "@statechannels/devtools": "0.5.1",
     "@statechannels/jest-gas-reporter": "0.4.5",
@@ -78,7 +78,7 @@
     "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --export-all addresses.json && node ./scripts/postdeploy.js",
     "contract:deploy-mainnet": "yarn hardhat deploy --network mainnet --export-all addresses.json && node ./scripts/postdeploy.js",
     "docgen": "solidoc",
-    "generate-api": "yarn docgen",
+    "generate-api": "yarn docgen && yarn api-extractor run --local",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn solhint:check",
     "lint:write": "eslint \"*/**/*.ts\" --fix && yarn prettier:write",
     "precommit": "lint-staged --quiet",
