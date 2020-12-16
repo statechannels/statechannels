@@ -172,7 +172,7 @@ contract ForceMove is IForceMove {
         require(
             _recoverSigner(responseStateHash, sig) ==
                 fixedPart.participants[(turnNumRecord + 1) % fixedPart.participants.length],
-            'Response not signed by authorized mover'
+            'Signer not authorized mover'
         );
 
         _requireValidTransition(
@@ -294,10 +294,7 @@ contract ForceMove is IForceMove {
             whoSignedWhat.length
         );
 
-        require(
-            largestTurnNum + 1 >= numStates,
-            'largestTurnNum + 1 must be greater than or equal to numStates'
-        );
+        require(largestTurnNum + 1 >= numStates, 'largestTurnNum too low');
         // ^^ SW-C101: prevent underflow
 
         channelId = _getChannelId(fixedPart);
@@ -330,7 +327,7 @@ contract ForceMove is IForceMove {
                 sigs,
                 whoSignedWhat
             ),
-            'Invalid signatures OR isFinal=true expected'
+            'Invalid signatures / !isFinal'
         );
 
         // effects
@@ -429,10 +426,7 @@ contract ForceMove is IForceMove {
         uint256 nParticipants,
         uint256 nStates
     ) internal pure returns (bool) {
-        require(
-            whoSignedWhat.length == nParticipants,
-            '_validSignatures: whoSignedWhat must be the same length as participants'
-        );
+        require(whoSignedWhat.length == nParticipants, '|whoSignedWhat| ≠ nParticipants');
         for (uint256 i = 0; i < nParticipants; i++) {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
             // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
@@ -569,24 +563,12 @@ contract ForceMove is IForceMove {
         // chainId, participants, channelNonce, appDefinition, challengeDuration
         // and that the b.turnNum = a.turnNum + 1
         if (isFinalAB[1]) {
-            require(
-                _bytesEqual(ab[1].outcome, ab[0].outcome),
-                'InvalidTransitionError: Cannot move to a final state with a different default outcome'
-            );
+            require(_bytesEqual(ab[1].outcome, ab[0].outcome), 'Outcome change forbidden');
         } else {
-            require(
-                !isFinalAB[0],
-                'InvalidTransitionError: Cannot move from a final state to a non final state'
-            );
+            require(!isFinalAB[0], 'isFinal retrograde');
             if (turnNumB < 2 * nParticipants) {
-                require(
-                    _bytesEqual(ab[1].outcome, ab[0].outcome),
-                    'InvalidTransitionError: Cannot change the default outcome during setup phase'
-                );
-                require(
-                    _bytesEqual(ab[1].appData, ab[0].appData),
-                    'InvalidTransitionError: Cannot change the appData during setup phase'
-                );
+                require(_bytesEqual(ab[1].outcome, ab[0].outcome), 'Outcome change forbidden');
+                require(_bytesEqual(ab[1].appData, ab[0].appData), 'appData change forbidden');
             } else {
                 return IsValidTransition.NeedToCheckApp;
             }
@@ -778,10 +760,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a channel.
      */
     function _requireMatchingStorage(ChannelData memory data, bytes32 channelId) internal view {
-        require(
-            _matchesHash(data, channelStorageHashes[channelId]),
-            'Channel storage does not match stored version.'
-        );
+        require(_matchesHash(data, channelStorageHashes[channelId]), 'hash(ChannelData) ≠ storage');
     }
 
     /**
@@ -940,15 +919,12 @@ contract ForceMove is IForceMove {
         uint256 numSigs,
         uint256 numWhoSignedWhats
     ) public pure returns (bool) {
-        require(
-            (numParticipants >= numStates) && (numStates > 0),
-            'ForceMove | You must submit at least one but no more than numParticipants states'
-        );
+        require((numParticipants >= numStates) && (numStates > 0), 'Insufficient or excess states');
         require(
             (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
-            'ForceMove | Require exactly 1 signature per participant & who signed what for all participants'
+            'Bad |signatures|∨|whoSignedWhat|'
         );
-        require(numParticipants < type(uint8).max, 'ForceMove | Too many participants!');
+        require(numParticipants < type(uint8).max, 'Too many participants!');
         return true;
     }
 }

@@ -37,13 +37,10 @@ contract CountingApp is IForceMoveApp {
     ) public override pure returns (bool) {
         require(
             appData(b.appData).counter == appData(a.appData).counter + 1,
-            'CountingApp: Counter must be incremented'
+            'Counter must be incremented'
         );
         // Note this is gas inefficient, and inferior to _bytesEqual in use elsewhere
-        require(
-            keccak256(b.outcome) == keccak256(a.outcome),
-            'CountingApp: Outcome must not change'
-        );
+        require(keccak256(b.outcome) == keccak256(a.outcome), 'Outcome must not change');
         return true;
     }
 }

@@ -273,7 +273,7 @@ contract AssetHolder is IAssetHolder {
 
         for (uint256 j = 0; j < guarantee.destinations.length; j++) {
             if (balance == 0) {
-                revert('_claim : guarantorChannel affords 0 for destination');
+                revert('guarantor affords 0 for dest');
             }
             // for each destination in the guarantee,
             // find the first corresponding allocationItem in the target allocation
@@ -308,7 +308,7 @@ contract AssetHolder is IAssetHolder {
             }
         }
 
-        require(affordsForDestination > 0, '_claim | guarantor affords 0 for destination');
+        require(affordsForDestination > 0, 'guarantor affords 0 for dest');
 
         // effects
         holdings[guarantorChannelId] -= affordsForDestination;
@@ -569,7 +569,7 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash'
+            'h(allocation) ≠ assetOutcomeHash'
         );
     }
 
@@ -587,7 +587,7 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash'
+            'h(guarantee) ≠ assetOutcomeHash'
         );
     }
 

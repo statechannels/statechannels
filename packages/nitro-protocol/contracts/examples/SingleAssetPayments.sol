@@ -28,8 +28,8 @@ contract SingleAssetPayments is IForceMoveApp {
         Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
 
         // Throws if more than one asset
-        require(outcomeA.length == 1, 'SingleAssetPayments: outcomeA: Only one asset allowed');
-        require(outcomeB.length == 1, 'SingleAssetPayments: outcomeB: Only one asset allowed');
+        require(outcomeA.length == 1, 'outcomeA: Only one asset allowed');
+        require(outcomeB.length == 1, 'outcomeB: Only one asset allowed');
 
         // Throws unless the assetoutcome is an allocation
         Outcome.AssetOutcome memory assetOutcomeA = abi.decode(
@@ -42,11 +42,11 @@ contract SingleAssetPayments is IForceMoveApp {
         );
         require(
             assetOutcomeA.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
-            'SingleAssetPayments: outcomeA: AssetOutcomeType must be Allocation'
+            'AssetOutcome must be Allocation'
         );
         require(
             assetOutcomeB.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
-            'SingleAssetPayments: outcomeB: AssetOutcomeType must be Allocation'
+            'AssetOutcome must be Allocation'
         );
 
         // Throws unless that allocation has exactly n outcomes
@@ -58,14 +58,8 @@ contract SingleAssetPayments is IForceMoveApp {
             assetOutcomeB.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
-        require(
-            allocationA.length == nParticipants,
-            'SingleAssetPayments: outcomeA: Allocation length must equal number of participants'
-        );
-        require(
-            allocationB.length == nParticipants,
-            'SingleAssetPayments: outcomeB: Allocation length must equal number of participants'
-        );
+        require(allocationA.length == nParticipants, '|Allocation| ≠ |participants|');
+        require(allocationB.length == nParticipants, '|Allocation| ≠ |participants|');
 
         // Interprets the nth outcome as benefiting participant n
         // checks the destinations have not changed
@@ -77,21 +71,18 @@ contract SingleAssetPayments is IForceMoveApp {
         for (uint256 i = 0; i < nParticipants; i++) {
             require(
                 allocationB[i].destination == allocationA[i].destination,
-                'SingleAssetPayments: Destinations may not change'
+                'Destinations may not change'
             );
             allocationSumA += allocationA[i].amount;
             allocationSumB += allocationB[i].amount;
             if (i != turnNumB % nParticipants) {
                 require(
                     allocationB[i].amount >= allocationA[i].amount,
-                    'SingleAssetPayments: Nonmovers cannot have their balance decreased'
+                    'Nonmover balance decreased'
                 );
             }
         }
-        require(
-            allocationSumA == allocationSumB,
-            'SingleAssetPayments: Total amount allocated cannot change'
-        );
+        require(allocationSumA == allocationSumB, 'Total allocated cannot change');
 
         return true;
     }

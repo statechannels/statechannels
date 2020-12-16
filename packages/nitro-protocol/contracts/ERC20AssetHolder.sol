@@ -35,21 +35,15 @@ contract ERC20AssetHolder is AssetHolder {
         uint256 expectedHeld,
         uint256 amount
     ) external {
-        require(!_isExternalDestination(destination), 'Cannot deposit to external destination');
+        require(!_isExternalDestination(destination), 'Deposit to external destination');
         uint256 amountDeposited;
         // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
         // 1. Participant A deposits
         // 2. Participant B sees A's deposit, which means it is now safe for them to deposit
         // 3. Participant B submits their deposit
         // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
-        require(
-            holdings[destination] >= expectedHeld,
-            'Deposit | holdings[destination] is less than expected'
-        );
-        require(
-            holdings[destination] < expectedHeld.add(amount),
-            'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'
-        );
+        require(holdings[destination] >= expectedHeld, 'holdings < expectedHeld');
+        require(holdings[destination] < expectedHeld.add(amount), 'holdings already sufficient');
 
         // The depositor wishes to increase the holdings against channelId to amount + expectedHeld
         // The depositor need only deposit (at most) amount + (expectedHeld - holdings) (the term in parentheses is non-positive)
