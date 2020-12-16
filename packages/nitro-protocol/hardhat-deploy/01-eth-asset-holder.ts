@@ -2,8 +2,15 @@ import {HardhatRuntimeEnvironment} from 'hardhat/types';
 import {DeployFunction} from 'hardhat-deploy/types';
 
 const func: DeployFunction = async function(hre: HardhatRuntimeEnvironment) {
-  const {deployments, getNamedAccounts} = hre;
+  const {deployments, getChainId, getNamedAccounts} = hre;
   const {deploy} = deployments;
+
+  const chainId = await getChainId();
+
+  if (chainId === '1') {
+    console.info(`Skipping deployment of ETHAssetHolder for mainnet`);
+    return;
+  }
 
   const {deployer} = await getNamedAccounts();
 
