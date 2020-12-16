@@ -569,7 +569,7 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'h(allocation) ≠ assetOutcomeHash'
+            'h(allocation)!=assetOutcomeHash'
         );
     }
 
@@ -587,7 +587,7 @@ contract AssetHolder is IAssetHolder {
                         )
                     )
                 ),
-            'h(guarantee) ≠ assetOutcomeHash'
+            'h(guarantee)!=assetOutcomeHash'
         );
     }
 

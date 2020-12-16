@@ -426,7 +426,7 @@ contract ForceMove is IForceMove {
         uint256 nParticipants,
         uint256 nStates
     ) internal pure returns (bool) {
-        require(whoSignedWhat.length == nParticipants, '|whoSignedWhat| ≠ nParticipants');
+        require(whoSignedWhat.length == nParticipants, '|whoSignedWhat|!=nParticipants');
         for (uint256 i = 0; i < nParticipants; i++) {
             uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
             // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
@@ -760,7 +760,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a channel.
      */
     function _requireMatchingStorage(ChannelData memory data, bytes32 channelId) internal view {
-        require(_matchesHash(data, channelStorageHashes[channelId]), 'hash(ChannelData) ≠ storage');
+        require(_matchesHash(data, channelStorageHashes[channelId]), 'hash(ChannelData)!=storage');
     }
 
     /**
@@ -922,7 +922,7 @@ contract ForceMove is IForceMove {
         require((numParticipants >= numStates) && (numStates > 0), 'Insufficient or excess states');
         require(
             (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
-            'Bad |signatures|∨|whoSignedWhat|'
+            'Bad |signatures|v|whoSignedWhat|'
         );
         require(numParticipants < type(uint8).max, 'Too many participants!');
         return true;
