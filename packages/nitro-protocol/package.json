@@ -11,6 +11,7 @@
     "lodash.isequal": "^4.5.0"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "7.11.2",
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
     "@statechannels/devtools": "0.5.1",
     "@statechannels/jest-gas-reporter": "0.4.5",
