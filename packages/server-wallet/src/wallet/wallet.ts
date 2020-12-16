@@ -670,7 +670,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           try {
             switch (action.type) {
               case 'DismissLedgerProposals': {
-                await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
                 await this.store.removeMyLedgerProposal(action.channelId, tx);
                 await this.store.removeTheirLedgerProposal(action.channelId, tx);
                 requiresAnotherCrankUponCompletion = true;
@@ -681,21 +680,23 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                 const {myIndex, channelId} = protocolState.fundingChannel;
                 const channel = await Channel.forId(channelId, tx);
                 const signedState = await this.store.signState(channel, action.stateToSign, tx);
-                await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
                 response.queueState(signedState, myIndex, channelId);
                 return;
               }
 
               case 'ProposeLedgerState': {
                 // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
+                await this.store.storeMyLedgerProposal(
+                  action.channelId,
+                  action.outcome,
+                  action.nonce,
+                  tx
+                );
+                return;
+              }
+
+              case 'MarkInsufficientFunds': {
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-                if (action.outcome && action.nonce)
-                  await this.store.storeMyLedgerProposal(
-                    action.channelId,
-                    action.outcome,
-                    action.nonce,
-                    tx
-                  );
                 return;
               }
 

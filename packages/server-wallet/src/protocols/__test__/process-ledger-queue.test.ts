@@ -204,10 +204,8 @@ describe('exchanging ledger proposals', () => {
         channelsRequestingFunds: [requestChannel.protocolState],
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
-        nonce: 1,
+        type: 'MarkInsufficientFunds',
         channelId: protocolArgs.fundingChannel.channelId,
-        outcome: undefined,
         channelsNotFunded: [requestChannel.channelId],
       });
     });
@@ -227,11 +225,6 @@ describe('exchanging ledger proposals', () => {
           [requestChannels[0].channelId, 5],
           [requestChannels[1].channelId, 5]
         ),
-        channelsNotFunded: [
-          requestChannels[2].channelId,
-          requestChannels[3].channelId,
-          requestChannels[4].channelId,
-        ],
       });
     });
   });
@@ -254,41 +247,6 @@ describe('exchanging ledger proposals', () => {
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: protocolArgs.theirLedgerProposal,
       });
-    });
-
-    it('will propose intersected proposal to counterparty with superset of requests', () => {
-      const requestChannel1 = prefundChannelWithAllocations([alice, 1]);
-      const requestChannel2 = prefundChannelWithAllocations([alice, 1]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel1.protocolState, requestChannel2.protocolState],
-        theirLedgerProposal: simpleEthAllocation(
-          [alice, 9],
-          [bob, 10],
-          [requestChannel1.channelId, 1]
-        ),
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
-        nonce: 1,
-        channelId: protocolArgs.fundingChannel.channelId,
-        outcome: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel1.channelId, 1]),
-      });
-    });
-
-    it('will not propose new state if intersection is identical to supported outcome', () => {
-      const requestChannel1 = prefundChannelWithAllocations([alice, 1]);
-      const requestChannel2 = prefundChannelWithAllocations([alice, 1]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel2.protocolState], // <-- requestChannel1 missing
-        theirLedgerProposal: simpleEthAllocation(
-          [alice, 9],
-          [bob, 10],
-          [requestChannel1.channelId, 1]
-        ),
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
     });
   });
 });

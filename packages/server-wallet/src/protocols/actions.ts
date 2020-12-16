@@ -40,18 +40,20 @@ export type MarkLedgerFundingRequestsAsComplete = {
 export type ProposeLedgerState = {
   type: 'ProposeLedgerState';
   channelId: Bytes32;
-  outcome?: SimpleAllocation;
-  nonce?: number;
-  channelsNotFunded: Bytes32[];
+  outcome: SimpleAllocation;
+  nonce: number;
 };
 export type SignLedgerState = {
   type: 'SignLedgerState';
   channelId: Bytes32;
   stateToSign: StateVariables;
-  channelsNotFunded: Bytes32[];
 };
 export type DismissLedgerProposals = {
   type: 'DismissLedgerProposals';
+  channelId: Bytes32;
+};
+export type MarkInsufficientFunds = {
+  type: 'MarkInsufficientFunds';
   channelId: Bytes32;
   channelsNotFunded: Bytes32[];
 };
@@ -85,6 +87,7 @@ export type Outgoing = Notice;
 
 export type ProtocolAction =
   | SignState
+  | MarkInsufficientFunds
   | ProposeLedgerState
   | DismissLedgerProposals
   | SignLedgerState

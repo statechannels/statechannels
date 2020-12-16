@@ -45,6 +45,7 @@ import {LedgerRequestType} from '../models/ledger-request';
 import {Protocol, ProtocolResult, ChannelState, ChannelStateWithSupported} from './state';
 import {
   DismissLedgerProposals,
+  MarkInsufficientFunds,
   MarkLedgerFundingRequestsAsComplete,
   noAction,
   ProposeLedgerState,
@@ -203,15 +204,15 @@ const exchangeSignedLedgerStates = ({
   // Already signed something and waiting for reply
   if (latestSignedByMe.turnNum === supported.turnNum + n) return false;
 
-  const {outcome, channelsNotFunded} = _.isEqual(theirLedgerProposal, myLedgerProposal)
-    ? {outcome: myLedgerProposal, channelsNotFunded: []}
+  const outcome = _.isEqual(theirLedgerProposal, myLedgerProposal)
+    ? myLedgerProposal
     : mergeProposedLedgerUpdates(
         myLedgerProposal,
         theirLedgerProposal,
         supportedOutcome,
         channelsRequestingFunds,
         channelsReturningFunds
-      );
+      ).outcome;
 
   const receivedReveal = latest.turnNum === supported.turnNum + n;
   if (receivedReveal && !_.isEqual(outcome, latest.outcome))
@@ -222,7 +223,6 @@ const exchangeSignedLedgerStates = ({
     ? {
         type: 'DismissLedgerProposals',
         channelId,
-        channelsNotFunded,
       }
     : {
         type: 'SignLedgerState',
@@ -232,7 +232,6 @@ const exchangeSignedLedgerStates = ({
           outcome,
           turnNum: supported.turnNum + n,
         },
-        channelsNotFunded,
       };
 };
 
@@ -240,41 +239,34 @@ const exchangeProposals = ({
   fundingChannel: {supported, channelId},
   myLedgerProposal,
   myLedgerProposalNonce,
-  theirLedgerProposal,
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolState): ProposeLedgerState | false => {
+}: ProtocolState): MarkInsufficientFunds | ProposeLedgerState | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Don't propose another commit, wait for theirs
   if (myLedgerProposal) return false;
 
-  let {outcome, channelsNotFunded} = redistributeFunds(
+  const {outcome, channelsNotFunded} = redistributeFunds(
     supportedOutcome,
     channelsReturningFunds,
     channelsRequestingFunds
   );
 
-  if (theirLedgerProposal && !_.isEqual(theirLedgerProposal, outcome))
-    ({outcome, channelsNotFunded} = mergeProposedLedgerUpdates(
-      outcome,
-      theirLedgerProposal,
-      supportedOutcome,
-      channelsRequestingFunds,
-      channelsReturningFunds
-    ));
-
-  const mergedProposalIdenticalToSupportedOutcome = _.isEqual(outcome, supportedOutcome);
-
-  if (mergedProposalIdenticalToSupportedOutcome && channelsNotFunded.length === 0) return false;
-
-  return {
-    type: 'ProposeLedgerState',
-    channelId,
-    outcome: mergedProposalIdenticalToSupportedOutcome ? undefined : outcome,
-    nonce: myLedgerProposalNonce + 1,
-    channelsNotFunded,
-  };
+  return _.isEqual(outcome, supportedOutcome)
+    ? channelsNotFunded.length > 0
+      ? {
+          type: 'MarkInsufficientFunds',
+          channelId,
+          channelsNotFunded,
+        }
+      : false
+    : {
+        type: 'ProposeLedgerState',
+        channelId,
+        outcome,
+        nonce: myLedgerProposalNonce + 1,
+      };
 };
 
 const markRequestsAsComplete = ({
