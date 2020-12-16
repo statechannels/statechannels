@@ -122,6 +122,7 @@ export function computeNewAssetOutcome(
   );
 
   // Use the emulated, pure solidity function to figure out what the chain will have done
+  // TODO switch on contract method to computeNewAllocationWithGuarantee when doing a claim
   const {newAllocation, deleted, payouts, totalPayouts} = computeNewAllocation(
     allocationUpdatedEvent.initialHoldings,
     oldAllocation,
@@ -189,7 +190,10 @@ function extractOldAllocationAndIndices(
     // all methods (transfer, transferAll, claim, claimAll)
     // have a parameter allocationBytes:
     oldAllocation = decodeAllocation(txDescription.args.allocationBytes);
-    indices = txDescription.name == 'transfer' ? txDescription.args.indices : []; // TODO: claim does not use indices!
+    indices =
+      txDescription.name === 'transfer' || txDescription.name == 'claim'
+        ? txDescription.args.indices
+        : [];
   } else if (tx.to === nitroAdjudicatorAddress) {
     // If the originating tx targeted the supplied NitroAdjudicator...
 
