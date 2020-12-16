@@ -14,7 +14,7 @@ import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroA
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
 
-const deploy = async () => {
+export async function deploy(): Promise<Record<string, string>> {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
 
   const nitroAdjudicatorDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
@@ -73,8 +73,4 @@ const deploy = async () => {
     TEST_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER2_ADDRESS,
   };
-};
-
-module.exports = {
-  deploy,
-};
+}
