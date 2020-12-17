@@ -1,6 +1,5 @@
 import {Contract, providers, Signature} from 'ethers';
 
-import {Outcome} from './contract/outcome';
 import {Uint256} from './contract/types';
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
