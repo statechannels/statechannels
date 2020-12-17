@@ -6,22 +6,36 @@
  *
  * Algorithm:
  *
- * IF there are any pending ledger updates (to fund OR defund a channel)
+ *  Let O be the outcome of the currently supported state S.
  *
- *   i. Check if I already proposed a new ledger update O₁. Otherwise, iteratively allocate funds
- *      from the supported state's (i.e., S) outcome to each request, call this O₁.
+ *   i. Create my own ledger update. If I have already proposed a new ledger update, go to (ii).
+ *      Else:
+ *      Let D₁ be the pending defund ledger updates. Remove D₁ from O.
  *
- *  ii. Check if there is an existing proposal for a ledger update, O₂.
+ *      Sort pending ledger updates by channel nonce. Call them F.
+ *      Add from F when the outcome O "affords it", and mark with an error otherwise.
+ *      Call F₁ those we could "afford" to add to O.
+ *      For those we cannot afford, mark as ‘failed’ with insufficient funds.
  *
- * iii. If so, compute O₁ ⋂ O₂
+ *      My ledger update is (D₁, F₁). Send it to my peer.
  *
- *      a. If I haven't sent my proposal yet, propose O₁ (or O₁ ⋂ O₂ if O₂ exists)
+ *  ii. If there is an existing peer proposal for a ledger update D₂ and F₂, go to (iii).
+ *      Else, ask for their ledger update and return.
  *
- *      b. If I have sent my proposal and received theirs, sign O₁ ⋂ O₂ at
- *         the turn number n higher than the most recently supported one.
+ * iii. Compute the next outcome O'.
+ *      a. Compute D = D₁ ⋂ D₂. Remove all items D from O.
  *
- *      c. If O₂ is NULL (not received a proposal), wait for the counterparty.
+ *      b. Compute F = F₁ ∩ F₂.
+ *      Add from F when the outcome O "affords it".
  *
+ *      c. If O' !== O, sign a state S' with outcome O' and turn number S.turnNum + 1.
+ *         Else erase both sent and received proposals and start again at (i).
+ *
+ * Notes:
+ *   - In the implementation below, instead of sending (D, F) to my peer, a computed
+ *     outcome based on applying D and F to O is sent and the peer is expected to be
+ *     able to "deconstruct" it into D and F if it is not equal to their proposal. In
+ *     a future implementation we will send (D, F) instead of the computed proposal
  */
 
 import {compose, map, filter} from 'lodash/fp';
