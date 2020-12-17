@@ -327,7 +327,7 @@ export const getOpenChannelProtocolState = async (
   channelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
-  const app = await store.getChannel(channelId, tx);
+  const app = await store.getChannelState(channelId, tx);
   switch (app.fundingStrategy) {
     case 'Direct':
     case 'Fake':
@@ -338,7 +338,7 @@ export const getOpenChannelProtocolState = async (
         type: 'LedgerFundingProtocolState',
         app,
         ledgerFundingRequested: !!req,
-        ledger: req ? await store.getChannel(req.ledgerChannelId, tx) : undefined,
+        ledger: req ? await store.getChannelState(req.ledgerChannelId, tx) : undefined,
       };
     }
     case 'Unknown':

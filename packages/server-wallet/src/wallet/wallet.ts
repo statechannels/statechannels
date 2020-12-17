@@ -374,7 +374,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
-    const channel = await this.store.getChannel(channelId);
+    const channel = await this.store.getChannelState(channelId);
 
     if (!channel)
       throw new JoinChannel.JoinChannelError(
@@ -439,7 +439,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
       });
       response.queueState(signedState, myIndex, channelId);
 
-      const channelState = await this.store.getChannel(channelId, tx);
+      const channelState = await this.store.getChannelState(channelId, tx);
       response.queueChannelState(channelState);
 
       return response.singleChannelOutput();
@@ -500,7 +500,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const response = WalletResponse.initialize();
 
     try {
-      const channel = await this.store.getChannel(channelId);
+      const channel = await this.store.getChannelState(channelId);
 
       response.queueChannelState(channel);
 
@@ -799,7 +799,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   private async registerChannelWithChainService(channelId: string): Promise<void> {
-    const channel = await this.store.getChannel(channelId);
+    const channel = await this.store.getChannelState(channelId);
     const channelResult = ChannelState.toChannelResult(channel);
 
     const assetHolderAddresses = channelResult.allocations.map(a =>
