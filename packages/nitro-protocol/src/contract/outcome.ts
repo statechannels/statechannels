@@ -45,7 +45,7 @@ export interface AllocationItem {
   amount: Uint256;
 }
 
-export function encodeAllocation(allocation: Allocation): Bytes32 {
+export function encodeAllocation(allocation: Allocation): Bytes {
   return utils.defaultAbiCoder.encode(
     ['tuple(bytes32 destination, uint256 amount)[]'],
     [allocation]

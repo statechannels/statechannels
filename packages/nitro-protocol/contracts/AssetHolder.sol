@@ -55,6 +55,7 @@ contract AssetHolder is IAssetHolder {
         uint256[] memory indices
     ) external {
         // checks
+        _requireIncreasingIndices(indices);
         _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
         _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
@@ -142,7 +143,7 @@ contract AssetHolder is IAssetHolder {
     {
         // `indices == []` means "pay out to all"
         // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length); // [] means "all"; values default to 0
+        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
         safeToDelete = true; // switched to false if there is an item remaining with amount > 0
@@ -157,26 +158,27 @@ contract AssetHolder is IAssetHolder {
 
         // for each guarantee destination
         for (uint256 j = 0; j < guarantee.destinations.length; j++) {
+            if (surplus == 0) break;
             for (uint256 i = 0; i < newAllocation.length; i++) {
+                if (surplus == 0) break;
                 // search for it in the allocation
                 if (guarantee.destinations[j] == newAllocation[i].destination) {
                     // if we find it, compute new amount
-                    uint256 affordsForDestination = min(newAllocation[i].amount, surplus);
+                    uint256 affordsForDestination = min(allocation[i].amount, surplus);
+                    // decrease surplus by the current amount regardless of hitting a specified index
+                    surplus -= affordsForDestination;
                     if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
                         // only if specified in supplied indices, or we if we are doing "all"
-                        // reduce the current allocationItem.amount
+                        // reduce the new allocationItem.amount
                         newAllocation[i].amount -= affordsForDestination;
                         // increase the relevant payout
-                        payouts[k] = affordsForDestination;
+                        payouts[k] += affordsForDestination;
                         totalPayouts += affordsForDestination;
                         // move on to the next supplied index
                         ++k;
                     }
-                    // decrease surplus by the current amount regardless of hitting a specified index
-                    surplus -= affordsForDestination;
-                    if (surplus == 0) break;
+                    break; // start again with the next guarantee destination
                 }
-                if (surplus == 0) break;
             }
         }
 
