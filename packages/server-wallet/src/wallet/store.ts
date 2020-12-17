@@ -269,6 +269,13 @@ export class Store {
       .first();
   }
 
+  async getLockedChannel(channelId: Bytes32, tx: Transaction): Promise<Channel> {
+    return Channel.query(tx)
+      .where({channelId})
+      .forUpdate()
+      .first();
+  }
+
   async getStates(
     channelId: Bytes32,
     tx?: Transaction
