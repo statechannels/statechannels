@@ -35,6 +35,8 @@ export class ChannelOpener {
     this.store.transaction(async tx => {
       const channel = await this.store.getLockedChannel(channelToLock, tx);
 
+      if (!channel) throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
+
       // if we haven't signed the pre-fund, sign it
       if (!channel.prefundSigned) {
         const signedState = await this.store.signState(channel, channel.latest, tx);
