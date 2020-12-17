@@ -4317,6 +4317,11 @@
   version "4.4.0"
   resolved "https://registry.npmjs.org/@types/lodash.pick/-/lodash.pick-4.4.0.tgz#c44dd5139b2e7fc5aaf19ce0b5a8c631d6a5062b"
   integrity sha1-xE3VE5suf8Wq8ZzgtajGMdalBis=
+  
+"@types/lodash.shuffle@^4.2.6":
+  version "4.2.6"
+  resolved "https://registry.npmjs.org/@types/lodash.shuffle/-/lodash.shuffle-4.2.6.tgz#191b0fc66699214558352123811d1657d9ed8930"
+  integrity sha512-ucI9VswlV9jOZiIh43Nd0tJ4Z8pfXy3PbQ9cB6Re1gPds8gLbOdmB0l3UkVI2crZjnQB95bhyNZVEDH8DgglYA==
   dependencies:
     "@types/lodash" "*"
 
@@ -15363,6 +15368,11 @@ lodash.set@^4.3.2:
   version "4.3.2"
   resolved "https://registry.npmjs.org/lodash.set/-/lodash.set-4.3.2.tgz#d8757b1da807dde24816b0d6a84bea1a76230b23"
   integrity sha1-2HV7HagH3eJIFrDWqEvqGnYjCyM=
+
+lodash.shuffle@^4.2.0:
+  version "4.2.0"
+  resolved "https://registry.npmjs.org/lodash.shuffle/-/lodash.shuffle-4.2.0.tgz#145b5053cf875f6f5c2a33f48b6e9948c6ec7b4b"
+  integrity sha1-FFtQU8+HX29cKjP0i26ZSMbse0s=
 
 lodash.some@^4.4.0:
   version "4.6.0"
