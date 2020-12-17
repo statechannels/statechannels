@@ -665,13 +665,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   async assetOutcomeUpdated({
     channelId,
     assetHolderAddress,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    newAssetOutcome, // TODO currently unused
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    newHoldings, // TODO currently unused
     externalPayouts,
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    internalPayouts, // TODO currently unused
   }: AssetOutcomeUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
     externalPayouts.forEach(async payout => {
