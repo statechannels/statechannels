@@ -252,13 +252,24 @@ export class Store {
     // This is somewhat faster than Channel.forId for simply fetching a channel:
     // - the signingWallet isn't needed to construct the protocol state
     // - withGraphJoined is slightly faster in this case
-    return (
-      await Channel.query(tx ?? this.knex)
-        .where({'channels.channel_id': channelId})
-        .withGraphJoined('funding')
-        .withGraphJoined('chainServiceRequests')
-        .first()
-    )?.protocolState;
+    const channel = await this.getChannel(channelId, tx);
+
+    // TODO: throwing here is a quick fix until we can update all consumers of getChannelState
+    // to handle ChannelState | undefined
+    if (!channel) throw new Error(`Channel not found with id ${channelId}`);
+
+    return channel.protocolState;
+  }
+
+  async getChannel(channelId: Bytes32, tx?: Transaction): Promise<Channel | undefined> {
+    // This is somewhat faster than Channel.forId for simply fetching a channel:
+    // - the signingWallet isn't needed to construct the protocol state
+    // - withGraphJoined is slightly faster in this case
+    return Channel.query(tx ?? this.knex)
+      .where({'channels.channel_id': channelId})
+      .withGraphJoined('funding')
+      .withGraphJoined('chainServiceRequests')
+      .first();
   }
 
   async getStates(
