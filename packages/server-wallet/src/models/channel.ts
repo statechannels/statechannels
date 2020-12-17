@@ -6,14 +6,15 @@ import {
   SignedStateVarsWithHash,
   SignedStateWithHash,
   calculateChannelId,
-  hashState,
   outcomesEqual,
   Zero,
   Address,
+  toNitroState,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
 import _ from 'lodash';
+import {hashState} from '@statechannels/wasm-utils';
 
 import {Bytes32, Uint48} from '../type-aliases';
 import {
@@ -204,7 +205,7 @@ export class Channel extends Model implements RequiredColumns {
     this.vars = this.vars.map(sv => dropNonVariables(sv));
 
     this.vars.map(sv => {
-      const correctHash = hashState({...this.channelConstants, ...sv});
+      const correctHash = hashState(toNitroState({...this.channelConstants, ...sv}));
       sv.stateHash = sv.stateHash ?? correctHash;
       if (sv.stateHash !== correctHash) {
         throw new ChannelError(ChannelError.reasons.incorrectHash, {
