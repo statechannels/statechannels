@@ -110,7 +110,7 @@ export function deserializeObjective(objective: ObjectiveWire): Objective {
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
 
 export function deserializeRequest(request: ChannelRequestWire): ChannelRequest {
-  if (request.type === 'ProposeLedger')
+  if (request.type === 'ProposeLedgerUpdate')
     return {
       ...request,
       outcome: deserializeOutcome(request.outcome),

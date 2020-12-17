@@ -92,7 +92,7 @@
               "$ref": "#/definitions/Address"
             },
             "type": {
-              "const": "ProposeLedger",
+              "const": "ProposeLedgerUpdate",
               "type": "string"
             }
           },

@@ -456,7 +456,11 @@ describe('when there is a request provided', () => {
             data: {
               signedStates,
               requests: [
-                {type: 'ProposeLedger', channelId, outcome: serializeOutcome(someArbitraryOutcome)},
+                {
+                  type: 'ProposeLedgerUpdate',
+                  channelId,
+                  outcome: serializeOutcome(someArbitraryOutcome),
+                },
               ],
             },
           },
@@ -553,7 +557,7 @@ describe('ledger funded app scenarios', () => {
       walletVersion: WALLET_VERSION,
       requests: [
         serializeRequest({
-          type: 'ProposeLedger',
+          type: 'ProposeLedgerUpdate',
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
           nonce: 1,
@@ -563,7 +567,7 @@ describe('ledger funded app scenarios', () => {
     });
 
     expect(getRequestFor(ledger.channelId, outbox)).toMatchObject({
-      type: 'ProposeLedger',
+      type: 'ProposeLedgerUpdate',
       outcome: serializeOutcome(expectedUpdatedLedgerState.outcome),
     });
 
@@ -593,7 +597,7 @@ describe('ledger funded app scenarios', () => {
       walletVersion: WALLET_VERSION,
       requests: [
         serializeRequest({
-          type: 'ProposeLedger',
+          type: 'ProposeLedgerUpdate',
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
           nonce: 1,
@@ -603,7 +607,7 @@ describe('ledger funded app scenarios', () => {
     });
 
     expect(getRequestFor(ledger.channelId, outbox)).toMatchObject({
-      type: 'ProposeLedger',
+      type: 'ProposeLedgerUpdate',
       outcome: serializeOutcome(expectedUpdatedLedgerState.outcome),
     });
   });
@@ -635,7 +639,7 @@ describe('ledger funded app scenarios', () => {
       walletVersion: WALLET_VERSION,
       requests: [
         serializeRequest({
-          type: 'ProposeLedger',
+          type: 'ProposeLedgerUpdate',
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
           nonce: 1,
@@ -691,7 +695,7 @@ describe('ledger funded app scenarios', () => {
       walletVersion: WALLET_VERSION,
       requests: [
         serializeRequest({
-          type: 'ProposeLedger',
+          type: 'ProposeLedgerUpdate',
           channelId: ledger.channelId,
           outcome: conflictingUpdatedLedgerState.outcome,
           nonce: 1,

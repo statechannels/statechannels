@@ -62,9 +62,9 @@ import {
   MarkInsufficientFunds,
   MarkLedgerFundingRequestsAsComplete,
   noAction,
-  ProposeLedgerState,
+  ProposeLedgerUpdate,
   ProtocolAction,
-  SignLedgerState,
+  SignLedgerUpdate,
 } from './actions';
 
 export type ProtocolState = {
@@ -210,7 +210,7 @@ const exchangeSignedLedgerStates = ({
   theirLedgerProposal: {proposal: theirProposedOutcome},
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerState | false => {
+}: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerUpdate | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Already signed something and waiting for reply
@@ -237,7 +237,7 @@ const exchangeSignedLedgerStates = ({
         channelId,
       }
     : {
-        type: 'SignLedgerState',
+        type: 'SignLedgerUpdate',
         channelId,
         stateToSign: {
           ...supported,
@@ -252,7 +252,7 @@ const exchangeProposals = ({
   myLedgerProposal: {proposal, nonce},
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolState): MarkInsufficientFunds | ProposeLedgerState | false => {
+}: ProtocolState): MarkInsufficientFunds | ProposeLedgerUpdate | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Don't propose another commit, wait for theirs
@@ -273,7 +273,7 @@ const exchangeProposals = ({
         }
       : false
     : {
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         channelId,
         outcome,
         nonce: nonce + 1,

@@ -209,7 +209,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         participants[myIndex].signingAddress,
       ]);
       if (mine && mine.proposal)
-        response.queueProposeLedger(channelId, myIndex, participants, mine.proposal, mine.nonce);
+        response.queueProposeLedgerUpdate(
+          channelId,
+          myIndex,
+          participants,
+          mine.proposal,
+          mine.nonce
+        );
     }
   }
 
@@ -569,7 +575,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
             ]);
 
             if (mine && mine.proposal)
-              response.queueProposeLedger(
+              response.queueProposeLedgerUpdate(
                 channelId,
                 channelState.myIndex,
                 channelState.participants,
@@ -580,7 +586,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
           continue;
         }
-        case 'ProposeLedger':
+        case 'ProposeLedgerUpdate':
           await store.storeLedgerProposal(
             channelId,
             request.outcome,
@@ -647,7 +653,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
              * Always re-send a proposal if I have one withstanding, just in case.
              */
             if (proposal)
-              response.queueProposeLedger(channelId, myIndex, participants, proposal, nonce);
+              response.queueProposeLedgerUpdate(channelId, myIndex, participants, proposal, nonce);
             /**
              * Re-send my latest signed ledger state if it is not supported yet.
              */
@@ -679,7 +685,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                 return;
               }
 
-              case 'SignLedgerState': {
+              case 'SignLedgerUpdate': {
                 const {myIndex, channelId} = protocolState.fundingChannel;
                 const channel = await Channel.forId(channelId, tx);
                 const signedState = await this.store.signState(channel, action.stateToSign, tx);
@@ -687,7 +693,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                 return;
               }
 
-              case 'ProposeLedgerState': {
+              case 'ProposeLedgerUpdate': {
                 // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
                 await this.store.storeLedgerProposal(
                   action.channelId,

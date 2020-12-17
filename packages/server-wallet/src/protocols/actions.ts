@@ -37,15 +37,15 @@ export type MarkLedgerFundingRequestsAsComplete = {
   defundedChannels: Bytes32[];
   ledgerChannelId: Bytes32;
 };
-export type ProposeLedgerState = {
-  type: 'ProposeLedgerState';
+export type ProposeLedgerUpdate = {
+  type: 'ProposeLedgerUpdate';
   channelId: Bytes32;
   outcome: SimpleAllocation;
   nonce: number;
   signingAddress: Address;
 };
-export type SignLedgerState = {
-  type: 'SignLedgerState';
+export type SignLedgerUpdate = {
+  type: 'SignLedgerUpdate';
   channelId: Bytes32;
   stateToSign: StateVariables;
 };
@@ -89,9 +89,9 @@ export type Outgoing = Notice;
 export type ProtocolAction =
   | SignState
   | MarkInsufficientFunds
-  | ProposeLedgerState
+  | ProposeLedgerUpdate
   | DismissLedgerProposals
-  | SignLedgerState
+  | SignLedgerUpdate
   | FundChannel
   | Withdraw
   | CompleteObjective

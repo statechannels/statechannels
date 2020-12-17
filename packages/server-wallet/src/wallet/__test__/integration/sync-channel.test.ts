@@ -118,7 +118,7 @@ it('returns an outgoing message with the latest proposed ledger update', async (
             signedStates: [runningState],
             requests: [
               {type: 'GetChannel', channelId},
-              {type: 'ProposeLedger', channelId, outcome: serializeOutcome(myLedgerProposal)},
+              {type: 'ProposeLedgerUpdate', channelId, outcome: serializeOutcome(myLedgerProposal)},
             ],
           },
         },

@@ -140,7 +140,7 @@ describe('exchanging ledger proposals', () => {
         channelsRequestingFunds: [requestChannel.protocolState],
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
@@ -154,7 +154,7 @@ describe('exchanging ledger proposals', () => {
         channelsRequestingFunds: _.map(requestChannels, 'protocolState'),
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation(
@@ -175,7 +175,7 @@ describe('exchanging ledger proposals', () => {
         channelsRequestingFunds: [requestChannel.protocolState],
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([requestChannel.channelId, 20]),
@@ -191,7 +191,7 @@ describe('exchanging ledger proposals', () => {
         channelsReturningFunds: [olderChannel.protocolState],
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation([requestChannel.channelId, 10]),
@@ -218,7 +218,7 @@ describe('exchanging ledger proposals', () => {
         channelsRequestingFunds: _.map(requestChannels, 'protocolState'),
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         nonce: 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: simpleEthAllocation(
@@ -242,7 +242,7 @@ describe('exchanging ledger proposals', () => {
         },
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerState',
+        type: 'ProposeLedgerUpdate',
         nonce: protocolArgs.theirLedgerProposal.nonce + 1,
         channelId: protocolArgs.fundingChannel.channelId,
         outcome: protocolArgs.theirLedgerProposal.proposal,
@@ -284,7 +284,7 @@ describe('exchanging signed ledger state updates', () => {
         theirLedgerProposal: {proposal, nonce: 0},
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'SignLedgerState',
+        type: 'SignLedgerUpdate',
         channelId: protocolArgs.fundingChannel.channelId,
         stateToSign: {
           outcome: proposal,
@@ -325,7 +325,7 @@ describe('exchanging signed ledger state updates', () => {
         theirLedgerProposal: {proposal: proposal2, nonce: 0},
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'SignLedgerState',
+        type: 'SignLedgerUpdate',
         channelId: protocolArgs.fundingChannel.channelId,
         stateToSign: {
           outcome: expectedMerged,

@@ -141,9 +141,9 @@ export class WalletResponse {
   }
 
   /**
-   * Add a ProposeLedger to outbox for given channelId
+   * Add a ProposeLedgerUpdate to outbox for given channelId
    */
-  queueProposeLedger(
+  queueProposeLedgerUpdate(
     channelId: string,
     myIndex: number,
     participants: Participant[],
@@ -161,7 +161,7 @@ export class WalletResponse {
               walletVersion: WALLET_VERSION,
               requests: [
                 {
-                  type: 'ProposeLedger' as const,
+                  type: 'ProposeLedgerUpdate' as const,
                   channelId,
                   outcome,
                   nonce,

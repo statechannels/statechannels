@@ -302,7 +302,7 @@ describe('ledger funded app scenarios', () => {
               signedStates: [serializeState(stateWithHashSignedBy([bob()])(signedPreFS1))],
               requests: [
                 serializeRequest({
-                  type: 'ProposeLedger',
+                  type: 'ProposeLedgerUpdate',
                   channelId: ledger.channelId,
                   outcome: expectedUpdatedLedgerState.outcome,
                   nonce: 1,
