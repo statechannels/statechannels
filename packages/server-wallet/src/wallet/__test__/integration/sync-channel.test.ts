@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {BN, serializeOutcome} from '@statechannels/wallet-core';
+import {BN, checkThat, isSimpleAllocation, serializeOutcome} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -11,6 +11,7 @@ import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {LedgerProposal} from '../../../models/ledger-proposal';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -95,10 +96,9 @@ it('returns an outgoing message with the latest proposed ledger update', async (
     appData,
   };
   const nextState = {turnNum: turnNum + 1, appData};
-  const myLedgerProposal = stateSignedBy([])(nextState).outcome;
+  const proposal = checkThat(stateSignedBy([])(nextState).outcome, isSimpleAllocation);
   const c = channel({
     assetHolderAddress: BN.from(1),
-    myLedgerProposal,
     vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
   });
 
@@ -106,6 +106,16 @@ it('returns an outgoing message with the latest proposed ledger update', async (
   expect(inserted.vars).toMatchObject([runningState]);
 
   const channelId = c.channelId;
+
+  await LedgerProposal.storeProposal(
+    {
+      channelId,
+      proposal,
+      nonce: 0,
+      signingAddress: alice().address,
+    },
+    w.knex
+  );
 
   await expect(w.syncChannel({channelId})).resolves.toMatchObject({
     outbox: [
@@ -118,7 +128,7 @@ it('returns an outgoing message with the latest proposed ledger update', async (
             signedStates: [runningState],
             requests: [
               {type: 'GetChannel', channelId},
-              {type: 'ProposeLedgerUpdate', channelId, outcome: serializeOutcome(myLedgerProposal)},
+              {type: 'ProposeLedgerUpdate', channelId, outcome: serializeOutcome(proposal)},
             ],
           },
         },

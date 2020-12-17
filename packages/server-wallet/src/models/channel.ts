@@ -10,7 +10,6 @@ import {
   outcomesEqual,
   Zero,
   Address,
-  Outcome,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -82,11 +81,6 @@ export class Channel extends Model implements RequiredColumns {
   readonly assetHolderAddress!: string; // only Ledger channels have this
   readonly fundingLedgerChannelId!: Bytes32; // only App channels funded by Ledger have this
 
-  readonly myLedgerProposal: Outcome | undefined; // only Ledger channels have this
-  readonly myLedgerProposalNonce!: number; // only Ledger channels have this
-  readonly theirLedgerProposal: Outcome | undefined; // only Ledger channels have this
-  readonly theirLedgerProposalNonce!: number; // only Ledger channels have this
-
   static get jsonSchema(): JSONSchema {
     return {
       type: 'object',
@@ -140,7 +134,7 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static jsonAttributes = ['vars', 'participants', 'myLedgerProposal', 'theirLedgerProposal'];
+  static jsonAttributes = ['vars', 'participants'];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     return Channel.query(txOrKnex)
