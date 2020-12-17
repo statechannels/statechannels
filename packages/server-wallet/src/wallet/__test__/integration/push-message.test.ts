@@ -435,13 +435,12 @@ describe('when there is a request provided', () => {
       wallet.knex
     );
 
-    // Store some outcome in the my_ledger_proposal column
     const someArbitraryOutcome: SimpleAllocation = {
       type: 'SimpleAllocation',
       assetHolderAddress: makeAddress('0x0000000000000000000000000000000000001337'),
       allocationItems: [],
     };
-    await wallet.store.storeMyLedgerProposal(channelId, someArbitraryOutcome, 1);
+    await wallet.store.storeLedgerProposal(channelId, someArbitraryOutcome, 1, alice().address);
 
     // Expect a GetChannel request to produce an outbound message with all states
     await expect(
@@ -558,6 +557,7 @@ describe('ledger funded app scenarios', () => {
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
           nonce: 1,
+          signingAddress: alice().address,
         }),
       ],
     });
@@ -597,6 +597,7 @@ describe('ledger funded app scenarios', () => {
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
           nonce: 1,
+          signingAddress: alice().address,
         }),
       ],
     });
@@ -623,10 +624,11 @@ describe('ledger funded app scenarios', () => {
       wallet.knex
     );
 
-    await wallet.store.storeMyLedgerProposal(
+    await wallet.store.storeLedgerProposal(
       ledger.channelId,
       expectedUpdatedLedgerState.outcome,
-      1
+      1,
+      alice().address
     );
 
     const {outbox} = await wallet.pushMessage({
@@ -637,6 +639,7 @@ describe('ledger funded app scenarios', () => {
           channelId: ledger.channelId,
           outcome: expectedUpdatedLedgerState.outcome,
           nonce: 1,
+          signingAddress: bob().address,
         }),
       ],
     });
@@ -662,10 +665,11 @@ describe('ledger funded app scenarios', () => {
       wallet.knex
     );
 
-    await wallet.store.storeMyLedgerProposal(
+    await wallet.store.storeLedgerProposal(
       ledger.channelId,
       expectedUpdatedLedgerState.outcome,
-      1
+      1,
+      alice().address
     );
 
     // Using spread syntax to do a deep copy essentially
@@ -691,6 +695,7 @@ describe('ledger funded app scenarios', () => {
           channelId: ledger.channelId,
           outcome: conflictingUpdatedLedgerState.outcome,
           nonce: 1,
+          signingAddress: bob().address,
         }),
       ],
     });

@@ -150,7 +150,7 @@ export class WalletResponse {
     outcome: Outcome,
     nonce: number
   ): void {
-    const myParticipantId = participants[myIndex].participantId;
+    const myParticipant = participants[myIndex];
 
     participants.forEach((p, i) => {
       if (i !== myIndex) {
@@ -159,10 +159,18 @@ export class WalletResponse {
             WALLET_VERSION,
             {
               walletVersion: WALLET_VERSION,
-              requests: [{type: 'ProposeLedger' as const, channelId, outcome, nonce}],
+              requests: [
+                {
+                  type: 'ProposeLedger' as const,
+                  channelId,
+                  outcome,
+                  nonce,
+                  signingAddress: myParticipant.signingAddress,
+                },
+              ],
             },
             p.participantId,
-            myParticipantId,
+            myParticipant.participantId,
             channelId
           )
         );

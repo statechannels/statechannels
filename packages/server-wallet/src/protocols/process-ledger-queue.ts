@@ -55,17 +55,15 @@ import {
 
 export type ProtocolState = {
   fundingChannel: ChannelStateWithSupported;
-  theirLedgerProposal?: SimpleAllocation;
-  myLedgerProposal?: SimpleAllocation;
-  theirLedgerProposalNonce: number;
-  myLedgerProposalNonce: number;
+  theirLedgerProposal: {proposal: SimpleAllocation | null; nonce: number};
+  myLedgerProposal: {proposal: SimpleAllocation | null; nonce: number};
   channelsRequestingFunds: ChannelState[];
   channelsReturningFunds: ChannelState[];
 };
 
 type ProtocolStateWithCommits = ProtocolState & {
-  theirLedgerProposal: SimpleAllocation;
-  myLedgerProposal: SimpleAllocation;
+  theirLedgerProposal: {proposal?: SimpleAllocation; nonce: number};
+  myLedgerProposal: {proposal?: SimpleAllocation; nonce: number};
 };
 
 function removeChannelFromAllocation(
@@ -194,8 +192,8 @@ const exchangeSignedLedgerStates = ({
     channelId,
     participants: {length: n},
   },
-  myLedgerProposal,
-  theirLedgerProposal,
+  myLedgerProposal: {proposal: myProposedOutcome},
+  theirLedgerProposal: {proposal: theirProposedOutcome},
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerState | false => {
@@ -204,11 +202,11 @@ const exchangeSignedLedgerStates = ({
   // Already signed something and waiting for reply
   if (latestSignedByMe.turnNum === supported.turnNum + n) return false;
 
-  const outcome = _.isEqual(theirLedgerProposal, myLedgerProposal)
-    ? myLedgerProposal
+  const outcome = _.isEqual(theirProposedOutcome, myProposedOutcome)
+    ? myProposedOutcome
     : mergeProposedLedgerUpdates(
-        myLedgerProposal,
-        theirLedgerProposal,
+        myProposedOutcome,
+        theirProposedOutcome,
         supportedOutcome,
         channelsRequestingFunds,
         channelsReturningFunds
@@ -236,16 +234,15 @@ const exchangeSignedLedgerStates = ({
 };
 
 const exchangeProposals = ({
-  fundingChannel: {supported, channelId},
-  myLedgerProposal,
-  myLedgerProposalNonce,
+  fundingChannel: {supported, channelId, myIndex, participants},
+  myLedgerProposal: {proposal, nonce},
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolState): MarkInsufficientFunds | ProposeLedgerState | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
 
   // Don't propose another commit, wait for theirs
-  if (myLedgerProposal) return false;
+  if (proposal) return false;
 
   const {outcome, channelsNotFunded} = redistributeFunds(
     supportedOutcome,
@@ -265,7 +262,8 @@ const exchangeProposals = ({
         type: 'ProposeLedgerState',
         channelId,
         outcome,
-        nonce: myLedgerProposalNonce + 1,
+        nonce: nonce + 1,
+        signingAddress: participants[myIndex].signingAddress,
       };
 };
 
@@ -301,7 +299,7 @@ const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
   ps.channelsRequestingFunds.length + ps.channelsReturningFunds.length > 0;
 
 const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithCommits =>
-  Boolean(ps.myLedgerProposal && ps.theirLedgerProposal);
+  Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
 
 export const protocol: Protocol<ProtocolState> = (
   ps: ProtocolState
@@ -324,15 +322,16 @@ export const getProcessLedgerQueueProtocolState = async (
 ): Promise<ProtocolState> => {
   const fundingChannel = await store.getChannel(ledgerChannelId, tx);
   const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
-  const {mine, theirs} = await store.getLedgerProposals(ledgerChannelId, tx);
+  const proposals = await store.getLedgerProposals(ledgerChannelId, tx);
+  const [[mine], [theirs]] = _.partition(proposals, [
+    'signingAddress',
+    fundingChannel.participants[fundingChannel.myIndex].signingAddress,
+  ]);
   return {
     fundingChannel: runningOrError(fundingChannel),
 
-    myLedgerProposal: mine.outcome ? checkThat(mine.outcome, isSimpleAllocation) : undefined,
-    theirLedgerProposal: theirs.outcome ? checkThat(theirs.outcome, isSimpleAllocation) : undefined,
-
-    myLedgerProposalNonce: mine.nonce,
-    theirLedgerProposalNonce: theirs.nonce,
+    myLedgerProposal: mine ?? {proposal: null, nonce: 0},
+    theirLedgerProposal: theirs ?? {proposal: null, nonce: 0},
 
     channelsRequestingFunds: await Promise.all<ChannelState>(
       compose(

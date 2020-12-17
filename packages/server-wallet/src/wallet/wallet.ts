@@ -20,8 +20,6 @@ import {
   PrivateKey,
   makeDestination,
   deserializeRequest,
-  checkThat,
-  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -205,10 +203,13 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.queueChannelState(channelState);
 
     if (await this.store.isLedger(channelId)) {
-      const {
-        mine: {outcome, nonce},
-      } = await this.store.getLedgerProposals(channelId);
-      if (outcome) response.queueProposeLedger(channelId, myIndex, participants, outcome, nonce);
+      const proposals = await this.store.getLedgerProposals(channelId);
+      const [[mine]] = _.partition(proposals, [
+        'signingAddress',
+        participants[myIndex].signingAddress,
+      ]);
+      if (mine && mine.proposal)
+        response.queueProposeLedger(channelId, myIndex, participants, mine.proposal, mine.nonce);
     }
   }
 
@@ -560,27 +561,31 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
 
           if (await this.store.isLedger(channelId)) {
-            const {
-              mine: {outcome, nonce},
-            } = await this.store.getLedgerProposals(channelId);
+            const proposals = await this.store.getLedgerProposals(channelId);
 
-            if (outcome)
+            const [[mine]] = _.partition(proposals, [
+              'signingAddress',
+              channelState.participants[channelState.myIndex].signingAddress,
+            ]);
+
+            if (mine && mine.proposal)
               response.queueProposeLedger(
                 channelId,
                 channelState.myIndex,
                 channelState.participants,
-                outcome,
-                nonce
+                mine.proposal,
+                mine.nonce
               );
           }
 
           continue;
         }
         case 'ProposeLedger':
-          await store.storeTheirLedgerProposal(
+          await store.storeLedgerProposal(
             channelId,
-            checkThat(request.outcome, isSimpleAllocation),
-            request.nonce
+            request.outcome,
+            request.nonce,
+            request.signingAddress
           );
           continue;
         default:
@@ -635,15 +640,14 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         const pessimisticallyAddStateAndProposalToOutbox = () => {
           const {
             fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
-            myLedgerProposal: outcome,
-            myLedgerProposalNonce: nonce,
+            myLedgerProposal: {proposal, nonce},
           } = protocolState;
           if (latestSignedByMe && supported) {
             /**
              * Always re-send a proposal if I have one withstanding, just in case.
              */
-            if (outcome)
-              response.queueProposeLedger(channelId, myIndex, participants, outcome, nonce);
+            if (proposal)
+              response.queueProposeLedger(channelId, myIndex, participants, proposal, nonce);
             /**
              * Re-send my latest signed ledger state if it is not supported yet.
              */
@@ -670,8 +674,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           try {
             switch (action.type) {
               case 'DismissLedgerProposals': {
-                await this.store.removeMyLedgerProposal(action.channelId, tx);
-                await this.store.removeTheirLedgerProposal(action.channelId, tx);
+                await this.store.removeLedgerProposals(ledgerChannelId, tx);
                 requiresAnotherCrankUponCompletion = true;
                 return;
               }
@@ -686,10 +689,11 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
               case 'ProposeLedgerState': {
                 // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
-                await this.store.storeMyLedgerProposal(
+                await this.store.storeLedgerProposal(
                   action.channelId,
                   action.outcome,
                   action.nonce,
+                  action.signingAddress,
                   tx
                 );
                 return;
@@ -707,8 +711,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
                  * After we have completed some funding requests (i.e., a new ledger state
                  * has been signed), we can confidently clear now-stale proposals from the DB.
                  */
-                await this.store.removeMyLedgerProposal(ledgerChannelId, tx);
-                await this.store.removeTheirLedgerProposal(ledgerChannelId, tx);
+                await this.store.removeLedgerProposals(ledgerChannelId, tx);
 
                 await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
                 await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);

@@ -42,6 +42,7 @@ export type ProposeLedgerState = {
   channelId: Bytes32;
   outcome: SimpleAllocation;
   nonce: number;
+  signingAddress: Address;
 };
 export type SignLedgerState = {
   type: 'SignLedgerState';

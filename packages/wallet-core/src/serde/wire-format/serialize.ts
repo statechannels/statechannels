@@ -66,7 +66,12 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
 
 export function serializeRequest(request: ChannelRequest): ChannelRequestWire {
   if (request.type === 'ProposeLedger') {
-    return {...request, nonce: request.nonce, outcome: serializeOutcome(request.outcome)};
+    return {
+      ...request,
+      nonce: request.nonce,
+      outcome: serializeOutcome(request.outcome),
+      signingAddress: request.signingAddress
+    };
   }
   return request;
 }

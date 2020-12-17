@@ -49,6 +49,7 @@ import {shouldValidateTransition, validateTransition} from '../utilities/validat
 import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
+import {LedgerProposal} from '../models/ledger-proposal';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -526,66 +527,26 @@ export class Store {
     );
   }
 
-  async getLedgerProposals(
-    ledgerChannelId: Bytes32,
-    tx?: Transaction
-  ): Promise<{
-    mine: {outcome: Outcome | undefined; nonce: number};
-    theirs: {outcome: Outcome | undefined; nonce: number};
-  }> {
-    const channel = await Channel.forId(ledgerChannelId, tx || this.knex);
-    return {
-      mine: {
-        outcome: channel.myLedgerProposal ?? undefined,
-        nonce: channel.myLedgerProposalNonce ?? 0,
-      },
-      theirs: {
-        outcome: channel.theirLedgerProposal ?? undefined,
-        nonce: channel.theirLedgerProposalNonce ?? 0,
-      },
-    };
+  async getLedgerProposals(channelId: Bytes32, tx?: Transaction): Promise<LedgerProposal[]> {
+    return await LedgerProposal.forChannel(channelId, tx || this.knex);
   }
 
-  async storeMyLedgerProposal(
+  async storeLedgerProposal(
     channelId: Bytes32,
-    outcome: Outcome,
+    proposal: Outcome,
     nonce: number,
+    signingAddress: Address,
     tx?: Transaction
   ): Promise<void> {
-    await Channel.query(tx || this.knex)
-      .where({channelId})
-      .whereNull('myLedgerProposal')
-      .patch({
-        myLedgerProposal: outcome,
-        myLedgerProposalNonce: nonce,
-      });
+    proposal = checkThat(proposal, isSimpleAllocation);
+    await LedgerProposal.storeProposal(
+      {channelId, proposal, nonce, signingAddress},
+      tx || this.knex
+    );
   }
 
-  async storeTheirLedgerProposal(
-    channelId: Bytes32,
-    outcome: Outcome,
-    nonce: number,
-    tx?: Transaction
-  ): Promise<void> {
-    await Channel.query(tx || this.knex)
-      .where({channelId})
-      .whereNull('theirLedgerProposal')
-      .andWhere('theirLedgerProposalNonce', '<', nonce)
-      .patch({theirLedgerProposal: outcome, theirLedgerProposalNonce: nonce});
-  }
-
-  async removeMyLedgerProposal(channelId: Bytes32, tx: Transaction): Promise<void> {
-    await Channel.query(tx)
-      .where({channelId})
-      .whereNotNull('myLedgerProposal')
-      .patch({myLedgerProposal: this.knex.raw('NULL')});
-  }
-
-  async removeTheirLedgerProposal(channelId: Bytes32, tx: Transaction): Promise<void> {
-    await Channel.query(tx)
-      .where({channelId})
-      .whereNotNull('theirLedgerProposal')
-      .patch({theirLedgerProposal: this.knex.raw('NULL')});
+  async removeLedgerProposals(channelId: Bytes32, tx: Transaction): Promise<void> {
+    await LedgerProposal.setProposalsToNull(channelId, tx);
   }
 
   /**

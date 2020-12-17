@@ -114,7 +114,8 @@ export function deserializeRequest(request: ChannelRequestWire): ChannelRequest 
     return {
       ...request,
       outcome: deserializeOutcome(request.outcome),
-      nonce: request.nonce
+      nonce: request.nonce,
+      signingAddress: makeAddress(request.signingAddress)
     };
 
   return request;

@@ -68,11 +68,9 @@ const processLedgerQueueProtocolState = (args: Partial<ProtocolState> = {}) => (
   channelsRequestingFunds: [],
   channelsReturningFunds: [],
 
-  theirLedgerProposal: undefined,
-  theirLedgerProposalNonce: 0,
+  theirLedgerProposal: {proposal: null, nonce: 0},
 
-  myLedgerProposal: undefined,
-  myLedgerProposalNonce: 0,
+  myLedgerProposal: {proposal: null, nonce: 0},
 
   ...args,
 });
@@ -127,7 +125,10 @@ describe('exchanging ledger proposals', () => {
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
-        myLedgerProposal: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
+        myLedgerProposal: {
+          proposal: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
+          nonce: 0,
+        },
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
     });
@@ -235,17 +236,16 @@ describe('exchanging ledger proposals', () => {
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
-        theirLedgerProposal: simpleEthAllocation(
-          [alice, 9],
-          [bob, 10],
-          [requestChannel.channelId, 1]
-        ),
+        theirLedgerProposal: {
+          proposal: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
+          nonce: 0,
+        },
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'ProposeLedgerState',
-        nonce: 1,
+        nonce: protocolArgs.theirLedgerProposal.nonce + 1,
         channelId: protocolArgs.fundingChannel.channelId,
-        outcome: protocolArgs.theirLedgerProposal,
+        outcome: protocolArgs.theirLedgerProposal.proposal,
       });
     });
   });
@@ -268,8 +268,8 @@ describe('exchanging signed ledger state updates', () => {
       const protocolArgs = {
         fundingChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
-        myLedgerProposal: proposal,
-        theirLedgerProposal: proposal,
+        myLedgerProposal: {proposal, nonce: 0},
+        theirLedgerProposal: {proposal, nonce: 0},
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
     });
@@ -280,8 +280,8 @@ describe('exchanging signed ledger state updates', () => {
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
-        myLedgerProposal: proposal,
-        theirLedgerProposal: proposal,
+        myLedgerProposal: {proposal, nonce: 0},
+        theirLedgerProposal: {proposal, nonce: 0},
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'SignLedgerState',
@@ -321,8 +321,8 @@ describe('exchanging signed ledger state updates', () => {
           requestChannel2.protocolState,
           requestChannel3.protocolState,
         ],
-        myLedgerProposal: proposal1,
-        theirLedgerProposal: proposal2,
+        myLedgerProposal: {proposal: proposal1, nonce: 0},
+        theirLedgerProposal: {proposal: proposal2, nonce: 0},
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'SignLedgerState',
@@ -342,8 +342,8 @@ describe('exchanging signed ledger state updates', () => {
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel1.protocolState, requestChannel2.protocolState],
-        myLedgerProposal: proposal1,
-        theirLedgerProposal: proposal2,
+        myLedgerProposal: {proposal: proposal1, nonce: 0},
+        theirLedgerProposal: {proposal: proposal2, nonce: 0},
       };
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
         type: 'DismissLedgerProposals',
@@ -369,8 +369,8 @@ describe('exchanging signed ledger state updates', () => {
       const protocolArgs = {
         fundingChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
-        myLedgerProposal: proposal,
-        theirLedgerProposal: proposal,
+        myLedgerProposal: {proposal, nonce: 0},
+        theirLedgerProposal: {proposal, nonce: 0},
       };
       expect(() => protocol(processLedgerQueueProtocolState(protocolArgs))).toThrow(
         'received a signed reveal that is _not_ what we agreed on :/'

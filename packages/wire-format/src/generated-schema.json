@@ -88,6 +88,9 @@
             "outcome": {
               "$ref": "#/definitions/Outcome"
             },
+            "signingAddress": {
+              "$ref": "#/definitions/Address"
+            },
             "type": {
               "const": "ProposeLedger",
               "type": "string"
@@ -97,7 +100,8 @@
             "type",
             "nonce",
             "channelId",
-            "outcome"
+            "outcome",
+            "signingAddress"
           ],
           "type": "object"
         }

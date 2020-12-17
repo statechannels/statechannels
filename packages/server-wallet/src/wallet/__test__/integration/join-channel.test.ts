@@ -306,6 +306,7 @@ describe('ledger funded app scenarios', () => {
                   channelId: ledger.channelId,
                   outcome: expectedUpdatedLedgerState.outcome,
                   nonce: 1,
+                  signingAddress: bob().address,
                 }),
               ],
             },
