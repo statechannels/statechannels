@@ -1,6 +1,6 @@
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
+import {Participant, serializeMessage, SignedState, Outcome} from '@statechannels/wallet-core';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 
 import {Notice, Outgoing} from '../protocols/actions';
@@ -133,6 +133,44 @@ export class WalletResponse {
             },
             p.participantId,
             myParticipantId,
+            channelId
+          )
+        );
+      }
+    });
+  }
+
+  /**
+   * Add a ProposeLedgerUpdate to outbox for given channelId
+   */
+  queueProposeLedgerUpdate(
+    channelId: string,
+    myIndex: number,
+    participants: Participant[],
+    outcome: Outcome,
+    nonce: number
+  ): void {
+    const myParticipant = participants[myIndex];
+
+    participants.forEach((p, i) => {
+      if (i !== myIndex) {
+        this.queuedMessages.push(
+          serializeMessage(
+            WALLET_VERSION,
+            {
+              walletVersion: WALLET_VERSION,
+              requests: [
+                {
+                  type: 'ProposeLedgerUpdate' as const,
+                  channelId,
+                  outcome,
+                  nonce,
+                  signingAddress: myParticipant.signingAddress,
+                },
+              ],
+            },
+            p.participantId,
+            myParticipant.participantId,
             channelId
           )
         );

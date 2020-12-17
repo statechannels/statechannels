@@ -49,6 +49,7 @@ import {shouldValidateTransition, validateTransition} from '../utilities/validat
 import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
+import {LedgerProposal} from '../models/ledger-proposal';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -526,6 +527,28 @@ export class Store {
     );
   }
 
+  async getLedgerProposals(channelId: Bytes32, tx?: Transaction): Promise<LedgerProposal[]> {
+    return await LedgerProposal.forChannel(channelId, tx || this.knex);
+  }
+
+  async storeLedgerProposal(
+    channelId: Bytes32,
+    proposal: Outcome,
+    nonce: number,
+    signingAddress: Address,
+    tx?: Transaction
+  ): Promise<void> {
+    proposal = checkThat(proposal, isSimpleAllocation);
+    await LedgerProposal.storeProposal(
+      {channelId, proposal, nonce, signingAddress},
+      tx || this.knex
+    );
+  }
+
+  async removeLedgerProposals(channelId: Bytes32, tx: Transaction): Promise<void> {
+    await LedgerProposal.setProposalsToNull(channelId, tx);
+  }
+
   /**
    * Add a new state into the database.
    *
@@ -669,6 +692,7 @@ class StoreError extends WalletError {
 
   static readonly reasons = {
     duplicateChannel: 'Expected the channel to NOT exist in the database',
+    duplicateTurnNums: 'multiple states with same turn number',
     notSorted: 'states not sorted',
     multipleSignedStates: 'Store signed multiple states for a single turn',
     invalidSignature: 'Invalid signature',
@@ -754,6 +778,14 @@ function ensureReverseSortedOrderOfStates(states: SignedStateVarsWithHash[]): vo
     throw new StoreError(StoreError.reasons.notSorted);
 }
 
+function ensureNoDuplicateTurnNums(states: SignedStateVarsWithHash[]): void {
+  const turnNums = _.map(states, 'turnNum');
+  const duplicateTurnNums = turnNums.some((t, i) => turnNums.indexOf(t) != i);
+  if (duplicateTurnNums) {
+    throw new StoreError(StoreError.reasons.duplicateTurnNums, {states});
+  }
+}
+
 /**
  * There are currently two invariants being checked:
  *
@@ -762,5 +794,6 @@ function ensureReverseSortedOrderOfStates(states: SignedStateVarsWithHash[]): vo
  */
 function validateInvariants(states: SignedStateVarsWithHash[], mySigningAddress: string): void {
   ensureSingleSignedState(states, mySigningAddress);
+  ensureNoDuplicateTurnNums(states);
   ensureReverseSortedOrderOfStates(states);
 }

@@ -1,5 +1,5 @@
 import {MessageQueuedNotification} from '@statechannels/client-api-schema';
-import {Address, StateVariables} from '@statechannels/wallet-core';
+import {Address, SimpleAllocation, StateVariables} from '@statechannels/wallet-core';
 
 import {Bytes32, Uint256} from '../type-aliases';
 
@@ -35,11 +35,27 @@ export type MarkLedgerFundingRequestsAsComplete = {
   type: 'MarkLedgerFundingRequestsAsComplete';
   fundedChannels: Bytes32[];
   defundedChannels: Bytes32[];
+  ledgerChannelId: Bytes32;
 };
-export type SignLedgerState = {
-  type: 'SignLedgerState';
+export type ProposeLedgerUpdate = {
+  type: 'ProposeLedgerUpdate';
+  channelId: Bytes32;
+  outcome: SimpleAllocation;
+  nonce: number;
+  signingAddress: Address;
+};
+export type SignLedgerUpdate = {
+  type: 'SignLedgerUpdate';
   channelId: Bytes32;
   stateToSign: StateVariables;
+};
+export type DismissLedgerProposals = {
+  type: 'DismissLedgerProposals';
+  channelId: Bytes32;
+};
+export type MarkInsufficientFunds = {
+  type: 'MarkInsufficientFunds';
+  channelId: Bytes32;
   channelsNotFunded: Bytes32[];
 };
 
@@ -72,7 +88,10 @@ export type Outgoing = Notice;
 
 export type ProtocolAction =
   | SignState
-  | SignLedgerState
+  | MarkInsufficientFunds
+  | ProposeLedgerUpdate
+  | DismissLedgerProposals
+  | SignLedgerUpdate
   | FundChannel
   | Withdraw
   | CompleteObjective

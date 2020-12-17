@@ -7,6 +7,9 @@ export async function up(knex: Knex): Promise<any> {
   });
 }
 
-export async function down(_knex: Knex): Promise<any> {
-  return;
+export async function down(knex: Knex): Promise<any> {
+  await knex.schema.table('channels', function(table) {
+    table.dropColumn('asset_holder_address');
+    table.dropColumn('funding_ledger_channel_id');
+  });
 }

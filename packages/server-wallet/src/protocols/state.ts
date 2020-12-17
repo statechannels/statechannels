@@ -40,7 +40,6 @@ export type ChannelState = {
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
-  latestNotSignedByMe?: SignedStateWithHash;
   funding: (address: Address) => ChannelStateFunding;
   chainServiceRequests: ChainServiceRequest[];
   fundingStrategy: FundingStrategy;

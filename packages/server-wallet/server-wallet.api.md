@@ -44,6 +44,7 @@ import { SignedState } from '@statechannels/wallet-core';
 import { SignedState as SignedState_2 } from '@statechannels/wire-format';
 import { SignedStateVarsWithHash } from '@statechannels/wallet-core';
 import { SignedStateWithHash } from '@statechannels/wallet-core';
+import { SimpleAllocation } from '@statechannels/wallet-core';
 import { State } from '@statechannels/wallet-core';
 import { StateVariables } from '@statechannels/wallet-core';
 import { StateWithHash } from '@statechannels/wallet-core';

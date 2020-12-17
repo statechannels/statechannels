@@ -2,6 +2,7 @@ import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
   Objective as ObjectiveWire,
+  ChannelRequest as ChannelRequestWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Message as WireMessage,
@@ -17,8 +18,9 @@ import {
   SimpleAllocation,
   Objective,
   Participant,
+  makeAddress,
   Payload,
-  makeAddress
+  ChannelRequest
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
@@ -44,9 +46,9 @@ export function validatePayload(rawPayload: unknown): WirePayload {
 }
 
 export function deserializeMessage(message: WireMessage): Payload {
-  const signedStates = message.data.signedStates?.map(ss => deserializeState(ss));
-  const objectives = message.data.objectives?.map(objective => deserializeObjective(objective));
-  const requests = message.data.requests;
+  const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
+  const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
+  const requests = message?.data?.requests?.map(req => deserializeRequest(req));
   const walletVersion = message.data.walletVersion;
 
   return {
@@ -107,6 +109,18 @@ export function deserializeObjective(objective: ObjectiveWire): Objective {
 // I have to have asset holder between the wallets, otherwise there is ambiguity
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
 
+export function deserializeRequest(request: ChannelRequestWire): ChannelRequest {
+  if (request.type === 'ProposeLedgerUpdate')
+    return {
+      ...request,
+      outcome: deserializeOutcome(request.outcome),
+      nonce: request.nonce,
+      signingAddress: makeAddress(request.signingAddress)
+    };
+
+  return request;
+}
+
 export function deserializeOutcome(outcome: OutcomeWire): Outcome {
   if (isAllocations(outcome)) {
     switch (outcome.length) {
@@ -147,5 +161,5 @@ function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
 
 function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
   const {amount, destination} = allocationItem;
-  return {destination: makeDestination(destination), amount: BN.from(amount)};
+  return {amount: BN.from(amount), destination: makeDestination(destination)};
 }

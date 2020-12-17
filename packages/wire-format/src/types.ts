@@ -142,8 +142,15 @@ export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 
 // channel requests
-type GetChannel = {type: 'GetChannel'; channelId: Bytes32};
-export type ChannelRequest = GetChannel;
+type GetChannel = {type: 'GetChannel'; channelId: string};
+type ProposeLedgerUpdate = {
+  type: 'ProposeLedgerUpdate';
+  nonce: number;
+  channelId: string;
+  outcome: Outcome;
+  signingAddress: Address;
+};
+export type ChannelRequest = GetChannel | ProposeLedgerUpdate;
 
 export interface Payload {
   walletVersion: string; // e.g. @statechannels/server-wallet@1.4.0

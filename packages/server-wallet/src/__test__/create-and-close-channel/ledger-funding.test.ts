@@ -23,6 +23,8 @@ import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../co
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
+const tablesUsingLedgerChannels = ['channels', 'ledger_requests', 'ledger_proposals'];
+
 // TODO: Extending expect should be probably done in a setup file
 // This is probably fine for now since we only use toContainAllocationItem in these tests
 // This was moved from test-helpers.ts where it was a bit of footgun.
@@ -69,7 +71,7 @@ let b = Wallet.create(
 let participantA: Participant;
 let participantB: Participant;
 
-jest.setTimeout(100_000);
+jest.setTimeout(15_000);
 
 beforeAll(async () => {
   await a.dbAdmin().createDB();
@@ -212,8 +214,8 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
   let appChannelId: Bytes32;
 
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it('can fund a channel by ledger between two wallets ', async () => {
@@ -240,11 +242,6 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      turnNum: 5,
-      status: 'running',
-    });
 
     expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
       turnNum: 3,
@@ -273,11 +270,6 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      turnNum: 7,
-      status: 'running',
-    });
-
     expect(getChannelResultFor(appChannelId, channelResults)).toMatchObject({
       turnNum: 4,
       status: 'closed',
@@ -300,8 +292,8 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   let appChannelId: Bytes32;
 
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it('can fund a channel by ledger between two wallets ', async () => {
@@ -327,11 +319,6 @@ describe('Funding a single channel with 50% of ledger funds', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      turnNum: 5,
-      status: 'running',
-    });
 
     expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
       turnNum: 3,
@@ -370,11 +357,6 @@ describe('Funding a single channel with 50% of ledger funds', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      turnNum: 7,
-      status: 'running',
-    });
-
     expect(getChannelResultFor(appChannelId, channelResults)).toMatchObject({
       turnNum: 4,
       status: 'closed',
@@ -396,8 +378,8 @@ describe('Funding a single channel with 50% of ledger funds', () => {
 
 describe('Closing a ledger channel and preventing it from being used again', () => {
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it('can close a ledger channel and fail to fund a new channel ', async () => {
@@ -422,8 +404,8 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
   let appChannelIds: Bytes32[];
 
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it(`can fund ${N} channels created in bulk by Alice`, async () => {
@@ -446,11 +428,6 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
     const {
       allocations: [{allocationItems}],
     } = ledger;
-
-    expect(ledger).toMatchObject({
-      turnNum: 5,
-      status: 'running',
-    });
 
     expect(allocationItems).toHaveLength(N);
 
@@ -487,12 +464,6 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      // 13 because there is a conflicting back-and-forth due to concurrent messages
-      turnNum: 13,
-      status: 'running',
-    });
-
     for (const channelId of appChannelIds) {
       expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
         turnNum: 4,
@@ -519,8 +490,8 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
   let appChannelIds: Bytes32[];
 
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it(`can fund ${N * 2} channels created in bulk by Alice`, async () => {
@@ -551,7 +522,6 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
     } = ledger;
 
     expect(ledger.status).toBe('running');
-    // there is a race condition which means the turNum should be either 5 or 7
 
     expect(allocationItems).toHaveLength(N * 2);
 
@@ -587,10 +557,6 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
       allocations: [{allocationItems}],
     } = ledger;
 
-    expect(ledger).toMatchObject({
-      status: 'running',
-    });
-
     for (const channelId of appChannelIds) {
       expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
         turnNum: 4,
@@ -613,8 +579,8 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
 
 describe('Funding multiple channels syncronously without enough funds', () => {
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it(`can fund 4 channels created in bulk by Alice, rejecting 2 with no funds`, async () => {
@@ -699,8 +665,8 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
 describe('Funding multiple channels concurrently (one sided)', () => {
   afterAll(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it('can fund 2 channels by ledger both proposed by the same wallet', async () => {
@@ -760,8 +726,8 @@ async function proposeMultipleChannelsToEachother(
 
 describe('Funding multiple channels concurrently (two sides)', () => {
   afterEach(async () => {
-    await a.dbAdmin().truncateDB(['channels', 'ledger_requests']);
-    await b.dbAdmin().truncateDB(['channels', 'ledger_requests']);
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
   });
 
   it('can fund 2 channels by ledger each proposed by the other', async () => {
@@ -942,6 +908,73 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     expect(allocationItems).toContainAllocationItem({
       destination: participantB.destination,
       amount: BN.from(6),
+    });
+  });
+});
+
+describe('Automatic channel syncing on successive API calls', () => {
+  afterAll(async () => {
+    await a.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+    await b.dbAdmin().truncateDB(tablesUsingLedgerChannels);
+  });
+
+  it('can fund two channels in a situation where first proposal is dropped', async () => {
+    const ledgerChannelId = await createLedgerChannel(2, 2);
+    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+
+    const {
+      channelResults: [{channelId: channelId1}],
+      outbox: proposeFirstChannel,
+    } = await a.createChannel(params);
+
+    await b.pushMessage(getPayloadFor(participantB.participantId, proposeFirstChannel));
+
+    const {outbox: joinAndProposeFirst} = await b.joinChannel({channelId: channelId1});
+
+    /* This message is ignored 👇
+    const {outbox: agreeToProposalAndSign} = */ await a.pushMessage(
+      getPayloadFor(participantA.participantId, joinAndProposeFirst)
+    );
+
+    const {
+      channelResults: [{channelId: channelId2}],
+      outbox: proposeSecondChannel,
+    } = await a.createChannel(params);
+
+    await b.pushMessage(getPayloadFor(participantB.participantId, proposeSecondChannel));
+
+    const {outbox: joinAndProposeSecond} = await b.joinChannel({channelId: channelId2});
+
+    await exchangeMessagesBetweenAandB([joinAndProposeSecond], []);
+
+    const {channelResults} = await a.getChannels();
+
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
+
+    expect(getChannelResultFor(channelId1, channelResults)).toMatchObject({
+      turnNum: 3,
+      status: 'running',
+    });
+
+    expect(getChannelResultFor(channelId2, channelResults)).toMatchObject({
+      turnNum: 3,
+      status: 'running',
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: channelId1,
+      amount: BN.from(2),
+    });
+
+    expect(allocationItems).toContainAllocationItem({
+      destination: channelId2,
+      amount: BN.from(2),
     });
   });
 });

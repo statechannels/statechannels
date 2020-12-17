@@ -19,6 +19,7 @@ import {
   Address as CoreAddress,
   PrivateKey,
   makeDestination,
+  deserializeRequest,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -200,6 +201,22 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     response.queueChannelRequest(channelId, myIndex, participants);
     response.queueChannelState(channelState);
+
+    if (await this.store.isLedger(channelId)) {
+      const proposals = await this.store.getLedgerProposals(channelId);
+      const [[mine]] = _.partition(proposals, [
+        'signingAddress',
+        participants[myIndex].signingAddress,
+      ]);
+      if (mine && mine.proposal)
+        response.queueProposeLedgerUpdate(
+          channelId,
+          myIndex,
+          participants,
+          mine.proposal,
+          mine.nonce
+        );
+    }
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
@@ -529,21 +546,65 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   private async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
     const store = this.store;
 
-    const {channelIds, channelResults: fromStoring} = await this.store.pushMessage(wirePayload);
+    const {
+      channelIds: channelIdsFromStates,
+      channelResults: fromStoring,
+    } = await this.store.pushMessage(wirePayload);
+
+    const channelIdsFromRequests: Bytes32[] = [];
+    const requests = (wirePayload.requests || []).map(deserializeRequest);
+
+    for (const request of requests) {
+      const {channelId} = request;
+
+      channelIdsFromRequests.push(channelId);
+
+      switch (request.type) {
+        case 'GetChannel': {
+          const {states: signedStates, channelState} = await store.getStates(channelId);
+
+          // add signed states to response
+          signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
+
+          if (await this.store.isLedger(channelId)) {
+            const proposals = await this.store.getLedgerProposals(channelId);
+
+            const [[mine]] = _.partition(proposals, [
+              'signingAddress',
+              channelState.participants[channelState.myIndex].signingAddress,
+            ]);
+
+            if (mine && mine.proposal)
+              response.queueProposeLedgerUpdate(
+                channelId,
+                channelState.myIndex,
+                channelState.participants,
+                mine.proposal,
+                mine.nonce
+              );
+          }
+
+          continue;
+        }
+        case 'ProposeLedgerUpdate':
+          await store.storeLedgerProposal(
+            channelId,
+            request.outcome,
+            request.nonce,
+            request.signingAddress
+          );
+          continue;
+        default:
+          continue;
+      }
+    }
 
     // add channelResults to response
     fromStoring.forEach(cr => response.queueChannelResult(cr));
 
+    const channelIds = _.uniq(channelIdsFromStates.concat(channelIdsFromRequests));
+
     await this.takeActions(channelIds, response);
-
-    for (const request of wirePayload.requests || []) {
-      const channelId = request.channelId;
-
-      const {states: signedStates, channelState} = await store.getStates(channelId);
-
-      // add signed states to response
-      signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
-    }
   }
 
   private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
@@ -571,13 +632,34 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     while (ledgersToProcess.length) {
       const ledgerChannelId = ledgersToProcess[0];
 
-      await this.store.lockApp(ledgerChannelId, async tx => {
-        const setError = async (e: Error): Promise<void> => {
-          await tx.rollback(e);
-        };
+      await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
+        const setError = (e: Error) => tx.rollback(e);
 
-        const markLedgerAsProcessed = (): void => {
-          ledgersToProcess.shift();
+        const markLedgerAsProcessed = () => ledgersToProcess.shift();
+
+        // TODO: Move these checks inside the DB query when fetching ledgers to process
+        if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
+          markLedgerAsProcessed();
+          return;
+        }
+
+        const pessimisticallyAddStateAndProposalToOutbox = () => {
+          const {
+            fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
+            myLedgerProposal: {proposal, nonce},
+          } = protocolState;
+          if (latestSignedByMe && supported) {
+            /**
+             * Always re-send a proposal if I have one withstanding, just in case.
+             */
+            if (proposal)
+              response.queueProposeLedgerUpdate(channelId, myIndex, participants, proposal, nonce);
+            /**
+             * Re-send my latest signed ledger state if it is not supported yet.
+             */
+            if (latestSignedByMe.turnNum > supported.turnNum)
+              response.queueState(latestSignedByMe, myIndex, channelId);
+          }
         };
 
         const protocolState = await ProcessLedgerQueue.getProcessLedgerQueueProtocolState(
@@ -592,26 +674,54 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
         if (!action) {
           markLedgerAsProcessed();
+          if (!requiresAnotherCrankUponCompletion) pessimisticallyAddStateAndProposalToOutbox();
           response.queueChannelState(protocolState.fundingChannel);
         } else {
           try {
             switch (action.type) {
-              case 'SignLedgerState': {
+              case 'DismissLedgerProposals': {
+                await this.store.removeLedgerProposals(ledgerChannelId, tx);
+                requiresAnotherCrankUponCompletion = true;
+                return;
+              }
+
+              case 'SignLedgerUpdate': {
                 const {myIndex, channelId} = protocolState.fundingChannel;
                 const channel = await Channel.forId(channelId, tx);
                 const signedState = await this.store.signState(channel, action.stateToSign, tx);
-
                 response.queueState(signedState, myIndex, channelId);
+                return;
+              }
 
+              case 'ProposeLedgerUpdate': {
+                // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
+                await this.store.storeLedgerProposal(
+                  action.channelId,
+                  action.outcome,
+                  action.nonce,
+                  action.signingAddress,
+                  tx
+                );
+                return;
+              }
+
+              case 'MarkInsufficientFunds': {
                 await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-
                 return;
               }
 
               case 'MarkLedgerFundingRequestsAsComplete': {
-                const {fundedChannels, defundedChannels} = action;
+                const {fundedChannels, defundedChannels, ledgerChannelId} = action;
+
+                /**
+                 * After we have completed some funding requests (i.e., a new ledger state
+                 * has been signed), we can confidently clear now-stale proposals from the DB.
+                 */
+                await this.store.removeLedgerProposals(ledgerChannelId, tx);
+
                 await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
                 await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
+
                 requiresAnotherCrankUponCompletion = true;
                 return;
               }

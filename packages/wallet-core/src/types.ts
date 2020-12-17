@@ -169,7 +169,14 @@ export function objectiveId(objective: Objective): string {
 }
 
 type GetChannel = {type: 'GetChannel'; channelId: string};
-export type ChannelRequest = GetChannel;
+type ProposeLedgerUpdate = {
+  type: 'ProposeLedgerUpdate';
+  nonce: number;
+  channelId: string;
+  outcome: Outcome;
+  signingAddress: Address;
+};
+export type ChannelRequest = GetChannel | ProposeLedgerUpdate;
 
 export interface Payload {
   walletVersion: string;

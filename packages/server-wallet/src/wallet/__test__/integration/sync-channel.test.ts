@@ -1,15 +1,17 @@
 import _ from 'lodash';
+import {BN, checkThat, isSimpleAllocation, serializeOutcome} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateWithHashSignedBy} from '../fixtures/states';
+import {stateWithHashSignedBy, stateSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {LedgerProposal} from '../../../models/ledger-proposal';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -75,6 +77,59 @@ it('returns an outgoing message with the latest state', async () => {
           data: {
             signedStates: [runningState, nextState],
             requests: [{type: 'GetChannel', channelId}],
+          },
+        },
+      },
+    ],
+    channelResult: runningState,
+  });
+
+  const updated = await Channel.forId(channelId, w.knex);
+  expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
+});
+
+it('returns an outgoing message with the latest proposed ledger update', async () => {
+  const appData = '0xf0';
+  const turnNum = 7;
+  const runningState = {
+    turnNum,
+    appData,
+  };
+  const nextState = {turnNum: turnNum + 1, appData};
+  const proposal = checkThat(stateSignedBy([])(nextState).outcome, isSimpleAllocation);
+  const c = channel({
+    assetHolderAddress: BN.from(1),
+    vars: [stateWithHashSignedBy([alice(), bob()])(runningState)],
+  });
+
+  const inserted = await Channel.query(w.knex).insert(c);
+  expect(inserted.vars).toMatchObject([runningState]);
+
+  const channelId = c.channelId;
+
+  await LedgerProposal.storeProposal(
+    {
+      channelId,
+      proposal,
+      nonce: 0,
+      signingAddress: alice().address,
+    },
+    w.knex
+  );
+
+  await expect(w.syncChannel({channelId})).resolves.toMatchObject({
+    outbox: [
+      {
+        method: 'MessageQueued',
+        params: {
+          recipient: 'bob',
+          sender: 'alice',
+          data: {
+            signedStates: [runningState],
+            requests: [
+              {type: 'GetChannel', channelId},
+              {type: 'ProposeLedgerUpdate', channelId, outcome: serializeOutcome(proposal)},
+            ],
           },
         },
       },
