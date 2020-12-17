@@ -668,14 +668,16 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     externalPayouts,
   }: AssetOutcomeUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
-    externalPayouts.forEach(async payout => {
-      await this.store.updateTransferredOut(
-        channelId,
-        assetHolderAddress,
-        makeDestination(payout.destination),
-        payout.amount
-      );
-    });
+    await Promise.all(
+      externalPayouts.map(payout =>
+        this.store.updateTransferredOut(
+          channelId,
+          assetHolderAddress,
+          makeDestination(payout.destination),
+          payout.amount
+        )
+      )
+    );
 
     await this.takeActions([channelId], response);
 
