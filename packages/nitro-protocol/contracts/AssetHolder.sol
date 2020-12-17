@@ -129,7 +129,7 @@ contract AssetHolder is IAssetHolder {
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices,
-        Outcome.Guarantee memory guarantee
+        Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
     )
         public
         pure
