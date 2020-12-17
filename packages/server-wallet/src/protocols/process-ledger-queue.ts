@@ -75,9 +75,9 @@ export type ProtocolState = {
   channelsReturningFunds: ChannelState[];
 };
 
-type ProtocolStateWithCommits = ProtocolState & {
-  theirLedgerProposal: {proposal?: SimpleAllocation; nonce: number};
-  myLedgerProposal: {proposal?: SimpleAllocation; nonce: number};
+type ProtocolStateWithDefinedProposals = ProtocolState & {
+  theirLedgerProposal: {proposal: SimpleAllocation; nonce: number};
+  myLedgerProposal: {proposal: SimpleAllocation; nonce: number};
 };
 
 function removeChannelFromAllocation(
@@ -204,7 +204,7 @@ const exchangeSignedLedgerStates = ({
   theirLedgerProposal: {proposal: theirProposedOutcome},
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerUpdate | false => {
+}: ProtocolStateWithDefinedProposals): DismissLedgerProposals | SignLedgerUpdate | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
   const nextTurnNum = supported.turnNum + 1;
 
@@ -308,7 +308,7 @@ const markRequestsAsComplete = ({
 const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
   ps.channelsRequestingFunds.length + ps.channelsReturningFunds.length > 0;
 
-const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithCommits =>
+const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithDefinedProposals =>
   Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
 
 export const protocol: Protocol<ProtocolState> = (
