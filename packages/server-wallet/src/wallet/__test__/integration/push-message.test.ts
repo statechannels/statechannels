@@ -489,6 +489,7 @@ describe('ledger funded app scenarios', () => {
         channelNonce: someNonConflictingChannelNonce,
         vars: [
           stateWithHashSignedBy([alice(), bob()])({
+            appData: '0x00',
             appDefinition: '0x0000000000000000000000000000000000000000',
             channelNonce: someNonConflictingChannelNonce,
             turnNum: 4,
@@ -509,7 +510,7 @@ describe('ledger funded app scenarios', () => {
     // Construct expected ledger update state
     expectedUpdatedLedgerState = {
       ...ledger.latest,
-      turnNum: 6,
+      turnNum: 5,
       outcome: {
         type: 'SimpleAllocation' as const,
         assetHolderAddress: makeAddress('0x0000000000000000000000000000000000000000'),
@@ -706,7 +707,7 @@ describe('ledger funded app scenarios', () => {
 
     const expectedResolvedUpdatedLedgerState = {
       ...expectedUpdatedLedgerState,
-      turnNum: 6,
+      turnNum: 5,
     };
 
     expect(getSignedStateFor(ledger.channelId, outbox)).toMatchObject(
