@@ -330,7 +330,7 @@ export const getProcessLedgerQueueProtocolState = async (
   ledgerChannelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
-  const fundingChannel = await store.getChannel(ledgerChannelId, tx);
+  const fundingChannel = await store.getChannelState(ledgerChannelId, tx);
   const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
   const proposals = await store.getLedgerProposals(ledgerChannelId, tx);
   const [[mine], [theirs]] = _.partition(proposals, [
@@ -345,7 +345,9 @@ export const getProcessLedgerQueueProtocolState = async (
 
     channelsRequestingFunds: await Promise.all<ChannelState>(
       compose(
-        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+        map(({channelToBeFunded}: LedgerRequestType) =>
+          store.getChannelState(channelToBeFunded, tx)
+        ),
         filter(['status', 'pending']),
         filter(['type', 'fund'])
       )(ledgerRequests)
@@ -353,7 +355,9 @@ export const getProcessLedgerQueueProtocolState = async (
 
     channelsReturningFunds: await Promise.all<ChannelState>(
       compose(
-        map(({channelToBeFunded}: LedgerRequestType) => store.getChannel(channelToBeFunded, tx)),
+        map(({channelToBeFunded}: LedgerRequestType) =>
+          store.getChannelState(channelToBeFunded, tx)
+        ),
         filter(['status', 'pending']),
         filter(['type', 'defund'])
       )(ledgerRequests)

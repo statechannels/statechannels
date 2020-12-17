@@ -83,7 +83,7 @@ export class Store {
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
       this.lockApp = recordFunctionMetrics(this.lockApp);
       this.signState = recordFunctionMetrics(this.signState);
-      this.getChannel = recordFunctionMetrics(this.getChannel);
+      this.getChannelState = recordFunctionMetrics(this.getChannelState);
       this.getStates = recordFunctionMetrics(this.getStates);
       this.getChannels = recordFunctionMetrics(this.getChannels);
       this.ensureObjective = recordFunctionMetrics(this.ensureObjective);
@@ -248,7 +248,7 @@ export class Store {
     return result;
   }
 
-  async getChannel(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
+  async getChannelState(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
     // This is somewhat faster than Channel.forId for simply fetching a channel:
     // - the signingWallet isn't needed to construct the protocol state
     // - withGraphJoined is slightly faster in this case
@@ -377,7 +377,7 @@ export class Store {
     } = objective;
 
     // fetch the channel to make sure the channel exists
-    const channel = await this.getChannel(channelId, tx);
+    const channel = await this.getChannelState(channelId, tx);
     if (!channel) {
       throw new StoreError(StoreError.reasons.channelMissing, {channelId});
     }
@@ -429,7 +429,7 @@ export class Store {
     } = objective;
 
     // fetch the channel to make sure the channel exists
-    const channel = await this.getChannel(targetChannelId, tx);
+    const channel = await this.getChannelState(targetChannelId, tx);
     if (!channel)
       throw new StoreError(StoreError.reasons.channelMissing, {
         channelId: targetChannelId,
@@ -657,7 +657,7 @@ export class Store {
       const objective = await this.ensureObjective(objectiveParams, tx);
       await this.approveObjective(objective.objectiveId, tx);
 
-      return {channel: await this.getChannel(channelId, tx), firstSignedState, objective};
+      return {channel: await this.getChannelState(channelId, tx), firstSignedState, objective};
     });
   }
 

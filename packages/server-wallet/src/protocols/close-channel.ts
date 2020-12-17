@@ -253,7 +253,7 @@ export const getCloseChannelProtocolState = async (
   channelId: Bytes32,
   tx: Transaction
 ): Promise<ProtocolState> => {
-  const app = await store.getChannel(channelId, tx);
+  const app = await store.getChannelState(channelId, tx);
   switch (app.fundingStrategy) {
     case 'Direct':
     case 'Fake':

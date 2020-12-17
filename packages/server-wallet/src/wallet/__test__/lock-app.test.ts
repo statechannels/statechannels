@@ -93,7 +93,7 @@ describe('concurrency', () => {
     expect(numRejected).toEqual(numAttempts - 1);
     expect(numSettled).toEqual(numAttempts);
 
-    await expect(store.getChannel(channelId)).resolves.toMatchObject({
+    await expect(store.getChannelState(channelId)).resolves.toMatchObject({
       latest: {turnNum: 6},
     });
   });
@@ -135,7 +135,7 @@ describe('concurrency', () => {
 
       expect([numResolved, numRejected, numSettled]).toMatchObject([NUM_ATTEMPTS, 0, NUM_ATTEMPTS]);
 
-      await expect(store.getChannel(channels[1].channelId)).resolves.toMatchObject({
+      await expect(store.getChannelState(channels[1].channelId)).resolves.toMatchObject({
         latest: {turnNum: 6},
       });
     },
@@ -158,7 +158,7 @@ describe('concurrency', () => {
     expect(numRejected).toEqual(0);
     expect(numSettled).toEqual(NUM_ATTEMPTS);
 
-    await expect(store.getChannel(channelId)).resolves.toMatchObject({
+    await expect(store.getChannelState(channelId)).resolves.toMatchObject({
       latest: next(c.latest),
     });
   });
