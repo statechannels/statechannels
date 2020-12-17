@@ -1,7 +1,12 @@
 import {Contract, BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
-import {getTestProvider, setupContracts, randomExternalDestination} from '../../test-helpers';
+import {
+  getTestProvider,
+  setupContracts,
+  randomExternalDestination,
+  randomChannelId,
+} from '../../test-helpers';
 // eslint-disable-next-line import/order
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 
@@ -17,8 +22,11 @@ beforeAll(async () => {
   );
 });
 
-import {AllocationItem} from '../../../src';
-import {computeNewAllocation} from '../../../src/contract/asset-holder';
+import {AllocationItem, Guarantee} from '../../../src';
+import {
+  computeNewAllocation,
+  computeNewAllocationWithGuarantee,
+} from '../../../src/contract/asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
@@ -29,39 +37,50 @@ const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
     : [];
 };
 
-const heldBefore = BigNumber.from(100).toHexString();
-const allocation = randomAllocation(Math.floor(Math.random() * 20));
-const indices = shuffle([...Array(allocation.length).keys()]); // [0, 1, 2, 3,...] but shuffled
+const randomGuarantee = (allocation: AllocationItem[]): Guarantee => {
+  return {
+    targetChannelId: randomChannelId(),
+    destinations: shuffle(allocation.map(a => a.destination)),
+  };
+};
 
-describe('AsserHolder._computeNewAllocation', () => {
+const heldBefore = BigNumber.from(100).toHexString();
+const allocation = randomAllocation(Math.ceil(Math.random() * 20));
+const indices = shuffle([...Array(allocation.length).keys()]); // [0, 1, 2, 3,...] but shuffled
+const guarantee = randomGuarantee(allocation);
+
+describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
   it(`matches on chain method for input \n heldBefore: ${heldBefore}, \n allocation: ${JSON.stringify(
     allocation,
     null,
     2
-  )}, \n indices: ${indices}`, async () => {
+  )}, \n indices: ${indices}, \n guarantee: ${JSON.stringify(guarantee, null, 2)}`, async () => {
     // check local function works as expected
-    const locallyComputedNewAllocation = computeNewAllocation(heldBefore, allocation, indices);
-
-    const result = (await AssetHolder._computeNewAllocation(
+    const locallyComputedNewAllocation = computeNewAllocationWithGuarantee(
       heldBefore,
       allocation,
-      indices
+      indices,
+      guarantee
+    );
+
+    const result = (await AssetHolder._computeNewAllocationWithGuarantee(
+      BigNumber.from(heldBefore),
+      allocation,
+      indices,
+      guarantee
     )) as ReturnType<typeof computeNewAllocation>;
+
     expect(result).toBeDefined();
-    console.log(result);
     expect(result.newAllocation).toMatchObject(
       locallyComputedNewAllocation.newAllocation.map(a => ({
         ...a,
         amount: BigNumber.from(a.amount),
       }))
     );
-
     expect((result as any).safeToDelete).toEqual(locallyComputedNewAllocation.deleted);
-
+    expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
     expect(result.payouts).toMatchObject(
       locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))
     );
-
-    expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
   });
 });

@@ -8,7 +8,9 @@ import {
   AllocationAssetOutcome,
   AllocationItem,
   decodeAllocation,
+  decodeGuarantee,
   decodeOutcome,
+  Guarantee,
   isAllocationOutcome,
 } from './outcome';
 import {Address, Bytes32} from './types';
@@ -54,12 +56,88 @@ export function convertAddressToBytes32(address: string): string {
  * @param allocation
  * @param indices
  */
+export function computeNewAllocationWithGuarantee(
+  initialHoldings: string,
+  allocation: AllocationItem[], // we must index this with a JS number that is less than 2**32 - 1
+  indices: number[],
+  guarantee: Guarantee
+): {newAllocation: AllocationItem[]; deleted: boolean; payouts: string[]; totalPayouts: string} {
+  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocation.length).fill(
+    BigNumber.from(0).toHexString()
+  );
+  let totalPayouts = BigNumber.from(0);
+  let safeToDelete = true;
+  let surplus = BigNumber.from(initialHoldings);
+  let k = 0;
+
+  // copy allocation
+  const newAllocation: AllocationItem[] = [];
+  for (let i = 0; i < allocation.length; i++) {
+    newAllocation.push({
+      destination: allocation[i].destination,
+      amount: allocation[i].amount,
+    });
+  }
+
+  // for each guarantee destination
+  for (let j = 0; j < guarantee.destinations.length; j++) {
+    if (surplus.isZero()) break;
+    for (let i = 0; i < newAllocation.length; i++) {
+      if (surplus.isZero()) break;
+      // search for it in the allocation
+      if (
+        BigNumber.from(guarantee.destinations[j]).eq(BigNumber.from(newAllocation[i].destination))
+      ) {
+        // if we find it, compute new amount
+        const affordsForDestination = min(BigNumber.from(newAllocation[i].amount), surplus);
+        // decrease surplus by the current amount regardless of hitting a specified index
+        surplus = surplus.sub(affordsForDestination);
+        if (indices.length === 0 || (k < indices.length && indices[k] === i)) {
+          // only if specified in supplied indices, or we if we are doing "all"
+          // reduce the current allocationItem.amount
+          newAllocation[i].amount = BigNumber.from(newAllocation[i].amount)
+            .sub(affordsForDestination)
+            .toHexString();
+          // increase the relevant payout
+          payouts[k] = affordsForDestination.toHexString();
+          totalPayouts = totalPayouts.add(affordsForDestination);
+          ++k;
+        }
+        break;
+      }
+    }
+  }
+
+  for (let i = 0; i < allocation.length; i++) {
+    if (!BigNumber.from(newAllocation[i].amount).isZero()) {
+      safeToDelete = false;
+      break;
+    }
+  }
+
+  return {
+    newAllocation,
+    deleted: safeToDelete,
+    payouts,
+    totalPayouts: totalPayouts.toHexString(),
+  };
+}
+
+/**
+ *
+ * Emulates solidity code. TODO replace with PureEVM implementation?
+ * @param initialHoldings
+ * @param allocation
+ * @param indices
+ */
 export function computeNewAllocation(
   initialHoldings: string,
   allocation: AllocationItem[], // we must index this with a JS number that is less than 2**32 - 1
   indices: number[]
 ): {newAllocation: AllocationItem[]; deleted: boolean; payouts: string[]; totalPayouts: string} {
-  const payouts: string[] = Array(indices.length).fill(BigNumber.from(0).toHexString());
+  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocation.length).fill(
+    BigNumber.from(0).toHexString()
+  );
   let totalPayouts = BigNumber.from(0);
   const newAllocation: AllocationItem[] = [];
   let safeToDelete = true;
@@ -115,19 +193,21 @@ export function computeNewAssetOutcome(
   internalPayouts: AllocationItem[];
 } {
   // Extract the calldata that we need
-  const {oldAllocation, indices} = extractOldAllocationAndIndices(
+  const {oldAllocation, indices, guarantee} = extractOldAllocationAndIndices(
     assetHolderAddress,
     nitroAdjudicatorAddress,
     tx
   );
 
-  // Use the emulated, pure solidity function to figure out what the chain will have done
-  // TODO switch on contract method to computeNewAllocationWithGuarantee when doing a claim
-  const {newAllocation, deleted, payouts, totalPayouts} = computeNewAllocation(
-    allocationUpdatedEvent.initialHoldings,
-    oldAllocation,
-    indices
-  );
+  // Use the emulated, pure solidity functions to figure out what the chain will have done
+  const {newAllocation, deleted, payouts, totalPayouts} = guarantee
+    ? computeNewAllocationWithGuarantee(
+        allocationUpdatedEvent.initialHoldings,
+        oldAllocation,
+        indices,
+        guarantee
+      ) // if guarantee is defined, then we know that claim was called
+    : computeNewAllocation(allocationUpdatedEvent.initialHoldings, oldAllocation, indices);
 
   // Massage the output for convenience
   const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
@@ -174,9 +254,11 @@ function extractOldAllocationAndIndices(
 ): {
   oldAllocation: AllocationItem[];
   indices: number[];
+  guarantee: Guarantee | undefined;
 } {
   let oldAllocation;
   let indices = [];
+  let guarantee: Guarantee | undefined = undefined;
   // First, deduce which contract the tx targeted:
 
   if (tx.to === assetHolderAddress) {
@@ -190,6 +272,9 @@ function extractOldAllocationAndIndices(
     // all methods (transfer, transferAll, claim, claimAll)
     // have a parameter allocationBytes:
     oldAllocation = decodeAllocation(txDescription.args.allocationBytes);
+    if (txDescription.name === 'claim') {
+      guarantee = decodeGuarantee(txDescription.args.guarantee);
+    }
     indices =
       txDescription.name === 'transfer' || txDescription.name == 'claim'
         ? txDescription.args.indices
@@ -217,7 +302,7 @@ function extractOldAllocationAndIndices(
   } else
     throw Error('transaction did not originate from either of the supplied contract addresses');
 
-  return {oldAllocation, indices};
+  return {oldAllocation, indices, guarantee};
 }
 function min(a: BigNumber, b: BigNumber) {
   return a.gt(b) ? b : a;
