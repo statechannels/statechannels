@@ -259,7 +259,8 @@ describe('exchanging signed ledger state updates', () => {
       const fundingChannel = channel({
         vars: [
           stateSignedBy([aliceSW()])({
-            turnNum: 5,
+            appData: '0x00',
+            turnNum: 4,
             outcome: proposal,
           }),
           defaultLedgerChannel.latest,
@@ -288,7 +289,7 @@ describe('exchanging signed ledger state updates', () => {
         channelId: protocolArgs.fundingChannel.channelId,
         stateToSign: {
           outcome: proposal,
-          turnNum: 5,
+          turnNum: 4,
         },
       });
     });
@@ -329,7 +330,7 @@ describe('exchanging signed ledger state updates', () => {
         channelId: protocolArgs.fundingChannel.channelId,
         stateToSign: {
           outcome: expectedMerged,
-          turnNum: 5,
+          turnNum: 4,
         },
       });
     });
@@ -360,7 +361,7 @@ describe('exchanging signed ledger state updates', () => {
       const fundingChannel = channel({
         vars: [
           stateSignedBy([bobSW()])({
-            turnNum: 5,
+            turnNum: 4,
             outcome: unexpectedOutcome,
           }),
           defaultLedgerChannel.latest,

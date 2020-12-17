@@ -199,22 +199,17 @@ const mergeProposedLedgerUpdates = (
 };
 
 const exchangeSignedLedgerStates = ({
-  fundingChannel: {
-    supported,
-    latestSignedByMe,
-    latest,
-    channelId,
-    participants: {length: n},
-  },
+  fundingChannel: {supported, latestSignedByMe, latest, channelId},
   myLedgerProposal: {proposal: myProposedOutcome},
   theirLedgerProposal: {proposal: theirProposedOutcome},
   channelsRequestingFunds,
   channelsReturningFunds,
 }: ProtocolStateWithCommits): DismissLedgerProposals | SignLedgerUpdate | false => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+  const nextTurnNum = supported.turnNum + 1;
 
   // Already signed something and waiting for reply
-  if (latestSignedByMe.turnNum === supported.turnNum + n) return false;
+  if (latestSignedByMe.turnNum === nextTurnNum) return false;
 
   const outcome = _.isEqual(theirProposedOutcome, myProposedOutcome)
     ? myProposedOutcome
@@ -226,7 +221,7 @@ const exchangeSignedLedgerStates = ({
         channelsReturningFunds
       ).outcome;
 
-  const receivedReveal = latest.turnNum === supported.turnNum + n;
+  const receivedReveal = latest.turnNum === nextTurnNum;
   if (receivedReveal && !_.isEqual(outcome, latest.outcome))
     // TODO: signals a corrupt / broken counterparty wallet, what do we want to do here?
     throw new Error('received a signed reveal that is _not_ what we agreed on :/');
@@ -240,9 +235,10 @@ const exchangeSignedLedgerStates = ({
         type: 'SignLedgerUpdate',
         channelId,
         stateToSign: {
-          ...supported,
+          turnNum: nextTurnNum,
           outcome,
-          turnNum: supported.turnNum + n,
+          appData: '0x00',
+          isFinal: false,
         },
       };
 };
