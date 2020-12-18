@@ -44,12 +44,13 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 
 let chainService: ChainService;
 let channelNonce = 0;
-async function mineBlock(timestamp: number) {
-  await provider.send('evm_mine', [timestamp]);
+async function mineBlock(timestamp?: number) {
+  const param = timestamp ? [timestamp] : [];
+  await provider.send('evm_mine', param);
 }
 async function mineBlocks() {
   for (const _i in _.range(5)) {
-    await provider.send('evm_mine', []);
+    await mineBlock();
   }
 }
 
@@ -71,9 +72,19 @@ const testAdjudicator = new Contract(
   nitroAdjudicatorAddress,
   TestContractArtifacts.TestNitroAdjudicatorArtifact.abi,
   // We use a separate signer address to avoid nonce issues
-  // eslint-disable-next-line no-process-env
   new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)
 );
+const ethHolder = new Contract(
+  ethAssetHolderAddress,
+  ContractArtifacts.EthAssetHolderArtifact.abi,
+  provider
+);
+const erc20Holder = new Contract(
+  erc20AssetHolderAddress,
+  ContractArtifacts.Erc20AssetHolderArtifact.abi,
+  provider
+);
+
 beforeAll(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
@@ -87,17 +98,7 @@ beforeAll(async () => {
   });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 
-  const ethHolder = new Contract(
-    ethAssetHolderAddress,
-    ContractArtifacts.EthAssetHolderArtifact.abi,
-    provider
-  );
   mineOnEvent(ethHolder);
-  const erc20Holder = new Contract(
-    erc20AssetHolderAddress,
-    ContractArtifacts.Erc20AssetHolderArtifact.abi,
-    provider
-  );
   mineOnEvent(erc20Holder);
 });
 
@@ -203,45 +204,11 @@ describe('fundChannel', () => {
     const channelId = randomChannelId();
 
     await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
-    const contract: Contract = new Contract(
-      erc20AssetHolderAddress,
-      ContractArtifacts.Erc20AssetHolderArtifact.abi,
-      provider
-    );
-    expect(await contract.holdings(channelId)).toEqual(BigNumber.from(5));
+    expect(await erc20Holder.holdings(channelId)).toEqual(BigNumber.from(5));
   });
 });
 
 describe('registerChannel', () => {
-  it('dispatches a channel finalized event if the channel has been finalized BEFORE registering', async () => {
-    const channelId = randomChannelId();
-    const CHALLENGE_EXPIRE_TIME = 2_000_000_000;
-    const FUTURE_TIME = 2_000_500_000;
-
-    const tx = await testAdjudicator.functions.setChannelStorageHash(
-      channelId,
-      channelDataToChannelStorageHash({
-        turnNumRecord: 0,
-        finalizesAt: CHALLENGE_EXPIRE_TIME,
-      })
-    );
-    await tx.wait();
-    const channelFinalizedHandler = jest.fn();
-    const channelFinalizedPromise = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
-        assetOutcomeUpdated: _.noop,
-        channelFinalized: arg => {
-          channelFinalizedHandler(arg);
-          resolve();
-        },
-      })
-    );
-    await mineBlock(FUTURE_TIME);
-    await channelFinalizedPromise;
-    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
-  });
-
   it('registers a channel in the finalizing channel list and fires an event when that channel is finalized', async () => {
     const channelId = randomChannelId();
     // We use large values so we don't have to worry about ganache
@@ -272,11 +239,6 @@ describe('registerChannel', () => {
     );
 
     await mineBlock(CURRENT_TIME);
-    // Wait a second to ensure that the channel finalized handler does not get triggered erroneously
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // TODO: Currently due to ganache mining blocks outside of our control we can't assert on this
-    // expect(channelFinalizedHandler).not.toHaveBeenCalled();
 
     await mineBlock(FUTURE_TIME);
     await channelFinalizedPromise;
