@@ -52,11 +52,6 @@ async function mineBlocks() {
   }
 }
 
-function mineOnEvent(contract: Contract) {
-  contract.on('Deposited', mineBlocks);
-  contract.on('AllocationUpdated', mineBlocks);
-}
-
 jest.setTimeout(20_000);
 // The test nitro adjudicator allows us to set channel storage
 const testAdjudicator = new Contract(
@@ -65,11 +60,7 @@ const testAdjudicator = new Contract(
   // We use a separate signer address to avoid nonce issues
   new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)
 );
-const ethHolder = new Contract(
-  ethAssetHolderAddress,
-  ContractArtifacts.EthAssetHolderArtifact.abi,
-  provider
-);
+
 const erc20Holder = new Contract(
   erc20AssetHolderAddress,
   ContractArtifacts.Erc20AssetHolderArtifact.abi,
@@ -88,9 +79,6 @@ beforeAll(async () => {
     allowanceMode: 'MaxUint',
   });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
-
-  mineOnEvent(ethHolder);
-  mineOnEvent(erc20Holder);
 });
 
 afterAll(() => {
@@ -119,6 +107,23 @@ function fundChannel(
     amount: BN.from(amount),
   });
   return {channelId, request};
+}
+
+function fundChannelAndMineBlocks(
+  expectedHeld: number,
+  amount: number,
+  channelId: string = randomChannelId(),
+  assetHolderAddress: Address = ethAssetHolderAddress
+): {
+  channelId: string;
+  request: Promise<providers.TransactionResponse>;
+} {
+  const retVal = fundChannel(expectedHeld, amount, channelId, assetHolderAddress);
+  retVal.request.then(async response => {
+    await response.wait();
+    mineBlocks();
+  });
+  return retVal;
 }
 
 async function waitForChannelFunding(
@@ -248,7 +253,7 @@ describe('registerChannel', () => {
           });
           counter++;
           fundChannel(0, 5, wrongChannelId);
-          fundChannel(0, 5, channelId);
+          fundChannelAndMineBlocks(0, 5, channelId);
           break;
         case 1:
           expect(arg).toMatchObject({
@@ -324,8 +329,8 @@ describe('registerChannel', () => {
       assetOutcomeUpdated: _.noop,
       channelFinalized: _.noop,
     });
-    fundChannel(0, 5, channelId, ethAssetHolderAddress);
-    fundChannel(0, 5, channelId, erc20AssetHolderAddress);
+    fundChannelAndMineBlocks(0, 5, channelId, ethAssetHolderAddress);
+    fundChannelAndMineBlocks(0, 5, channelId, erc20AssetHolderAddress);
     await p;
   });
 });
@@ -369,6 +374,7 @@ describe('concludeAndWithdraw', () => {
 
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
+    mineBlocks();
     await p;
   });
 
@@ -416,6 +422,7 @@ describe('concludeAndWithdraw', () => {
     expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));
     expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
 
+    mineBlocks();
     await p;
   });
 });
