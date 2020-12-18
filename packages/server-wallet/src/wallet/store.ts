@@ -164,7 +164,7 @@ export class Store {
     });
   }
 
-  async transaction<T>(callback: (tx: Transaction) => T): Promise<T> {
+  async transaction<T>(callback: (tx: Transaction) => Promise<T>): Promise<T> {
     return this.knex.transaction(async tx => callback(tx));
   }
 
@@ -173,7 +173,10 @@ export class Store {
     vars: StateVariables,
     tx: Transaction // Insist on a transaction since addSignedState requires it
   ): Promise<SignedState> {
-    if (!channel.signingWallet) {
+    const signingWallet =
+      channel.signingWallet || (await channel.$relatedQuery('signingWallet', tx).first());
+
+    if (!signingWallet) {
       throw new Error('No signing wallets');
     }
     const timer = timerFactory(this.timingMetrics, `signState ${channel.channelId}`);
@@ -186,9 +189,7 @@ export class Store {
       // Don't sign a new state with lower turnNum than already signed by you
       throw new StoreError(StoreError.reasons.staleState);
 
-    const signatureEntry = await timer('signing', async () =>
-      channel.signingWallet.signState(state)
-    );
+    const signatureEntry = await timer('signing', async () => signingWallet.signState(state));
     const signedState = {...state, signatures: [signatureEntry]};
 
     if (supported && shouldValidateTransition(state, channel)) {
