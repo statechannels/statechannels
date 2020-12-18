@@ -47,7 +47,7 @@ async function mineBlock(timestamp?: number) {
   await provider.send('evm_mine', param);
 }
 async function mineBlocks() {
-  for (const _i in _.range(5)) {
+  for (const _i of _.range(5)) {
     await mineBlock();
   }
 }
