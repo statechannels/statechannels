@@ -50,6 +50,7 @@ import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
+import {ChainServiceRequest} from '../models/chain-service-request';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -696,6 +697,26 @@ export class Store {
 
   async nextNonce(signingAddresses: Address[]): Promise<number> {
     return await Nonce.next(this.knex, signingAddresses);
+  }
+
+  async fundingRequestExists(channelId: string, tx: Transaction): Promise<boolean> {
+    const request = await ChainServiceRequest.query(tx)
+      .where({channelId, request: 'fund'})
+      .first();
+
+    return !!request && request.isValid();
+  }
+
+  async getFunding(
+    channelId: string,
+    assetHolder: Address,
+    tx: Transaction
+  ): Promise<Funding | undefined> {
+    const funding = Funding.query(tx)
+      .where({channelId, assetHolder})
+      .first();
+
+    return funding;
   }
 
   dbAdmin(): DBAdmin {
