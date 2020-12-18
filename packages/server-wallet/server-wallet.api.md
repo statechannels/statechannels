@@ -231,20 +231,14 @@ export function validateServerWalletConfig(config: Record<string, any>): {
 };
 
 // Warning: (ae-forgotten-export) The symbol "SingleThreadedWallet" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "MultiThreadedWallet" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
-
-// @public (undocumented)
-export const Wallet: {
-    create(walletConfig: IncomingServerWalletConfig): Wallet;
-};
-
-// Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type WalletEvent = ChannelUpdatedEvent;
+export abstract class Wallet extends SingleThreadedWallet {
+    // Warning: (ae-forgotten-export) The symbol "MultiThreadedWallet" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet | MultiThreadedWallet;
+}
 
 
 // (No @packageDocumentation comment for this package)
