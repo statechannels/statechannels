@@ -211,17 +211,13 @@ describe('fundChannel', () => {
 describe('registerChannel', () => {
   it('registers a channel in the finalizing channel list and fires an event when that channel is finalized', async () => {
     const channelId = randomChannelId();
-    // We use large values so we don't have to worry about ganache
-    // mining a block with the current timestamp setting off the expiry
-    const CURRENT_TIME = 2_000_000_000;
-    const CHALLENGE_EXPIRE_TIME = 2_000_400_000;
-    const FUTURE_TIME = 2_000_800_000;
+    const currentTime = (await provider.getBlock(provider.getBlockNumber())).timestamp;
 
     const tx = await testAdjudicator.setChannelStorageHash(
       channelId,
       channelDataToChannelStorageHash({
         turnNumRecord: 0,
-        finalizesAt: CHALLENGE_EXPIRE_TIME,
+        finalizesAt: currentTime + 2,
       })
     );
     await tx.wait();
@@ -238,9 +234,8 @@ describe('registerChannel', () => {
       })
     );
 
-    await mineBlock(CURRENT_TIME);
-
-    await mineBlock(FUTURE_TIME);
+    await mineBlock(currentTime + 1);
+    await mineBlock(currentTime + 2);
     await channelFinalizedPromise;
     expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
   });
