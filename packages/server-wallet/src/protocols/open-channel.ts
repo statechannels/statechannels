@@ -32,15 +32,16 @@ export class ChannelOpener {
   public async crank(objective: DBOpenChannelObjective, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
-    this.store.transaction(async tx => {
+    await this.store.transaction(async tx => {
       const channel = await this.store.getLockedChannel(channelToLock, tx);
 
-      if (!channel) throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
+      if (!channel) {
+        throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
+      }
 
       // if we haven't signed the pre-fund, sign it
       if (!channel.prefundSigned) {
-        const signedState = await this.store.signState(channel, channel.latest, tx);
-        response.queueState(signedState, channel.myIndex, channel.channelId);
+        await this.signPrefundSetup(channel, response, tx);
       }
 
       // if we don't have a supported preFundSetup, we're done for now
@@ -54,8 +55,7 @@ export class ChannelOpener {
 
       // if the channel is funded and I haven't signed the post-fund, sign it
       if (funded && !channel.postfundSigned) {
-        const signedState = await this.store.signState(channel, channel.latest, tx);
-        response.queueState(signedState, channel.myIndex, channel.channelId);
+        await this.signPostfundSetup(channel, response, tx);
       }
 
       if (channel.postfundSupported) {
@@ -96,5 +96,27 @@ export class ChannelOpener {
 
   private get ledgerFunder(): LedgerFunder {
     return LedgerFunder.create(this.store, this.chainService, this.logger, this.timingMetrics);
+  }
+
+  private async signPrefundSetup(
+    channel: Channel,
+    response: WalletResponse,
+    tx: Transaction
+  ): Promise<void> {
+    // TODO: should probably have more checking around the form of channel.latest
+    const postfund = {...channel.latest, turnNum: 0};
+    const signedState = await this.store.signState(channel, postfund, tx);
+    response.queueState(signedState, channel.myIndex, channel.channelId);
+  }
+
+  private async signPostfundSetup(
+    channel: Channel,
+    response: WalletResponse,
+    tx: Transaction
+  ): Promise<void> {
+    // TODO: should probably have more checking around the form of channel.latest
+    const postfund = {...channel.latest, turnNum: channel.nParticipants * 2 - 1};
+    const signedState = await this.store.signState(channel, postfund, tx);
+    response.queueState(signedState, channel.myIndex, channel.channelId);
   }
 }

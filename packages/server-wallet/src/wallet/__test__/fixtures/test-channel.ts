@@ -79,12 +79,23 @@ export class TestChannel {
    * be the turnNum
    */
   public state(n: number, bals?: [number, number]): State {
+    if (n < 2) {
+      // in prefund setup, everyone signs state 0
+      n = 0;
+    } else if (n < 4) {
+      // postfund setup, everyone signs state 3
+      n = 3;
+    } else if (this.finalFrom && n > this.finalFrom) {
+      // when finalizing, everyone signs the final state
+      n = this.finalFrom;
+    }
+
     return {
       ...this.channelConstants,
       appData: '0x',
       isFinal: !!this.finalFrom && n >= this.finalFrom,
       // test channels adopt a countersigning strategy for final states, so the turn number doesn't progress after finalFrom.
-      turnNum: Math.min(n, this.finalFrom || n),
+      turnNum: n,
       outcome: bals ? this.toOutcome(bals) : this.startOutcome,
     };
   }
