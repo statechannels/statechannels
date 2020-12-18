@@ -4,7 +4,7 @@ import {ChannelResult} from '@statechannels/client-api-schema';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {Outgoing} from '../protocols/actions';
-import {WalletEvent} from '../wallet';
+import {WalletEvent} from '../wallet/types';
 
 export interface ObjectiveManagerParams {
   store: Store;

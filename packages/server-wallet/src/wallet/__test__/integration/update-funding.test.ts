@@ -155,3 +155,46 @@ it('sends the post fund setup when the funding event is provided', async () => {
     channelResults: [{channelId: c.channelId, turnNum: 2}],
   });
 });
+
+it('emits new channel result when the funding event is provided via holdingUpdated', async () => {
+  const c = channel({
+    vars: [
+      stateWithHashSignedBy([alice()])({turnNum: 0}),
+      stateWithHashSignedBy([bob()])({turnNum: 1}),
+    ],
+  });
+  await Channel.query(w.knex).insert(c);
+  const {channelId} = c;
+
+  await ObjectiveModel.insert(
+    {
+      type: 'OpenChannel',
+      participants: c.participants,
+      data: {
+        targetChannelId: c.channelId,
+        fundingStrategy: 'Direct',
+        role: 'app',
+      },
+      status: 'approved',
+    },
+    w.knex
+  );
+
+  const channelUpdatedPromise = new Promise(resolve =>
+    w.on('channelUpdated', ({channelResult}) =>
+      channelResult.channelId === channelId ? resolve(channelResult) : undefined
+    )
+  );
+
+  await w.holdingUpdated({
+    channelId: c.channelId,
+    assetHolderAddress: makeAddress(constants.AddressZero),
+    amount: BN.from(4),
+  });
+
+  const channelResult = await channelUpdatedPromise;
+
+  await expect(Funding.getFundingAmount(w.knex, channelId, AddressZero)).resolves.toEqual('0x04');
+
+  expect(channelResult).toMatchObject({channelId: c.channelId, turnNum: 2});
+});
