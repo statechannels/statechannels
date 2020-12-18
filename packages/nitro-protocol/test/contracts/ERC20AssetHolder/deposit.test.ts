@@ -51,8 +51,8 @@ describe('deposit', () => {
     description     | held | expectedHeld | amount | heldAfter | reasonString
     ${description0} | ${0} | ${0}         | ${1}   | ${1}      | ${undefined}
     ${description1} | ${1} | ${1}         | ${1}   | ${2}      | ${undefined}
-    ${description2} | ${0} | ${1}         | ${2}   | ${0}      | ${'Deposit | holdings[destination] is less than expected'}
-    ${description3} | ${3} | ${1}         | ${1}   | ${3}      | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description2} | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
+    ${description3} | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
     ${description4} | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
   `('$description', async ({description, held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = BigNumber.from(held);

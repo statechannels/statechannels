@@ -20,24 +20,12 @@ export function requireValidProtocolTransition(fromState: State, toState: State)
 
   // directly ported checks:
   if (toState.isFinal) {
-    _require(
-      isEqual(toState.outcome, fromState.outcome),
-      'InvalidTransitionError: Cannot move to a final state with a different default outcome'
-    );
+    _require(isEqual(toState.outcome, fromState.outcome), 'Outcome change forbidden');
   } else {
-    _require(
-      !fromState.isFinal,
-      'InvalidTransitionError: Cannot move from a final state to a non final state'
-    );
+    _require(!fromState.isFinal, 'isFinal retrograde');
     if (toState.turnNum < 2 * toState.channel.participants.length) {
-      _require(
-        isEqual(toState.outcome, fromState.outcome),
-        'InvalidTransitionError: Cannot change the default outcome during setup phase'
-      );
-      _require(
-        toState.appData == fromState.appData,
-        'InvalidTransitionError: Cannot change the appData during setup phase'
-      );
+      _require(isEqual(toState.outcome, fromState.outcome), 'Outcome change forbidden');
+      _require(toState.appData == fromState.appData, 'appData change forbidden');
     } else {
       return Status.NeedToCheckApp;
     }

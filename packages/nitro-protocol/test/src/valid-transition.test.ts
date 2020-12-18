@@ -46,19 +46,19 @@ const changedAConstantCases: TestCaseWithError[] = [
 ];
 //prettier-ignore
 const changedOutcomeWhenToIsFinal: TestCaseWithError[] = [
-    [/Cannot move to a final state with a different default outcome/, {}, { isFinal:true, outcome: []}],
+    [/Outcome change forbidden/, {}, { isFinal:true, outcome: []}],
 ]
 //prettier-ignore
 const fromFinalToNotFinal: TestCaseWithError[] = [
-    [/Cannot move from a final state to a non final state/, {isFinal:true}, {}],
+    [/isFinal retrograde/, {isFinal:true}, {}],
 ]
 //prettier-ignore
 const changedOutcomeDuringSetup: TestCaseWithError[] = [
-    [/Cannot change the default outcome during setup phase/, {turnNum:1}, { turnNum:2, outcome:[]}, ],
+    [/Outcome change forbidden/, {turnNum:1}, { turnNum:2, outcome:[]}, ],
 ]
 //prettier-ignore
 const changedAppDataDuringSetup: TestCaseWithError[] = [
-    [/Cannot change the appData during setup phase/, {turnNum:1}, { turnNum:2, appData:'0x02'}],
+    [/appData change forbidden/, {turnNum:1}, { turnNum:2, appData:'0x02'}],
 ]
 //prettier-ignore
 const commonCase: TestCase[] = [

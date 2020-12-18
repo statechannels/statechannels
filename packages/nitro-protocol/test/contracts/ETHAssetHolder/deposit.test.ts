@@ -44,8 +44,8 @@ describe('deposit', () => {
   it.each`
     description     | held   | expectedHeld | amount | msgValue | heldAfterString | reasonString
     ${description0} | ${'0'} | ${'0'}       | ${'1'} | ${'1'}   | ${'1'}          | ${undefined}
-    ${description1} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}          | ${'Deposit | holdings[destination] is less than expected'}
-    ${description2} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}          | ${'Deposit | holdings[destination] already meets or exceeds expectedHeld + amount'}
+    ${description1} | ${'0'} | ${'1'}       | ${'2'} | ${'2'}   | ${'0'}          | ${'holdings < expectedHeld'}
+    ${description2} | ${'3'} | ${'1'}       | ${'1'} | ${'1'}   | ${'3'}          | ${'holdings already sufficient'}
     ${description3} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}          | ${undefined}
   `(
     '$description',

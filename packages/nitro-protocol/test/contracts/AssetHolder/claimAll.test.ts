@@ -39,10 +39,8 @@ beforeAll(async () => {
   );
 });
 
-const reason5 =
-  'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash';
-const reason6 =
-  'AssetHolder | submitted guaranteeBytes data does not match stored assetOutcomeHash';
+const reason5 = 'h(allocation)!=assetOutcomeHash';
+const reason6 = 'h(guarantee)!=assetOutcomeHash';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)

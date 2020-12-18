@@ -164,12 +164,9 @@ describe('pushOutcome', () => {
 
       // Call method in a slightly different way if expecting a revert
       if (reasonString) {
-        const regex = new RegExp(
-          '(' + 'VM Exception while processing transaction: revert ' + reasonString + ')'
-        );
         await expectRevert(
           () => sendTransaction(provider, TestNitroAdjudicator.address, transactionRequest),
-          regex
+          reasonString
         );
       } else {
         const receipt = await sendTransaction(
