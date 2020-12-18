@@ -243,7 +243,7 @@ describe('registerChannel', () => {
     let resolve: (value: unknown) => void;
     const p = new Promise(r => (resolve = r));
 
-    const holdingUpdated = (arg: HoldingUpdatedArg): void => {
+    const holdingUpdated = async (arg: HoldingUpdatedArg): Promise<void> => {
       switch (counter) {
         case 0:
           expect(arg).toMatchObject({
@@ -252,7 +252,10 @@ describe('registerChannel', () => {
             amount: BN.from(0),
           });
           counter++;
-          fundChannel(0, 5, wrongChannelId);
+          // wait for the transaction to be mined.
+          // Otherwise, it is possibleble for the correct channel funding transaction to be mined first.
+          // In which case, this test might pass even if the holdingUpdated callback is fired for the wrongChannelId.
+          await (await fundChannel(0, 5, wrongChannelId).request).wait();
           fundChannelAndMineBlocks(0, 5, channelId);
           break;
         case 1:
