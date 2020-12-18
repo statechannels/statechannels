@@ -374,7 +374,7 @@ export class Channel extends Model implements RequiredColumns {
    * Have we signed a postfund state (or later)
    */
   public get postfundSigned(): boolean {
-    return !!this.latestSignedByMe && this.latestSignedByMe.turnNum >= 2 * this.nParticipants() - 1;
+    return !!this.latestSignedByMe && this.latestSignedByMe.turnNum >= 2 * this.nParticipants - 1;
   }
 
   /**
@@ -389,7 +389,7 @@ export class Channel extends Model implements RequiredColumns {
    * Is a postfund state (or later) supported
    */
   public get postfundSupported(): boolean {
-    return !!this.supported && this.supported.turnNum >= 2 * this.nParticipants() - 1;
+    return !!this.supported && this.supported.turnNum >= 2 * this.nParticipants - 1;
   }
 
   public get isDirectFunded(): boolean {
@@ -400,7 +400,7 @@ export class Channel extends Model implements RequiredColumns {
     return signatures.some(sig => sig.signer === this.myAddress);
   }
 
-  private nParticipants(): number {
+  get nParticipants(): number {
     return this.participants.length;
   }
 
@@ -417,7 +417,7 @@ export class Channel extends Model implements RequiredColumns {
         support = [];
         participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
       }
-      const moverIndex = signedState.turnNum % this.nParticipants();
+      const moverIndex = signedState.turnNum % this.nParticipants;
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
       // If the mover hasn't signed the state then we know it cannot be part of the support
@@ -445,7 +445,7 @@ export class Channel extends Model implements RequiredColumns {
     if (secondState.isFinal) {
       return outcomesEqual(firstState.outcome, secondState.outcome);
     }
-    if (secondState.turnNum < 2 * this.nParticipants()) {
+    if (secondState.turnNum < 2 * this.nParticipants) {
       return (
         outcomesEqual(firstState.outcome, secondState.outcome) &&
         firstState.appData === secondState.appData
