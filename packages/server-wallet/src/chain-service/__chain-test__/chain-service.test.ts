@@ -1,5 +1,3 @@
-import {setTimeout} from 'timers';
-
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {
   channelDataToChannelStorageHash,
@@ -57,13 +55,6 @@ async function mineBlocks() {
 function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocks);
   contract.on('AllocationUpdated', mineBlocks);
-}
-
-async function mineBlockPeriodically(blocks: number) {
-  for (const _i in _.range(blocks)) {
-    await provider.send('evm_mine', []);
-    await new Promise(r => setTimeout(r, 100));
-  }
 }
 
 jest.setTimeout(20_000);
@@ -438,13 +429,19 @@ describe('challenge', () => {
     const channelNonces = [0, 1].map(getChannelNonce);
 
     const outcome = simpleEthAllocation([
-      {destination: aDestintination, amount: BN.from(1)},
-      {destination: bDestintination, amount: BN.from(3)},
+      {
+        destination: aDestintination,
+        amount: BN.from(1),
+      },
+      {
+        destination: bDestintination,
+        amount: BN.from(3),
+      },
     ]);
     const state0s = channelNonces.map((channelNonce, index) =>
       stateSignedBy()({
         chainId,
-        challengeDuration: index + 1,
+        challengeDuration: index + 2,
         outcome,
         channelNonce,
       })
@@ -453,7 +450,7 @@ describe('challenge', () => {
       stateSignedBy([bWallet()])({
         chainId,
         turnNum: 1,
-        challengeDuration: index + 1,
+        challengeDuration: index + 2,
         outcome,
         channelNonce: channelNonce,
       })
@@ -482,7 +479,16 @@ describe('challenge', () => {
 
     await (await chainService.challenge([state0s[0], state1s[0]], aWallet().privateKey)).wait();
     await (await chainService.challenge([state0s[1], state1s[1]], aWallet().privateKey)).wait();
-    await mineBlockPeriodically(20);
+
+    const currentTime = (await provider.getBlock(provider.getBlockNumber())).timestamp;
+    // The longest challenge duration is 3 seconds.
+    // Lets mine a few blocks up to challenge expiration
+    const blockDeltas = _.range(0, 3.5, 0.5).map(Math.floor);
+    for (const blockDelta of blockDeltas) {
+      await mineBlock(currentTime + blockDelta);
+    }
+
+    //await mineBlockPeriodically(20);
     await Promise.all(channelsFinalized);
     await Promise.all(
       state1s.map(
