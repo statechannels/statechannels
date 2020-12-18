@@ -73,7 +73,7 @@ describe('respond', () => {
     ${description2} | ${past}     | ${false}  | ${[false, false]} | ${8}          | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${NO_ONGOING_CHALLENGE}
     ${description3} | ${future}   | ${true}   | ${[false, false]} | ${8}          | ${[0, 1]} | ${wallets[2]} | ${wallets[0]}     | ${WRONG_CHANNEL_STORAGE}
     ${description4} | ${future}   | ${false}  | ${[false, false]} | ${8}          | ${[0, 1]} | ${wallets[2]} | ${nonParticipant} | ${RESPONSE_UNAUTHORIZED}
-    ${description5} | ${future}   | ${false}  | ${[false, false]} | ${8}          | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'CountingApp: Counter must be incremented'}
+    ${description5} | ${future}   | ${false}  | ${[false, false]} | ${8}          | ${[0, 0]} | ${wallets[2]} | ${wallets[0]}     | ${'Counter must be incremented'}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({

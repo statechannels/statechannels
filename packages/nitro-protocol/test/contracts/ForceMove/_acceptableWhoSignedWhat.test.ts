@@ -52,7 +52,7 @@ describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
 describe('_acceptableWhoSignedWhat (expect revert)', () => {
   it.each`
     whoSignedWhat | largestTurnNum | nParticipants | nStates | reasonString
-    ${[0, 0]}     | ${2}           | ${3}          | ${1}    | ${'_validSignatures: whoSignedWhat must be the same length as participants'}
+    ${[0, 0]}     | ${2}           | ${3}          | ${1}    | ${'|whoSignedWhat|!=nParticipants'}
   `(
     'reverts for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
     async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, reasonString}) => {

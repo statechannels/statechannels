@@ -36,8 +36,7 @@ beforeAll(async () => {
   );
 });
 
-const reason0 =
-  'AssetHolder | submitted allocationBytes data does not match stored assetOutcomeHash';
+const reason0 = 'h(allocation)!=assetOutcomeHash';
 const reason1 = 'Indices must be sorted';
 
 // c is the channel we are transferring from.

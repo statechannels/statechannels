@@ -174,8 +174,6 @@ describe('conclude', () => {
       [0, 0, 0],
       [signature, signature, signature] // enough to clear the input type validation
     );
-    await expect(() => tx).rejects.toThrow(
-      'largestTurnNum + 1 must be greater than or equal to numStates'
-    );
+    await expect(() => tx).rejects.toThrow('largestTurnNum too low');
   });
 });
