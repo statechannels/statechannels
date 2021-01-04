@@ -27,7 +27,7 @@ module.exports = {
     repoUrl: 'https://github.com/statechannels/statechannels',
     packageUrl: 'https://www.npmjs.com/package/@statechannels/nitro-protocol'
   },
-  onBrokenLinks: 'log',
+  onBrokenLinks: 'throw',
   presets: [
     [
       '@docusaurus/preset-classic',
