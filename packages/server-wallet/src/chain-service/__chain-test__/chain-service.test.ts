@@ -462,7 +462,7 @@ describe('concludeAndWithdraw', () => {
 
     const erc20Contract: Contract = new Contract(
       erc20Address,
-      ContractArtifacts.TokenArtifact.abi,
+      TestContractArtifacts.TokenArtifact.abi,
       provider
     );
     expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));

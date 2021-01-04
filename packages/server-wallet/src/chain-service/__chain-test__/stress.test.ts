@@ -1,5 +1,5 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
+import {TestContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
@@ -41,7 +41,7 @@ describe('fundChannel', () => {
   it.skip(`${iterations} simultaneous deposits`, async () => {
     const depositAmount = 5;
     const totalTransferAmount = iterations * depositAmount;
-    const contract: Contract = new Contract(erc20Address, ContractArtifacts.TokenArtifact.abi);
+    const contract: Contract = new Contract(erc20Address, TestContractArtifacts.TokenArtifact.abi);
     await (
       await contract
         .connect(ethWalletWithTokens)

@@ -18,11 +18,13 @@ export async function deploy(): Promise<TestNetworkContext> {
 
   // TODO: best way to configure this?
   const deployer = new GanacheDeployer(8545, ethereumPrivateKey);
-  const {EthAssetHolderArtifact, TokenArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
+  const {EthAssetHolderArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
 
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(TestContractArtifacts.TestNitroAdjudicatorArtifact as any);
+  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(
+    TestContractArtifacts.TestNitroAdjudicatorArtifact as any
+  );
   const ERC20_ADDRESS = await deployer.deploy(
-    TokenArtifact as any,
+    TestContractArtifacts.TokenArtifact as any,
     {},
     new Wallet(ethereumPrivateKey).address
   );
