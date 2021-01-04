@@ -5,7 +5,7 @@ title: Quick start (contracts)
 
 import Mermaid from '@theme/Mermaid';
 
-You should begin your application design process by creating a single smart contract conforming to the [`ForceMoveApp`](../contract-api/natspec/ForceMoveApp) interface.
+You should begin your application design process by creating a single smart contract conforming to the [`ForceMoveApp`](../../contract-api/natspec/IForceMoveApp) interface.
 
 You'll want to pull this interface, as well as the `Outcome` library contract, into your project using your favourite node package manager:
 
@@ -42,7 +42,7 @@ contract CountingApp is ForceMoveApp {
     VariablePart memory b,
     uint256 turnNumB,
     uint256 nParticipants
-  ) public pure override returns (bool) {
+  ) public override pure returns (bool) {
     require(
       appData(b.appData).counter == appData(a.appData).counter + 1,
       'CountingApp: Counter must be incremented'

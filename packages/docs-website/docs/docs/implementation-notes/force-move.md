@@ -14,7 +14,7 @@ ForceMove is a state channel execution framework. It:
 3. Enables disputes to be raised and adjudicated;
 4. Allows for a final **outcome** to be registered against a unique `channelId`.
 
-This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../contract-api/natspec/ForceMove).
+This page documents our reference implementation in `ForceMove.sol`: please also see the [API](../../contract-api/natspec/ForceMove).
 
 ---
 
@@ -39,20 +39,20 @@ In ForceMove, the following fields must be included in state updates:
 Since states must ultimately be interpreted by the adjudicator, the encoding of these fields must be carefully considered. The following encoding is designed around optimal gas consumption:
 
 ```solidity
-    struct State {
-        // participants sign the hash of this
-        uint256 turnNum;
-        bool isFinal;
-        bytes32 channelId; // keccack256(abi.encode(chainId, participants, channelNonce))
-        bytes32 appPartHash;
-        //     keccak256(abi.encode(
-        //         fixedPart.challengeDuration,
-        //         fixedPart.appDefinition,
-        //         variablePart.appData
-        //     )
-        // )
-        bytes32 outcomeHash; //  keccak256(abi.encode(outcome))
-    }
+struct State {
+  // participants sign the hash of this
+  uint256 turnNum;
+  bool isFinal;
+  bytes32 channelId; // keccack256(abi.encode(chainId, participants, channelNonce))
+  bytes32 appPartHash;
+  //     keccak256(abi.encode(
+  //         fixedPart.challengeDuration,
+  //         fixedPart.appDefinition,
+  //         variablePart.appData
+  //     )
+  // )
+  bytes32 outcomeHash; //  keccak256(abi.encode(outcome))
+}
 ```
 
 ### `channelId`
@@ -66,22 +66,22 @@ By choosing a new `channelNonce` each time the same participants execute a state
 It is convenient to define some other structs, each containing a subset of the above data:
 
 ```solidity
-  struct FixedPart {
-        uint256 chainId;
-        address[] participants;
-        uint256 channelNonce;
-        address appDefinition;
-        uint256 challengeDuration;
-    }
+struct FixedPart {
+  uint256 chainId;
+  address[] participants;
+  uint256 channelNonce;
+  address appDefinition;
+  uint256 challengeDuration;
+}
 ```
 
 which contains information which must be identical in every state channel update, and
 
 ```solidity
-   struct VariablePart {
-        bytes outcome;
-        bytes appData;
-    }
+struct VariablePart {
+  bytes outcome;
+  bytes appData;
+}
 ```
 
 which contains fields which are allowed to change. These structs, along with remaining fields, `turnNum` and `isFinal`, can be passed in to contract methods for more gas efficient execution.
@@ -222,11 +222,11 @@ Internal call
 Each signature is a struct:
 
 ```solidity
-    struct Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
+struct Signature {
+  uint8 v;
+  bytes32 r;
+  bytes32 s;
+}
 ```
 
 Requirements:
@@ -347,7 +347,7 @@ When the adjudicator needs to verify the exact state or outcome, the data is pro
 
 **Why include the `outcomeHash`?**
 
-Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](/implementation-notes/nitro-adjudicator#push-outcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
+Although the `outcome` is included in the `state`, we include the `outcomeHash` at the top level of the `channelStorageHash` to make it easier for the [`pushOutcome`](./nitro-adjudicator#pushoutcome) method to prove what the outcome of the channel was. The tradeoff here is that the methods need to make sure they have the data to calculate it - which adds at most a `bytes32` to their `calldata`.
 
 ---
 
@@ -436,14 +436,14 @@ Implementation:
 - Check `validTransition(nParticipants, isFinalAB, variablePartAB, appDefiintion)`
 - Set channelStorageHashes:
   - `turnNumRecord += 1`
-  - Other fields set to their null values (see [Channel Storage](/implementation-notes/force-move#channel-storage)).
+  - Other fields set to their null values (see [Channel Storage](#channel-storage)).
 
 ### `conclude`
 
 If a participant signs a state with `isFinal = true`, then in a cooperative channel-closing procedure the other players can countersign that state and broadcast it. Once a full set of `n` such signatures exists \(this set is known as a **finalization proof**\) anyone in possession may use it to finalize the channel on-chain. They would do this by calling `conclude` on the adjudicator.
 
 :::tip
-In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](/protocol-docs/client-specification/auxiliary-protocols#closing-off-chain).
+In Nitro, the existence of this possibility can be relied on \(counterfactually\) to [close a channel off-chain](../protocol-tutorial/off-chain-funding#indirect-defunding).
 :::
 
 The conclude methods allow anyone with sufficient off-chain state to immediately finalize an outcome for a channel without having to wait for a challenge to expire.

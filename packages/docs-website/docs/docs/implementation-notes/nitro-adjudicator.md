@@ -4,7 +4,7 @@ title: NitroAdjudicator.sol
 sidebar_label: NitroAdjudicator.sol
 ---
 
-Please see the [API](../contract-api/natspec/NitroAdjudicator).
+Please see the [API](../../contract-api/natspec/NitroAdjudicator).
 
 ## pushOutcome
 
