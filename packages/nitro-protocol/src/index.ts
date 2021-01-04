@@ -1,4 +1,6 @@
 import pick from 'lodash.pick';
+
+import FULLTokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import FULLNitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import FULLErc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
 import FULLEthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
@@ -15,20 +17,30 @@ const fields = [
   'deployedLinkReferences',
 ];
 
+interface MinimalArtifact {
+  contractName: typeof FULLNitroAdjudicatorArtifact.contractName;
+  abi: typeof FULLNitroAdjudicatorArtifact.abi;
+  bytecode: typeof FULLNitroAdjudicatorArtifact.bytecode;
+  deployedBytecode: typeof FULLNitroAdjudicatorArtifact.deployedBytecode;
+  linkReferences: typeof FULLNitroAdjudicatorArtifact.linkReferences;
+  deployedLinkReferences: typeof FULLNitroAdjudicatorArtifact.deployedLinkReferences;
+}
+
 export const ContractArtifacts = {
-  NitroAdjudicatorArtifact: pick(FULLNitroAdjudicatorArtifact, fields),
-  Erc20AssetHolderArtifact: pick(FULLErc20AssetHolderArtifact, fields),
-  EthAssetHolderArtifact: pick(FULLEthAssetHolderArtifact, fields),
+  NitroAdjudicatorArtifact: pick(FULLNitroAdjudicatorArtifact, fields) as MinimalArtifact,
+  Erc20AssetHolderArtifact: pick(FULLErc20AssetHolderArtifact, fields) as MinimalArtifact,
+  EthAssetHolderArtifact: pick(FULLEthAssetHolderArtifact, fields) as MinimalArtifact,
 };
 
-/**
+/*
  * Various test contract artifacts used for testing.
  * They expose helper functions to allow for easier testing.
  * They should NEVER be used in a production environment.
  */
 export const TestContractArtifacts = {
-  TestNitroAdjudicatorArtifact: pick(FULLTestNitroAdjudicatorArtifact, fields),
-  TestAssetHolderArtifact: pick(FULLTestAssetHolderArtifact, fields),
+  TestNitroAdjudicatorArtifact: pick(FULLTestNitroAdjudicatorArtifact, fields) as MinimalArtifact,
+  TestAssetHolderArtifact: pick(FULLTestAssetHolderArtifact, fields) as MinimalArtifact,
+  TokenArtifact: pick(FULLTokenArtifact, fields) as MinimalArtifact,
 };
 
 export {
@@ -100,6 +112,7 @@ export {
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
 import {computePublicKey} from 'ethers/lib/utils';
+import {Contract, ContractInterface} from 'ethers';
 export {Signatures, Transactions};
 
 // types

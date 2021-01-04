@@ -1,5 +1,6 @@
 import {
   ContractArtifacts,
+  TestContractArtifacts,
   createERC20DepositTransaction,
   createETHDepositTransaction,
   getChallengeRegisteredEvent,
@@ -492,7 +493,7 @@ export class ChainService implements ChainServiceInterface {
     const tokenAddress = await assetHolderContract.Token();
     const tokenContract = this.getOrAddContractMapping(
       tokenAddress,
-      ContractArtifacts.TokenArtifact.abi
+      TestContractArtifacts.TokenArtifact.abi
     );
 
     switch (this.allowanceMode) {
