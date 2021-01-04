@@ -1,19 +1,24 @@
-import NitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
-import TrivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
-import TokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
-import AssetHolderArtifact from '../artifacts/contracts/AssetHolder.sol/AssetHolder.json';
-import Erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
-import EthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
-import TestNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
-import TestAssetHolderArtifact from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
+import pick from 'lodash.pick';
+import FULLNitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
+import FULLErc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
+import FULLEthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
+import FULLTestNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+import FULLTestAssetHolderArtifact from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
+
+// https://hardhat.org/guides/compile-contracts.html#artifacts
+const fields = [
+  'contractName',
+  'abi',
+  'bytecode',
+  'deployedByteCode',
+  'linkReferences',
+  'deployedLinkReferences',
+];
 
 export const ContractArtifacts = {
-  NitroAdjudicatorArtifact,
-  TrivialAppArtifact, // TODO do we want to export this?
-  Erc20AssetHolderArtifact,
-  EthAssetHolderArtifact,
-  TokenArtifact, // TODO do we want to export this?
-  AssetHolderArtifact, // TODO do we want to export this?
+  NitroAdjudicatorArtifact: pick(FULLNitroAdjudicatorArtifact, fields),
+  Erc20AssetHolderArtifact: pick(FULLErc20AssetHolderArtifact, fields),
+  EthAssetHolderArtifact: pick(FULLEthAssetHolderArtifact, fields),
 };
 
 /**
@@ -22,8 +27,8 @@ export const ContractArtifacts = {
  * They should NEVER be used in a production environment.
  */
 export const TestContractArtifacts = {
-  TestNitroAdjudicatorArtifact,
-  TestAssetHolderArtifact,
+  TestNitroAdjudicatorArtifact: pick(FULLTestNitroAdjudicatorArtifact, fields),
+  TestAssetHolderArtifact: pick(FULLTestAssetHolderArtifact, fields),
 };
 
 export {
@@ -94,6 +99,7 @@ export {
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
+import {computePublicKey} from 'ethers/lib/utils';
 export {Signatures, Transactions};
 
 // types

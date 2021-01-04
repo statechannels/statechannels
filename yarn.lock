@@ -4313,6 +4313,13 @@
   dependencies:
     "@types/lodash" "*"
 
+"@types/lodash.pick@4.4.0":
+  version "4.4.0"
+  resolved "https://registry.npmjs.org/@types/lodash.pick/-/lodash.pick-4.4.0.tgz#c44dd5139b2e7fc5aaf19ce0b5a8c631d6a5062b"
+  integrity sha1-xE3VE5suf8Wq8ZzgtajGMdalBis=
+  dependencies:
+    "@types/lodash" "*"
+
 "@types/lodash@*", "@types/lodash@^4.14.165":
   version "4.14.165"
   resolved "https://registry.npmjs.org/@types/lodash/-/lodash-4.14.165.tgz#74d55d947452e2de0742bad65270433b63a8c30f"
@@ -15332,7 +15339,7 @@ lodash.padstart@^4.6.1:
   resolved "https://registry.npmjs.org/lodash.padstart/-/lodash.padstart-4.6.1.tgz#d2e3eebff0d9d39ad50f5cbd1b52a7bce6bb611b"
   integrity sha1-0uPuv/DZ05rVD1y9G1KnvOa7YRs=
 
-lodash.pick@^4.2.1, lodash.pick@^4.4.0:
+lodash.pick@4.4.0, lodash.pick@^4.2.1, lodash.pick@^4.4.0:
   version "4.4.0"
   resolved "https://registry.npmjs.org/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
   integrity sha1-UvBWEP/53tQiYRRB7R/BI6AwAbM=
