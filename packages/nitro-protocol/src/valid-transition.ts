@@ -20,7 +20,7 @@ export function requireValidProtocolTransition(fromState: State, toState: State)
 
   // directly ported checks:
   if (toState.isFinal) {
-    _require(isEqual(toState.outcome, fromState.outcome), 'Outcome change forbidden');
+    _require(isEqual(toState.outcome, fromState.outcome), 'Outcome change verboten');
   } else {
     _require(!fromState.isFinal, 'isFinal retrograde');
     if (toState.turnNum < 2 * toState.channel.participants.length) {

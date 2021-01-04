@@ -46,7 +46,7 @@ const changedAConstantCases: TestCaseWithError[] = [
 ];
 //prettier-ignore
 const changedOutcomeWhenToIsFinal: TestCaseWithError[] = [
-    [/Outcome change forbidden/, {}, { isFinal:true, outcome: []}],
+    [/Outcome change verboten/, {}, { isFinal:true, outcome: []}],
 ]
 //prettier-ignore
 const fromFinalToNotFinal: TestCaseWithError[] = [
