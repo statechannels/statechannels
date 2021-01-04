@@ -273,7 +273,7 @@ contract AssetHolder is IAssetHolder {
 
         for (uint256 j = 0; j < guarantee.destinations.length; j++) {
             if (balance == 0) {
-                revert('guarantor affords 0 for dest');
+                revert('guarantor affords zero for dest');
             }
             // for each destination in the guarantee,
             // find the first corresponding allocationItem in the target allocation

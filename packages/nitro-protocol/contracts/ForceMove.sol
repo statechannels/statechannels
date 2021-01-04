@@ -563,7 +563,7 @@ contract ForceMove is IForceMove {
         // chainId, participants, channelNonce, appDefinition, challengeDuration
         // and that the b.turnNum = a.turnNum + 1
         if (isFinalAB[1]) {
-            require(_bytesEqual(ab[1].outcome, ab[0].outcome), 'Outcome change forbidden');
+            require(_bytesEqual(ab[1].outcome, ab[0].outcome), 'Outcome change verboten');
         } else {
             require(!isFinalAB[0], 'isFinal retrograde');
             if (turnNumB < 2 * nParticipants) {

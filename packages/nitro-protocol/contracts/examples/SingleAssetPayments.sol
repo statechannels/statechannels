@@ -42,11 +42,11 @@ contract SingleAssetPayments is IForceMoveApp {
         );
         require(
             assetOutcomeA.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
-            'AssetOutcome must be Allocation'
+            'AssetOutcomeA must be Allocation'
         );
         require(
             assetOutcomeB.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
-            'AssetOutcome must be Allocation'
+            'AssetOutcomeB must be Allocation'
         );
 
         // Throws unless that allocation has exactly n outcomes
@@ -58,8 +58,8 @@ contract SingleAssetPayments is IForceMoveApp {
             assetOutcomeB.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
-        require(allocationA.length == nParticipants, '|Allocation|!=|participants|');
-        require(allocationB.length == nParticipants, '|Allocation|!=|participants|');
+        require(allocationA.length == nParticipants, '|AllocationA|!=|participants|');
+        require(allocationB.length == nParticipants, '|AllocationB|!=|participants|');
 
         // Interprets the nth outcome as benefiting participant n
         // checks the destinations have not changed
