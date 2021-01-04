@@ -12,24 +12,27 @@ const fields = [
   'contractName',
   'abi',
   'bytecode',
-  'deployedByteCode',
+  'deployedBytecode',
   'linkReferences',
   'deployedLinkReferences',
 ];
 
-interface MinimalArtifact {
-  contractName: typeof FULLNitroAdjudicatorArtifact.contractName;
-  abi: typeof FULLNitroAdjudicatorArtifact.abi;
-  bytecode: typeof FULLNitroAdjudicatorArtifact.bytecode;
-  deployedBytecode: typeof FULLNitroAdjudicatorArtifact.deployedBytecode;
-  linkReferences: typeof FULLNitroAdjudicatorArtifact.linkReferences;
-  deployedLinkReferences: typeof FULLNitroAdjudicatorArtifact.deployedLinkReferences;
-}
+type MinimalArtifact = Pick<
+  typeof FULLNitroAdjudicatorArtifact,
+  | 'contractName'
+  | 'abi'
+  | 'bytecode'
+  | 'deployedBytecode'
+  | 'linkReferences'
+  | 'deployedLinkReferences'
+>;
+
+const minimize = artifact => pick(artifact, fields) as MinimalArtifact;
 
 export const ContractArtifacts = {
-  NitroAdjudicatorArtifact: pick(FULLNitroAdjudicatorArtifact, fields) as MinimalArtifact,
-  Erc20AssetHolderArtifact: pick(FULLErc20AssetHolderArtifact, fields) as MinimalArtifact,
-  EthAssetHolderArtifact: pick(FULLEthAssetHolderArtifact, fields) as MinimalArtifact,
+  NitroAdjudicatorArtifact: minimize(FULLNitroAdjudicatorArtifact),
+  Erc20AssetHolderArtifact: minimize(FULLErc20AssetHolderArtifact),
+  EthAssetHolderArtifact: minimize(FULLEthAssetHolderArtifact),
 };
 
 /*
@@ -38,9 +41,9 @@ export const ContractArtifacts = {
  * They should NEVER be used in a production environment.
  */
 export const TestContractArtifacts = {
-  TestNitroAdjudicatorArtifact: pick(FULLTestNitroAdjudicatorArtifact, fields) as MinimalArtifact,
-  TestAssetHolderArtifact: pick(FULLTestAssetHolderArtifact, fields) as MinimalArtifact,
-  TokenArtifact: pick(FULLTokenArtifact, fields) as MinimalArtifact,
+  TestNitroAdjudicatorArtifact: minimize(FULLTestNitroAdjudicatorArtifact),
+  TestAssetHolderArtifact: minimize(FULLTestAssetHolderArtifact),
+  TokenArtifact: minimize(FULLTokenArtifact),
 };
 
 export {
@@ -111,8 +114,6 @@ export {
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
-import {computePublicKey} from 'ethers/lib/utils';
-import {Contract, ContractInterface} from 'ethers';
 export {Signatures, Transactions};
 
 // types
