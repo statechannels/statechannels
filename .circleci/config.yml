@@ -278,11 +278,11 @@ jobs:
             - run:
                 name: deploy docs-website (production)
                 command: >
-                  npx -p netlify-cli \
-                  -c 'netlify deploy \
-                  --site $NITRO_PROTOCOL_NETLIFY_ID \
-                  --dir=/home/circleci/project/packages/docs-website/build \
-                  --auth $NETLIFY_ACCESS_TOKEN \
+                  npx -p netlify-cli
+                  -c 'netlify deploy
+                  --site $NITRO_PROTOCOL_NETLIFY_ID
+                  --dir=/home/circleci/project/packages/docs-website/build
+                  --auth $NETLIFY_ACCESS_TOKEN
                   --message $(git rev-parse --short HEAD)'
                   --prod
       - when:
@@ -296,12 +296,12 @@ jobs:
             - run:
                 name: deploy docs-website (preview)
                 command: >
-                  test -d "/home/circleci/project/packages/docs-website/build" && \
-                  npx -p netlify-cli \
-                  -c 'netlify deploy \
-                  --site $NITRO_PROTOCOL_NETLIFY_ID \
-                  --dir=/home/circleci/project/packages/docs-website/build \
-                  --auth $NETLIFY_ACCESS_TOKEN \
+                  test -d "/home/circleci/project/packages/docs-website/build" && 
+                  npx -p netlify-cli 
+                  -c 'netlify deploy 
+                  --site $NITRO_PROTOCOL_NETLIFY_ID 
+                  --dir=/home/circleci/project/packages/docs-website/build 
+                  --auth $NETLIFY_ACCESS_TOKEN 
                   --message $(git rev-parse --short HEAD)'
 workflows:
   statechannels:
