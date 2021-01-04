@@ -268,26 +268,39 @@ jobs:
       - checkout
       - attach_workspace:
           at: /home/circleci/project
-      - run: 
+      - run:
           name: build docs-website
-          command: yarn lerna run --scope docs-website build
+          command: yarn lerna run --scope docs-website --since $(git merge-base $CIRCLE_BRANCH origin/master) build
       - when:
           condition:
-            equal: [ master, << pipeline.git.branch >> ]
+            equal: [master, << pipeline.git.branch >>]
           steps:
-            - run: 
+            - run:
                 name: deploy docs-website (production)
-                command: |
-                  npx -p netlify-cli -c 'netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=/home/circleci/project/packages/docs-website/build --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --prod' 
+                command: >
+                  test -d "/home/circleci/project/packages/docs-website/build" && \
+                  npx -p netlify-cli \
+                  -c 'netlify deploy \
+                  --site $NITRO_PROTOCOL_NETLIFY_ID \
+                  --dir=/home/circleci/project/packages/docs-website/build \
+                  --auth $NETLIFY_ACCESS_TOKEN \
+                  --message $(git rev-parse --short HEAD)'
+                  --prod
       - when:
           condition:
-            -not: 
-              equal: [ master, << pipeline.git.branch >> ]
+            -not:
+              equal: [master, << pipeline.git.branch >>]
           steps:
-            - run: 
+            - run:
                 name: deploy docs-website (preview)
-                command: |
-                  npx -p netlify-cli -c 'netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=/home/circleci/project/packages/docs-website/build --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD)' 
+                command: >
+                  test -d "/home/circleci/project/packages/docs-website/build" && \
+                  npx -p netlify-cli \
+                  -c 'netlify deploy \
+                  --site $NITRO_PROTOCOL_NETLIFY_ID \
+                  --dir=/home/circleci/project/packages/docs-website/build \
+                  --auth $NETLIFY_ACCESS_TOKEN \
+                  --message $(git rev-parse --short HEAD)'
 workflows:
   statechannels:
     jobs:
