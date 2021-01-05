@@ -33,7 +33,7 @@
   "private": true,
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
-    "build": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
+    "build-docs-website": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
     "start": "yarn trigger-api-generation && yarn api-documenter && docusaurus start",
     "trigger-api-generation": "yarn lerna run generate-api"
   }
