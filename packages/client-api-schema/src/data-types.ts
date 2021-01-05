@@ -141,7 +141,7 @@ export interface ChannelResult {
   status: ChannelStatus;
   turnNum: Uint48;
   challengeExpirationTime?: number;
-  fundingStatus: FundingStatus;
+  fundingStatus?: FundingStatus;
 }
 
 /**

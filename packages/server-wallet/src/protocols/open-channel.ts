@@ -236,7 +236,14 @@ const requestFundChannelIfMyTurn = ({app}: ProtocolState): FundChannel | false =
     isSimpleAllocation
   );
 
-  const currentFunding = app.funding(assetHolderAddress).amount;
+  const currentFunding = app.funding(assetHolderAddress)?.amount;
+  if (!currentFunding) {
+    // this is a developer error, so throw
+    throw new Error(
+      `Funding not loaded from db. Make sure you use .withGraphJoined('funding') when fetching the channel.`
+    );
+  }
+
   const allocationsBeforeMe = _.takeWhile(allocationItems, a => a.destination !== myDestination);
   const targetBeforeMyDeposit = allocationsBeforeMe.map(a => a.amount).reduce(BN.add, BN.from(0));
   if (BN.lt(currentFunding, targetBeforeMyDeposit)) return false;
