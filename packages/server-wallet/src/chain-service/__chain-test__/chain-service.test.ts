@@ -493,12 +493,11 @@ describe('challenge', () => {
     const currentTime = (await provider.getBlock(provider.getBlockNumber())).timestamp;
     // The longest challenge duration is 3 seconds.
     // Lets mine a few blocks up to challenge expiration
-    const blockDeltas = _.range(0, 3.5, 0.5).map(Math.floor);
+    const blockDeltas = [0, 1, 2, 3];
     for (const blockDelta of blockDeltas) {
       await mineBlock(currentTime + blockDelta);
     }
 
-    //await mineBlockPeriodically(20);
     await Promise.all(channelsFinalized);
     await Promise.all(
       state1s.map(
