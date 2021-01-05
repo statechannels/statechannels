@@ -44,12 +44,10 @@ export async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
 export async function interParticipantChannelResultsAreEqual(a: Wallet, b: Wallet): Promise<void> {
   const {channelResults: aChannelResults} = await a.getChannels();
   const {channelResults: bChannelResults, outbox: bOutbox} = await b.getChannels();
-  // The same channel state can map to a different ChannelResult fundingStatus for different participants
-  const bChannelResultsNoFunding = bChannelResults.map(cr => ({
-    ...cr,
-    fundingStatus: expect.anything(),
-  }));
-  expect(aChannelResults).toEqual(bChannelResultsNoFunding);
+
+  const nullifyFunding = (cr: ChannelResult) => ({...cr, fundingStatus: null});
+
+  expect(aChannelResults.map(nullifyFunding)).toEqual(bChannelResults.map(nullifyFunding));
   expect(bOutbox).toEqual([]);
 }
 

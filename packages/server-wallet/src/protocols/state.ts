@@ -40,11 +40,11 @@ export type ChannelState = {
   supported?: SignedStateWithHash;
   latest: SignedStateWithHash;
   latestSignedByMe?: SignedStateWithHash;
-  funding: (address: Address) => ChannelStateFunding;
+  funding: (address: Address) => ChannelStateFunding | undefined;
   chainServiceRequests: ChainServiceRequest[];
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
-  directFundingStatus: FundingStatus;
+  directFundingStatus?: FundingStatus;
 };
 
 type WithSupported = {supported: SignedStateWithHash};
@@ -118,10 +118,10 @@ on ReadyToFund status as the sole criteria for determening if a channel is ready
 */
 export function directFundingStatus(
   supported: SignedStateVarsWithHash | undefined,
-  fundingFn: (address: Address) => ChannelStateFunding,
+  fundingFn: (address: Address) => ChannelStateFunding | undefined,
   myParticipant: Participant,
   fundingStrategy: FundingStrategy
-): FundingStatus {
+): FundingStatus | undefined {
   if (fundingStrategy !== 'Direct') {
     return 'Uncategorized';
   }
@@ -141,6 +141,7 @@ export function directFundingStatus(
     .reduce(BN.add, BN.from(0));
 
   const funding = fundingFn(assetHolderAddress);
+  if (!funding) return undefined;
 
   const amountTransferredToMe = funding.transferredOut
     .filter(tf => tf.toAddress === myDestination)

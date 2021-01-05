@@ -229,13 +229,18 @@ export class Channel extends Model implements RequiredColumns {
       fundingStrategy,
       fundingLedgerChannelId,
     } = this;
-    const funding = (assetHolder: Address): ChannelStateFunding => {
+    const funding = (assetHolder: Address): ChannelStateFunding | undefined => {
       const noFunding = {amount: Zero, transferredOut: []};
-      if (!this.funding) return noFunding;
+      if (!this.funding) return undefined; // funding hasn't been fetched from db
       const result = this.funding.find(f => f.assetHolder === assetHolder);
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
-    const dfs = directFundingStatus(supported, funding, participants[myIndex], fundingStrategy);
+    // directFundingStatus will return 'Uncategorized' e.g. if there's no supported outcome, even if
+    // the funding hasn't been fetched. By checking for funding here too, we make it so that it
+    // always returns undefined if the funding hasn't been fetched.
+    const dfs = this.funding
+      ? directFundingStatus(supported, funding, participants[myIndex], fundingStrategy)
+      : undefined;
     return {
       myIndex: myIndex as 0 | 1,
       participants,

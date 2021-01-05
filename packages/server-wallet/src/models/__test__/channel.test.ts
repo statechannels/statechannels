@@ -1,8 +1,12 @@
+import {constants} from 'ethers';
+import {makeAddress} from '@statechannels/wallet-core';
+
 import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {dropNonVariables} from '../../state-utils';
+import {Funding} from '../funding';
 
 import {channel} from './fixtures/channel';
 
@@ -67,4 +71,35 @@ describe('validation', () => {
         channelId: 'wrongId',
       })
     ).rejects.toThrow(ChannelError.reasons.invalidChannelId));
+});
+
+describe('fundingStatus', () => {
+  it("should be undefined if funding wasn't fetched from db", async () => {
+    const c1 = channel({vars: [stateWithHashSignedBy()()]});
+    await Channel.transaction(knex, async tx => {
+      const {channelId} = await Channel.query(tx).insert(c1);
+      await Funding.updateFunding(tx, channelId, '0x0a', makeAddress(constants.AddressZero));
+    });
+
+    await Channel.transaction(knex, async () => {
+      const channel = await Channel.query(knex).first();
+
+      expect(channel.channelResult.fundingStatus).toBeUndefined();
+    });
+  });
+  it('should not be undefined if funding was fetched from db', async () => {
+    const c1 = channel({vars: [stateWithHashSignedBy()()]});
+    await Channel.transaction(knex, async tx => {
+      const {channelId} = await Channel.query(tx).insert(c1);
+      await Funding.updateFunding(tx, channelId, '0x0a', makeAddress(constants.AddressZero));
+    });
+
+    await Channel.transaction(knex, async () => {
+      const channel = await Channel.query(knex)
+        .withGraphJoined('funding')
+        .first();
+
+      expect(channel.channelResult.fundingStatus).not.toBeUndefined();
+    });
+  });
 });
