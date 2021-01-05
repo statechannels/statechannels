@@ -5,7 +5,7 @@ title: Finalize a channel (sad)
 
 When cooperation breaks down, it is possible to finalize a state channel without requiring on-demand cooperation of all `n` participants. This is the so-called 'sad' path to finalizing a channel, and it requires a supported (but not necessarily `isFinal`) state(s) being submitted to the chain.
 
-The `forceMove` function allows anyone holding the appropriate off-chain state(s) to register a _challenge state_ on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
+The `challenge` function allows anyone holding the appropriate off-chain state(s) to register a _challenge state_ on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
 The required data for this method consist of between `1` and `n` states, along with `n` signatures that imply a [support proof](./execute-state-transitions#support-a-state-in-several-different-ways) for the challenge state. Once these are submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed.
 
@@ -15,7 +15,7 @@ This delay allows the challenge to be cleared by a timely and well-formed [respo
 The `challengeDuration` is a [fixed parameter](./execute-state-transitions#construct-a-state-with-the-correct-format) expressed in seconds, that is set when a channel is proposed. It should be set to a value low enough that participants may close a channel in a reasonable amount of time in the case that a counterparty becomes unresponsive; but high enough that malicious challenges can be detected and responded to without placing unreasonable liveness requirements on responders. A `challengeDuration` of 1 day is a reasonable starting point, but the "right" value will likely depend on your application.
 :::
 
-## Call `forceMove`
+## Call `challenge`
 
 :::note
 The challenger needs to sign this data:
