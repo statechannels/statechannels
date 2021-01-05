@@ -249,9 +249,6 @@ export class Store {
   }
 
   async getChannelState(channelId: Bytes32, tx?: Transaction): Promise<ChannelState> {
-    // This is somewhat faster than Channel.forId for simply fetching a channel:
-    // - the signingWallet isn't needed to construct the protocol state
-    // - withGraphJoined is slightly faster in this case
     const channel = await this.getChannel(channelId, tx);
 
     // TODO: throwing here is a quick fix until we can update all consumers of getChannelState
