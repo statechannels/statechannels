@@ -13,6 +13,7 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 
 const provider = getTestProvider();
 
@@ -39,7 +40,7 @@ beforeAll(async () => {
 const reason0 = 'h(allocation)!=assetOutcomeHash';
 
 // c is the channel we are transferring from.
-describe('transferAll', () => {
+describe('transferAll (using transfer and empty indices array)', () => {
   it.each`
     name                              | heldBefore | setOutcome      | newOutcome      | heldAfter             | payouts         | reason
     ${' 0. outcome not set         '} | ${{c: 1}}  | ${{}}           | ${{}}           | ${{}}                 | ${{A: 1}}       | ${reason0}
@@ -91,7 +92,8 @@ describe('transferAll', () => {
       ).wait();
       expect(await AssetHolder.assetOutcomeHashes(channelId)).toBe(assetOutcomeHash);
 
-      const tx = AssetHolder.transferAll(channelId, encodeAllocation(allocation));
+      const emptyArray = [];
+      const tx = AssetHolder.transfer(channelId, encodeAllocation(allocation), emptyArray);
 
       // Call method in a slightly different way if expecting a revert
       if (reason) {
