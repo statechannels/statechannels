@@ -31,7 +31,7 @@ import {Funding} from './funding';
 import {ObjectiveModel} from './objective';
 import {LedgerRequest} from './ledger-request';
 import {ChainServiceRequest} from './chain-service-request';
-import {FinalizationStatus} from './finalization-status';
+import {ChallengingStatus} from './challenging-status';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -77,7 +77,7 @@ export class Channel extends Model implements RequiredColumns {
 
   readonly signingWallet!: SigningWallet;
   readonly funding!: Funding[];
-  readonly finalizationStatus!: FinalizationStatus;
+  readonly finalizationStatus!: ChallengingStatus;
   readonly chainServiceRequests!: ChainServiceRequest[];
   readonly fundingStrategy!: FundingStrategy;
 
@@ -115,10 +115,10 @@ export class Channel extends Model implements RequiredColumns {
         to: 'funding.channelId',
       },
     },
-    finalizationStatus: {
+    challengingStatus: {
       relation: Model.HasOneRelation,
-      modelClass: FinalizationStatus,
-      join: {from: 'channels.channelId', to: 'finalization_status.channelId'},
+      modelClass: ChallengingStatus,
+      join: {from: 'channels.channelId', to: 'challenging_status.channelId'},
     },
     objectivesChannels: {
       relation: Model.ManyToManyRelation,
@@ -150,7 +150,7 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding')
       .withGraphFetched('chainServiceRequests')
-      .withGraphFetched('finalizationStatus')
+      .withGraphFetched('challengingStatus')
       .first();
   }
 

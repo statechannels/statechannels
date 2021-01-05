@@ -3,7 +3,7 @@ import {Model} from 'objection';
 
 import {Bytes32, Uint48} from '../type-aliases';
 
-export type FinalizationStatusResult =
+export type ChallengingStatusResult =
   | {status: 'Finalized'; finalizedAt: number; finalizedBlockNumber: number}
   | {status: 'Not Finalized'};
 
@@ -12,50 +12,50 @@ interface RequiredColumns {
   readonly finalizesAt: Uint48;
   readonly blockNumber: Uint48;
 }
-export class FinalizationStatus extends Model implements RequiredColumns {
+export class ChallengingStatus extends Model implements RequiredColumns {
   readonly channelId!: Bytes32;
   readonly finalizesAt!: Uint48;
   readonly blockNumber!: Uint48;
-  static tableName = 'finalization_status';
+  static tableName = 'challenging_status';
 
-  static async getFinalizationStatus(
+  static async getChallengingStatus(
     knex: Knex,
     channelId: Bytes32
-  ): Promise<FinalizationStatusResult> {
-    const result = await FinalizationStatus.query(knex)
+  ): Promise<ChallengingStatusResult> {
+    const result = await ChallengingStatus.query(knex)
       .where({channelId})
       .first();
 
-    return FinalizationStatus.convertResult(result);
+    return ChallengingStatus.convertResult(result);
   }
 
-  static async updateFinalizationStatus(
+  static async updateChallengingStatus(
     knex: Knex,
     channelId: string,
     finalizesAt = 0,
     blockNumber = 0
-  ): Promise<FinalizationStatusResult> {
-    const existing = await FinalizationStatus.query(knex)
+  ): Promise<ChallengingStatusResult> {
+    const existing = await ChallengingStatus.query(knex)
       .where({channelId})
       .first();
 
     if (!existing) {
-      const result = await FinalizationStatus.query(knex).insert({
+      const result = await ChallengingStatus.query(knex).insert({
         channelId,
         finalizesAt,
         blockNumber,
       });
-      return FinalizationStatus.convertResult(result);
+      return ChallengingStatus.convertResult(result);
     } else {
-      const result = await FinalizationStatus.query(knex)
+      const result = await ChallengingStatus.query(knex)
         .patch({finalizesAt, blockNumber})
         .where({channelId})
         .returning('*')
         .first();
-      return FinalizationStatus.convertResult(result);
+      return ChallengingStatus.convertResult(result);
     }
   }
-  private static convertResult(result: FinalizationStatus | undefined): FinalizationStatusResult {
+  private static convertResult(result: ChallengingStatus | undefined): ChallengingStatusResult {
     if (!result || result.finalizesAt === 0) {
       return {status: 'Not Finalized'};
     } else {
@@ -64,7 +64,7 @@ export class FinalizationStatus extends Model implements RequiredColumns {
     }
   }
 
-  public asResult(): FinalizationStatusResult {
-    return FinalizationStatus.convertResult(this);
+  public asResult(): ChallengingStatusResult {
+    return ChallengingStatus.convertResult(this);
   }
 }

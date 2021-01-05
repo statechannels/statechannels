@@ -1,6 +1,6 @@
 import * as Knex from 'knex';
 
-const tableName = 'finalization_status';
+const tableName = 'challenging_status';
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(tableName, function(table) {
     table.string('channel_id').notNullable();

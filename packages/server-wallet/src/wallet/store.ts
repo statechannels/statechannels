@@ -50,7 +50,7 @@ import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
-import {FinalizationStatus} from '../models/finalization-status';
+import {ChallengingStatus} from '../models/challenging-status';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -267,7 +267,7 @@ export class Store {
       .where({'channels.channel_id': channelId})
       .withGraphJoined('funding')
       .withGraphJoined('chainServiceRequests')
-      .withGraphJoined('finalizationStatus')
+      .withGraphJoined('challengingStatus')
       .first();
   }
 
@@ -684,7 +684,7 @@ export class Store {
     finalizedAt: number,
     finalizedBlockNumber: number
   ): Promise<void> {
-    await FinalizationStatus.updateFinalizationStatus(
+    await ChallengingStatus.updateChallengingStatus(
       this.knex,
       channelId,
       finalizedAt,
