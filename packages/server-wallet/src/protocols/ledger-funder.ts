@@ -51,7 +51,7 @@ export class LedgerFunder {
     if (await this.alreadyFunded(channel, ledger, tx)) return true;
 
     // if we already requested funding return false
-    if (await this.alreadyRequestedFunding) return false;
+    if (await this.alreadyRequestedFunding(channel.channelId, tx)) return false;
 
     // otherwise request funding
     await this.requestLedgerFunding(channel.channelId, ledgerId, tx);
