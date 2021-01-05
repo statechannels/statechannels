@@ -233,7 +233,7 @@ describe('registerChannel', () => {
     await mineBlock(currentTime + 1);
     await mineBlock(currentTime + 2);
     await channelFinalizedPromise;
-    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
+    expect(channelFinalizedHandler).toHaveBeenCalledWith(expect.objectContaining({channelId}));
   });
 
   it('Successfully registers channel and receives follow on funding event', async () => {
