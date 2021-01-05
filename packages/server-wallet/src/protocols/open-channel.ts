@@ -107,6 +107,7 @@ export class ChannelOpener {
     const postfund = {...channel.latest, turnNum: 0};
     const signedState = await this.store.signState(channel, postfund, tx);
     response.queueState(signedState, channel.myIndex, channel.channelId);
+    response.queueChannel(channel);
   }
 
   private async signPostfundSetup(
@@ -118,5 +119,6 @@ export class ChannelOpener {
     const postfund = {...channel.latest, turnNum: channel.nParticipants * 2 - 1};
     const signedState = await this.store.signState(channel, postfund, tx);
     response.queueState(signedState, channel.myIndex, channel.channelId);
+    response.queueChannel(channel);
   }
 }
