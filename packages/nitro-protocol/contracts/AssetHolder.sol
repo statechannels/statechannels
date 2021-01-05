@@ -41,19 +41,6 @@ contract AssetHolder is IAssetHolder {
     }
 
     /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. Checks against the storage in this contract.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. Checks against the storage in this contract.
-     * @param channelId Unique identifier for a state channel.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     */
-    function transferAll(bytes32 channelId, bytes calldata allocationBytes) external {
-        // checks
-        _requireCorrectAllocationHash(channelId, allocationBytes);
-        // effects and interactions
-        _transfer(channelId, allocationBytes, new uint256[](0));
-    }
-
-    /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
