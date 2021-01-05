@@ -253,7 +253,7 @@ describe('registerChannel', () => {
           });
           counter++;
           // wait for the transaction to be mined.
-          // Otherwise, it is possibleble for the correct channel funding transaction to be mined first.
+          // Otherwise, it is possible for the correct channel funding transaction to be mined first.
           // In which case, this test might pass even if the holdingUpdated callback is fired for the wrongChannelId.
           await (await fundChannel(0, 5, wrongChannelId).request).wait();
           fundChannelAndMineBlocks(0, 5, channelId);
