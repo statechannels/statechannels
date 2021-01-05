@@ -274,7 +274,7 @@ jobs:
           steps:
             - run:
                 name: build docs-website
-                command: yarn lerna run --scope docs-website build
+                command: yarn lerna run build-docs-website --stream
             - run:
                 name: deploy docs-website (production)
                 command: >
@@ -292,7 +292,7 @@ jobs:
           steps:
             - run:
                 name: build docs-website
-                command: yarn lerna run --scope docs-website --since $(git merge-base $CIRCLE_BRANCH origin/master) build
+                command: yarn lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build-docs-website --stream
             - run:
                 name: deploy docs-website (preview)
                 command: >
