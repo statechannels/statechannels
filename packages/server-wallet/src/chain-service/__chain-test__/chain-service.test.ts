@@ -239,7 +239,7 @@ describe('registerChannel', () => {
     );
     await mineBlock(FUTURE_TIME);
     await channelFinalizedPromise;
-    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
+    expect(channelFinalizedHandler).toHaveBeenCalledWith(expect.objectContaining({channelId}));
   });
 
   it('registers a channel in the finalizing channel list and fires an event when that channel is finalized', async () => {
@@ -280,7 +280,7 @@ describe('registerChannel', () => {
 
     await mineBlock(FUTURE_TIME);
     await channelFinalizedPromise;
-    expect(channelFinalizedHandler).toHaveBeenCalledWith({channelId});
+    expect(channelFinalizedHandler).toHaveBeenCalledWith(expect.objectContaining({channelId}));
   });
 
   it('Successfully registers channel and receives follow on funding event', async () => {
