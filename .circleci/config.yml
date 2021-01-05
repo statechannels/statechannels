@@ -283,11 +283,11 @@ jobs:
                   --site $NITRO_PROTOCOL_NETLIFY_ID
                   --dir=/home/circleci/project/packages/docs-website/build
                   --auth $NETLIFY_ACCESS_TOKEN
-                  --message $(git rev-parse --short HEAD)'
-                  --prod
+                  --message $(git rev-parse --short HEAD)
+                  --prod'
       - when:
           condition:
-            -not:
+            not:
               equal: [master, << pipeline.git.branch >>]
           steps:
             - run:
