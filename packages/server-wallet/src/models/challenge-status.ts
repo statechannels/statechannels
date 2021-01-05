@@ -30,8 +30,8 @@ export class ChallengeStatus extends Model implements RequiredColumns {
   static async updateChallengeStatus(
     knex: Knex,
     channelId: string,
-    finalizesAt = 0,
-    blockNumber = 0
+    finalizesAt: number,
+    blockNumber: number
   ): Promise<ChallengeStatusResult> {
     const existing = await ChallengeStatus.query(knex)
       .where({channelId})
