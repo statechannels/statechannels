@@ -97,7 +97,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   const resultB1 = await b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
-    turnNum: 1,
+    turnNum: 0,
   });
 
   //  PreFund0B <
@@ -112,7 +112,7 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
     status: 'opening',
-    turnNum: 1,
+    turnNum: 0,
   });
 
   const depositByA = {
@@ -138,12 +138,12 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
     status: 'opening',
-    turnNum: 2,
+    turnNum: 0,
   });
 
   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
     status: 'opening',
-    turnNum: 1,
+    turnNum: 0,
   });
 
   //  > PostFund3A

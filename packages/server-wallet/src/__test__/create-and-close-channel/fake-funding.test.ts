@@ -92,7 +92,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
     status: 'opening',
-    turnNum: 1,
+    turnNum: 0,
   });
 
   // B sends signed PreFund1 and PostFund3 to A
