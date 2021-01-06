@@ -26,7 +26,7 @@ contract AssetHolder is IAssetHolder {
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     * @param indices Array with each entry denoting the index of a destination to transfer funds to.
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to. An empty array indicates "all".
      */
     function transfer(
         bytes32 fromChannelId,
@@ -46,7 +46,7 @@ contract AssetHolder is IAssetHolder {
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
      * @param guaranteeBytes The abi.encode of Outcome.Guarantee
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order.
+     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
      */
     function claim(
         bytes32 guarantorChannelId,
@@ -222,7 +222,7 @@ contract AssetHolder is IAssetHolder {
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     * @param indices Array with each entry denoting the index of a destination to transfer funds to. Should be in increasing order.
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to. Should be in increasing order. An empty array indicates "all".
      */
     function _transfer(
         bytes32 fromChannelId,
@@ -285,7 +285,7 @@ contract AssetHolder is IAssetHolder {
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
      * @param guarantee The guarantee
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to.
+     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. An empty array indicates "all".
      */
     function _claim(
         bytes32 guarantorChannelId,
