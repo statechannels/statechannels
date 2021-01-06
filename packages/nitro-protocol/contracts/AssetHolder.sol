@@ -147,7 +147,7 @@ contract AssetHolder is IAssetHolder {
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
         safeToDelete = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // virtual funds available during calculation
+        uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
 
         // copy allocation
@@ -210,7 +210,7 @@ contract AssetHolder is IAssetHolder {
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
         safeToDelete = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // virtual funds available during calculation
+        uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
 
         // loop over allocations and decrease surplus
