@@ -53,7 +53,7 @@ contract AssetHolder is IAssetHolder {
         bytes calldata guaranteeBytes,
         bytes calldata allocationBytes,
         uint256[] memory indices
-    ) external {
+    ) external override {
         // checks
         _requireIncreasingIndices(indices);
         _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);

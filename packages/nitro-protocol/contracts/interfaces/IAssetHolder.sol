@@ -20,16 +20,18 @@ interface IAssetHolder {
     ) external;
 
     /**
-     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
-     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel.
+     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
      * @param guaranteeBytes The abi.encode of Outcome.Guarantee
      * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
+     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
      */
-    function claimAll(
+    function claim(
         bytes32 guarantorChannelId,
         bytes calldata guaranteeBytes,
-        bytes calldata allocationBytes
+        bytes calldata allocationBytes,
+        uint256[] memory indices
     ) external;
 
     /**
