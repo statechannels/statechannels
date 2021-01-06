@@ -46,6 +46,7 @@ export class ChannelOpener {
 
       // if we don't have a supported preFundSetup, we're done for now
       if (!channel.prefundSupported) {
+        response.queueChannel(channel); // always queue the channel if we've potentially touched it
         return;
       }
 
@@ -61,9 +62,10 @@ export class ChannelOpener {
       if (channel.postfundSupported) {
         await this.store.markObjectiveAsSucceeded(objective, tx);
 
-        response.queueChannel(channel); // why am I doing this?
         response.queueSucceededObjective(objective);
       }
+
+      response.queueChannel(channel); // always queue the channel if we've potentially touched it
     });
   }
 
