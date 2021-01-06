@@ -70,7 +70,7 @@ export class LedgerFunder {
     // ledger is running
     if (!ledger.isRunning) return false;
 
-    return ledgerFundedThisChannel(ledger, channel);
+    return doesLedgerFundApp(ledger, channel);
   }
 
   private async requestLedgerFunding(
@@ -87,7 +87,7 @@ export class LedgerFunder {
   }
 }
 
-function ledgerFundedThisChannel(ledger: Channel, app: Channel): boolean {
+function doesLedgerFundApp(ledger: Channel, app: Channel): boolean {
   if (!ledger.supported) return false;
   if (!app.supported) return false;
 

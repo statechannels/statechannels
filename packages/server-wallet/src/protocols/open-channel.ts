@@ -104,8 +104,8 @@ export class ChannelOpener {
     tx: Transaction
   ): Promise<void> {
     // TODO: should probably have more checking around the form of channel.latest
-    const postfund = {...channel.latest, turnNum: 0};
-    const signedState = await this.store.signState(channel, postfund, tx);
+    const prefund = {...channel.latest, turnNum: 0};
+    const signedState = await this.store.signState(channel, prefund, tx);
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueChannel(channel);
   }
