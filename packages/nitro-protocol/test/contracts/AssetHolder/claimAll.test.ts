@@ -48,7 +48,7 @@ const reason6 = 'h(guarantee)!=assetOutcomeHash';
 // 4. claim G2 (step 2 of alternative of figure 23 of nitro paper)
 
 // Amounts are valueString representations of wei
-describe('claimAll', () => {
+describe('claimAll (by passing [] as indices to claim)', () => {
   it.each`
     name                                               | heldBefore | guaranteeDestinations | tOutcomeBefore        | tOutcomeAfter         | heldAfter | payouts         | reason
     ${'1. straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${{I: 0, A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
@@ -134,7 +134,7 @@ describe('claimAll', () => {
         expect(await AssetHolder.assetOutcomeHashes(guarantorId)).toBe(gOutcomeContentHash);
       }
 
-      const tx = AssetHolder.claimAll(...claimAllArgs(guarantorId, guarantee, allocation));
+      const tx = AssetHolder.claim(...claimAllArgs(guarantorId, guarantee, allocation), []);
 
       // Call method in a slightly different way if expecting a revert
       if (reason) {
