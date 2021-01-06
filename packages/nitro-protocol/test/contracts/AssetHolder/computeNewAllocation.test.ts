@@ -48,7 +48,6 @@ describe('AsserHolder._computeNewAllocation', () => {
       indices
     )) as ReturnType<typeof computeNewAllocation>;
     expect(result).toBeDefined();
-    console.log(result);
     expect(result.newAllocation).toMatchObject(
       locallyComputedNewAllocation.newAllocation.map(a => ({
         ...a,
