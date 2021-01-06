@@ -63,26 +63,6 @@ contract AssetHolder is IAssetHolder {
         _claim(guarantorChannelId, guarantee, allocationBytes, indices);
     }
 
-    /**
-     * @notice Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-     * @dev Transfers the funds escrowed against `guarantorChannelId` to the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-     * @param guarantorChannelId Unique identifier for a guarantor state channel.
-     * @param guaranteeBytes The abi.encode of Outcome.Guarantee
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-     */
-    function claimAll(
-        bytes32 guarantorChannelId,
-        bytes calldata guaranteeBytes,
-        bytes calldata allocationBytes
-    ) external override {
-        // checks
-        _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
-        _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
-        // effects and interactions
-        _claim(guarantorChannelId, guarantee, allocationBytes, new uint256[](0));
-    }
-
     // **************
     // Permissioned methods
     // **************
