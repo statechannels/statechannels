@@ -72,7 +72,7 @@ export class DirectFunder {
   private assetHolder(channel: Channel): Address {
     const supported = channel.supported;
     if (!supported) {
-      throw new Error(`Channel passed to DirectFunded has no supported state`);
+      throw new Error(`Channel passed to DirectFunder has no supported state`);
     }
 
     const {assetHolderAddress} = checkThat(supported?.outcome, isSimpleAllocation);
@@ -97,7 +97,7 @@ export class DirectFunder {
      */
     const supported = channel.supported;
     if (!supported) {
-      throw new Error(`Channel passed to DriectFunded has no supported state`);
+      throw new Error(`Channel passed to DriectFunder has no supported state`);
     }
 
     const myDestination = channel.participants[channel.myIndex].destination;
