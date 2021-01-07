@@ -33,7 +33,7 @@ export class ChannelOpener {
     const channelToLock = objective.data.targetChannelId;
 
     await this.store.transaction(async tx => {
-      const channel = await this.store.getLockedChannel(channelToLock, tx);
+      const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
       if (!channel) {
         throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
