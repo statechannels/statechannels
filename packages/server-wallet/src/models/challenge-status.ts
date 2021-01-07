@@ -18,7 +18,9 @@ export class ChallengeStatus extends Model implements RequiredColumns {
   readonly finalizesAt!: Uint48;
   readonly blockNumber!: Uint48;
   static tableName = 'challenge_status';
-
+  static get idColumn(): string[] {
+    return ['channelId'];
+  }
   static async getChallengeStatus(knex: Knex, channelId: Bytes32): Promise<ChallengeStatusResult> {
     const result = await ChallengeStatus.query(knex)
       .where({channelId})
