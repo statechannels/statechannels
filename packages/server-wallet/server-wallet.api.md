@@ -223,6 +223,94 @@ export type SingleChannelOutput = {
     channelResult: ChannelResult;
 };
 
+// Warning: (ae-forgotten-export) The symbol "EventEmitterType" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "WalletInterface" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export class SingleThreadedWallet extends EventEmitter<EventEmitterType> implements WalletInterface {
+    protected constructor(walletConfig: IncomingServerWalletConfig);
+    // (undocumented)
+    addSigningKey(privateKey: PrivateKey): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    chainService: ChainServiceInterface;
+    // (undocumented)
+    closeChannel({ channelId }: CloseChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet;
+    // (undocumented)
+    createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
+    // Warning: (ae-forgotten-export) The symbol "DBAdmin" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    dbAdmin(): DBAdmin;
+    // (undocumented)
+    destroy(): Promise<void>;
+    // (undocumented)
+    getChannels(): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    getParticipant(): Promise<Participant | undefined>;
+    // (undocumented)
+    getSigningAddress(): Promise<Address>;
+    // (undocumented)
+    getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    knex: Knex;
+    // (undocumented)
+    logger: Logger;
+    // Warning: (ae-forgotten-export) The symbol "Output" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    mergeMessages(output: Output[]): MultipleChannelOutput;
+    // Warning: (ae-forgotten-export) The symbol "ObjectiveManager" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    objectiveManager: ObjectiveManager;
+    // (undocumented)
+    pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput>;
+    // (undocumented)
+    registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
+    // (undocumented)
+    registerAppDefinition(appDefinition: string): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "Store" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    store: Store;
+    // (undocumented)
+    syncChannel({ channelId }: SyncChannelParams): Promise<SingleChannelOutput>;
+    // Warning: (ae-forgotten-export) The symbol "Bytes32" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
+    // Warning: (ae-forgotten-export) The symbol "UpdateChannelFundingParams" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    readonly walletConfig: ServerWalletConfig;
+    // (undocumented)
+    warmUpThreads(): Promise<void>;
+}
+
 // @public (undocumented)
 export function validateServerWalletConfig(config: Record<string, any>): {
     valid: boolean;
@@ -230,21 +318,13 @@ export function validateServerWalletConfig(config: Record<string, any>): {
     errors: ValidationErrorItem[];
 };
 
-// Warning: (ae-forgotten-export) The symbol "SingleThreadedWallet" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "MultiThreadedWallet" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export type Wallet = SingleThreadedWallet | MultiThreadedWallet;
-
-// @public (undocumented)
-export const Wallet: {
-    create(walletConfig: IncomingServerWalletConfig): Wallet;
-};
-
-// Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type WalletEvent = ChannelUpdatedEvent;
+export abstract class Wallet extends SingleThreadedWallet {
+    // Warning: (ae-forgotten-export) The symbol "MultiThreadedWallet" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet | MultiThreadedWallet;
+}
 
 
 // (No @packageDocumentation comment for this package)
