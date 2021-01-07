@@ -186,7 +186,8 @@ it('emits new channel result when the funding event is provided via holdingUpdat
     )
   );
 
-  await w.holdingUpdated({
+  await (w as any).holdingUpdated({
+    // typecasting enables us to acess private method without a TS error
     channelId: c.channelId,
     assetHolderAddress: makeAddress(constants.AddressZero),
     amount: BN.from(4),
