@@ -86,7 +86,7 @@ export class ConfigValidationError extends Error {
 }
 
 export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
-  implements WalletInterface, ChainEventSubscriberInterface {
+  implements WalletInterface {
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
@@ -763,7 +763,17 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
   }
 
   // ChainEventSubscriberInterface implementation
-  async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
+  private chainEventSubscriber: ChainEventSubscriberInterface = {
+    holdingUpdated: this.holdingUpdated,
+    assetOutcomeUpdated: this.assetOutcomeUpdated,
+    channelFinalized: this.channelFinalized,
+  };
+
+  private async holdingUpdated({
+    channelId,
+    amount,
+    assetHolderAddress,
+  }: HoldingUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
@@ -772,7 +782,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  async assetOutcomeUpdated({
+  private async assetOutcomeUpdated({
     channelId,
     assetHolderAddress,
     externalPayouts,
@@ -794,7 +804,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
+  private async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
     const response = WalletResponse.initialize();
     await this.store.updateFinalizationStatus(arg.channelId, arg.finalizedAt, arg.blockNumber);
 
@@ -809,7 +819,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     const assetHolderAddresses = channelResult.allocations.map(a =>
       makeAddress(a.assetHolderAddress)
     );
-    this.chainService.registerChannel(channelId, assetHolderAddresses, this);
+    this.chainService.registerChannel(channelId, assetHolderAddresses, this.chainEventSubscriber);
   }
 
   dbAdmin(): DBAdmin {
