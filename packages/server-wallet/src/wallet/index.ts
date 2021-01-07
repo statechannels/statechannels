@@ -4,6 +4,8 @@ export {SingleChannelOutput, MultipleChannelOutput} from './types';
 import {MultiThreadedWallet} from './multi-threaded-wallet';
 import {SingleThreadedWallet} from './wallet';
 
+export {SingleThreadedWallet};
+
 export abstract class Wallet extends SingleThreadedWallet {
   static create(
     walletConfig: IncomingServerWalletConfig
