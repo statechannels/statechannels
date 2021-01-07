@@ -16,11 +16,11 @@ import {
   Outcome,
   AllocationItem,
   SimpleAllocation,
-  Objective,
   Participant,
   makeAddress,
   Payload,
-  ChannelRequest
+  ChannelRequest,
+  SharedObjective
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
@@ -96,7 +96,7 @@ export function deserializeState(state: SignedStateWire): SignedState {
   };
 }
 
-export function deserializeObjective(objective: ObjectiveWire): Objective {
+export function deserializeObjective(objective: ObjectiveWire): SharedObjective {
   const participants = objective.participants?.map(p => ({
     ...p,
     signingAddress: makeAddress(p.signingAddress),

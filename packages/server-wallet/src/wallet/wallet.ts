@@ -20,6 +20,8 @@ import {
   PrivateKey,
   makeDestination,
   deserializeRequest,
+  calculateChannelId,
+  State,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -812,6 +814,27 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
 
+  async challenge(challengeState: State): Promise<SingleChannelOutput> {
+    const channelId = calculateChannelId(challengeState);
+    return await this.knex.transaction(async tx => {
+      const response = WalletResponse.initialize();
+      const dbObjective = await this.store.ensureObjective(
+        {
+          type: 'SubmitChallenge',
+          participants: [],
+          data: {targetChannelId: channelId, challengeState},
+        },
+        tx
+      );
+      await this.store.approveObjective(dbObjective.objectiveId, tx);
+      const channel = await this.store.getChannel(channelId, tx);
+      if (!channel) {
+        throw new Error(`No channel found for channel id ${channelId}`);
+      }
+      response.queueChannel(channel);
+      return response.singleChannelOutput();
+    });
+  }
   dbAdmin(): DBAdmin {
     return new DBAdmin(this.knex);
   }

@@ -7,6 +7,7 @@ import {ChannelCloser} from '../protocols/close-channel';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
+import {ChallengeSubmitter} from '../protocols/challenge-submitter';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -44,11 +45,20 @@ export class ObjectiveManager {
         return this.channelOpener.crank(objective, response);
       case 'CloseChannel':
         return this.channelCloser.crank(objective, response);
+      case 'SubmitChallenge':
+        return this.challengeSubmitter.crank(objective, response);
       default:
         unreachable(objective);
     }
   }
-
+  private get challengeSubmitter(): ChallengeSubmitter {
+    return ChallengeSubmitter.create(
+      this.store,
+      this.chainService,
+      this.logger,
+      this.timingMetrics
+    );
+  }
   private get channelOpener(): ChannelOpener {
     return ChannelOpener.create(this.store, this.chainService, this.logger, this.timingMetrics);
   }

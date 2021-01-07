@@ -1,4 +1,4 @@
-import {Objective} from '@statechannels/wallet-core';
+import {SharedObjective} from '@statechannels/wallet-core';
 
 import {Store} from '../../store';
 
@@ -24,7 +24,7 @@ export class TestLedgerChannel extends TestChannel {
     super(args);
   }
 
-  public get openChannelObjective(): Objective {
+  public get openChannelObjective(): SharedObjective {
     return {
       participants: this.participants,
       type: 'OpenChannel',

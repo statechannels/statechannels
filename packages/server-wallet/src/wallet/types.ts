@@ -7,7 +7,7 @@ import {
   ChannelId,
   ChannelResult,
 } from '@statechannels/client-api-schema';
-import {Participant, Address as CoreAddress} from '@statechannels/wallet-core';
+import {Participant, Address as CoreAddress, State} from '@statechannels/wallet-core';
 
 import {Outgoing} from '../protocols/actions';
 import {Bytes32, Uint256} from '../type-aliases';
@@ -63,4 +63,6 @@ export type WalletInterface = {
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 
   mergeMessages(messages: Output[]): MultipleChannelOutput;
+
+  challenge(challengeState: State): Promise<SingleChannelOutput>;
 };
