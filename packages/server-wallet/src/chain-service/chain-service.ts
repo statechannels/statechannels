@@ -348,26 +348,23 @@ export class ChainService implements ChainServiceInterface {
       this.addFinalizingChannel(finalizingChannel);
       return;
     }
-    if (finalizingChannel.finalizesAtS <= block.timestamp) {
-      const {channelId} = finalizingChannel;
-      const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
-      if (finalizesAt === finalizingChannel.finalizesAtS) {
-        // Should we wait for 6 blocks before emitting the finalized event?
-        // Will the wallet sign new states or deposit into the channel based on this event?
-        // The answer is likely no.
-        // So we probably want to emit this event as soon as possible.
-        this.channelToSubscribers.get(channelId)?.map(subscriber =>
-          subscriber.channelFinalized({
-            channelId,
-            blockNumber: block.number,
-            finalizedAt: finalizingChannel.finalizesAtS,
-          })
-        );
-        // Chain storage has a new finalizesAt timestamp
-      } else if (finalizesAt) {
-        this.addFinalizingChannel({channelId, finalizesAtS: finalizesAt});
-      }
-      this.checkFinalizingChannels(block);
+    const {channelId} = finalizingChannel;
+    const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
+    if (finalizesAt === finalizingChannel.finalizesAtS) {
+      // Should we wait for 6 blocks before emitting the finalized event?
+      // Will the wallet sign new states or deposit into the channel based on this event?
+      // The answer is likely no.
+      // So we probably want to emit this event as soon as possible.
+      this.channelToSubscribers.get(channelId)?.map(subscriber =>
+        subscriber.channelFinalized({
+          channelId,
+          blockNumber: block.number,
+          finalizedAt: finalizingChannel.finalizesAtS,
+        })
+      );
+      // Chain storage has a new finalizesAt timestamp
+    } else if (finalizesAt) {
+      this.addFinalizingChannel({channelId, finalizesAtS: finalizesAt});
     }
     this.checkFinalizingChannels(block);
   }
