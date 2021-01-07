@@ -301,12 +301,12 @@ describe('when the application protocol returns an action', () => {
     });
     await expectResults(p, [{channelId, status: 'opening'}]);
     await expect(p).resolves.toMatchObject({
-      outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 2}]}}}],
+      outbox: [{method: 'MessageQueued', params: {data: {signedStates: [{turnNum: 3}]}}}],
     });
 
     const updatedC = await Channel.forId(channelId, wallet.knex);
     expect(updatedC.protocolState).toMatchObject({
-      latestSignedByMe: {turnNum: 2},
+      latestSignedByMe: {turnNum: 3},
       supported: {turnNum: 0},
     });
   });

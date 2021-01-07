@@ -232,21 +232,21 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
     const {outbox: join} = await b.joinChannel({channelId});
 
     await exchangeMessagesBetweenAandB([join], []);
+    // so the problem is that we don't end up ledger funded here
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
-
-    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
-
-    const {
-      allocations: [{allocationItems}],
-    } = ledger;
+    await interParticipantChannelResultsAreEqual(a, b);
 
     expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
       turnNum: 3,
       status: 'running',
     });
+
+    const ledger = getChannelResultFor(ledgerChannelId, channelResults);
+    const {
+      allocations: [{allocationItems}],
+    } = ledger;
 
     expect(allocationItems).toContainAllocationItem({
       destination: channelId,
@@ -608,11 +608,11 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
     expect(unfundedChannels).toMatchObject([
       {
-        turnNum: 1,
+        turnNum: 0,
         status: 'opening',
       },
       {
-        turnNum: 1,
+        turnNum: 0,
         status: 'opening',
       },
     ]);
@@ -655,7 +655,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
     const unfundedChannels = channelResults.filter(c => c.channelId === channelId);
 
-    expect(unfundedChannels).toMatchObject([{turnNum: 1, status: 'opening'}]);
+    expect(unfundedChannels).toMatchObject([{turnNum: 0, status: 'opening'}]);
     expect(allocationItems).not.toContainAllocationItem({
       destination: makeDestination(channelId),
       amount: BN.from(2),

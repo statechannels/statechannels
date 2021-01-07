@@ -50,6 +50,7 @@ import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
+import {ChainServiceRequest} from '../models/chain-service-request';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -164,7 +165,7 @@ export class Store {
     });
   }
 
-  async transaction<T>(callback: (tx: Transaction) => T): Promise<T> {
+  async transaction<T>(callback: (tx: Transaction) => Promise<T>): Promise<T> {
     return this.knex.transaction(async tx => callback(tx));
   }
 
@@ -173,7 +174,10 @@ export class Store {
     vars: StateVariables,
     tx: Transaction // Insist on a transaction since addSignedState requires it
   ): Promise<SignedState> {
-    if (!channel.signingWallet) {
+    const signingWallet =
+      channel.signingWallet || (await channel.$relatedQuery('signingWallet', tx).first());
+
+    if (!signingWallet) {
       throw new Error('No signing wallets');
     }
     const timer = timerFactory(this.timingMetrics, `signState ${channel.channelId}`);
@@ -186,9 +190,7 @@ export class Store {
       // Don't sign a new state with lower turnNum than already signed by you
       throw new StoreError(StoreError.reasons.staleState);
 
-    const signatureEntry = await timer('signing', async () =>
-      channel.signingWallet.signState(state)
-    );
+    const signatureEntry = await timer('signing', async () => signingWallet.signState(state));
     const signedState = {...state, signatures: [signatureEntry]};
 
     if (supported && shouldValidateTransition(state, channel)) {
@@ -266,6 +268,13 @@ export class Store {
       .where({'channels.channel_id': channelId})
       .withGraphJoined('funding')
       .withGraphJoined('chainServiceRequests')
+      .first();
+  }
+
+  async getLockedChannel(channelId: Bytes32, tx: Transaction): Promise<Channel | undefined> {
+    return Channel.query(tx)
+      .where({channelId})
+      .forUpdate()
       .first();
   }
 
@@ -688,6 +697,26 @@ export class Store {
 
   async nextNonce(signingAddresses: Address[]): Promise<number> {
     return await Nonce.next(this.knex, signingAddresses);
+  }
+
+  async fundingRequestExists(channelId: string, tx: Transaction): Promise<boolean> {
+    const request = await ChainServiceRequest.query(tx)
+      .where({channelId, request: 'fund'})
+      .first();
+
+    return !!request && request.isValid();
+  }
+
+  async getFunding(
+    channelId: string,
+    assetHolder: Address,
+    tx: Transaction
+  ): Promise<Funding | undefined> {
+    const funding = Funding.query(tx)
+      .where({channelId, assetHolder})
+      .first();
+
+    return funding;
   }
 
   dbAdmin(): DBAdmin {

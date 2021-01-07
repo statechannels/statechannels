@@ -27,7 +27,9 @@ beforeEach(async () => {
   await store.dbAdmin().truncateDB();
 });
 
-afterEach(async () => await store.dbAdmin().truncateDB());
+afterEach(async () => {
+  await store.dbAdmin().truncateDB();
+});
 
 describe(`pre-fund-setup phase`, () => {
   describe(`as participant 0`, () => {

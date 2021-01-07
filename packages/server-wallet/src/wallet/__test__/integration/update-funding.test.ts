@@ -29,17 +29,11 @@ beforeEach(async () => await seedAlicesSigningWallet(w.knex));
 it('sends the post fund setup when the funding event is provided for multiple channels', async () => {
   const c1 = channel({
     channelNonce: 1,
-    vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0, channelNonce: 1}),
-      stateWithHashSignedBy([bob()])({turnNum: 1, channelNonce: 1}),
-    ],
+    vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 0, channelNonce: 1})],
   });
   const c2 = channel({
     channelNonce: 2,
-    vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0, channelNonce: 2}),
-      stateWithHashSignedBy([bob()])({turnNum: 1, channelNonce: 2}),
-    ],
+    vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 0, channelNonce: 2})],
   });
   await Channel.query(w.knex).insert(c1);
   await Channel.query(w.knex).insert(c2);
@@ -90,30 +84,27 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   );
 
   expect(getChannelResultFor(channelIds[0], channelResults)).toMatchObject({
-    turnNum: 2,
+    turnNum: 0, // 3 not supported, so channelResult still has turnNum 0
   });
 
   expect(getChannelResultFor(channelIds[1], channelResults)).toMatchObject({
-    turnNum: 2,
+    turnNum: 0, // 3 not supported, so channelResult still has turnNum 0
   });
 
   expect(getSignedStateFor(channelIds[0], outbox)).toMatchObject({
-    turnNum: 2,
+    turnNum: 3,
     channelNonce: 1,
   });
 
   expect(getSignedStateFor(channelIds[1], outbox)).toMatchObject({
-    turnNum: 2,
+    turnNum: 3,
     channelNonce: 2,
   });
 });
 
 it('sends the post fund setup when the funding event is provided', async () => {
   const c = channel({
-    vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0}),
-      stateWithHashSignedBy([bob()])({turnNum: 1}),
-    ],
+    vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 0})],
   });
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
@@ -148,20 +139,17 @@ it('sends the post fund setup when the funding event is provided', async () => {
         params: {
           recipient: 'bob',
           sender: 'alice',
-          data: {signedStates: [{turnNum: 2}]},
+          data: {signedStates: [{turnNum: 3}]},
         },
       },
     ],
-    channelResults: [{channelId: c.channelId, turnNum: 2}],
+    channelResults: [{channelId: c.channelId, turnNum: 0}],
   });
 });
 
 it('emits new channel result when the funding event is provided via holdingUpdated', async () => {
   const c = channel({
-    vars: [
-      stateWithHashSignedBy([alice()])({turnNum: 0}),
-      stateWithHashSignedBy([bob()])({turnNum: 1}),
-    ],
+    vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 0})],
   });
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
@@ -196,5 +184,5 @@ it('emits new channel result when the funding event is provided via holdingUpdat
 
   await expect(Funding.getFundingAmount(w.knex, channelId, AddressZero)).resolves.toEqual('0x04');
 
-  expect(channelResult).toMatchObject({channelId: c.channelId, turnNum: 2});
+  expect(channelResult).toMatchObject({channelId: c.channelId, turnNum: 0});
 });
