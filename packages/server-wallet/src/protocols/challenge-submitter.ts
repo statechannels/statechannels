@@ -32,13 +32,15 @@ export class ChallengeSubmitter {
       const channel = await this.store.getLockedChannel(channelToLock, tx);
       if (!channel) {
         this.logger.warn(`No channel exists for channel ${channelToLock}`);
-        return false;
+        return;
       }
 
-      const {status} = channel.challengeStatus.toResult();
-      if (status !== 'No Challenge Detected') {
-        this.logger.warn('There is already a challange registered on chain');
-        return false;
+      if (
+        channel.challengeStatus &&
+        channel.challengeStatus.toResult().status !== 'No Challenge Detected'
+      ) {
+        this.logger.warn('There is already a challenge registered on chain');
+        return;
       }
 
       if (!channel.signingWallet) {
@@ -51,8 +53,8 @@ export class ChallengeSubmitter {
 
       await this.chainService.challenge([signedState], channel.signingWallet.privateKey);
 
+      await this.store.markObjectiveAsSucceeded(objective, tx);
       response.queueChannel(channel);
-      return true;
     });
   }
 }
