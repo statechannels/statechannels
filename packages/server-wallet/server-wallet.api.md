@@ -48,6 +48,7 @@ import { SimpleAllocation } from '@statechannels/wallet-core';
 import { State } from '@statechannels/wallet-core';
 import { StateVariables } from '@statechannels/wallet-core';
 import { StateWithHash } from '@statechannels/wallet-core';
+import { SubmitChallenge } from '@statechannels/wallet-core';
 import { SyncChannelParams } from '@statechannels/client-api-schema';
 import { Transaction } from 'objection';
 import { TransactionOrKnex } from 'objection';
