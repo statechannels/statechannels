@@ -5,7 +5,7 @@ import {Bytes32, Uint48} from '../type-aliases';
 
 export type ChallengeStatusResult =
   | {status: 'Challenge Finalized'; finalizedAt: number; finalizedBlockNumber: number}
-  | {status: 'Challenge Active'}
+  | {status: 'Challenge Active'; finalizesAt: number}
   | {status: 'No Challenge Detected'};
 
 interface RequiredColumns {
@@ -54,11 +54,14 @@ export class ChallengeStatus extends Model implements RequiredColumns {
     }
   }
   private static convertResult(result: ChallengeStatus | undefined): ChallengeStatusResult {
-    // Currently we aren't concerned with detecting a challenge so that status is omitted
     if (!result || result.finalizesAt === 0) {
       return {status: 'No Challenge Detected'};
+    }
+
+    const {finalizesAt, blockNumber} = result;
+    if (finalizesAt > blockNumber) {
+      return {status: 'Challenge Active', finalizesAt};
     } else {
-      const {finalizesAt, blockNumber} = result;
       return {
         status: 'Challenge Finalized',
         finalizedAt: finalizesAt,
