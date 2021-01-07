@@ -1,6 +1,6 @@
 import {BN} from '@statechannels/wallet-core';
 
-import {ChannelOpener} from '../open-channel';
+import {ChannelOpener} from '../channel-opener';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
