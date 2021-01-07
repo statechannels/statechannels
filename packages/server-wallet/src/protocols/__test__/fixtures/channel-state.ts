@@ -14,6 +14,7 @@ const defaultChannelState: ChannelStateWithSupported = {
   chainServiceRequests: [],
   fundingStrategy: 'Direct',
   directFundingStatus: 'Uncategorized',
+  challengeStatus: 'No Challenge Detected',
 };
 
 export const channelStateFixture = fixture(defaultChannelState);

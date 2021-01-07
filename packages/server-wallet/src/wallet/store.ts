@@ -51,6 +51,7 @@ import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
+import {ChallengeStatus} from '../models/challenge-status';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -268,6 +269,7 @@ export class Store {
       .where({'channels.channel_id': channelId})
       .withGraphJoined('funding')
       .withGraphJoined('chainServiceRequests')
+      .withGraphJoined('challengeStatus')
       .first();
   }
 
@@ -686,6 +688,18 @@ export class Store {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
   }
 
+  async updateFinalizationStatus(
+    channelId: string,
+    finalizedAt: number,
+    finalizedBlockNumber: number
+  ): Promise<void> {
+    await ChallengeStatus.updateChallengeStatus(
+      this.knex,
+      channelId,
+      finalizedAt,
+      finalizedBlockNumber
+    );
+  }
   async updateTransferredOut(
     channelId: string,
     assetHolder: Address,

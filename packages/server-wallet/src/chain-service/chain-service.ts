@@ -344,12 +344,10 @@ export class ChainService implements ChainServiceInterface {
   private async checkFinalizingChannels(block: providers.Block): Promise<void> {
     const finalizingChannel = this.finalizingChannels.shift();
     if (!finalizingChannel) return;
-
     if (finalizingChannel.finalizesAtS > block.timestamp) {
       this.addFinalizingChannel(finalizingChannel);
       return;
     }
-
     const {channelId} = finalizingChannel;
     const [, finalizesAt] = await this.nitroAdjudicator.getChannelStorage(channelId);
     if (finalizesAt === finalizingChannel.finalizesAtS) {
@@ -360,6 +358,8 @@ export class ChainService implements ChainServiceInterface {
       this.channelToSubscribers.get(channelId)?.map(subscriber =>
         subscriber.channelFinalized({
           channelId,
+          blockNumber: block.number,
+          finalizedAt: finalizingChannel.finalizesAtS,
         })
       );
       // Chain storage has a new finalizesAt timestamp
