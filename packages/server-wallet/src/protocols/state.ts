@@ -82,7 +82,7 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
     latestSignedByMe,
     support,
     directFundingStatus,
-    challengeStatus: challengeStatus,
+    challengeStatus,
   } = channelState;
 
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
