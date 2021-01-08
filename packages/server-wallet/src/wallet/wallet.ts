@@ -816,9 +816,15 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
   async challenge(challengeState: State): Promise<SingleChannelOutput> {
     const channelId = calculateChannelId(challengeState);
-    return await this.knex.transaction(async tx => {
-      const response = WalletResponse.initialize();
-      const dbObjective = await this.store.ensureObjective(
+    const response = WalletResponse.initialize();
+
+    await this.knex.transaction(async tx => {
+      const channel = await this.store.getChannel(channelId, tx);
+      if (!channel) {
+        throw new Error(`No channel found for channel id ${channelId}`);
+      }
+
+      const {objectiveId} = await this.store.ensureObjective(
         {
           type: 'SubmitChallenge',
           participants: [],
@@ -826,14 +832,15 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
         },
         tx
       );
-      await this.store.approveObjective(dbObjective.objectiveId, tx);
-      const channel = await this.store.getChannel(channelId, tx);
-      if (!channel) {
-        throw new Error(`No channel found for channel id ${channelId}`);
-      }
+
+      await this.store.approveObjective(objectiveId, tx);
+
       response.queueChannel(channel);
-      return response.singleChannelOutput();
     });
+
+    await this.takeActions([channelId], response);
+
+    return response.singleChannelOutput();
   }
   dbAdmin(): DBAdmin {
     return new DBAdmin(this.knex);

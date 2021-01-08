@@ -414,6 +414,7 @@ export class Store {
     } catch (e) {
       if (e.name !== 'UniqueViolationError') throw e;
     }
+
     return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
   }
 

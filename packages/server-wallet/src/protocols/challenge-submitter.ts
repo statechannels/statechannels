@@ -1,7 +1,10 @@
+import {SignedState, State} from '@statechannels/wallet-core';
+import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
+import {Channel} from '../models/channel';
 import {DBSubmitChallengeObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
@@ -49,12 +52,26 @@ export class ChallengeSubmitter {
 
       await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
 
-      const signedState = await this.store.signState(channel, challengeState, tx);
+      const signedState = await this.signState(channel, challengeState, tx);
 
       await this.chainService.challenge([signedState], channel.signingWallet.privateKey);
 
       await this.store.markObjectiveAsSucceeded(objective, tx);
       response.queueChannel(channel);
     });
+  }
+
+  /**
+   * A simple method that only produces a signature for a given state.
+   * It does not store the state or validate it in any way.
+   */
+  private async signState(channel: Channel, state: State, tx: Transaction): Promise<SignedState> {
+    const signingWallet =
+      channel.signingWallet || (await channel.$relatedQuery('signingWallet', tx).first());
+
+    if (!signingWallet) {
+      throw new Error('No signing wallets');
+    }
+    return {...state, signatures: [signingWallet.signState(state)]};
   }
 }
