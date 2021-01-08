@@ -246,7 +246,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     });
 
     await this.takeActions([channelId], response);
-
+    // TODO: In v0 of challenging the challengeStatus on the channel will not be updated
+    // We return a single channel result anwyays in case there are messages in the outbox
     return response.singleChannelOutput();
   }
 
