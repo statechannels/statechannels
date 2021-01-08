@@ -1,12 +1,13 @@
 import _ from 'lodash';
 
-import {defaultTestConfig, Wallet} from '../..';
-import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {ChallengeStatus} from '../../../models/challenge-status';
-import {Channel} from '../../../models/channel';
-import {channel} from '../../../models/__test__/fixtures/channel';
-import {alice, bob} from '../fixtures/signing-wallets';
-import {stateWithHashSignedBy} from '../fixtures/states';
+import {defaultTestConfig, Wallet} from '..';
+import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
+import {ChallengeStatus} from '../../models/challenge-status';
+import {Channel} from '../../models/channel';
+import {channel} from '../../models/__test__/fixtures/channel';
+
+import {alice, bob} from './fixtures/signing-wallets';
+import {stateWithHashSignedBy} from './fixtures/states';
 
 let w: Wallet;
 beforeAll(async () => {
