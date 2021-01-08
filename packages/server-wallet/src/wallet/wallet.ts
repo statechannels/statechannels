@@ -221,6 +221,35 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     }
   }
 
+  async challenge(challengeState: State): Promise<SingleChannelOutput> {
+    const channelId = calculateChannelId(challengeState);
+    const response = WalletResponse.initialize();
+
+    await this.knex.transaction(async tx => {
+      const channel = await this.store.getChannel(channelId, tx);
+      if (!channel) {
+        throw new Error(`No channel found for channel id ${channelId}`);
+      }
+
+      const {objectiveId} = await this.store.ensureObjective(
+        {
+          type: 'SubmitChallenge',
+          participants: [],
+          data: {targetChannelId: channelId, challengeState},
+        },
+        tx
+      );
+
+      await this.store.approveObjective(objectiveId, tx);
+
+      response.queueChannel(channel);
+    });
+
+    await this.takeActions([channelId], response);
+
+    return response.singleChannelOutput();
+  }
+
   public async getParticipant(): Promise<Participant | undefined> {
     let participant: Participant | undefined = undefined;
 
@@ -814,34 +843,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
     this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
 
-  async challenge(challengeState: State): Promise<SingleChannelOutput> {
-    const channelId = calculateChannelId(challengeState);
-    const response = WalletResponse.initialize();
-
-    await this.knex.transaction(async tx => {
-      const channel = await this.store.getChannel(channelId, tx);
-      if (!channel) {
-        throw new Error(`No channel found for channel id ${channelId}`);
-      }
-
-      const {objectiveId} = await this.store.ensureObjective(
-        {
-          type: 'SubmitChallenge',
-          participants: [],
-          data: {targetChannelId: channelId, challengeState},
-        },
-        tx
-      );
-
-      await this.store.approveObjective(objectiveId, tx);
-
-      response.queueChannel(channel);
-    });
-
-    await this.takeActions([channelId], response);
-
-    return response.singleChannelOutput();
-  }
   dbAdmin(): DBAdmin {
     return new DBAdmin(this.knex);
   }

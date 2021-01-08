@@ -57,12 +57,12 @@ export type WalletInterface = {
   syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
   syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
 
+  challenge(challengeState: State): Promise<SingleChannelOutput>;
+
   updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 
   mergeMessages(messages: Output[]): MultipleChannelOutput;
-
-  challenge(challengeState: State): Promise<SingleChannelOutput>;
 };
