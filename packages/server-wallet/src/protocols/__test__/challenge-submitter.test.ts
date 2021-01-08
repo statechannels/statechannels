@@ -1,4 +1,5 @@
 import {State} from '@statechannels/wallet-core';
+import _ from 'lodash';
 
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
@@ -8,11 +9,12 @@ import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {DBSubmitChallengeObjective} from '../../models/objective';
 import {ChallengeSubmitter} from '../challenge-submitter';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {ChallengeStatus} from '../../models/challenge-status';
+import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -35,18 +37,23 @@ afterEach(async () => await store.dbAdmin().truncateDB());
 describe(`challenge-submitter`, () => {
   it(`takes no action if there is an existing challenge`, async () => {
     const c = channel();
+
     await Channel.query(knex)
       .withGraphFetched('signingWallet')
       .insert(c);
 
     await ChallengeStatus.updateChallengeStatus(knex, c.channelId, 100, 200);
-    const state: State = {...c.channelConstants, ...stateVars()};
+
+    const challengeState = {
+      ...c.channelConstants,
+      ..._.pick(c.latest, ['appData', 'outcome', 'isFinal', 'turnNum']),
+    };
 
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {challengeState: state, targetChannelId: c.channelId},
+      data: {challengeState, targetChannelId: c.channelId},
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));
@@ -54,24 +61,30 @@ describe(`challenge-submitter`, () => {
   });
 
   it(`calls challenge when no challenge exists`, async () => {
-    const c = channel();
+    const c = channel({
+      vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+    });
+
     await Channel.query(knex)
       .withGraphFetched('signingWallet')
       .insert(c);
 
-    const state: State = {...c.channelConstants, ...stateVars()};
+    const challengeState = {
+      ...c.channelConstants,
+      ..._.pick(c.latest, ['appData', 'outcome', 'isFinal', 'turnNum']),
+    };
 
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {challengeState: state, targetChannelId: c.channelId},
+      data: {challengeState, targetChannelId: c.channelId},
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));
     await await crankAndAssert(obj, {
       callsChallenge: true,
-      challengeState: state,
+      challengeState,
       completesObj: true,
     });
   });
