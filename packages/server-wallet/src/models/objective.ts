@@ -45,10 +45,10 @@ export type DBSubmitChallengeObjective = {
   type: 'SubmitChallenge';
 };
 
-export function isDBSubmitChallengeObjective(
+export function isSharedObjective(
   objective: DBObjective
-): objective is DBSubmitChallengeObjective {
-  return objective.type === 'SubmitChallenge';
+): objective is DBOpenChannelObjective | DBCloseChannelObjective {
+  return objective.type === 'OpenChannel' || objective.type === 'CloseChannel';
 }
 
 /**
