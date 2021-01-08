@@ -383,6 +383,10 @@ export class Store {
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
+  /**
+   * Ensure the provided objective is stored in the database.
+   * Returns the objective as a DBObjective
+   */
   async ensureObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     switch (objective.type) {
       case 'OpenChannel':
@@ -412,6 +416,7 @@ export class Store {
     try {
       await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
     } catch (e) {
+      // If the objective exists our job is done
       if (e.name !== 'UniqueViolationError') throw e;
     }
 
@@ -458,6 +463,7 @@ export class Store {
     try {
       await ObjectiveModel.insert(objectiveToBeStored, tx);
     } catch (e) {
+      // If the objective exists our job is done
       if (e.name !== 'UniqueViolationError') throw e;
     }
 
@@ -499,6 +505,7 @@ export class Store {
     try {
       await ObjectiveModel.insert(objectiveToBeStored, tx);
     } catch (e) {
+      // If the objective exists our job is done
       if (e.name !== 'UniqueViolationError') throw e;
     }
 
