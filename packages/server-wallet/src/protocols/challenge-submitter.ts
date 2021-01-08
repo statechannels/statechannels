@@ -50,6 +50,15 @@ export class ChallengeSubmitter {
         throw new Error(`No signing wallet fetched for channel ${channelToLock}`);
       }
 
+      const existingRequest = await ChainServiceRequest.query(tx)
+        .where({channelId: channelToLock, request: 'challenge'})
+        .first();
+
+      if (existingRequest) {
+        this.logger.warn('There is already an existing request', existingRequest);
+        return;
+      }
+
       await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
 
       const signedState = await this.signState(channel, challengeState, tx);
