@@ -234,7 +234,10 @@ export class Store {
     const timer = timerFactory(this.timingMetrics, `addMyState ${channel.channelId}`);
 
     channel.vars = await timer('adding state', async () => addState(channel.vars, signedState));
-    channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
+    channel.vars = clearOldStates(
+      channel.vars,
+      channel.isSupported ? channel.latestSupportProof : undefined
+    );
 
     await timer('validating invariants', async () =>
       validateInvariants(channel.vars, channel.myAddress)
@@ -624,7 +627,10 @@ export class Store {
     channel.vars = syncTimer('adding state', () => addState(channel.vars, state));
 
     // Do 'garbage collection' by removing unnecessary / stale states
-    channel.vars = clearOldStates(channel.vars, channel.isSupported ? channel.support : undefined);
+    channel.vars = clearOldStates(
+      channel.vars,
+      channel.isSupported ? channel.latestSupportProof : undefined
+    );
 
     // Do checks on the Channel object before inserting into the database
     syncTimer('validating invariants', () => validateInvariants(channel.vars, channel.myAddress));
@@ -775,7 +781,7 @@ async function createChannel(
   if (fundingLedgerChannelId) {
     const ledger = await Channel.forId(fundingLedgerChannelId, txOrKnex);
     if (!ledger) throw new StoreError(StoreError.reasons.invalidFundingLedgerChannelId);
-    if (ledger.latestSupportedState && _.some(ledger.support, 'isFinal'))
+    if (ledger.latestSupportedState && _.some(ledger.latestSupportProof, 'isFinal'))
       throw new StoreError(StoreError.reasons.expiredFundingLedgerChannelId);
   }
 

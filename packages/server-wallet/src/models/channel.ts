@@ -231,7 +231,7 @@ export class Channel extends Model implements RequiredColumns {
       latestSupportedState: supported,
       latest,
       latestSignedByMe,
-      support,
+      latestSupportProof: support,
       participants,
       chainServiceRequests,
       fundingStrategy,
@@ -315,17 +315,21 @@ export class Channel extends Model implements RequiredColumns {
     return !!this._latestSupportedState;
   }
 
-  public get support(): Array<SignedStateWithHash> {
+  /**
+   * The support proof for the latest supported state, if one exists, [] otherwise
+   * TODO: this seems like a thin public wrapper for _latestSupportedState. But why does it merge this.channelConstants? The return type is identical.
+   */
+  public get latestSupportProof(): Array<SignedStateWithHash> {
     return this._latestSupportProof.map(s => ({...this.channelConstants, ...s}));
   }
 
   get hasConclusionProof(): boolean {
-    return this.isSupported && this.support.every(s => s.isFinal);
+    return this.isSupported && this.latestSupportProof.every(s => s.isFinal);
   }
 
   /**
    * The latest supported state, if one exists
-   * TODO: this seems like a thin public wrapper for _supported. But thwy does it merge this.channelConstants?
+   * TODO: this seems like a thin public wrapper for _supported. But why does it merge this.channelConstants? The return type is identical.
    */
   get latestSupportedState(): SignedStateWithHash | undefined {
     const vars = this._latestSupportedState;
