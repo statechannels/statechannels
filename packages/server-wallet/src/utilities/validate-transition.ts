@@ -2,6 +2,7 @@ import _ from 'lodash';
 import {SignedState, StateWithHash, toNitroState, unreachable} from '@statechannels/wallet-core';
 import {requireValidProtocolTransition, Status} from '@statechannels/nitro-protocol';
 import {Logger} from 'pino';
+import {BigNumber} from 'ethers';
 
 import {validateAppTransitionWithEVM} from '../evm-validator';
 import {Bytes} from '../type-aliases';
@@ -40,10 +41,15 @@ export function validateTransition(
       case Status.True:
         return true;
       case Status.NeedToCheckApp:
-        return (
-          skipAppTransitionCheck || // TODO this should be removed as soon as possible
-          validateAppTransitionWithEVM(toNitroState(fromState), toNitroState(toState), bytecode)
-        );
+        // fail early for null apps. TODO this doesn't really belong here, I am doing this to debug
+        return BigNumber.from(fromState.appDefinition).isZero()
+          ? false
+          : skipAppTransitionCheck || // TODO this should be removed as soon as possible
+              validateAppTransitionWithEVM(
+                toNitroState(fromState),
+                toNitroState(toState),
+                bytecode
+              );
       default:
         return unreachable(status);
     }
