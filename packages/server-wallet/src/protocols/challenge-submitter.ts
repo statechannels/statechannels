@@ -4,6 +4,7 @@ import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
+import {ChallengeStatus} from '../models/challenge-status';
 import {Channel} from '../models/channel';
 import {DBSubmitChallengeObjective} from '../models/objective';
 import {Store} from '../wallet/store';
@@ -64,7 +65,11 @@ export class ChallengeSubmitter {
       const signedState = await this.signState(channel, challengeState, tx);
 
       await this.chainService.challenge([signedState], channel.signingWallet.privateKey);
+      // TODO: Store the actual finalizesAt instead of 0
+      await this.store.insertChallengeStatus(channelToLock, 0, challengeState);
 
+      // TODO: Store the actual finalizesAt instead of 0
+      await ChallengeStatus.insertChallengeStatus(tx, channelToLock, 0, challengeState);
       await this.store.markObjectiveAsSucceeded(objective, tx);
       response.queueChannel(channel);
     });

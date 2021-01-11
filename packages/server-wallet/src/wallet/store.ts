@@ -25,6 +25,7 @@ import {
   PrivateKey,
   SubmitChallenge,
   isSubmitChallenge,
+  State,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -726,17 +727,16 @@ export class Store {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
   }
 
-  async updateFinalizationStatus(
+  async insertChallengeStatus(
     channelId: string,
     finalizedAt: number,
-    finalizedBlockNumber: number
+    challengeState: State
   ): Promise<void> {
-    await ChallengeStatus.updateChallengeStatus(
-      this.knex,
-      channelId,
-      finalizedAt,
-      finalizedBlockNumber
-    );
+    await ChallengeStatus.insertChallengeStatus(this.knex, channelId, finalizedAt, challengeState);
+  }
+
+  async setFinalizedChallengeStatus(channelId: string, blockNumber: number): Promise<void> {
+    await ChallengeStatus.setFinalized(this.knex, channelId, blockNumber);
   }
   async updateTransferredOut(
     channelId: string,
