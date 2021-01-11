@@ -316,13 +316,17 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get support(): Array<SignedStateWithHash> {
-    return this._support.map(s => ({...this.channelConstants, ...s}));
+    return this._latestSupportProof.map(s => ({...this.channelConstants, ...s}));
   }
 
   get hasConclusionProof(): boolean {
     return this.isSupported && this.support.every(s => s.isFinal);
   }
 
+  /**
+   * The latest supported state, if one exists
+   * TODO: this seems like a thin public wrapper for _supported. But thwy does it merge this.channelConstants?
+   */
   get supported(): SignedStateWithHash | undefined {
     const vars = this._supported;
     if (vars) return {...this.channelConstants, ...vars};
@@ -343,8 +347,11 @@ export class Channel extends Model implements RequiredColumns {
     return {...this.channelConstants, ...this.signedStates[0]};
   }
 
+  /**
+   * The latest supported state, if one exists
+   */
   private get _supported(): SignedStateWithHash | undefined {
-    const latestSupport = this._support;
+    const latestSupport = this._latestSupportProof;
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
 
@@ -422,7 +429,7 @@ export class Channel extends Model implements RequiredColumns {
   /**
    * The support proof for the latest supported state, if one exists, [] otherwise
    */
-  private get _support(): Array<SignedStateWithHash> {
+  private get _latestSupportProof(): Array<SignedStateWithHash> {
     let support: Array<SignedStateWithHash> = [];
 
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
