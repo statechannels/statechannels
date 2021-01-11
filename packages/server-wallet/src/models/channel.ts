@@ -290,6 +290,9 @@ export class Channel extends Model implements RequiredColumns {
     };
   }
 
+  /**
+   * The signed states for this channel, sorted by decreasing turn number
+   */
   public get sortedStates(): Array<SignedStateWithHash> {
     return this.vars
       .map(s => ({...this.channelConstants, ...s}))
@@ -416,7 +419,9 @@ export class Channel extends Model implements RequiredColumns {
   get nParticipants(): number {
     return this.participants.length;
   }
-
+  /**
+   * The support proof for the latest supported state, if one exists, [] otherwise
+   */
   private get _support(): Array<SignedStateWithHash> {
     let support: Array<SignedStateWithHash> = [];
 
@@ -434,6 +439,8 @@ export class Channel extends Model implements RequiredColumns {
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
       // If the mover hasn't signed the state then we know it cannot be part of the support
+      // GEORGE: what if we have 1,2 signed by A,BC respectively? This is valid, but 1 was not signed by it's mover.
+      // It's possible (and OK?) to specialize to i) strict turn-taking and ii) unanimous countersigning; and to not support iii) in between cases
       if (signedState.signatures.some(s => s.signer === moverForThisTurn)) {
         support.push(signedState);
 
