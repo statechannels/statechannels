@@ -47,6 +47,6 @@ export class PushMessageError extends WalletError {
     reason: Values<typeof PushMessageError.reasons>,
     public readonly data: {thisWalletVersion: string; payloadWalletVersion: string; cause: Error}
   ) {
-    super(reason);
+    super(reason, data);
   }
 }
