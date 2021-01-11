@@ -435,6 +435,7 @@ export class Channel extends Model implements RequiredColumns {
   }
   /**
    * The support proof for the latest supported state, if one exists, [] otherwise
+   * TODO: this is potentially redundant, since we already validated transitions when we stored the states
    */
   private get _latestSupportProof(): Array<SignedStateWithHash> {
     // TODO: activate these fields for proper application checks (may be resource hungry)
