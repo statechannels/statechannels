@@ -242,14 +242,11 @@ it("Doesn't store stale states", async () => {
   expect(channelsBefore).toHaveLength(0);
 
   const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
-  try {
-    await pushMessage({
-      walletVersion: WALLET_VERSION,
-      signedStates,
-    });
-  } catch (err) {
-    throw err instanceof PushMessageError ? err.data.cause : err;
-  }
+
+  await pushMessage({
+    walletVersion: WALLET_VERSION,
+    signedStates,
+  });
 
   const afterFirst = await Channel.query(wallet.knex).select();
 
