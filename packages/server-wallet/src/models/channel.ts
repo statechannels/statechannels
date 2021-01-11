@@ -435,7 +435,6 @@ export class Channel extends Model implements RequiredColumns {
   }
   /**
    * The support proof for the latest supported state, if one exists, [] otherwise
-   * TODO: this is potentially redundant, since we already validated transitions when we stored the states
    */
   private get _latestSupportProof(): Array<SignedStateWithHash> {
     // TODO: activate these fields for proper application checks (may be resource hungry)
@@ -447,6 +446,8 @@ export class Channel extends Model implements RequiredColumns {
 
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
     let previousState;
+
+    // TODO: this is potentially redundant, since we already validated transitions when we stored the states
 
     for (const signedState of this.sortedStates) {
       // If there is not a valid transition we know there cannot be a valid support proof
