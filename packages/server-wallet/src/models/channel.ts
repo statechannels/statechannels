@@ -228,7 +228,7 @@ export class Channel extends Model implements RequiredColumns {
     const {
       channelId,
       myIndex,
-      supported,
+      latestSupportedState: supported,
       latest,
       latestSignedByMe,
       support,
@@ -304,15 +304,15 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   public get myTurn(): boolean {
-    if (this.supported) {
-      return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
+    if (this.latestSupportedState) {
+      return (this.latestSupportedState.turnNum + 1) % this.participants.length === this.myIndex;
     } else {
       return this.myIndex === 0;
     }
   }
 
   get isSupported(): boolean {
-    return !!this._supported;
+    return !!this._latestSupportedState;
   }
 
   public get support(): Array<SignedStateWithHash> {
@@ -327,8 +327,8 @@ export class Channel extends Model implements RequiredColumns {
    * The latest supported state, if one exists
    * TODO: this seems like a thin public wrapper for _supported. But thwy does it merge this.channelConstants?
    */
-  get supported(): SignedStateWithHash | undefined {
-    const vars = this._supported;
+  get latestSupportedState(): SignedStateWithHash | undefined {
+    const vars = this._latestSupportedState;
     if (vars) return {...this.channelConstants, ...vars};
     else return undefined;
   }
@@ -350,7 +350,7 @@ export class Channel extends Model implements RequiredColumns {
   /**
    * The latest supported state, if one exists
    */
-  private get _supported(): SignedStateWithHash | undefined {
+  private get _latestSupportedState(): SignedStateWithHash | undefined {
     const latestSupport = this._latestSupportProof;
     return latestSupport.length === 0 ? undefined : latestSupport[0];
   }
@@ -405,14 +405,16 @@ export class Channel extends Model implements RequiredColumns {
    */
   public get prefundSupported(): boolean {
     // all states are later than the prefund, so we just check if have any supported state
-    return !!this.supported;
+    return !!this.latestSupportedState;
   }
 
   /**
    * Is a postfund state (or later) supported
    */
   public get postfundSupported(): boolean {
-    return !!this.supported && this.supported.turnNum >= 2 * this.nParticipants - 1;
+    return (
+      !!this.latestSupportedState && this.latestSupportedState.turnNum >= 2 * this.nParticipants - 1
+    );
   }
 
   public get isDirectFunded(): boolean {

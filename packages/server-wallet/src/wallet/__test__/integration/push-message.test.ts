@@ -125,7 +125,7 @@ it('adds signatures to existing states', async () => {
 
   expect(channelsAfter).toHaveLength(1);
   expect(channelsAfter[0].vars).toHaveLength(1);
-  const signatures = channelsAfter[0].supported?.signatures.map(s => s.signer);
+  const signatures = channelsAfter[0].latestSupportedState?.signatures.map(s => s.signer);
   expect(signatures).toContain(alice().address);
   expect(signatures).toContain(bob().address);
 });
@@ -241,8 +241,8 @@ it("Doesn't store stale states", async () => {
 
   expect(afterFirst).toHaveLength(1);
   expect(afterFirst[0].vars).toHaveLength(1);
-  expect(afterFirst[0].supported).toBeTruthy();
-  expect(afterFirst[0].supported?.turnNum).toEqual(five);
+  expect(afterFirst[0].latestSupportedState).toBeTruthy();
+  expect(afterFirst[0].latestSupportedState?.turnNum).toEqual(five);
 
   await wallet.pushMessage({
     walletVersion: WALLET_VERSION,
@@ -292,7 +292,7 @@ describe('when the application protocol returns an action', () => {
     );
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
-    expect(c.supported).toBeUndefined();
+    expect(c.latestSupportedState).toBeUndefined();
     const {channelId} = c;
 
     const p = wallet.pushMessage({

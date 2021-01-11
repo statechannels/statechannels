@@ -70,7 +70,7 @@ export class DirectFunder {
   }
 
   private assetHolder(channel: Channel): Address {
-    const supported = channel.supported;
+    const supported = channel.latestSupportedState;
     if (!supported) {
       throw new Error(`Channel passed to DirectFunder has no supported state`);
     }
@@ -95,7 +95,7 @@ export class DirectFunder {
      *  2. We only care about a single destination.
      * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
      */
-    const supported = channel.supported;
+    const supported = channel.latestSupportedState;
     if (!supported) {
       throw new Error(`Channel passed to DriectFunder has no supported state`);
     }

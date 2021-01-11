@@ -88,11 +88,17 @@ export class LedgerFunder {
 }
 
 function doesLedgerFundApp(ledger: Channel, app: Channel): boolean {
-  if (!ledger.supported) return false;
-  if (!app.supported) return false;
+  if (!ledger.latestSupportedState) return false;
+  if (!app.latestSupportedState) return false;
 
-  const {allocationItems: ledgerFunding} = checkThat(ledger.supported.outcome, isSimpleAllocation);
-  const {allocationItems: appFunding} = checkThat(app.supported.outcome, isSimpleAllocation);
+  const {allocationItems: ledgerFunding} = checkThat(
+    ledger.latestSupportedState.outcome,
+    isSimpleAllocation
+  );
+  const {allocationItems: appFunding} = checkThat(
+    app.latestSupportedState.outcome,
+    isSimpleAllocation
+  );
   const targetFunding = appFunding.map(a => a.amount).reduce(BN.add, BN.from(0));
 
   return _.some(

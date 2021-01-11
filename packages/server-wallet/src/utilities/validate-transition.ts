@@ -8,7 +8,7 @@ import {Bytes} from '../type-aliases';
 import {Channel} from '../models/channel';
 
 export function shouldValidateTransition(incomingState: StateWithHash, channel: Channel): boolean {
-  const {supported, isLedger, fundingStrategy} = channel;
+  const {latestSupportedState: supported, isLedger, fundingStrategy} = channel;
   // TODO: This is a temporary workaround for https://github.com/statechannels/statechannels/issues/2842
   // We should figure out a smarter way of handling this
   if (fundingStrategy == 'Fake' && incomingState.turnNum === 3) {

@@ -185,7 +185,7 @@ export class Store {
 
     const state = addHash({...channel.channelConstants, ...vars});
 
-    const {supported, latestSignedByMe} = channel;
+    const {latestSupportedState: supported, latestSignedByMe} = channel;
 
     if (latestSignedByMe && latestSignedByMe.turnNum >= state.turnNum)
       // Don't sign a new state with lower turnNum than already signed by you
@@ -208,7 +208,7 @@ export class Store {
         ))
       ) {
         throw new StoreError('Invalid state transition', {
-          from: channel.supported,
+          from: channel.latestSupportedState,
           to: signedState,
         });
       }
@@ -599,7 +599,7 @@ export class Store {
       (await Channel.forId(channelId, tx)) ||
       (await createChannel(state, 'Unknown', undefined, tx));
 
-    const {supported} = channel;
+    const {latestSupportedState: supported} = channel;
     if (supported && shouldValidateTransition(state, channel)) {
       const bytecode = await this.getBytecode(supported.appDefinition, tx);
 
@@ -775,7 +775,7 @@ async function createChannel(
   if (fundingLedgerChannelId) {
     const ledger = await Channel.forId(fundingLedgerChannelId, txOrKnex);
     if (!ledger) throw new StoreError(StoreError.reasons.invalidFundingLedgerChannelId);
-    if (ledger.supported && _.some(ledger.support, 'isFinal'))
+    if (ledger.latestSupportedState && _.some(ledger.support, 'isFinal'))
       throw new StoreError(StoreError.reasons.expiredFundingLedgerChannelId);
   }
 
