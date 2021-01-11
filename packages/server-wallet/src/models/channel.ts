@@ -25,6 +25,7 @@ import {
 } from '../protocols/state';
 import {WalletError, Values} from '../errors/wallet-error';
 import {dropNonVariables} from '../state-utils';
+import {validateTransition} from '../utilities/validate-transition';
 
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
@@ -418,6 +419,11 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   private get _support(): Array<SignedStateWithHash> {
+    // TODO: activate these fields for proper application checks (may be resource hungry)
+    const logger = undefined;
+    const byteCode = undefined;
+    const skipAppTransition = true;
+
     let support: Array<SignedStateWithHash> = [];
 
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
@@ -426,7 +432,10 @@ export class Channel extends Model implements RequiredColumns {
     for (const signedState of this.sortedStates) {
       // If there is not a valid transition we know there cannot be a valid support
       // so we clear out what we have and start at the current signed state
-      if (previousState && !this.validChain(signedState, previousState)) {
+      if (
+        previousState &&
+        !validateTransition(signedState, previousState, logger, byteCode, skipAppTransition)
+      ) {
         support = [];
         participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
       }
@@ -447,27 +456,6 @@ export class Channel extends Model implements RequiredColumns {
       previousState = signedState;
     }
     return [];
-  }
-  // This is a simple check based on _requireValidTransition from NitroProtocol
-  // We will eventually want to perform a proper validTransition check
-  // but we will have to be careful where we do that to prevent eating up a ton of cpu
-  private validChain(firstState: SignedState, secondState: SignedState): boolean {
-    if (firstState.turnNum + 1 !== secondState.turnNum) {
-      return false;
-    }
-    if (secondState.isFinal) {
-      return outcomesEqual(firstState.outcome, secondState.outcome);
-    }
-    if (secondState.turnNum < 2 * this.nParticipants) {
-      return (
-        outcomesEqual(firstState.outcome, secondState.outcome) &&
-        firstState.appData === secondState.appData
-      );
-    }
-    if (secondState.appDefinition === '0x00') {
-      return false; // running apps with 0x00 need all signatures, no valid chain
-    }
-    return true;
   }
 
   public get otherParticipants(): Participant[] {
