@@ -464,7 +464,7 @@ export class Channel extends Model implements RequiredColumns {
         firstState.appData === secondState.appData
       );
     }
-    if (secondState.appData === '0x00') {
+    if (secondState.appDefinition === '0x00') {
       return false; // running apps with 0x00 need all signatures, no valid chain
     }
     return true;
