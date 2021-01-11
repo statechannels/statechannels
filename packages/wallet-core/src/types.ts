@@ -137,13 +137,23 @@ export type CloseLedger = _Objective<
   }
 >;
 
-export type Objective =
+export type SubmitChallenge = _Objective<
+  'SubmitChallenge',
+  {
+    targetChannelId: string;
+    challengeState: State;
+  }
+>;
+
+export type SharedObjective =
   | OpenChannel
   | CloseChannel
   | VirtuallyFund
   | FundGuarantor
   | FundLedger
   | CloseLedger;
+
+export type Objective = SharedObjective | SubmitChallenge;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
@@ -153,12 +163,14 @@ export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');
 export const isCloseLedger = guard<CloseLedger>('CloseLedger');
+export const isSubmitChallenge = guard<SubmitChallenge>('SubmitChallenge');
 
 export function objectiveId(objective: Objective): string {
   switch (objective.type) {
     case 'OpenChannel':
     case 'CloseChannel':
     case 'VirtuallyFund':
+    case 'SubmitChallenge':
       return [objective.type, objective.data.targetChannelId].join('-');
     case 'FundGuarantor':
       return [objective.type, objective.data.guarantorId].join('-');
@@ -181,7 +193,7 @@ export type ChannelRequest = GetChannel | ProposeLedgerUpdate;
 export interface Payload {
   walletVersion: string;
   signedStates?: SignedState[];
-  objectives?: Objective[];
+  objectives?: SharedObjective[];
   requests?: ChannelRequest[];
 }
 

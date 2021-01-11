@@ -6,11 +6,11 @@ import {
   ChannelConstants,
   makeAddress,
   makePrivateKey,
-  Objective,
   Outcome,
   Participant,
   PrivateKey,
   serializeState,
+  SharedObjective,
   SignedStateWithHash,
   simpleEthAllocation,
   State,
@@ -155,7 +155,7 @@ export class TestChannel {
     return calculateChannelId(this.channelConstants);
   }
 
-  public get openChannelObjective(): Objective {
+  public get openChannelObjective(): SharedObjective {
     return {
       participants: this.participants,
       type: 'OpenChannel',
@@ -166,7 +166,7 @@ export class TestChannel {
     };
   }
 
-  public get closeChannelObjective(): Objective {
+  public get closeChannelObjective(): SharedObjective {
     return {
       participants: this.participants,
       type: 'CloseChannel',

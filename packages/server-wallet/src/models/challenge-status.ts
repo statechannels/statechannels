@@ -1,4 +1,5 @@
 import Knex from 'knex';
+import _ from 'lodash';
 import {Model} from 'objection';
 
 import {Bytes32, Uint48} from '../type-aliases';
@@ -56,7 +57,7 @@ export class ChallengeStatus extends Model implements RequiredColumns {
     }
   }
   private static convertResult(result: ChallengeStatus | undefined): ChallengeStatusResult {
-    if (!result || result.finalizesAt === 0) {
+    if (!result || _.isEmpty(result) || result.finalizesAt === 0) {
       return {status: 'No Challenge Detected'};
     }
 

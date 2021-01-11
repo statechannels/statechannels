@@ -5,7 +5,7 @@ import {Message as WireMessage, SignedState as WireState} from '@statechannels/w
 
 import {Notice, Outgoing} from '../protocols/actions';
 import {Channel} from '../models/channel';
-import {DBObjective, toWireObjective} from '../models/objective';
+import {DBObjective, isSharedObjective, toWireObjective} from '../models/objective';
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
@@ -84,22 +84,23 @@ export class WalletResponse {
     participants: Participant[]
   ): void {
     const myParticipantId = participants[myIndex].participantId;
-
-    participants.forEach((p, i) => {
-      if (i !== myIndex) {
-        this.queuedMessages.push(
-          serializeMessage(
-            WALLET_VERSION,
-            {
-              walletVersion: WALLET_VERSION,
-              objectives: [toWireObjective(objective)],
-            },
-            p.participantId,
-            myParticipantId
-          )
-        );
-      }
-    });
+    if (isSharedObjective(objective)) {
+      participants.forEach((p, i) => {
+        if (i !== myIndex) {
+          this.queuedMessages.push(
+            serializeMessage(
+              WALLET_VERSION,
+              {
+                walletVersion: WALLET_VERSION,
+                objectives: [toWireObjective(objective)],
+              },
+              p.participantId,
+              myParticipantId
+            )
+          );
+        }
+      });
+    }
   }
 
   /**

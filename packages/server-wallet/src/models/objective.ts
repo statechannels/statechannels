@@ -1,4 +1,12 @@
-import {objectiveId, Objective, OpenChannel, CloseChannel} from '@statechannels/wallet-core';
+import {
+  objectiveId,
+  Objective,
+  OpenChannel,
+  CloseChannel,
+  State,
+  SharedObjective,
+  SubmitChallenge,
+} from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
 
@@ -7,12 +15,14 @@ function extractReferencedChannels(objective: Objective): string[] {
     case 'OpenChannel':
     case 'CloseChannel':
     case 'VirtuallyFund':
+    case 'SubmitChallenge':
       return [objective.data.targetChannelId];
     case 'FundGuarantor':
       return [objective.data.guarantorId];
     case 'FundLedger':
     case 'CloseLedger':
       return [objective.data.ledgerId];
+
     default:
       return [];
   }
@@ -28,15 +38,34 @@ export type SupportedWireObjective = OpenChannel | CloseChannel;
 export type DBOpenChannelObjective = OpenChannel & {objectiveId: string; status: ObjectiveStatus};
 export type DBCloseChannelObjective = CloseChannel & {objectiveId: string; status: ObjectiveStatus};
 
+export type DBSubmitChallengeObjective = {
+  data: {targetChannelId: string; challengeState: State};
+  objectiveId: string;
+  status: ObjectiveStatus;
+  type: 'SubmitChallenge';
+};
+
+export function isSharedObjective(
+  objective: DBObjective
+): objective is DBOpenChannelObjective | DBCloseChannelObjective {
+  return objective.type === 'OpenChannel' || objective.type === 'CloseChannel';
+}
+
 /**
  * A DBObjective is a wire objective with a status and an objectiveId
  *
  * Limited to 'OpenChannel' and 'CloseChannel', which are the only objectives
  * that are currently supported by the server wallet
  */
-export type DBObjective = DBOpenChannelObjective | DBCloseChannelObjective;
+export type DBObjective =
+  | DBOpenChannelObjective
+  | DBCloseChannelObjective
+  | DBSubmitChallengeObjective;
 
-export const toWireObjective = (dbObj: DBObjective): Objective => {
+export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
+  if (dbObj.type === 'SubmitChallenge') {
+    throw new Error('SubmitChallenge objectives are not supported as wire objectives');
+  }
   return _.omit(dbObj, ['objectiveId', 'status']);
 };
 
@@ -85,7 +114,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: SupportedWireObjective & {
+    objectiveToBeStored: (SupportedWireObjective | SubmitChallenge) & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex

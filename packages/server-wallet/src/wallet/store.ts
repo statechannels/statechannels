@@ -23,6 +23,8 @@ import {
   Address,
   Destination,
   PrivateKey,
+  SubmitChallenge,
+  isSubmitChallenge,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -276,6 +278,8 @@ export class Store {
   async getAndLockChannel(channelId: Bytes32, tx: Transaction): Promise<Channel | undefined> {
     return Channel.query(tx)
       .where({channelId})
+      .withGraphJoined('challengeStatus')
+      .withGraphFetched('signingWallet')
       .forUpdate()
       .first();
   }
@@ -329,7 +333,10 @@ export class Store {
       }
 
       const objectiveChannelIds = storedObjectives
-        .filter(objective => isOpenChannel(objective) || isCloseChannel(objective))
+        .filter(
+          objective =>
+            isSubmitChallenge(objective) || isOpenChannel(objective) || isCloseChannel(objective)
+        )
         .map(objective => objective.data.targetChannelId);
 
       return {
@@ -376,15 +383,44 @@ export class Store {
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
+  /**
+   * Ensure the provided objective is stored in the database.
+   * Returns the objective as a DBObjective
+   */
   async ensureObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
     switch (objective.type) {
       case 'OpenChannel':
         return this.ensureOpenChannelObjective(objective, tx);
       case 'CloseChannel':
         return this.ensureCloseChannelObjective(objective, tx);
+
+      case 'SubmitChallenge':
+        return this.ensureSubmitChallengeObjective(objective, tx);
       default:
         throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
+  }
+
+  private async ensureSubmitChallengeObjective(
+    objective: SubmitChallenge,
+    tx: Transaction
+  ): Promise<DBObjective> {
+    const {data} = objective;
+    const {targetChannelId} = data;
+    // fetch the channel to make sure the channel exists
+    const channel = await this.getChannelState(targetChannelId, tx);
+    if (!channel) {
+      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
+    }
+
+    try {
+      await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
+    } catch (e) {
+      // If the objective exists our job is done
+      if (e.name !== 'UniqueViolationError') throw e;
+    }
+
+    return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
   }
 
   private async ensureOpenChannelObjective(
@@ -427,6 +463,7 @@ export class Store {
     try {
       await ObjectiveModel.insert(objectiveToBeStored, tx);
     } catch (e) {
+      // If the objective exists our job is done
       if (e.name !== 'UniqueViolationError') throw e;
     }
 
@@ -468,6 +505,7 @@ export class Store {
     try {
       await ObjectiveModel.insert(objectiveToBeStored, tx);
     } catch (e) {
+      // If the objective exists our job is done
       if (e.name !== 'UniqueViolationError') throw e;
     }
 

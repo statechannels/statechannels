@@ -20,6 +20,8 @@ import {
   PrivateKey,
   makeDestination,
   deserializeRequest,
+  calculateChannelId,
+  State,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -217,6 +219,36 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
           mine.nonce
         );
     }
+  }
+
+  async challenge(challengeState: State): Promise<SingleChannelOutput> {
+    const channelId = calculateChannelId(challengeState);
+    const response = WalletResponse.initialize();
+
+    await this.knex.transaction(async tx => {
+      const channel = await this.store.getChannel(channelId, tx);
+      if (!channel) {
+        throw new Error(`No channel found for channel id ${channelId}`);
+      }
+
+      const {objectiveId} = await this.store.ensureObjective(
+        {
+          type: 'SubmitChallenge',
+          participants: [],
+          data: {targetChannelId: channelId, challengeState},
+        },
+        tx
+      );
+
+      await this.store.approveObjective(objectiveId, tx);
+
+      response.queueChannel(channel);
+    });
+
+    await this.takeActions([channelId], response);
+    // TODO: In v0 of challenging the challengeStatus on the channel will not be updated
+    // We return a single channel result anwyays in case there are messages in the outbox
+    return response.singleChannelOutput();
   }
 
   public async getParticipant(): Promise<Participant | undefined> {
