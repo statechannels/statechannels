@@ -41,15 +41,10 @@ export function validateTransition(
       case Status.True:
         return true;
       case Status.NeedToCheckApp:
-        // fail early for null apps. TODO this doesn't really belong here, I am doing this to debug
-        return BigNumber.from(fromState.appDefinition).isZero()
-          ? false
-          : skipAppTransitionCheck || // TODO this should be removed as soon as possible
-              validateAppTransitionWithEVM(
-                toNitroState(fromState),
-                toNitroState(toState),
-                bytecode
-              );
+        return (
+          skipAppTransitionCheck || // TODO this should be removed as soon as possible
+          validateAppTransitionWithEVM(toNitroState(fromState), toNitroState(toState), bytecode)
+        );
       default:
         return unreachable(status);
     }
