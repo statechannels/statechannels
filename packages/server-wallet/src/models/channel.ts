@@ -436,7 +436,7 @@ export class Channel extends Model implements RequiredColumns {
    * The support proof for the latest supported state, if one exists, [] otherwise
    */
   private get _latestSupportProof(): Array<SignedStateWithHash> {
-    let support: Array<SignedStateWithHash> = [];
+    let supportProof: Array<SignedStateWithHash> = [];
 
     let participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
     let previousState;
@@ -445,7 +445,7 @@ export class Channel extends Model implements RequiredColumns {
       // If there is not a valid transition we know there cannot be a valid support
       // so we clear out what we have and start at the current signed state
       if (previousState && !this.validChain(signedState, previousState)) {
-        support = [];
+        supportProof = [];
         participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
       }
       const moverIndex = signedState.turnNum % this.nParticipants;
@@ -455,12 +455,12 @@ export class Channel extends Model implements RequiredColumns {
       // GEORGE: what if we have 1,2 signed by A,BC respectively? This is valid, but 1 was not signed by it's mover.
       // It's possible (and OK?) to specialize to i) strict turn-taking and ii) unanimous countersigning; and to not support iii) in between cases
       if (signedState.signatures.some(s => s.signer === moverForThisTurn)) {
-        support.push(signedState);
+        supportProof.push(signedState);
 
         for (const signature of signedState.signatures) {
           participantsWhoHaveNotSigned.delete(signature.signer);
           if (participantsWhoHaveNotSigned.size === 0) {
-            return support;
+            return supportProof;
           }
         }
       }
