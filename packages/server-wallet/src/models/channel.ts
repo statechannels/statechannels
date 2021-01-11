@@ -442,7 +442,7 @@ export class Channel extends Model implements RequiredColumns {
     let previousState;
 
     for (const signedState of this.sortedStates) {
-      // If there is not a valid transition we know there cannot be a valid support
+      // If there is not a valid transition we know there cannot be a valid support proof
       // so we clear out what we have and start at the current signed state
       if (previousState && !this.validChain(signedState, previousState)) {
         supportProof = [];
@@ -451,7 +451,7 @@ export class Channel extends Model implements RequiredColumns {
       const moverIndex = signedState.turnNum % this.nParticipants;
       const moverForThisTurn = this.participants[moverIndex].signingAddress;
 
-      // If the mover hasn't signed the state then we know it cannot be part of the support
+      // If the mover hasn't signed the state then we know it cannot be part of the support proof
       // GEORGE: what if we have 1,2 signed by A,BC respectively? This is valid, but 1 was not signed by it's mover.
       // It's possible (and OK?) to specialize to i) strict turn-taking and ii) unanimous countersigning; and to not support iii) in between cases
       if (signedState.signatures.some(s => s.signer === moverForThisTurn)) {
