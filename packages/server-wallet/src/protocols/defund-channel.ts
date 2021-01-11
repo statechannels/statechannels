@@ -33,14 +33,14 @@ export class ChannelDefunder {
 
       if (!channel) {
         this.logger.error(`No channel found for channel id ${channelId}`);
-        await this.store.markObjectiveStatus(objective, 'failed', tx);
+        await this.store.removeObjective(objective.objectiveId, tx);
         return;
       }
 
       if (channel.fundingStrategy !== 'Direct') {
         // TODO: https://github.com/statechannels/statechannels/issues/3124
         this.logger.error(`Only direct funding is currently supported.`);
-        await this.store.markObjectiveStatus(objective, 'failed', tx);
+        await this.store.removeObjective(objective.objectiveId, tx);
         return;
       }
 
@@ -56,12 +56,12 @@ export class ChannelDefunder {
         } else {
           await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
           this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
-          await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+          await this.store.removeObjective(objective.objectiveId, tx);
         }
       } else if (channel.hasConclusionProof) {
         await ChainServiceRequest.insertOrUpdate(channelId, 'withdraw', tx);
         this.chainService.concludeAndWithdraw(channel.support);
-        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        await this.store.removeObjective(objective.objectiveId, tx);
         return;
       }
     });

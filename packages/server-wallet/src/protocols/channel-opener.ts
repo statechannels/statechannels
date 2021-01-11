@@ -60,7 +60,7 @@ export class ChannelOpener {
       }
 
       if (channel.postfundSupported) {
-        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        await this.store.removeObjective(objective.objectiveId, tx);
 
         response.queueSucceededObjective(objective);
       }

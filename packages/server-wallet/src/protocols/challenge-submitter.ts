@@ -65,7 +65,8 @@ export class ChallengeSubmitter {
 
       await this.chainService.challenge([signedState], channel.signingWallet.privateKey);
 
-      await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+      await this.store.removeObjective(objective.objectiveId, tx);
+
       response.queueChannel(channel);
     });
   }

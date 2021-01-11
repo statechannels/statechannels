@@ -86,9 +86,8 @@ describe('when there is an active challenge', () => {
     await channelDefunder.crank(objective, WalletResponse.initialize());
 
     // Check the results
-    const reloadedObjective = await store.getObjective(objective.objectiveId);
+    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
 
-    expect(reloadedObjective.status).toEqual('succeeded');
     expect(concludeSpy).toHaveBeenCalled();
   });
 
@@ -141,8 +140,9 @@ describe('when the channel is finalized on chain', () => {
 
     // Check the results
     expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining(challengeState), c.myAddress);
-    const reloadedObjective = await store.getObjective(objective.objectiveId);
-    expect(reloadedObjective.status).toEqual('succeeded');
+
+    // Check the results
+    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
   });
 
   it('does nothing if the on-chain state is final', async () => {
@@ -182,9 +182,9 @@ it('should fail the objective when the channel does not exist', async () => {
 
   // Crank the protocol
   await channelDefunder.crank(objective, WalletResponse.initialize());
+
   // Check the results
-  const reloadedObjective = await store.getObjective(objective.objectiveId);
-  expect(reloadedObjective.status).toEqual('failed');
+  await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
 });
 
 it('should fail when using non-direct funding', async () => {
@@ -203,8 +203,7 @@ it('should fail when using non-direct funding', async () => {
   await channelDefunder.crank(obj, WalletResponse.initialize());
 
   // Check the results
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('failed');
+  await expect(store.getObjective(obj.objectiveId)).rejects.toThrow();
 });
 
 // Helpers

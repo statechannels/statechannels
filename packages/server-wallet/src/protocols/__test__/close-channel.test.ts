@@ -141,10 +141,10 @@ const crankAndAssert = async (
     expect(spy).not.toHaveBeenCalled();
   }
 
-  const reloadedObjective = await store.getObjective(objective.objectiveId);
   if (completesObj) {
-    expect(reloadedObjective.status).toEqual('succeeded');
+    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
   } else {
+    const reloadedObjective = await store.getObjective(objective.objectiveId);
     expect(reloadedObjective.status).toEqual('approved');
   }
 };

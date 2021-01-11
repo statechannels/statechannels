@@ -345,16 +345,8 @@ export class Store {
     await ObjectiveModel.approve(objectiveId, tx || this.knex);
   }
 
-  async markObjectiveStatus(
-    objective: DBObjective,
-    status: 'succeeded' | 'failed',
-    tx?: Transaction
-  ): Promise<void> {
-    if (status === 'succeeded') {
-      await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
-    } else {
-      await ObjectiveModel.failed(objective.objectiveId, tx || this.knex);
-    }
+  async removeObjective(objectiveId: string, tx?: Transaction): Promise<void> {
+    await ObjectiveModel.delete(objectiveId, tx || this.knex);
   }
 
   private bytecodeCache: Record<string, string | undefined> = {};

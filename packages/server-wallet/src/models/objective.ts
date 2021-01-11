@@ -29,7 +29,7 @@ function extractReferencedChannels(objective: Objective): string[] {
   }
 }
 
-type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+type ObjectiveStatus = 'pending' | 'approved' | 'rejected';
 
 /**
  * Objectives that are currently supported by the server wallet (wire format)
@@ -128,7 +128,7 @@ export class ObjectiveModel extends Model {
 
   static async insert(
     objectiveToBeStored: (SupportedWireObjective | SubmitChallenge | DefundChannel) & {
-      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+      status: 'pending' | 'approved' | 'rejected';
     },
     tx: TransactionOrKnex
   ): Promise<ObjectiveModel> {
@@ -163,11 +163,9 @@ export class ObjectiveModel extends Model {
     await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
   }
 
-  static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'succeeded'});
-  }
-  static async failed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'failed'});
+  static async delete(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
+    await ObjectiveChannelModel.query(tx).where({objectiveId}).delete();
+    await ObjectiveModel.query(tx).deleteById(objectiveId);
   }
 
   static async forChannelIds(
