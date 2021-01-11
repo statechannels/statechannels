@@ -32,7 +32,7 @@ export class ChallengeSubmitter {
     const {targetChannelId: channelToLock, challengeState} = objective.data;
 
     await this.store.transaction(async tx => {
-      const channel = await this.store.getLockedChannel(channelToLock, tx);
+      const channel = await this.store.getAndLockChannel(channelToLock, tx);
       if (!channel) {
         this.logger.warn(`No channel exists for channel ${channelToLock}`);
         return;
