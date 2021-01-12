@@ -548,10 +548,10 @@ describe('challenge', () => {
       chainId: state1.chainId,
       participants: [alice(), bob()].map(p => p.signingAddress),
     });
-    const challengeRegistered: Promise<ChallengeRegisteredArg> = new Promise(resolve =>
+    const challengeRegistered: Promise<ChallengeRegisteredArg> = new Promise(challengeRegistered =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         ...defaultNoopListeners,
-        challengeRegistered: arg => resolve(arg),
+        challengeRegistered
       })
     );
 
