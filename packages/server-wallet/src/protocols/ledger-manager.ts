@@ -36,11 +36,9 @@ export class LedgerManager {
       await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
         const setError = (e: Error) => tx.rollback(e);
 
-        const markLedgerAsProcessed = () => (ledgerFullyProcessed = true);
-
         // TODO: Move these checks inside the DB query when fetching ledgers to process
         if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
-          markLedgerAsProcessed();
+          ledgerFullyProcessed = true;
           return;
         }
 
@@ -55,7 +53,7 @@ export class LedgerManager {
         );
 
         if (!action) {
-          markLedgerAsProcessed();
+          ledgerFullyProcessed = true;
           if (!requiresAnotherCrankUponCompletion) {
             // pessimistically add state and proposal to outbox
             const {
