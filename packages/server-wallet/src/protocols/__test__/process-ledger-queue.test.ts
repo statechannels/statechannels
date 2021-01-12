@@ -12,9 +12,9 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {alice, bob} from '../../wallet/__test__/fixtures/participants';
 import {alice as aliceSW, bob as bobSW} from '../../wallet/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
-import {protocol, ProtocolState} from '../process-ledger-queue';
 import {Fixture} from '../../wallet/__test__/fixtures/utils';
 import {ChannelStateWithSupported} from '../state';
+import {protocol, ProtocolState} from '../ledger-manager';
 
 // TEST HELPERS
 // There are many test cases in this file. These helpers make the tests cases more readable.
