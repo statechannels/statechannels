@@ -551,7 +551,7 @@ describe('challenge', () => {
     const challengeRegistered: Promise<ChallengeRegisteredArg> = new Promise(challengeRegistered =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         ...defaultNoopListeners,
-        challengeRegistered
+        challengeRegistered,
       })
     );
 
