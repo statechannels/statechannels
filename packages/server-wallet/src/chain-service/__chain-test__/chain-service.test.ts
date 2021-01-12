@@ -346,7 +346,7 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
 
-    const assetOutocomeUpdated: AssetOutcomeUpdatedArg = {
+    const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
       assetHolderAddress: ethAssetHolderAddress,
       newHoldings: '0x00' as Uint256,
@@ -368,7 +368,7 @@ describe('concludeAndWithdraw', () => {
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
-          expect(arg).toMatchObject(assetOutocomeUpdated);
+          expect(arg).toMatchObject(assetOutcomeUpdated);
           resolve();
         },
       })
@@ -387,7 +387,7 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
 
-    const assetOutocomeUpdated: AssetOutcomeUpdatedArg = {
+    const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
       assetHolderAddress: erc20AssetHolderAddress,
       newHoldings: '0x00' as Uint256,
@@ -409,7 +409,7 @@ describe('concludeAndWithdraw', () => {
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
         ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
-          expect(arg).toMatchObject(assetOutocomeUpdated);
+          expect(arg).toMatchObject(assetOutcomeUpdated);
           resolve();
         },
       })
@@ -436,17 +436,17 @@ describe('challenge', () => {
   it('two channels are challenged, funds are withdrawn -> final balances are correct', async () => {
     const aDestinationAddress = Wallet.createRandom().address;
     const bDestinationAddress = Wallet.createRandom().address;
-    const aDestintination = makeDestination(aDestinationAddress);
-    const bDestintination = makeDestination(bDestinationAddress);
+    const aDestination = makeDestination(aDestinationAddress);
+    const bDestination = makeDestination(bDestinationAddress);
     const channelNonces = [0, 1].map(getChannelNonce);
 
     const outcome = simpleEthAllocation([
       {
-        destination: aDestintination,
+        destination: aDestination,
         amount: BN.from(1),
       },
       {
-        destination: bDestintination,
+        destination: bDestination,
         amount: BN.from(3),
       },
     ]);
@@ -514,17 +514,17 @@ describe('challenge', () => {
   it('triggers challenge registered when a challenge is raised', async () => {
     const aDestinationAddress = Wallet.createRandom().address;
     const bDestinationAddress = Wallet.createRandom().address;
-    const aDestintination = makeDestination(aDestinationAddress);
-    const bDestintination = makeDestination(bDestinationAddress);
+    const aDestination = makeDestination(aDestinationAddress);
+    const bDestination = makeDestination(bDestinationAddress);
     const channelNonce = getChannelNonce();
 
     const outcome = simpleEthAllocation([
       {
-        destination: aDestintination,
+        destination: aDestination,
         amount: BN.from(1),
       },
       {
-        destination: bDestintination,
+        destination: bDestination,
         amount: BN.from(3),
       },
     ]);
