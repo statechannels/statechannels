@@ -1,6 +1,6 @@
 import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
 import * as PureEVM from '@connext/pure-evm-wasm';
-import {utils} from 'ethers';
+import {BigNumber, utils} from 'ethers';
 
 import {Bytes} from './type-aliases';
 import {createLogger} from './logger';
@@ -17,7 +17,7 @@ export const validateAppTransitionWithEVM = (
   to: NitroState,
   bytecode?: Bytes
 ): boolean => {
-  if (bytecode === '0x' || bytecode == undefined) return false;
+  if (BigNumber.from(bytecode).isZero() || bytecode == undefined) return false;
 
   const {data} = createValidTransitionTransaction(from, to);
 
