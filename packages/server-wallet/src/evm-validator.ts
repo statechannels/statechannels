@@ -3,21 +3,24 @@ import * as PureEVM from '@connext/pure-evm-wasm';
 import {utils} from 'ethers';
 
 import {Bytes} from './type-aliases';
-import {createLogger} from './logger';
-import {defaultTestConfig} from './config';
 
-const logger = createLogger(defaultTestConfig());
+type EVMExecutionResult =
+  | {success: true; revertReason: undefined}
+  | {success: false; revertReason: string};
+
 /**
  * Takes two states and runs the validateTransition in an evm (pureevm).
- * Returns a promise that resolves to true if the validateTransition
- * returns true false otherwise
  */
 export const validateAppTransitionWithEVM = (
   from: NitroState,
   to: NitroState,
-  bytecode?: Bytes
-): boolean => {
-  if (bytecode === '0x' || bytecode == undefined) return false;
+  bytecode: Bytes
+): EVMExecutionResult => {
+  if (bytecode === '0x')
+    return {
+      success: false,
+      revertReason: 'empty bytecode',
+    };
 
   const {data} = createValidTransitionTransaction(from, to);
 
@@ -25,18 +28,20 @@ export const validateAppTransitionWithEVM = (
     Uint8Array.from(Buffer.from(bytecode.substr(2), 'hex')),
     Uint8Array.from(Buffer.from(data ? data.toString().substr(2) : '0x00', 'hex'))
   );
-  // We need to ensure the result is the correct length otherwise we might be interpreting a failed assertion
+
   const transitionPassed =
+    // We need to ensure the result is the correct length otherwise
+    // we might be interpreting a failed assertion
     result.length === 32 && (utils.defaultAbiCoder.decode(['bool'], result)[0] as boolean);
 
   if (!transitionPassed) {
-    logger.error(`Call to ValidTransition failed in the EVM ${parseRevertReason(result)}`, {
-      result: parseRevertReason(result),
-    });
-    return false;
+    return {
+      success: false,
+      revertReason: parseRevertReason(result),
+    };
   }
 
-  return true;
+  return {success: true, revertReason: undefined};
 };
 
 function parseRevertReason(result: Uint8Array) {

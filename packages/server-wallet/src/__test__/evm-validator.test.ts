@@ -20,7 +20,9 @@ it('returns true for a valid transition', () => {
       appData: utils.defaultAbiCoder.encode(['uint256'], [2]),
     })
   );
-  expect(validateAppTransitionWithEVM(fromState, toState, appBytecode().appBytecode)).toBe(true);
+  expect(
+    validateAppTransitionWithEVM(fromState, toState, appBytecode().appBytecode)
+  ).toMatchObject({success: true});
 });
 
 it('returns false for an invalid transition', () => {
@@ -36,7 +38,9 @@ it('returns false for an invalid transition', () => {
       appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
     })
   );
-  expect(validateAppTransitionWithEVM(fromState, toState, appBytecode().appBytecode)).toBe(false);
+  expect(
+    validateAppTransitionWithEVM(fromState, toState, appBytecode().appBytecode)
+  ).toMatchObject({success: false});
 });
 
 it('returns false when no byte code exists for the app definition', () => {
@@ -45,5 +49,5 @@ it('returns false when no byte code exists for the app definition', () => {
       appDefinition: UNDEFINED_APP_DEFINITION,
     })
   );
-  expect(validateAppTransitionWithEVM(state, state, '0x')).toBe(false);
+  expect(validateAppTransitionWithEVM(state, state, '0x')).toMatchObject({success: false});
 });
