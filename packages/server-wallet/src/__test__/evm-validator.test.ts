@@ -49,5 +49,5 @@ it('returns false when no byte code exists for the app definition', () => {
       appDefinition: UNDEFINED_APP_DEFINITION,
     })
   );
-  expect(validateAppTransitionWithEVM(state, state, '0x')).toMatchObject({success: false});
+  expect(validateAppTransitionWithEVM(state, state, '0x00')).toMatchObject({success: false});
 });
