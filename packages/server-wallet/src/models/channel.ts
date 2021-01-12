@@ -420,7 +420,7 @@ export class Channel extends Model implements RequiredColumns {
     // TODO: activate these fields for proper application checks (may be resource hungry)
     const logger = undefined;
     const byteCode = undefined;
-    const skipAppTransition = !this.isLedger;
+    const skipAppTransition = !this.isLedger; // i.e. perform the check for ledger channels (it will return false because they run the null app)
 
     let support: Array<SignedStateWithHash> = [];
 
