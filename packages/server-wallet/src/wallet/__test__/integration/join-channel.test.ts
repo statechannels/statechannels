@@ -221,6 +221,7 @@ describe('ledger funded app scenarios', () => {
       channel({
         signingAddress: bob().address,
         channelNonce: someNonConflictingChannelNonce,
+        appDefinition: '0x0000000000000000000000000000000000000000',
         vars: [
           stateWithHashSignedBy([alice(), bob()])({
             appDefinition: '0x0000000000000000000000000000000000000000',

@@ -257,6 +257,7 @@ describe('exchanging signed ledger state updates', () => {
       const requestChannel = prefundChannelWithAllocations([alice, 1]);
       const proposal = simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]);
       const fundingChannel = channel({
+        appDefinition: '0x0000000000000000000000000000000000000000',
         vars: [
           stateSignedBy([aliceSW()])({
             appData: '0x00',
