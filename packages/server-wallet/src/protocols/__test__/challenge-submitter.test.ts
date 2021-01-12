@@ -16,6 +16,7 @@ import {ChallengeStatus} from '../../models/challenge-status';
 import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
 import {ChainServiceRequest} from '../../models/chain-service-request';
+import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -68,7 +69,10 @@ describe(`challenge-submitter`, () => {
       .withGraphFetched('signingWallet')
       .insert(c);
 
-    await ChallengeStatus.updateChallengeStatus(knex, c.channelId, 100, 200);
+    await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, {
+      ...stateVars(),
+      ...c.channelConstants,
+    });
 
     const challengeState = {
       ...c.channelConstants,

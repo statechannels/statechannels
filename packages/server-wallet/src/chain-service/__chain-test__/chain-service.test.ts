@@ -20,13 +20,15 @@ import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
 import {
+  alice,
   alice as aliceParticipant,
+  bob,
   bob as bobParticipant,
 } from '../../wallet/__test__/fixtures/participants';
 import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
-import {AssetOutcomeUpdatedArg, HoldingUpdatedArg} from '../types';
+import {AssetOutcomeUpdatedArg, ChallengeRegisteredArg, HoldingUpdatedArg} from '../types';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -40,6 +42,12 @@ const chainId = process.env.CHAIN_NETWORK_ID || '9002';
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
+const defaultNoopListeners = {
+  holdingUpdated: _.noop,
+  assetOutcomeUpdated: _.noop,
+  channelFinalized: _.noop,
+  challengeRegistered: _.noop,
+};
 let chainService: ChainService;
 let channelNonce = 0;
 async function mineBlock(timestamp?: number) {
@@ -221,8 +229,7 @@ describe('registerChannel', () => {
     const channelFinalizedHandler = jest.fn();
     const channelFinalizedPromise = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
-        assetOutcomeUpdated: _.noop,
+        ...defaultNoopListeners,
         channelFinalized: arg => {
           channelFinalizedHandler(arg);
           resolve();
@@ -274,9 +281,8 @@ describe('registerChannel', () => {
     };
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      ...defaultNoopListeners,
       holdingUpdated,
-      assetOutcomeUpdated: _.noop,
-      channelFinalized: _.noop,
     });
     await p;
   });
@@ -287,6 +293,7 @@ describe('registerChannel', () => {
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        ...defaultNoopListeners,
         holdingUpdated: arg => {
           expect(arg).toMatchObject({
             channelId,
@@ -295,8 +302,6 @@ describe('registerChannel', () => {
           });
           resolve(true);
         },
-        assetOutcomeUpdated: _.noop,
-        channelFinalized: _.noop,
       })
     );
   });
@@ -328,9 +333,8 @@ describe('registerChannel', () => {
       if (!objectsToMatch.length) resolve(true);
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
+      ...defaultNoopListeners,
       holdingUpdated,
-      assetOutcomeUpdated: _.noop,
-      channelFinalized: _.noop,
     });
     fundChannelAndMineBlocks(0, 5, channelId, ethAssetHolderAddress);
     fundChannelAndMineBlocks(0, 5, channelId, erc20AssetHolderAddress);
@@ -342,7 +346,7 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
 
-    const assetOutocomeUpdated: AssetOutcomeUpdatedArg = {
+    const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
       assetHolderAddress: ethAssetHolderAddress,
       newHoldings: '0x00' as Uint256,
@@ -362,12 +366,11 @@ describe('concludeAndWithdraw', () => {
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
+        ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
-          expect(arg).toMatchObject(assetOutocomeUpdated);
+          expect(arg).toMatchObject(assetOutcomeUpdated);
           resolve();
         },
-        channelFinalized: _.noop,
       })
     );
 
@@ -384,7 +387,7 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with erc20 allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
 
-    const assetOutocomeUpdated: AssetOutcomeUpdatedArg = {
+    const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
       assetHolderAddress: erc20AssetHolderAddress,
       newHoldings: '0x00' as Uint256,
@@ -404,12 +407,11 @@ describe('concludeAndWithdraw', () => {
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
-        holdingUpdated: _.noop,
+        ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
-          expect(arg).toMatchObject(assetOutocomeUpdated);
+          expect(arg).toMatchObject(assetOutcomeUpdated);
           resolve();
         },
-        channelFinalized: _.noop,
       })
     );
 
@@ -434,17 +436,17 @@ describe('challenge', () => {
   it('two channels are challenged, funds are withdrawn -> final balances are correct', async () => {
     const aDestinationAddress = Wallet.createRandom().address;
     const bDestinationAddress = Wallet.createRandom().address;
-    const aDestintination = makeDestination(aDestinationAddress);
-    const bDestintination = makeDestination(bDestinationAddress);
+    const aDestination = makeDestination(aDestinationAddress);
+    const bDestination = makeDestination(bDestinationAddress);
     const channelNonces = [0, 1].map(getChannelNonce);
 
     const outcome = simpleEthAllocation([
       {
-        destination: aDestintination,
+        destination: aDestination,
         amount: BN.from(1),
       },
       {
-        destination: bDestintination,
+        destination: bDestination,
         amount: BN.from(3),
       },
     ]);
@@ -477,8 +479,7 @@ describe('challenge', () => {
       channelId =>
         new Promise(resolve =>
           chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-            holdingUpdated: _.noop,
-            assetOutcomeUpdated: _.noop,
+            ...defaultNoopListeners,
             channelFinalized: resolve,
           })
         )
@@ -508,6 +509,69 @@ describe('challenge', () => {
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(2));
     expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(6));
+  });
+
+  it('triggers challenge registered when a challenge is raised', async () => {
+    const aDestinationAddress = Wallet.createRandom().address;
+    const bDestinationAddress = Wallet.createRandom().address;
+    const aDestination = makeDestination(aDestinationAddress);
+    const bDestination = makeDestination(bDestinationAddress);
+    const channelNonce = getChannelNonce();
+
+    const outcome = simpleEthAllocation([
+      {
+        destination: aDestination,
+        amount: BN.from(1),
+      },
+      {
+        destination: bDestination,
+        amount: BN.from(3),
+      },
+    ]);
+    const state0 = stateSignedBy()({
+      chainId,
+      challengeDuration: 2,
+      outcome,
+      channelNonce,
+    });
+
+    const state1 = stateSignedBy([bWallet()])({
+      chainId,
+      turnNum: 1,
+      challengeDuration: 2,
+      outcome,
+      channelNonce: channelNonce,
+    });
+
+    const channelId = getChannelId({
+      channelNonce: state1.channelNonce,
+      chainId: state1.chainId,
+      participants: [alice(), bob()].map(p => p.signingAddress),
+    });
+    const challengeRegistered: Promise<ChallengeRegisteredArg> = new Promise(challengeRegistered =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        ...defaultNoopListeners,
+        challengeRegistered,
+      })
+    );
+
+    await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
+
+    await (await chainService.challenge([state0, state1], aWallet().privateKey)).wait();
+
+    const result = await challengeRegistered;
+    // TODO: Sort out these inconsistencies
+    // Currently the participants come back slightly different (since the chain only knows the participant's address)
+    // The chainId is returned as hex
+    // We don't care about the signatures
+    expect(result.challengeStates[0]).toMatchObject(
+      _.omit(state0, ['participants', 'chainId', 'signatures'])
+    );
+    expect(result.challengeStates[1]).toMatchObject(
+      _.omit(state1, ['participants', 'chainId', 'signatures'])
+    );
+
+    expect(result.channelId).toEqual(channelId);
   });
 });
 
