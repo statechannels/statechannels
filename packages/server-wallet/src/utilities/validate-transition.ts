@@ -39,11 +39,17 @@ export function validateTransition(
     switch (status) {
       case Status.True:
         return true;
-      case Status.NeedToCheckApp:
-        return (
-          skipAppTransitionCheck || // TODO this should be removed as soon as possible
-          validateAppTransitionWithEVM(toNitroState(fromState), toNitroState(toState), bytecode)
+      case Status.NeedToCheckApp: {
+        if (skipAppTransitionCheck) return true; // TODO: remove this possibility
+        if (!bytecode) return false;
+        const {success, revertReason} = validateAppTransitionWithEVM(
+          toNitroState(fromState),
+          toNitroState(toState),
+          bytecode
         );
+        if (!success) logger.error(`EVM transition validation failed`, {result: revertReason});
+        return success;
+      }
       default:
         return unreachable(status);
     }
