@@ -669,10 +669,10 @@ export class SingleThreadedWallet
 
     const ledgersToProcess = _.uniq(ledgerIdsFromChannels.concat(ledgerIdsFundingChannels));
 
-    ledgersToProcess.forEach(async ledgerChannelId => {
+    for (const ledgerChannelId of ledgersToProcess) {
       const result = await this.ledgerManager.crank(ledgerChannelId, response);
       requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || result;
-    });
+    }
 
     return requiresAnotherCrankUponCompletion;
   }
