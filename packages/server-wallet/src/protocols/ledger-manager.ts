@@ -71,7 +71,7 @@ export class LedgerManager {
           ledgerChannelId,
           tx
         );
-        const action = recordFunctionMetrics(protocol(protocolState), this.timingMetrics);
+        const action = protocol(protocolState);
 
         if (!action) {
           ledgerFullyProcessed = true;
@@ -79,7 +79,6 @@ export class LedgerManager {
             // pessimistically add state and proposal to outbox
             await this.addStateAndProposalToOutbox(protocolState, response);
           }
-
           response.queueChannelState(protocolState.fundingChannel);
         } else {
           switch (action.type) {
