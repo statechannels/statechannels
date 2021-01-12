@@ -14,6 +14,7 @@ import { CloseChannel } from '@statechannels/wallet-core';
 import { CloseChannelParams } from '@statechannels/client-api-schema';
 import { Config } from 'knex';
 import { CreateChannelParams } from '@statechannels/client-api-schema';
+import { DefundChannel } from '@statechannels/wallet-core';
 import { Destination } from '@statechannels/wallet-core';
 import { ethers } from 'ethers';
 import EventEmitter from 'eventemitter3';
