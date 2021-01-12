@@ -42,6 +42,12 @@ const chainId = process.env.CHAIN_NETWORK_ID || '9002';
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEndpoint);
 
+const defaultNoopListeners = {
+  holdingUpdated: _.noop,
+  assetOutcomeUpdated: _.noop,
+  channelFinalized: _.noop,
+  challengeRegistered: _.noop,
+};
 let chainService: ChainService;
 let channelNonce = 0;
 async function mineBlock(timestamp?: number) {
@@ -223,13 +229,11 @@ describe('registerChannel', () => {
     const channelFinalizedHandler = jest.fn();
     const channelFinalizedPromise = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
-        assetOutcomeUpdated: _.noop,
+        ...defaultNoopListeners,
         channelFinalized: arg => {
           channelFinalizedHandler(arg);
           resolve();
         },
-        challengeRegistered: _.noop,
       })
     );
 
@@ -277,10 +281,8 @@ describe('registerChannel', () => {
     };
 
     chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      ...defaultNoopListeners,
       holdingUpdated,
-      assetOutcomeUpdated: _.noop,
-      channelFinalized: _.noop,
-      challengeRegistered: _.noop,
     });
     await p;
   });
@@ -291,6 +293,7 @@ describe('registerChannel', () => {
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        ...defaultNoopListeners,
         holdingUpdated: arg => {
           expect(arg).toMatchObject({
             channelId,
@@ -299,9 +302,6 @@ describe('registerChannel', () => {
           });
           resolve(true);
         },
-        assetOutcomeUpdated: _.noop,
-        channelFinalized: _.noop,
-        challengeRegistered: _.noop,
       })
     );
   });
@@ -333,10 +333,8 @@ describe('registerChannel', () => {
       if (!objectsToMatch.length) resolve(true);
     };
     chainService.registerChannel(channelId, [ethAssetHolderAddress, erc20AssetHolderAddress], {
+      ...defaultNoopListeners,
       holdingUpdated,
-      assetOutcomeUpdated: _.noop,
-      channelFinalized: _.noop,
-      challengeRegistered: _.noop,
     });
     fundChannelAndMineBlocks(0, 5, channelId, ethAssetHolderAddress);
     fundChannelAndMineBlocks(0, 5, channelId, erc20AssetHolderAddress);
@@ -368,13 +366,11 @@ describe('concludeAndWithdraw', () => {
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
+        ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
           expect(arg).toMatchObject(assetOutocomeUpdated);
           resolve();
         },
-        channelFinalized: _.noop,
-        challengeRegistered: _.noop,
       })
     );
 
@@ -411,13 +407,11 @@ describe('concludeAndWithdraw', () => {
 
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
-        holdingUpdated: _.noop,
+        ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
           expect(arg).toMatchObject(assetOutocomeUpdated);
           resolve();
         },
-        channelFinalized: _.noop,
-        challengeRegistered: _.noop,
       })
     );
 
@@ -485,10 +479,8 @@ describe('challenge', () => {
       channelId =>
         new Promise(resolve =>
           chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-            holdingUpdated: _.noop,
-            assetOutcomeUpdated: _.noop,
+            ...defaultNoopListeners,
             channelFinalized: resolve,
-            challengeRegistered: _.noop,
           })
         )
     );
@@ -558,9 +550,7 @@ describe('challenge', () => {
     });
     const challengeRegistered: Promise<ChallengeRegisteredArg> = new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        holdingUpdated: _.noop,
-        assetOutcomeUpdated: _.noop,
-        channelFinalized: _.noop,
+        ...defaultNoopListeners,
         challengeRegistered: arg => resolve(arg),
       })
     );
