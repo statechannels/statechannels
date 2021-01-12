@@ -11,6 +11,7 @@ import {
   AllocationItem,
   Errors,
   NULL_APP_DATA,
+  StateVariables,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -76,28 +77,7 @@ export class LedgerManager {
           ledgerFullyProcessed = true;
           if (!requiresAnotherCrankUponCompletion) {
             // pessimistically add state and proposal to outbox
-            const {
-              fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
-              myLedgerProposal: {proposal, nonce},
-            } = protocolState;
-            if (latestSignedByMe && supported) {
-              /**
-               * Always re-send a proposal if I have one withstanding, just in case.
-               */
-              if (proposal)
-                response.queueProposeLedgerUpdate(
-                  channelId,
-                  myIndex,
-                  participants,
-                  proposal,
-                  nonce
-                );
-              /**
-               * Re-send my latest signed ledger state if it is not supported yet.
-               */
-              if (latestSignedByMe.turnNum > supported.turnNum)
-                response.queueState(latestSignedByMe, myIndex, channelId);
-            }
+            await this.addStateAndProposalToOutbox(protocolState, response);
           }
 
           response.queueChannelState(protocolState.fundingChannel);
@@ -110,10 +90,12 @@ export class LedgerManager {
             }
 
             case 'SignLedgerUpdate': {
-              const {myIndex, channelId} = protocolState.fundingChannel;
-              const channel = await Channel.forId(channelId, tx);
-              const signedState = await this.store.signState(channel, action.stateToSign, tx);
-              response.queueState(signedState, myIndex, channelId);
+              await this.signLedgerUpdate(
+                protocolState.fundingChannel,
+                action.stateToSign,
+                response,
+                tx
+              );
               return;
             }
 
@@ -136,16 +118,12 @@ export class LedgerManager {
 
             case 'MarkLedgerFundingRequestsAsComplete': {
               const {fundedChannels, defundedChannels, ledgerChannelId} = action;
-
-              /**
-               * After we have completed some funding requests (i.e., a new ledger state
-               * has been signed), we can confidently clear now-stale proposals from the DB.
-               */
-              await this.store.removeLedgerProposals(ledgerChannelId, tx);
-
-              await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
-              await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
-
+              this.markLedgerFundingRequestsAsComplete(
+                fundedChannels,
+                defundedChannels,
+                ledgerChannelId,
+                tx
+              );
               requiresAnotherCrankUponCompletion = true;
               return;
             }
@@ -156,6 +134,56 @@ export class LedgerManager {
       });
     }
     return requiresAnotherCrankUponCompletion;
+  }
+
+  private async signLedgerUpdate(
+    fundingChannel: ChannelStateWithSupported,
+    stateToSign: StateVariables,
+    response: WalletResponse,
+    tx: Transaction
+  ) {
+    const {myIndex, channelId} = fundingChannel;
+    const channel = await Channel.forId(channelId, tx);
+    const signedState = await this.store.signState(channel, stateToSign, tx);
+    response.queueState(signedState, myIndex, channelId);
+  }
+
+  private async markLedgerFundingRequestsAsComplete(
+    fundedChannels: Bytes32[],
+    defundedChannels: Bytes32[],
+    ledgerChannelId: string,
+    tx: Transaction
+  ) {
+    /**
+     * After we have completed some funding requests (i.e., a new ledger state
+     * has been signed), we can confidently clear now-stale proposals from the DB.
+     */
+    await this.store.removeLedgerProposals(ledgerChannelId, tx);
+
+    await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
+    await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
+  }
+
+  private async addStateAndProposalToOutbox(
+    protocolState: ProtocolState,
+    response: WalletResponse
+  ) {
+    const {
+      fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
+      myLedgerProposal: {proposal, nonce},
+    } = protocolState;
+    if (latestSignedByMe && supported) {
+      /**
+       * Always re-send a proposal if I have one withstanding, just in case.
+       */
+      if (proposal)
+        response.queueProposeLedgerUpdate(channelId, myIndex, participants, proposal, nonce);
+      /**
+       * Re-send my latest signed ledger state if it is not supported yet.
+       */
+      if (latestSignedByMe.turnNum > supported.turnNum)
+        response.queueState(latestSignedByMe, myIndex, channelId);
+    }
   }
 }
 
