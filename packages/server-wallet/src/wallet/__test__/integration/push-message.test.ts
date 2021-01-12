@@ -487,6 +487,7 @@ describe('ledger funded app scenarios', () => {
     ledger = await Channel.query(wallet.knex).insert(
       channel({
         channelNonce: someNonConflictingChannelNonce,
+        appDefinition: '0x0000000000000000000000000000000000000000',
         vars: [
           stateWithHashSignedBy([alice(), bob()])({
             appData: '0x00',
