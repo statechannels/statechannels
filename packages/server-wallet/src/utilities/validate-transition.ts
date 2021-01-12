@@ -2,7 +2,6 @@ import _ from 'lodash';
 import {SignedState, StateWithHash, toNitroState, unreachable} from '@statechannels/wallet-core';
 import {requireValidProtocolTransition, Status} from '@statechannels/nitro-protocol';
 import {Logger} from 'pino';
-import {BigNumber} from 'ethers';
 
 import {validateAppTransitionWithEVM} from '../evm-validator';
 import {Bytes} from '../type-aliases';
