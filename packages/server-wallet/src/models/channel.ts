@@ -420,7 +420,8 @@ export class Channel extends Model implements RequiredColumns {
     // TODO: activate these fields for proper application checks (may be resource hungry)
     const logger = undefined;
     const byteCode = undefined;
-    const skipAppTransition = !this.isLedger; // i.e. perform the check for ledger channels (it will return false because they run the null app)
+    const skipAppTransition = !this.isLedger; // i.e. perform the check for ledger channels
+    // It will return false because bytecode is i) undefined or ii) zero for ledger channels
 
     let support: Array<SignedStateWithHash> = [];
 
@@ -432,7 +433,8 @@ export class Channel extends Model implements RequiredColumns {
       // so we clear out what we have and start at the current signed state
       if (
         previousState &&
-        !validateTransition(signedState, previousState, logger, byteCode, skipAppTransition)
+        (!this.isLedger || // this is stronger than it should be. Ledger channels (null apps) *CAN* have valid transitions, but just not in the running phase
+          !validateTransition(signedState, previousState, logger, byteCode, skipAppTransition))
       ) {
         support = [];
         participantsWhoHaveNotSigned = new Set(this.participants.map(p => p.signingAddress));
