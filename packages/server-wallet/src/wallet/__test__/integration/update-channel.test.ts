@@ -32,6 +32,7 @@ beforeEach(async () => {
 
 it('updates a channel', async () => {
   const c = channel({
+    appDefinition: COUNTING_APP_DEFINITION,
     vars: [
       stateWithHashSignedBy([alice(), bob()])({
         turnNum: 5,
@@ -81,6 +82,7 @@ describe('error cases', () => {
 
   it('throws when it is an invalid app transition', async () => {
     const c = channel({
+      appDefinition: COUNTING_APP_DEFINITION,
       vars: [
         stateWithHashSignedBy([alice(), bob()])({
           turnNum: 5,

@@ -143,7 +143,7 @@ export class TestChannel {
 
   public get channelConstants(): ChannelConstants {
     return {
-      appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
+      appDefinition: makeAddress('0x000000000000000000000000000000000000adef'),
       participants: this.participants,
       channelNonce: this.channelNonce,
       chainId: '0x01',
