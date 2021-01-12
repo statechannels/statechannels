@@ -170,6 +170,11 @@ export class ObjectiveModel extends Model {
       .findById(objectiveId)
       .patch({status: 'succeeded'});
   }
+  static async failed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
+    await ObjectiveModel.query(tx)
+      .findById(objectiveId)
+      .patch({status: 'failed'});
+  }
 
   static async forChannelIds(
     targetChannelIds: string[],
