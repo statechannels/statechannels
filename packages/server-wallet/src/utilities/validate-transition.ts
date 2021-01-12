@@ -47,7 +47,7 @@ export function validateTransition(
           toNitroState(toState),
           bytecode
         );
-        if (!success) logger.error(`EVM transition validation failed`, {result: revertReason});
+        if (!success) logger?.error(`EVM transition validation failed`, {result: revertReason});
         return success;
       }
       default:
