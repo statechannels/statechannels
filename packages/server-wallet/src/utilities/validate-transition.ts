@@ -30,7 +30,7 @@ export function shouldValidateTransition(incomingState: StateWithHash, channel: 
 export function validateTransition(
   fromState: SignedState,
   toState: SignedState,
-  logger: Logger,
+  logger?: Logger,
   bytecode?: Bytes,
   skipAppTransitionCheck = false
 ): boolean {
@@ -54,7 +54,7 @@ export function validateTransition(
         return unreachable(status);
     }
   } catch (err) {
-    logger.error(err);
+    logger?.error(err);
     return false;
   }
 }
