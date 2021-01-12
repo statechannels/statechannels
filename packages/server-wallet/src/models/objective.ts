@@ -6,6 +6,7 @@ import {
   State,
   SharedObjective,
   SubmitChallenge,
+  DefundChannel,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
@@ -40,6 +41,12 @@ export type DBCloseChannelObjective = CloseChannel & {
   objectiveId: string;
   status: ObjectiveStatus;
 };
+export type DBDefundChannelObjective = {
+  type: 'DefundChannel';
+  objectiveId: string;
+  status: ObjectiveStatus;
+  data: {targetChannelId: string};
+};
 
 export type DBSubmitChallengeObjective = {
   data: {targetChannelId: string; challengeState: State};
@@ -63,11 +70,14 @@ export function isSharedObjective(
 export type DBObjective =
   | DBOpenChannelObjective
   | DBCloseChannelObjective
-  | DBSubmitChallengeObjective;
+  | DBSubmitChallengeObjective
+  | DBDefundChannelObjective;
 
 export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
-  if (dbObj.type === 'SubmitChallenge') {
-    throw new Error('SubmitChallenge objectives are not supported as wire objectives');
+  if (dbObj.type === 'SubmitChallenge' || dbObj.type === 'DefundChannel') {
+    throw new Error(
+      'SubmitChallenge and DefundChannel objectives are not supported as wire objectives'
+    );
   }
   return _.omit(dbObj, ['objectiveId', 'status']);
 };
@@ -117,7 +127,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: (SupportedWireObjective | SubmitChallenge) & {
+    objectiveToBeStored: (SupportedWireObjective | SubmitChallenge | DefundChannel) & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex
@@ -150,11 +160,15 @@ export class ObjectiveModel extends Model {
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
+    await ObjectiveModel.query(tx)
+      .findById(objectiveId)
+      .patch({status: 'approved'});
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'succeeded'});
+    await ObjectiveModel.query(tx)
+      .findById(objectiveId)
+      .patch({status: 'succeeded'});
   }
 
   static async forChannelIds(
