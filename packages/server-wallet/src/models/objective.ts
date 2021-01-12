@@ -177,6 +177,7 @@ export class ObjectiveModel extends Model {
     const objectiveIds = (
       await ObjectiveChannelModel.query(tx)
         .column('objectiveId')
+        .forUpdate()
         .select()
         .whereIn('channelId', targetChannelIds)
     ).map(oc => oc.objectiveId);

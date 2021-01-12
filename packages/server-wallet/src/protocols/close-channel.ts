@@ -43,49 +43,54 @@ export class ChannelCloser {
     return new ChannelCloser(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
+  public async crank(
+    objective: DBCloseChannelObjective,
+    response: WalletResponse,
+    tx: Transaction
+  ): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
     let attemptAnotherProtocolStep = true;
 
     while (attemptAnotherProtocolStep) {
-      await this.store.lockApp(channelToLock, async tx => {
-        const protocolState = await getCloseChannelProtocolState(
-          this.store,
-          objective.data.targetChannelId,
-          tx
-        );
-        const nextAction = recordFunctionMetrics(protocol(protocolState), this.timingMetrics);
+      /* TODO: Avoid throwing away this value */
+      const _ = await this.store.getAndLockChannel(channelToLock, tx);
 
-        if (nextAction) {
-          try {
-            switch (nextAction.type) {
-              case 'SignState':
-                await this.signState(nextAction, protocolState, tx, response);
-                break;
-              case 'CompleteObjective':
-                attemptAnotherProtocolStep = false;
-                await this.completeObjective(objective, protocolState, tx, response);
-                break;
-              case 'Withdraw':
-                await this.withdraw(nextAction, protocolState, tx);
-                break;
-              case 'RequestLedgerDefunding':
-                await this.requestLedgerDefunding(protocolState, tx);
-                break;
-              default:
-                unreachable(nextAction);
-            }
-          } catch (error) {
-            this.logger.error({error}, 'Error handling action');
-            await tx.rollback(error);
-            attemptAnotherProtocolStep = false;
+      const protocolState = await getCloseChannelProtocolState(
+        this.store,
+        objective.data.targetChannelId,
+        tx
+      );
+      const nextAction = recordFunctionMetrics(protocol(protocolState), this.timingMetrics);
+
+      if (nextAction) {
+        try {
+          switch (nextAction.type) {
+            case 'SignState':
+              await this.signState(nextAction, protocolState, tx, response);
+              break;
+            case 'CompleteObjective':
+              attemptAnotherProtocolStep = false;
+              await this.completeObjective(objective, protocolState, tx, response);
+              break;
+            case 'Withdraw':
+              await this.withdraw(nextAction, protocolState, tx);
+              break;
+            case 'RequestLedgerDefunding':
+              await this.requestLedgerDefunding(protocolState, tx);
+              break;
+            default:
+              unreachable(nextAction);
           }
-        } else {
-          response.queueChannelState(protocolState.app);
+        } catch (error) {
+          this.logger.error({error}, 'Error handling action');
+          await tx.rollback(error);
           attemptAnotherProtocolStep = false;
         }
-      });
+      } else {
+        response.queueChannelState(protocolState.app);
+        attemptAnotherProtocolStep = false;
+      }
     }
   }
 
