@@ -20,7 +20,7 @@ import {alice as aliceWallet} from './signing-wallets';
 
 const defaultState: State = {
   appData: '0x',
-  appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
+  appDefinition: makeAddress('0x000000000000000000000000000000000000adef'), // something arbitary, but NOT zero (reserved for null Apps)
   isFinal: false,
   turnNum: 0,
   outcome: simpleEthAllocation([
