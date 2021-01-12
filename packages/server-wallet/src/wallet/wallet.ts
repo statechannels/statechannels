@@ -55,6 +55,7 @@ import {
   MockChainService,
   ChannelFinalizedArg,
   AssetOutcomeUpdatedArg,
+  ChallengeRegisteredArg,
 } from '../chain-service';
 import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
@@ -823,6 +824,15 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
 
     await this.takeActions([channelId], response);
 
+    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+  }
+
+  async challengeRegistered(arg: ChallengeRegisteredArg): Promise<void> {
+    const response = WalletResponse.initialize();
+    const {channelId, finalizesAt: finalizedAt, challengeStates} = arg;
+
+    await this.store.insertChallengeStatus(channelId, finalizedAt, challengeStates.slice(-1)[0]);
+    await this.takeActions([arg.channelId], response);
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 

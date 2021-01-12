@@ -10,6 +10,7 @@ import {
 import {
   Address,
   BN,
+  fromNitroState,
   makeAddress,
   PrivateKey,
   SignedState,
@@ -109,6 +110,16 @@ export class ChainService implements ChainServiceInterface {
     this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
       const event = getChallengeRegisteredEvent(args);
       this.addFinalizingChannel({channelId: event.channelId, finalizesAtS: event.finalizesAt});
+
+      const {channelId, challengeStates, finalizesAt} = event;
+
+      this.channelToSubscribers.get(event.channelId)?.map(subscriber =>
+        subscriber.challengeRegistered({
+          channelId,
+          challengeStates: challengeStates.map(s => fromNitroState(s.state)),
+          finalizesAt,
+        })
+      );
     });
 
     this.provider.on('block', async (blockTag: providers.BlockTag) =>

@@ -7,8 +7,7 @@ import {
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
   getChannelId,
-  convertAddressToBytes32,
-  convertBytes32ToAddress
+  convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
 import * as _ from 'lodash';
 import {Wallet, utils} from 'ethers';
@@ -26,6 +25,8 @@ import {
   Address
 } from './types';
 import {BN} from './bignumber';
+
+import {makeDestination} from './';
 
 export function toNitroState(state: State): NitroState {
   const {channelNonce, participants, chainId} = state;
@@ -163,10 +164,7 @@ function convertToNitroAllocationItems(allocationItems: AllocationItem[]): Nitro
 function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
   return allocationItems.map(a => ({
     amount: BN.from(a.amount),
-    destination:
-      a.destination.substr(2, 22) === '00000000000000000000'
-        ? (convertBytes32ToAddress(a.destination) as Destination)
-        : (a.destination as Destination)
+    destination: makeDestination(a.destination)
   }));
 }
 
