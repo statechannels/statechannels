@@ -156,6 +156,7 @@ export class ObjectiveModel extends Model {
 
   static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
     const model = await ObjectiveModel.query(tx).findById(objectiveId);
+    if (!model) throw new Error('Objective does not exist in database');
     return model.toObjective();
   }
 

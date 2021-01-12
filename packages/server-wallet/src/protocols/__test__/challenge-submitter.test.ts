@@ -146,7 +146,9 @@ const crankAndAssert = async (
   }
 
   if (completesObj) {
-    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
+    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow(
+      'Objective does not exist in database'
+    );
   } else {
     const reloadedObjective = await store.getObjective(objective.objectiveId);
     expect(reloadedObjective.status).toEqual('pending');

@@ -86,7 +86,9 @@ describe('when there is an active challenge', () => {
     await channelDefunder.crank(objective, WalletResponse.initialize());
 
     // Check the results
-    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
+    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow(
+      'Objective does not exist in database'
+    );
 
     expect(concludeSpy).toHaveBeenCalled();
   });
@@ -142,7 +144,9 @@ describe('when the channel is finalized on chain', () => {
     expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining(challengeState), c.myAddress);
 
     // Check the results
-    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
+    await expect(store.getObjective(objective.objectiveId)).rejects.toThrow(
+      'Objective does not exist in database'
+    );
   });
 
   it('does nothing if the on-chain state is final', async () => {
@@ -184,7 +188,9 @@ it('should fail the objective when the channel does not exist', async () => {
   await channelDefunder.crank(objective, WalletResponse.initialize());
 
   // Check the results
-  await expect(store.getObjective(objective.objectiveId)).rejects.toThrow();
+  await expect(store.getObjective(objective.objectiveId)).rejects.toThrow(
+    'Objective does not exist in database'
+  );
 });
 
 it('should fail when using non-direct funding', async () => {
@@ -203,7 +209,9 @@ it('should fail when using non-direct funding', async () => {
   await channelDefunder.crank(obj, WalletResponse.initialize());
 
   // Check the results
-  await expect(store.getObjective(obj.objectiveId)).rejects.toThrow();
+  await expect(store.getObjective(obj.objectiveId)).rejects.toThrow(
+    'Objective does not exist in database'
+  );
 });
 
 // Helpers
