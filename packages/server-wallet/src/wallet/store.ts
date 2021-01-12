@@ -355,10 +355,10 @@ export class Store {
 
   async markObjectiveStatus(
     objective: DBObjective,
-    status: 'succeed' | 'failed',
+    status: 'succeeded' | 'failed',
     tx?: Transaction
   ): Promise<void> {
-    if (status === 'succeed') {
+    if (status === 'succeeded') {
       await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
     } else {
       await ObjectiveModel.failed(objective.objectiveId, tx || this.knex);

@@ -54,11 +54,11 @@ export class ChannelDefunder {
       // applies to both co-operatively concluding or challenging
       if (result.status === 'Challenge Finalized') {
         this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
-        await this.store.markObjectiveStatus(objective, 'succeed', tx);
+        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
         return;
       } else if (channel.hasConclusionProof) {
         this.chainService.concludeAndWithdraw(channel.support);
-        await this.store.markObjectiveStatus(objective, 'succeed', tx);
+        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
         return;
       }
     });
