@@ -10,8 +10,8 @@ export class ChannelDefunder {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
-    logger: Logger,
-    _timingMetrics = false
+    private logger: Logger,
+    private timingMetrics = false
   ) {}
   public static create(
     store: Store,
@@ -21,6 +21,7 @@ export class ChannelDefunder {
   ): ChannelDefunder {
     return new ChannelDefunder(store, chainService, logger, timingMetrics);
   }
+
   public async crank(
     objective: DBDefundChannelObjective,
     _response: WalletResponse
@@ -28,32 +29,38 @@ export class ChannelDefunder {
     const {targetChannelId: channelId} = objective.data;
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelId, tx);
+
       if (!channel) {
-        throw new Error(`No channel found for channel id ${channelId}`);
+        this.logger.error(`No channel found for channel id ${channelId}`);
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
+        return;
       }
 
       if (channel.fundingStrategy !== 'Direct') {
         // TODO: https://github.com/statechannels/statechannels/issues/3124
-        throw new Error('Only direct funding is currently supported.');
+        this.logger.error(`Only direct funding is currently supported.`);
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
+        return;
       }
 
       const result = await ChallengeStatus.getChallengeStatus(tx, channelId);
 
       if (result.status === 'Challenge Active') {
-        throw new Error('Cannot defund a channel with an active challenge');
-        // TODO: We might want to refactor challengeStatus to something that
-        // applies to both co-operatively concluding or challenging
-      } else if (result.status === 'Challenge Finalized') {
-        this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
-      } else {
-        // No challenge found so we must need to call concludeAndWithdraw
-        if (!channel.hasConclusionProof) {
-          throw new Error('The support is not a valid conclusion proof.');
-        }
-        this.chainService.concludeAndWithdraw(channel.support);
+        this.logger.warn('There is a challenge active so cannot defund the channel');
+        return;
       }
 
-      await this.store.markObjectiveAsSucceeded(objective, tx);
+      // TODO: We might want to refactor challengeStatus to something that
+      // applies to both co-operatively concluding or challenging
+      if (result.status === 'Challenge Finalized') {
+        this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
+        await this.store.markObjectiveStatus(objective, 'succeed', tx);
+        return;
+      } else if (channel.hasConclusionProof) {
+        this.chainService.concludeAndWithdraw(channel.support);
+        await this.store.markObjectiveStatus(objective, 'succeed', tx);
+        return;
+      }
     });
   }
 }
