@@ -1,5 +1,8 @@
 import {SharedObjective} from '@statechannels/wallet-core';
 
+import {LedgerRequest} from '../../../models/ledger-request';
+import {Store} from '../../store';
+
 import {TestChannel} from './test-channel';
 
 interface TestChannelArgs {
@@ -32,5 +35,17 @@ export class TestLedgerChannel extends TestChannel {
         fundingStrategy: 'Direct',
       },
     };
+  }
+
+  public async insertFundingRequest(store: Store, channelToBeFunded: string): Promise<void> {
+    return store.transaction(tx =>
+      LedgerRequest.requestLedgerFunding(channelToBeFunded, this.channelId, tx)
+    );
+  }
+
+  public async insertDefundingRequest(store: Store, channelToBeFunded: string): Promise<void> {
+    return store.transaction(tx =>
+      LedgerRequest.requestLedgerDefunding(channelToBeFunded, this.channelId, tx)
+    );
   }
 }

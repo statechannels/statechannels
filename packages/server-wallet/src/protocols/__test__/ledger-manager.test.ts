@@ -4,6 +4,7 @@ import {
   BN,
   makeDestination,
   Participant,
+  serializeRequest,
   SimpleAllocation,
   simpleEthAllocation as coreSimpleEthAllocation,
 } from '@statechannels/wallet-core';
@@ -14,7 +15,17 @@ import {alice as aliceSW, bob as bobSW} from '../../wallet/__test__/fixtures/sig
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {Fixture} from '../../wallet/__test__/fixtures/utils';
 import {ChannelStateWithSupported} from '../state';
-import {protocol, ProtocolState} from '../ledger-manager';
+import {LedgerManager, protocol, ProtocolState} from '../ledger-manager';
+import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {defaultTestConfig} from '../../config';
+import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {Store} from '../../wallet/store';
+import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
+import {WalletResponse} from '../../wallet/wallet-response';
+import {createLogger} from '../../logger';
+import {LedgerRequestType} from '../../models/ledger-request';
+import {getPayloadFor} from '../../__test__/test-helpers';
+import {ProposeLedgerUpdate} from '../actions';
 
 // TEST HELPERS
 // There are many test cases in this file. These helpers make the tests cases more readable.
@@ -75,36 +86,86 @@ const processLedgerQueueProtocolState = (args: Partial<ProtocolState> = {}) => (
   ...args,
 });
 
+let store: Store;
+let ledgerManager: LedgerManager;
+
+beforeEach(async () => {
+  store = new Store(
+    knex,
+    defaultTestConfig().metricsConfiguration.timingMetrics,
+    defaultTestConfig().skipEvmValidation,
+    '0',
+    createLogger(defaultTestConfig())
+  );
+  ledgerManager = LedgerManager.create({
+    store,
+    logger: store.logger,
+    timingMetrics: defaultTestConfig().metricsConfiguration.timingMetrics,
+  });
+  await store.dbAdmin().truncateDB();
+});
+
+afterEach(async () => {
+  await store.dbAdmin().truncateDB();
+});
+
 describe('marking ledger requests as complete', () => {
   it('takes no action if there are no ledger requests', () => {
     expect(protocol(processLedgerQueueProtocolState())).toBeUndefined();
   });
 
-  it('detects completed funding requests from the outcome of supported state', () => {
-    const requestChannel = channel();
-    const protocolArgs = {
-      fundingChannel: ledgerChannelWithAllocations([requestChannel.channelId, 10]),
-      channelsRequestingFunds: [requestChannel.protocolState],
-    };
-    expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-      type: 'MarkLedgerFundingRequestsAsComplete',
-      fundedChannels: [requestChannel.channelId],
-      defundedChannels: [],
-      ledgerChannelId: protocolArgs.fundingChannel.channelId,
+  it('detects completed funding requests from the outcome of supported state', async () => {
+    // create an application channel
+    const appChannel = TestChannel.create({aBal: 5, bBal: 5});
+    await appChannel.insertInto(store, {states: [0, 1]});
+    // create a ledger channel that funds that channel. Note distinct channel nonce
+    const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+    await ledgerChannel.insertInto(store, {
+      states: [4, 5],
+      bals: [[appChannel.channelId, 10]],
+    });
+    // create a ledger request for the ledger to fund the channel
+    await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+
+    // crank the ledger manager
+    await ledgerManager.crank(ledgerChannel.channelId, new WalletResponse());
+    // assert that it marks the request as complete
+    expect(
+      await store.getLedgerRequest(appChannel.channelId, 'fund')
+    ).toMatchObject<LedgerRequestType>({
+      type: 'fund',
+      ledgerChannelId: ledgerChannel.channelId,
+      channelToBeFunded: appChannel.channelId,
+      status: 'succeeded',
     });
   });
 
-  it('detects completed defunding requests from the outcome of supported state', () => {
-    const requestChannel = channel();
-    const protocolArgs = {
-      fundingChannel: defaultLedgerChannel,
-      channelsReturningFunds: [requestChannel.protocolState],
-    };
-    expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-      type: 'MarkLedgerFundingRequestsAsComplete',
-      fundedChannels: [],
-      defundedChannels: [requestChannel.channelId],
-      ledgerChannelId: protocolArgs.fundingChannel.channelId,
+  it('detects completed defunding requests from the outcome of supported state', async () => {
+    // create an application channel
+    const appChannel = TestChannel.create({aBal: 5, bBal: 5});
+    await appChannel.insertInto(store, {states: [0, 1]});
+    // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce
+    const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+    await ledgerChannel.insertInto(store, {
+      states: [5, 6],
+      bals: [
+        [appChannel.participantA.destination, 5],
+        [appChannel.participantB.destination, 5],
+      ],
+    });
+    // create a ledger request for the ledger to defund the channel
+    await ledgerChannel.insertDefundingRequest(store, appChannel.channelId);
+
+    // crank the ledger manager
+    await ledgerManager.crank(ledgerChannel.channelId, new WalletResponse());
+    // assert that it marks the request as complete
+    expect(
+      await store.getLedgerRequest(appChannel.channelId, 'defund')
+    ).toMatchObject<LedgerRequestType>({
+      type: 'defund',
+      ledgerChannelId: ledgerChannel.channelId,
+      channelToBeFunded: appChannel.channelId,
+      status: 'succeeded',
     });
   });
 });
@@ -133,99 +194,193 @@ describe('exchanging ledger proposals', () => {
       expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
     });
 
-    it('proposes new outcome funding 1 channel', () => {
-      const requestChannel = prefundChannelWithAllocations([alice, 1]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
+    it('proposes new outcome funding 1 channel, exhaussting 100% of funds', async () => {
+      // create an application channel
+      const appChannel = TestChannel.create({aBal: 5, bBal: 5});
+      await appChannel.insertInto(store, {states: [0, 1]});
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce
+      const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+      await ledgerChannel.insertInto(store, {
+        // Will be "fully funded" i.e. with 10 coins
+        states: [4, 5],
+        bals: [
+          [appChannel.participantA.destination, 5],
+          [appChannel.participantB.destination, 5],
+        ],
+      });
+      // create a ledger request for the ledger to fund the channel
+      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there is a proposal in the outbox
+      const payload = getPayloadFor(
+        ledgerChannel.participantB.participantId,
+        response.multipleChannelOutput().outbox
+      );
+      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
         type: 'ProposeLedgerUpdate',
         nonce: 1,
-        channelId: protocolArgs.fundingChannel.channelId,
-        outcome: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
+        channelId: ledgerChannel.channelId,
+        outcome: simpleEthAllocation([appChannel.channelId, 10]),
+        signingAddress: ledgerChannel.participantA.signingAddress,
+      };
+      expect(payload).toMatchObject({
+        requests: [serializeRequest(expectedProposeLedgerUpdate)],
       });
     });
 
-    it('proposes new outcome funding many channels', () => {
-      const requestChannels = _.range(5).map(() => prefundChannelWithAllocations([alice, 1]));
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: _.map(requestChannels, 'protocolState'),
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
+    it('proposes new outcome funding many channels', async () => {
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce
+      const ledgerChannel = TestLedgerChannel.create({channelNonce: 5});
+      await ledgerChannel.insertInto(store, {
+        states: [4, 5],
+        bals: [10, 10],
+      });
+
+      // create 5 application channels, each allocating 1 to Alice
+      const appChannels = [0, 1, 2, 3, 4].map(channelNonce =>
+        TestChannel.create({aBal: 1, bBal: 0, channelNonce})
+      );
+      for await (const appChannel of appChannels) {
+        // for each one, insert the channel and a ledger funding request
+        await appChannel.insertInto(store, {states: [0, 1]});
+        await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+      }
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there is a proposal funding all of those channels in the outbox
+      const payload = getPayloadFor(
+        ledgerChannel.participantB.participantId,
+        response.multipleChannelOutput().outbox
+      );
+      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
         type: 'ProposeLedgerUpdate',
         nonce: 1,
-        channelId: protocolArgs.fundingChannel.channelId,
+        channelId: ledgerChannel.channelId,
         outcome: simpleEthAllocation(
           [alice, 5],
           [bob, 10],
-          ..._.map(
-            requestChannels,
-            requestChannel => [requestChannel.channelId, 1] as PreAllocationItem
-          )
+          ...appChannels.map(c => [c.channelId, c.startBal] as [string, number])
         ),
+        signingAddress: ledgerChannel.participantA.signingAddress,
+      };
+      expect(payload).toMatchObject({
+        requests: [serializeRequest(expectedProposeLedgerUpdate)],
       });
     });
 
-    it('proposes new outcome exhausting 100% of funds', () => {
-      const requestChannel = prefundChannelWithAllocations([alice, 10], [bob, 10]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
+    it('proposes new outcome requiring defund before having sufficient funds', async () => {
+      // setup a ledger channel funding an 'older' channel
+      const ledgerChannel = TestLedgerChannel.create({channelNonce: 0});
+      const olderChannel = TestChannel.create({aBal: 10, bBal: 0, channelNonce: 1});
+      await ledgerChannel.insertInto(store, {
+        states: [4, 5],
+        bals: [[olderChannel.channelId, 10]],
+      });
+      await olderChannel.insertInto(store, {states: [0, 1]});
+
+      // create a new channel
+      const newChannel = TestChannel.create({aBal: 10, bBal: 0, channelNonce: 2});
+      await newChannel.insertInto(store, {states: [0, 1]});
+
+      // create a ledger request for the ledger to defund the older channel
+      await ledgerChannel.insertDefundingRequest(store, olderChannel.channelId);
+      // create a ledger request for the ledger to fund the new channel
+      await ledgerChannel.insertFundingRequest(store, newChannel.channelId);
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there is a proposal funding the new channel in the outbox
+      const payload = getPayloadFor(
+        ledgerChannel.participantB.participantId,
+        response.multipleChannelOutput().outbox
+      );
+      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
         type: 'ProposeLedgerUpdate',
         nonce: 1,
-        channelId: protocolArgs.fundingChannel.channelId,
-        outcome: simpleEthAllocation([requestChannel.channelId, 20]),
+        channelId: ledgerChannel.channelId,
+        outcome: simpleEthAllocation([newChannel.channelId, 10]),
+        signingAddress: ledgerChannel.participantA.signingAddress,
+      };
+      expect(payload).toMatchObject({
+        requests: [serializeRequest(expectedProposeLedgerUpdate)],
       });
     });
 
-    it('proposes new outcome requiring defund before having sufficient funds', () => {
-      const olderChannel = prefundChannelWithAllocations([alice, 10]);
-      const requestChannel = prefundChannelWithAllocations([alice, 10]);
-      const protocolArgs = {
-        fundingChannel: ledgerChannelWithAllocations([olderChannel.channelId, 10]),
-        channelsRequestingFunds: [requestChannel.protocolState],
-        channelsReturningFunds: [olderChannel.protocolState],
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
+    it('makes no proposal but identifies channel when ledger has insufficient funds', async () => {
+      // create an application channel that allocates 200 coins
+      const appChannel = TestChannel.create({aBal: 100, bBal: 100});
+      await appChannel.insertInto(store, {states: [0, 1]});
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce
+      const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+      await ledgerChannel.insertInto(store, {
+        // Will be "fully funded" with 10 coins, but this is insufficient for the app channel
+        states: [4, 5],
+        bals: [
+          [appChannel.participantA.destination, 5],
+          [appChannel.participantB.destination, 5],
+        ],
+      });
+      // create a ledger request for the ledger to fund the channel
+      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there is NO proposal in the outbox
+      expect(response.multipleChannelOutput().outbox).toHaveLength(0);
+    });
+
+    it('proposes outcome funding some channels, identifying insufficient funds for others', async () => {
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce
+      const ledgerChannel = TestLedgerChannel.create({channelNonce: 5});
+      await ledgerChannel.insertInto(store, {
+        states: [4, 5],
+        bals: [10, 10],
+      });
+
+      // create 5 application channels, each allocating 5 to Alice
+      // The ledger channel can only afford 2 of these
+      const appChannels = [0, 1, 2, 3, 4].map(channelNonce =>
+        TestChannel.create({aBal: 5, bBal: 0, channelNonce})
+      );
+      for await (const appChannel of appChannels) {
+        // for each one, insert the channel and a ledger funding request
+        await appChannel.insertInto(store, {states: [0, 1]});
+        await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+      }
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there is a proposal some of those channels in the outbox
+      const payload = getPayloadFor(
+        ledgerChannel.participantB.participantId,
+        response.multipleChannelOutput().outbox
+      );
+      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
         type: 'ProposeLedgerUpdate',
         nonce: 1,
-        channelId: protocolArgs.fundingChannel.channelId,
-        outcome: simpleEthAllocation([requestChannel.channelId, 10]),
-      });
-    });
-
-    it('makes no proposal but identifies channel when ledger has insufficient funds', () => {
-      const requestChannel = prefundChannelWithAllocations([alice, 100], [bob, 100]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'MarkInsufficientFunds',
-        channelId: protocolArgs.fundingChannel.channelId,
-        channelsNotFunded: [requestChannel.channelId],
-      });
-    });
-
-    it('proposes outcome funding some channels, identifying insufficient funds for others', () => {
-      const requestChannels = _.range(5).map(() => prefundChannelWithAllocations([alice, 5]));
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: _.map(requestChannels, 'protocolState'),
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
-        type: 'ProposeLedgerUpdate',
-        nonce: 1,
-        channelId: protocolArgs.fundingChannel.channelId,
+        channelId: ledgerChannel.channelId,
         outcome: simpleEthAllocation(
           [bob, 10],
-          [requestChannels[0].channelId, 5],
-          [requestChannels[1].channelId, 5]
+          ...appChannels.slice(0, 2).map(c => [c.channelId, c.startBal] as [string, number])
         ),
+        signingAddress: ledgerChannel.participantA.signingAddress,
+      };
+
+      expect(payload).toMatchObject({
+        requests: [serializeRequest(expectedProposeLedgerUpdate)],
       });
     });
   });
