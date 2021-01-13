@@ -5,6 +5,7 @@ import {
   calculateChannelId,
   ChannelConstants,
   makeAddress,
+  makeDestination,
   makePrivateKey,
   Outcome,
   Participant,
@@ -40,6 +41,8 @@ interface TestChannelArgs {
   fundingStrategy?: FundingStrategy;
 }
 
+type Bals = [string, number][];
+
 /** A two-party channel between Alice and Bob, with state history. For testing purposes. */
 export class TestChannel {
   public participantA: Participant = alice();
@@ -47,7 +50,7 @@ export class TestChannel {
 
   public signingWalletA: SigningWallet = aliceWallet();
   public signingWalletB: SigningWallet = bobWallet();
-  public startBals: [number, number];
+  public startBals: Bals;
   public channelNonce: number;
   public finalFrom?: number;
   public fundingStrategy: FundingStrategy;
@@ -65,7 +68,10 @@ export class TestChannel {
 
   protected constructor(args: TestChannelArgs) {
     this.fundingStrategy = args.fundingStrategy || 'Direct';
-    this.startBals = [args.aBal ?? 5, args.bBal ?? 5];
+    this.startBals = [
+      ['a', args.aBal ?? 5],
+      ['b', args.bBal ?? 5],
+    ];
     this.channelNonce = args.channelNonce ?? 5;
     this.finalFrom = args.finalFrom;
   }
@@ -78,7 +84,7 @@ export class TestChannel {
    * Note - in cases where participants double-sign the same states, n might _not_
    * be the turnNum
    */
-  public state(n: number, bals?: [number, number]): State {
+  public state(n: number, bals?: Bals): State {
     if (n < 2) {
       // in prefund setup, everyone signs state 0
       n = 0;
@@ -100,18 +106,18 @@ export class TestChannel {
     };
   }
 
-  public signedStateWithHash(n: number, bals?: [number, number]): SignedStateWithHash {
+  public signedStateWithHash(n: number, bals?: Bals): SignedStateWithHash {
     return stateWithHashSignedBy([this.signingWallets[n % 2]])(this.state(n, bals));
   }
 
   /**
    * Gives the nth state in the history, signed by the correct participant
    */
-  public wireState(n: number, bals?: [number, number]): WireState {
+  public wireState(n: number, bals?: Bals): WireState {
     return serializeState(this.signedStateWithHash(n, bals));
   }
 
-  public wirePayload(n: number, bals?: [number, number]): Payload {
+  public wirePayload(n: number, bals?: Bals): Payload {
     return {
       walletVersion: WALLET_VERSION,
       signedStates: [this.wireState(n, bals)],
@@ -122,11 +128,19 @@ export class TestChannel {
     return this.toOutcome(this.startBals);
   }
 
-  public toOutcome([aBal, bBal]: [number, number]): Outcome {
-    return simpleEthAllocation([
-      {destination: this.participantA.destination, amount: BN.from(aBal)},
-      {destination: this.participantB.destination, amount: BN.from(bBal)},
-    ]);
+  public toOutcome(bals: Bals): Outcome {
+    return simpleEthAllocation(
+      bals.map(([dest, amt]) => {
+        const amount = BN.from(amt);
+        if (dest === 'a') {
+          return {destination: this.participantA.destination, amount};
+        } else if (dest === 'b') {
+          return {destination: this.participantB.destination, amount};
+        } else {
+          return {destination: makeDestination(dest), amount: BN.from(amt)};
+        }
+      })
+    );
   }
 
   public get signingKeyA(): PrivateKey {
@@ -210,7 +224,7 @@ export class TestChannel {
   }
 
   public get startBal(): number {
-    return this.startBals.reduce((s, n) => s + n);
+    return this.startBals.reduce((sum, [_dest, amt]) => sum + amt, 0);
   }
 
   /**
