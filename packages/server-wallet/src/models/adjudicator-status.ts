@@ -31,10 +31,8 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   }
 
   static async getAdjudicatorStatus(knex: Knex, channelId: Bytes32): Promise<AdjudicatorStatus> {
-    const result = await AdjudicatorStatusModel.query(knex)
-      .where({channelId})
-      .first();
-    console.log(result);
+    const result = await AdjudicatorStatusModel.query(knex).where({channelId}).first();
+
     if (!result) return {status: 'Nothing'};
     return AdjudicatorStatusModel.convertResult(result);
   }
@@ -66,7 +64,7 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
       channelId,
       finalizesAt,
       blockNumber: 0,
-      states: JSON.stringify(states) as any, // TODO: Ugly workaround for https://github.com/brianc/node-postgres/issues/442
+      states,
     });
     return AdjudicatorStatusModel.convertResult(result);
   }
@@ -84,7 +82,7 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
         status: 'Channel Finalized',
         finalizedAt: finalizesAt,
         finalizedBlockNumber: blockNumber,
-        states: JSON.stringify(states) as any, // TODO: Ugly workaround for https://github.com/brianc/node-postgres/issues/442
+        states,
       };
     }
   }

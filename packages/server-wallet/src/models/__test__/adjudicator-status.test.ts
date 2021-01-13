@@ -48,7 +48,7 @@ describe('ChallengeStatus model', () => {
     const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
     expect(result).toEqual({
-      status: 'Challenge Finalized',
+      status: 'Channel Finalized',
       finalizedAt: 5,
       finalizedBlockNumber: 10,
       states: [challengeState],
