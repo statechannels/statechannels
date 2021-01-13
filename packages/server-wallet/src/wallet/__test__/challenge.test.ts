@@ -5,6 +5,7 @@ import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {ChallengeStatus} from '../../models/challenge-status';
 import {Channel} from '../../models/channel';
+import {ObjectiveModel} from '../../models/objective';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {alice, bob} from './fixtures/signing-wallets';
@@ -60,6 +61,28 @@ it('stores the challenge state on the challenge created event', async () => {
 
   expect(updated.status).toEqual('Challenge Active');
   expect((updated as any).challengeState).toMatchObject(challengeState);
+});
+
+it('creates a defundChannel objective on channel finalized', async () => {
+  const c = channel({
+    channelNonce: 1,
+    vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+  });
+  await Channel.query(w.knex).insert(c);
+
+  await w.channelFinalized({channelId: c.channelId, blockNumber: 100, finalizedAt: 50});
+  const objectiveId = `DefundChannel-${c.channelId}`;
+  const objective = await ObjectiveModel.forId(objectiveId, w.knex);
+
+  expect(objective).toEqual({
+    objectiveId,
+    status: 'approved',
+    type: 'DefundChannel',
+    data: {
+      targetChannelId: c.channelId,
+    },
+    participants: [],
+  });
 });
 
 afterAll(async () => {
