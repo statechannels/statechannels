@@ -30,18 +30,40 @@ beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
 });
 
+test('it should submit a conclude transaction even if there is an active challenge if there is a conclusion proof', async () => {
+  const chainService = new MockChainService();
+  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+  const c = channel({
+    channelNonce: 1,
+    vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
+  });
+
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+  const challengeState = {
+    ...c.channelConstants,
+    ...stateVars(),
+  };
+  await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, challengeState);
+  const obj = createPendingObjective(c.channelId);
+  await knex.transaction(tx => ObjectiveModel.insert(obj, tx));
+  const response = WalletResponse.initialize();
+  const concludeSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
+
+  await channelDefunder.crank(obj, response);
+
+  const reloadedObjective = await store.getObjective(obj.objectiveId);
+  expect(reloadedObjective.status).toEqual('succeeded');
+  expect(concludeSpy).toHaveBeenCalled();
+});
+
 test('when the channel does not exist it should fail the objective', async () => {
   const chainService = new MockChainService();
   const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
   const c = channel();
 
-  const obj: DBDefundChannelObjective = {
-    type: 'DefundChannel',
-    status: 'pending',
-    objectiveId: ['DefundChannel', c.channelId].join('-'),
-    data: {targetChannelId: c.channelId},
-  };
-
+  const obj = createPendingObjective(c.channelId);
   await knex.transaction(tx => ObjectiveModel.insert(obj, tx));
   const response = WalletResponse.initialize();
 
@@ -50,16 +72,13 @@ test('when the channel does not exist it should fail the objective', async () =>
   const reloadedObjective = await store.getObjective(obj.objectiveId);
   expect(reloadedObjective.status).toEqual('failed');
 });
-
 test('when using non-direct funding it fails', async () => {
   const chainService = new MockChainService();
   const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
   const c = channel({fundingStrategy: 'Fake'});
 
-  await Channel.query(knex)
-    .withGraphFetched('signingWallet')
-    .insert(c);
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
   const obj = createPendingObjective(c.channelId);
   await knex.transaction(tx => store.ensureObjective(obj, tx));
@@ -71,7 +90,7 @@ test('when using non-direct funding it fails', async () => {
   expect(reloadedObjective.status).toEqual('failed');
 });
 
-test('when there is an active challenge it should do nothing', async () => {
+test('when there is an active challenge and no conclusion proof it should do nothing', async () => {
   const chainService = new MockChainService();
   const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
@@ -80,9 +99,7 @@ test('when there is an active challenge it should do nothing', async () => {
     ...c.channelConstants,
     ...stateVars(),
   };
-  await Channel.query(knex)
-    .withGraphFetched('signingWallet')
-    .insert(c);
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
   await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, challengeState);
 
   const obj = createPendingObjective(c.channelId);
@@ -103,9 +120,7 @@ test('when the channel is not finalized it defunds the channel by calling pushOu
     ...c.channelConstants,
     ...stateVars(),
   };
-  await Channel.query(knex)
-    .withGraphFetched('signingWallet')
-    .insert(c);
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
   await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, challengeState);
   await ChallengeStatus.setFinalized(knex, c.channelId, 200);
   const obj = createPendingObjective(c.channelId);
@@ -129,9 +144,7 @@ test('when the channel has not been concluded on chain it should call withdrawAn
     vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
   });
 
-  await Channel.query(knex)
-    .withGraphFetched('signingWallet')
-    .insert(c);
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
   await ChallengeStatus.setFinalized(knex, c.channelId, 200);
   const obj = createPendingObjective(c.channelId);

@@ -160,20 +160,14 @@ export class ObjectiveModel extends Model {
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'approved'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'succeeded'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'succeeded'});
   }
   static async failed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'failed'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'failed'});
   }
 
   static async forChannelIds(

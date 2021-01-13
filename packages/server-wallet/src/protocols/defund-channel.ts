@@ -46,11 +46,6 @@ export class ChannelDefunder {
 
       const result = await ChallengeStatus.getChallengeStatus(tx, channelId);
 
-      if (result.status === 'Challenge Active') {
-        this.logger.warn('There is a challenge active so cannot defund the channel');
-        return;
-      }
-
       // TODO: We might want to refactor challengeStatus to something that
       // applies to both co-operatively concluding or challenging
       // see https://github.com/statechannels/statechannels/issues/3132
