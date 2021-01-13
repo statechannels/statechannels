@@ -10,7 +10,6 @@ import {
   BN,
   AllocationItem,
   Errors,
-  NULL_APP_DATA,
   StateVariables,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
@@ -20,18 +19,8 @@ import {WalletResponse} from '../wallet/wallet-response';
 import {Store} from '../wallet/store';
 import {Bytes32} from '../type-aliases';
 import {LedgerRequestType} from '../models/ledger-request';
-import {recordFunctionMetrics} from '../metrics';
 
-import {Protocol, ProtocolResult, ChannelState, ChannelStateWithSupported} from './state';
-import {
-  DismissLedgerProposals,
-  MarkInsufficientFunds,
-  MarkLedgerFundingRequestsAsComplete,
-  noAction,
-  ProposeLedgerUpdate,
-  ProtocolAction,
-  SignLedgerUpdate,
-} from './actions';
+import {ChannelState, ChannelStateWithSupported} from './state';
 
 interface LedgerManagerParams {
   store: Store;
@@ -56,82 +45,55 @@ export class LedgerManager {
 
   async crank(ledgerChannelId: string, response: WalletResponse): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
-    let ledgerFullyProcessed = false;
 
-    while (!ledgerFullyProcessed) {
-      await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
-        // TODO: Move these checks inside the DB query when fetching ledgers to process
-        if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
-          ledgerFullyProcessed = true;
-          return;
+    await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
+      // TODO: Move these checks inside the DB query when fetching ledgers to process
+      if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
+        return;
+      }
+
+      let protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+
+      if (!hasUnhandledLedgerRequests(protocolState)) {
+        if (!requiresAnotherCrankUponCompletion) {
+          // pessimistically add state and proposal to outbox
+          await this.addStateAndProposalToOutbox(protocolState, response);
         }
+        response.queueChannelState(protocolState.fundingChannel);
+        return;
+      }
 
-        const protocolState = await getProcessLedgerQueueProtocolState(
-          this.store,
-          ledgerChannelId,
-          tx
-        );
-        const action = protocol(protocolState);
+      const crankAgain = await this.markIncludedRequestsAsComplete(protocolState, tx);
+      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain;
 
-        if (!action) {
-          ledgerFullyProcessed = true;
-          if (!requiresAnotherCrankUponCompletion) {
-            // pessimistically add state and proposal to outbox
-            await this.addStateAndProposalToOutbox(protocolState, response);
-          }
-          response.queueChannelState(protocolState.fundingChannel);
-        } else {
-          switch (action.type) {
-            case 'DismissLedgerProposals': {
-              await this.store.removeLedgerProposals(ledgerChannelId, tx);
-              requiresAnotherCrankUponCompletion = true;
-              return;
-            }
+      // refresh the protocol state to be safe
+      // TODO: remove if possible
+      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
 
-            case 'SignLedgerUpdate': {
-              await this.signLedgerUpdate(
-                protocolState.fundingChannel,
-                action.stateToSign,
-                response,
-                tx
-              );
-              return;
-            }
+      if (finishedExchangingProposals(protocolState)) {
+        const crankAgain2 = await this.exchangeSignedLedgerStates(protocolState, response, tx);
+        requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain2;
+      }
 
-            case 'ProposeLedgerUpdate': {
-              // NOTE: Proposal added to response in pessimisticallyAddStateAndProposalToOutbox
-              await this.store.storeLedgerProposal(
-                action.channelId,
-                action.outcome,
-                action.nonce,
-                action.signingAddress,
-                tx
-              );
-              return;
-            }
+      // refresh the protocol state to be safe
+      // TODO: remove if possible
+      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
 
-            case 'MarkInsufficientFunds': {
-              await this.store.markLedgerRequests(action.channelsNotFunded, 'fund', 'failed', tx);
-              return;
-            }
+      // exchange proposals - when do I need to do this?
+      const crankAgain3 = await this.exchangeProposals(protocolState, tx);
+      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain3;
 
-            case 'MarkLedgerFundingRequestsAsComplete': {
-              const {fundedChannels, defundedChannels, ledgerChannelId} = action;
-              this.markLedgerFundingRequestsAsComplete(
-                fundedChannels,
-                defundedChannels,
-                ledgerChannelId,
-                tx
-              );
-              requiresAnotherCrankUponCompletion = true;
-              return;
-            }
-            default:
-              throw 'Unimplemented';
-          }
-        }
-      });
-    }
+      // refresh the protocol state to be safe
+      // TODO: remove if possible
+      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+
+      if (!requiresAnotherCrankUponCompletion) {
+        // pessimistically add state and proposal to outbox
+        await this.addStateAndProposalToOutbox(protocolState, response);
+      }
+      response.queueChannelState(protocolState.fundingChannel);
+    });
+
     return requiresAnotherCrankUponCompletion;
   }
 
@@ -145,22 +107,6 @@ export class LedgerManager {
     const channel = await Channel.forId(channelId, tx);
     const signedState = await this.store.signState(channel, stateToSign, tx);
     response.queueState(signedState, myIndex, channelId);
-  }
-
-  private async markLedgerFundingRequestsAsComplete(
-    fundedChannels: Bytes32[],
-    defundedChannels: Bytes32[],
-    ledgerChannelId: string,
-    tx: Transaction
-  ) {
-    /**
-     * After we have completed some funding requests (i.e., a new ledger state
-     * has been signed), we can confidently clear now-stale proposals from the DB.
-     */
-    await this.store.removeLedgerProposals(ledgerChannelId, tx);
-
-    await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
-    await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
   }
 
   private async addStateAndProposalToOutbox(
@@ -182,6 +128,132 @@ export class LedgerManager {
        */
       if (latestSignedByMe.turnNum > supported.turnNum)
         response.queueState(latestSignedByMe, myIndex, channelId);
+    }
+  }
+
+  private async markIncludedRequestsAsComplete(
+    protocolState: ProtocolState,
+    tx: Transaction
+  ): Promise<boolean> {
+    const {fundingChannel, channelsRequestingFunds, channelsReturningFunds} = protocolState;
+    const {supported, channelId: ledgerChannelId} = fundingChannel;
+
+    const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+    const supportedChannelIds = _.map(supportedOutcome.allocationItems, 'destination');
+
+    const fundedChannels = _.chain(channelsRequestingFunds)
+      .map('channelId')
+      .intersection(supportedChannelIds)
+      .value();
+
+    const defundedChannels = _.chain(channelsReturningFunds)
+      .map('channelId')
+      .difference(supportedChannelIds)
+      .value();
+
+    if (fundedChannels.length + defundedChannels.length === 0) return false;
+
+    /**
+     * After we have completed some funding requests (i.e., a new ledger state
+     * has been signed), we can confidently clear now-stale proposals from the DB.
+     */
+    await this.store.removeLedgerProposals(ledgerChannelId, tx);
+
+    await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
+    await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
+
+    return true; // requiesAnotherCrankUponCompletion
+  }
+
+  private async exchangeSignedLedgerStates(
+    protocolState: ProtocolStateWithDefinedProposals,
+    response: WalletResponse,
+    tx: Transaction
+  ): Promise<boolean> {
+    const {
+      fundingChannel: {supported, latestSignedByMe, latest, channelId},
+      myLedgerProposal: {proposal: myProposedOutcome},
+      theirLedgerProposal: {proposal: theirProposedOutcome},
+      channelsRequestingFunds,
+      channelsReturningFunds,
+    } = protocolState;
+
+    const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+    const nextTurnNum = supported.turnNum + 1;
+
+    // Already signed something and waiting for reply
+    if (latestSignedByMe.turnNum === nextTurnNum) return false;
+
+    const outcome = _.isEqual(theirProposedOutcome, myProposedOutcome)
+      ? myProposedOutcome
+      : mergeProposedLedgerUpdates(
+          myProposedOutcome,
+          theirProposedOutcome,
+          supportedOutcome,
+          channelsRequestingFunds,
+          channelsReturningFunds
+        ).outcome;
+
+    const receivedReveal = latest.turnNum === nextTurnNum;
+    if (receivedReveal && !_.isEqual(outcome, latest.outcome))
+      // TODO: signals a corrupt / broken counterparty wallet, what do we want to do here?
+      throw new Error('received a signed reveal that is _not_ what we agreed on :/');
+
+    if (_.isEqual(outcome, supportedOutcome)) {
+      // dismiss
+      await this.store.removeLedgerProposals(channelId, tx);
+      return true;
+    } else {
+      // sign ledger update
+      const stateToSign = {
+        turnNum: nextTurnNum,
+        outcome,
+        appData: '0x00',
+        isFinal: false,
+      };
+
+      await this.signLedgerUpdate(protocolState.fundingChannel, stateToSign, response, tx);
+      return false;
+    }
+  }
+
+  private async exchangeProposals(protocolState: ProtocolState, tx: Transaction): Promise<boolean> {
+    const {
+      fundingChannel: {supported, channelId, myIndex, participants},
+      myLedgerProposal: {proposal, nonce},
+      channelsRequestingFunds,
+      channelsReturningFunds,
+    } = protocolState;
+
+    const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
+
+    // Don't propose another commit, wait for theirs
+    if (proposal) return false;
+
+    const {outcome, channelsNotFunded} = redistributeFunds(
+      supportedOutcome,
+      channelsReturningFunds,
+      channelsRequestingFunds
+    );
+
+    if (_.isEqual(outcome, supportedOutcome)) {
+      if (channelsNotFunded.length > 0) {
+        // mark insufficient funds
+        await this.store.markLedgerRequests(channelsNotFunded, 'fund', 'failed', tx);
+        return false;
+      } else {
+        return false;
+      }
+    } else {
+      // propose Ledger update
+      await this.store.storeLedgerProposal(
+        channelId,
+        outcome,
+        nonce + 1,
+        participants[myIndex].signingAddress,
+        tx
+      );
+      return false;
     }
   }
 }
@@ -357,127 +429,11 @@ const mergeProposedLedgerUpdates = (
   return redistributeFunds(supportedOutcome, bothDefunding, bothFunding);
 };
 
-const exchangeSignedLedgerStates = ({
-  fundingChannel: {supported, latestSignedByMe, latest, channelId},
-  myLedgerProposal: {proposal: myProposedOutcome},
-  theirLedgerProposal: {proposal: theirProposedOutcome},
-  channelsRequestingFunds,
-  channelsReturningFunds,
-}: ProtocolStateWithDefinedProposals): DismissLedgerProposals | SignLedgerUpdate | false => {
-  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-  const nextTurnNum = supported.turnNum + 1;
-
-  // Already signed something and waiting for reply
-  if (latestSignedByMe.turnNum === nextTurnNum) return false;
-
-  const outcome = _.isEqual(theirProposedOutcome, myProposedOutcome)
-    ? myProposedOutcome
-    : mergeProposedLedgerUpdates(
-        myProposedOutcome,
-        theirProposedOutcome,
-        supportedOutcome,
-        channelsRequestingFunds,
-        channelsReturningFunds
-      ).outcome;
-
-  const receivedReveal = latest.turnNum === nextTurnNum;
-  if (receivedReveal && !_.isEqual(outcome, latest.outcome))
-    // TODO: signals a corrupt / broken counterparty wallet, what do we want to do here?
-    throw new Error('received a signed reveal that is _not_ what we agreed on :/');
-
-  return _.isEqual(outcome, supportedOutcome)
-    ? {
-        type: 'DismissLedgerProposals',
-        channelId,
-      }
-    : {
-        type: 'SignLedgerUpdate',
-        channelId,
-        stateToSign: {
-          turnNum: nextTurnNum,
-          outcome,
-          appData: NULL_APP_DATA,
-          isFinal: false,
-        },
-      };
-};
-
-const exchangeProposals = ({
-  fundingChannel: {supported, channelId, myIndex, participants},
-  myLedgerProposal: {proposal, nonce},
-  channelsRequestingFunds,
-  channelsReturningFunds,
-}: ProtocolState): MarkInsufficientFunds | ProposeLedgerUpdate | false => {
-  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-
-  // Don't propose another commit, wait for theirs
-  if (proposal) return false;
-
-  const {outcome, channelsNotFunded} = redistributeFunds(
-    supportedOutcome,
-    channelsReturningFunds,
-    channelsRequestingFunds
-  );
-
-  return _.isEqual(outcome, supportedOutcome)
-    ? channelsNotFunded.length > 0
-      ? {
-          type: 'MarkInsufficientFunds',
-          channelId,
-          channelsNotFunded,
-        }
-      : false
-    : {
-        type: 'ProposeLedgerUpdate',
-        channelId,
-        outcome,
-        nonce: nonce + 1,
-        signingAddress: participants[myIndex].signingAddress,
-      };
-};
-
-const markRequestsAsComplete = ({
-  fundingChannel: {supported, channelId: ledgerChannelId},
-  channelsRequestingFunds,
-  channelsReturningFunds,
-}: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
-  const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-  const supportedChannelIds = _.map(supportedOutcome.allocationItems, 'destination');
-
-  const fundedChannels = _.chain(channelsRequestingFunds)
-    .map('channelId')
-    .intersection(supportedChannelIds)
-    .value();
-
-  const defundedChannels = _.chain(channelsReturningFunds)
-    .map('channelId')
-    .difference(supportedChannelIds)
-    .value();
-
-  if (fundedChannels.length + defundedChannels.length === 0) return false;
-
-  return {
-    type: 'MarkLedgerFundingRequestsAsComplete',
-    fundedChannels,
-    defundedChannels,
-    ledgerChannelId,
-  };
-};
-
 const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
   ps.channelsRequestingFunds.length + ps.channelsReturningFunds.length > 0;
 
 const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithDefinedProposals =>
   Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
-
-export const protocol: Protocol<ProtocolState> = (
-  ps: ProtocolState
-): ProtocolResult<ProtocolAction> =>
-  (hasUnhandledLedgerRequests(ps) &&
-    (markRequestsAsComplete(ps) ||
-      (finishedExchangingProposals(ps) && exchangeSignedLedgerStates(ps)) ||
-      exchangeProposals(ps))) ||
-  noAction;
 
 /**
  * Helper method to retrieve scoped data needed for ProcessLedger protocol.
