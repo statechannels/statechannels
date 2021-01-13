@@ -17,15 +17,11 @@ it('can insert Channel instances to, and fetch them from, the database', async (
   const vars = [stateWithHashSignedBy()({channelNonce: 1234})];
   const c1 = channel({channelNonce: 1234, vars});
 
-  await Channel.query(knex)
-    .withGraphFetched('signingWallet')
-    .insert(c1);
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c1);
 
   expect(c1.signingWallet).toBeDefined();
 
-  const c2 = await Channel.query(knex)
-    .where({channel_nonce: 1234})
-    .first();
+  const c2 = await Channel.query(knex).where({channel_nonce: 1234}).first();
 
   expect(c1.vars).toMatchObject(c2.vars);
 });
@@ -44,7 +40,10 @@ it('does not store extraneous fields in the variables property', async () => {
 
 it('can insert multiple channels instances within a transaction', async () => {
   const c1 = channel({vars: [stateWithHashSignedBy()()]});
-  const c2 = channel({channelNonce: 1234, vars: [stateWithHashSignedBy()({channelNonce: 1234})]});
+  const c2 = channel({
+    channelNonce: 1234,
+    vars: [stateWithHashSignedBy()({channelNonce: 1234})],
+  });
 
   await Channel.transaction(knex, async tx => {
     await Channel.query(tx).insert(c1);
@@ -95,9 +94,7 @@ describe('fundingStatus', () => {
     });
 
     await Channel.transaction(knex, async () => {
-      const channel = await Channel.query(knex)
-        .withGraphJoined('funding')
-        .first();
+      const channel = await Channel.query(knex).withGraphJoined('funding').first();
 
       expect(channel.channelResult.fundingStatus).not.toBeUndefined();
     });

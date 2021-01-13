@@ -6,11 +6,7 @@ export async function up(knex: Knex): Promise<any> {
 
     table.string('signing_address').notNullable();
     table.jsonb('proposal');
-    table
-      .integer('nonce')
-      .notNullable()
-      .defaultTo(0)
-      .unsigned();
+    table.integer('nonce').notNullable().defaultTo(0).unsigned();
 
     table.index('channel_id');
 

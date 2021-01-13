@@ -25,14 +25,8 @@ export async function dropValidChainServiceRequests(knex: Knex): Promise<any> {
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table => {
-    table
-      .specificType(chainServiceRequests, 'text[]')
-      .notNullable()
-      .defaultTo('{}');
-    table
-      .string(fundingStrategy)
-      .notNullable()
-      .defaultTo(defaultFundingStrategy);
+    table.specificType(chainServiceRequests, 'text[]').notNullable().defaultTo('{}');
+    table.string(fundingStrategy).notNullable().defaultTo(defaultFundingStrategy);
   });
 
   await addValidChainServiceRequests(knex, "'fund'");

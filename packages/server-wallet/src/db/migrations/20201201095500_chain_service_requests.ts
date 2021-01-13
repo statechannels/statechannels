@@ -9,7 +9,7 @@ const requestsConstraint = `valid_requests`;
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(channels, table => table.dropColumn(chainServiceRequests));
 
-  await knex.schema.createTable(chain_service_requests, function(table) {
+  await knex.schema.createTable(chain_service_requests, function (table) {
     table.string('channel_id').notNullable();
     table.string('request').notNullable();
     table.timestamp('timestamp').notNullable();
@@ -32,10 +32,7 @@ export async function down(knex: Knex): Promise<any> {
   await knex.schema.dropTable(chain_service_requests);
 
   await knex.schema.alterTable(channels, table => {
-    table
-      .specificType(chainServiceRequests, 'text[]')
-      .notNullable()
-      .defaultTo('{}');
+    table.specificType(chainServiceRequests, 'text[]').notNullable().defaultTo('{}');
   });
   await addValidChainServiceRequests(knex, "'fund', 'withdraw'");
 }

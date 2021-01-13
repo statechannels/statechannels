@@ -15,14 +15,8 @@ const databaseObjectConfigurationSchema = joi.object({
   database: joi.string().required(),
   host: joi.string().required(),
   user: joi.string().required(),
-  password: joi
-    .string()
-    .allow('')
-    .optional(),
-  port: joi
-    .number()
-    .integer()
-    .optional(),
+  password: joi.string().allow('').optional(),
+  port: joi.number().integer().optional(),
 });
 const databaseConnectionConfigurationSchema = joi.alternatives().conditional('.', {
   is: joi.string(),
@@ -31,16 +25,8 @@ const databaseConnectionConfigurationSchema = joi.alternatives().conditional('.'
 });
 
 const databasePoolConfigurationSchema = joi.object({
-  max: joi
-    .number()
-    .integer()
-    .min(0)
-    .optional(),
-  min: joi
-    .number()
-    .integer()
-    .min(0)
-    .optional(),
+  max: joi.number().integer().min(0).optional(),
+  min: joi.number().integer().min(0).optional(),
 });
 
 const databaseConfigurationSchema = joi.object({
@@ -74,23 +60,10 @@ const chainServiceConfigurationSchema = joi.object({
     .string()
     .pattern(/0[xX][0-9a-fA-F]{40}/, {name: 'Hex value validator'})
     .optional(),
-  provider: joi
-    .string()
-    .uri()
-    .optional(),
-  pollingInterval: joi
-    .number()
-    .positive()
-    .optional(),
-  blockConfirmations: joi
-    .number()
-    .not()
-    .negative()
-    .optional(),
-  allowanceMode: joi
-    .string()
-    .valid('MaxUint', 'PerDeposit')
-    .optional(),
+  provider: joi.string().uri().optional(),
+  pollingInterval: joi.number().positive().optional(),
+  blockConfirmations: joi.number().not().negative().optional(),
+  allowanceMode: joi.string().valid('MaxUint', 'PerDeposit').optional(),
 });
 
 const serverWalletConfigSchema = joi.object({
@@ -98,10 +71,7 @@ const serverWalletConfigSchema = joi.object({
   networkConfiguration: networkConfigurationSchema,
   chainServiceConfiguration: chainServiceConfigurationSchema,
 
-  workerThreadAmount: joi
-    .number()
-    .min(0)
-    .optional(),
+  workerThreadAmount: joi.number().min(0).optional(),
   skipEvmValidation: joi.boolean().optional(),
   loggingConfiguration: loggingConfigurationSchema.optional(),
   metricsConfiguration: metricsConfigurationSchema.optional(),

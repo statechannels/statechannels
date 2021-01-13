@@ -74,12 +74,7 @@ describe('deposit', () => {
     const allowance = BigNumber.from(
       await Token.allowance(signer0Address, ERC20AssetHolder.address)
     );
-    expect(
-      allowance
-        .sub(amount)
-        .sub(held)
-        .gte(0)
-    ).toBe(true);
+    expect(allowance.sub(amount).sub(held).gte(0)).toBe(true);
 
     if (held > 0) {
       // Set holdings by depositing in the 'safest' way

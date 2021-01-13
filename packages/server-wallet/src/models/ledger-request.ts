@@ -43,18 +43,14 @@ export class LedgerRequest extends Model implements LedgerRequestType {
     status: LedgerRequestStatus,
     tx: TransactionOrKnex
   ): Promise<void> {
-    await LedgerRequest.query(tx)
-      .findById([channelToBeFunded, type])
-      .patch({status});
+    await LedgerRequest.query(tx).findById([channelToBeFunded, type]).patch({status});
   }
 
   static async getPendingRequests(
     ledgerChannelId: string,
     tx: TransactionOrKnex
   ): Promise<LedgerRequestType[]> {
-    return LedgerRequest.query(tx)
-      .select()
-      .where({ledgerChannelId, status: 'pending'});
+    return LedgerRequest.query(tx).select().where({ledgerChannelId, status: 'pending'});
   }
 
   static async getAllPendingRequests(tx: TransactionOrKnex): Promise<LedgerRequestType[]> {

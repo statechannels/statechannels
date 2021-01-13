@@ -335,9 +335,7 @@ export class GasReporter implements Reporter {
         '\nrevision: ' +
         hash +
         '\n' +
-        this.objectToEasyTable(gasConsumed, true)
-          .print()
-          .toString(),
+        this.objectToEasyTable(gasConsumed, true).print().toString(),
       err => {
         if (err) throw err;
         console.log('Wrote table to gas.md');

@@ -36,7 +36,10 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 export type SupportedWireObjective = OpenChannel | CloseChannel;
 
 export type DBOpenChannelObjective = OpenChannel & {objectiveId: string; status: ObjectiveStatus};
-export type DBCloseChannelObjective = CloseChannel & {objectiveId: string; status: ObjectiveStatus};
+export type DBCloseChannelObjective = CloseChannel & {
+  objectiveId: string;
+  status: ObjectiveStatus;
+};
 
 export type DBSubmitChallengeObjective = {
   data: {targetChannelId: string; challengeState: State};
@@ -147,15 +150,11 @@ export class ObjectiveModel extends Model {
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'approved'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({status: 'succeeded'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'succeeded'});
   }
 
   static async forChannelIds(

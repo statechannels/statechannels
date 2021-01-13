@@ -39,9 +39,7 @@ export class LedgerProposal extends Model implements RequiredColumns {
   }
 
   static async setProposalsToNull(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<void> {
-    await LedgerProposal.query(txOrKnex)
-      .where({channelId})
-      .patch({proposal: null});
+    await LedgerProposal.query(txOrKnex).where({channelId}).patch({proposal: null});
   }
 
   static async storeProposal(

@@ -87,7 +87,7 @@ async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promi
   });
 }
 
-(async function(): Promise<void> {
+(async function (): Promise<void> {
   configureEnvVariables();
   // TODO: Use yargs?
   const typeArg = process.argv.slice(2)[0].toLowerCase();

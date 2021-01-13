@@ -16,10 +16,7 @@ export async function startApp(): Promise<express.Application> {
   app.post('/status', (_req, res) => res.status(200).send('OK'));
 
   app.get('/participant', (_req, res) =>
-    res
-      .status(200)
-      .contentType('application/json')
-      .send(controller.participantInfo)
+    res.status(200).contentType('application/json').send(controller.participantInfo)
   );
 
   // endpoint for general state channel messages

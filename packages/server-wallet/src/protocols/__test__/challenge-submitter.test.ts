@@ -40,9 +40,7 @@ describe(`challenge-submitter`, () => {
   it(`takes no action if there is an existing chain service request`, async () => {
     const c = channel();
 
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     // Add a existing request
     await ChainServiceRequest.insertOrUpdate(c.channelId, 'challenge', knex);
@@ -65,9 +63,7 @@ describe(`challenge-submitter`, () => {
   it(`takes no action if there is an existing challenge`, async () => {
     const c = channel();
 
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, {
       ...stateVars(),
@@ -95,9 +91,7 @@ describe(`challenge-submitter`, () => {
       vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
     });
 
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     const challengeState = {
       ...c.channelConstants,

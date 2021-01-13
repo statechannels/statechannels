@@ -29,7 +29,7 @@ const {argv} = yargs
     description: 'The amount of connections (and channels) to use in the stress test.',
   });
 
-(async function(): Promise<void> {
+(async function (): Promise<void> {
   const receiverServer = startReceiverServer();
   const payerServer = startPayerServer();
   await waitForServerToStart(receiverServer);

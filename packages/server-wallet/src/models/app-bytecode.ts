@@ -42,10 +42,6 @@ export class AppBytecode extends Model implements RequiredColumns {
     appDefinition: Address,
     txOrKnex: TransactionOrKnex
   ): Promise<Bytes | undefined> {
-    return (
-      await AppBytecode.query(txOrKnex)
-        .where({chainId, appDefinition})
-        .first()
-    )?.appBytecode;
+    return (await AppBytecode.query(txOrKnex).where({chainId, appDefinition}).first())?.appBytecode;
   }
 }

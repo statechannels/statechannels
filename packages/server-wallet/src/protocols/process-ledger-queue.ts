@@ -369,7 +369,8 @@ const sortByNonce = (channelStates: ChannelState[]): ChannelState[] =>
   _.sortBy(channelStates, ({latest: {channelNonce}}) => channelNonce);
 
 const runningOrError = (cs: ChannelState): ChannelStateWithSupported => {
-  /* @ts-ignore */ // TODO: Figure out why TypeScript is not detecting latestSignedByMe
-  if (cs.supported && cs.latestSignedByMe && cs.supported.turnNum >= 3) return cs;
+  // TODO: Figure out why TypeScript is not detecting latestSignedByMe
+  if (cs.supported && cs.latestSignedByMe && cs.supported.turnNum >= 3)
+    return cs as ChannelStateWithSupported;
   throw new Error('unreachable: ledger channel is not running');
 };
