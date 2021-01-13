@@ -1,6 +1,7 @@
 import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
+import {ChainServiceRequest} from '../models/chain-service-request';
 import {ChallengeStatus} from '../models/challenge-status';
 import {DBDefundChannelObjective} from '../models/objective';
 import {Store} from '../wallet/store';
@@ -53,10 +54,13 @@ export class ChannelDefunder {
       // TODO: We might want to refactor challengeStatus to something that
       // applies to both co-operatively concluding or challenging
       if (result.status === 'Challenge Finalized') {
+        await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
         this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
         await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+
         return;
       } else if (channel.hasConclusionProof) {
+        await ChainServiceRequest.insertOrUpdate(channelId, 'withdraw', tx);
         this.chainService.concludeAndWithdraw(channel.support);
         await this.store.markObjectiveStatus(objective, 'succeeded', tx);
         return;

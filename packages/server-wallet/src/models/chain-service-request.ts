@@ -8,7 +8,7 @@ export const requestTimeout = 10 * 60 * 1_000;
 const ID_COLUMN = ['channelId', 'request'] as const;
 const REQUIRED_COLUMNS = [...ID_COLUMN, 'timestamp'] as const;
 
-type Request = 'fund' | 'withdraw' | 'challenge';
+type Request = 'fund' | 'withdraw' | 'challenge' | 'pushOutcome';
 
 interface RequiredColumns {
   readonly channelId: Bytes32;
