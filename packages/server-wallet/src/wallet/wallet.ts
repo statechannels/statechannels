@@ -714,29 +714,26 @@ export class SingleThreadedWallet
 
   // todo(tom): change function to return a value instead of mutating input args
   private async crankUntilIdle(channels: Bytes32[], response: WalletResponse): Promise<void> {
-    await this.store.transaction(async tx => {
-      // Fetch channels related to the channels argument where related means, either:
-      // - The channel is in the channels array
-      // - The channel is being funded by one of the channels in the channels array
-      const channelsWithRelevantPendingReqs = await this.store.getChannelIdsPendingLedgerFundingFrom(
-        channels,
-        tx
-      );
+    // Fetch channels related to the channels argument where related means, either:
+    // - The channel is in the channels array
+    // - The channel is being funded by one of the channels in the channels array
+    const channelsWithRelevantPendingReqs = await this.store.getChannelIdsPendingLedgerFundingFrom(
+      channels
+    );
 
-      const objectives = (
-        await this.store.getObjectives(channels.concat(channelsWithRelevantPendingReqs), tx)
-      ).filter(objective => objective.status === 'approved');
+    const objectives = (
+      await this.store.getObjectives(channels.concat(channelsWithRelevantPendingReqs))
+    ).filter(objective => objective.status === 'approved');
 
-      // todo(tom): why isn't this just a for loop?
-      while (objectives.length) {
-        const [{objectiveId}] = objectives;
+    // todo(tom): why isn't this just a for loop?
+    while (objectives.length) {
+      const [{objectiveId}] = objectives;
 
-        await this.objectiveManager.crank(objectiveId, response, tx);
+      await this.objectiveManager.crank(objectiveId, response);
 
-        // remove objective from list
-        objectives.shift();
-      }
-    });
+      // remove objective from list
+      objectives.shift();
+    }
   }
 
   // ChainEventSubscriberInterface implementation

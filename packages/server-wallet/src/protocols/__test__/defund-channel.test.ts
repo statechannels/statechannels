@@ -55,7 +55,9 @@ describe('when there is no challenge or finalized channel', () => {
     const withdrawSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await store.transaction(tx =>
+      channelDefunder.crank(objective, WalletResponse.initialize(), tx)
+    );
 
     // Check the results
     expect(pushSpy).not.toHaveBeenCalled();
@@ -84,7 +86,9 @@ describe('when there is an active challenge', () => {
     const concludeSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await store.transaction(tx =>
+      channelDefunder.crank(objective, WalletResponse.initialize(), tx)
+    );
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective.objectiveId);
@@ -108,7 +112,9 @@ describe('when there is an active challenge', () => {
     await knex.transaction(tx => store.ensureObjective(objective, tx));
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await store.transaction(tx =>
+      channelDefunder.crank(objective, WalletResponse.initialize(), tx)
+    );
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective.objectiveId);
@@ -140,7 +146,9 @@ describe('when the channel is finalized on chain', () => {
     const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await store.transaction(tx =>
+      channelDefunder.crank(objective, WalletResponse.initialize(), tx)
+    );
 
     // Check the results
     expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining(challengeState), c.myAddress);
@@ -186,7 +194,8 @@ it('should fail the objective when the channel does not exist', async () => {
   await knex.transaction(tx => ObjectiveModel.insert(objective, tx));
 
   // Crank the protocol
-  await channelDefunder.crank(objective, WalletResponse.initialize());
+  await store.transaction(tx => channelDefunder.crank(objective, WalletResponse.initialize(), tx));
+
   // Check the results
   const reloadedObjective = await store.getObjective(objective.objectiveId);
   expect(reloadedObjective.status).toEqual('failed');

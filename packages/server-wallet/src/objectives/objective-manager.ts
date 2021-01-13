@@ -1,6 +1,5 @@
 import {Logger} from 'pino';
 import {unreachable} from '@statechannels/wallet-core';
-import {Transaction} from 'objection';
 
 import {Bytes32} from '../type-aliases';
 import {ChannelOpener} from '../protocols/channel-opener';
@@ -10,6 +9,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChallengeSubmitter} from '../protocols/challenge-submitter';
 import {ChannelDefunder} from '../protocols/defund-channel';
+import {DBObjective} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -39,21 +39,29 @@ export class ObjectiveManager {
    * @param objectiveId - id of objective to try to advance
    * @param response - response builder; will be modified by the method
    */
-  async crank(objectiveId: string, response: WalletResponse, tx: Transaction): Promise<void> {
-    const objective = await this.store.getObjective(objectiveId, tx);
+  async crank(objectiveId: string, response: WalletResponse): Promise<void> {
+    await this.store.transaction(async tx => {
+      let objective: DBObjective;
+      try {
+        objective = await this.store.getObjective(objectiveId, tx);
+      } catch (err) {
+        this.logger.error({objectiveId, err}, 'Attempted to crank objective which does not exist');
+        return;
+      }
 
-    switch (objective.type) {
-      case 'OpenChannel':
-        return this.channelOpener.crank(objective, response, tx);
-      case 'CloseChannel':
-        return this.channelCloser.crank(objective, response, tx);
-      case 'SubmitChallenge':
-        return this.challengeSubmitter.crank(objective, response, tx);
-      case 'DefundChannel':
-        return this.channelDefunder.crank(objective, response, tx);
-      default:
-        unreachable(objective);
-    }
+      switch (objective.type) {
+        case 'OpenChannel':
+          return this.channelOpener.crank(objective, response, tx);
+        case 'CloseChannel':
+          return this.channelCloser.crank(objective, response, tx);
+        case 'SubmitChallenge':
+          return this.challengeSubmitter.crank(objective, response, tx);
+        case 'DefundChannel':
+          return this.channelDefunder.crank(objective, response, tx);
+        default:
+          unreachable(objective);
+      }
+    });
   }
 
   private get channelDefunder(): ChannelDefunder {
