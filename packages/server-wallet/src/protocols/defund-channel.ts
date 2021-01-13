@@ -53,6 +53,7 @@ export class ChannelDefunder {
 
       // TODO: We might want to refactor challengeStatus to something that
       // applies to both co-operatively concluding or challenging
+      // see https://github.com/statechannels/statechannels/issues/3132
       if (result.status === 'Challenge Finalized') {
         await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
         this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
