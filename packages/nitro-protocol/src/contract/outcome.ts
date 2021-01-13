@@ -58,7 +58,10 @@ export function decodeAllocation(encodedAllocation: Bytes): Allocation {
     encodedAllocation
   )[0];
 
-  return allocationItems.map(a => ({destination: a.destination, amount: a.amount.toHexString()}));
+  return allocationItems.map(a => ({
+    destination: a.destination,
+    amount: a.amount.toHexString(),
+  }));
 }
 
 export function isAllocation(

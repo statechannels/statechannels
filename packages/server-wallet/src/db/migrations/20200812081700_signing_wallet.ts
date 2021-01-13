@@ -5,11 +5,7 @@ const enforceOneRow = 'enforce_one_row';
 
 export async function up(knex: Knex): Promise<any> {
   await knex.schema.alterTable(signingWallet, table =>
-    table
-      .integer(enforceOneRow)
-      .unique(enforceOneRow)
-      .notNullable()
-      .defaultTo(1)
+    table.integer(enforceOneRow).unique(enforceOneRow).notNullable().defaultTo(1)
   );
 
   // https://github.com/knex/knex/issues/266 will add check constraints to knex

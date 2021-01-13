@@ -88,7 +88,8 @@ export class ConfigValidationError extends Error {
   }
 }
 
-export class SingleThreadedWallet extends EventEmitter<EventEmitterType>
+export class SingleThreadedWallet
+  extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
   knex: Knex;
   store: Store;

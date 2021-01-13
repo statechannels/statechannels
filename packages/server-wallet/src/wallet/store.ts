@@ -154,10 +154,7 @@ export class Store {
     return this.knex.transaction(async tx => {
       const timer = timerFactory(this.timingMetrics, `lock app ${channelId}`);
       const channel = await timer('getting channel', () => {
-        const query = Channel.query(tx)
-          .where({channelId})
-          .forUpdate()
-          .first();
+        const query = Channel.query(tx).where({channelId}).forUpdate().first();
 
         if (fetchSigningWallet) return query.withGraphFetched('signingWallet');
 
@@ -752,9 +749,7 @@ export class Store {
   }
 
   async fundingRequestExists(channelId: string, tx: Transaction): Promise<boolean> {
-    const request = await ChainServiceRequest.query(tx)
-      .where({channelId, request: 'fund'})
-      .first();
+    const request = await ChainServiceRequest.query(tx).where({channelId, request: 'fund'}).first();
 
     return !!request && request.isValid();
   }
@@ -764,9 +759,7 @@ export class Store {
     assetHolder: Address,
     tx: Transaction
   ): Promise<Funding | undefined> {
-    const funding = Funding.query(tx)
-      .where({channelId, assetHolder})
-      .first();
+    const funding = Funding.query(tx).where({channelId, assetHolder}).first();
 
     return funding;
   }
@@ -819,9 +812,7 @@ async function createChannel(
 
   const addresses = constants.participants.map(p => p.signingAddress);
 
-  const signingWallet = await SigningWallet.query(txOrKnex)
-    .whereIn('address', addresses)
-    .first();
+  const signingWallet = await SigningWallet.query(txOrKnex).whereIn('address', addresses).first();
 
   if (!signingWallet) throw new StoreError(StoreError.reasons.notInChannel);
 

@@ -159,9 +159,7 @@ export class Channel extends Model implements RequiredColumns {
     assetHolderAddress: Address,
     txOrKnex: TransactionOrKnex
   ): Promise<void> {
-    await Channel.query(txOrKnex)
-      .findOne({channelId})
-      .patch({assetHolderAddress});
+    await Channel.query(txOrKnex).findOne({channelId}).patch({assetHolderAddress});
   }
 
   static async isLedger(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<boolean> {

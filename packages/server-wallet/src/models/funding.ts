@@ -42,9 +42,7 @@ export class Funding extends Model implements RequiredColumns {
     channelId: Bytes32,
     assetHolder: Address
   ): Promise<Uint256> {
-    const result = await Funding.query(knex)
-      .where({channelId, assetHolder})
-      .first();
+    const result = await Funding.query(knex).where({channelId, assetHolder}).first();
 
     return result ? result.amount : Zero;
   }
@@ -55,9 +53,7 @@ export class Funding extends Model implements RequiredColumns {
     amount: Uint256,
     assetHolder: Address
   ): Promise<Funding> {
-    const existing = await Funding.query(knex)
-      .where({channelId, assetHolder})
-      .first();
+    const existing = await Funding.query(knex).where({channelId, assetHolder}).first();
 
     if (!existing) {
       return await Funding.query(knex).insert({

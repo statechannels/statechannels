@@ -32,9 +32,7 @@ describe('Objective > insert', () => {
   });
 
   it('inserts and associates an objective with all channels that it references (channels exist)', async () => {
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
 
@@ -50,9 +48,7 @@ describe('Objective > insert', () => {
 
 describe('Objective > forChannelIds', () => {
   it('retrieves objectives associated with a given channelId', async () => {
-    await Channel.query(knex)
-      .withGraphFetched('signingWallet')
-      .insert(c);
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
 

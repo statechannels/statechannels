@@ -40,7 +40,7 @@ export type Fixture<T> = (mergeProps?: DeepPartial<T>, extendProps?: DeepPartial
  * is probably what the consumer expects, and doing it in the modifier serves as a convenience for
  * developers who wish to pass a single `mergeProps` object.
  */
-export const fixture = function<T>(defaults: T, modifier: Modifier<T> = _.identity): Fixture<T> {
+export const fixture = function <T>(defaults: T, modifier: Modifier<T> = _.identity): Fixture<T> {
   return (mergeProps?: DeepPartial<T>, extendProps?: DeepPartial<T>): T =>
     modifier(_.extend(_.merge(_.cloneDeep(defaults), mergeProps), extendProps), mergeProps) as T;
 };

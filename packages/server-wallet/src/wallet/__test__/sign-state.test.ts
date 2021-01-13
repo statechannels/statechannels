@@ -48,7 +48,10 @@ describe('signState', () => {
     const state = {...c.vars[0], ...c.channelConstants};
     const signature = signState(state, alice().privateKey).signature;
     const result = await store.signState(c, c.vars[0], tx);
-    expect(result).toMatchObject({...state, signatures: [{signature, signer: alice().address}]});
+    expect(result).toMatchObject({
+      ...state,
+      signatures: [{signature, signer: alice().address}],
+    });
   });
 
   it('uses a transaction', async () => {

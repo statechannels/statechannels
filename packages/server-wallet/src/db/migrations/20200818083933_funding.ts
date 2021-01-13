@@ -2,7 +2,7 @@ import * as Knex from 'knex';
 
 const funding = 'funding';
 export async function up(knex: Knex): Promise<any> {
-  await knex.schema.createTable(funding, function(table) {
+  await knex.schema.createTable(funding, function (table) {
     table.string('channel_id').notNullable();
     table.string('amount').notNullable();
     table.string('asset_holder').notNullable();

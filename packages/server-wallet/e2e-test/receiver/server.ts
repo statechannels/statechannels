@@ -4,7 +4,7 @@ import {RECEIVER_PORT} from '../e2e-utils';
 
 import {startApp} from './app';
 
-(async function(): Promise<void> {
+(async function (): Promise<void> {
   process.on('SIGINT', () => {
     server.close();
     process.exit(0);

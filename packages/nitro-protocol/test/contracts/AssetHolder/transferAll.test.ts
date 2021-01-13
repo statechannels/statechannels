@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber, utils} from 'ethers';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {
@@ -13,7 +14,6 @@ import {
   writeGasConsumption,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
-import {defaultAbiCoder} from 'ethers/lib/utils';
 
 const provider = getTestProvider();
 

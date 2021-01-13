@@ -19,8 +19,14 @@ const createChannel = {
       {
         assetHolderAddress: '0x0000000000000000000000000000000000000000',
         allocationItems: [
-          {destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7', amount: '0x06f05b59d3b20000'},
-          {destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7', amount: '0x06f05b59d3b20000'}
+          {
+            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            amount: '0x06f05b59d3b20000'
+          },
+          {
+            destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+            amount: '0x06f05b59d3b20000'
+          }
         ]
       }
     ],

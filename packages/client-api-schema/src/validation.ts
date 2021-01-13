@@ -18,7 +18,9 @@ const apiSchema = require('./generated-schema.json'); // because https://github.
 ajv.addSchema(apiSchema, 'api.json');
 
 export const validateRequest = ajv.compile({$ref: 'api.json#/definitions/StateChannelsRequest'});
-export const validateResponse = ajv.compile({$ref: 'api.json#/definitions/StateChannelsResponse'});
+export const validateResponse = ajv.compile({
+  $ref: 'api.json#/definitions/StateChannelsResponse'
+});
 export const validateErrorResponse = ajv.compile({
   $ref: 'api.json#/definitions/StateChannelsErrorResponse'
 });

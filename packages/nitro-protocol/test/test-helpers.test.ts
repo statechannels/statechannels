@@ -14,7 +14,10 @@ const addresses = {
 };
 
 const singleAsset = {C: 1, X: 2};
-const singleAssetReplaced = {'0xCHANNEL': BigNumber.from(1), '0xANOTHERCHANNEL': BigNumber.from(2)};
+const singleAssetReplaced = {
+  '0xCHANNEL': BigNumber.from(1),
+  '0xANOTHERCHANNEL': BigNumber.from(2),
+};
 
 const multiAsset = {ETH: {C: 3}, TOK: {X: 4}};
 const multiAssetReplaced = {
