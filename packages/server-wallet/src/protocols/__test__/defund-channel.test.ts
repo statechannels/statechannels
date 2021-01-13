@@ -11,10 +11,10 @@ import {Channel} from '../../models/channel';
 import {MockChainService} from '../../chain-service';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {ChannelDefunder} from '../defund-channel';
-import {ChallengeStatus} from '../../models/challenge-status';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
-import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
+import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
+import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -213,13 +213,11 @@ async function setChallengeStatus(
   channel: Channel,
   state?: Partial<State>
 ): Promise<void> {
-  await ChallengeStatus.insertChallengeStatus(knex, channel.channelId, 100, {
-    ...channel.channelConstants,
-    ...stateVars(state),
-    ...(state || {}),
-  });
+  await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, channel.channelId, 100, [
+    stateSignedBy([alice()])(state),
+  ]);
   if (status === 'finalized') {
-    await ChallengeStatus.setFinalized(knex, channel.channelId, 200);
+    await AdjudicatorStatusModel.setFinalized(knex, channel.channelId, 200);
   }
 }
 

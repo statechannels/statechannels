@@ -3,7 +3,7 @@ import _ from 'lodash';
 import {defaultTestConfig, Wallet} from '..';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {ChallengeStatus} from '../../models/challenge-status';
+import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {Channel} from '../../models/channel';
 import {ObjectiveModel} from '../../models/objective';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -31,9 +31,9 @@ it('submits a challenge when no challenge exists for a channel', async () => {
 
   const {channelId} = c;
 
-  const current = await ChallengeStatus.getChallengeStatus(w.knex, channelId);
+  const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, channelId);
 
-  expect(current.status).toEqual('No Challenge Detected');
+  expect(current.status).toEqual('Nothing');
   const challengeState = {
     ...c.channelConstants,
     ..._.pick(c.latest, ['turnNum', 'outcome', 'appData', 'isFinal']),
@@ -48,19 +48,16 @@ it('stores the challenge state on the challenge created event', async () => {
     vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
   });
   await Channel.query(w.knex).insert(c);
-  const current = await ChallengeStatus.getChallengeStatus(w.knex, c.channelId);
+  const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, c.channelId);
 
-  expect(current.status).toEqual('No Challenge Detected');
-  const challengeState = {
-    ...c.channelConstants,
-    ..._.pick(c.latest, ['turnNum', 'outcome', 'appData', 'isFinal']),
-  };
+  expect(current.status).toEqual('Nothing');
+  const challengeState = stateWithHashSignedBy([alice()])({turnNum: 1});
   const {channelId} = c;
   await w.challengeRegistered({channelId, finalizesAt: 200, challengeStates: [challengeState]});
-  const updated = await ChallengeStatus.getChallengeStatus(w.knex, c.channelId);
+  const updated = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, c.channelId);
 
   expect(updated.status).toEqual('Challenge Active');
-  expect((updated as any).challengeState).toMatchObject(challengeState);
+  expect((updated as any).states).toMatchObject([challengeState]);
 });
 
 it('creates a defundChannel objective on channel finalized', async () => {

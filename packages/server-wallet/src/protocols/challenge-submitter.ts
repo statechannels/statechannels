@@ -38,10 +38,10 @@ export class ChallengeSubmitter {
         return;
       }
 
-      if (
-        channel.challengeStatus &&
-        channel.challengeStatus.toResult().status !== 'No Challenge Detected'
-      ) {
+      const status = channel.adjudicatorStatus
+        ? channel.adjudicatorStatus.toResult().status
+        : 'Nothing';
+      if (status !== 'Nothing') {
         this.logger.warn('There is already a challenge registered on chain');
         return;
       }
