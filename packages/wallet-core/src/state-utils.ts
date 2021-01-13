@@ -43,6 +43,19 @@ export function toNitroState(state: State): NitroState {
   };
 }
 
+export function fromNitroSignedState(nitroSignedState: NitroSignedState): SignedState {
+  const state = fromNitroState(nitroSignedState.state);
+  const signature = utils.joinSignature(nitroSignedState.signature);
+  const signatures: SignatureEntry[] = [
+    {
+      signature,
+      signer: getSignerAddress(state, signature)
+    }
+  ];
+
+  return {...state, signatures};
+}
+
 export function fromNitroState(state: NitroState): State {
   const {appData, isFinal, outcome, challengeDuration, appDefinition, channel, turnNum} = state;
 

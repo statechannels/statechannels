@@ -1,9 +1,10 @@
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {DBAdmin} from '../../db-admin/db-admin';
-import {ChallengeStatus} from '../challenge-status';
+import {AdjudicatorStatusModel} from '../adjudicator-status';
 import {Channel} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
+import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
+import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
 
 import {channel} from './fixtures/channel';
 
@@ -17,12 +18,12 @@ describe('ChallengeStatus model', () => {
 
   it('returns an active challenge status when the challenge is not finalized (finalizesAt>blockNumber)', async () => {
     const c = channel();
-    const challengeState = {...stateVars(), ...c.channelConstants};
+    const challengeState = stateSignedBy([alice()])();
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 5, challengeState);
+    await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 5, [challengeState]);
 
-    const result = await ChallengeStatus.getChallengeStatus(knex, c.channelId);
+    const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
     expect(result).toEqual({status: 'Challenge Active', finalizesAt: 5, challengeState});
   });
@@ -31,26 +32,26 @@ describe('ChallengeStatus model', () => {
     const c = channel();
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    const result = await ChallengeStatus.getChallengeStatus(knex, c.channelId);
+    const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
-    expect(result).toEqual({status: 'No Challenge Detected'});
+    expect(result).toEqual({status: 'Nothing'});
   });
 
   it('returns channel finalized when the channel is finalized (finalizedAt<=blockNumber)', async () => {
     const c = channel();
-    const challengeState = {...stateVars(), ...c.channelConstants};
+    const challengeState = stateSignedBy([alice()])();
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 5, challengeState);
-    await ChallengeStatus.setFinalized(knex, c.channelId, 10);
+    await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 5, [challengeState]);
+    await AdjudicatorStatusModel.setFinalized(knex, c.channelId, 10);
 
-    const result = await ChallengeStatus.getChallengeStatus(knex, c.channelId);
+    const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
     expect(result).toEqual({
       status: 'Challenge Finalized',
       finalizedAt: 5,
       finalizedBlockNumber: 10,
-      challengeState,
+      states: [challengeState],
     });
   });
 });

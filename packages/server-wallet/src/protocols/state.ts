@@ -20,7 +20,7 @@ import _ from 'lodash';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {ChainServiceRequest} from '../models/chain-service-request';
-import {ChallengeStatusResult} from '../models/challenge-status';
+import {AdjudicatorStatus} from '../models/adjudicator-status';
 
 import {ProtocolAction} from './actions';
 
@@ -45,7 +45,7 @@ export type ChannelState = {
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
   directFundingStatus?: FundingStatus;
-  challengeStatus: ChallengeStatusResult['status'];
+  adjudicatorStatus: AdjudicatorStatus['status'];
 };
 
 type WithSupported = {supported: SignedStateWithHash};
@@ -80,7 +80,7 @@ export const status = (channelState: ChannelState): ChannelStatus => {
 };
 
 export const toChannelResult = (channelState: ChannelState): ChannelResult => {
-  const {channelId, supported, latest, directFundingStatus, challengeStatus} = channelState;
+  const {channelId, supported, latest, directFundingStatus, adjudicatorStatus} = channelState;
 
   const {outcome, appData, turnNum, participants, appDefinition} = supported ?? latest;
   return {
@@ -92,13 +92,13 @@ export const toChannelResult = (channelState: ChannelState): ChannelResult => {
     allocations: serializeAllocation(checkThat(outcome, isAllocation)),
     status: status(channelState),
     fundingStatus: directFundingStatus,
-    challengeStatus,
+    adjudicatorStatus,
   };
 };
 
 /* 
 Note that this function does not take into consideration state turn numbers. Do not rely
-on ReadyToFund status as the sole criteria for determening if a channel is ready to be funded
+on ReadyToFund status as the sole criteria for determining if a channel is ready to be funded
 */
 export function directFundingStatus(
   supported: SignedStateVarsWithHash | undefined,

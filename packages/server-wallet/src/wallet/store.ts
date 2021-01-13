@@ -25,7 +25,6 @@ import {
   PrivateKey,
   SubmitChallenge,
   isSubmitChallenge,
-  State,
   DefundChannel,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
@@ -55,7 +54,7 @@ import {createLogger} from '../logger';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
-import {ChallengeStatus} from '../models/challenge-status';
+import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -262,14 +261,14 @@ export class Store {
       .where({'channels.channel_id': channelId})
       .withGraphJoined('funding')
       .withGraphJoined('chainServiceRequests')
-      .withGraphJoined('challengeStatus')
+      .withGraphJoined('adjudicatorStatus')
       .first();
   }
 
   async getAndLockChannel(channelId: Bytes32, tx: Transaction): Promise<Channel | undefined> {
     return Channel.query(tx)
       .where({channelId})
-      .withGraphJoined('challengeStatus')
+      .withGraphJoined('adjudicatorStatus')
       .withGraphFetched('signingWallet')
       .forUpdate()
       .first();
@@ -748,16 +747,16 @@ export class Store {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
   }
 
-  async insertChallengeStatus(
+  async insertAdjudicatorStatus(
     channelId: string,
     finalizedAt: number,
-    challengeState: State
+    states: SignedState[]
   ): Promise<void> {
-    await ChallengeStatus.insertChallengeStatus(this.knex, channelId, finalizedAt, challengeState);
+    await AdjudicatorStatusModel.insertAdjudicatorStatus(this.knex, channelId, finalizedAt, states);
   }
 
   async setFinalizedChallengeStatus(channelId: string, blockNumber: number): Promise<void> {
-    await ChallengeStatus.setFinalized(this.knex, channelId, blockNumber);
+    await AdjudicatorStatusModel.setFinalized(this.knex, channelId, blockNumber);
   }
   async updateTransferredOut(
     channelId: string,
