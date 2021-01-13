@@ -41,7 +41,7 @@ interface TestChannelArgs {
   fundingStrategy?: FundingStrategy;
 }
 
-type Bals = [string, number][];
+type Bals = [string, number][] | [number, number];
 
 /** A two-party channel between Alice and Bob, with state history. For testing purposes. */
 export class TestChannel {
@@ -129,6 +129,16 @@ export class TestChannel {
   }
 
   public toOutcome(bals: Bals): Outcome {
+    if (typeof bals[0] === 'number') {
+      bals = bals as [number, number];
+      // of format [number, number]
+      bals = [
+        ['a', bals[0]],
+        ['b', bals[1]],
+      ];
+    }
+
+    bals = bals as [string, number][];
     return simpleEthAllocation(
       bals.map(([dest, amt]) => {
         const amount = BN.from(amt);
@@ -224,21 +234,28 @@ export class TestChannel {
   }
 
   public get startBal(): number {
-    return this.startBals.reduce((sum, [_dest, amt]) => sum + amt, 0);
+    if (typeof this.startBals[0] === 'number') {
+      return (this.startBals as [number, number]).reduce((sum, amt) => sum + amt);
+    } else {
+      return (this.startBals as [string, number][]).reduce((sum, [_dest, amt]) => sum + amt, 0);
+    }
   }
 
   /**
    * Calls addSigningKey, pushMessage, updateFunding, ensureObjective and approveObjective on the supplied store.
    */
-  public async insertInto(store: Store, args: InsertionParams): Promise<DBOpenChannelObjective> {
-    const {states, participant} = args;
+  public async insertInto(
+    store: Store,
+    args: InsertionParams = {}
+  ): Promise<DBOpenChannelObjective> {
+    const {states, participant, bals} = {states: [0], participant: 0, ...args};
 
     // load the signingKey for the appopriate participant
     await store.addSigningKey(this.signingKeys[participant]);
 
     // load in the states
     for (const stateNum of states) {
-      await store.pushMessage(this.wirePayload(Number(stateNum)));
+      await store.pushMessage(this.wirePayload(Number(stateNum), bals));
     }
 
     // if no funds are passed in, fully fund the channel iff we're into post fund setup
@@ -262,10 +279,11 @@ export class TestChannel {
   }
 }
 
-interface InsertionParams {
-  participant: 0 | 1;
-  states: number[];
+export interface InsertionParams {
+  participant?: 0 | 1;
+  states?: number[];
   funds?: number;
+  bals?: Bals;
 }
 
 function combineArrays<T>(a1: T[] | undefined, a2: T[] | undefined): T[] | undefined {
