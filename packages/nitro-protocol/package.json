@@ -8,7 +8,9 @@
   "dependencies": {
     "@openzeppelin/contracts": "3.2.2-solc-0.7",
     "ethers": "5.0.12",
-    "lodash.isequal": "^4.5.0"
+    "lodash.isequal": "^4.5.0",
+    "lodash.pick": "4.4.0",
+    "lodash.shuffle": "^4.2.0"
   },
   "devDependencies": {
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
