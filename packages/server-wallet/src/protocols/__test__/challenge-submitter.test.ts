@@ -12,11 +12,10 @@ import {ChallengeSubmitter} from '../challenge-submitter';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {ChallengeStatus} from '../../models/challenge-status';
-import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
+import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
 import {ChainServiceRequest} from '../../models/chain-service-request';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -65,15 +64,8 @@ describe(`challenge-submitter`, () => {
 
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, {
-      ...stateVars(),
-      ...c.channelConstants,
-    });
-
-    const challengeState = {
-      ...c.channelConstants,
-      ..._.pick(c.latest, ['appData', 'outcome', 'isFinal', 'turnNum']),
-    };
+    const challengeState = stateSignedBy([alice()])();
+    await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 100, [challengeState]);
 
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',

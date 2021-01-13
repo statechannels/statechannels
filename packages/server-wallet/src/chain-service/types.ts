@@ -36,7 +36,7 @@ export type ChannelFinalizedArg = {
 export type ChallengeRegisteredArg = {
   channelId: string;
   finalizesAt: number;
-  challengeStates: State[];
+  challengeStates: SignedState[];
 };
 
 export interface ChainEventSubscriberInterface {
