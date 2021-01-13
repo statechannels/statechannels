@@ -1,7 +1,5 @@
 import {SharedObjective} from '@statechannels/wallet-core';
 
-import {Store} from '../../store';
-
 import {TestChannel} from './test-channel';
 
 interface TestChannelArgs {
@@ -34,18 +32,5 @@ export class TestLedgerChannel extends TestChannel {
         fundingStrategy: 'Direct',
       },
     };
-  }
-
-  public async insertIntoStore(store: Store): Promise<void> {
-    await store.addSigningKey(this.signingKeyA);
-    // The only way the store currently knows the channel is a ledger is by the role
-    // passed in on the OpenChannel objective. So we need to push in that objective,
-    // and then approve it.
-    await store.pushMessage(this.openChannelPayload);
-    const objectives = await store.getObjectives([this.channelId]);
-    if (objectives.length !== 1) {
-      throw Error(`TestLedgerChannel expected 1 objective. Found ${objectives.length}`);
-    }
-    await store.approveObjective(objectives[0].objectiveId);
   }
 }
