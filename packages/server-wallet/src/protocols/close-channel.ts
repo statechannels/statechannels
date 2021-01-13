@@ -1,4 +1,4 @@
-import {checkThat, isSimpleAllocation, State, unreachable} from '@statechannels/wallet-core';
+import {checkThat, isSimpleAllocation, unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
