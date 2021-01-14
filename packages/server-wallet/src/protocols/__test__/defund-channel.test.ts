@@ -72,6 +72,7 @@ test('when the channel does not exist it should fail the objective', async () =>
   const reloadedObjective = await store.getObjective(obj.objectiveId);
   expect(reloadedObjective.status).toEqual('failed');
 });
+
 test('when using non-direct funding it fails', async () => {
   const chainService = new MockChainService();
   const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
