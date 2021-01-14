@@ -1,4 +1,4 @@
-import {Transaction, TransactionOrKnex} from 'objection';
+import {Transaction, TransactionOrKnex, UniqueViolationError} from 'objection';
 import {
   Objective,
   Outcome,
@@ -61,14 +61,6 @@ const defaultLogger = createLogger(defaultTestConfig());
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
 
-class UniqueViolationError extends Error {
-  columns: string[] = [];
-}
-
-function isUniqueViolationError(error: any): error is UniqueViolationError {
-  return error?.name === 'UniqueViolationError' && error?.columns[0] === 'enforce_one_row';
-}
-
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
@@ -126,7 +118,7 @@ export class Store {
         .returning('*');
       return signingWallet.address;
     } catch (error) {
-      if (isUniqueViolationError(error)) {
+      if (error instanceof UniqueViolationError) {
         return (await SigningWallet.query(this.knex).first()).address;
       }
       throw error;
@@ -415,7 +407,7 @@ export class Store {
       await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
     } catch (e) {
       // If the objective exists our job is done
-      if (e.name !== 'UniqueViolationError') throw e;
+      if (!(e instanceof UniqueViolationError)) throw e;
     }
 
     return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
@@ -462,7 +454,7 @@ export class Store {
       await ObjectiveModel.insert(objectiveToBeStored, tx);
     } catch (e) {
       // If the objective exists our job is done
-      if (e.name !== 'UniqueViolationError') throw e;
+      if (!(e instanceof UniqueViolationError)) throw e;
     }
 
     await Channel.query(tx)
@@ -504,7 +496,7 @@ export class Store {
       await ObjectiveModel.insert(objectiveToBeStored, tx);
     } catch (e) {
       // If the objective exists our job is done
-      if (e.name !== 'UniqueViolationError') throw e;
+      if (!(e instanceof UniqueViolationError)) throw e;
     }
 
     return objectiveToBeStored;
