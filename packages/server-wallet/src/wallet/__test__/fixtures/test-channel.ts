@@ -65,8 +65,8 @@ export class TestChannel {
 
   protected constructor(args: TestChannelArgs) {
     this.fundingStrategy = args.fundingStrategy || 'Direct';
-    this.startBals = [args.aBal || 5, args.bBal || 5];
-    this.channelNonce = args.channelNonce || 5;
+    this.startBals = [args.aBal ?? 5, args.bBal ?? 5];
+    this.channelNonce = args.channelNonce ?? 5;
     this.finalFrom = args.finalFrom;
   }
 
