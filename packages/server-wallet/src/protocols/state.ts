@@ -69,12 +69,12 @@ export const status = (channelState: ChannelState): ChannelStatus => {
     return 'opening';
   }
 
-  if (supported.turnNum < 2 * participants.length - 1) return 'opening';
-
   if (supported.isFinal) {
     if (_.every(support, 'isFinal')) return 'closed';
     return 'closing';
   }
+
+  if (supported.turnNum < 2 * participants.length - 1) return 'opening';
 
   return 'running';
 };
