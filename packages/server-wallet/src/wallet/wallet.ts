@@ -100,7 +100,27 @@ export class SingleThreadedWallet
   readonly walletConfig: ServerWalletConfig;
 
   public static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet {
-    return new SingleThreadedWallet(walletConfig);
+    const wallet = new SingleThreadedWallet(walletConfig);
+    // This is an async method so it could continue executing after this method returns
+    wallet.registerExistingChannelsWithChainService();
+    return wallet;
+  }
+
+  /**
+   * Registers any channels existing in the database with the chain service
+   * so the chain service can alert us of any block chain events for existing channels
+   */
+  private async registerExistingChannelsWithChainService() {
+    const channelsToRegister = (await this.store.getChannels())
+      .map(ChannelState.toChannelResult)
+      .map(cr => ({
+        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+        channelId: cr.channelId,
+      }));
+
+    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
+      this.chainService.registerChannel(channelId, assetHolderAddresses, this);
+    }
   }
 
   // protected constructor to force consumers to initialize wallet via Wallet.create(..)
