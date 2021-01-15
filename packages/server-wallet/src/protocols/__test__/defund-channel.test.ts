@@ -116,9 +116,7 @@ describe('when there is an active challenge', () => {
 });
 
 describe('when the channel is finalized on chain', () => {
-  // Currently we rely on isFinal as a proxy whether we can call
-  // This should be fixed in https://github.com/statechannels/statechannels/issues/3112
-  it('should call pushOutcome if the on-chain state is not final', async () => {
+  it('should call pushOutcome if the outcome has not been pushed', async () => {
     const chainService = new MockChainService();
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
@@ -128,7 +126,7 @@ describe('when the channel is finalized on chain', () => {
 
     // Store a non final state on chain
     const challengeState = stateVars({isFinal: false});
-    await setChallengeStatus('finalized', c, challengeState);
+    await setChallengeStatus('finalized', c, {state: challengeState});
 
     // Set the objective in the database
     const objective = await createPendingObjective(c.channelId);
@@ -145,7 +143,7 @@ describe('when the channel is finalized on chain', () => {
     expect(reloadedObjective.status).toEqual('succeeded');
   });
 
-  it('does nothing if the on-chain state is final', async () => {
+  it('does nothing if the outcome has been pushed', async () => {
     const chainService = new MockChainService();
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
@@ -154,7 +152,7 @@ describe('when the channel is finalized on chain', () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     // Set a finalized channel with a final state
-    await setChallengeStatus('finalized', c, {isFinal: true});
+    await setChallengeStatus('finalized', c, {outcomePushed: true});
 
     // Store the objective
     const obj = createPendingObjective(c.channelId);
@@ -211,13 +209,21 @@ it('should fail when using non-direct funding', async () => {
 async function setChallengeStatus(
   status: 'finalized' | 'active',
   channel: Channel,
-  state?: Partial<State>
+  options?: {
+    state?: Partial<State>;
+    outcomePushed?: boolean;
+  }
 ): Promise<void> {
   await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, channel.channelId, 100, [
-    stateSignedBy([alice()])(state),
+    stateSignedBy([alice()])(options?.state),
   ]);
   if (status === 'finalized') {
-    await AdjudicatorStatusModel.setFinalized(knex, channel.channelId, 200);
+    await AdjudicatorStatusModel.setFinalized(
+      knex,
+      channel.channelId,
+      200,
+      options?.outcomePushed || false
+    );
   }
 }
 

@@ -67,7 +67,12 @@ it('creates a defundChannel objective on channel finalized', async () => {
   });
   await Channel.query(w.knex).insert(c);
 
-  await w.channelFinalized({channelId: c.channelId, blockNumber: 100, finalizedAt: 50});
+  await w.channelFinalized({
+    channelId: c.channelId,
+    blockNumber: 100,
+    finalizedAt: 50,
+    outcomePushed: false,
+  });
   const objectiveId = `DefundChannel-${c.channelId}`;
   const objective = await ObjectiveModel.forId(objectiveId, w.knex);
 

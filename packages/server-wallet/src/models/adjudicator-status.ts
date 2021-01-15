@@ -11,6 +11,7 @@ export type AdjudicatorStatus =
       finalizedAt: number;
       states: SignedState[];
       finalizedBlockNumber: number;
+      outcomePushed: boolean;
     }
   | {status: 'Challenge Active'; finalizesAt: number; states: SignedState[]}
   | {status: 'Nothing'};
@@ -25,6 +26,7 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   readonly finalizesAt!: Uint48;
   readonly blockNumber!: Uint48;
   readonly states!: SignedState[];
+  readonly outcomePushed!: boolean | undefined;
   static tableName = 'adjudicator_status';
   static get idColumn(): string[] {
     return ['channelId'];
@@ -40,14 +42,15 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   static async setFinalized(
     knex: Knex,
     channelId: string,
-    blockNumber: number
+    blockNumber: number,
+    outcomePushed: boolean
   ): Promise<AdjudicatorStatus> {
     const existing = await AdjudicatorStatusModel.query(knex).where({channelId});
     if (!existing) {
       await AdjudicatorStatusModel.query(knex).insert({channelId, blockNumber});
     }
     const result = await AdjudicatorStatusModel.query(knex)
-      .patch({blockNumber})
+      .patch({blockNumber, outcomePushed})
       .where({channelId})
       .returning('*')
       .first();
@@ -73,7 +76,7 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
       return {status: 'Nothing'};
     }
 
-    const {finalizesAt, blockNumber, states} = result;
+    const {finalizesAt, blockNumber, states, outcomePushed} = result;
 
     if (finalizesAt > blockNumber) {
       return {status: 'Challenge Active', finalizesAt, states};
@@ -83,6 +86,7 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
         finalizedAt: finalizesAt,
         finalizedBlockNumber: blockNumber,
         states,
+        outcomePushed: outcomePushed || false,
       };
     }
   }
