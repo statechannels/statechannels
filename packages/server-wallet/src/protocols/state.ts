@@ -106,6 +106,13 @@ export function directFundingStatus(
   myParticipant: Participant,
   fundingStrategy: FundingStrategy
 ): FundingStatus | undefined {
+  if (fundingStrategy === 'Fake') {
+    if (!supported) return 'Uncategorized';
+    if (supported.turnNum < 3) return 'ReadyToFund';
+    if (supported.isFinal) return 'Defunded';
+    return 'Funded';
+  }
+
   if (fundingStrategy !== 'Direct') {
     return 'Uncategorized';
   }
