@@ -1,3 +1,5 @@
+import {State} from '@statechannels/wallet-core';
+
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
 import {DBDefundChannelObjective, ObjectiveModel} from '../../models/objective';
@@ -18,6 +20,7 @@ const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
 
 let store: Store;
+
 beforeEach(async () => {
   store = new Store(
     knex,
@@ -30,141 +33,195 @@ beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
 });
 
-test('it should submit a conclude transaction even if there is an active challenge if there is a conclusion proof', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-
-  const c = channel({
-    channelNonce: 1,
-    vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
-  });
-
-  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-
-  const challengeState = {
-    ...c.channelConstants,
-    ...stateVars(),
-  };
-  await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, challengeState);
-  const obj = createPendingObjective(c.channelId);
-  await knex.transaction(tx => ObjectiveModel.insert(obj, tx));
-  const response = WalletResponse.initialize();
-  const concludeSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
-
-  await channelDefunder.crank(obj, response);
-
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('succeeded');
-  expect(concludeSpy).toHaveBeenCalled();
-});
-
-test('when the channel does not exist it should fail the objective', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-  const c = channel();
-
-  const obj = createPendingObjective(c.channelId);
-  await knex.transaction(tx => ObjectiveModel.insert(obj, tx));
-  const response = WalletResponse.initialize();
-
-  await channelDefunder.crank(obj, response);
-
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('failed');
-});
-
-test('when using non-direct funding it fails', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-
-  const c = channel({fundingStrategy: 'Fake'});
-
-  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-
-  const obj = createPendingObjective(c.channelId);
-  await knex.transaction(tx => store.ensureObjective(obj, tx));
-  const response = WalletResponse.initialize();
-
-  await channelDefunder.crank(obj, response);
-
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('failed');
-});
-
-test('when there is an active challenge and no conclusion proof it should do nothing', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-
-  const c = channel();
-  const challengeState = {
-    ...c.channelConstants,
-    ...stateVars(),
-  };
-  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-  await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, challengeState);
-
-  const obj = createPendingObjective(c.channelId);
-  await knex.transaction(tx => store.ensureObjective(obj, tx));
-  const response = WalletResponse.initialize();
-
-  await channelDefunder.crank(obj, response);
-
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('pending');
-});
-
-test('when the channel is not finalized it defunds the channel by calling pushOutcomeAndWithdraw', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-  const c = channel();
-  const challengeState = {
-    ...c.channelConstants,
-    ...stateVars(),
-  };
-  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-  await ChallengeStatus.insertChallengeStatus(knex, c.channelId, 100, challengeState);
-  await ChallengeStatus.setFinalized(knex, c.channelId, 200);
-  const obj = createPendingObjective(c.channelId);
-
-  await knex.transaction(tx => store.ensureObjective(obj, tx));
-  const response = WalletResponse.initialize();
-  const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
-
-  await channelDefunder.crank(obj, response);
-
-  expect(pushSpy).toHaveBeenCalledWith(challengeState, c.myAddress);
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('succeeded');
-});
-
-test('when the channel has not been concluded on chain it should call withdrawAndPushOutcome', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-  const c = channel({
-    channelNonce: 1,
-    vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
-  });
-
-  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-
-  await ChallengeStatus.setFinalized(knex, c.channelId, 200);
-  const obj = createPendingObjective(c.channelId);
-
-  await knex.transaction(tx => store.ensureObjective(obj, tx));
-  const response = WalletResponse.initialize();
-  const withdrawSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
-
-  await channelDefunder.crank(obj, response);
-
-  expect(withdrawSpy).toHaveBeenCalledWith(c.support);
-
-  const reloadedObjective = await store.getObjective(obj.objectiveId);
-  expect(reloadedObjective.status).toEqual('succeeded');
-});
-
 afterEach(async () => {
   await store.dbAdmin().truncateDB();
 });
+
+describe('when there is no challenge or finalized channel', () => {
+  it('should do nothing', async () => {
+    const chainService = new MockChainService();
+    const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+    // Create the channel in the database
+    const c = channel();
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+    // Set the objective in the database
+    const objective = await createPendingObjective(c.channelId);
+    await knex.transaction(tx => store.ensureObjective(objective, tx));
+
+    const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
+    const withdrawSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
+
+    // Crank the protocol
+    await channelDefunder.crank(objective, WalletResponse.initialize());
+
+    // Check the results
+    expect(pushSpy).not.toHaveBeenCalled();
+    expect(withdrawSpy).not.toHaveBeenCalled();
+  });
+});
+
+describe('when there is an active challenge', () => {
+  it('should submit a conclude transaction if there is a conclusion proof', async () => {
+    const chainService = new MockChainService();
+    const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+    // Set up a channel with a conclusion proof
+    const c = channel({
+      channelNonce: 1,
+      vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
+    });
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+    await setChallengeStatus('active', c);
+
+    // Store objective
+    const objective = createPendingObjective(c.channelId);
+    await knex.transaction(tx => ObjectiveModel.insert(objective, tx));
+    // Setup spies
+    const concludeSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
+
+    // Crank the protocol
+    await channelDefunder.crank(objective, WalletResponse.initialize());
+
+    // Check the results
+    const reloadedObjective = await store.getObjective(objective.objectiveId);
+
+    expect(reloadedObjective.status).toEqual('succeeded');
+    expect(concludeSpy).toHaveBeenCalled();
+  });
+
+  it('should do nothing if there is no conclusion proof', async () => {
+    const chainService = new MockChainService();
+    const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+    // Setup a channel with no conclusion proof
+    const c = channel();
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+    await setChallengeStatus('active', c);
+
+    // Store the objective
+    const objective = createPendingObjective(c.channelId);
+    await knex.transaction(tx => store.ensureObjective(objective, tx));
+
+    // Crank the protocol
+    await channelDefunder.crank(objective, WalletResponse.initialize());
+
+    // Check the results
+    const reloadedObjective = await store.getObjective(objective.objectiveId);
+    expect(reloadedObjective.status).toEqual('pending');
+  });
+});
+
+describe('when the channel is finalized on chain', () => {
+  // Currently we rely on isFinal as a proxy whether we can call
+  // This should be fixed in https://github.com/statechannels/statechannels/issues/3112
+  it('should call pushOutcome if the on-chain state is not final', async () => {
+    const chainService = new MockChainService();
+    const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+    // Create the channel in the database
+    const c = channel();
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+    // Store a non final state on chain
+    const challengeState = stateVars({isFinal: false});
+    await setChallengeStatus('finalized', c, challengeState);
+
+    // Set the objective in the database
+    const objective = await createPendingObjective(c.channelId);
+    await knex.transaction(tx => store.ensureObjective(objective, tx));
+
+    const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
+
+    // Crank the protocol
+    await channelDefunder.crank(objective, WalletResponse.initialize());
+
+    // Check the results
+    expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining(challengeState), c.myAddress);
+    const reloadedObjective = await store.getObjective(objective.objectiveId);
+    expect(reloadedObjective.status).toEqual('succeeded');
+  });
+
+  it('does nothing if the on-chain state is final', async () => {
+    const chainService = new MockChainService();
+    const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+    // Create the channel in the database
+    const c = channel();
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+    // Set a finalized channel with a final state
+    await setChallengeStatus('finalized', c, {isFinal: true});
+
+    // Store the objective
+    const obj = createPendingObjective(c.channelId);
+    await knex.transaction(tx => store.ensureObjective(obj, tx));
+
+    const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
+    const withdrawSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
+
+    // Crank the protocol
+    await channelDefunder.crank(obj, WalletResponse.initialize());
+
+    // Check the results
+    expect(withdrawSpy).not.toHaveBeenCalled();
+    expect(pushSpy).not.toHaveBeenCalled();
+  });
+});
+
+it('should fail the objective when the channel does not exist', async () => {
+  const chainService = new MockChainService();
+  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+  // Create an objective for a channel that does exist in the database
+  const objective = createPendingObjective(channel().channelId);
+  await knex.transaction(tx => ObjectiveModel.insert(objective, tx));
+
+  // Crank the protocol
+  await channelDefunder.crank(objective, WalletResponse.initialize());
+  // Check the results
+  const reloadedObjective = await store.getObjective(objective.objectiveId);
+  expect(reloadedObjective.status).toEqual('failed');
+});
+
+it('should fail when using non-direct funding', async () => {
+  const chainService = new MockChainService();
+  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+  // Create a channel with fake funding strategy
+  const c = channel({fundingStrategy: 'Fake'});
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+  // Store the objective
+  const obj = createPendingObjective(c.channelId);
+  await knex.transaction(tx => store.ensureObjective(obj, tx));
+
+  // Crank the protocol
+  await channelDefunder.crank(obj, WalletResponse.initialize());
+
+  // Check the results
+  const reloadedObjective = await store.getObjective(obj.objectiveId);
+  expect(reloadedObjective.status).toEqual('failed');
+});
+
+// Helpers
+async function setChallengeStatus(
+  status: 'finalized' | 'active',
+  channel: Channel,
+  state?: Partial<State>
+): Promise<void> {
+  await ChallengeStatus.insertChallengeStatus(knex, channel.channelId, 100, {
+    ...channel.channelConstants,
+    ...stateVars(state),
+    ...(state || {}),
+  });
+  if (status === 'finalized') {
+    await ChallengeStatus.setFinalized(knex, channel.channelId, 200);
+  }
+}
 
 function createPendingObjective(channelId: string): DBDefundChannelObjective {
   return {

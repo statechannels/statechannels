@@ -50,11 +50,14 @@ export class ChannelDefunder {
       // applies to both co-operatively concluding or challenging
       // see https://github.com/statechannels/statechannels/issues/3132
       if (result.status === 'Challenge Finalized') {
-        await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
-        this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
-        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
-
-        return;
+        if (result.challengeState.isFinal) {
+          // We should handle this in https://github.com/statechannels/statechannels/issues/3112
+          this.logger.warn('TODO: Currently do not support defunding concluded channels');
+        } else {
+          await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
+          this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
+          await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        }
       } else if (channel.hasConclusionProof) {
         await ChainServiceRequest.insertOrUpdate(channelId, 'withdraw', tx);
         this.chainService.concludeAndWithdraw(channel.support);
