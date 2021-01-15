@@ -41,7 +41,7 @@ interface TestChannelArgs {
   fundingStrategy?: FundingStrategy;
 }
 
-type Bals = [string, number][] | [number, number];
+export type Bals = [string, number][] | [number, number];
 
 /** A two-party channel between Alice and Bob, with state history. For testing purposes. */
 export class TestChannel {
@@ -98,7 +98,7 @@ export class TestChannel {
 
     return {
       ...this.channelConstants,
-      appData: '0x',
+      appData: '0x00',
       isFinal: !!this.finalFrom && n >= this.finalFrom,
       // test channels adopt a countersigning strategy for final states, so the turn number doesn't progress after finalFrom.
       turnNum: n,
