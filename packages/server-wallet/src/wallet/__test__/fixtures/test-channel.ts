@@ -72,7 +72,8 @@ export class TestChannel {
       ['a', args.aBal ?? 5],
       ['b', args.bBal ?? 5],
     ];
-    this.channelNonce = args.channelNonce ?? Math.ceil(Math.random() * 1e12);
+    const MAX_INTEGER_POSTGRES = 2147483647;
+    this.channelNonce = args.channelNonce ?? Math.floor(Math.random() * MAX_INTEGER_POSTGRES);
     this.finalFrom = args.finalFrom;
   }
 
