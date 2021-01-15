@@ -72,7 +72,7 @@ export class TestChannel {
       ['a', args.aBal ?? 5],
       ['b', args.bBal ?? 5],
     ];
-    this.channelNonce = args.channelNonce ?? 5;
+    this.channelNonce = args.channelNonce ?? Math.ceil(Math.random() * 1e12);
     this.finalFrom = args.finalFrom;
   }
 
