@@ -85,6 +85,16 @@ export function clearOldStates(
   signedStates: SignedStateVarsWithHash[],
   support: SignedStateWithHash[] | undefined
 ): SignedStateVarsWithHash[] {
+  signedStates = signedStates.map(
+    ({turnNum, appData, signatures, stateHash, outcome, isFinal}) => ({
+      turnNum,
+      appData,
+      signatures,
+      stateHash,
+      outcome,
+      isFinal,
+    })
+  );
   let sorted = _.reverse(_.sortBy(signedStates, s => s.turnNum));
 
   // If we don't have a supported state we don't clean anything out
