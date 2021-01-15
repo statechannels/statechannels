@@ -62,7 +62,7 @@ export type ChannelStateWithSupported = ChannelState & SignedByMe & WithSupporte
  */
 export const status = (channelState: ChannelState): ChannelStatus => {
   const {supported, latest, latestSignedByMe, support} = channelState;
-  const {participants} = supported ?? latest;
+  const {participants} = latest;
 
   if (!supported) {
     if (!latestSignedByMe) return 'proposed';
