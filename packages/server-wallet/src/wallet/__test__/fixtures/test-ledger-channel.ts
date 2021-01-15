@@ -1,9 +1,17 @@
-import {SharedObjective} from '@statechannels/wallet-core';
+import {
+  ChannelConstants,
+  makeAddress,
+  serializeState,
+  SharedObjective,
+  SignedStateWithHash,
+} from '@statechannels/wallet-core';
+import {SignedState as WireState} from '@statechannels/wire-format';
 
 import {LedgerRequest} from '../../../models/ledger-request';
 import {Store} from '../../store';
 
-import {TestChannel} from './test-channel';
+import {stateWithHashSignedBy} from './states';
+import {TestChannel, Bals} from './test-channel';
 
 interface TestChannelArgs {
   aBal?: number;
@@ -35,6 +43,37 @@ export class TestLedgerChannel extends TestChannel {
         fundingStrategy: 'Direct',
       },
     };
+  }
+
+  // Override appDefinition to indicate a ledger channel
+  public get channelConstants(): ChannelConstants {
+    return {
+      appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
+      participants: this.participants,
+      channelNonce: this.channelNonce,
+      chainId: '0x01',
+      challengeDuration: 9001,
+    };
+  }
+
+  /**
+   * Gives the nth state in the history, signed by the provided participant(s) -- default is both
+   */
+  public wireState(n: number, bals?: Bals, signerIndices: number[] = [n % 1, n % 2]): WireState {
+    return serializeState(this.signedStateWithHash(n, bals, signerIndices));
+  }
+
+  /**
+   * Gives the nth state in the history, signed by the provided participant(s) -- default is both
+   */
+  public signedStateWithHash(
+    n: number,
+    bals?: Bals,
+    signerIndices: number[] = [n % 2]
+  ): SignedStateWithHash {
+    return stateWithHashSignedBy(signerIndices.map(i => this.signingWallets[i]))(
+      this.state(n, bals)
+    );
   }
 
   public async insertFundingRequest(store: Store, channelToBeFunded: string): Promise<void> {
