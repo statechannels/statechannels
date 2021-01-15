@@ -145,6 +145,13 @@ export type SubmitChallenge = _Objective<
   }
 >;
 
+export type DefundChannel = _Objective<
+  'DefundChannel',
+  {
+    targetChannelId: string;
+  }
+>;
+
 export type SharedObjective =
   | OpenChannel
   | CloseChannel
@@ -153,7 +160,7 @@ export type SharedObjective =
   | FundLedger
   | CloseLedger;
 
-export type Objective = SharedObjective | SubmitChallenge;
+export type Objective = SharedObjective | SubmitChallenge | DefundChannel;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
@@ -164,6 +171,7 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');
 export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 export const isSubmitChallenge = guard<SubmitChallenge>('SubmitChallenge');
+export const isDefundChannel = guard<DefundChannel>('DefundChannel');
 
 export function objectiveId(objective: Objective): string {
   switch (objective.type) {
@@ -171,6 +179,7 @@ export function objectiveId(objective: Objective): string {
     case 'CloseChannel':
     case 'VirtuallyFund':
     case 'SubmitChallenge':
+    case 'DefundChannel':
       return [objective.type, objective.data.targetChannelId].join('-');
     case 'FundGuarantor':
       return [objective.type, objective.data.guarantorId].join('-');

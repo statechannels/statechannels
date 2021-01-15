@@ -744,7 +744,19 @@ export class SingleThreadedWallet
 
   async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
     const response = WalletResponse.initialize();
+
     await this.store.setFinalizedChallengeStatus(arg.channelId, arg.blockNumber);
+    await this.knex.transaction(async tx => {
+      const {objectiveId} = await this.store.ensureObjective(
+        {
+          type: 'DefundChannel',
+          participants: [],
+          data: {targetChannelId: arg.channelId},
+        },
+        tx
+      );
+      await this.store.approveObjective(objectiveId, tx);
+    });
 
     await this.takeActions([arg.channelId], response);
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));

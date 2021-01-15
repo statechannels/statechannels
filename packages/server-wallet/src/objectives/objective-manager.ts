@@ -8,6 +8,7 @@ import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChallengeSubmitter} from '../protocols/challenge-submitter';
+import {ChannelDefunder} from '../protocols/defund-channel';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -47,10 +48,17 @@ export class ObjectiveManager {
         return this.channelCloser.crank(objective, response);
       case 'SubmitChallenge':
         return this.challengeSubmitter.crank(objective, response);
+      case 'DefundChannel':
+        return this.channelDefunder.crank(objective, response);
       default:
         unreachable(objective);
     }
   }
+
+  private get channelDefunder(): ChannelDefunder {
+    return ChannelDefunder.create(this.store, this.chainService, this.logger, this.timingMetrics);
+  }
+
   private get challengeSubmitter(): ChallengeSubmitter {
     return ChallengeSubmitter.create(
       this.store,
