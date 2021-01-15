@@ -8,7 +8,7 @@ import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
 
 import {channel} from './fixtures/channel';
 
-describe('ChallengeStatus model', () => {
+describe('AdjudicatorStatus model', () => {
   beforeEach(async () => {
     await new DBAdmin(knex).truncateDB();
     await seedAlicesSigningWallet(knex);
@@ -25,7 +25,7 @@ describe('ChallengeStatus model', () => {
 
     const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
-    expect(result).toEqual({status: 'Challenge Active', finalizesAt: 5, challengeState});
+    expect(result).toEqual({status: 'Challenge Active', finalizesAt: 5, states: [challengeState]});
   });
 
   it('returns no challenge when there is not an entry', async () => {
