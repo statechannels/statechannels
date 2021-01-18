@@ -136,7 +136,7 @@ describe('pushOutcomeAndTransferAll', () => {
 
       const challengerAddress = participants[state.turnNum % participants.length];
 
-      const initialChannelStorageHash = finalizedFingerprint(
+      const initialFingerprint = finalizedFingerprint(
         storedTurnNumRecord,
         finalizesAt,
         outcome,
@@ -145,14 +145,9 @@ describe('pushOutcomeAndTransferAll', () => {
       );
 
       // Call public wrapper to set state (only works on test contract)
-      const tx0 = await NitroAdjudicator.setChannelStorageHash(
-        channelId,
-        initialChannelStorageHash
-      );
+      const tx0 = await NitroAdjudicator.setFingerprint(channelId, initialFingerprint);
       await tx0.wait();
-      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-        initialChannelStorageHash
-      );
+      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(initialFingerprint);
 
       const stateHash = hashState(state);
       const encodedOutcome = encodeOutcome(outcome);

@@ -134,7 +134,7 @@ describe('challenge', () => {
   let channelNonce = getRandomNonce('challenge');
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description  | initialChannelStorageHash    | stateData      | challengeSignatureType | reasonString
+    description  | initialFingerprint           | stateData      | challengeSignatureType | reasonString
     ${accepts1}  | ${empty}                     | ${oneState}    | ${'correct'}           | ${undefined}
     ${accepts2}  | ${empty}                     | ${threeStates} | ${'correct'}           | ${undefined}
     ${accepts3}  | ${openAtFive}                | ${oneState}    | ${'correct'}           | ${undefined}
@@ -152,13 +152,7 @@ describe('challenge', () => {
     ${reverts6}  | ${finalizedAtFive}           | ${fourStates}  | ${'correct'}           | ${INVALID_NUMBER_OF_STATES}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({
-      description,
-      initialChannelStorageHash,
-      stateData,
-      challengeSignatureType,
-      reasonString,
-    }) => {
+    async ({description, initialFingerprint, stateData, challengeSignatureType, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
@@ -205,7 +199,7 @@ describe('challenge', () => {
       }
 
       // Set current channelStorageHashes value
-      await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
+      await (await ForceMove.setFingerprint(channelId, initialFingerprint)).wait();
 
       const tx = ForceMove.challenge(
         fixedPart,
@@ -271,7 +265,7 @@ describe('challenge', () => {
 
 describe('challenge with transaction generator', () => {
   beforeEach(async () => {
-    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
+    await (await ForceMove.setFingerprint(getChannelId(twoPartyChannel), HashZero)).wait();
   });
   it.each`
     description                                     | appData   | outcome                            | turnNums  | challenger

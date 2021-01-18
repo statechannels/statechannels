@@ -111,7 +111,7 @@ describe('respond', () => {
       };
       const responseStateHash = hashState(responseState);
 
-      const challengeExistsHash = slotEmpty
+      const challengeExistsFingerprint = slotEmpty
         ? ethers.constants.HashZero
         : channelDataToFingerprint({
             turnNumRecord,
@@ -122,8 +122,8 @@ describe('respond', () => {
           });
 
       // Call public wrapper to set state (only works on test contract)
-      await (await ForceMove.setChannelStorageHash(channelId, challengeExistsHash)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      await (await ForceMove.setFingerprint(channelId, challengeExistsFingerprint)).wait();
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsFingerprint);
 
       // Sign the state
       const responseSignature = await sign(responder, responseStateHash);

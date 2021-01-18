@@ -89,21 +89,21 @@ let channelNonce = getRandomNonce('conclude');
 describe('conclude', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | initialChannelStorageHash | largestTurnNum                   | support        | reasonString
-    ${accepts1} | ${HashZero}               | ${turnNumRecord - nParticipants} | ${threeStates} | ${undefined}
-    ${accepts2} | ${HashZero}               | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
-    ${accepts2} | ${HashZero}               | ${turnNumRecord + 1}             | ${oneState}    | ${undefined}
-    ${accepts3} | ${channelOpen}            | ${turnNumRecord + 2}             | ${oneState}    | ${undefined}
-    ${accepts4} | ${challengeOngoing}       | ${turnNumRecord + 3}             | ${oneState}    | ${undefined}
-    ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 4}             | ${oneState}    | ${undefined}
-    ${accepts6} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
-    ${accepts7} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
-    ${reverts1} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts2} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts3} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
+    description | initialFingerprint  | largestTurnNum                   | support        | reasonString
+    ${accepts1} | ${HashZero}         | ${turnNumRecord - nParticipants} | ${threeStates} | ${undefined}
+    ${accepts2} | ${HashZero}         | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${accepts2} | ${HashZero}         | ${turnNumRecord + 1}             | ${oneState}    | ${undefined}
+    ${accepts3} | ${channelOpen}      | ${turnNumRecord + 2}             | ${oneState}    | ${undefined}
+    ${accepts4} | ${challengeOngoing} | ${turnNumRecord + 3}             | ${oneState}    | ${undefined}
+    ${accepts5} | ${challengeOngoing} | ${turnNumRecord + 4}             | ${oneState}    | ${undefined}
+    ${accepts6} | ${channelOpen}      | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${accepts7} | ${challengeOngoing} | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${reverts1} | ${channelOpen}      | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts2} | ${challengeOngoing} | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts3} | ${finalized}        | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({description, initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
+    async ({description, initialFingerprint, largestTurnNum, support, reasonString}) => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
       const {appData, whoSignedWhat} = support;
@@ -123,8 +123,8 @@ describe('conclude', () => {
         });
       }
       // Call public wrapper to set state (only works on test contract)
-      await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialChannelStorageHash);
+      await (await ForceMove.setFingerprint(channelId, initialFingerprint)).wait();
+      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
