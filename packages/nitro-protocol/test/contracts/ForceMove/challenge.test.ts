@@ -6,7 +6,7 @@ const {defaultAbiCoder} = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash, ChannelData} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint, ChannelData} from '../../../src/contract/channel-storage';
 import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
@@ -20,14 +20,14 @@ import {Outcome, SignedState} from '../../../src/index';
 import {signChallengeMessage, signData, signState, signStates} from '../../../src/signatures';
 import {COUNTING_APP_INVALID_TRANSITION} from '../../revert-reasons';
 import {
-  clearedChallengeHash,
-  finalizedOutcomeHash,
+  clearedChallengeFingerprint,
+  finalizedFingerprint,
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
   largeOutcome,
   nonParticipant,
-  ongoingChallengeHash,
+  ongoingChallengeFingerprint,
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
@@ -123,18 +123,18 @@ describe('challenge', () => {
   const isFinalCount = 0;
   const challenger = wallets[2];
   const empty = HashZero; // Equivalent to openAtZero
-  const openAtFive = clearedChallengeHash(5);
-  const openAtLargestTurnNum = clearedChallengeHash(largestTurnNum);
-  const openAtTwenty = clearedChallengeHash(20);
-  const challengeAtFive = ongoingChallengeHash(5);
-  const challengeAtLargestTurnNum = ongoingChallengeHash(largestTurnNum);
-  const challengeAtTwenty = ongoingChallengeHash(20);
-  const finalizedAtFive = finalizedOutcomeHash(5);
+  const openAtFive = clearedChallengeFingerprint(5);
+  const openAtLargestTurnNum = clearedChallengeFingerprint(largestTurnNum);
+  const openAtTwenty = clearedChallengeFingerprint(20);
+  const challengeAtFive = ongoingChallengeFingerprint(5);
+  const challengeAtLargestTurnNum = ongoingChallengeFingerprint(largestTurnNum);
+  const challengeAtTwenty = ongoingChallengeFingerprint(20);
+  const finalizedAtFive = finalizedFingerprint(5);
 
   let channelNonce = getRandomNonce('challenge');
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description  | initialChannelStorageHash    | stateData      | challengeSignatureType | reasonString
+    description  | initialFingerprint           | stateData      | challengeSignatureType | reasonString
     ${accepts1}  | ${empty}                     | ${oneState}    | ${'correct'}           | ${undefined}
     ${accepts2}  | ${empty}                     | ${threeStates} | ${'correct'}           | ${undefined}
     ${accepts3}  | ${openAtFive}                | ${oneState}    | ${'correct'}           | ${undefined}
@@ -152,13 +152,7 @@ describe('challenge', () => {
     ${reverts6}  | ${finalizedAtFive}           | ${fourStates}  | ${'correct'}           | ${INVALID_NUMBER_OF_STATES}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({
-      description,
-      initialChannelStorageHash,
-      stateData,
-      challengeSignatureType,
-      reasonString,
-    }) => {
+    async ({description, initialFingerprint, stateData, challengeSignatureType, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
@@ -205,7 +199,7 @@ describe('challenge', () => {
       }
 
       // Set current channelStorageHashes value
-      await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
+      await (await ForceMove.setFingerprint(channelId, initialFingerprint)).wait();
 
       const tx = ForceMove.challenge(
         fixedPart,
@@ -260,10 +254,10 @@ describe('challenge', () => {
           challengerAddress: challenger.address,
           outcome,
         };
-        const expectedChannelStorageHash = channelDataToChannelStorageHash(expectedChannelStorage);
+        const expectedFingerprint = channelDataToFingerprint(expectedChannelStorage);
 
         // Check channelStorageHash against the expected value
-        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+        expect(await ForceMove.fingerprints(channelId)).toEqual(expectedFingerprint);
       }
     }
   );
@@ -271,7 +265,7 @@ describe('challenge', () => {
 
 describe('challenge with transaction generator', () => {
   beforeEach(async () => {
-    await (await ForceMove.setChannelStorageHash(getChannelId(twoPartyChannel), HashZero)).wait();
+    await (await ForceMove.setFingerprint(getChannelId(twoPartyChannel), HashZero)).wait();
   });
   it.each`
     description                                     | appData   | outcome                            | turnNums  | challenger
