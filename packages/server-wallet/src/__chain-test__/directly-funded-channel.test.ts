@@ -138,7 +138,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     .toPromise();
 
   const channelClosedAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
-    .pipe(take(3))
+    .pipe(take(4))
     .toPromise();
 
   //        A <> B
@@ -239,7 +239,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     fundingStatus: 'Funded',
   });
 
-  await mineBlocks(2);
+  await mineBlocks(5);
 
   const channelClosedA = await channelClosedAPromise;
 
