@@ -12,20 +12,15 @@ export interface ChannelData {
   outcome?: Outcome;
 }
 interface CompactChannelData {
-  turnNumRecord: Uint48;
-  finalizesAt: Uint48;
   stateHash: Bytes32;
   challengerAddress: Address;
   outcomeHash: Bytes32;
 }
 const CHANNEL_DATA_TYPE = `tuple(
-  uint256 turnNumRecord,
-  uint256 finalizesAt,
   bytes32 stateHash,
   address challengerAddress,
   bytes32 outcomeHash
 )`;
-
 export interface ChannelDataLite {
   finalizesAt: Uint48;
   state: State;
@@ -82,7 +77,6 @@ export function channelDataStruct({
   finalizesAt,
   state,
   challengerAddress,
-  turnNumRecord,
   outcome,
 }: ChannelData): CompactChannelData {
   /*
@@ -103,7 +97,7 @@ export function channelDataStruct({
   const outcomeHash = isOpen || !outcome ? constants.HashZero : hashOutcome(outcome);
   challengerAddress = challengerAddress || constants.AddressZero;
 
-  return {turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash};
+  return {stateHash, challengerAddress, outcomeHash};
 }
 
 export function encodeChannelData(data: ChannelData): Bytes {
