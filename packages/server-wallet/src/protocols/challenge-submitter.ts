@@ -42,7 +42,7 @@ export class ChallengeSubmitter {
         ? channel.adjudicatorStatus.toResult().channelMode
         : 'Open';
       if (status !== 'Open') {
-        this.logger.warn('There is already a challenge registered on chain');
+        this.logger.warn('There is an existing challenge or the channel is finalized on chain');
         return;
       }
 
