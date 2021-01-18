@@ -6,7 +6,7 @@ export async function up(knex: Knex): Promise<void> {
     table.string('channel_id').notNullable();
     table.integer('finalizes_at').notNullable();
     table.integer('block_number').notNullable();
-    table.timestamp('block_timestamp').notNullable();
+    table.integer('block_timestamp').notNullable();
     table.specificType('states', 'jsonb[]');
 
     table.primary(['channel_id']);
