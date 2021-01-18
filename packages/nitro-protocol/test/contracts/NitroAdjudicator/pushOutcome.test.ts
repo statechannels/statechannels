@@ -138,9 +138,7 @@ describe('pushOutcome', () => {
 
       const tx = await TestNitroAdjudicator.setFingerprint(channelId, initialFingerprint);
       await tx.wait();
-      expect(await TestNitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-        initialFingerprint
-      );
+      expect(await TestNitroAdjudicator.fingerprints(channelId)).toEqual(initialFingerprint);
 
       let arg: PushOutcomeTransactionArg = {
         turnNumRecord: wasConcluded ? 0 : declaredTurnNumRecord,
