@@ -7,7 +7,7 @@ const {defaultAbiCoder} = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -131,8 +131,8 @@ describe('checkpoint', () => {
           challengeDuration,
         };
 
-    const channelStorageHashes = finalizesAt
-      ? channelDataToChannelStorageHash({
+    const fingerprint = finalizesAt
+      ? channelDataToFingerprint({
           turnNumRecord,
           finalizesAt,
           state: challengeState,
@@ -142,8 +142,8 @@ describe('checkpoint', () => {
       : HashZero;
 
     // Call public wrapper to set state (only works on test contract)
-    await (await ForceMove.setChannelStorageHash(channelId, channelStorageHashes)).wait();
-    expect(await ForceMove.channelStorageHashes(channelId)).toEqual(channelStorageHashes);
+    await (await ForceMove.setFingerprint(channelId, fingerprint)).wait();
+    expect(await ForceMove.fingerprints(channelId)).toEqual(fingerprint);
 
     const signatures = await signStates(states, wallets, whoSignedWhat);
 
@@ -158,13 +158,13 @@ describe('checkpoint', () => {
         newTurnNumRecord: largestTurnNum,
       });
 
-      const expectedChannelStorageHash = channelDataToChannelStorageHash({
+      const expectedChannelStorageHash = channelDataToFingerprint({
         turnNumRecord: largestTurnNum,
         finalizesAt: 0x0,
       });
 
       // Check channelStorageHash against the expected value
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+      expect(await ForceMove.fingerprints(channelId)).toEqual(expectedChannelStorageHash);
     }
   });
 });

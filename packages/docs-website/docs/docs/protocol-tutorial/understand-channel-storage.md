@@ -5,51 +5,58 @@ title: Understand channel storage
 
 import Mermaid from '@theme/Mermaid';
 
-The adjudicator contract stores certain information about any channel that it knows about. Specifically, it stores
+The adjudicator contract stores certain information about any channel that it knows about. Specifically, it stores a fingerprint of the `ChannelData` struct, which contains:
 
 - `uint48 turnNumRecord`
 - `uint48 finalizesAt`
-- `uint160 fingerprint`
+- `uint160 thumbprint`
+- `bytes32 stateHash // keccak256(abi.encode(State))`
+- `address challengerAddress`
+- `bytes32 outcomeHash`
 
-serialized, inside the following mapping (with `channelId` as the key):
+The fingerprint is stored inside the following mapping (with `channelId` as the key):
 
 ```solidity
-    mapping(bytes32 => bytes32) public channelStorageHashes;
+    mapping(bytes32 => bytes32) public fingerprints;
 ```
 
-The value of `channelStorageHashes[someChannelId]` is obtained by:
+Generating a 32 byte fingerprint involves
 
 - setting the most significant 48 bits to the `turnNumRecord`
 - setting the next most significant 48 bits to `finalizesAt`
-- setting the next most significant 160 bits to the `fingerprint`
+- setting the next most significant 160 bits to the `thumbprint`
 
-The `fingerprint` uniquely identifies the channel's current state, up to hash collisions. It is the 160 least significant bits of `keccak256(abi.encode(channelData))`, where `channelData` is a struct of type
+The `thumbprint` helps to uniquely identify the channel's current state, up to hash collisions. It is computed as:
 
 ```solidity
-    struct ChannelData {
-        uint256 turnNumRecord;
-        uint256 finalizesAt;
-        bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
-        bytes32 outcomeHash // keccak256(abi.encode(Outcome));
-    }
+uint160(
+        uint256(
+            keccak256(
+                abi.encode(
+                    channelData.stateHash,
+                    channelData.challengerAddress,
+                    channelData.outcomeHash
+                )
+            )
+        )
+    )
 ```
 
-When the adjudicator needs to verify the exact state or outcome, the data is provided in the function arguments, as part of the `calldata`. The chain will then check that the hydrated data hashes to the image that has been stored.
+When the adjudicator needs to verify the exact state or outcome, the data is provided in the function arguments, as part of the `calldata`. The chain will then check that the hydrated data matches the fingerprint that has been stored.
 
-We provide a helper function to construct the appropriate hash from a javascript representation of `ChannelData`:
+We provide a helper function to construct the appropriate fingerprint from a javascript representation of `ChannelData`:
 
 ```typescript
-import {ChannelData, channelDataToChannelStorageHash} from '@statechannels/nitro-protocol';
+import {ChannelData, channelDataToFingerprint} from '@statechannels/nitro-protocol';
 
 const channelData: ChannelData = {
   turnNumRecord: largestTurnNum,
   finalizesAt: 0x0
 };
-const channelStorageHash = channelDataToChannelStorageHash(channelData);
+const fingerprint = channelDataToFingerprint(channelData);
 ```
 
-We'll be using this in the next tutorial lesson.
+Here we omitted some of the fields, because the helper function is smart enough to know to set them to null values when finalizes at is zero. We'll be using this helper in the next tutorial lesson.
 
 ### `turnNumRecord`
 
@@ -67,14 +74,14 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
 
 ### Channel Modes
 
-The `finalizesAt` part of the storage, together with block timestamp, imply a channel is in one or the other of three modes:
+The `finalizesAt` part of the fingerprint, together with block timestamp, imply a channel is in one or the other of three modes:
 
 ```solidity
 function _mode(bytes32 channelId) internal view returns (ChannelMode) {
-  // Note that _getChannelStorage(someRandomChannelId) returns (0,0,0), which is
+  // Note that _getFingerprint(someRandomChannelId) returns (0,0,0), which is
   // correct when nobody has written to storage yet.
 
-  (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
+  (, uint48 finalizesAt, ) = _getFingerprint(channelId);
   if (finalizesAt == 0) {
     return ChannelMode.Open;
   } else if (finalizesAt <= now) {
@@ -83,6 +90,7 @@ function _mode(bytes32 channelId) internal view returns (ChannelMode) {
     return ChannelMode.Challenge;
   }
 }
+
 ```
 
 These states can be represented in the following state machine:

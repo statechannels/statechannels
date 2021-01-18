@@ -11,80 +11,56 @@ export interface ChannelData {
   challengerAddress?: Address;
   outcome?: Outcome;
 }
-interface CompactChannelData {
-  turnNumRecord: Uint48;
-  finalizesAt: Uint48;
+interface ThumbprintPreimage {
   stateHash: Bytes32;
   challengerAddress: Address;
   outcomeHash: Bytes32;
 }
-const CHANNEL_DATA_TYPE = `tuple(
-  uint256 turnNumRecord,
-  uint256 finalizesAt,
+const THUMBPRINT_PREIMAGE_TYPE = `tuple(
   bytes32 stateHash,
   address challengerAddress,
   bytes32 outcomeHash
 )`;
 
-export interface ChannelDataLite {
-  finalizesAt: Uint48;
-  state: State;
-  challengerAddress: Address;
-  outcome: Outcome;
-}
-interface CompactChannelDataLite {
-  finalizesAt: Uint48;
-  stateHash: Bytes32;
-  challengerAddress: Address;
-  outcomeHash: Bytes32;
-}
-const CHANNEL_DATA_LITE_TYPE = `tuple(
-  uint256 finalizesAt,
-  bytes32 stateHash,
-  address challengerAddress,
-  bytes32 outcomeHash
-)`;
-
-export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes32 {
+export function channelDataToFingerprint(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
-  const hash = utils.keccak256(encodeChannelData(channelData));
-  const fingerprint = utils.hexDataSlice(hash, 12);
+  const hash = utils.keccak256(encodeThumbprintPreimage(channelData));
+  const thumbprint = utils.hexDataSlice(hash, 12);
 
   const storage =
     '0x' +
     utils.hexZeroPad(utils.hexlify(turnNumRecord), 6).slice(2) +
     utils.hexZeroPad(utils.hexlify(finalizesAt), 6).slice(2) +
-    fingerprint.slice(2);
+    thumbprint.slice(2);
 
   return storage;
 }
 
-export function parseChannelStorageHash(
-  channelStorageHash: Bytes32
-): {turnNumRecord: number; finalizesAt: number; fingerprint: Bytes} {
-  validateHexString(channelStorageHash);
+export function parseFingerprint(
+  fingerprint: Bytes32
+): {turnNumRecord: number; finalizesAt: number; thumbprint: Bytes} {
+  validateHexString(fingerprint);
 
   //
   let cursor = 2;
-  const turnNumRecord = '0x' + channelStorageHash.slice(cursor, (cursor += 12));
-  const finalizesAt = '0x' + channelStorageHash.slice(cursor, (cursor += 12));
-  const fingerprint = '0x' + channelStorageHash.slice(cursor);
+  const turnNumRecord = '0x' + fingerprint.slice(cursor, (cursor += 12));
+  const finalizesAt = '0x' + fingerprint.slice(cursor, (cursor += 12));
+  const thumbprint = '0x' + fingerprint.slice(cursor);
 
   return {
     turnNumRecord: asNumber(turnNumRecord),
     finalizesAt: asNumber(finalizesAt),
-    fingerprint,
+    thumbprint,
   };
 }
 const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
 
-export function channelDataStruct({
+export function thumbprint({
   finalizesAt,
   state,
   challengerAddress,
-  turnNumRecord,
   outcome,
-}: ChannelData): CompactChannelData {
+}: ChannelData): ThumbprintPreimage {
   /*
   When the channel is not open, it is still possible for the state and
   challengerAddress to be missing. They should either both be present, or
@@ -103,32 +79,11 @@ export function channelDataStruct({
   const outcomeHash = isOpen || !outcome ? constants.HashZero : hashOutcome(outcome);
   challengerAddress = challengerAddress || constants.AddressZero;
 
-  return {turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash};
+  return {stateHash, challengerAddress, outcomeHash};
 }
 
-export function encodeChannelData(data: ChannelData): Bytes {
-  return utils.defaultAbiCoder.encode([CHANNEL_DATA_TYPE], [channelDataStruct(data)]);
-}
-
-export function channelDataLiteStruct({
-  finalizesAt,
-  challengerAddress,
-  state,
-  outcome,
-}: ChannelDataLite): CompactChannelDataLite {
-  return {
-    finalizesAt,
-    challengerAddress,
-    stateHash: state ? hashState(state) : constants.HashZero,
-    outcomeHash: outcome ? hashOutcome(outcome) : constants.HashZero,
-  };
-}
-
-export function encodeChannelStorageLite(channelDataLite: ChannelDataLite): Bytes {
-  return utils.defaultAbiCoder.encode(
-    [CHANNEL_DATA_LITE_TYPE],
-    [channelDataLiteStruct(channelDataLite)]
-  );
+export function encodeThumbprintPreimage(data: ChannelData): Bytes {
+  return utils.defaultAbiCoder.encode([THUMBPRINT_PREIMAGE_TYPE], [thumbprint(data)]);
 }
 
 function validateHexString(hexString) {
