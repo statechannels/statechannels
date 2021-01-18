@@ -25,7 +25,7 @@ describe('AdjudicatorStatus model', () => {
 
     const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
-    expect(result).toEqual({status: 'Challenge Active', finalizesAt: 5, states: [challengeState]});
+    expect(result).toEqual({channelMode: 'Challenge', states: [challengeState]});
   });
 
   it('returns no challenge when there is not an entry', async () => {
@@ -34,7 +34,7 @@ describe('AdjudicatorStatus model', () => {
 
     const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
-    expect(result).toEqual({status: 'Nothing'});
+    expect(result).toEqual({channelMode: 'Open'});
   });
 
   it('returns channel finalized when the channel is finalized (finalizedAt<=blockNumber)', async () => {
@@ -48,9 +48,7 @@ describe('AdjudicatorStatus model', () => {
     const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
     expect(result).toEqual({
-      status: 'Channel Finalized',
-      finalizedAt: 5,
-      finalizedBlockNumber: 10,
+      channelMode: 'Finalized',
       states: [challengeState],
     });
   });
