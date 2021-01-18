@@ -25,13 +25,13 @@ const THUMBPRINT_PREIMAGE_TYPE = `tuple(
 export function channelDataToFingerprint(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
   const hash = utils.keccak256(encodeThumbprintPreimage(channelData));
-  const fingerprint = utils.hexDataSlice(hash, 12);
+  const thumbprint = utils.hexDataSlice(hash, 12);
 
   const storage =
     '0x' +
     utils.hexZeroPad(utils.hexlify(turnNumRecord), 6).slice(2) +
     utils.hexZeroPad(utils.hexlify(finalizesAt), 6).slice(2) +
-    fingerprint.slice(2);
+    thumbprint.slice(2);
 
   return storage;
 }
