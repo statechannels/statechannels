@@ -124,7 +124,7 @@ describe('conclude', () => {
       }
       // Call public wrapper to set state (only works on test contract)
       await (await ForceMove.setFingerprint(channelId, initialFingerprint)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialFingerprint);
+      expect(await ForceMove.fingerprints(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
@@ -141,14 +141,14 @@ describe('conclude', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = channelDataToFingerprint({
+        const expectedFingerprint = channelDataToFingerprint({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
         });
 
-        // Check channelStorageHash against the expected value
-        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+        // Check fingerprint against the expected value
+        expect(await ForceMove.fingerprints(channelId)).toEqual(expectedFingerprint);
       }
     }
   );
