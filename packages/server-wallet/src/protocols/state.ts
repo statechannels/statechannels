@@ -45,7 +45,7 @@ export type ChannelState = {
   fundingStrategy: FundingStrategy;
   fundingLedgerChannelId?: Bytes32; // only present if funding strategy is Ledger
   directFundingStatus?: FundingStatus;
-  adjudicatorStatus: AdjudicatorStatus['status'];
+  adjudicatorStatus: AdjudicatorStatus['channelMode'];
 };
 
 type WithSupported = {supported: SignedStateWithHash};

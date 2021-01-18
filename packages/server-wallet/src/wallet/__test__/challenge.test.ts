@@ -33,7 +33,7 @@ it('submits a challenge when no challenge exists for a channel', async () => {
 
   const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, channelId);
 
-  expect(current.status).toEqual('Nothing');
+  expect(current.channelMode).toEqual('Open');
   const challengeState = {
     ...c.channelConstants,
     ..._.pick(c.latest, ['turnNum', 'outcome', 'appData', 'isFinal']),
@@ -50,13 +50,13 @@ it('stores the challenge state on the challenge created event', async () => {
   await Channel.query(w.knex).insert(c);
   const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, c.channelId);
 
-  expect(current.status).toEqual('Nothing');
+  expect(current.channelMode).toEqual('Open');
   const challengeState = stateWithHashSignedBy([alice()])({turnNum: 1});
   const {channelId} = c;
   await w.challengeRegistered({channelId, finalizesAt: 200, challengeStates: [challengeState]});
   const updated = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, c.channelId);
 
-  expect(updated.status).toEqual('Challenge Active');
+  expect(updated.channelMode).toEqual('Challenge');
   expect((updated as any).states).toMatchObject([challengeState]);
 });
 
@@ -67,7 +67,12 @@ it('creates a defundChannel objective on channel finalized', async () => {
   });
   await Channel.query(w.knex).insert(c);
 
-  await w.channelFinalized({channelId: c.channelId, blockNumber: 100, finalizedAt: 50});
+  await w.channelFinalized({
+    channelId: c.channelId,
+    blockNumber: 3,
+    blockTimestamp: 100,
+    finalizedAt: 50,
+  });
   const objectiveId = `DefundChannel-${c.channelId}`;
   const objective = await ObjectiveModel.forId(objectiveId, w.knex);
 

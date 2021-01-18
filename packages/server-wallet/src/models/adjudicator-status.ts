@@ -1,3 +1,4 @@
+import {getChannelMode} from '@statechannels/nitro-protocol';
 import {SignedState} from '@statechannels/wallet-core';
 import Knex from 'knex';
 import _ from 'lodash';
@@ -7,23 +8,23 @@ import {Bytes32, Uint48} from '../type-aliases';
 
 export type AdjudicatorStatus =
   | {
-      status: 'Channel Finalized';
-      finalizedAt: number;
+      channelMode: 'Finalized';
       states: SignedState[];
-      finalizedBlockNumber: number;
     }
-  | {status: 'Challenge Active'; finalizesAt: number; states: SignedState[]}
-  | {status: 'Nothing'};
+  | {channelMode: 'Challenge'; states: SignedState[]}
+  | {channelMode: 'Open'};
 
 interface RequiredColumns {
   readonly channelId: Bytes32;
   readonly finalizesAt: Uint48;
   readonly blockNumber: Uint48;
+  readonly blockTimestamp: Uint48;
 }
 export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   readonly channelId!: Bytes32;
   readonly finalizesAt!: Uint48;
   readonly blockNumber!: Uint48;
+  readonly blockTimestamp!: Uint48;
   readonly states!: SignedState[];
   static tableName = 'adjudicator_status';
   static get idColumn(): string[] {
@@ -33,21 +34,22 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   static async getAdjudicatorStatus(knex: Knex, channelId: Bytes32): Promise<AdjudicatorStatus> {
     const result = await AdjudicatorStatusModel.query(knex).where({channelId}).first();
 
-    if (!result) return {status: 'Nothing'};
+    if (!result) return {channelMode: 'Open'};
     return AdjudicatorStatusModel.convertResult(result);
   }
 
   static async setFinalized(
     knex: Knex,
     channelId: string,
-    blockNumber: number
+    blockNumber: number,
+    blockTimestamp: number
   ): Promise<AdjudicatorStatus> {
     const existing = await AdjudicatorStatusModel.query(knex).where({channelId});
     if (!existing) {
       await AdjudicatorStatusModel.query(knex).insert({channelId, blockNumber});
     }
     const result = await AdjudicatorStatusModel.query(knex)
-      .patch({blockNumber})
+      .patch({blockNumber, blockTimestamp})
       .where({channelId})
       .returning('*')
       .first();
@@ -70,21 +72,13 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   }
   private static convertResult(result: AdjudicatorStatusModel | undefined): AdjudicatorStatus {
     if (!result || _.isEmpty(result)) {
-      return {status: 'Nothing'};
+      return {channelMode: 'Open'};
     }
 
-    const {finalizesAt, blockNumber, states} = result;
+    const {finalizesAt, blockTimestamp, states} = result;
 
-    if (finalizesAt > blockNumber) {
-      return {status: 'Challenge Active', finalizesAt, states};
-    } else {
-      return {
-        status: 'Channel Finalized',
-        finalizedAt: finalizesAt,
-        finalizedBlockNumber: blockNumber,
-        states,
-      };
-    }
+    const channelMode = getChannelMode(finalizesAt, blockTimestamp);
+    return channelMode === 'Open' ? {channelMode} : {channelMode, states};
   }
 
   public toResult(): AdjudicatorStatus {
