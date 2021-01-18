@@ -21,24 +21,6 @@ const CHANNEL_DATA_TYPE = `tuple(
   address challengerAddress,
   bytes32 outcomeHash
 )`;
-export interface ChannelDataLite {
-  finalizesAt: Uint48;
-  state: State;
-  challengerAddress: Address;
-  outcome: Outcome;
-}
-interface CompactChannelDataLite {
-  finalizesAt: Uint48;
-  stateHash: Bytes32;
-  challengerAddress: Address;
-  outcomeHash: Bytes32;
-}
-const CHANNEL_DATA_LITE_TYPE = `tuple(
-  uint256 finalizesAt,
-  bytes32 stateHash,
-  address challengerAddress,
-  bytes32 outcomeHash
-)`;
 
 export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
@@ -102,27 +84,6 @@ export function channelDataStruct({
 
 export function encodeChannelData(data: ChannelData): Bytes {
   return utils.defaultAbiCoder.encode([CHANNEL_DATA_TYPE], [channelDataStruct(data)]);
-}
-
-export function channelDataLiteStruct({
-  finalizesAt,
-  challengerAddress,
-  state,
-  outcome,
-}: ChannelDataLite): CompactChannelDataLite {
-  return {
-    finalizesAt,
-    challengerAddress,
-    stateHash: state ? hashState(state) : constants.HashZero,
-    outcomeHash: outcome ? hashOutcome(outcome) : constants.HashZero,
-  };
-}
-
-export function encodeChannelStorageLite(channelDataLite: ChannelDataLite): Bytes {
-  return utils.defaultAbiCoder.encode(
-    [CHANNEL_DATA_LITE_TYPE],
-    [channelDataLiteStruct(channelDataLite)]
-  );
 }
 
 function validateHexString(hexString) {
