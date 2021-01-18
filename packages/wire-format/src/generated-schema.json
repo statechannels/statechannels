@@ -118,7 +118,6 @@
                 "Direct",
                 "Ledger",
                 "Virtual",
-                "Fake",
                 "Unknown"
               ],
               "type": "string"
@@ -338,7 +337,6 @@
                 "Direct",
                 "Ledger",
                 "Virtual",
-                "Fake",
                 "Unknown"
               ],
               "type": "string"

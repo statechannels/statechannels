@@ -308,8 +308,7 @@ export class SingleThreadedWallet
   }
 
   async createLedgerChannel(
-    args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>,
-    fundingStrategy: 'Direct' | 'Fake' = 'Direct'
+    args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>
   ): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
@@ -319,7 +318,7 @@ export class SingleThreadedWallet
         ...args,
         appDefinition: ethers.constants.AddressZero,
         appData: '0x00',
-        fundingStrategy,
+        fundingStrategy: 'Direct',
       },
       'ledger'
     );

@@ -79,8 +79,6 @@ export class ChannelOpener {
     switch (strategy) {
       case 'Direct':
         return this.directFunder.crank(objective, channel, response, tx);
-      case 'Fake':
-        return true;
       case 'Ledger':
         return this.ledgerFunder.crank(objective, channel, response, tx);
       case 'Virtual':

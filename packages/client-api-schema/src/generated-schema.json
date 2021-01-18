@@ -365,7 +365,6 @@
         "Direct",
         "Ledger",
         "Virtual",
-        "Fake",
         "Unknown"
       ],
       "type": "string"

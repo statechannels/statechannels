@@ -272,7 +272,14 @@ it("doesn't store states for unknown signing addresses", async () => {
 
 describe('when the application protocol returns an action', () => {
   it('signs the postfund setup when the prefund setup is supported', async () => {
-    const state = stateSignedBy()({outcome: simpleEthAllocation([])});
+    const state = stateSignedBy()({
+      outcome: simpleEthAllocation([
+        {
+          destination: aliceP().destination,
+          amount: BN.from(0),
+        },
+      ]),
+    });
 
     const c = channel({vars: [addHash(state)]});
     await Channel.query(wallet.knex).insert(c);
@@ -284,7 +291,7 @@ describe('when the application protocol returns an action', () => {
         participants: c.participants,
         data: {
           targetChannelId: c.channelId,
-          fundingStrategy: 'Fake', // Could also be Direct, funding is empty
+          fundingStrategy: 'Direct',
           role: 'app',
         },
       },

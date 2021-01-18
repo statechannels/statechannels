@@ -293,7 +293,7 @@ export type ExternalDestination = string;
 export type FundingStatus = 'Uncategorized' | 'ReadyToFund' | 'Funded' | 'Defunded';
 
 // @public (undocumented)
-export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Fake' | 'Unknown';
+export type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Unknown';
 
 // @public (undocumented)
 export interface Funds {
