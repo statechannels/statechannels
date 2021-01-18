@@ -203,7 +203,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
       // Call public wrapper to set state (only works on test contract)
       await (await NitroAdjudicator.setFingerprint(channelId, initialFingerprint)).wait();
-      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(initialFingerprint);
+      expect(await NitroAdjudicator.fingerprints(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
@@ -230,16 +230,14 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = channelDataToFingerprint({
+        const expectedFingerprint = channelDataToFingerprint({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
         });
 
-        // Check channelStorageHash against the expected value
-        expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-          expectedChannelStorageHash
-        );
+        // Check fingerprint against the expected value
+        expect(await NitroAdjudicator.fingerprints(channelId)).toEqual(expectedFingerprint);
 
         // Extract logs
         const {logs} = await (await tx).wait();

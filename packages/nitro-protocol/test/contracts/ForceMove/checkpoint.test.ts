@@ -142,7 +142,7 @@ describe('checkpoint', () => {
       : HashZero;
 
     // Call public wrapper to set state (only works on test contract)
-    await (await ForceMove.setFingerint(channelId, fingerprint)).wait();
+    await (await ForceMove.setFingerprint(channelId, fingerprint)).wait();
     expect(await ForceMove.fingerprints(channelId)).toEqual(fingerprint);
 
     const signatures = await signStates(states, wallets, whoSignedWhat);
@@ -164,7 +164,7 @@ describe('checkpoint', () => {
       });
 
       // Check channelStorageHash against the expected value
-      expect(await ForceMove.fingerprint(channelId)).toEqual(expectedChannelStorageHash);
+      expect(await ForceMove.fingerprints(channelId)).toEqual(expectedChannelStorageHash);
     }
   });
 });

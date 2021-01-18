@@ -40,10 +40,10 @@ describe('storage', () => {
 
     // Testing getData is a little more laborious
     await (await ForceMove.setFingerprint(ethers.constants.HashZero, blockchainStorage)).wait();
-    const {turnNumRecord, finalizesAt, fingerprint: f} = await ForceMove.getChannelStorage(
+    const {turnNumRecord, finalizesAt, thumbrint: f} = await ForceMove.unpackFingerprint(
       ethers.constants.HashZero
     );
-    expect({turnNumRecord, finalizesAt, fingerprint: f._hex}).toMatchObject(expected);
+    expect({turnNumRecord, finalizesAt, thumbprint: f._hex}).toMatchObject(expected);
   });
 });
 
