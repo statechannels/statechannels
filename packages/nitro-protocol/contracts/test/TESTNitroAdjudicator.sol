@@ -70,20 +70,29 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
     }
 
     /**
-     * @dev Manually set the channelStorageHashes for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
+     * @dev Manually set the fingerprint for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
      * @param channelId Unique identifier for a state channel.
-     * @param channelData The channelData to be hashed and stored against the channelId
+     * @param channelData The channelData to be formatted and stored against the channelId
      */
-    function setChannelStorage(bytes32 channelId, ChannelData memory channelData) public {
-        channelStorageHashes[channelId] = _hashChannelData(channelData);
+    function setFingerprint(bytes32 channelId, ChannelData memory channelData) public {
+        if (channelData.finalizesAt == 0) {
+            require(
+                channelData.stateHash == bytes32(0) &&
+                    channelData.challengerAddress == address(0) &&
+                    channelData.outcomeHash == bytes32(0),
+                'Invalid open channel'
+            );
+        }
+
+        fingerprints[channelId] = _generateFingerprint(channelData);
     }
 
     /**
-     * @dev Manually set the channelStorageHash for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
+     * @dev Manually set the fingerprint for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
      * @param channelId Unique identifier for a state channel.
-     * @param h The channelStorageHash to store against the channelId
+     * @param f The fingerprint to store against the channelId
      */
-    function setChannelStorageHash(bytes32 channelId, bytes32 h) public {
-        channelStorageHashes[channelId] = h;
+    function setFingerprint(bytes32 channelId, bytes32 f) public {
+        fingerprints[channelId] = f;
     }
 }
