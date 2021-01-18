@@ -804,7 +804,19 @@ contract ForceMove is IForceMove {
         result |= (uint256(channelData.finalizesAt) << (cursor -= 48));
 
         // logical or with the last 160 bits of the hash of the encoded storage
-        result |= uint256(uint160(uint256(keccak256(abi.encode(channelData)))));
+        result |= uint256(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encode(
+                            channelData.stateHash,
+                            channelData.challengerAddress,
+                            channelData.outcomeHash
+                        )
+                    )
+                )
+            )
+        );
 
         newHash = bytes32(result);
     }
