@@ -9,8 +9,8 @@ import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-chan
 import {SingleAppUpdater} from '../single-app-updater';
 
 const FINAL = 8;
-const testChan = TestChannel.create({channelNonce: 1, finalFrom: FINAL});
-const testChan2 = TestChannel.create({channelNonce: 2});
+const testChan = TestChannel.create({finalFrom: FINAL});
+const testChan2 = TestChannel.create({});
 
 let store: Store;
 let singleAppUpdater: SingleAppUpdater;

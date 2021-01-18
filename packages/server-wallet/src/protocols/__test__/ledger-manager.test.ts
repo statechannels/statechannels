@@ -118,7 +118,7 @@ describe('marking ledger requests as complete', () => {
     // create an application channel
     const appChannel = TestChannel.create({aBal: 5, bBal: 5});
     await appChannel.insertInto(store, {states: [0, 1]});
-    // create a ledger channel that funds that channel. Note distinct channel nonce
+    // create a ledger channel that funds that channel.Note distinct channel nonce should be automatically ensured automatically
     const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
     await ledgerChannel.insertInto(store, {
       states: [4, 5],
@@ -144,8 +144,8 @@ describe('marking ledger requests as complete', () => {
     // create an application channel
     const appChannel = TestChannel.create({aBal: 5, bBal: 5});
     await appChannel.insertInto(store, {states: [0, 1]});
-    // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce
-    const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+    // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce should be automatically ensuredd automatically
+    const ledgerChannel = TestLedgerChannel.create({});
     await ledgerChannel.insertInto(store, {
       states: [5, 6],
       bals: [
@@ -198,8 +198,8 @@ describe('exchanging ledger proposals', () => {
       // create an application channel
       const appChannel = TestChannel.create({aBal: 5, bBal: 5});
       await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce
-      const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce should be automatically ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         // Will be "fully funded" i.e. with 10 coins
         states: [4, 5],
@@ -233,17 +233,15 @@ describe('exchanging ledger proposals', () => {
     });
 
     it('proposes new outcome funding many channels', async () => {
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce
-      const ledgerChannel = TestLedgerChannel.create({channelNonce: 5});
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce should be automatically ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         states: [4, 5],
         bals: [10, 10],
       });
 
       // create 5 application channels, each allocating 1 to Alice
-      const appChannels = [0, 1, 2, 3, 4].map(channelNonce =>
-        TestChannel.create({aBal: 1, bBal: 0, channelNonce})
-      );
+      const appChannels = [0, 1, 2, 3, 4].map(() => TestChannel.create({aBal: 1, bBal: 0}));
       for await (const appChannel of appChannels) {
         // for each one, insert the channel and a ledger funding request
         await appChannel.insertInto(store, {states: [0, 1]});
@@ -277,8 +275,8 @@ describe('exchanging ledger proposals', () => {
 
     it('proposes new outcome requiring defund before having sufficient funds', async () => {
       // setup a ledger channel funding an 'older' channel
-      const ledgerChannel = TestLedgerChannel.create({channelNonce: 0});
-      const olderChannel = TestChannel.create({aBal: 10, bBal: 0, channelNonce: 1});
+      const ledgerChannel = TestLedgerChannel.create({});
+      const olderChannel = TestChannel.create({aBal: 10, bBal: 0});
       await ledgerChannel.insertInto(store, {
         states: [4, 5],
         bals: [[olderChannel.channelId, 10]],
@@ -286,7 +284,7 @@ describe('exchanging ledger proposals', () => {
       await olderChannel.insertInto(store, {states: [0, 1]});
 
       // create a new channel
-      const newChannel = TestChannel.create({aBal: 10, bBal: 0, channelNonce: 2});
+      const newChannel = TestChannel.create({aBal: 10, bBal: 0});
       await newChannel.insertInto(store, {states: [0, 1]});
 
       // create a ledger request for the ledger to defund the older channel
@@ -319,8 +317,8 @@ describe('exchanging ledger proposals', () => {
       // create an application channel that allocates 200 coins
       const appChannel = TestChannel.create({aBal: 100, bBal: 100});
       await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce
-      const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce should be automatically ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         // Will be "fully funded" with 10 coins, but this is insufficient for the app channel
         states: [4, 5],
@@ -341,8 +339,8 @@ describe('exchanging ledger proposals', () => {
     });
 
     it('proposes outcome funding some channels, identifying insufficient funds for others', async () => {
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce
-      const ledgerChannel = TestLedgerChannel.create({channelNonce: 5});
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce should be automatically ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         states: [4, 5],
         bals: [10, 10],
@@ -350,9 +348,7 @@ describe('exchanging ledger proposals', () => {
 
       // create 5 application channels, each allocating 5 to Alice
       // The ledger channel can only afford 2 of these
-      const appChannels = [0, 1, 2, 3, 4].map(channelNonce =>
-        TestChannel.create({aBal: 5, bBal: 0, channelNonce})
-      );
+      const appChannels = [0, 1, 2, 3, 4].map(() => TestChannel.create({aBal: 5, bBal: 0}));
       for await (const appChannel of appChannels) {
         // for each one, insert the channel and a ledger funding request
         await appChannel.insertInto(store, {states: [0, 1]});
