@@ -1,11 +1,13 @@
 import * as Knex from 'knex';
 
-const tableName = 'challenge_status';
+const tableName = 'adjudicator_status';
 export async function up(knex: Knex): Promise<void> {
   await knex.schema.createTable(tableName, function (table) {
     table.string('channel_id').notNullable();
     table.integer('finalizes_at').notNullable();
     table.integer('block_number').notNullable();
+    table.timestamp('block_timestamp').notNullable();
+    table.specificType('states', 'jsonb[]');
 
     table.primary(['channel_id']);
     table.foreign('channel_id').references('channels.channel_id');

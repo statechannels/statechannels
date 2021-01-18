@@ -745,7 +745,11 @@ export class SingleThreadedWallet
   async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
     const response = WalletResponse.initialize();
 
-    await this.store.setFinalizedChallengeStatus(arg.channelId, arg.blockNumber);
+    await this.store.markAdjudicatorStatusAsFinalized(
+      arg.channelId,
+      arg.blockNumber,
+      arg.blockTimestamp
+    );
     await this.knex.transaction(async tx => {
       const {objectiveId} = await this.store.ensureObjective(
         {

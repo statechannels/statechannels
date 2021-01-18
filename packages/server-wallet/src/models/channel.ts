@@ -261,7 +261,7 @@ export class Channel extends Model implements RequiredColumns {
       fundingStrategy,
       fundingLedgerChannelId,
       directFundingStatus: dfs,
-      adjudicatorStatus: this.adjudicatorStatus?.toResult().status || 'Nothing',
+      adjudicatorStatus: this.adjudicatorStatus?.toResult().channelMode || 'Open',
     };
   }
 

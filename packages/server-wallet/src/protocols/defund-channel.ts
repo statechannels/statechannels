@@ -49,7 +49,7 @@ export class ChannelDefunder {
       // TODO: We might want to refactor challengeStatus to something that
       // applies to both co-operatively concluding or challenging
       // see https://github.com/statechannels/statechannels/issues/3132
-      if (result.status === 'Channel Finalized') {
+      if (result.channelMode === 'Finalized') {
         if (result.states.every(s => s.isFinal)) {
           // We should handle this in https://github.com/statechannels/statechannels/issues/3112
           this.logger.warn('TODO: Currently do not support defunding concluded channels');

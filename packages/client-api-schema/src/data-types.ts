@@ -140,7 +140,7 @@ export interface ChannelResult {
   channelId: ChannelId;
   status: ChannelStatus;
   turnNum: Uint48;
-  adjudicatorStatus: 'Channel Finalized' | 'Challenge Active' | 'Nothing';
+  adjudicatorStatus: 'Challenge' | 'Open' | 'Finalized';
   fundingStatus?: FundingStatus;
 }
 

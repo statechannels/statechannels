@@ -217,7 +217,7 @@ async function setChallengeStatus(
     stateSignedBy([alice()])(state),
   ]);
   if (status === 'finalized') {
-    await AdjudicatorStatusModel.setFinalized(knex, channel.channelId, 200);
+    await AdjudicatorStatusModel.setFinalized(knex, channel.channelId, 22, 200);
   }
 }
 

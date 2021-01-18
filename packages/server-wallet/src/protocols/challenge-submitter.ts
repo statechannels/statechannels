@@ -39,9 +39,9 @@ export class ChallengeSubmitter {
       }
 
       const status = channel.adjudicatorStatus
-        ? channel.adjudicatorStatus.toResult().status
-        : 'Nothing';
-      if (status !== 'Nothing') {
+        ? channel.adjudicatorStatus.toResult().channelMode
+        : 'Open';
+      if (status !== 'Open') {
         this.logger.warn('There is already a challenge registered on chain');
         return;
       }

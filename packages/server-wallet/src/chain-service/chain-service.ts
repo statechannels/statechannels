@@ -370,6 +370,7 @@ export class ChainService implements ChainServiceInterface {
         subscriber.channelFinalized({
           channelId,
           blockNumber: block.number,
+          blockTimestamp: block.timestamp,
           finalizedAt: finalizingChannel.finalizesAtS,
         })
       );
