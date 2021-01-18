@@ -211,7 +211,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(closeA.channelResult).toMatchObject({
     status: 'closing',
     turnNum: 4,
-    fundingStatus: 'Funded',
+    fundingStatus: 'Defunded',
   });
 
   const closeB = await b.pushMessage(getPayloadFor(participantB.participantId, closeA.outbox));
@@ -225,7 +225,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect(getChannelResultFor(channelId, close2A.channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 4,
-    fundingStatus: 'Funded',
+    fundingStatus: 'Defunded',
   });
 
   // Mine a few blocks, but not enough for the chain service to update holdings
@@ -236,7 +236,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   expect((await a.getState({channelId})).channelResult).toMatchObject({
     status: 'closed',
     turnNum: 4,
-    fundingStatus: 'Funded',
+    fundingStatus: 'Defunded',
   });
 
   await mineBlocks(2);
