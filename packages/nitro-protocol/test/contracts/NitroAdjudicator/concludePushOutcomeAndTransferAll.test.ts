@@ -148,7 +148,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
     }: {
       description: string;
       outcomeShortHand: OutcomeShortHand;
-      initialChannelStorageHash;
+      initialFingerprint;
       heldBefore: OutcomeShortHand;
       heldAfter: OutcomeShortHand;
       newOutcome: OutcomeShortHand;
@@ -162,7 +162,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
       const largestTurnNum = turnNumRecord + 1;
-      const initialChannelStorageHash = ethers.constants.HashZero;
+      const initialFingerprint = ethers.constants.HashZero;
 
       // Transfer some tokens into ERC20AssetHolder
       // Do this step before transforming input data (easier)
@@ -202,12 +202,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       }
 
       // Call public wrapper to set state (only works on test contract)
-      await (
-        await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash)
-      ).wait();
-      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-        initialChannelStorageHash
-      );
+      await (await NitroAdjudicator.setFingerprint(channelId, initialFingerprint)).wait();
+      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);

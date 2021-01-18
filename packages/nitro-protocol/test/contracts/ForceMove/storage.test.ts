@@ -30,13 +30,13 @@ describe('storage', () => {
     ${123456}     | ${789}
   `('Hashing and data retrieval', async storage => {
     const blockchainStorage = {...storage, ...zeroData};
-    const blockchainHash = await ForceMove.hashChannelData(blockchainStorage);
+    const blockchainFingerprint = await ForceMove.generateFingerprint(blockchainStorage);
     const clientFingerprint = channelDataToFingerprint(storage);
 
     const expected = {...storage, fingerprint: '0x' + clientFingerprint.slice(2 + 24)};
 
-    expect(clientFingerprint).toEqual(blockchainHash);
-    expect(await ForceMove.matchesHash(blockchainStorage, blockchainHash)).toBe(true);
+    expect(clientFingerprint).toEqual(blockchainFingerprint);
+    expect(await ForceMove.matchesHash(blockchainStorage, blockchainFingerprint)).toBe(true);
     expect(await ForceMove.matchesHash(blockchainStorage, clientFingerprint)).toBe(true);
 
     expect(parseChannelStorageHash(clientFingerprint)).toMatchObject(expected);

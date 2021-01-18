@@ -76,7 +76,9 @@ contract TESTForceMove is ForceMove {
      * @param channelId Unique identifier for a state channel.
      * @param channelData The channelData to be formatted and stored against the channelId
      */
-    function setFingerprint(bytes32 channelId, ChannelData memory channelData) public {
+    function setFingerprintFromChannelData(bytes32 channelId, ChannelData memory channelData)
+        public
+    {
         if (channelData.finalizesAt == 0) {
             require(
                 channelData.stateHash == bytes32(0) &&
