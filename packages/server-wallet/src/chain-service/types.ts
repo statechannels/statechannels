@@ -31,7 +31,6 @@ export type ChannelFinalizedArg = {
   channelId: Bytes32;
   blockNumber: number;
   finalizedAt: number;
-  outcomePushed: boolean;
 };
 
 export type ChallengeRegisteredArg = {

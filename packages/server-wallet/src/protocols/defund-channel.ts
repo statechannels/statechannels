@@ -1,4 +1,6 @@
 import {Logger} from 'pino';
+import {makeAddress} from '@statechannels/wallet-core';
+import {BigNumber} from 'ethers';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
@@ -46,8 +48,13 @@ export class ChannelDefunder {
 
       const result = await AdjudicatorStatusModel.getAdjudicatorStatus(tx, channelId);
 
+      const channelHoldings =
+        channel.assetHolderAddress &&
+        (await this.store.getFunding(channelId, makeAddress(channel.assetHolderAddress), tx));
+
+      const outcomePushed = !channelHoldings || BigNumber.from(channelHoldings.amount).isZero();
       if (result.status === 'Channel Finalized') {
-        if (!result.outcomePushed) {
+        if (!outcomePushed) {
           await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
           this.chainService.pushOutcomeAndWithdraw(result.states[0], channel.myAddress);
           await this.store.markObjectiveStatus(objective, 'succeeded', tx);

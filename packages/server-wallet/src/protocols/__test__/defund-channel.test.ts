@@ -1,4 +1,5 @@
-import {State} from '@statechannels/wallet-core';
+import {makeAddress, State} from '@statechannels/wallet-core';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
@@ -14,7 +15,7 @@ import {ChannelDefunder} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
+import {Funding} from '../../models/funding';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -121,12 +122,16 @@ describe('when the channel is finalized on chain', () => {
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel();
+    const c = channel({
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    });
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    // Store a non final state on chain
-    const challengeState = stateVars({isFinal: false});
-    await setChallengeStatus('finalized', c, {state: challengeState});
+    // If there is a funding entry that means the outcome has not been pushed
+    await Funding.updateFunding(knex, c.channelId, '0x05', makeAddress(c.assetHolderAddress));
+
+    const challengeState = stateSignedBy([alice()])();
+    await setChallengeStatus('finalized', c, challengeState);
 
     // Set the objective in the database
     const objective = await createPendingObjective(c.channelId);
@@ -143,16 +148,18 @@ describe('when the channel is finalized on chain', () => {
     expect(reloadedObjective.status).toEqual('succeeded');
   });
 
-  it('does nothing if the outcome has been pushed', async () => {
+  it('does nothing if the outcome has already been pushed', async () => {
     const chainService = new MockChainService();
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel();
+    const c = channel({
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    });
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     // Set a finalized channel with a final state
-    await setChallengeStatus('finalized', c, {outcomePushed: true});
+    await setChallengeStatus('finalized', c);
 
     // Store the objective
     const obj = createPendingObjective(c.channelId);
@@ -209,21 +216,13 @@ it('should fail when using non-direct funding', async () => {
 async function setChallengeStatus(
   status: 'finalized' | 'active',
   channel: Channel,
-  options?: {
-    state?: Partial<State>;
-    outcomePushed?: boolean;
-  }
+  state?: Partial<State>
 ): Promise<void> {
   await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, channel.channelId, 100, [
-    stateSignedBy([alice()])(options?.state),
+    stateSignedBy([alice()])(state),
   ]);
   if (status === 'finalized') {
-    await AdjudicatorStatusModel.setFinalized(
-      knex,
-      channel.channelId,
-      200,
-      options?.outcomePushed || false
-    );
+    await AdjudicatorStatusModel.setFinalized(knex, channel.channelId, 200);
   }
 }
 

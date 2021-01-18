@@ -42,15 +42,14 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   static async setFinalized(
     knex: Knex,
     channelId: string,
-    blockNumber: number,
-    outcomePushed: boolean
+    blockNumber: number
   ): Promise<AdjudicatorStatus> {
     const existing = await AdjudicatorStatusModel.query(knex).where({channelId});
     if (!existing) {
       await AdjudicatorStatusModel.query(knex).insert({channelId, blockNumber});
     }
     const result = await AdjudicatorStatusModel.query(knex)
-      .patch({blockNumber, outcomePushed})
+      .patch({blockNumber})
       .where({channelId})
       .returning('*')
       .first();

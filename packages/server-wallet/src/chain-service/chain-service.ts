@@ -376,13 +376,12 @@ export class ChainService implements ChainServiceInterface {
       // Will the wallet sign new states or deposit into the channel based on this event?
       // The answer is likely no.
       // So we probably want to emit this event as soon as possible.
-      const outcomePushed = await this.isOutcomePushed(channelId);
+
       this.channelToSubscribers.get(channelId)?.map(subscriber =>
         subscriber.channelFinalized({
           channelId,
           blockNumber: block.number,
           finalizedAt: finalizingChannel.finalizesAtS,
-          outcomePushed,
         })
       );
       // Chain storage has a new finalizesAt timestamp
@@ -429,16 +428,6 @@ export class ChainService implements ChainServiceInterface {
     };
   }
 
-  private async isOutcomePushed(channelId: string) {
-    const assetHolders = this.channelToAssetHolders.get(channelId) || [];
-    for (const assetHolder of assetHolders) {
-      const outcomeHash = await assetHolder.assetOutcomeHashes(channelId);
-      if (outcomeHash) {
-        return true;
-      }
-    }
-    return false;
-  }
   private async waitForConfirmations(event: Event): Promise<void> {
     // `tx.wait(n)` resolves after n blocks are mined that include the given transaction `tx`
     // See https://docs.ethers.io/v5/api/providers/types/#providers-TransactionResponse

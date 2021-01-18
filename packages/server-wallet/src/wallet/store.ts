@@ -755,12 +755,8 @@ export class Store {
     await AdjudicatorStatusModel.insertAdjudicatorStatus(this.knex, channelId, finalizedAt, states);
   }
 
-  async setFinalizationStatus(
-    channelId: string,
-    blockNumber: number,
-    outcomePushed: boolean
-  ): Promise<void> {
-    await AdjudicatorStatusModel.setFinalized(this.knex, channelId, blockNumber, outcomePushed);
+  async setFinalizationStatus(channelId: string, blockNumber: number): Promise<void> {
+    await AdjudicatorStatusModel.setFinalized(this.knex, channelId, blockNumber);
   }
   async updateTransferredOut(
     channelId: string,
