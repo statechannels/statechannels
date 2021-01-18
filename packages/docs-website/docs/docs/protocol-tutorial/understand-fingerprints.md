@@ -1,6 +1,6 @@
 ---
-id: understand-channel-storage
-title: Understand channel storage
+id: understand-fingerprints
+title: Understand fingerprints
 ---
 
 import Mermaid from '@theme/Mermaid';
