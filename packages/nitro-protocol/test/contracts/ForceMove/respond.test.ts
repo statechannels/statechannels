@@ -123,7 +123,7 @@ describe('respond', () => {
 
       // Call public wrapper to set state (only works on test contract)
       await (await ForceMove.setFingerprint(channelId, challengeExistsFingerprint)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsFingerprint);
+      expect(await ForceMove.fingerprints(channelId)).toEqual(challengeExistsFingerprint);
 
       // Sign the state
       const responseSignature = await sign(responder, responseStateHash);
@@ -146,11 +146,11 @@ describe('respond', () => {
 
         // Compute and check new expected ChannelDataHash
 
-        const expectedChannelStorageHash = channelDataToFingerprint({
+        const expectedFingerprint = channelDataToFingerprint({
           turnNumRecord: turnNumRecord + 1,
           finalizesAt: 0,
         });
-        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+        expect(await ForceMove.fingerprints(channelId)).toEqual(expectedFingerprint);
       }
     }
   );

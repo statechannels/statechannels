@@ -147,7 +147,7 @@ describe('pushOutcomeAndTransferAll', () => {
       // Call public wrapper to set state (only works on test contract)
       const tx0 = await NitroAdjudicator.setFingerprint(channelId, initialFingerprint);
       await tx0.wait();
-      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(initialFingerprint);
+      expect(await NitroAdjudicator.fingerprints(channelId)).toEqual(initialFingerprint);
 
       const stateHash = hashState(state);
       const encodedOutcome = encodeOutcome(outcome);
