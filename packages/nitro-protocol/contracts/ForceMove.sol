@@ -19,7 +19,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return thumprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
+     * @return thumbprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
      */
     function unpackFingerprint(bytes32 channelId)
         external
@@ -30,7 +30,7 @@ contract ForceMove is IForceMove {
             uint160 thumbprint
         )
     {
-        (turnNumRecord, finalizesAt, thumprint) = _unpackFingerprint(channelId);
+        (turnNumRecord, finalizesAt, thumbprint) = _unpackFingerprint(channelId);
     }
 
     /**
@@ -831,7 +831,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return thumprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
+     * @return thumbprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
 
      */
     function _unpackFingerprint(bytes32 channelId)
