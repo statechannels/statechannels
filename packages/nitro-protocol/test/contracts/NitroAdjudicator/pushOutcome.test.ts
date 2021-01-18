@@ -13,7 +13,7 @@ import {
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {createPushOutcomeTransaction, NITRO_MAX_GAS} from '../../../src/transactions';
 import {
-  finalizedOutcomeHash,
+  finalizedFingerprint,
   getRandomNonce,
   getTestProvider,
   largeOutcome,
@@ -119,7 +119,7 @@ describe('pushOutcome', () => {
 
       const challengerAddress = participants[state.turnNum % participants.length];
 
-      const initialChannelStorageHash = finalizedOutcomeHash(
+      const initialChannelStorageHash = finalizedFingerprint(
         wasConcluded ? 0 : storedTurnNumRecord,
         finalizesAt,
         outcome,

@@ -3,7 +3,7 @@ import {Contract, Wallet, ethers} from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
 import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -113,7 +113,7 @@ describe('respond', () => {
 
       const challengeExistsHash = slotEmpty
         ? ethers.constants.HashZero
-        : channelDataToChannelStorageHash({
+        : channelDataToFingerprint({
             turnNumRecord,
             finalizesAt,
             state: challenger ? challengeState : undefined,
@@ -146,7 +146,7 @@ describe('respond', () => {
 
         // Compute and check new expected ChannelDataHash
 
-        const expectedChannelStorageHash = channelDataToChannelStorageHash({
+        const expectedChannelStorageHash = channelDataToFingerprint({
           turnNumRecord: turnNumRecord + 1,
           finalizesAt: 0,
         });

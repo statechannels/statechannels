@@ -7,7 +7,7 @@ import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc2
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
@@ -234,7 +234,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = channelDataToChannelStorageHash({
+        const expectedChannelStorageHash = channelDataToFingerprint({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,

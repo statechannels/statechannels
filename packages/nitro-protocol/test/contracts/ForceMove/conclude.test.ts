@@ -4,7 +4,7 @@ const {HashZero} = ethers.constants;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {getFixedPart, State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -13,12 +13,12 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {
-  clearedChallengeHash,
-  finalizedOutcomeHash,
+  clearedChallengeFingerprint,
+  finalizedFingerprint,
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
-  ongoingChallengeHash,
+  ongoingChallengeFingerprint,
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
@@ -81,9 +81,9 @@ const unsupported = {
   appData: [HashZero, HashZero, HashZero],
 };
 const turnNumRecord = 5;
-const channelOpen = clearedChallengeHash(turnNumRecord);
-const challengeOngoing = ongoingChallengeHash(turnNumRecord);
-const finalized = finalizedOutcomeHash(turnNumRecord);
+const channelOpen = clearedChallengeFingerprint(turnNumRecord);
+const challengeOngoing = ongoingChallengeFingerprint(turnNumRecord);
+const finalized = finalizedFingerprint(turnNumRecord);
 
 let channelNonce = getRandomNonce('conclude');
 describe('conclude', () => {
@@ -141,7 +141,7 @@ describe('conclude', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = channelDataToChannelStorageHash({
+        const expectedChannelStorageHash = channelDataToFingerprint({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,

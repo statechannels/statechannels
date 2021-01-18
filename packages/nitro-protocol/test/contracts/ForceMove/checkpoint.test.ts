@@ -7,7 +7,7 @@ const {defaultAbiCoder} = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {checkpointArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -132,7 +132,7 @@ describe('checkpoint', () => {
         };
 
     const channelStorageHashes = finalizesAt
-      ? channelDataToChannelStorageHash({
+      ? channelDataToFingerprint({
           turnNumRecord,
           finalizesAt,
           state: challengeState,
@@ -158,7 +158,7 @@ describe('checkpoint', () => {
         newTurnNumRecord: largestTurnNum,
       });
 
-      const expectedChannelStorageHash = channelDataToChannelStorageHash({
+      const expectedChannelStorageHash = channelDataToFingerprint({
         turnNumRecord: largestTurnNum,
         finalizesAt: 0x0,
       });

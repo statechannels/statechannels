@@ -11,20 +11,20 @@ export interface ChannelData {
   challengerAddress?: Address;
   outcome?: Outcome;
 }
-interface CompactChannelData {
+interface ThumbprintPreimage {
   stateHash: Bytes32;
   challengerAddress: Address;
   outcomeHash: Bytes32;
 }
-const CHANNEL_DATA_TYPE = `tuple(
+const THUMBPRINT_PREIMAGE_TYPE = `tuple(
   bytes32 stateHash,
   address challengerAddress,
   bytes32 outcomeHash
 )`;
 
-export function channelDataToChannelStorageHash(channelData: ChannelData): Bytes32 {
+export function channelDataToFingerprint(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
-  const hash = utils.keccak256(encodeChannelData(channelData));
+  const hash = utils.keccak256(encodeThumbprintPreimage(channelData));
   const fingerprint = utils.hexDataSlice(hash, 12);
 
   const storage =
@@ -55,12 +55,12 @@ export function parseChannelStorageHash(
 }
 const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
 
-export function channelDataStruct({
+export function thumprint({
   finalizesAt,
   state,
   challengerAddress,
   outcome,
-}: ChannelData): CompactChannelData {
+}: ChannelData): ThumbprintPreimage {
   /*
   When the channel is not open, it is still possible for the state and
   challengerAddress to be missing. They should either both be present, or
@@ -82,8 +82,8 @@ export function channelDataStruct({
   return {stateHash, challengerAddress, outcomeHash};
 }
 
-export function encodeChannelData(data: ChannelData): Bytes {
-  return utils.defaultAbiCoder.encode([CHANNEL_DATA_TYPE], [channelDataStruct(data)]);
+export function encodeThumbprintPreimage(data: ChannelData): Bytes {
+  return utils.defaultAbiCoder.encode([THUMBPRINT_PREIMAGE_TYPE], [thumprint(data)]);
 }
 
 function validateHexString(hexString) {

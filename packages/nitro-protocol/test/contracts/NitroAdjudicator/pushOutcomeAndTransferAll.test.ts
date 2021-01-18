@@ -12,7 +12,7 @@ import {
   checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
-  finalizedOutcomeHash,
+  finalizedFingerprint,
   getRandomNonce,
   getTestProvider,
   OutcomeShortHand,
@@ -136,7 +136,7 @@ describe('pushOutcomeAndTransferAll', () => {
 
       const challengerAddress = participants[state.turnNum % participants.length];
 
-      const initialChannelStorageHash = finalizedOutcomeHash(
+      const initialChannelStorageHash = finalizedFingerprint(
         storedTurnNumRecord,
         finalizesAt,
         outcome,
