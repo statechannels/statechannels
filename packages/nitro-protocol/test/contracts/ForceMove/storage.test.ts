@@ -2,10 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers} from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts//test/TESTForceMove.sol/TESTForceMove.json';
-import {
-  channelDataToFingerprint,
-  parseChannelStorageHash,
-} from '../../../src/contract/channel-storage';
+import {channelDataToFingerprint, parseFingerprint} from '../../../src/contract/channel-storage';
 import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -28,21 +25,21 @@ describe('storage', () => {
     turnNumRecord | finalizesAt
     ${0x42}       | ${0x9001}
     ${123456}     | ${789}
-  `('Hashing and data retrieval', async storage => {
+  `('Fingerprinting and data retrieval', async storage => {
     const blockchainStorage = {...storage, ...zeroData};
     const blockchainFingerprint = await ForceMove.generateFingerprint(blockchainStorage);
     const clientFingerprint = channelDataToFingerprint(storage);
 
-    const expected = {...storage, fingerprint: '0x' + clientFingerprint.slice(2 + 24)};
+    const expected = {...storage, thumbprint: '0x' + clientFingerprint.slice(2 + 24)};
 
     expect(clientFingerprint).toEqual(blockchainFingerprint);
-    expect(await ForceMove.matchesHash(blockchainStorage, blockchainFingerprint)).toBe(true);
-    expect(await ForceMove.matchesHash(blockchainStorage, clientFingerprint)).toBe(true);
+    expect(await ForceMove.matchesFingerprint(blockchainStorage, blockchainFingerprint)).toBe(true);
+    expect(await ForceMove.matchesFingerprint(blockchainStorage, clientFingerprint)).toBe(true);
 
-    expect(parseChannelStorageHash(clientFingerprint)).toMatchObject(expected);
+    expect(parseFingerprint(clientFingerprint)).toMatchObject(expected);
 
     // Testing getData is a little more laborious
-    await (await ForceMove.setChannelStorage(ethers.constants.HashZero, blockchainStorage)).wait();
+    await (await ForceMove.setFingerPrint(ethers.constants.HashZero, blockchainStorage)).wait();
     const {turnNumRecord, finalizesAt, fingerprint: f} = await ForceMove.getChannelStorage(
       ethers.constants.HashZero
     );
@@ -57,7 +54,7 @@ describe('_requireChannelOpen', () => {
   });
 
   it('works when the slot is empty', async () => {
-    expect(await ForceMove.channelStorageHashes(channelId)).toEqual(ethers.constants.HashZero);
+    expect(await ForceMove.fingerprints(channelId)).toEqual(ethers.constants.HashZero);
     await ForceMove.requireChannelOpen(channelId);
   });
 
@@ -74,8 +71,8 @@ describe('_requireChannelOpen', () => {
     async ({turnNumRecord, finalizesAt, result}) => {
       const blockchainStorage = {turnNumRecord, finalizesAt, ...zeroData};
 
-      await (await ForceMove.setChannelStorage(channelId, blockchainStorage)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(
+      await (await ForceMove.setFingerprintFromChannelData(channelId, blockchainStorage)).wait();
+      expect(await ForceMove.fingerprints(channelId)).toEqual(
         channelDataToFingerprint(blockchainStorage)
       );
 
