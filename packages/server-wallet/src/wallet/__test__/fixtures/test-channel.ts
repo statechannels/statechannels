@@ -36,7 +36,6 @@ import {stateWithHashSignedBy} from './states';
 interface TestChannelArgs {
   aBal?: number;
   bBal?: number;
-  channelNonce?: number;
   finalFrom?: number;
   fundingStrategy?: FundingStrategy;
 }
@@ -54,6 +53,7 @@ export class TestChannel {
   public channelNonce: number;
   public finalFrom?: number;
   public fundingStrategy: FundingStrategy;
+  static maximumNonce = 0;
 
   public get participants(): Participant[] {
     return [this.participantA, this.participantB];
@@ -72,9 +72,8 @@ export class TestChannel {
       ['a', args.aBal ?? 5],
       ['b', args.bBal ?? 5],
     ];
-    const MAX_INTEGER_POSTGRES = 2147483647;
-    this.channelNonce = args.channelNonce ?? Math.floor(Math.random() * MAX_INTEGER_POSTGRES);
     this.finalFrom = args.finalFrom;
+    this.channelNonce = TestChannel.maximumNonce++;
   }
 
   /**
