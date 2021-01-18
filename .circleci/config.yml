@@ -146,7 +146,7 @@ jobs:
       - run:
           name: test
           command: |
-            if [ "${CIRCLE_BRANCH}" = "master" ]
+            if [ "${CIRCLE_BRANCH}" = "master" ] || [ "${CIRCLE_BRANCH}" = "test-ci" ]
             then
               yarn test:ci
             else
