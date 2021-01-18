@@ -44,6 +44,10 @@ uint160(
 
 When the adjudicator needs to verify the exact state or outcome, the data is provided in the function arguments, as part of the `calldata`. The chain will then check that the hydrated data matches the fingerprint that has been stored.
 
+:::note
+`turnNumRecord` and `finalizesAt` can be read from storage straightforwardly, whereas the other `ChannelData` fields are only stored as the output of a one-way function. The input to this function must, therefore, be tracked in client code.
+:::
+
 We provide a helper function to construct the appropriate fingerprint from a javascript representation of `ChannelData`:
 
 ```typescript
