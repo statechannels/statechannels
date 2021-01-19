@@ -187,6 +187,27 @@ it('should fail the objective when the channel does not exist', async () => {
   expect(reloadedObjective.status).toEqual('failed');
 });
 
+it('should fail when using non-direct funding', async () => {
+  const chainService = new MockChainService();
+  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
+
+  // Create a channel with fake funding strategy
+  const c = channel({fundingStrategy: 'Ledger'});
+
+  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+  // Store the objective
+  const obj = createPendingObjective(c.channelId);
+  await knex.transaction(tx => store.ensureObjective(obj, tx));
+
+  // Crank the protocol
+  await channelDefunder.crank(obj, WalletResponse.initialize());
+
+  // Check the results
+  const reloadedObjective = await store.getObjective(obj.objectiveId);
+  expect(reloadedObjective.status).toEqual('failed');
+});
+
 // Helpers
 async function setChallengeStatus(
   status: 'finalized' | 'active',
