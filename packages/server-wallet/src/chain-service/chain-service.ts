@@ -235,7 +235,7 @@ export class ChainService implements ChainServiceInterface {
         return;
       }
 
-      const [, finalizesAt] = await this.nitroAdjudicator.unpackFingerprint(channelId);
+      const [, finalizesAt] = await this.nitroAdjudicator.unpackStatus(channelId);
 
       const {timestamp: latestBlockTimestamp} = await this.provider.getBlock(
         this.provider.getBlockNumber()
@@ -293,11 +293,9 @@ export class ChainService implements ChainServiceInterface {
     this.logger.info('pushOutcomeAndWithdraw: entry');
     const lastState = toNitroState(state);
     const channelId = getChannelId(lastState.channel);
-    const [
-      turnNumRecord,
-      finalizesAt,
-      _fingerprint,
-    ] = await this.nitroAdjudicator.unpackFingerprint(channelId);
+    const [turnNumRecord, finalizesAt, _Status] = await this.nitroAdjudicator.unpackStatus(
+      channelId
+    );
 
     const pushTransactionRequest = {
       ...Transactions.createPushOutcomeAndTransferAllTransaction({
@@ -360,7 +358,7 @@ export class ChainService implements ChainServiceInterface {
       return;
     }
     const {channelId} = finalizingChannel;
-    const [, finalizesAt] = await this.nitroAdjudicator.unpackFingerprint(channelId);
+    const [, finalizesAt] = await this.nitroAdjudicator.unpackStatus(channelId);
     if (finalizesAt === finalizingChannel.finalizesAtS) {
       // Should we wait for 6 blocks before emitting the finalized event?
       // Will the wallet sign new states or deposit into the channel based on this event?
@@ -400,7 +398,7 @@ export class ChainService implements ChainServiceInterface {
   }
 
   private async getFinalizedAt(channelId: string): Promise<number> {
-    const [, finalizesAt] = await this.nitroAdjudicator.unpackFingerprint(channelId);
+    const [, finalizesAt] = await this.nitroAdjudicator.unpackStatus(channelId);
     return finalizesAt;
   }
 

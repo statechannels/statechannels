@@ -11,56 +11,56 @@ export interface ChannelData {
   challengerAddress?: Address;
   outcome?: Outcome;
 }
-interface ThumbprintPreimage {
+interface FingerprintPreimage {
   stateHash: Bytes32;
   challengerAddress: Address;
   outcomeHash: Bytes32;
 }
-const THUMBPRINT_PREIMAGE_TYPE = `tuple(
+const FINGERPRINT_PREIMAGE_TYPE = `tuple(
   bytes32 stateHash,
   address challengerAddress,
   bytes32 outcomeHash
 )`;
 
-export function channelDataToFingerprint(channelData: ChannelData): Bytes32 {
+export function channelDataToStatus(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
-  const hash = utils.keccak256(encodeThumbprintPreimage(channelData));
-  const thumbprint = utils.hexDataSlice(hash, 12);
+  const hash = utils.keccak256(encodeFingerprintPreimage(channelData));
+  const fingerprint = utils.hexDataSlice(hash, 12);
 
-  const storage =
+  const status =
     '0x' +
     utils.hexZeroPad(utils.hexlify(turnNumRecord), 6).slice(2) +
     utils.hexZeroPad(utils.hexlify(finalizesAt), 6).slice(2) +
-    thumbprint.slice(2);
+    fingerprint.slice(2);
 
-  return storage;
+  return status;
 }
 
-export function parseFingerprint(
-  fingerprint: Bytes32
-): {turnNumRecord: number; finalizesAt: number; thumbprint: Bytes} {
-  validateHexString(fingerprint);
+export function parseStatus(
+  status: Bytes32
+): {turnNumRecord: number; finalizesAt: number; fingerprint: Bytes} {
+  validateHexString(status);
 
   //
   let cursor = 2;
-  const turnNumRecord = '0x' + fingerprint.slice(cursor, (cursor += 12));
-  const finalizesAt = '0x' + fingerprint.slice(cursor, (cursor += 12));
-  const thumbprint = '0x' + fingerprint.slice(cursor);
+  const turnNumRecord = '0x' + status.slice(cursor, (cursor += 12));
+  const finalizesAt = '0x' + status.slice(cursor, (cursor += 12));
+  const fingerprint = '0x' + status.slice(cursor);
 
   return {
     turnNumRecord: asNumber(turnNumRecord),
     finalizesAt: asNumber(finalizesAt),
-    thumbprint,
+    fingerprint,
   };
 }
 const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
 
-export function thumbprint({
+export function fingerprint({
   finalizesAt,
   state,
   challengerAddress,
   outcome,
-}: ChannelData): ThumbprintPreimage {
+}: ChannelData): FingerprintPreimage {
   /*
   When the channel is not open, it is still possible for the state and
   challengerAddress to be missing. They should either both be present, or
@@ -82,8 +82,8 @@ export function thumbprint({
   return {stateHash, challengerAddress, outcomeHash};
 }
 
-export function encodeThumbprintPreimage(data: ChannelData): Bytes {
-  return utils.defaultAbiCoder.encode([THUMBPRINT_PREIMAGE_TYPE], [thumbprint(data)]);
+export function encodeFingerprintPreimage(data: ChannelData): Bytes {
+  return utils.defaultAbiCoder.encode([FINGERPRINT_PREIMAGE_TYPE], [fingerprint(data)]);
 }
 
 function validateHexString(hexString) {

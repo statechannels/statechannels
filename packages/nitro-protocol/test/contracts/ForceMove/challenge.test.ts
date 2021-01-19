@@ -6,7 +6,7 @@ const {defaultAbiCoder} = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToFingerprint, ChannelData} from '../../../src/contract/channel-storage';
+import {channelDataToStatus, ChannelData} from '../../../src/contract/channel-storage';
 import {getFixedPart, getVariablePart, State} from '../../../src/contract/state';
 import {
   CHALLENGER_NON_PARTICIPANT,
@@ -199,7 +199,7 @@ describe('challenge', () => {
       }
 
       // Set current channelStorageHashes value
-      await (await ForceMove.setFingerprint(channelId, initialFingerprint)).wait();
+      await (await ForceMove.setStatus(channelId, initialFingerprint)).wait();
 
       const tx = ForceMove.challenge(
         fixedPart,
@@ -254,10 +254,10 @@ describe('challenge', () => {
           challengerAddress: challenger.address,
           outcome,
         };
-        const expectedFingerprint = channelDataToFingerprint(expectedChannelStorage);
+        const expectedFingerprint = channelDataToStatus(expectedChannelStorage);
 
         // Check channelStorageHash against the expected value
-        expect(await ForceMove.fingerprints(channelId)).toEqual(expectedFingerprint);
+        expect(await ForceMove.statusOf(channelId)).toEqual(expectedFingerprint);
       }
     }
   );
@@ -265,7 +265,7 @@ describe('challenge', () => {
 
 describe('challenge with transaction generator', () => {
   beforeEach(async () => {
-    await (await ForceMove.setFingerprint(getChannelId(twoPartyChannel), HashZero)).wait();
+    await (await ForceMove.setStatus(getChannelId(twoPartyChannel), HashZero)).wait();
   });
   it.each`
     description                                     | appData   | outcome                            | turnNums  | challenger

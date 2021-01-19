@@ -4,7 +4,7 @@ const {HashZero} = ethers.constants;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
+import {channelDataToStatus} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {getFixedPart, State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -123,8 +123,8 @@ describe('conclude', () => {
         });
       }
       // Call public wrapper to set state (only works on test contract)
-      await (await ForceMove.setFingerprint(channelId, initialFingerprint)).wait();
-      expect(await ForceMove.fingerprints(channelId)).toEqual(initialFingerprint);
+      await (await ForceMove.setStatus(channelId, initialFingerprint)).wait();
+      expect(await ForceMove.statusOf(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
@@ -141,14 +141,14 @@ describe('conclude', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedFingerprint = channelDataToFingerprint({
+        const expectedFingerprint = channelDataToStatus({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
         });
 
         // Check fingerprint against the expected value
-        expect(await ForceMove.fingerprints(channelId)).toEqual(expectedFingerprint);
+        expect(await ForceMove.statusOf(channelId)).toEqual(expectedFingerprint);
       }
     }
   );

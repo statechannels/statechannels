@@ -1,6 +1,6 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {
-  channelDataToFingerprint,
+  channelDataToStatus,
   ContractArtifacts,
   getChannelId,
   randomChannelId,
@@ -217,9 +217,9 @@ describe('registerChannel', () => {
     const channelId = randomChannelId();
     const currentTime = (await provider.getBlock(provider.getBlockNumber())).timestamp;
 
-    const tx = await testAdjudicator.setFingerprint(
+    const tx = await testAdjudicator.setStatus(
       channelId,
-      channelDataToFingerprint({
+      channelDataToStatus({
         turnNumRecord: 0,
         finalizesAt: currentTime + 2,
       })

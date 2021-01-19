@@ -7,7 +7,7 @@ import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc2
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToFingerprint} from '../../../src/contract/channel-storage';
+import {channelDataToStatus} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
@@ -202,8 +202,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       }
 
       // Call public wrapper to set state (only works on test contract)
-      await (await NitroAdjudicator.setFingerprint(channelId, initialFingerprint)).wait();
-      expect(await NitroAdjudicator.fingerprints(channelId)).toEqual(initialFingerprint);
+      await (await NitroAdjudicator.setStatus(channelId, initialFingerprint)).wait();
+      expect(await NitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
@@ -230,14 +230,14 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedFingerprint = channelDataToFingerprint({
+        const expectedFingerprint = channelDataToStatus({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
         });
 
         // Check fingerprint against the expected value
-        expect(await NitroAdjudicator.fingerprints(channelId)).toEqual(expectedFingerprint);
+        expect(await NitroAdjudicator.statusOf(channelId)).toEqual(expectedFingerprint);
 
         // Extract logs
         const {logs} = await (await tx).wait();

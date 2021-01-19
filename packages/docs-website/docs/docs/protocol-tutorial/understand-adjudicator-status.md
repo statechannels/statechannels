@@ -1,11 +1,11 @@
 ---
-id: understand-fingerprints
-title: Understand fingerprints
+id: understand-adjudicator-status
+title: Understand adjudicator status
 ---
 
 import Mermaid from '@theme/Mermaid';
 
-The adjudicator contract stores certain information about any channel that it knows about. Specifically, it stores a fingerprint of the `ChannelData` struct, which contains:
+The adjudicator contract stores certain information about any channel that it knows about. Specifically, it stores data derived from the `ChannelData` struct, which contains:
 
 - `uint48 turnNumRecord`
 - `uint48 finalizesAt`
@@ -14,19 +14,19 @@ The adjudicator contract stores certain information about any channel that it kn
 - `address challengerAddress`
 - `bytes32 outcomeHash`
 
-The fingerprint is stored inside the following mapping (with `channelId` as the key):
+The derived data is stored inside the following mapping (with `channelId` as the key):
 
 ```solidity
-    mapping(bytes32 => bytes32) public fingerprints;
+    mapping(bytes32 => bytes32) public statusOf;
 ```
 
-Generating a 32 byte fingerprint involves
+Generating a 32 byte status involves
 
 - setting the most significant 48 bits to the `turnNumRecord`
 - setting the next most significant 48 bits to `finalizesAt`
-- setting the next most significant 160 bits to the `thumbprint`
+- setting the next most significant 160 bits to the `fingerprint`
 
-The `thumbprint` helps to uniquely identify the channel's current state, up to hash collisions. It is computed as:
+The `fingerprint` helps to uniquely identify the channel's current state, up to hash collisions. It is computed as:
 
 ```solidity
 uint160(
@@ -42,13 +42,13 @@ uint160(
     )
 ```
 
-When the adjudicator needs to verify the exact state or outcome, the data is provided in the function arguments, as part of the `calldata`. The chain will then check that the hydrated data matches the fingerprint that has been stored.
+When the adjudicator needs to verify the exact state or outcome, the data is provided in the function arguments, as part of the `calldata`. The chain will then check that the hydrated data matches the status that has been stored.
 
 :::note
 `turnNumRecord` and `finalizesAt` can be read from storage straightforwardly, whereas the other `ChannelData` fields are only stored as the output of a one-way function. The input to this function must therefore be tracked in client code by monitoring the relevant contract events.
 :::
 
-We provide a helper function to construct the appropriate fingerprint from a javascript representation of `ChannelData`:
+We provide a helper function to construct the appropriate status from a javascript representation of `ChannelData`:
 
 ```typescript
 import {ChannelData, channelDataToFingerprint} from '@statechannels/nitro-protocol';
@@ -57,7 +57,7 @@ const channelData: ChannelData = {
   turnNumRecord: largestTurnNum,
   finalizesAt: 0x0
 };
-const fingerprint = channelDataToFingerprint(channelData);
+const status = channelDataToStatus(channelData);
 ```
 
 Here we omitted some of the fields, because the helper function is smart enough to know to set them to null values when finalizes at is zero. We'll be using this helper in the next tutorial lesson.

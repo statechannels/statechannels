@@ -19,7 +19,7 @@
       "docs/protocol-tutorial/deposit-assets",
       "docs/protocol-tutorial/finalize-a-channel-happy",
       "docs/protocol-tutorial/finalize-a-channel-sad",
-      "docs/protocol-tutorial/understand-fingerprints",
+      "docs/protocol-tutorial/understand-adjudicator-status",
       "docs/protocol-tutorial/clear-a-challenge",
       "docs/protocol-tutorial/outcomes",
       "docs/protocol-tutorial/release-assets",
