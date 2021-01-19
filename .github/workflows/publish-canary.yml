@@ -1,7 +1,10 @@
 name: Publish Packages (canary)
 
 on:
-  workflow_dispatch:
+  schedule:
+    - cron:  '0 7 * * *'
+  # enable users to manually trigger with workflow_dispatch
+  workflow_dispatch: {}
 
 jobs:
   canary-publish:
