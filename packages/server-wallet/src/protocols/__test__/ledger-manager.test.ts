@@ -211,7 +211,7 @@ describe('exchanging ledger proposals', () => {
       // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
       const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
-        // Will be "fully funded" i.e. with 10 coins
+        // Will be "fully funded" i.e. with 20 coins
         states: [4, 5],
         bals: [
           [appChannel.participantA.destination, 10],
