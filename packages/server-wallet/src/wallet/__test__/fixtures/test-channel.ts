@@ -15,6 +15,7 @@ import {
   SimpleAllocation,
   simpleEthAllocation,
   State,
+  NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
@@ -98,7 +99,7 @@ export class TestChannel {
 
     return {
       ...this.channelConstants,
-      appData: '0x00',
+      appData: NULL_APP_DATA,
       isFinal: !!this.finalFrom && n >= this.finalFrom,
       // test channels adopt a countersigning strategy for final states, so the turn number doesn't progress after finalFrom.
       turnNum: n,

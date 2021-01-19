@@ -2,6 +2,7 @@ export * from './types';
 export * from './state-utils';
 export * from './utils';
 export * from './bignumber';
+export * from './constants';
 
 export * from './serde/app-messages/deserialize';
 export * from './serde/app-messages/serialize';

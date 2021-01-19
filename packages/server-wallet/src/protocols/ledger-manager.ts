@@ -10,6 +10,7 @@ import {
   BN,
   AllocationItem,
   Errors,
+  NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -375,7 +376,7 @@ const exchangeSignedLedgerStates = ({
         stateToSign: {
           turnNum: nextTurnNum,
           outcome,
-          appData: '0x00',
+          appData: NULL_APP_DATA,
           isFinal: false,
         },
       };
