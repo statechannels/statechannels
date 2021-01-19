@@ -1,4 +1,5 @@
-import {State} from '@statechannels/wallet-core';
+import {makeAddress, State} from '@statechannels/wallet-core';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
@@ -14,7 +15,7 @@ import {ChannelDefunder} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
-import {stateVars} from '../../wallet/__test__/fixtures/state-vars';
+import {Funding} from '../../models/funding';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -116,18 +117,20 @@ describe('when there is an active challenge', () => {
 });
 
 describe('when the channel is finalized on chain', () => {
-  // Currently we rely on isFinal as a proxy whether we can call
-  // This should be fixed in https://github.com/statechannels/statechannels/issues/3112
-  it('should call pushOutcome if the on-chain state is not final', async () => {
+  it('should call pushOutcome if the outcome has not been pushed', async () => {
     const chainService = new MockChainService();
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel();
+    const c = channel({
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    });
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    // Store a non final state on chain
-    const challengeState = stateVars({isFinal: false});
+    // If there is a funding entry that means the outcome has not been pushed
+    await Funding.updateFunding(knex, c.channelId, '0x05', makeAddress(c.assetHolderAddress));
+
+    const challengeState = stateSignedBy([alice()])();
     await setChallengeStatus('finalized', c, challengeState);
 
     // Set the objective in the database
@@ -145,16 +148,18 @@ describe('when the channel is finalized on chain', () => {
     expect(reloadedObjective.status).toEqual('succeeded');
   });
 
-  it('does nothing if the on-chain state is final', async () => {
+  it('does nothing if the outcome has already been pushed', async () => {
     const chainService = new MockChainService();
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel();
+    const c = channel({
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    });
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     // Set a finalized channel with a final state
-    await setChallengeStatus('finalized', c, {isFinal: true});
+    await setChallengeStatus('finalized', c);
 
     // Store the objective
     const obj = createPendingObjective(c.channelId);
