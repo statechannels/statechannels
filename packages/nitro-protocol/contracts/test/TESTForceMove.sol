@@ -69,16 +69,14 @@ contract TESTForceMove is ForceMove {
         return _recoverSigner(_d, sig);
     }
 
-    // public setter for fingerprints
+    // public setter for statusOf
 
     /**
      * @dev Manually set the fingerprint for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
      * @param channelId Unique identifier for a state channel.
      * @param channelData The channelData to be formatted and stored against the channelId
      */
-    function setFingerprintFromChannelData(bytes32 channelId, ChannelData memory channelData)
-        public
-    {
+    function setStatusFromChannelData(bytes32 channelId, ChannelData memory channelData) public {
         if (channelData.finalizesAt == 0) {
             require(
                 channelData.stateHash == bytes32(0) &&
@@ -88,7 +86,7 @@ contract TESTForceMove is ForceMove {
             );
         }
 
-        fingerprints[channelId] = _generateFingerprint(channelData);
+        statusOf[channelId] = _generateStatus(channelData);
     }
 
     /**
@@ -96,20 +94,20 @@ contract TESTForceMove is ForceMove {
      * @param channelId Unique identifier for a state channel.
      * @param f The fingerprint to store against the channelId
      */
-    function setFingerprint(bytes32 channelId, bytes32 f) public {
-        fingerprints[channelId] = f;
+    function setStatus(bytes32 channelId, bytes32 f) public {
+        statusOf[channelId] = f;
     }
 
     /**
      * @dev Wrapper for otherwise internal function. Hashes the input data and formats it for on chain storage.
      * @param channelData ChannelData data.
      */
-    function generateFingerprint(ChannelData memory channelData)
+    function generateStatus(ChannelData memory channelData)
         public
         pure
-        returns (bytes32 newHash)
+        returns (bytes32 newStatus)
     {
-        return _generateFingerprint(channelData);
+        return _generateStatus(channelData);
     }
 
     /**
@@ -117,8 +115,8 @@ contract TESTForceMove is ForceMove {
      * @param cs A given ChannelData data structure.
      * @param f Some data in on-chain storage format.
      */
-    function matchesFingerprint(ChannelData memory cs, bytes32 f) public pure returns (bool) {
-        return _matchesFingerprint(cs, f);
+    function matchesStatus(ChannelData memory cs, bytes32 f) public pure returns (bool) {
+        return _matchesStatus(cs, f);
     }
 
     /**

@@ -129,16 +129,16 @@ describe('pushOutcome', () => {
 
       // Use public wrapper to set state (only works on test contract)
       const txRequest = {
-        data: TestNitroAdjudicator.interface.encodeFunctionData('setFingerprint', [
+        data: TestNitroAdjudicator.interface.encodeFunctionData('setStatus', [
           channelId,
           initialFingerprint,
         ]),
       };
       await sendTransaction(provider, TestNitroAdjudicator.address, txRequest);
 
-      const tx = await TestNitroAdjudicator.setFingerprint(channelId, initialFingerprint);
+      const tx = await TestNitroAdjudicator.setStatus(channelId, initialFingerprint);
       await tx.wait();
-      expect(await TestNitroAdjudicator.fingerprints(channelId)).toEqual(initialFingerprint);
+      expect(await TestNitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
 
       let arg: PushOutcomeTransactionArg = {
         turnNumRecord: wasConcluded ? 0 : declaredTurnNumRecord,

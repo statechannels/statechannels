@@ -74,9 +74,7 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
      * @param channelId Unique identifier for a state channel.
      * @param channelData The channelData to be formatted and stored against the channelId
      */
-    function setFingerprintFromChannelData(bytes32 channelId, ChannelData memory channelData)
-        public
-    {
+    function setStatusFromChannelData(bytes32 channelId, ChannelData memory channelData) public {
         if (channelData.finalizesAt == 0) {
             require(
                 channelData.stateHash == bytes32(0) &&
@@ -86,7 +84,7 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
             );
         }
 
-        fingerprints[channelId] = _generateFingerprint(channelData);
+        statusOf[channelId] = _generateStatus(channelData);
     }
 
     /**
@@ -94,7 +92,7 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
      * @param channelId Unique identifier for a state channel.
      * @param f The fingerprint to store against the channelId
      */
-    function setFingerprint(bytes32 channelId, bytes32 f) public {
-        fingerprints[channelId] = f;
+    function setStatus(bytes32 channelId, bytes32 f) public {
+        statusOf[channelId] = f;
     }
 }
