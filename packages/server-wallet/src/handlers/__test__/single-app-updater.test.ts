@@ -97,7 +97,7 @@ describe('app channel not running', () => {
 describe('not an app channel', () => {
   it(`errors if the channel is a ledger channel`, async () => {
     // want a running ledger channel
-    const testLedger = TestLedgerChannel.create({aBal: 5, bBal: 5, channelNonce: 3});
+    const testLedger = TestLedgerChannel.create({aBal: 5, bBal: 5});
     await testLedger.insertInto(store);
 
     await store.pushMessage(testLedger.wirePayload(5));
