@@ -118,8 +118,8 @@ describe('marking ledger requests as complete', () => {
     // create an application channel
     const appChannel = TestChannel.create({aBal: 5, bBal: 5});
     await appChannel.insertInto(store, {states: [0, 1]});
-    // create a ledger channel that funds that channel.Note distinct channel nonce should be automatically ensured automatically
-    const ledgerChannel = TestLedgerChannel.create({channelNonce: 1});
+    // create a ledger channel that funds that channel. Note distinct channel nonce ensured automatically
+    const ledgerChannel = TestLedgerChannel.create({});
     await ledgerChannel.insertInto(store, {
       states: [4, 5],
       bals: [[appChannel.channelId, 10]],
@@ -144,7 +144,7 @@ describe('marking ledger requests as complete', () => {
     // create an application channel
     const appChannel = TestChannel.create({aBal: 5, bBal: 5});
     await appChannel.insertInto(store, {states: [0, 1]});
-    // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce should be automatically ensuredd automatically
+    // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
     const ledgerChannel = TestLedgerChannel.create({});
     await ledgerChannel.insertInto(store, {
       states: [5, 6],
@@ -172,33 +172,81 @@ describe('marking ledger requests as complete', () => {
 
 describe('exchanging ledger proposals', () => {
   describe('as initial proposer', () => {
-    it('takes no action if proposal is identical to existing supported outcome', () => {
-      const requestChannel = prefundChannelWithAllocations(); // Empty outcome
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
+    it('takes no action if proposal is identical to existing supported outcome', async () => {
+      // NOTE: currently, there are some side effects that happen even when there is "no action"
+      // these side effects are the "pessimistic" resending of proposals and states.
+      // So here I interpret "takes no action" <> no new signed state in the outbox
+
+      // create a ledger channel. Note distinct channel nonce ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
+      await ledgerChannel.insertInto(store, {
+        states: [5, 6],
+      });
+      // insert a ledger proposal identical to the existing outcome
+      await ledgerChannel.insertProposal(
+        store,
+        ledgerChannel.startOutcome, // proposal
+        ledgerChannel.participantA.signingAddress,
+        1
+      );
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that the signed state in the outbox has the same turnNum (we are just pessimistically resending)
+      expect(
+        (response.multipleChannelOutput().outbox[0]?.params.data as any).signedStates[0].turnNum
+      ).toEqual(6);
     });
 
-    it('takes no action if proposal exists but counterparties does not', () => {
-      const requestChannel = prefundChannelWithAllocations([alice, 1]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-        myLedgerProposal: {
-          proposal: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
-          nonce: 0,
-        },
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
+    it(`takes no action if proposal exists but counterparty's does not`, async () => {
+      // NOTE: currently, there are some side effects that happen even when there is "no action"
+      // these side effects are the "pessimistic" resending of proposals and states.
+      // So here I interpret "takes no action" <> no new signed state in the outbox
+
+      // create an application channel
+      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
+      await appChannel.insertInto(store, {states: [0, 1]});
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
+      await ledgerChannel.insertInto(store, {
+        // Will be "fully funded" i.e. with 10 coins
+        states: [4, 5],
+        bals: [
+          [appChannel.participantA.destination, 10],
+          [appChannel.participantB.destination, 10],
+        ],
+      });
+      // create a ledger request for the ledger to fund the channel
+      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+      // insert a ledger proposal identical to the existing outcome
+      await ledgerChannel.insertProposal(
+        store,
+        simpleEthAllocation(
+          [appChannel.participantA.destination, 9],
+          [appChannel.participantB.destination, 10],
+          [appChannel.channelId, 1]
+        ), // proposal
+        ledgerChannel.participantA.signingAddress,
+        1
+      );
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there are NO signed state in the outbox
+      expect(
+        (response.multipleChannelOutput().outbox[0]?.params.data as any).signedStates
+      ).toBeUndefined();
     });
 
-    it('proposes new outcome funding 1 channel, exhaussting 100% of funds', async () => {
+    it('proposes new outcome funding 1 channel, exhausting 100% of funds', async () => {
       // create an application channel
       const appChannel = TestChannel.create({aBal: 5, bBal: 5});
       await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce should be automatically ensured automatically
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
       const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         // Will be "fully funded" i.e. with 10 coins
@@ -233,7 +281,7 @@ describe('exchanging ledger proposals', () => {
     });
 
     it('proposes new outcome funding many channels', async () => {
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce should be automatically ensured automatically
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce ensured automatically
       const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         states: [4, 5],
@@ -317,7 +365,7 @@ describe('exchanging ledger proposals', () => {
       // create an application channel that allocates 200 coins
       const appChannel = TestChannel.create({aBal: 100, bBal: 100});
       await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce should be automatically ensured automatically
+      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
       const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         // Will be "fully funded" with 10 coins, but this is insufficient for the app channel
@@ -339,7 +387,7 @@ describe('exchanging ledger proposals', () => {
     });
 
     it('proposes outcome funding some channels, identifying insufficient funds for others', async () => {
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce should be automatically ensured automatically
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce ensured automatically
       const ledgerChannel = TestLedgerChannel.create({});
       await ledgerChannel.insertInto(store, {
         states: [4, 5],
@@ -359,7 +407,7 @@ describe('exchanging ledger proposals', () => {
       const response = new WalletResponse();
       await ledgerManager.crank(ledgerChannel.channelId, response);
 
-      // assert that there is a proposal some of those channels in the outbox
+      // assert that there is a proposal to fund some of those channels in the outbox
       const payload = getPayloadFor(
         ledgerChannel.participantB.participantId,
         response.multipleChannelOutput().outbox
@@ -382,21 +430,51 @@ describe('exchanging ledger proposals', () => {
   });
 
   describe('as responding proposer', () => {
-    it('will propose identical proposal to counterparty with same requests', () => {
-      const requestChannel = prefundChannelWithAllocations([alice, 1]);
-      const protocolArgs = {
-        fundingChannel: defaultLedgerChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-        theirLedgerProposal: {
-          proposal: simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]),
-          nonce: 0,
-        },
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toMatchObject({
+    it('will propose identical proposal to counterparty with same requests', async () => {
+      // create an application channel
+      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
+      await appChannel.insertInto(store, {states: [0, 1]});
+
+      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce ensured automatically
+      const ledgerChannel = TestLedgerChannel.create({});
+      await ledgerChannel.insertInto(store, {
+        states: [3, 4],
+        bals: [10, 10],
+      });
+
+      const bobsProposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
+      // add a proposal from bob into Alice's store
+      await ledgerChannel.insertProposal(
+        store,
+        bobsProposal,
+        ledgerChannel.participantB.signingAddress,
+        0
+      );
+
+      // add consistent funding requests to Alice's store
+      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // check that Alice proposes the same as bob
+      const payload = getPayloadFor(
+        ledgerChannel.participantB.participantId,
+        response.multipleChannelOutput().outbox
+      );
+      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
         type: 'ProposeLedgerUpdate',
-        nonce: protocolArgs.theirLedgerProposal.nonce + 1,
-        channelId: protocolArgs.fundingChannel.channelId,
-        outcome: protocolArgs.theirLedgerProposal.proposal,
+        nonce: 1,
+        channelId: ledgerChannel.channelId,
+        outcome: bobsProposal,
+        signingAddress: ledgerChannel.participantA.signingAddress,
+      };
+      expect(payload).toMatchObject({
+        requests: [serializeRequest(expectedProposeLedgerUpdate)],
       });
     });
   });
@@ -404,32 +482,110 @@ describe('exchanging ledger proposals', () => {
 
 describe('exchanging signed ledger state updates', () => {
   describe('as initial signer', () => {
-    it('does not sign ledger update if one has already been signed by me', () => {
-      const requestChannel = prefundChannelWithAllocations([alice, 1]);
-      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]);
-      const fundingChannel = channel({
-        appDefinition: '0x0000000000000000000000000000000000000000',
-        vars: [
-          stateSignedBy([aliceSW()])({
-            appData: '0x00',
-            turnNum: 4,
-            outcome: proposal,
-          }),
-          defaultLedgerChannel.latest,
+    it('does not sign ledger update if one has already been signed by me', async () => {
+      // create an application channel
+      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
+      await appChannel.insertInto(store, {states: [0, 1]});
+
+      // create and insert a funded ledger channel that already funds the appChannel
+      const ledgerChannel = TestLedgerChannel.create({});
+      await ledgerChannel.insertInto(store, {
+        states: [4, 5],
+        bals: [
+          [appChannel.participantA.destination, 9],
+          [appChannel.participantB.destination, 10],
+          [appChannel.channelId, 1],
         ],
-      }).protocolState as ChannelStateWithSupported;
-      const protocolArgs = {
-        fundingChannel,
-        channelsRequestingFunds: [requestChannel.protocolState],
-        myLedgerProposal: {proposal, nonce: 0},
-        theirLedgerProposal: {proposal, nonce: 0},
-      };
-      expect(protocol(processLedgerQueueProtocolState(protocolArgs))).toBeUndefined();
+      });
+
+      // create a ledger request for the ledger to fund the channel
+      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+
+      // add a proposal from each of alice and bob (into Alice's store)
+      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
+      await ledgerChannel.insertProposal(
+        store,
+        proposal,
+        ledgerChannel.participantA.signingAddress,
+        0
+      );
+      await ledgerChannel.insertProposal(
+        store,
+        proposal,
+        ledgerChannel.participantB.signingAddress,
+        1
+      );
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there IS NOTHING in the outbox
+      // NOTE this is somewhat awkward because pessimisstic resending may cause something to be in the outbox
+      // If there is, we can instead check there are no signed states in there. Still awkward, though.
+      expect(response.multipleChannelOutput().outbox).toHaveLength(0);
     });
 
-    it('generates signed ledger update when proposals were identical', () => {
+    it('generates signed ledger update when proposals were identical', async () => {
+      // create an application channel
+      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
+      await appChannel.insertInto(store, {states: [0, 1]});
+
+      // create and insert a funded ledger channel that already funds the appChannel
+      const ledgerChannel = TestLedgerChannel.create({});
+      await ledgerChannel.insertInto(store, {
+        states: [4, 5],
+        bals: [
+          [appChannel.participantA.destination, 10],
+          [appChannel.participantB.destination, 10],
+        ],
+      });
+
+      // create a ledger request for the ledger to fund the channel
+      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+
+      // add a proposal from each of alice and bob (into Alice's store)
+      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
+      await ledgerChannel.insertProposal(
+        store,
+        proposal,
+        ledgerChannel.participantA.signingAddress,
+        0
+      );
+      await ledgerChannel.insertProposal(
+        store,
+        proposal,
+        ledgerChannel.participantB.signingAddress,
+        1
+      );
+
+      // crank the ledger manager
+      const response = new WalletResponse();
+      await ledgerManager.crank(ledgerChannel.channelId, response);
+
+      // assert that there is a signedState in the outbox
+      const payload = getPayloadFor(
+        ledgerChannel.participantB.participantId,
+        response.multipleChannelOutput().outbox
+      );
+
+      expect(payload).toMatchObject({
+        signedStates: [
+          {
+            ...ledgerChannel.wireState(
+              6,
+              [
+                [alice().destination, 9],
+                [bob().destination, 10],
+                [appChannel.channelId, 1],
+              ],
+              [0]
+            ),
+          },
+        ],
+      });
+
       const requestChannel = prefundChannelWithAllocations([alice, 1]);
-      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [requestChannel.channelId, 1]);
       const protocolArgs = {
         fundingChannel: defaultLedgerChannel,
         channelsRequestingFunds: [requestChannel.protocolState],
