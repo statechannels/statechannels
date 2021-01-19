@@ -7,12 +7,12 @@ import {
   makeAddress,
   makeDestination,
   makePrivateKey,
-  Outcome,
   Participant,
   PrivateKey,
   serializeState,
   SharedObjective,
   SignedStateWithHash,
+  SimpleAllocation,
   simpleEthAllocation,
   State,
 } from '@statechannels/wallet-core';
@@ -124,11 +124,11 @@ export class TestChannel {
     };
   }
 
-  public get startOutcome(): Outcome {
+  public get startOutcome(): SimpleAllocation {
     return this.toOutcome(this.startBals);
   }
 
-  public toOutcome(bals: Bals): Outcome {
+  public toOutcome(bals: Bals): SimpleAllocation {
     if (typeof bals[0] === 'number') {
       bals = bals as [number, number];
       // of format [number, number]
