@@ -457,9 +457,6 @@ describe('exchanging ledger proposals', () => {
       // crank the ledger manager
       const response = new WalletResponse();
       await ledgerManager.crank(ledgerChannel.channelId, response);
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-      await ledgerManager.crank(ledgerChannel.channelId, response);
 
       // check that Alice proposes the same as bob
       const payload = getPayloadFor(
