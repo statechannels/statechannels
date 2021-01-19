@@ -22,6 +22,7 @@ import {
   deserializeRequest,
   calculateChannelId,
   State,
+  NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -318,7 +319,7 @@ export class SingleThreadedWallet
       {
         ...args,
         appDefinition: ethers.constants.AddressZero,
-        appData: '0x00',
+        appData: NULL_APP_DATA,
         fundingStrategy,
       },
       'ledger'

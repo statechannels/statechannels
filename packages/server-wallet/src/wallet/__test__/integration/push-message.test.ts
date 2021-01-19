@@ -9,6 +9,7 @@ import {
   makeAddress,
   serializeRequest,
   serializeOutcome,
+  NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {PartialModelObject} from 'objection';
@@ -490,7 +491,7 @@ describe('ledger funded app scenarios', () => {
         appDefinition: '0x0000000000000000000000000000000000000000',
         vars: [
           stateWithHashSignedBy([alice(), bob()])({
-            appData: '0x00',
+            appData: NULL_APP_DATA,
             appDefinition: '0x0000000000000000000000000000000000000000',
             channelNonce: someNonConflictingChannelNonce,
             turnNum: 4,

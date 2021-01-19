@@ -1,4 +1,5 @@
 import {constants} from 'ethers';
+import {NULL_APP_DATA} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
@@ -58,7 +59,7 @@ describe('happy path', () => {
     const updated = await Channel.forId(channelId, w.knex);
     const expectedState = {
       turnNum: 0,
-      appData: '0x00',
+      appData: NULL_APP_DATA,
       appDefinition: constants.AddressZero,
     };
 
