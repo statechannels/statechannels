@@ -12,7 +12,7 @@ import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
 
 const {AddressZero} = ethers.constants;
-
+jest.setTimeout(10_000);
 const a = Wallet.create(
   overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
 );
