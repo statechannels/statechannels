@@ -23,6 +23,7 @@ import {LedgerRequestType} from '../../models/ledger-request';
 import {getPayloadFor} from '../../__test__/test-helpers';
 import {ProposeLedgerUpdate} from '../actions';
 import {LedgerProposal} from '../../models/ledger-proposal';
+import {truncateDatabase} from '../../db-admin/db-admin';
 
 // TEST HELPERS
 // There are many test cases in this file. These helpers make the tests cases more readable.
@@ -59,11 +60,11 @@ beforeEach(async () => {
     logger: store.logger,
     timingMetrics: defaultTestConfig().metricsConfiguration.timingMetrics,
   });
-  await store.dbAdmin().truncateDB();
+  await truncateDatabase(defaultTestConfig());
 });
 
 afterEach(async () => {
-  await store.dbAdmin().truncateDB();
+  await truncateDatabase(defaultTestConfig());
 });
 
 describe('marking ledger requests as complete', () => {

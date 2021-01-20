@@ -1,5 +1,6 @@
 import {BN} from '@statechannels/wallet-core';
 
+import * as DBAdmin from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {Store} from '../../wallet/store';
@@ -23,13 +24,13 @@ beforeEach(async () => {
     defaultTestConfig().skipEvmValidation,
     '0'
   );
-  await store.dbAdmin().truncateDB();
-  await store.dbAdmin().migrateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
+  await DBAdmin.migrateDatabaseFromKnex(knex);
   singleAppUpdater = SingleAppUpdater.create(store);
   response = WalletResponse.initialize();
 });
 
-afterEach(async () => await store.dbAdmin().truncateDB());
+afterEach(async () => await DBAdmin.truncateDataBaseFromKnex(knex));
 
 describe('when given an update for a single, running app channel', () => {
   it(`updates the channel`, async () => {

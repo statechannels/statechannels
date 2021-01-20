@@ -65,6 +65,12 @@ export type ChainServiceConfiguration = {
 } & Partial<ChainServiceArgs>;
 
 // @public
+export function createDatabase(config: ServerWalletConfig): Promise<void>;
+
+// @public
+export function createDatabaseFromKnex(knex: Knex): Promise<void>;
+
+// @public
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
 
 // @public
@@ -120,6 +126,12 @@ export const defaultTestConfig: (partialConfig?: DeepPartial<ServerWalletConfig 
 // @public (undocumented)
 export const defaultTestNetworkConfiguration: NetworkConfiguration;
 
+// @public
+export function dropDatabase(config: ServerWalletConfig): Promise<void>;
+
+// @public
+export function dropDatabaseFromKnex(knex: Knex): Promise<void>;
+
 // @public (undocumented)
 export function extractDBConfigFromServerWalletConfig(serverWalletConfig: ServerWalletConfig): Config;
 
@@ -147,6 +159,12 @@ export type MetricsConfiguration = {
     timingMetrics: boolean;
     metricsOutputFile?: string;
 };
+
+// @public
+export function migrateDatabase(config: ServerWalletConfig): Promise<void>;
+
+// @public
+export function migrateDatabaseFromKnex(knex: Knex): Promise<void>;
 
 // @public (undocumented)
 export type MultipleChannelOutput = {
@@ -280,10 +298,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
     // (undocumented)
     createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "DBAdmin" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    dbAdmin(): DBAdmin;
     // (undocumented)
     destroy(): Promise<void>;
     // (undocumented)
@@ -350,6 +364,12 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     warmUpThreads(): Promise<void>;
 }
+
+// @public
+export function truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
+
+// @public
+export function truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
 
 // @public (undocumented)
 export function validateServerWalletConfig(config: Record<string, any>): {

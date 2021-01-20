@@ -16,6 +16,7 @@ import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
 import {ChainServiceRequest} from '../../models/chain-service-request';
+import * as DBAdmin from '../../db-admin/db-admin';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -29,11 +30,11 @@ beforeEach(async () => {
     '0'
   );
 
-  await store.dbAdmin().truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
   await seedAlicesSigningWallet(knex);
 });
 
-afterEach(async () => await store.dbAdmin().truncateDB());
+afterEach(async () => await DBAdmin.truncateDataBaseFromKnex(knex));
 
 describe(`challenge-submitter`, () => {
   it(`takes no action if there is an existing chain service request`, async () => {

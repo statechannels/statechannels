@@ -1,6 +1,7 @@
 import {makeAddress, State} from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
+import * as DBAdmin from '../../db-admin/db-admin';
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
 import {DBDefundChannelObjective, ObjectiveModel} from '../../models/objective';
@@ -30,12 +31,12 @@ beforeEach(async () => {
     '0'
   );
 
-  await store.dbAdmin().truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
   await seedAlicesSigningWallet(knex);
 });
 
 afterEach(async () => {
-  await store.dbAdmin().truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
 });
 
 describe('when there is no challenge or finalized channel', () => {

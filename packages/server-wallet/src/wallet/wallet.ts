@@ -57,7 +57,6 @@ import {
   AssetOutcomeUpdatedArg,
   ChallengeRegisteredArg,
 } from '../chain-service';
-import {DBAdmin} from '../db-admin/db-admin';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
@@ -809,10 +808,6 @@ export class SingleThreadedWallet
       makeAddress(a.assetHolderAddress)
     );
     this.chainService.registerChannel(channelId, assetHolderAddresses, this);
-  }
-
-  dbAdmin(): DBAdmin {
-    return new DBAdmin(this.knex);
   }
 
   async warmUpThreads(): Promise<void> {

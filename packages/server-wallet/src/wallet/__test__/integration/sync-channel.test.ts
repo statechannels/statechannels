@@ -9,13 +9,13 @@ import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import * as DBAdmin from '../../../db-admin/db-admin';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {LedgerProposal} from '../../../models/ledger-proposal';
 
 let w: Wallet;
 beforeEach(async () => {
-  await new DBAdmin(knex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
 
   w = Wallet.create(defaultTestConfig());
 });
