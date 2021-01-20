@@ -8,11 +8,10 @@ import {Bytes32, Uint48} from '../type-aliases';
 
 export type AdjudicatorStatus =
   | {
-      channelMode: 'Finalized';
+      channelMode: 'Finalized' | 'Challenge';
       states: SignedState[];
     }
-  | {channelMode: 'Challenge'; states: SignedState[]}
-  | {channelMode: 'Open'};
+    | {channelMode: 'Open'};
 
 interface RequiredColumns {
   readonly channelId: Bytes32;
