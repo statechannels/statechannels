@@ -290,6 +290,17 @@ export class Store {
     return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }
 
+  /**
+   * Returns all channels that are not finalized on chain
+   */
+  async getNonFinalizedChannels(): Promise<ChannelState[]> {
+    return (await Channel.query(this.knex))
+      .filter(
+        c => !c.challengeStatus || c.challengeStatus.toResult().status !== 'Challenge Finalized'
+      )
+      .map(channel => channel.protocolState);
+  }
+
   async getLedgerChannels(
     assetHolderAddress: string,
     participants: Participant[]
