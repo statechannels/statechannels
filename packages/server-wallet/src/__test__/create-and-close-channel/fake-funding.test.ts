@@ -9,28 +9,33 @@ import {BigNumber, ethers, constants} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
+import {createAndMigrateDatabase, dropDatabase} from '../../wallet/__test__/db-helpers';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
+let a: Wallet;
+let b: Wallet;
 
-const a = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_A'})
-);
-const b = Wallet.create(
-  overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database: 'TEST_B'})
-);
+const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
+  database: 'TEST_A',
+});
+const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
+  database: 'TEST_B',
+});
 
 let channelId: string;
 let participantA: Participant;
 let participantB: Participant;
 
 beforeAll(async () => {
-  await a.dbAdmin().createDB();
-  await b.dbAdmin().createDB();
-  await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
+  await Promise.all([
+    createAndMigrateDatabase(aWalletConfig),
+    createAndMigrateDatabase(bWalletConfig),
+  ]);
+  a = Wallet.create(aWalletConfig);
+  b = Wallet.create(bWalletConfig);
 });
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await a.dbAdmin().dropDB();
-  await b.dbAdmin().dropDB();
+  await Promise.all([dropDatabase(aWalletConfig), dropDatabase(bWalletConfig)]);
 });
 
 it('Create a fake-funded channel between two wallets ', async () => {
