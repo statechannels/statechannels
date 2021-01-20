@@ -19,7 +19,7 @@ Multiple changes are not recommended, so this section should normally be omitted
 1. `'foo'` is replaced by `'bar'`
 2. `'fizzbuzz'` is optimized for gas
 
-## Type of change
+## Labels
 
 Feel free to delete options that are not relevant.
 
