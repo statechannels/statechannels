@@ -13,8 +13,8 @@ import {Funding} from '../models/funding';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest} from '../models/ledger-request';
 import {LedgerProposal} from '../models/ledger-proposal';
-import {ChallengeStatus} from '../models/challenge-status';
 import {ChainServiceRequest} from '../models/chain-service-request';
+import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 
 export class DBAdmin {
   knex: Knex;
@@ -50,7 +50,7 @@ export class DBAdmin {
       LedgerRequest.tableName,
       LedgerProposal.tableName,
       Funding.tableName,
-      ChallengeStatus.tableName,
+      AdjudicatorStatusModel.tableName,
       ChainServiceRequest.tableName,
     ]
   ): Promise<void> {
