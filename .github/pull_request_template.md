@@ -13,8 +13,8 @@ It may include
 
 The summary may omit some of these details if this PR fixes a single ticket that includes these details. It is the reviewer's discretion. 
 
-## Proposed changes
-Multiple changes are not recommended, but are sometimes unavoidable. If there are multiple logical changes, list them separately.
+## [Optional] Changes
+Multiple changes are not recommended, so this section should normally be omitted. Unforunately, they are sometimes unavoidable. If there are multiple logical changes, list them separately.
 
 1. `'foo'` is replaced by `'bar'`
 2. `'fizzbuzz'` is optimized for gas
@@ -30,7 +30,7 @@ Feel free to delete options that are not relevant.
 - [ ] Performance improvement (either gas efficiency or computational efficiency)
 - [ ] Requires a documentation update
 
-# How Has This Been Tested?
+# [Optional] How Has This Been Tested?
 
 Did you need to run manual tests to verify this change? If so, please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
 
