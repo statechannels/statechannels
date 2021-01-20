@@ -43,6 +43,7 @@ import {
 const Deposited = 'Deposited' as const;
 const AllocationUpdated = 'AllocationUpdated';
 const ChallengeRegistered = 'ChallengeRegistered' as const;
+const Concluded = 'Concluded' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
 type AllocationUpdatedEvent = {
   type: 'AllocationUpdated';
@@ -120,6 +121,10 @@ export class ChainService implements ChainServiceInterface {
           finalizesAt,
         })
       );
+    });
+
+    this.nitroAdjudicator.on(Concluded, (channelId, finalizesAtS) => {
+      this.addFinalizingChannel({channelId, finalizesAtS});
     });
 
     this.provider.on('block', async (blockTag: providers.BlockTag) =>
