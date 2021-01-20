@@ -101,7 +101,27 @@ export class SingleThreadedWallet
   readonly walletConfig: ServerWalletConfig;
 
   public static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet {
-    return new SingleThreadedWallet(walletConfig);
+    const wallet = new SingleThreadedWallet(walletConfig);
+    // This is an async method so it could continue executing after this method returns
+    wallet.registerExistingChannelsWithChainService();
+    return wallet;
+  }
+
+  /**
+   * Registers any channels existing in the database with the chain service
+   * so the chain service can alert us of any block chain events for existing channels
+   */
+  private async registerExistingChannelsWithChainService() {
+    const channelsToRegister = (await this.store.getNonFinalizedChannels())
+      .map(ChannelState.toChannelResult)
+      .map(cr => ({
+        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+        channelId: cr.channelId,
+      }));
+
+    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
+      this.chainService.registerChannel(channelId, assetHolderAddresses, this);
+    }
   }
 
   // protected constructor to force consumers to initialize wallet via Wallet.create(..)
@@ -738,7 +758,7 @@ export class SingleThreadedWallet
     const response = WalletResponse.initialize();
     const {channelId, finalizesAt: finalizedAt, challengeStates} = arg;
 
-    await this.store.insertChallengeStatus(channelId, finalizedAt, challengeStates.slice(-1)[0]);
+    await this.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
     await this.takeActions([arg.channelId], response);
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
@@ -746,7 +766,11 @@ export class SingleThreadedWallet
   async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
     const response = WalletResponse.initialize();
 
-    await this.store.setFinalizedChallengeStatus(arg.channelId, arg.blockNumber);
+    await this.store.markAdjudicatorStatusAsFinalized(
+      arg.channelId,
+      arg.blockNumber,
+      arg.blockTimestamp
+    );
     await this.knex.transaction(async tx => {
       const {objectiveId} = await this.store.ensureObjective(
         {

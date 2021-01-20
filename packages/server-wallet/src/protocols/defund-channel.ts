@@ -1,8 +1,10 @@
 import {Logger} from 'pino';
+import {makeAddress} from '@statechannels/wallet-core';
+import {BigNumber} from 'ethers';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
-import {ChallengeStatus} from '../models/challenge-status';
+import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {DBDefundChannelObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
@@ -44,19 +46,20 @@ export class ChannelDefunder {
         return;
       }
 
-      const result = await ChallengeStatus.getChallengeStatus(tx, channelId);
+      const result = await AdjudicatorStatusModel.getAdjudicatorStatus(tx, channelId);
 
-      // TODO: We might want to refactor challengeStatus to something that
-      // applies to both co-operatively concluding or challenging
-      // see https://github.com/statechannels/statechannels/issues/3132
-      if (result.status === 'Challenge Finalized') {
-        if (result.challengeState.isFinal) {
-          // We should handle this in https://github.com/statechannels/statechannels/issues/3112
-          this.logger.warn('TODO: Currently do not support defunding concluded channels');
-        } else {
+      const channelHoldings =
+        channel.assetHolderAddress &&
+        (await this.store.getFunding(channelId, makeAddress(channel.assetHolderAddress), tx));
+
+      const outcomePushed = !channelHoldings || BigNumber.from(channelHoldings.amount).isZero();
+      if (result.channelMode === 'Finalized') {
+        if (!outcomePushed) {
           await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
-          this.chainService.pushOutcomeAndWithdraw(result.challengeState, channel.myAddress);
+          this.chainService.pushOutcomeAndWithdraw(result.states[0], channel.myAddress);
           await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        } else {
+          this.logger.trace('Outcome already pushed, doing nothing');
         }
       } else if (channel.hasConclusionProof) {
         await ChainServiceRequest.insertOrUpdate(channelId, 'withdraw', tx);

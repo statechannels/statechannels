@@ -30,13 +30,14 @@ export type FundChannelArg = {
 export type ChannelFinalizedArg = {
   channelId: Bytes32;
   blockNumber: number;
+  blockTimestamp: number;
   finalizedAt: number;
 };
 
 export type ChallengeRegisteredArg = {
   channelId: string;
   finalizesAt: number;
-  challengeStates: State[];
+  challengeStates: SignedState[];
 };
 
 export interface ChainEventSubscriberInterface {
