@@ -29,6 +29,7 @@ Feel free to delete options that are not relevant.
 - [ ] Chore (tech debt, improved developer experience, etc)
 - [ ] Performance improvement (either gas efficiency or computational efficiency)
 - [ ] Requires a documentation update
+- [ ] Security related (requires two sets of eyes before merging)
 
 # [Optional] How Has This Been Tested?
 
