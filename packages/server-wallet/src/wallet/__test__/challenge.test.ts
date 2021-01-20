@@ -1,7 +1,7 @@
 import _ from 'lodash';
 
 import {defaultTestConfig, Wallet} from '..';
-import {DBAdmin} from '../../db-admin/db-admin';
+import * as DBAdmin from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {Channel} from '../../models/channel';
@@ -17,7 +17,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await new DBAdmin(w.knex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(w.knex);
   await seedAlicesSigningWallet(w.knex);
 });
 

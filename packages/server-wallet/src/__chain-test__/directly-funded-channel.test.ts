@@ -5,9 +5,14 @@ import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
 import _ from 'lodash';
 import {fromEvent} from 'rxjs';
-import {take} from 'rxjs/operators';
+import {take, takeWhile} from 'rxjs/operators';
 
-import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../config';
+import {
+  defaultTestConfig,
+  overwriteConfigWithDatabaseConnection,
+  ServerWalletConfig,
+} from '../config';
+import * as DBAdmin from '../db-admin/db-admin';
 import {Wallet, SingleChannelOutput} from '../wallet';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../__test__/test-helpers';
 
@@ -28,7 +33,10 @@ const config = {
 };
 
 let provider: providers.JsonRpcProvider;
-const b = Wallet.create({
+let a: Wallet;
+let b: Wallet;
+
+const bWalletConfig: ServerWalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'}),
   chainServiceConfiguration: {
     attachChainService: true,
@@ -37,8 +45,8 @@ const b = Wallet.create({
     pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
     allowanceMode: 'MaxUint',
   },
-});
-const a = Wallet.create({
+};
+const aWalletConfig: ServerWalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'}),
   chainServiceConfiguration: {
     attachChainService: true,
@@ -47,7 +55,7 @@ const a = Wallet.create({
     pk: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
     allowanceMode: 'MaxUint',
   },
-});
+};
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
@@ -73,10 +81,13 @@ function mineOnEvent(contract: Contract) {
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
-  await a.dbAdmin().createDB();
-  await b.dbAdmin().createDB();
-  await Promise.all([a.dbAdmin().migrateDB(), b.dbAdmin().migrateDB()]);
-
+  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
+  await Promise.all([
+    DBAdmin.migrateDatabase(aWalletConfig),
+    DBAdmin.migrateDatabase(bWalletConfig),
+  ]);
+  a = Wallet.create(aWalletConfig);
+  b = Wallet.create(bWalletConfig);
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,
@@ -87,8 +98,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await a.dbAdmin().dropDB();
-  await b.dbAdmin().dropDB();
+  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
+
   provider.polling = false;
 });
 
@@ -138,7 +149,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     .toPromise();
 
   const channelClosedAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
-    .pipe(take(4))
+    .pipe(takeWhile(o => o.channelResult?.fundingStatus !== 'Defunded', true))
     .toPromise();
 
   //        A <> B

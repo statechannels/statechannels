@@ -10,6 +10,7 @@ import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {DBOpenChannelObjective} from '../../models/objective';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
+import {truncateDatabase} from '../../db-admin/db-admin';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
@@ -24,11 +25,11 @@ beforeEach(async () => {
     defaultTestConfig().skipEvmValidation,
     '0'
   );
-  await store.dbAdmin().truncateDB();
+  await truncateDatabase(defaultTestConfig());
 });
 
 afterEach(async () => {
-  await store.dbAdmin().truncateDB();
+  await truncateDatabase(defaultTestConfig());
 });
 
 describe(`pre-fund-setup phase`, () => {

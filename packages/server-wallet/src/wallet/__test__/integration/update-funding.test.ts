@@ -9,7 +9,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
 import {ObjectiveModel} from '../../../models/objective';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import * as DBAdmin from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {defaultTestConfig} from '../../../config';
 
@@ -18,7 +18,7 @@ const AddressZero = makeAddress(ethers.constants.AddressZero);
 let w: Wallet;
 beforeEach(async () => {
   w = Wallet.create(defaultTestConfig());
-  await new DBAdmin(w.knex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });
 afterEach(async () => {
   await w.destroy();

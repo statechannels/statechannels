@@ -1,3 +1,4 @@
+import * as DBAdmin from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {MockChainService} from '../../chain-service';
 import {defaultTestConfig} from '../../config';
@@ -21,10 +22,10 @@ beforeEach(async () => {
     defaultTestConfig().skipEvmValidation,
     '0'
   );
-  await store.dbAdmin().truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
 });
 
-afterAll(async () => await store.dbAdmin().truncateDB());
+afterAll(async () => await DBAdmin.truncateDataBaseFromKnex(knex));
 
 describe(`closing phase`, () => {
   it(`waits, if it isn't my turn`, async () => {

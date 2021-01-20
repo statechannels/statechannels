@@ -51,7 +51,6 @@ import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
-import {DBAdmin} from '../db-admin/db-admin';
 import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
@@ -798,10 +797,6 @@ export class Store {
     const funding = Funding.query(tx).where({channelId, assetHolder}).first();
 
     return funding;
-  }
-
-  dbAdmin(): DBAdmin {
-    return new DBAdmin(this.knex);
   }
 }
 

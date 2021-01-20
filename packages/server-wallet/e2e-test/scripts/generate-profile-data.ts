@@ -15,7 +15,7 @@ import {
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
-import {DBAdmin} from '../../src/db-admin/db-admin';
+import * as DBAdmin from '../../src/db-admin/db-admin';
 
 const startReceiver = async (
   profiling: 'FlameGraph' | 'BubbleProf' | 'Doctor'
@@ -52,7 +52,7 @@ const NUM_PAYMENTS = 20;
 async function generateData(type: 'BubbleProf' | 'FlameGraph' | 'Doctor'): Promise<void> {
   const [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
 
-  await Promise.all([knexPayer, knexReceiver].map(knex => new DBAdmin(knex).truncateDB()));
+  await Promise.all([knexPayer, knexReceiver].map(knex => DBAdmin.truncateDataBaseFromKnex(knex)));
   // Adds Alice to Payer's Database
   await SWPayer.query().insert(alice());
 
