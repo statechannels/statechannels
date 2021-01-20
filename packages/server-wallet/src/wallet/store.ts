@@ -295,9 +295,7 @@ export class Store {
    */
   async getNonFinalizedChannels(): Promise<ChannelState[]> {
     return (await Channel.query(this.knex))
-      .filter(
-        c => !c.challengeStatus || c.challengeStatus.toResult().status !== 'Challenge Finalized'
-      )
+      .filter(c => !c.adjudicatorStatus || c.adjudicatorStatus.toResult().channelMode === 'Open')
       .map(channel => channel.protocolState);
   }
 
