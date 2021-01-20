@@ -7,7 +7,7 @@ import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
-import {DBAdmin} from '../src/db-admin/db-admin';
+import * as DBAdmin from '../src/db-admin/db-admin';
 
 import PayerClient from './payer/client';
 import {
@@ -43,7 +43,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await Promise.all([knexPayer, knexReceiver].map(knex => new DBAdmin(knex).truncateDB()));
+  await Promise.all([knexPayer, knexReceiver].map(knex => DBAdmin.truncateDataBaseFromKnex(knex)));
 
   // Adds Alice to Payer's Database
   await SWPayer.query().insert(alice());

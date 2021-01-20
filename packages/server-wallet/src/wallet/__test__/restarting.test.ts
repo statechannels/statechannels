@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 
 import {defaultTestConfig, Wallet} from '..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
-import {DBAdmin} from '../../db-admin/db-admin';
+import * as DBAdmin from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -24,7 +24,7 @@ jest.mock('../../chain-service/mock-chain-service', () => {
 });
 
 test('the wallet registers existing channels with the chain service on starting up', async () => {
-  await new DBAdmin(testKnex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(testKnex);
 
   await seedAlicesSigningWallet(testKnex);
 

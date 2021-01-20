@@ -25,7 +25,7 @@ import {channel, withSupportedState} from '../../../models/__test__/fixtures/cha
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import * as DBAdmin from '../../../db-admin/db-admin';
 import {LedgerRequest} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/wallet-error';
@@ -38,10 +38,11 @@ import {
 
 jest.setTimeout(20_000);
 
-const wallet = Wallet.create(defaultTestConfig());
+let wallet: Wallet;
 
 beforeAll(async () => {
-  await wallet.dbAdmin().migrateDB();
+  await DBAdmin.migrateDatabase(defaultTestConfig());
+  wallet = Wallet.create(defaultTestConfig());
 });
 
 afterAll(async () => {
@@ -263,7 +264,7 @@ it("Doesn't store stale states", async () => {
 });
 
 it("doesn't store states for unknown signing addresses", async () => {
-  await new DBAdmin(wallet.knex).truncateDB(['signing_wallets']);
+  await DBAdmin.truncateDataBaseFromKnex(wallet.knex, ['signing_wallets']);
 
   const signedStates = [serializeState(stateSignedBy([alice(), bob()])({turnNum: five}))];
   return expect(wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates})).rejects.toThrow(

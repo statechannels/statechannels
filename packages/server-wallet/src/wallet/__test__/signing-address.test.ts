@@ -4,7 +4,7 @@ import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {DBAdmin} from '../../db-admin/db-admin';
+import * as DBAdmin from '../../db-admin/db-admin';
 
 import {alice} from './fixtures/participants';
 
@@ -20,7 +20,7 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  await new DBAdmin(knex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
 });
 
 describe('signingAddress', () => {
