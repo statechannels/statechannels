@@ -12,6 +12,9 @@ import {ObjectiveModel, ObjectiveChannelModel} from '../models/objective';
 import {Funding} from '../models/funding';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest} from '../models/ledger-request';
+import {LedgerProposal} from '../models/ledger-proposal';
+import {ChallengeStatus} from '../models/challenge-status';
+import {ChainServiceRequest} from '../models/chain-service-request';
 
 export class DBAdmin {
   knex: Knex;
@@ -45,6 +48,10 @@ export class DBAdmin {
       Funding.tableName,
       AppBytecode.tableName,
       LedgerRequest.tableName,
+      LedgerProposal.tableName,
+      Funding.tableName,
+      ChallengeStatus.tableName,
+      ChainServiceRequest.tableName,
     ]
   ): Promise<void> {
     // eslint-disable-next-line no-process-env
