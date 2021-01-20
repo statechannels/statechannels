@@ -10,7 +10,7 @@ import {
 import {
   Address,
   BN,
-  fromNitroState,
+  fromNitroSignedState,
   makeAddress,
   PrivateKey,
   SignedState,
@@ -72,7 +72,7 @@ export class ChainService implements ChainServiceInterface {
   private assetHolderToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToSubscribers: Map<Bytes32, ChainEventSubscriberInterface[]> = new Map();
-  // For convinience, can also use addressToContract map
+  // For convenience, can also use addressToContract map
   private nitroAdjudicator: Contract;
 
   private readonly blockConfirmations: number;
@@ -116,7 +116,7 @@ export class ChainService implements ChainServiceInterface {
       this.channelToSubscribers.get(event.channelId)?.map(subscriber =>
         subscriber.challengeRegistered({
           channelId,
-          challengeStates: challengeStates.map(s => fromNitroState(s.state)),
+          challengeStates: challengeStates.map(s => fromNitroSignedState(s)),
           finalizesAt,
         })
       );
@@ -370,6 +370,7 @@ export class ChainService implements ChainServiceInterface {
         subscriber.channelFinalized({
           channelId,
           blockNumber: block.number,
+          blockTimestamp: block.timestamp,
           finalizedAt: finalizingChannel.finalizesAtS,
         })
       );
