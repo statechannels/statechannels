@@ -291,7 +291,7 @@ export class Store {
   }
 
   /**
-   * Returns all channels that are not finalized chain
+   * Returns all channels that are not finalized on chain
    */
   async getActiveChannels(): Promise<ChannelState[]> {
     return (await Channel.query(this.knex))
