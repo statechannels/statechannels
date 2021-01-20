@@ -41,7 +41,7 @@ Did you need to run manual tests to verify this change? If so, please describe t
 - [ ] I have performed a self-review of my own code
 - [ ] I have scoped this change as narrowly as possible
 - [ ] I have separated functional and non-functional changes
-- [ ] I have commented my code strictly where necessary
+- [ ] I have commented my code wherever necessary
 - [ ] I have added tests that prove my fix is effective or that my feature works
 ## Project management
 - [ ] I have linked to relevant issues
