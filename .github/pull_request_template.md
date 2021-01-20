@@ -1,5 +1,5 @@
 # Description
-Mandatory, single line description of the pull request, written as though it was an order.
+**Title** Clear, single line description of the pull request, written as though it was an order.
 
 Then, following a single blank line, a summary of the change and which issue is fixed, including 
 - [ ] what is the problem being solved
