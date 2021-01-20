@@ -293,7 +293,7 @@ export class Store {
   /**
    * Returns all channels that are not finalized on chain
    */
-  async getActiveChannels(): Promise<ChannelState[]> {
+  async getNonFinalizedChannels(): Promise<ChannelState[]> {
     return (await Channel.query(this.knex))
       .filter(
         c => !c.challengeStatus || c.challengeStatus.toResult().status !== 'Challenge Finalized'

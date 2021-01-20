@@ -111,7 +111,7 @@ export class SingleThreadedWallet
    * so the chain service can alert us of any block chain events for existing channels
    */
   private async registerExistingChannelsWithChainService() {
-    const channelsToRegister = (await this.store.getActiveChannels())
+    const channelsToRegister = (await this.store.getNonFinalizedChannels())
       .map(ChannelState.toChannelResult)
       .map(cr => ({
         assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
