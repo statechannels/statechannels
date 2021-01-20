@@ -103,7 +103,7 @@ export class SingleThreadedWallet
   public static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet {
     const wallet = new SingleThreadedWallet(walletConfig);
     // This is an async method so it could continue executing after this method returns
-    wallet.registerExistingChannelsWithChainService();
+    // wallet.registerExistingChannelsWithChainService();
     return wallet;
   }
 
@@ -729,6 +729,7 @@ export class SingleThreadedWallet
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
     await this.takeActions([channelId], response);
 
+    console.log(channelId, amount);
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
@@ -784,6 +785,7 @@ export class SingleThreadedWallet
     });
 
     await this.takeActions([arg.channelId], response);
+    console.log(arg);
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
