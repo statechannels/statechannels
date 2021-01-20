@@ -7,10 +7,11 @@ import {
   SignedStateWithHash,
   SimpleAllocation,
 } from '@statechannels/wallet-core';
-import {SignedState as WireState} from '@statechannels/wire-format';
+import {Payload, SignedState as WireState} from '@statechannels/wire-format';
 
 import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest} from '../../../models/ledger-request';
+import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
 import {stateWithHashSignedBy} from './states';
@@ -55,6 +56,16 @@ export class TestLedgerChannel extends TestChannel {
       channelNonce: this.channelNonce,
       chainId: '0x01',
       challengeDuration: 9001,
+    };
+  }
+
+  /**
+   * Gives the nth state in the history, signed by the provided participant(s) -- default is both
+   */
+  public wirePayload(n: number, bals?: Bals, signerIndices: number[] = [n % 1, n % 2]): Payload {
+    return {
+      walletVersion: WALLET_VERSION,
+      signedStates: [this.wireState(n, bals, signerIndices)],
     };
   }
 
