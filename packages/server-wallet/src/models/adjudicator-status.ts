@@ -11,7 +11,7 @@ export type AdjudicatorStatus =
       channelMode: 'Finalized' | 'Challenge';
       states: SignedState[];
     }
-    | {channelMode: 'Open'};
+  | {channelMode: 'Open'};
 
 interface RequiredColumns {
   readonly channelId: Bytes32;
@@ -26,8 +26,8 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
   readonly blockTimestamp!: Uint48;
   readonly states!: SignedState[];
   static tableName = 'adjudicator_status';
-  static get idColumn(): string[] {
-    return ['channelId'];
+  static get idColumn(): string {
+    return 'channelId';
   }
 
   static async getAdjudicatorStatus(knex: Knex, channelId: Bytes32): Promise<AdjudicatorStatus> {
