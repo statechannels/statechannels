@@ -12,7 +12,7 @@ import {
   overwriteConfigWithDatabaseConnection,
   ServerWalletConfig,
 } from '../config';
-import * as DBAdmin from '../db-admin/db-admin';
+import {DBAdmin} from '../db-admin/db-admin';
 import {Wallet, SingleChannelOutput} from '../wallet';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../__test__/test-helpers';
 

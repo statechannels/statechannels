@@ -1,6 +1,6 @@
 import Knex from 'knex';
 
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {SigningWallet} from '../../models/signing-wallet';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
 

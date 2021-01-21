@@ -13,7 +13,7 @@ import {
 } from '../test-helpers';
 import {Wallet} from '../../wallet';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 
 jest.setTimeout(15_000);
 

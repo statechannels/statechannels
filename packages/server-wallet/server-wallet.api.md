@@ -65,12 +65,6 @@ export type ChainServiceConfiguration = {
 } & Partial<ChainServiceArgs>;
 
 // @public (undocumented)
-export function createDatabase(config: ServerWalletConfig): Promise<void>;
-
-// @public (undocumented)
-export function createDatabaseFromKnex(knex: Knex): Promise<void>;
-
-// @public (undocumented)
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
 
 // @public (undocumented)
@@ -81,6 +75,26 @@ export type DatabasePoolConfiguration = {
     max?: number;
     min?: number;
 };
+
+// @public (undocumented)
+export class DBAdmin {
+    // (undocumented)
+    static createDatabase(config: ServerWalletConfig): Promise<void>;
+    // (undocumented)
+    static createDatabaseFromKnex(knex: Knex): Promise<void>;
+    // (undocumented)
+    static dropDatabase(config: ServerWalletConfig): Promise<void>;
+    // (undocumented)
+    static dropDatabaseFromKnex(knex: Knex): Promise<void>;
+    // (undocumented)
+    static migrateDatabase(config: ServerWalletConfig): Promise<void>;
+    // (undocumented)
+    static migrateDatabaseFromKnex(knex: Knex): Promise<void>;
+    // (undocumented)
+    static truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
+    // (undocumented)
+    static truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
+}
 
 // @public (undocumented)
 export type DeepPartial<T> = {
@@ -127,12 +141,6 @@ export const defaultTestConfig: (partialConfig?: DeepPartial<ServerWalletConfig 
 export const defaultTestNetworkConfiguration: NetworkConfiguration;
 
 // @public (undocumented)
-export function dropDatabase(config: ServerWalletConfig): Promise<void>;
-
-// @public (undocumented)
-export function dropDatabaseFromKnex(knex: Knex): Promise<void>;
-
-// @public (undocumented)
 export function extractDBConfigFromServerWalletConfig(serverWalletConfig: ServerWalletConfig): Config;
 
 // Warning: (ae-forgotten-export) The symbol "DatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
@@ -159,12 +167,6 @@ export type MetricsConfiguration = {
     timingMetrics: boolean;
     metricsOutputFile?: string;
 };
-
-// @public (undocumented)
-export function migrateDatabase(config: ServerWalletConfig): Promise<void>;
-
-// @public (undocumented)
-export function migrateDatabaseFromKnex(knex: Knex): Promise<void>;
 
 // @public (undocumented)
 export type MultipleChannelOutput = {
@@ -242,12 +244,6 @@ export type SingleChannelOutput = {
     outbox: Outgoing[];
     channelResult: ChannelResult;
 };
-
-// @public (undocumented)
-export function truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
-
-// @public (undocumented)
-export function truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
 
 // @public (undocumented)
 export function validateServerWalletConfig(config: Record<string, any>): {

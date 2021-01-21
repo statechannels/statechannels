@@ -8,7 +8,7 @@ import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, crashAndRestart, ONE_DAY} from '../test-helpers';
 const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {

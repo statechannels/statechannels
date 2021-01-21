@@ -16,7 +16,7 @@ import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
 import {ChainServiceRequest} from '../../models/chain-service-request';
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;

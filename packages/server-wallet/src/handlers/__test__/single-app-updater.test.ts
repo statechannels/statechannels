@@ -1,6 +1,6 @@
 import {BN} from '@statechannels/wallet-core';
 
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {Store} from '../../wallet/store';
