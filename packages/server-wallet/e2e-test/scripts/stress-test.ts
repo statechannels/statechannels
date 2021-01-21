@@ -14,7 +14,7 @@ import {
 } from '../e2e-utils';
 import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
-import * as DBAdmin from '../../src/db-admin/db-admin';
+import {DBAdmin} from '../../src';
 
 const {argv} = yargs
   .option('duration', {

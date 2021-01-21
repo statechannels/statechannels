@@ -65,12 +65,6 @@ export type ChainServiceConfiguration = {
 } & Partial<ChainServiceArgs>;
 
 // @public
-export function createDatabase(config: ServerWalletConfig): Promise<void>;
-
-// @public
-export function createDatabaseFromKnex(knex: Knex): Promise<void>;
-
-// @public
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
 
 // @public
@@ -81,6 +75,18 @@ export type DatabasePoolConfiguration = {
     max?: number;
     min?: number;
 };
+
+// @public
+export class DBAdmin {
+    static createDatabase(config: ServerWalletConfig): Promise<void>;
+    static createDatabaseFromKnex(knex: Knex): Promise<void>;
+    static dropDatabase(config: ServerWalletConfig): Promise<void>;
+    static dropDatabaseFromKnex(knex: Knex): Promise<void>;
+    static migrateDatabase(config: ServerWalletConfig): Promise<void>;
+    static migrateDatabaseFromKnex(knex: Knex): Promise<void>;
+    static truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
+    static truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
+}
 
 // @public (undocumented)
 export type DeepPartial<T> = {
@@ -126,12 +132,6 @@ export const defaultTestConfig: (partialConfig?: DeepPartial<ServerWalletConfig 
 // @public (undocumented)
 export const defaultTestNetworkConfiguration: NetworkConfiguration;
 
-// @public
-export function dropDatabase(config: ServerWalletConfig): Promise<void>;
-
-// @public
-export function dropDatabaseFromKnex(knex: Knex): Promise<void>;
-
 // @public (undocumented)
 export function extractDBConfigFromServerWalletConfig(serverWalletConfig: ServerWalletConfig): Config;
 
@@ -159,12 +159,6 @@ export type MetricsConfiguration = {
     timingMetrics: boolean;
     metricsOutputFile?: string;
 };
-
-// @public
-export function migrateDatabase(config: ServerWalletConfig): Promise<void>;
-
-// @public
-export function migrateDatabaseFromKnex(knex: Knex): Promise<void>;
 
 // @public (undocumented)
 export type MultipleChannelOutput = {
@@ -364,12 +358,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     warmUpThreads(): Promise<void>;
 }
-
-// @public
-export function truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
-
-// @public
-export function truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
 
 // @public (undocumented)
 export function validateServerWalletConfig(config: Record<string, any>): {
