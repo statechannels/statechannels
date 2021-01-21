@@ -369,7 +369,7 @@ export function validateServerWalletConfig(config: Record<string, any>): {
 // @public (undocumented)
 export abstract class Wallet extends SingleThreadedWallet {
     // (undocumented)
-    static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet | MultiThreadedWallet;
+    static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet | MultiThreadedWallet>;
 }
 
 

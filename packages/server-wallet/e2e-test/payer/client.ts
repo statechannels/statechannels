@@ -12,17 +12,26 @@ import {defaultConfig, ServerWalletConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
 
 export default class PayerClient {
-  private readonly wallet: ServerWallet;
-  constructor(
+  readonly config: ServerWalletConfig;
+  private constructor(
     private readonly pk: Bytes32,
     private readonly receiverHttpServerURL: string,
-    readonly config?: ServerWalletConfig
+    private readonly wallet: ServerWallet
   ) {
-    this.wallet = recordFunctionMetrics(
-      ServerWallet.create(this.config || payerConfig),
+    this.config = wallet.walletConfig;
+  }
+  public static async create(
+    pk: Bytes32,
+    receiverHttpServerURL: string,
+    config?: ServerWalletConfig
+  ): Promise<PayerClient> {
+    const wallet = await recordFunctionMetrics(
+      ServerWallet.create(config ?? payerConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
+    return new PayerClient(pk, receiverHttpServerURL, wallet);
   }
+
   public async warmup(): Promise<void> {
     await this.wallet.warmUpThreads();
   }

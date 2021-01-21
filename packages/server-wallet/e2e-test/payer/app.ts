@@ -7,7 +7,7 @@ import {RECEIVER_PORT} from '../e2e-utils';
 
 import PayerClient from './client';
 export async function startApp(): Promise<express.Application> {
-  const client = new PayerClient(alice().privateKey, `http://127.0.0.1:${RECEIVER_PORT}`);
+  const client = await PayerClient.create(alice().privateKey, `http://127.0.0.1:${RECEIVER_PORT}`);
   await client.warmup();
   const app = express();
 
