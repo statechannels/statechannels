@@ -103,7 +103,8 @@ afterAll(async () => {
   provider.polling = false;
 });
 
-it('Create a directly funded channel between two wallets ', async () => {
+// TODO: This will be resolved by https://github.com/statechannels/statechannels/issues/3176
+it.skip('Create a directly funded channel between two wallets ', async () => {
   const participantA: Participant = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
