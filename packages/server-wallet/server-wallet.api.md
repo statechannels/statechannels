@@ -246,10 +246,9 @@ export type SingleChannelOutput = {
 // Warning: (ae-forgotten-export) The symbol "WalletInterface" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ChainEventSubscriberInterface" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export class SingleThreadedWallet extends EventEmitter<EventEmitterType> implements WalletInterface, ChainEventSubscriberInterface {
     protected constructor(walletConfig: IncomingServerWalletConfig);
-    // (undocumented)
     addSigningKey(privateKey: PrivateKey): Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "AssetOutcomeUpdatedArg" needs to be exported by the entry point index.d.ts
     //
