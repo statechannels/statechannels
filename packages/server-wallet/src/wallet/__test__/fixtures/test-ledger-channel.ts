@@ -1,13 +1,17 @@
 import {
+  Address,
   ChannelConstants,
   makeAddress,
   serializeState,
   SharedObjective,
   SignedStateWithHash,
+  SimpleAllocation,
 } from '@statechannels/wallet-core';
-import {SignedState as WireState} from '@statechannels/wire-format';
+import {Payload, SignedState as WireState} from '@statechannels/wire-format';
 
+import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest} from '../../../models/ledger-request';
+import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
 import {stateWithHashSignedBy} from './states';
@@ -16,7 +20,6 @@ import {TestChannel, Bals} from './test-channel';
 interface TestChannelArgs {
   aBal?: number;
   bBal?: number;
-  channelNonce?: number;
 }
 
 /**
@@ -59,6 +62,16 @@ export class TestLedgerChannel extends TestChannel {
   /**
    * Gives the nth state in the history, signed by the provided participant(s) -- default is both
    */
+  public wirePayload(n: number, bals?: Bals, signerIndices: number[] = [n % 1, n % 2]): Payload {
+    return {
+      walletVersion: WALLET_VERSION,
+      signedStates: [this.wireState(n, bals, signerIndices)],
+    };
+  }
+
+  /**
+   * Gives the nth state in the history, signed by the provided participant(s) -- default is both
+   */
   public wireState(n: number, bals?: Bals, signerIndices: number[] = [n % 1, n % 2]): WireState {
     return serializeState(this.signedStateWithHash(n, bals, signerIndices));
   }
@@ -85,6 +98,17 @@ export class TestLedgerChannel extends TestChannel {
   public async insertDefundingRequest(store: Store, channelToBeFunded: string): Promise<void> {
     return store.transaction(tx =>
       LedgerRequest.requestLedgerDefunding(channelToBeFunded, this.channelId, tx)
+    );
+  }
+
+  public async insertProposal(
+    store: Store,
+    proposal: SimpleAllocation,
+    signingAddress: Address,
+    nonce: number
+  ): Promise<void> {
+    return store.transaction(tx =>
+      LedgerProposal.storeProposal({channelId: this.channelId, signingAddress, proposal, nonce}, tx)
     );
   }
 }

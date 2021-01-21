@@ -38,11 +38,11 @@ export class ChallengeSubmitter {
         return;
       }
 
-      if (
-        channel.challengeStatus &&
-        channel.challengeStatus.toResult().status !== 'No Challenge Detected'
-      ) {
-        this.logger.warn('There is already a challenge registered on chain');
+      const status = channel.adjudicatorStatus
+        ? channel.adjudicatorStatus.toResult().channelMode
+        : 'Open';
+      if (status !== 'Open') {
+        this.logger.warn('There is an existing challenge or the channel is finalized on chain');
         return;
       }
 

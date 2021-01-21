@@ -343,6 +343,27 @@ describe('registerChannel', () => {
 });
 
 describe('concludeAndWithdraw', () => {
+  it('triggers a channel finalized event', async () => {
+    const {channelId, state, signatures} = await setUpConclude();
+
+    const p = new Promise<void>(resolve =>
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        ...defaultNoopListeners,
+        channelFinalized: arg => {
+          expect(arg.channelId).toEqual(channelId);
+          resolve();
+        },
+      })
+    );
+
+    const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
+    if (!transactionResponse) throw 'Expected transaction response';
+    await transactionResponse.wait();
+
+    mineBlocks();
+    await p;
+  });
+
   it('Successful concludeAndWithdraw with eth allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude();
 
