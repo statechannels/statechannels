@@ -17,3 +17,4 @@ export abstract class Wallet extends SingleThreadedWallet {
 }
 
 export * from '../config';
+export {SingleThreadedWallet, MultiThreadedWallet};
