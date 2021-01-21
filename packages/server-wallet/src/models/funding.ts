@@ -4,7 +4,7 @@ import Knex from 'knex';
 
 import {Uint256, Bytes32} from '../type-aliases';
 
-type TransferredOutEntry = {toAddress: Destination; amount: Uint256};
+export type TransferredOutEntry = {toAddress: Destination; amount: Uint256};
 
 const REQUIRED_COLUMNS = ['channelId', 'amount', 'assetHolder', 'transferredOut'] as const;
 interface RequiredColumns {
@@ -75,8 +75,7 @@ export class Funding extends Model implements RequiredColumns {
     knex: Knex,
     channelId: Bytes32,
     assetHolder: Address,
-    toAddress: Destination,
-    amount: Uint256
+    transferredOut: TransferredOutEntry[]
   ): Promise<Funding> {
     return knex.transaction(async tx => {
       const errorMessage = `Expected for funding row to exists with channelId ${channelId}, assetHolder ${assetHolder}`;
@@ -85,12 +84,12 @@ export class Funding extends Model implements RequiredColumns {
         .first()
         .throwIfNotFound({
           message: errorMessage,
-          data: {channelId, assetHolder, toAddress, amount},
+          data: {channelId, assetHolder, transferredOutArr: transferredOut},
         });
 
-      const transferredOut = existing.transferredOut.concat({toAddress, amount});
+      const newTransferredOut = existing.transferredOut.concat(transferredOut);
       return await Funding.query(tx)
-        .patch({transferredOut})
+        .patch({transferredOut: newTransferredOut})
         .where({channelId, assetHolder})
         .returning('*')
         .first();

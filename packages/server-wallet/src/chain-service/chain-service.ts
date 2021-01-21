@@ -172,7 +172,7 @@ export class ChainService implements ChainServiceInterface {
       } catch (err) {
         // https://github.com/ethers-io/ethers.js/issues/972
         this.ethWallet.incrementTransactionCount(-1);
-        this.logger.error({err}, 'Transaction submission failed');
+        //this.logger.error({err}, 'Transaction submission failed');
         throw err;
       }
     });
