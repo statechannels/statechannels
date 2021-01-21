@@ -59,18 +59,18 @@ import { ValidationErrorItem } from 'joi';
 
 // Warning: (ae-forgotten-export) The symbol "ChainServiceArgs" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export type ChainServiceConfiguration = {
     attachChainService: boolean;
 } & Partial<ChainServiceArgs>;
 
-// @public (undocumented)
+// @public
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
 
-// @public (undocumented)
+// @public
 export type DatabaseConnectionConfiguration = RequiredConnectionConfiguration & Partial<OptionalConnectionConfiguration>;
 
-// @public (undocumented)
+// @public
 export type DatabasePoolConfiguration = {
     max?: number;
     min?: number;
@@ -92,7 +92,7 @@ export const defaultChainServiceConfiguration: {
     attachChainService: boolean;
 };
 
-// @public (undocumented)
+// @public
 export const defaultConfig: OptionalServerWalletConfig;
 
 // @public (undocumented)
@@ -104,7 +104,7 @@ export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
     };
 };
 
-// @public (undocumented)
+// @public
 export const defaultLoggingConfiguration: LoggingConfiguration;
 
 // @public (undocumented)
@@ -131,10 +131,10 @@ export function getDatabaseConnectionConfig(config: ServerWalletConfig): Databas
     port: number;
 };
 
-// @public (undocumented)
+// @public
 export type IncomingServerWalletConfig = RequiredServerWalletConfig & Partial<OptionalServerWalletConfig>;
 
-// @public (undocumented)
+// @public
 export type LoggingConfiguration = {
     logLevel: Level;
     logDestination: string;
@@ -142,7 +142,7 @@ export type LoggingConfiguration = {
 
 export { Message }
 
-// @public (undocumented)
+// @public
 export type MetricsConfiguration = {
     timingMetrics: boolean;
     metricsOutputFile?: string;
@@ -171,12 +171,12 @@ export class MultiThreadedWallet extends SingleThreadedWallet {
     warmUpThreads(): Promise<void>;
     }
 
-// @public (undocumented)
+// @public
 export type NetworkConfiguration = {
     chainNetworkID: number;
 };
 
-// @public (undocumented)
+// @public
 export type OptionalConnectionConfiguration = {
     port: number;
 } | string;
@@ -188,7 +188,7 @@ export type OptionalDatabaseConfiguration = {
     connection: OptionalConnectionConfiguration;
 };
 
-// @public (undocumented)
+// @public
 export interface OptionalServerWalletConfig {
     // (undocumented)
     chainServiceConfiguration: ChainServiceConfiguration;
@@ -214,7 +214,7 @@ export type Outgoing = Notice;
 // @public (undocumented)
 export function overwriteConfigWithDatabaseConnection(config: ServerWalletConfig, databaseConnectionConfig: PartialConfigObject | string): ServerWalletConfig;
 
-// @public (undocumented)
+// @public
 export type RequiredConnectionConfiguration = {
     database: string;
     host: string;
@@ -222,18 +222,18 @@ export type RequiredConnectionConfiguration = {
     password?: string;
 } | string;
 
-// @public (undocumented)
+// @public
 export type RequiredDatabaseConfiguration = {
     connection: RequiredConnectionConfiguration;
 };
 
-// @public (undocumented)
+// @public
 export type RequiredServerWalletConfig = {
     databaseConfiguration: RequiredDatabaseConfiguration;
     networkConfiguration: NetworkConfiguration;
 };
 
-// @public (undocumented)
+// @public
 export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWalletConfig;
 
 // @public (undocumented)
@@ -323,7 +323,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     objectiveManager: ObjectiveManager;
     // (undocumented)
     pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
-    // (undocumented)
     pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput>;
     // (undocumented)
     registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;

@@ -8,7 +8,8 @@
     "outDir": "lib",
     "esModuleInterop": true,
     "noImplicitAny": true,
-    "allowJs": true // We want to include loader.js to load worker threads
+    "allowJs": true, // We want to include loader.js to load worker threads
+    "removeComments": false
   },
   "references": [
     {
