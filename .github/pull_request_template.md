@@ -35,7 +35,7 @@ Please explain which reason, if any, why this requires more than one approval.
 - [ ] I have written clear commit messages
 - [ ] I have performed a self-review of my own code
 - [ ] I have scoped this change as narrowly as possible
-- [ ] I have separated functional and non-functional changes
+- [ ] I have separated logic changes from refactor changes (formatting, renames, etc.)
 - [ ] I have commented my code wherever necessary
 - [ ] I have added tests that prove my fix is effective or that my feature works
 ## Project management
