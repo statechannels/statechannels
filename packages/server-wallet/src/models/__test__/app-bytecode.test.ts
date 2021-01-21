@@ -3,7 +3,7 @@ import {makeAddress} from '@statechannels/wallet-core';
 
 import {AppBytecode} from '../app-bytecode';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {DBAdmin} from '../../db-admin/db-admin';
+import * as DBAdmin from '../../db-admin/db-admin';
 
 const CHAIN_ID = '0x01';
 const APP_DEFINTION = makeAddress(constants.AddressZero);
@@ -11,7 +11,7 @@ const BYTE_CODE1 = '0x01';
 const BYTE_CODE2 = '0x02';
 describe('AppBytecode model', () => {
   beforeEach(async () => {
-    await new DBAdmin(knex).truncateDB();
+    await DBAdmin.truncateDataBaseFromKnex(knex);
   });
 
   afterAll(async () => await knex.destroy());

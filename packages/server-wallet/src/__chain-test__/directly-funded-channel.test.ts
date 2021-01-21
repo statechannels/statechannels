@@ -12,8 +12,8 @@ import {
   overwriteConfigWithDatabaseConnection,
   ServerWalletConfig,
 } from '../config';
+import * as DBAdmin from '../db-admin/db-admin';
 import {Wallet, SingleChannelOutput} from '../wallet';
-import {createAndMigrateDatabase, dropDatabase} from '../wallet/__test__/db-helpers';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
@@ -81,9 +81,10 @@ function mineOnEvent(contract: Contract) {
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
+  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
   await Promise.all([
-    createAndMigrateDatabase(aWalletConfig),
-    createAndMigrateDatabase(bWalletConfig),
+    DBAdmin.migrateDatabase(aWalletConfig),
+    DBAdmin.migrateDatabase(bWalletConfig),
   ]);
   a = Wallet.create(aWalletConfig);
   b = Wallet.create(bWalletConfig);
@@ -97,7 +98,8 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([dropDatabase(aWalletConfig), dropDatabase(bWalletConfig)]);
+  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
+
   provider.polling = false;
 });
 

@@ -1,5 +1,5 @@
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {DBAdmin} from '../../db-admin/db-admin';
+import * as DBAdmin from '../../db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../adjudicator-status';
 import {Channel} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -10,7 +10,7 @@ import {channel} from './fixtures/channel';
 
 describe('AdjudicatorStatus model', () => {
   beforeEach(async () => {
-    await new DBAdmin(knex).truncateDB();
+    await DBAdmin.truncateDataBaseFromKnex(knex);
     await seedAlicesSigningWallet(knex);
   });
 

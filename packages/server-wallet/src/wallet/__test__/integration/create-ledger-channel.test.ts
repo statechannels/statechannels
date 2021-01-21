@@ -6,12 +6,12 @@ import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {defaultTestConfig} from '../../../config';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import * as DBAdmin from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {
   w = Wallet.create(defaultTestConfig());
-  await new DBAdmin(w.knex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });
 
 afterEach(async () => {

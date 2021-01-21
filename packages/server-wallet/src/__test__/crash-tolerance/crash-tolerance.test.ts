@@ -8,8 +8,8 @@ import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
+import * as DBAdmin from '../../db-admin/db-admin';
 import {Wallet} from '../../wallet';
-import {createAndMigrateDatabase} from '../../wallet/__test__/db-helpers';
 import {getChannelResultFor, getPayloadFor, crashAndRestart, ONE_DAY} from '../test-helpers';
 const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
   database: 'TEST_A',
@@ -27,9 +27,10 @@ let participantB: Participant;
 jest.setTimeout(10_000);
 
 beforeAll(async () => {
+  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
   await Promise.all([
-    createAndMigrateDatabase(aWalletConfig),
-    createAndMigrateDatabase(bWalletConfig),
+    DBAdmin.migrateDatabase(aWalletConfig),
+    DBAdmin.migrateDatabase(bWalletConfig),
   ]);
   a = Wallet.create(aWalletConfig);
   b = Wallet.create(bWalletConfig); // Wallet that will "crash"
@@ -51,8 +52,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await a.dbAdmin().dropDB();
-  await b.dbAdmin().dropDB();
+  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
 });
 
 it('Create a directly-funded channel between two wallets, of which one crashes midway through ', async () => {

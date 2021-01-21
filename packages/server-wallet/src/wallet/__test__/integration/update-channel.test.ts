@@ -11,7 +11,7 @@ import {defaultTestConfig} from '../../../config';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {AppBytecode} from '../../../models/app-bytecode';
 import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';
-import {DBAdmin} from '../../../db-admin/db-admin';
+import * as DBAdmin from '../../../db-admin/db-admin';
 
 let w: Wallet;
 
@@ -24,7 +24,7 @@ const appData2 = utils.defaultAbiCoder.encode(['uint256'], [2]);
 beforeEach(async () => {
   w = Wallet.create({...defaultTestConfig(), skipEvmValidation: false});
 
-  await new DBAdmin(knex).truncateDB();
+  await DBAdmin.truncateDataBaseFromKnex(knex);
   await seedAlicesSigningWallet(knex);
   // We seed the counting app bytecode so we can use EVM validation
   await AppBytecode.query(knex).insert([appBytecode()]);

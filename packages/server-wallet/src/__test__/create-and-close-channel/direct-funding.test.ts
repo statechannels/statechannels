@@ -8,8 +8,8 @@ import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
+import * as DBAdmin from '../../db-admin/db-admin';
 import {Wallet} from '../../wallet';
-import {createAndMigrateDatabase, dropDatabase} from '../../wallet/__test__/db-helpers';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
 
 const {AddressZero} = ethers.constants;
@@ -29,9 +29,10 @@ let participantA: Participant;
 let participantB: Participant;
 
 beforeAll(async () => {
+  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
   await Promise.all([
-    createAndMigrateDatabase(aWalletConfig),
-    createAndMigrateDatabase(bWalletConfig),
+    DBAdmin.migrateDatabase(aWalletConfig),
+    DBAdmin.migrateDatabase(bWalletConfig),
   ]);
   a = Wallet.create(aWalletConfig);
   b = Wallet.create(bWalletConfig);
@@ -53,7 +54,7 @@ beforeAll(async () => {
 });
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([dropDatabase(aWalletConfig), dropDatabase(bWalletConfig)]);
+  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
 });
 
 it('Create a directly funded channel between two wallets ', async () => {
