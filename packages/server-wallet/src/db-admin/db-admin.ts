@@ -15,7 +15,11 @@ import {LedgerRequest} from '../models/ledger-request';
 import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
-import {extractDBConfigFromServerWalletConfig, ServerWalletConfig} from '../config';
+import {
+  extractDBConfigFromServerWalletConfig,
+  getDatabaseConnectionConfig,
+  ServerWalletConfig,
+} from '../config';
 
 /**
  * A collection of static utility methods for db admin
@@ -26,9 +30,7 @@ export class DBAdmin {
    * @param config The wallet configuration object with a database specified
    */
   static async createDatabase(config: ServerWalletConfig): Promise<void> {
-    const knex = Knex(extractDBConfigFromServerWalletConfig(config));
-    await DBAdmin.createDatabaseFromKnex(knex);
-    knex.destroy();
+    await exec(`createdb ${getDbNameFromConfig(config)} $PSQL_ARGS`);
   }
 
   /**
@@ -36,7 +38,7 @@ export class DBAdmin {
    * @param knex The knex instance which should have a db name specified
    */
   static async createDatabaseFromKnex(knex: Knex): Promise<void> {
-    await exec(`createdb ${getDbName(knex)} $PSQL_ARGS`);
+    await exec(`createdb ${getDbNameFromKnex(knex)} $PSQL_ARGS`);
   }
 
   /**
@@ -44,9 +46,7 @@ export class DBAdmin {
    * @param config The wallet configuration object containing the database configuration to use
    */
   static async dropDatabase(config: ServerWalletConfig): Promise<void> {
-    const knex = Knex(extractDBConfigFromServerWalletConfig(config));
-    await DBAdmin.dropDatabaseFromKnex(knex);
-    knex.destroy();
+    await exec(`dropdb ${getDbNameFromConfig(config)} --if-exists $PSQL_ARGS`);
   }
 
   /**
@@ -54,7 +54,7 @@ export class DBAdmin {
    * @param knex The knex instance which should have a db name specified
    */
   static async dropDatabaseFromKnex(knex: Knex): Promise<void> {
-    await exec(`dropdb ${getDbName(knex)} --if-exists $PSQL_ARGS`);
+    await exec(`dropdb ${getDbNameFromKnex(knex)} --if-exists $PSQL_ARGS`);
   }
 
   /**
@@ -104,9 +104,14 @@ export class DBAdmin {
   }
 }
 
-function getDbName(knex: Knex): string {
+function getDbNameFromKnex(knex: Knex): string {
   return knex.client.config.connection.database;
 }
+
+function getDbNameFromConfig(config: ServerWalletConfig): string {
+  return getDatabaseConnectionConfig(config).database;
+}
+
 const defaultTables = [
   SigningWallet.tableName,
   Channel.tableName,
