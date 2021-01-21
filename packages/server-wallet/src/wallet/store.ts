@@ -21,7 +21,6 @@ import {
   makePrivateKey,
   makeAddress,
   Address,
-  Destination,
   PrivateKey,
   SubmitChallenge,
   isSubmitChallenge,
@@ -43,7 +42,7 @@ import {WalletError, Values} from '../errors/wallet-error';
 import {Bytes32, Uint256, Bytes} from '../type-aliases';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} from '../metrics';
 import {isReverseSorted, pick} from '../utilities/helpers';
-import {Funding} from '../models/funding';
+import {Funding, TransferredOutEntry} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {ObjectiveModel, DBObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
@@ -770,13 +769,15 @@ export class Store {
   ): Promise<void> {
     await AdjudicatorStatusModel.setFinalized(this.knex, channelId, blockNumber, blockTimestamp);
   }
+
   async updateTransferredOut(
     channelId: string,
     assetHolder: Address,
-    toAddress: Destination,
-    amount: Uint256
+    transferredOut: TransferredOutEntry[]
   ): Promise<void> {
-    await Funding.updateTransferredOut(this.knex, channelId, assetHolder, toAddress, amount);
+    this.lockApp(channelId, tx =>
+      Funding.updateTransferredOut(tx, channelId, assetHolder, transferredOut)
+    );
   }
 
   async nextNonce(signingAddresses: Address[]): Promise<number> {
