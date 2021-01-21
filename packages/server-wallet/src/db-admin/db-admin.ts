@@ -23,7 +23,7 @@ import {extractDBConfigFromServerWalletConfig, ServerWalletConfig} from '../conf
 export class DBAdmin {
   /**
    * Creates a database based on the database specified in the wallet configuration
-   * @param config The wallet configuration object containing the database configuration to use
+   * @param config The wallet configuration object with a database specified
    */
   static async createDatabase(config: ServerWalletConfig): Promise<void> {
     const knex = Knex(extractDBConfigFromServerWalletConfig(config));
@@ -32,7 +32,7 @@ export class DBAdmin {
   }
 
   /**
-   * Creates the database specified in the knex instance connection info.
+   * Creates the database specified by the knex instance connection info
    * @param knex The knex instance which should have a db name specified
    */
   static async createDatabaseFromKnex(knex: Knex): Promise<void> {
@@ -50,7 +50,7 @@ export class DBAdmin {
   }
 
   /**
-   * Drops the database specified in the knex instance connection info.
+   * Drops the database specified by the knex instance connection info
    * @param knex The knex instance which should have a db name specified
    */
   static async dropDatabaseFromKnex(knex: Knex): Promise<void> {
@@ -68,7 +68,7 @@ export class DBAdmin {
   }
 
   /**
-   * Performs wallet database migrations for the given knex instance.
+   * Performs wallet database migrations for the database specified by the knex instance connection info
    * @param knex The knex instance that will be used for the migrations
    */
   static async migrateDatabaseFromKnex(knex: Knex): Promise<void> {
@@ -82,7 +82,7 @@ export class DBAdmin {
   /**
    * Truncates data from all the specified tables
    * @param config The wallet configuration object containing the database configuration to use
-   * @param tables A list of table names to truncate. Defaults to ALL tables.
+   * @param tables A list of table names to truncate. Defaults to ALL tables
    */
   static async truncateDatabase(config: ServerWalletConfig, tables = defaultTables): Promise<void> {
     const knex = Knex(extractDBConfigFromServerWalletConfig(config));
@@ -92,8 +92,8 @@ export class DBAdmin {
 
   /**
    * Truncates data from all the specified tables
-   * @param knex A connected knex instance
-   * @param tables A list of table names to truncate. Defaults to ALL tables.
+   * @param knex A knex instance connected to a wallet database
+   * @param tables A list of table names to truncate, which defaults to ALL tables
    */
   static async truncateDataBaseFromKnex(knex: Knex, tables = defaultTables): Promise<void> {
     // eslint-disable-next-line no-process-env
@@ -104,7 +104,6 @@ export class DBAdmin {
   }
 }
 
-// helpers
 function getDbName(knex: Knex): string {
   return knex.client.config.connection.database;
 }
