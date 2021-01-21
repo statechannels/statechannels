@@ -34,7 +34,7 @@
   "scripts": {
     "api-documenter": "node scripts/api-documenter.js",
     "build-docs-website": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus build",
-    "start": "yarn trigger-api-generation && yarn api-documenter && docusaurus start",
+    "start": "yarn trigger-api-generation && yarn api-documenter && yarn docusaurus start",
     "trigger-api-generation": "yarn lerna run generate-api"
   }
 }
