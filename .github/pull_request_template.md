@@ -19,18 +19,6 @@ Multiple changes are not recommended, so this section should normally be omitted
 1. `'foo'` is replaced by `'bar'`
 2. `'fizzbuzz'` is optimized for gas
 
-## Labels
-
-Feel free to delete options that are not relevant.
-
-- [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
-- [ ] Bug fix (non-breaking change which fixes an issue)
-- [ ] New feature (non-breaking change which adds functionality)
-- [ ] Chore (tech debt, improved developer experience, etc)
-- [ ] Performance improvement (either gas efficiency or computational efficiency)
-- [ ] Requires a documentation update
-- [ ] Security related (requires two sets of eyes before merging)
-
 # [Optional] How Has This Been Tested?
 
 Did you need to run manual tests to verify this change? If so, please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
@@ -45,6 +33,7 @@ Did you need to run manual tests to verify this change? If so, please describe t
 - [ ] I have commented my code wherever necessary
 - [ ] I have added tests that prove my fix is effective or that my feature works
 ## Project management
+- [ ] I have applied the [appropriate labels](https://github.com/statechannels/statechannels/issues/3177)
 - [ ] I have linked to relevant issues
 - [ ] I have added dependent tickets
 - [ ] I have assigned myself to this PR
