@@ -1,5 +1,5 @@
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../adjudicator-status';
 import {Channel} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';

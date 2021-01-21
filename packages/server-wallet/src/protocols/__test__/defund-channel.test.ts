@@ -1,7 +1,7 @@
 import {makeAddress, State} from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
 import {DBDefundChannelObjective, ObjectiveModel} from '../../models/objective';

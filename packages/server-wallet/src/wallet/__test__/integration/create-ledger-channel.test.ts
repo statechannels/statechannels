@@ -6,7 +6,7 @@ import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {defaultTestConfig} from '../../../config';
-import * as DBAdmin from '../../../db-admin/db-admin';
+import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
 beforeEach(async () => {

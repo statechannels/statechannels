@@ -25,7 +25,7 @@ import {channel, withSupportedState} from '../../../models/__test__/fixtures/cha
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
-import * as DBAdmin from '../../../db-admin/db-admin';
+import {DBAdmin} from '../../../db-admin/db-admin';
 import {LedgerRequest} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/wallet-error';

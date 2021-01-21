@@ -3,7 +3,7 @@ import waitForExpect from 'wait-for-expect';
 
 import {defaultTestConfig, Wallet} from '..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
