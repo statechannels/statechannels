@@ -9,7 +9,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
 import {ObjectiveModel} from '../../../models/objective';
-import * as DBAdmin from '../../../db-admin/db-admin';
+import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {defaultTestConfig} from '../../../config';
 

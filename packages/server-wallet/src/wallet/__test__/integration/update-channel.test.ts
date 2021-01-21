@@ -11,7 +11,7 @@ import {defaultTestConfig} from '../../../config';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {AppBytecode} from '../../../models/app-bytecode';
 import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';
-import * as DBAdmin from '../../../db-admin/db-admin';
+import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
 

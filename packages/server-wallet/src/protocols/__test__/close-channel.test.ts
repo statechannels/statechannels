@@ -1,4 +1,4 @@
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {MockChainService} from '../../chain-service';
 import {defaultTestConfig} from '../../config';

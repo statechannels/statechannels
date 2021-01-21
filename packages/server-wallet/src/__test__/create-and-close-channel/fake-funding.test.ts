@@ -7,7 +7,7 @@ import {
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
-import * as DBAdmin from '../../db-admin/db-admin';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';

@@ -1,7 +1,7 @@
 import {configureEnvVariables} from '@statechannels/devtools';
 import Knex from 'knex';
 import _ from 'lodash';
-import * as DBAdmin from '../src/db-admin/db-admin'
+import {DBAdmin} from '../src/db-admin/db-admin'
 
 configureEnvVariables();
 
