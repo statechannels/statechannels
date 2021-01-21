@@ -88,6 +88,9 @@ export class ConfigValidationError extends Error {
   }
 }
 
+/**
+ * A statechannels wallet
+ */
 export class SingleThreadedWallet
   extends EventEmitter<EventEmitterType>
   implements WalletInterface, ChainEventSubscriberInterface {
@@ -178,7 +181,18 @@ export class SingleThreadedWallet
       timingMetrics: this.walletConfig.metricsConfiguration.timingMetrics,
     });
   }
-
+  /**
+   * Adds an ethereum private key to the wallet's database
+   *
+   * @remarks
+   *
+   * This key will be used to sign state channel upates.
+   * If a key is not added, a random key will be generated the first time it is required.
+   * If a private key already exists, calling this function wil be a no-op.
+   *
+   * @param  privateKey - An ethereum private key
+   * @returns Promise
+   */
   public async addSigningKey(privateKey: PrivateKey): Promise<void> {
     await this.store.addSigningKey(privateKey);
   }
