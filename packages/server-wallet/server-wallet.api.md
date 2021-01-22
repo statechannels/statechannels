@@ -79,19 +79,19 @@ export type DatabasePoolConfiguration = {
 // @public (undocumented)
 export class DBAdmin {
     // (undocumented)
-    static createDatabase(config: ServerWalletConfig): Promise<void>;
+    static createDatabase(config: IncomingServerWalletConfig): Promise<void>;
     // (undocumented)
     static createDatabaseFromKnex(knex: Knex): Promise<void>;
     // (undocumented)
-    static dropDatabase(config: ServerWalletConfig): Promise<void>;
+    static dropDatabase(config: IncomingServerWalletConfig): Promise<void>;
     // (undocumented)
     static dropDatabaseFromKnex(knex: Knex): Promise<void>;
     // (undocumented)
-    static migrateDatabase(config: ServerWalletConfig): Promise<void>;
+    static migrateDatabase(config: IncomingServerWalletConfig): Promise<void>;
     // (undocumented)
     static migrateDatabaseFromKnex(knex: Knex): Promise<void>;
     // (undocumented)
-    static truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
+    static truncateDatabase(config: IncomingServerWalletConfig, tables?: string[]): Promise<void>;
     // (undocumented)
     static truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
 }
