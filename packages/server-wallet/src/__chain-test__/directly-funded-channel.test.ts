@@ -253,7 +253,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     fundingStatus: 'Funded',
   });
 
-  await mineBlocks(5);
+  await mineBlocks(2);
 
   const channelClosedA = await channelClosedAPromise;
 
