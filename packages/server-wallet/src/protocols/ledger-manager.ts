@@ -72,8 +72,8 @@ export class LedgerManager {
           ledgerChannelId,
           tx
         );
-        const action = recordFunctionMetrics(protocol(protocolState), this.timingMetrics);
-
+        const action = recordFunctionMetrics(inferAction(protocolState), this.timingMetrics);
+        console.log(action);
         if (!action) {
           ledgerFullyProcessed = true;
           if (!requiresAnotherCrankUponCompletion) {
@@ -338,17 +338,14 @@ const mergeProposedLedgerUpdates = (
 };
 
 const exchangeSignedLedgerStates = ({
-  fundingChannel: {supported, latestSignedByMe, latest, channelId},
+  fundingChannel: {supported, latest, channelId},
   myLedgerProposal: {proposal: myProposedOutcome},
   theirLedgerProposal: {proposal: theirProposedOutcome},
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolStateWithDefinedProposals): DismissLedgerProposals | SignLedgerUpdate | false => {
+}: ProtocolStateWithDefinedProposals): DismissLedgerProposals | SignLedgerUpdate => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
   const nextTurnNum = supported.turnNum + 1;
-
-  // Already signed something and waiting for reply
-  if (latestSignedByMe.turnNum === nextTurnNum) return false;
 
   const outcome = _.isEqual(theirProposedOutcome, myProposedOutcome)
     ? myProposedOutcome
@@ -384,14 +381,11 @@ const exchangeSignedLedgerStates = ({
 
 const exchangeProposals = ({
   fundingChannel: {supported, channelId, myIndex, participants},
-  myLedgerProposal: {proposal, nonce},
+  myLedgerProposal: {nonce},
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolState): MarkInsufficientFunds | ProposeLedgerUpdate | false => {
+}: ProtocolState): MarkInsufficientFunds | ProposeLedgerUpdate | typeof noAction => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-
-  // Don't propose another commit, wait for theirs
-  if (proposal) return false;
 
   const {outcome, channelsNotFunded} = redistributeFunds(
     supportedOutcome,
@@ -406,7 +400,7 @@ const exchangeProposals = ({
           channelId,
           channelsNotFunded,
         }
-      : false
+      : noAction
     : {
         type: 'ProposeLedgerUpdate',
         channelId,
@@ -416,11 +410,11 @@ const exchangeProposals = ({
       };
 };
 
-const markRequestsAsComplete = ({
-  fundingChannel: {supported, channelId: ledgerChannelId},
+const getFundedAndDefundedChannels = ({
+  fundingChannel: {supported},
   channelsRequestingFunds,
   channelsReturningFunds,
-}: ProtocolState): MarkLedgerFundingRequestsAsComplete | false => {
+}: ProtocolState): {fundedChannels: Bytes32[]; defundedChannels: Bytes32[]} => {
   const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
   const supportedChannelIds = _.map(supportedOutcome.allocationItems, 'destination');
 
@@ -434,14 +428,7 @@ const markRequestsAsComplete = ({
     .difference(supportedChannelIds)
     .value();
 
-  if (fundedChannels.length + defundedChannels.length === 0) return false;
-
-  return {
-    type: 'MarkLedgerFundingRequestsAsComplete',
-    fundedChannels,
-    defundedChannels,
-    ledgerChannelId,
-  };
+  return {fundedChannels, defundedChannels};
 };
 
 const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
@@ -450,12 +437,26 @@ const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
 const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithDefinedProposals =>
   Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
 
-const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult<ProtocolAction> =>
-  (hasUnhandledLedgerRequests(ps) &&
-    (markRequestsAsComplete(ps) ||
-      (finishedExchangingProposals(ps) && exchangeSignedLedgerStates(ps)) ||
-      exchangeProposals(ps))) ||
-  noAction;
+function inferAction(ps: ProtocolState): ProtocolAction | typeof noAction {
+  if (hasUnhandledLedgerRequests(ps)) {
+    const {fundedChannels, defundedChannels} = getFundedAndDefundedChannels(ps);
+    if (!(fundedChannels.length + defundedChannels.length === 0))
+      return {
+        type: 'MarkLedgerFundingRequestsAsComplete',
+        fundedChannels,
+        defundedChannels,
+        ledgerChannelId: ps.fundingChannel.channelId,
+      };
+    if (
+      finishedExchangingProposals(ps) &&
+      !(ps.fundingChannel.latestSignedByMe.turnNum === ps.fundingChannel.supported.turnNum + 1) // extract into helper "already signed something and waiting for reply"
+    ) {
+      return exchangeSignedLedgerStates(ps);
+    }
+    if (!ps.myLedgerProposal.proposal) return exchangeProposals(ps);
+  }
+  return noAction;
+}
 
 /**
  * Helper method to retrieve scoped data needed for ProcessLedger protocol.
