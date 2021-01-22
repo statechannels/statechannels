@@ -40,8 +40,8 @@ export default {
   handler: async (argv: {[key: string]: any} & Argv['argv']): Promise<void> => {
     const {database, numPayments, channels} = argv;
 
-    const payerClient = await recordFunctionMetrics(
-      PayerClient.create(
+    const payerClient = recordFunctionMetrics(
+      await PayerClient.create(
         alice().privateKey,
         `http://127.0.0.1:65535`,
         overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database})

@@ -25,8 +25,8 @@ export default class PayerClient {
     receiverHttpServerURL: string,
     config?: ServerWalletConfig
   ): Promise<PayerClient> {
-    const wallet = await recordFunctionMetrics(
-      ServerWallet.create(config ?? payerConfig),
+    const wallet = recordFunctionMetrics(
+      await ServerWallet.create(config ?? payerConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
     return new PayerClient(pk, receiverHttpServerURL, wallet);

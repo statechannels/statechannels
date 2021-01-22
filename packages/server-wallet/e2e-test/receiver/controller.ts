@@ -10,8 +10,8 @@ import {WALLET_VERSION} from '../../src/version';
 
 export default class ReceiverController {
   static async create(): Promise<ReceiverController> {
-    const wallet = await recordFunctionMetrics(
-      Wallet.create(receiverConfig),
+    const wallet = recordFunctionMetrics(
+      await Wallet.create(receiverConfig),
       defaultConfig.metricsConfiguration.timingMetrics
     );
     return new ReceiverController(wallet);
