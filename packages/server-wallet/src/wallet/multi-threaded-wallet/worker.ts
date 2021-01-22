@@ -9,20 +9,23 @@ import {ServerWalletConfig} from '../../config';
 
 import {isStateChannelWorkerData} from './worker-data';
 
-// We only expect a worker thread to use one postgres connection but we enforce it just to make sure
-const walletConfig: ServerWalletConfig = {
-  ...(workerData as ServerWalletConfig),
-  databaseConfiguration: {
-    connection: workerData.databaseConfiguration.connection,
-    pool: {min: 0, max: 1},
-  },
-  workerThreadAmount: 0, // don't want workers to start more workers
-};
+startWorker();
 
-const logger = createLogger(walletConfig);
+async function startWorker() {
+  // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
+  const walletConfig: ServerWalletConfig = {
+    ...(workerData as ServerWalletConfig),
+    databaseConfiguration: {
+      connection: workerData.databaseConfiguration.connection,
+      pool: {min: 0, max: 1},
+    },
+    workerThreadAmount: 0, // don't want workers to start more workers
+  };
 
-logger.debug(`Worker %o starting`, threadId);
-Wallet.create(walletConfig).then(wallet => {
+  const logger = createLogger(walletConfig);
+
+  logger.debug(`Worker %o starting`, threadId);
+  const wallet = await Wallet.create(walletConfig);
   parentPort?.on('message', async (message: any) => {
     if (isMainThread) {
       parentPort?.postMessage(
@@ -64,4 +67,4 @@ Wallet.create(walletConfig).then(wallet => {
     }
   });
   logger.info(`Thread %o started`, threadId);
-});
+}
