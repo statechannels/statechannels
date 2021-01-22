@@ -123,16 +123,16 @@ function getDbNameFromConfig(config: IncomingServerWalletConfig): string {
 }
 
 const defaultTables = [
-  SigningWallet.tableName,
-  Channel.tableName,
-  Nonce.tableName,
-  ObjectiveModel.tableName,
-  ObjectiveChannelModel.tableName,
-  Funding.tableName,
-  AppBytecode.tableName,
-  LedgerRequest.tableName,
-  LedgerProposal.tableName,
-  Funding.tableName,
-  AdjudicatorStatusModel.tableName,
-  ChainServiceRequest.tableName,
-];
+  SigningWallet,
+  Channel,
+  Nonce,
+  ObjectiveModel,
+  ObjectiveChannelModel,
+  Funding,
+  AppBytecode,
+  LedgerRequest,
+  LedgerProposal,
+  Funding,
+  AdjudicatorStatusModel,
+  ChainServiceRequest,
+].map(model => model.tableName);
