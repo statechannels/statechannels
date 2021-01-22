@@ -59,7 +59,6 @@ beforeEach(async () => {
     logger: store.logger,
     timingMetrics: defaultTestConfig().metricsConfiguration.timingMetrics,
   });
-  await store.dbAdmin().migrateDB();
   await store.dbAdmin().truncateDB();
 });
 
