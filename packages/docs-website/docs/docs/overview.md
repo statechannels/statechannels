@@ -4,8 +4,6 @@ title: statechannels docs
 slug: /
 ---
 
-[//]: # 'THIS PAGE WILL BE SERVED AT /, SO LINKS SHOULD BE ABSOLUTE'
-
 Welcome to the statechannels documentation site!
 
 :::important
