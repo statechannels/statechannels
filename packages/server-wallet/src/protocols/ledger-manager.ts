@@ -21,11 +21,10 @@ import {Bytes32} from '../type-aliases';
 import {LedgerRequestType} from '../models/ledger-request';
 import {recordFunctionMetrics} from '../metrics';
 
-import {Protocol, ProtocolResult, ChannelState, ChannelStateWithSupported} from './state';
+import {ChannelState, ChannelStateWithSupported} from './state';
 import {
   DismissLedgerProposals,
   MarkInsufficientFunds,
-  MarkLedgerFundingRequestsAsComplete,
   noAction,
   ProposeLedgerUpdate,
   ProtocolAction,
