@@ -170,7 +170,7 @@ export type MultipleChannelOutput = {
 export class MultiThreadedWallet extends SingleThreadedWallet {
     protected constructor(walletConfig: IncomingServerWalletConfig);
     // (undocumented)
-    static create(walletConfig: IncomingServerWalletConfig): MultiThreadedWallet;
+    static create(walletConfig: IncomingServerWalletConfig): Promise<MultiThreadedWallet>;
     // (undocumented)
     destroy(): Promise<void>;
     // (undocumented)
@@ -285,7 +285,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
-    static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet;
+    static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet>;
     // (undocumented)
     createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
     // (undocumented)
