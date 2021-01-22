@@ -437,6 +437,9 @@ const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
 const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithDefinedProposals =>
   Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
 
+const waitingForReply = (ps: ProtocolState): boolean =>
+  ps.fundingChannel.latestSignedByMe.turnNum === ps.fundingChannel.supported.turnNum + 1;
+
 function inferAction(ps: ProtocolState): ProtocolAction | typeof noAction {
   if (hasUnhandledLedgerRequests(ps)) {
     const {fundedChannels, defundedChannels} = getFundedAndDefundedChannels(ps);
@@ -447,10 +450,7 @@ function inferAction(ps: ProtocolState): ProtocolAction | typeof noAction {
         defundedChannels,
         ledgerChannelId: ps.fundingChannel.channelId,
       };
-    if (
-      finishedExchangingProposals(ps) &&
-      !(ps.fundingChannel.latestSignedByMe.turnNum === ps.fundingChannel.supported.turnNum + 1) // extract into helper "already signed something and waiting for reply"
-    ) {
+    if (finishedExchangingProposals(ps) && !waitingForReply(ps)) {
       return exchangeSignedLedgerStates(ps);
     }
     if (!ps.myLedgerProposal.proposal) return exchangeProposals(ps);
