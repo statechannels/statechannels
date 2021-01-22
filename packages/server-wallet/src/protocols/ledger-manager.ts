@@ -450,9 +450,7 @@ const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
 const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithDefinedProposals =>
   Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
 
-export const protocol: Protocol<ProtocolState> = (
-  ps: ProtocolState
-): ProtocolResult<ProtocolAction> =>
+const protocol: Protocol<ProtocolState> = (ps: ProtocolState): ProtocolResult<ProtocolAction> =>
   (hasUnhandledLedgerRequests(ps) &&
     (markRequestsAsComplete(ps) ||
       (finishedExchangingProposals(ps) && exchangeSignedLedgerStates(ps)) ||
