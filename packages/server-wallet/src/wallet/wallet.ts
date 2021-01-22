@@ -705,7 +705,14 @@ export class SingleThreadedWallet
     const ledgersToProcess = _.uniq(ledgerIdsFromChannels.concat(ledgerIdsFundingChannels));
 
     for (const ledgerChannelId of ledgersToProcess) {
-      const result = await this.ledgerManager.crank(ledgerChannelId, response);
+      const result = await this.ledgerManager.crank(ledgerChannelId, response).catch(err => {
+        // We log and swallow errors thrown during cranking
+        // So that the wallet can continue processing other ledger channels.
+        // TODO review this choice
+        // https://github.com/statechannels/statechannels/pull/3169#issuecomment-763637894
+        this.logger.error({err}, `Error cranking ledger channel ${ledgerChannelId}`);
+        return false;
+      });
       requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || result;
     }
 
