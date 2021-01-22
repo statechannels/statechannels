@@ -59,6 +59,7 @@ beforeEach(async () => {
     logger: store.logger,
     timingMetrics: defaultTestConfig().metricsConfiguration.timingMetrics,
   });
+  await store.dbAdmin().migrateDB();
   await store.dbAdmin().truncateDB();
 });
 
@@ -638,7 +639,6 @@ describe('exchanging signed ledger state updates', () => {
       );
 
       let ledgerProposals = await store.getLedgerProposals(ledgerChannel.channelId);
-      console.log(ledgerProposals);
 
       // crank the ledger manager
       const response = new WalletResponse();
