@@ -78,13 +78,13 @@ export type DatabasePoolConfiguration = {
 
 // @public
 export class DBAdmin {
-    static createDatabase(config: ServerWalletConfig): Promise<void>;
+    static createDatabase(config: IncomingServerWalletConfig): Promise<void>;
     static createDatabaseFromKnex(knex: Knex): Promise<void>;
-    static dropDatabase(config: ServerWalletConfig): Promise<void>;
+    static dropDatabase(config: IncomingServerWalletConfig): Promise<void>;
     static dropDatabaseFromKnex(knex: Knex): Promise<void>;
-    static migrateDatabase(config: ServerWalletConfig): Promise<void>;
+    static migrateDatabase(config: IncomingServerWalletConfig): Promise<void>;
     static migrateDatabaseFromKnex(knex: Knex): Promise<void>;
-    static truncateDatabase(config: ServerWalletConfig, tables?: string[]): Promise<void>;
+    static truncateDatabase(config: IncomingServerWalletConfig, tables?: string[]): Promise<void>;
     static truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
 }
 
