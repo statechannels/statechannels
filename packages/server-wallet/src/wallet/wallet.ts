@@ -191,7 +191,7 @@ export class SingleThreadedWallet
    * If a private key already exists, calling this function wil be a no-op.
    *
    * @param  privateKey - An ethereum private key
-   * @returns Promise
+   * @returns A promise that resolves when the key has been successfully added.
    */
   public async addSigningKey(privateKey: PrivateKey): Promise<void> {
     await this.store.addSigningKey(privateKey);
