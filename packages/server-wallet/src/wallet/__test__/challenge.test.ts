@@ -13,7 +13,7 @@ import {stateWithHashSignedBy} from './fixtures/states';
 
 let w: Wallet;
 beforeAll(async () => {
-  w = Wallet.create(defaultTestConfig());
+  w = await Wallet.create(defaultTestConfig());
 });
 
 beforeEach(async () => {

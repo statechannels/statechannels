@@ -41,7 +41,7 @@ export default {
     const {database, numPayments, channels} = argv;
 
     const payerClient = recordFunctionMetrics(
-      new PayerClient(
+      await PayerClient.create(
         alice().privateKey,
         `http://127.0.0.1:65535`,
         overwriteConfigWithDatabaseConnection(defaultTestConfig(), {database})

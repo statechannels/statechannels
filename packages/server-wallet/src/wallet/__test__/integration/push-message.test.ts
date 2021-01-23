@@ -42,7 +42,7 @@ let wallet: Wallet;
 
 beforeAll(async () => {
   await DBAdmin.migrateDatabase(defaultTestConfig());
-  wallet = Wallet.create(defaultTestConfig());
+  wallet = await Wallet.create(defaultTestConfig());
 });
 
 afterAll(async () => {

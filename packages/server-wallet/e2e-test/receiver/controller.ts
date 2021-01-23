@@ -9,10 +9,15 @@ import {defaultConfig} from '../../src/config';
 import {WALLET_VERSION} from '../../src/version';
 
 export default class ReceiverController {
-  private readonly wallet: Wallet = recordFunctionMetrics(
-    Wallet.create(receiverConfig),
-    defaultConfig.metricsConfiguration.timingMetrics
-  );
+  static async create(): Promise<ReceiverController> {
+    const wallet = recordFunctionMetrics(
+      await Wallet.create(receiverConfig),
+      defaultConfig.metricsConfiguration.timingMetrics
+    );
+    return new ReceiverController(wallet);
+  }
+
+  private constructor(private readonly wallet: Wallet) {}
 
   public async warmup(): Promise<void> {
     this.wallet.warmUpThreads();

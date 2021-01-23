@@ -34,8 +34,8 @@ beforeAll(async () => {
     DBAdmin.migrateDatabase(aWalletConfig),
     DBAdmin.migrateDatabase(bWalletConfig),
   ]);
-  a = Wallet.create(aWalletConfig);
-  b = Wallet.create(bWalletConfig);
+  a = await Wallet.create(aWalletConfig);
+  b = await Wallet.create(bWalletConfig);
 
   participantA = {
     signingAddress: await a.getSigningAddress(),

@@ -66,7 +66,7 @@ describe('e2e', () => {
 
   beforeAll(async () => {
     // Create actors
-    payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
+    payerClient = await PayerClient.create(alice().privateKey, `http://127.0.0.1:65535`);
 
     // Gets participant info for testing convenience
     payer = payerClient.me;
@@ -134,8 +134,8 @@ describe('payments', () => {
   describe('syncing', () => {
     let payerClient: PayerClient;
 
-    beforeAll(() => {
-      payerClient = new PayerClient(alice().privateKey, `http://127.0.0.1:65535`);
+    beforeAll(async () => {
+      payerClient = await PayerClient.create(alice().privateKey, `http://127.0.0.1:65535`);
     });
 
     afterAll(async () => {
