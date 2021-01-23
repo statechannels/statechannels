@@ -105,7 +105,7 @@ export class SingleThreadedWallet
   public static create(walletConfig: IncomingServerWalletConfig): SingleThreadedWallet {
     const wallet = new SingleThreadedWallet(walletConfig);
     // This is an async method so it could continue executing after this method returns
-    // wallet.registerExistingChannelsWithChainService();
+    wallet.registerExistingChannelsWithChainService();
     return wallet;
   }
 
