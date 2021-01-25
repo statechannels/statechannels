@@ -99,7 +99,7 @@ expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(expectedC
 
 ## Call `challenge` again
 
-It is important to understand that a challenge may be "cleared" by another more recent challenge. The channel will be left in challenge mode (so it has not really been 'cleared' in that sense), but some [on chain storage](./understand-channel-storage) will be updated, such as the deadline for responding.
+It is important to understand that a challenge may be "cleared" by another more recent challenge. The channel will be left in challenge mode (so it has not really been 'cleared' in that sense), but some [on chain storage](./understand-adjudicator-status) will be updated, such as the deadline for responding.
 
 ## Extract info from Adjudicator Events
 

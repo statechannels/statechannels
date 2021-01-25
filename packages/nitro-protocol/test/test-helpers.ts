@@ -13,7 +13,7 @@ import {
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {Bytes} from '../src/contract/types';
-import {channelDataToChannelStorageHash} from '../src/contract/channel-storage';
+import {channelDataToStatus} from '../src/contract/channel-storage';
 import {
   AllocationAssetOutcome,
   encodeAllocation,
@@ -67,28 +67,28 @@ export function getPlaceHolderContractAddress(): string {
 
 export const nonParticipant = ethers.Wallet.createRandom();
 
-export const clearedChallengeHash = (turnNumRecord = 5): Bytes32 =>
-  channelDataToChannelStorageHash({
+export const clearedChallengeFingerprint = (turnNumRecord = 5): Bytes32 =>
+  channelDataToStatus({
     turnNumRecord,
     finalizesAt: 0,
   });
 
-export const ongoingChallengeHash = (turnNumRecord = 5): Bytes32 =>
-  channelDataToChannelStorageHash({
+export const ongoingChallengeFingerprint = (turnNumRecord = 5): Bytes32 =>
+  channelDataToStatus({
     turnNumRecord,
     finalizesAt: 1e12,
     challengerAddress: constants.AddressZero,
     outcome: [],
   });
 
-export const finalizedOutcomeHash = (
+export const finalizedFingerprint = (
   turnNumRecord = 5,
   finalizesAt = 1,
   outcome: Outcome = [],
   state = undefined,
   challengerAddress = undefined
 ): Bytes32 =>
-  channelDataToChannelStorageHash({
+  channelDataToStatus({
     turnNumRecord,
     finalizesAt,
     outcome,

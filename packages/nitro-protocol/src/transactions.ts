@@ -15,19 +15,6 @@ export const NITRO_MAX_GAS = 6_000_000; // should be below the block gas limit, 
 // rinkeby: 10000000
 // ganache:  6721975 (hardcoded but can be overriden via config)
 
-export async function getChannelStorage(
-  provider: providers.Provider,
-  contractAddress: string,
-  channelId: string
-): Promise<[Uint256, Uint256, Uint256]> {
-  const forceMove = new Contract(
-    contractAddress,
-    forceMoveTrans.ForceMoveContractInterface,
-    provider
-  );
-  return await forceMove.getChannelStorage(channelId);
-}
-
 export function createChallengeTransaction(
   signedStates: SignedState[],
   challengePrivateKey: string

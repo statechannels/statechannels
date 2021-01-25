@@ -31,8 +31,8 @@ beforeAll(async () => {
     DBAdmin.migrateDatabase(aWalletConfig),
     DBAdmin.migrateDatabase(bWalletConfig),
   ]);
-  a = Wallet.create(aWalletConfig);
-  b = Wallet.create(bWalletConfig);
+  a = await Wallet.create(aWalletConfig);
+  b = await Wallet.create(bWalletConfig);
 });
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);

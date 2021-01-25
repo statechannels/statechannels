@@ -9,7 +9,9 @@ import {WorkerManager} from './manager';
 export class MultiThreadedWallet extends SingleThreadedWallet {
   private workerManager: WorkerManager;
 
-  public static create(walletConfig: IncomingServerWalletConfig): MultiThreadedWallet {
+  public static async create(
+    walletConfig: IncomingServerWalletConfig
+  ): Promise<MultiThreadedWallet> {
     return new this(walletConfig);
   }
 

@@ -5,9 +5,9 @@ import {MultiThreadedWallet} from './multi-threaded-wallet';
 import {SingleThreadedWallet} from './wallet';
 
 export abstract class Wallet extends SingleThreadedWallet {
-  static create(
+  static async create(
     walletConfig: IncomingServerWalletConfig
-  ): SingleThreadedWallet | MultiThreadedWallet {
+  ): Promise<SingleThreadedWallet | MultiThreadedWallet> {
     if (walletConfig?.workerThreadAmount && walletConfig.workerThreadAmount > 0) {
       return MultiThreadedWallet.create(walletConfig);
     } else {

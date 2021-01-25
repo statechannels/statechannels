@@ -3,7 +3,7 @@ import {Contract, Wallet, ethers} from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToStatus} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
 import {respondArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -111,9 +111,9 @@ describe('respond', () => {
       };
       const responseStateHash = hashState(responseState);
 
-      const challengeExistsHash = slotEmpty
+      const challengeExistsFingerprint = slotEmpty
         ? ethers.constants.HashZero
-        : channelDataToChannelStorageHash({
+        : channelDataToStatus({
             turnNumRecord,
             finalizesAt,
             state: challenger ? challengeState : undefined,
@@ -122,8 +122,8 @@ describe('respond', () => {
           });
 
       // Call public wrapper to set state (only works on test contract)
-      await (await ForceMove.setChannelStorageHash(channelId, challengeExistsHash)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(challengeExistsHash);
+      await (await ForceMove.setStatus(channelId, challengeExistsFingerprint)).wait();
+      expect(await ForceMove.statusOf(channelId)).toEqual(challengeExistsFingerprint);
 
       // Sign the state
       const responseSignature = await sign(responder, responseStateHash);
@@ -146,11 +146,11 @@ describe('respond', () => {
 
         // Compute and check new expected ChannelDataHash
 
-        const expectedChannelStorageHash = channelDataToChannelStorageHash({
+        const expectedFingerprint = channelDataToStatus({
           turnNumRecord: turnNumRecord + 1,
           finalizesAt: 0,
         });
-        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+        expect(await ForceMove.statusOf(channelId)).toEqual(expectedFingerprint);
       }
     }
   );

@@ -9,19 +9,19 @@ import './interfaces/IForceMoveApp.sol';
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
  */
 contract ForceMove is IForceMove {
-    mapping(bytes32 => bytes32) public channelStorageHashes;
+    mapping(bytes32 => bytes32) public statusOf;
 
     // Public methods:
 
     /**
-     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
-     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
+     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
+     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
+     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
      */
-    function getChannelStorage(bytes32 channelId)
+    function unpackStatus(bytes32 channelId)
         external
         view
         returns (
@@ -30,7 +30,7 @@ contract ForceMove is IForceMove {
             uint160 fingerprint
         )
     {
-        (turnNumRecord, finalizesAt, fingerprint) = _getChannelStorage(channelId);
+        (turnNumRecord, finalizesAt, fingerprint) = _unpackStatus(channelId);
     }
 
     /**
@@ -102,7 +102,7 @@ contract ForceMove is IForceMove {
             whoSignedWhat
         );
 
-        channelStorageHashes[channelId] = _hashChannelData(
+        statusOf[channelId] = _generateStatus(
             ChannelData(
                 largestTurnNum,
                 uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
@@ -134,7 +134,7 @@ contract ForceMove is IForceMove {
         // No need to validate fixedPart.participants.length here, as that validation would have happened during challenge
 
         bytes32 channelId = _getChannelId(fixedPart);
-        (uint48 turnNumRecord, uint48 finalizesAt, ) = _getChannelStorage(channelId);
+        (uint48 turnNumRecord, uint48 finalizesAt, ) = _unpackStatus(channelId);
 
         bytes32 challengeOutcomeHash = keccak256(variablePartAB[0].outcome);
         bytes32 responseOutcomeHash = keccak256(variablePartAB[1].outcome);
@@ -331,7 +331,7 @@ contract ForceMove is IForceMove {
         );
 
         // effects
-        channelStorageHashes[channelId] = _hashChannelData(
+        statusOf[channelId] = _generateStatus(
             ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash) //solhint-disable-line not-rely-on-time
         );
         emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
@@ -675,7 +675,7 @@ contract ForceMove is IForceMove {
      * @param newTurnNumRecord New turnNumRecord to overwrite existing value
      */
     function _clearChallenge(bytes32 channelId, uint48 newTurnNumRecord) internal {
-        channelStorageHashes[channelId] = _hashChannelData(
+        statusOf[channelId] = _generateStatus(
             ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
@@ -688,7 +688,7 @@ contract ForceMove is IForceMove {
      * @param newTurnNumRecord New turnNumRecord intended to overwrite existing value
      */
     function _requireIncreasedTurnNumber(bytes32 channelId, uint48 newTurnNumRecord) internal view {
-        (uint48 turnNumRecord, , ) = _getChannelStorage(channelId);
+        (uint48 turnNumRecord, , ) = _unpackStatus(channelId);
         require(newTurnNumRecord > turnNumRecord, 'turnNumRecord not increased.');
     }
 
@@ -702,7 +702,7 @@ contract ForceMove is IForceMove {
         internal
         view
     {
-        (uint48 turnNumRecord, , ) = _getChannelStorage(channelId);
+        (uint48 turnNumRecord, , ) = _unpackStatus(channelId);
         require(newTurnNumRecord >= turnNumRecord, 'turnNumRecord decreased.');
     }
 
@@ -760,7 +760,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a channel.
      */
     function _requireMatchingStorage(ChannelData memory data, bytes32 channelId) internal view {
-        require(_matchesHash(data, channelStorageHashes[channelId]), 'hash(ChannelData)!=storage');
+        require(_matchesStatus(data, statusOf[channelId]), 'status(ChannelData)!=storage');
     }
 
     /**
@@ -769,10 +769,10 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a channel.
      */
     function _mode(bytes32 channelId) internal view returns (ChannelMode) {
-        // Note that _getChannelStorage(someRandomChannelId) returns (0,0,0), which is
+        // Note that _unpackStatus(someRandomChannelId) returns (0,0,0), which is
         // correct when nobody has written to storage yet.
 
-        (, uint48 finalizesAt, ) = _getChannelStorage(channelId);
+        (, uint48 finalizesAt, ) = _unpackStatus(channelId);
         if (finalizesAt == 0) {
             return ChannelMode.Open;
             // solhint-disable-next-line not-rely-on-time
@@ -784,14 +784,14 @@ contract ForceMove is IForceMove {
     }
 
     /**
-     * @notice Hashes the input data and formats it for on chain storage.
-     * @dev Hashes the input data and formats it for on chain storage.
+     * @notice Formats the input data for on chain storage.
+     * @dev Formats the input data for on chain storage.
      * @param channelData ChannelData data.
      */
-    function _hashChannelData(ChannelData memory channelData)
+    function _generateStatus(ChannelData memory channelData)
         internal
         pure
-        returns (bytes32 newHash)
+        returns (bytes32 status)
     {
         // The hash is constructed from left to right.
         uint256 result;
@@ -803,21 +803,35 @@ contract ForceMove is IForceMove {
         // logical or with finalizesAt padded with 160 zeros to get the next 48 bits
         result |= (uint256(channelData.finalizesAt) << (cursor -= 48));
 
-        // logical or with the last 160 bits of the hash of the encoded storage
-        result |= uint256(uint160(uint256(keccak256(abi.encode(channelData)))));
+        // logical or with the last 160 bits of the hash the remaining channelData fields
+        // (we call this the fingerprint)
+        result |= uint256(
+            uint160(
+                uint256(
+                    keccak256(
+                        abi.encode(
+                            channelData.stateHash,
+                            channelData.challengerAddress,
+                            channelData.outcomeHash
+                        )
+                    )
+                )
+            )
+        );
 
-        newHash = bytes32(result);
+        status = bytes32(result);
     }
 
     /**
-     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
-     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the channelStorageHash of a particular channel.
+     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
+     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return fingerprint Unique identifier for the channel's current state, up to hash collisions.
+     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
+
      */
-    function _getChannelStorage(bytes32 channelId)
+    function _unpackStatus(bytes32 channelId)
         internal
         view
         returns (
@@ -826,21 +840,21 @@ contract ForceMove is IForceMove {
             uint160 fingerprint
         )
     {
-        bytes32 storageHash = channelStorageHashes[channelId];
+        bytes32 status = statusOf[channelId];
         uint16 cursor = 256;
-        turnNumRecord = uint48(uint256(storageHash) >> (cursor -= 48));
-        finalizesAt = uint48(uint256(storageHash) >> (cursor -= 48));
-        fingerprint = uint160(uint256(storageHash));
+        turnNumRecord = uint48(uint256(status) >> (cursor -= 48));
+        finalizesAt = uint48(uint256(status) >> (cursor -= 48));
+        fingerprint = uint160(uint256(status));
     }
 
     /**
      * @notice Checks that a given ChannelData struct matches a supplied bytes32 when formatted for storage.
      * @dev Checks that a given ChannelData struct matches a supplied bytes32 when formatted for storage.
      * @param data A given ChannelData data structure.
-     * @param h Some data in on-chain storage format.
+     * @param s Some data in on-chain storage format.
      */
-    function _matchesHash(ChannelData memory data, bytes32 h) internal pure returns (bool) {
-        return _hashChannelData(data) == h;
+    function _matchesStatus(ChannelData memory data, bytes32 s) internal pure returns (bool) {
+        return _generateStatus(data) == s;
     }
 
     /**

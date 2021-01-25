@@ -116,11 +116,11 @@ export interface ChannelResult {
     // (undocumented)
     appDefinition: Address;
     // (undocumented)
-    challengeExpirationTime?: number;
+    challengeStatus: 'Challenge Finalized' | 'Challenge Active' | 'No Challenge Detected';
     // (undocumented)
     channelId: ChannelId;
     // (undocumented)
-    fundingStatus: FundingStatus;
+    fundingStatus?: FundingStatus;
     // (undocumented)
     participants: Participant[];
     // (undocumented)

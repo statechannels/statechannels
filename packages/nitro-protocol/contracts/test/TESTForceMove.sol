@@ -69,14 +69,14 @@ contract TESTForceMove is ForceMove {
         return _recoverSigner(_d, sig);
     }
 
-    // public setter for channelStorageHashes
+    // public setter for statusOf
 
     /**
-     * @dev Manually set the channelStorageHash for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
+     * @dev Manually set the fingerprint for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
      * @param channelId Unique identifier for a state channel.
-     * @param channelData The channelData to be hashed and stored against the channelId
+     * @param channelData The channelData to be formatted and stored against the channelId
      */
-    function setChannelStorage(bytes32 channelId, ChannelData memory channelData) public {
+    function setStatusFromChannelData(bytes32 channelId, ChannelData memory channelData) public {
         if (channelData.finalizesAt == 0) {
             require(
                 channelData.stateHash == bytes32(0) &&
@@ -86,33 +86,37 @@ contract TESTForceMove is ForceMove {
             );
         }
 
-        channelStorageHashes[channelId] = hashChannelData(channelData);
+        statusOf[channelId] = _generateStatus(channelData);
     }
 
     /**
-     * @dev Manually set the channelStorageHash for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
+     * @dev Manually set the fingerprint for a given channelId.  Shortcuts the public methods (ONLY USE IN A TESTING ENVIRONMENT).
      * @param channelId Unique identifier for a state channel.
-     * @param h The channelStorageHash to store against the channelId
+     * @param f The fingerprint to store against the channelId
      */
-    function setChannelStorageHash(bytes32 channelId, bytes32 h) public {
-        channelStorageHashes[channelId] = h;
+    function setStatus(bytes32 channelId, bytes32 f) public {
+        statusOf[channelId] = f;
     }
 
     /**
      * @dev Wrapper for otherwise internal function. Hashes the input data and formats it for on chain storage.
      * @param channelData ChannelData data.
      */
-    function hashChannelData(ChannelData memory channelData) public pure returns (bytes32 newHash) {
-        return _hashChannelData(channelData);
+    function generateStatus(ChannelData memory channelData)
+        public
+        pure
+        returns (bytes32 newStatus)
+    {
+        return _generateStatus(channelData);
     }
 
     /**
      * @dev Wrapper for otherwise internal function. Checks that a given ChannelData struct matches a supplied bytes32 when formatted for storage.
      * @param cs A given ChannelData data structure.
-     * @param h Some data in on-chain storage format.
+     * @param f Some data in on-chain storage format.
      */
-    function matchesHash(ChannelData memory cs, bytes32 h) public pure returns (bool) {
-        return _matchesHash(cs, h);
+    function matchesStatus(ChannelData memory cs, bytes32 f) public pure returns (bool) {
+        return _matchesStatus(cs, f);
     }
 
     /**

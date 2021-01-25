@@ -81,6 +81,7 @@ function mineOnEvent(contract: Contract) {
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
+
   await Promise.all(
     [aWalletConfig, bWalletConfig].map(async config => {
       await DBAdmin.dropDatabase(config);
@@ -91,6 +92,7 @@ beforeAll(async () => {
 
   a = Wallet.create(aWalletConfig);
   b = Wallet.create(bWalletConfig);
+
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,

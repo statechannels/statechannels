@@ -26,7 +26,7 @@ import {ObjectiveModel} from '../../../models/objective';
 
 let w: Wallet;
 beforeEach(async () => {
-  w = Wallet.create(defaultTestConfig());
+  w = await Wallet.create(defaultTestConfig());
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
   await seedBobsSigningWallet(w.knex);
 });

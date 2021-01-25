@@ -4,7 +4,7 @@ const {HashZero} = ethers.constants;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToStatus} from '../../../src/contract/channel-storage';
 import {Outcome} from '../../../src/contract/outcome';
 import {getFixedPart, State} from '../../../src/contract/state';
 import {concludeArgs} from '../../../src/contract/transaction-creators/force-move';
@@ -13,12 +13,12 @@ import {
   UNACCEPTABLE_WHO_SIGNED_WHAT,
 } from '../../../src/contract/transaction-creators/revert-reasons';
 import {
-  clearedChallengeHash,
-  finalizedOutcomeHash,
+  clearedChallengeFingerprint,
+  finalizedFingerprint,
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
-  ongoingChallengeHash,
+  ongoingChallengeFingerprint,
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
@@ -81,29 +81,29 @@ const unsupported = {
   appData: [HashZero, HashZero, HashZero],
 };
 const turnNumRecord = 5;
-const channelOpen = clearedChallengeHash(turnNumRecord);
-const challengeOngoing = ongoingChallengeHash(turnNumRecord);
-const finalized = finalizedOutcomeHash(turnNumRecord);
+const channelOpen = clearedChallengeFingerprint(turnNumRecord);
+const challengeOngoing = ongoingChallengeFingerprint(turnNumRecord);
+const finalized = finalizedFingerprint(turnNumRecord);
 
 let channelNonce = getRandomNonce('conclude');
 describe('conclude', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | initialChannelStorageHash | largestTurnNum                   | support        | reasonString
-    ${accepts1} | ${HashZero}               | ${turnNumRecord - nParticipants} | ${threeStates} | ${undefined}
-    ${accepts2} | ${HashZero}               | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
-    ${accepts2} | ${HashZero}               | ${turnNumRecord + 1}             | ${oneState}    | ${undefined}
-    ${accepts3} | ${channelOpen}            | ${turnNumRecord + 2}             | ${oneState}    | ${undefined}
-    ${accepts4} | ${challengeOngoing}       | ${turnNumRecord + 3}             | ${oneState}    | ${undefined}
-    ${accepts5} | ${challengeOngoing}       | ${turnNumRecord + 4}             | ${oneState}    | ${undefined}
-    ${accepts6} | ${channelOpen}            | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
-    ${accepts7} | ${challengeOngoing}       | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
-    ${reverts1} | ${channelOpen}            | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts2} | ${challengeOngoing}       | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts3} | ${finalized}              | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
+    description | initialFingerprint  | largestTurnNum                   | support        | reasonString
+    ${accepts1} | ${HashZero}         | ${turnNumRecord - nParticipants} | ${threeStates} | ${undefined}
+    ${accepts2} | ${HashZero}         | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${accepts2} | ${HashZero}         | ${turnNumRecord + 1}             | ${oneState}    | ${undefined}
+    ${accepts3} | ${channelOpen}      | ${turnNumRecord + 2}             | ${oneState}    | ${undefined}
+    ${accepts4} | ${challengeOngoing} | ${turnNumRecord + 3}             | ${oneState}    | ${undefined}
+    ${accepts5} | ${challengeOngoing} | ${turnNumRecord + 4}             | ${oneState}    | ${undefined}
+    ${accepts6} | ${channelOpen}      | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${accepts7} | ${challengeOngoing} | ${turnNumRecord - 1}             | ${oneState}    | ${undefined}
+    ${reverts1} | ${channelOpen}      | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts2} | ${challengeOngoing} | ${turnNumRecord + nParticipants} | ${unsupported} | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts3} | ${finalized}        | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({description, initialChannelStorageHash, largestTurnNum, support, reasonString}) => {
+    async ({description, initialFingerprint, largestTurnNum, support, reasonString}) => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
       const {appData, whoSignedWhat} = support;
@@ -123,8 +123,8 @@ describe('conclude', () => {
         });
       }
       // Call public wrapper to set state (only works on test contract)
-      await (await ForceMove.setChannelStorageHash(channelId, initialChannelStorageHash)).wait();
-      expect(await ForceMove.channelStorageHashes(channelId)).toEqual(initialChannelStorageHash);
+      await (await ForceMove.setStatus(channelId, initialFingerprint)).wait();
+      expect(await ForceMove.statusOf(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
@@ -141,14 +141,14 @@ describe('conclude', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = channelDataToChannelStorageHash({
+        const expectedFingerprint = channelDataToStatus({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
         });
 
-        // Check channelStorageHash against the expected value
-        expect(await ForceMove.channelStorageHashes(channelId)).toEqual(expectedChannelStorageHash);
+        // Check fingerprint against the expected value
+        expect(await ForceMove.statusOf(channelId)).toEqual(expectedFingerprint);
       }
     }
   );

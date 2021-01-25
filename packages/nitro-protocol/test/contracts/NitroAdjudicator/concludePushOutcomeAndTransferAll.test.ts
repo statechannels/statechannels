@@ -7,7 +7,7 @@ import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc2
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {channelDataToChannelStorageHash} from '../../../src/contract/channel-storage';
+import {channelDataToStatus} from '../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../src/contract/outcome';
 import {State} from '../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../src/contract/transaction-creators/nitro-adjudicator';
@@ -148,7 +148,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
     }: {
       description: string;
       outcomeShortHand: OutcomeShortHand;
-      initialChannelStorageHash;
+      initialFingerprint;
       heldBefore: OutcomeShortHand;
       heldAfter: OutcomeShortHand;
       newOutcome: OutcomeShortHand;
@@ -162,7 +162,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
       const largestTurnNum = turnNumRecord + 1;
-      const initialChannelStorageHash = ethers.constants.HashZero;
+      const initialFingerprint = ethers.constants.HashZero;
 
       // Transfer some tokens into ERC20AssetHolder
       // Do this step before transforming input data (easier)
@@ -202,12 +202,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       }
 
       // Call public wrapper to set state (only works on test contract)
-      await (
-        await NitroAdjudicator.setChannelStorageHash(channelId, initialChannelStorageHash)
-      ).wait();
-      expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-        initialChannelStorageHash
-      );
+      await (await NitroAdjudicator.setStatus(channelId, initialFingerprint)).wait();
+      expect(await NitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
 
       // Sign the states
       const sigs = await signStates(states, wallets, whoSignedWhat);
@@ -234,16 +230,14 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedChannelStorageHash = channelDataToChannelStorageHash({
+        const expectedFingerprint = channelDataToStatus({
           turnNumRecord: 0,
           finalizesAt: blockTimestamp,
           outcome,
         });
 
-        // Check channelStorageHash against the expected value
-        expect(await NitroAdjudicator.channelStorageHashes(channelId)).toEqual(
-          expectedChannelStorageHash
-        );
+        // Check fingerprint against the expected value
+        expect(await NitroAdjudicator.statusOf(channelId)).toEqual(expectedFingerprint);
 
         // Extract logs
         const {logs} = await (await tx).wait();

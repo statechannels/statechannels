@@ -88,7 +88,7 @@ export {
   AllocationAssetOutcome,
   hashOutcome,
 } from './contract/outcome';
-export {channelDataToChannelStorageHash} from './contract/channel-storage';
+export {channelDataToStatus} from './contract/channel-storage';
 
 export {
   State,

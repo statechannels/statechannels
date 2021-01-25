@@ -7,7 +7,7 @@ import {logger} from '../logger';
 
 import ReceiverController from './controller';
 export async function startApp(): Promise<express.Application> {
-  const controller = new ReceiverController();
+  const controller = await ReceiverController.create();
   await controller.warmup();
   const app = express();
 
