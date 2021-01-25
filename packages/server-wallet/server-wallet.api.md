@@ -321,7 +321,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // Warning: (ae-forgotten-export) The symbol "Output" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
-    mergeMessages(output: Output[]): MultipleChannelOutput;
+    static mergeOutputs(output: Output[]): MultipleChannelOutput;
     // Warning: (ae-forgotten-export) The symbol "ObjectiveManager" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

@@ -214,7 +214,7 @@ export class SingleThreadedWallet
     );
   }
 
-  public mergeMessages(output: Output[]): MultipleChannelOutput {
+  public static mergeOutputs(output: Output[]): MultipleChannelOutput {
     return WalletResponse.mergeOutputs(output);
   }
 
