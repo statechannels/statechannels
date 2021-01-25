@@ -1,3 +1,7 @@
+# Architecture notes
+
+Please see [architecture notes](./docs/index.md)
+
 # Unit testing and running the server locally
 
 ## Setup
