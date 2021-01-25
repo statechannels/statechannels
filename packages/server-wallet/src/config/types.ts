@@ -53,7 +53,10 @@ export type MetricsConfiguration = {timingMetrics: boolean; metricsOutputFile?: 
 /**
  * Chain service configuration options
  */
-export type ChainServiceConfiguration = {attachChainService: boolean} & Partial<ChainServiceArgs>;
+export type ChainServiceConfiguration = {
+  attachChainService: boolean;
+  // We don't want to accept a complex object like the logger in the configuration object
+} & Partial<Exclude<ChainServiceArgs, 'logger'>>;
 
 /**
  * The minimum required configuration to use the server wallet.
