@@ -20,7 +20,7 @@ The derived data is stored inside the following mapping (with `channelId` as the
     mapping(bytes32 => bytes32) public statusOf;
 ```
 
-Generating a 32 byte status involves
+Generating a 32 byte `status` involves
 
 - setting the most significant 48 bits to the `turnNumRecord`
 - setting the next most significant 48 bits to `finalizesAt`
@@ -78,7 +78,7 @@ Note that a new `validTransition` `m`-chain may be implied by a single, signed s
 
 ### Channel Modes
 
-The `finalizesAt` part of the fingerprint, together with block timestamp, imply a channel is in one or the other of three modes:
+The `finalizesAt` part of the status, together with block timestamp, imply a channel is in one or the other of three modes:
 
 ```solidity
 function _mode(bytes32 channelId) internal view returns (ChannelMode) {
