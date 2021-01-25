@@ -63,7 +63,7 @@ export class ChannelDefunder {
         }
       } else if (channel.hasConclusionProof) {
         await ChainServiceRequest.insertOrUpdate(channelId, 'withdraw', tx);
-        this.chainService.concludeAndWithdraw(channel.support);
+        await this.chainService.concludeAndWithdraw(channel.support);
         await this.store.markObjectiveStatus(objective, 'succeeded', tx);
         return;
       }
