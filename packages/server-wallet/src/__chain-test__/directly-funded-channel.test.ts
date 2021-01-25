@@ -90,8 +90,8 @@ beforeAll(async () => {
     })
   );
 
-  a = Wallet.create(aWalletConfig);
-  b = Wallet.create(bWalletConfig);
+  a = await Wallet.create(aWalletConfig);
+  b = await Wallet.create(bWalletConfig);
 
   const assetHolder = new Contract(
     ethAssetHolderAddress,
