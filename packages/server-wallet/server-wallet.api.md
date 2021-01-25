@@ -369,6 +369,4 @@ export abstract class Wallet extends SingleThreadedWallet {
 }
 
 
-// (No @packageDocumentation comment for this package)
-
 ```
