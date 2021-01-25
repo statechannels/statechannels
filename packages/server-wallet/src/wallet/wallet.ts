@@ -243,6 +243,19 @@ export class SingleThreadedWallet
     );
   }
 
+  /**
+   * Streamlines wallet output messsages.
+   *
+   * @remarks
+   * Helps to enable more efficient messaging. Channel results are sorted and deduplicated. Messages to the same recipient are merged.
+   *
+   * @privateRemarks
+   * TODO: Consider whether we need to make this method public (at time of writing, it is used only once in consuming code)
+   * TODO: Is this method well named? "Merge" doesn't really do justice to what is going on. "Messages" is not in harmony with "Output[]".
+   *
+   * @param output - An array of output messages and channel results.
+   * @returns A streamlined output of messages.
+   */
   public static mergeOutputs(output: Output[]): MultipleChannelOutput {
     return WalletResponse.mergeOutputs(output);
   }
