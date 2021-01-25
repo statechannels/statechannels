@@ -326,6 +326,12 @@ export class SingleThreadedWallet
     }
   }
 
+  /**
+   * Trigger an on-chain challenge.
+   *
+   * @param challengeState - The state to raise the challenge with.
+   * @returns A promise that resolves to a channel output.
+   */
   async challenge(channelId: string): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
