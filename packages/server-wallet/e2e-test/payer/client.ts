@@ -1,25 +1,34 @@
 import axios from 'axios';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
-import {Wallet, constants} from 'ethers';
+import {Wallet, constants, providers} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {Wallet as ServerWallet} from '../../src';
+import {SingleChannelOutput, Wallet as ServerWallet} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {defaultConfig, ServerWalletConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
 
+// eslint-disable-next-line no-process-env
+const RPC_ENDPOINT = process.env.RPC_ENDPOINT;
+const ETH_ASSET_HOLDER_ADDRESS = makeAddress(
+  // eslint-disable-next-line no-process-env
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
+);
+
 export default class PayerClient {
   readonly config: ServerWalletConfig;
+  readonly provider: providers.JsonRpcProvider;
   private constructor(
     private readonly pk: Bytes32,
     private readonly receiverHttpServerURL: string,
     private readonly wallet: ServerWallet
   ) {
     this.config = wallet.walletConfig;
+    this.provider = new providers.JsonRpcProvider(RPC_ENDPOINT);
   }
   public static async create(
     pk: Bytes32,
@@ -36,6 +45,12 @@ export default class PayerClient {
 
   public async warmup(): Promise<void> {
     await this.wallet.warmUpThreads();
+  }
+
+  private async mineBlocks(confirmations = 5) {
+    for (const _i in _.range(confirmations)) {
+      await this.provider.send('evm_mine', []);
+    }
   }
   public async destroy(): Promise<void> {
     await this.wallet.destroy();
@@ -80,6 +95,13 @@ export default class PayerClient {
   }
 
   public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
+    this.wallet.on('channelUpdated', (o: SingleChannelOutput) =>
+      this.wallet.logger.trace({event: o}, 'Channel Updated event')
+    );
+
+    // We use some arbitrary non-zero amount to force a deposit to happen
+    const payerAmount = BN.from(1000);
+
     const {
       outbox: [{params}],
       channelResults: [{channelId}],
@@ -92,10 +114,10 @@ export default class PayerClient {
         participants: [this.me, receiver],
         allocations: [
           {
-            assetHolderAddress: AddressZero,
+            assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
             allocationItems: [
               {
-                amount: BN.from(0),
+                amount: payerAmount,
                 destination: this.destination,
               },
               {amount: BN.from(0), destination: receiver.destination},
@@ -108,8 +130,22 @@ export default class PayerClient {
 
     const prefund2 = await this.messageReceiverAndExpectReply(params.data);
 
-    const postfund1 = await this.wallet.pushMessage(prefund2);
-    const postfund2 = await this.messageReceiverAndExpectReply(postfund1.outbox[0].params.data);
+    const prefund2Response = await this.wallet.pushMessage(prefund2);
+
+    // This promise resolves when there is something in the outbox to send
+    // Either from the prefund2Response or from a channel updated event
+    const waitForMessageToSend = new Promise<unknown>(resolve => {
+      if (prefund2Response.outbox.length > 0) {
+        resolve(prefund2Response.outbox[0].params.data);
+      }
+      this.wallet.on('channelUpdated', (o: SingleChannelOutput) => {
+        if (o.outbox.length > 0) resolve(o.outbox[0].params.data);
+      });
+    });
+
+    await this.mineBlocks(10);
+    const message = await waitForMessageToSend;
+    const postfund2 = await this.messageReceiverAndExpectReply(message);
     await this.wallet.pushMessage(postfund2);
 
     const {channelResult} = await this.wallet.getState({channelId});

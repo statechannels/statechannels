@@ -5,6 +5,7 @@ import Knex = require('knex');
 import {Participant, makeDestination, makeAddress} from '@statechannels/wallet-core';
 import {Wallet} from 'ethers';
 import axios from 'axios';
+import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
@@ -23,6 +24,14 @@ import {LOG_PATH} from './logger';
 const config: ServerWalletConfig = {
   ...defaultTestConfig(),
   loggingConfiguration: {logLevel: 'trace', logDestination: LOG_PATH},
+  chainServiceConfiguration: {
+    attachChainService: true,
+    // eslint-disable-next-line no-process-env
+    provider: process.env.RPC_ENDPOINT,
+    /* eslint-disable-next-line no-process-env */
+    pk: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
+    allowanceMode: 'MaxUint',
+  },
 };
 
 export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(config, {
