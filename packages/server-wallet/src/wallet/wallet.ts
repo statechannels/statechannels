@@ -85,7 +85,7 @@ export class ConfigValidationError extends Error {
 }
 
 /**
- * A statechannels wallet
+ * A single-threaded Nitro wallet
  */
 export class SingleThreadedWallet
   extends EventEmitter<EventEmitterType>

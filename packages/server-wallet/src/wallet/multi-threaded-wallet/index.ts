@@ -6,6 +6,9 @@ import {SingleThreadedWallet} from '../wallet';
 
 import {WorkerManager} from './manager';
 
+/**
+ * A multi-threaded Nitro wallet
+ */
 export class MultiThreadedWallet extends SingleThreadedWallet {
   private workerManager: WorkerManager;
 
