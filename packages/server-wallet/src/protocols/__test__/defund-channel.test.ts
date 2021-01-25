@@ -31,7 +31,6 @@ beforeEach(async () => {
     '0'
   );
 
-  await DBAdmin.truncateDataBaseFromKnex(knex);
   await seedAlicesSigningWallet(knex);
 });
 
@@ -46,7 +45,7 @@ describe('when there is no challenge or finalized channel', () => {
 
     // Create the channel in the database
     const c = channel();
-    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    await Channel.query(knex).insert(c);
 
     // Set the objective in the database
     const objective = await createPendingObjective(c.channelId);
@@ -74,7 +73,7 @@ describe('when there is an active challenge', () => {
       channelNonce: 1,
       vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
     });
-    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    await Channel.query(knex).insert(c);
 
     await setChallengeStatus('active', c);
 
@@ -100,7 +99,7 @@ describe('when there is an active challenge', () => {
 
     // Setup a channel with no conclusion proof
     const c = channel();
-    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    await Channel.query(knex).insert(c);
 
     await setChallengeStatus('active', c);
 
@@ -126,7 +125,7 @@ describe('when the channel is finalized on chain', () => {
     const c = channel({
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     });
-    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    await Channel.query(knex).insert(c);
 
     // If there is a funding entry that means the outcome has not been pushed
     await Funding.updateFunding(knex, c.channelId, '0x05', makeAddress(c.assetHolderAddress));
@@ -157,7 +156,7 @@ describe('when the channel is finalized on chain', () => {
     const c = channel({
       assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     });
-    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    await Channel.query(knex).insert(c);
 
     // Set a finalized channel with a final state
     await setChallengeStatus('finalized', c);
@@ -199,7 +198,7 @@ it('should fail when using non-direct funding', async () => {
 
   // Create a channel with fake funding strategy
   const c = channel({fundingStrategy: 'Fake'});
-  await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+  await Channel.query(knex).insert(c);
 
   // Store the objective
   const obj = createPendingObjective(c.channelId);
