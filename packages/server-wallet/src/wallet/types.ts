@@ -7,7 +7,7 @@ import {
   ChannelId,
   ChannelResult,
 } from '@statechannels/client-api-schema';
-import {Participant, Address as CoreAddress, State} from '@statechannels/wallet-core';
+import {Address as CoreAddress, State} from '@statechannels/wallet-core';
 
 import {Outgoing} from '../protocols/actions';
 import {Bytes32, Uint256} from '../type-aliases';
@@ -39,7 +39,6 @@ export type WalletEvent = ChannelUpdatedEvent;
 
 export type WalletInterface = {
   // App utilities
-  getParticipant(): Promise<Participant | undefined>;
   registerAppDefinition(appDefinition: string): Promise<void>;
   registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
   // App channel management

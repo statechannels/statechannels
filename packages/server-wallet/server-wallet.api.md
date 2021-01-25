@@ -299,8 +299,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
     // (undocumented)
-    getParticipant(): Promise<Participant | undefined>;
-    // (undocumented)
     getSigningAddress(): Promise<Address>;
     // (undocumented)
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
