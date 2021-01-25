@@ -273,6 +273,12 @@ export class SingleThreadedWallet
     this.chainService.destructor();
   }
 
+  /**
+   * Trigger a response containing a message for counterparties, with all stored states for each a set of channels.
+   *
+   * @param channelIds - List of channel ids to be sync'ed
+   * @returns A promise that resolves to an object containing the messages.
+   */
   public async syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
     const response = WalletResponse.initialize();
 
@@ -281,6 +287,12 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
 
+  /**
+   * Trigger a response containing a message for all counterparties, with all stored states for a given channel.
+   *
+   * @param channelId - The channel id to be sync'ed
+   * @returns A promise that resolves to an object containing the messages.
+   */
   public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
     await this._syncChannel(channelId, response);
