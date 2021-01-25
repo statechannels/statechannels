@@ -17,16 +17,20 @@ import {
   defaultTestConfig,
 } from '../src/config';
 
-export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
-  defaultTestConfig(),
-  {database: 'server_wallet_payer'}
-);
-export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(
-  defaultTestConfig(),
-  {database: 'server_wallet_receiver'}
-);
-
 import {PerformanceTimer} from './payer/timers';
+import {LOG_PATH} from './logger';
+
+const config: ServerWalletConfig = {
+  ...defaultTestConfig(),
+  loggingConfiguration: {logLevel: 'trace', logDestination: LOG_PATH},
+};
+
+export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(config, {
+  database: 'server_wallet_payer',
+});
+export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(config, {
+  database: 'server_wallet_receiver',
+});
 
 export type E2EServer = {
   url: string;
