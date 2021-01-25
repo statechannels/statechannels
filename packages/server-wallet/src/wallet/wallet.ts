@@ -366,6 +366,12 @@ export class SingleThreadedWallet
     return response.singleChannelOutput();
   }
 
+  /**
+   * Update the wallets knowledge about the funding for some channels
+   *
+   * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
+   * @returns A promise that resolves to a channel output.
+   */
   public async updateFundingForChannels(
     args: UpdateChannelFundingParams[]
   ): Promise<MultipleChannelOutput> {
