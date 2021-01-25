@@ -110,13 +110,13 @@ export type ChannelProposedNotification = JsonRpcNotification<'ChannelProposed',
 // @public (undocumented)
 export interface ChannelResult {
     // (undocumented)
+    adjudicatorStatus: 'Challenge' | 'Open' | 'Finalized';
+    // (undocumented)
     allocations: Allocation[];
     // (undocumented)
     appData: string;
     // (undocumented)
     appDefinition: Address;
-    // (undocumented)
-    challengeStatus: 'Challenge Finalized' | 'Challenge Active' | 'No Challenge Detected';
     // (undocumented)
     channelId: ChannelId;
     // (undocumented)
