@@ -109,23 +109,9 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Registers any channels existing in the database with the chain service
-   * so the chain service can alert us of any block chain events for existing channels
+   * Protected method. Initialize wallet via Wallet.create(..)
+   * @readonly
    */
-  private async registerExistingChannelsWithChainService() {
-    const channelsToRegister = (await this.store.getNonFinalizedChannels())
-      .map(ChannelState.toChannelResult)
-      .map(cr => ({
-        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
-        channelId: cr.channelId,
-      }));
-
-    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
-      this.chainService.registerChannel(channelId, assetHolderAddresses, this);
-    }
-  }
-
-  // protected constructor to force consumers to initialize wallet via Wallet.create(..)
   protected constructor(walletConfig: IncomingServerWalletConfig) {
     super();
 
@@ -200,6 +186,22 @@ export class SingleThreadedWallet
     await this.store.addSigningKey(privateKey);
   }
 
+  /**
+   * Registers any channels existing in the database with the chain service
+   * so the chain service can alert us of any block chain events for existing channels
+   */
+  private async registerExistingChannelsWithChainService() {
+    const channelsToRegister = (await this.store.getNonFinalizedChannels())
+      .map(ChannelState.toChannelResult)
+      .map(cr => ({
+        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+        channelId: cr.channelId,
+      }));
+
+    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
+      this.chainService.registerChannel(channelId, assetHolderAddresses, this);
+    }
+  }
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(
