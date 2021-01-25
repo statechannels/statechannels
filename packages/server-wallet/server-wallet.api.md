@@ -166,7 +166,7 @@ export type MultipleChannelOutput = {
     channelResults: ChannelResult[];
 };
 
-// @public (undocumented)
+// @public
 export class MultiThreadedWallet extends SingleThreadedWallet {
     protected constructor(walletConfig: IncomingServerWalletConfig);
     // (undocumented)
@@ -362,7 +362,7 @@ export function validateServerWalletConfig(config: Record<string, any>): {
     errors: ValidationErrorItem[];
 };
 
-// @public (undocumented)
+// @public
 export abstract class Wallet extends SingleThreadedWallet {
     // (undocumented)
     static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet | MultiThreadedWallet>;
