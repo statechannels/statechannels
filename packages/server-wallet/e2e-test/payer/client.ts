@@ -3,6 +3,7 @@ import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet, constants} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
+import _ from 'lodash';
 
 import {Wallet as ServerWallet} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
@@ -26,7 +27,7 @@ export default class PayerClient {
     config?: ServerWalletConfig
   ): Promise<PayerClient> {
     const wallet = recordFunctionMetrics(
-      await ServerWallet.create(config ?? payerConfig),
+      await ServerWallet.create(_.assign(payerConfig, config)),
       payerConfig.metricsConfiguration.timingMetrics
     );
     return new PayerClient(pk, receiverHttpServerURL, wallet);
