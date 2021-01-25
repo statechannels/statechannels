@@ -382,7 +382,15 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
 
-  async updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput> {
+  /**
+   * Update the wallets knowledge about the funding for a channel.
+   *
+   * @param args - An object specifying the channelId, asset holder address and amount.
+   * @returns A promise that resolves to a channel output.
+   */
+  public async updateChannelFunding(
+    args: UpdateChannelFundingParams
+  ): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     await this._updateChannelFunding(args, response);
