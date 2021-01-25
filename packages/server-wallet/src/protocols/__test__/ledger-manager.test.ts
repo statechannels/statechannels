@@ -639,7 +639,6 @@ describe('exchanging signed ledger state updates', () => {
       );
 
       let ledgerProposals = await store.getLedgerProposals(ledgerChannel.channelId);
-      console.log(ledgerProposals);
 
       // crank the ledger manager
       const response = new WalletResponse();
