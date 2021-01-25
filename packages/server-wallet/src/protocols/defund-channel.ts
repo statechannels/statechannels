@@ -56,7 +56,7 @@ export class ChannelDefunder {
       if (result.channelMode === 'Finalized') {
         if (!outcomePushed) {
           await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
-          this.chainService.pushOutcomeAndWithdraw(result.states[0], channel.myAddress);
+          await this.chainService.pushOutcomeAndWithdraw(result.states[0], channel.myAddress);
           await this.store.markObjectiveStatus(objective, 'succeeded', tx);
         } else {
           this.logger.trace('Outcome already pushed, doing nothing');
