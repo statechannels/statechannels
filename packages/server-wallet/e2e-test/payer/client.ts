@@ -26,8 +26,9 @@ export default class PayerClient {
     receiverHttpServerURL: string,
     config?: ServerWalletConfig
   ): Promise<PayerClient> {
+    const mergedConfig = _.assign(payerConfig, config);
     const wallet = recordFunctionMetrics(
-      await ServerWallet.create(_.assign(payerConfig, config)),
+      await ServerWallet.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
     return new PayerClient(pk, receiverHttpServerURL, wallet);
