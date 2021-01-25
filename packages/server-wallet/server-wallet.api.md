@@ -62,7 +62,7 @@ import { ValidationErrorItem } from 'joi';
 // @public
 export type ChainServiceConfiguration = {
     attachChainService: boolean;
-} & Partial<ChainServiceArgs>;
+} & Partial<Exclude<ChainServiceArgs, 'logger'>>;
 
 // @public
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
