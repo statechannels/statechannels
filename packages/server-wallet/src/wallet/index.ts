@@ -2,6 +2,7 @@ import {IncomingServerWalletConfig} from '../config';
 
 export {SingleChannelOutput, MultipleChannelOutput} from './types';
 import {MultiThreadedWallet} from './multi-threaded-wallet';
+import {WalletInterface} from './types';
 import {SingleThreadedWallet} from './wallet';
 
 /**
@@ -10,7 +11,7 @@ import {SingleThreadedWallet} from './wallet';
  * @remarks
  * The number of threads is specified in the supplied {@link @statechannels/server-wallet#RequiredServerWalletConfig | configuration}.
  */
-export abstract class Wallet extends SingleThreadedWallet {
+export abstract class Wallet extends SingleThreadedWallet implements WalletInterface {
   static async create(
     walletConfig: IncomingServerWalletConfig
   ): Promise<SingleThreadedWallet | MultiThreadedWallet> {
