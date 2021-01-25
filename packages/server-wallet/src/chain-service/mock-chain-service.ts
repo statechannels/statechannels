@@ -78,3 +78,11 @@ export class MockChainService implements ChainServiceInterface {
     return;
   }
 }
+export class ErorringMockChainService extends MockChainService {
+  pushOutcomeAndWithdraw(
+    _state: State,
+    _challengerAddress: Address
+  ): Promise<providers.TransactionResponse> {
+    throw new Error('Failed to submit transaction');
+  }
+}
