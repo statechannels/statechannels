@@ -760,16 +760,12 @@ export class SingleThreadedWallet
     externalPayouts,
   }: AssetOutcomeUpdatedArg): Promise<void> {
     const response = WalletResponse.initialize();
-    await Promise.all(
-      externalPayouts.map(payout =>
-        this.store.updateTransferredOut(
-          channelId,
-          assetHolderAddress,
-          makeDestination(payout.destination),
-          payout.amount
-        )
-      )
-    );
+    const transferredOut = externalPayouts.map(ai => ({
+      toAddress: makeDestination(ai.destination),
+      amount: ai.amount,
+    }));
+
+    await this.store.updateTransferredOut(channelId, assetHolderAddress, transferredOut);
 
     await this.takeActions([channelId], response);
 

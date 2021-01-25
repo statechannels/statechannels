@@ -81,13 +81,18 @@ function mineOnEvent(contract: Contract) {
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
-  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
-  await Promise.all([
-    DBAdmin.migrateDatabase(aWalletConfig),
-    DBAdmin.migrateDatabase(bWalletConfig),
-  ]);
+
+  await Promise.all(
+    [aWalletConfig, bWalletConfig].map(async config => {
+      await DBAdmin.dropDatabase(config);
+      await DBAdmin.createDatabase(config);
+      await DBAdmin.migrateDatabase(config);
+    })
+  );
+
   a = await Wallet.create(aWalletConfig);
   b = await Wallet.create(bWalletConfig);
+
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,
@@ -103,8 +108,7 @@ afterAll(async () => {
   provider.polling = false;
 });
 
-// TODO: This will be resolved by https://github.com/statechannels/statechannels/issues/3176
-it.skip('Create a directly funded channel between two wallets ', async () => {
+it('Create a directly funded channel between two wallets ', async () => {
   const participantA: Participant = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
@@ -251,7 +255,7 @@ it.skip('Create a directly funded channel between two wallets ', async () => {
     fundingStatus: 'Funded',
   });
 
-  await mineBlocks(5);
+  await mineBlocks(2);
 
   const channelClosedA = await channelClosedAPromise;
 
