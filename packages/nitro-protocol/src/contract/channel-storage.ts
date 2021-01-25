@@ -55,7 +55,7 @@ export function parseStatus(
 }
 const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
 
-export function fingerprint({
+function getFingerprintPreimage({
   finalizesAt,
   state,
   challengerAddress,
@@ -83,7 +83,7 @@ export function fingerprint({
 }
 
 export function encodeFingerprintPreimage(data: ChannelData): Bytes {
-  return utils.defaultAbiCoder.encode([FINGERPRINT_PREIMAGE_TYPE], [fingerprint(data)]);
+  return utils.defaultAbiCoder.encode([FINGERPRINT_PREIMAGE_TYPE], [getFingerprintPreimage(data)]);
 }
 
 function validateHexString(hexString) {
