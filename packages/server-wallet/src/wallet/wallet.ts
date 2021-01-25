@@ -332,7 +332,7 @@ export class SingleThreadedWallet
    * @param challengeState - The state to raise the challenge with.
    * @returns A promise that resolves to a channel output.
    */
-  async challenge(channelId: string): Promise<SingleChannelOutput> {
+  public async challenge(channelId: string): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     await this.knex.transaction(async tx => {
