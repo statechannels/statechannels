@@ -260,6 +260,14 @@ export class SingleThreadedWallet
     return WalletResponse.mergeOutputs(output);
   }
 
+  /**
+   * Destroy this wallet instance
+   *
+   * @remarks
+   * Removes listeners from the chainService and destroys the wallet's database connection.
+   *
+   * @returns A promise that resolves when the wallet has been destroyed.
+   */
   public async destroy(): Promise<void> {
     await this.knex.destroy();
     this.chainService.destructor();
