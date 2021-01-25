@@ -329,9 +329,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
     pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput>;
-    // (undocumented)
     registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
-    // (undocumented)
     registerAppDefinition(appDefinition: string): Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "Store" needs to be exported by the entry point index.d.ts
     //
