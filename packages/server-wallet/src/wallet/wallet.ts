@@ -383,7 +383,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Update the wallets knowledge about the funding for a channel.
+   * Update the wallet's knowledge about the funding for a channel.
    *
    * @param args - An object specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
@@ -411,6 +411,11 @@ export class SingleThreadedWallet
     await this.takeActions([channelId], response);
   }
 
+  /**
+   * Get the signing address for this wallet, or create it if it does not exist.
+   *
+   * @returns A promise that resolves to the address.
+   */
   public async getSigningAddress(): Promise<CoreAddress> {
     return await this.store.getOrCreateSigningAddress();
   }
