@@ -187,10 +187,14 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Registers any channels existing in the database with the chain service
-   * so the chain service can alert us of any block chain events for existing channels
+   * Registers any channels existing in the database with the chain service.
+   *
+   * @remarks
+   * Enables the chain service to alert the wallet of of any blockchain events for existing channels.
+   *
+   * @returns A promise that resolves when the channels have been successfully registered.
    */
-  private async registerExistingChannelsWithChainService() {
+  private async registerExistingChannelsWithChainService(): Promise<void> {
     const channelsToRegister = (await this.store.getNonFinalizedChannels())
       .map(ChannelState.toChannelResult)
       .map(cr => ({
@@ -202,6 +206,16 @@ export class SingleThreadedWallet
       this.chainService.registerChannel(channelId, assetHolderAddresses, this);
     }
   }
+
+  /**
+   * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
+   *
+   * @remarks
+   * Storing the bytecode is necessary for the wallet to verify ForceMoveApp transitions.
+   *
+   * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
+   * @returns A promise that resolves when the bytecode has been successfully stored.
+   */
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(
@@ -211,6 +225,16 @@ export class SingleThreadedWallet
     );
   }
 
+  /**
+   * Stores the supplied ForceMoveApp definition bytecode against the supplied blockchain address.
+   *
+   * @remarks
+   * Storing the bytecode is necessary for the wallet to verify ForceMoveApp transitions.
+   *
+   * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
+   * @param  bytecode - The bytecode at that address.
+   * @returns A promise that resolves when the bytecode has been successfully stored.
+   */
   public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
     return this.store.upsertBytecode(
       utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
