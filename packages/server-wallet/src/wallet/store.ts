@@ -8,7 +8,6 @@ import {
   StateVariables,
   ChannelConstants,
   Participant,
-  makeDestination,
   deserializeObjective,
   isOpenChannel,
   isCloseChannel,
@@ -74,7 +73,6 @@ export class Store {
     logger?: Logger
   ) {
     if (timingMetrics) {
-      this.getFirstParticipant = recordFunctionMetrics(this.getFirstParticipant);
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
       this.lockApp = recordFunctionMetrics(this.lockApp);
       this.signState = recordFunctionMetrics(this.signState);
@@ -92,15 +90,6 @@ export class Store {
 
   async addSigningKey(privateKey: PrivateKey): Promise<void> {
     await this.getOrCreateSigningAddress(new ethers.Wallet(privateKey));
-  }
-
-  async getFirstParticipant(): Promise<Participant> {
-    const signingAddress = await this.getOrCreateSigningAddress();
-    return {
-      participantId: signingAddress,
-      signingAddress,
-      destination: makeDestination(signingAddress),
-    };
   }
 
   async getOrCreateSigningAddress(wallet = ethers.Wallet.createRandom()): Promise<Address> {

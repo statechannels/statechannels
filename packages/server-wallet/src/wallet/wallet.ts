@@ -13,7 +13,6 @@ import {
   validatePayload,
   Outcome,
   convertToParticipant,
-  Participant,
   BN,
   makeAddress,
   Address as CoreAddress,
@@ -38,7 +37,7 @@ import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
-import {isWalletError, PushMessageError} from '../errors/wallet-error';
+import {PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {
   ServerWalletConfig,
@@ -293,19 +292,6 @@ export class SingleThreadedWallet
     // TODO: In v0 of challenging the challengeStatus on the channel will not be updated
     // We return a single channel result anwyays in case there are messages in the outbox
     return response.singleChannelOutput();
-  }
-
-  public async getParticipant(): Promise<Participant | undefined> {
-    let participant: Participant | undefined = undefined;
-
-    try {
-      participant = await this.store.getFirstParticipant();
-    } catch (e) {
-      if (isWalletError(e)) this.logger.error('Wallet failed to get a participant', e);
-      else throw e;
-    }
-
-    return participant;
   }
 
   public async updateFundingForChannels(
