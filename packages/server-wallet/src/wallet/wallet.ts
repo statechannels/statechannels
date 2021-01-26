@@ -532,6 +532,16 @@ export class SingleThreadedWallet
     return channel.channelId;
   }
 
+  /**
+   * Joins a list of channels.
+   *
+   * @remarks
+   * Approves an OpenChannel objective for each channel, if it exists, and cranks it.
+   * Registers each channel with the wallet's chain service.
+   *
+   * @param channelIds - The list of ids of the channels to join.
+   * @returns A promise that resolves to the channel output.
+   */
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
     const response = WalletResponse.initialize();
     const objectives = await this.store.getObjectives(channelIds);
@@ -550,6 +560,18 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
 
+  /**
+   * Joins a channel.
+   *
+   * @remarks
+   * Approves an OpenChannel objective for this channel, if it exists, and cranks it.
+   * Registers the channel with the wallet's chain service.
+   * Throws an error if the channel is not known to this wallet.
+   * Throws an error if no objectives are known that have this channel in scope.
+   *
+   * @param channelId - The id of the channel to join.
+   * @returns A promise that resolves to the channel output.
+   */
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
     const channel = await this.store.getChannelState(channelId);
