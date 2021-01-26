@@ -286,11 +286,8 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet>;
-    // (undocumented)
     createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
-    // (undocumented)
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
-    // (undocumented)
     createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
     // (undocumented)
     destroy(): Promise<void>;
