@@ -39,7 +39,7 @@ Please explain which reason, if any, why this requires more than one approval.
 - [ ] This change does not have an unduly wide scope
 - [ ] I have separated logic changes from refactor changes (formatting, renames, etc.)
 - [ ] I have commented my code wherever necessary (can be 0)
-- [ ] I have added tests that prove my fix is effective or that my feature works
+- [ ] I have added tests that prove my fix is effective or that my feature works, if necessary
 ### Project management
 - [ ] I have applied the [appropriate labels](https://www.notion.so/Team-working-agreements-2a95c926bb5642e5a5c42e4b74a9dd24#b304e56734a74dfbb341b8b4b27b1c0c)
 - [ ] I have linked to all relevant issues (can be 0)
