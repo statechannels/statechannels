@@ -105,7 +105,15 @@ export class DBAdmin {
     if (process.env.NODE_ENV !== 'development' && process.env.NODE_ENV !== 'test') {
       throw 'Cannot truncate unless in test or development environments';
     }
-    await Promise.all(tables.map(table => knex.raw(`TRUNCATE TABLE ${table} CASCADE;`)));
+    await Promise.all(
+      tables.map(async table => {
+        try {
+          await knex.raw(`TRUNCATE TABLE ${table} CASCADE;`);
+        } catch (e) {
+          console.log(`Error truncating ${table}: ${e}`);
+        }
+      })
+    );
   }
 }
 
