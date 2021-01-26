@@ -318,7 +318,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     objectiveManager: ObjectiveManager;
-    // (undocumented)
     pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
     pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput>;
     registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
