@@ -77,11 +77,9 @@ describe('e2e', () => {
     await payerClient.destroy();
   });
 
-  it('can do a simple end-to-end flow with no signed states', async () => {
-    const response = await payerClient.emptyMessage();
-    const {signedStates, objectives} = validatePayload(response);
-    expect(signedStates?.length).toBe(0);
-    expect(objectives?.length).toBe(0);
+  it.only('crashes when receiving the deposit event before receiving a state', async () => {
+    const channel = await payerClient.createBrokenPayerChannel(receiver);
+    expect(channel.status).toBe('opening');
   });
 
   it('can create a channel, send signed state via http', async () => {

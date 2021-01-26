@@ -20,7 +20,7 @@ const ETH_ASSET_HOLDER_ADDRESS = makeAddress(
 );
 
 export default class PayerClient {
-  readonly config: ServerWalletConfig;
+  public readonly config: ServerWalletConfig;
   readonly provider: providers.JsonRpcProvider;
   private constructor(
     private readonly pk: Bytes32,
@@ -94,6 +94,37 @@ export default class PayerClient {
     return channelResults;
   }
 
+  public async createBrokenPayerChannel(receiver: Participant): Promise<ChannelResult> {
+    // We use some arbitrary non-zero amount to force a deposit to happen
+    const payerAmount = BN.from(1000);
+    const {
+      outbox,
+      channelResults: [result],
+    } = await this.wallet.createChannels(
+      {
+        appData: '0x',
+        appDefinition: AddressZero,
+        fundingStrategy: 'Direct',
+        challengeDuration: ONE_DAY,
+        participants: [this.me, receiver],
+        allocations: [
+          {
+            assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+            allocationItems: [
+              {
+                amount: payerAmount,
+                destination: this.destination,
+              },
+              {amount: BN.from(0), destination: receiver.destination},
+            ],
+          },
+        ],
+      },
+      1
+    );
+    return result;
+  }
+
   public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
     this.wallet.on('channelUpdated', (o: SingleChannelOutput) =>
       this.wallet.logger.trace({event: o}, 'Channel Updated event')
@@ -145,7 +176,9 @@ export default class PayerClient {
 
     await this.mineBlocks(10);
     const message = await waitForMessageToSend;
+    this.wallet.logger.debug({message}, 'message');
     const postfund2 = await this.messageReceiverAndExpectReply(message);
+    this.wallet.logger.debug({postfund2}, 'postfund2');
     await this.wallet.pushMessage(postfund2);
 
     const {channelResult} = await this.wallet.getState({channelId});
