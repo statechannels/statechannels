@@ -420,6 +420,14 @@ export class SingleThreadedWallet
     return await this.store.getOrCreateSigningAddress();
   }
 
+  /**
+   * Creates a ledger channel.
+   *
+   * @remarks
+   * The channel will have a null app definition and null app data. This method is otherwise identical to {@link SingleThreadedWallet.createChannel}.
+   *
+   * @returns A promise that resolves to the channel output.
+   */
   async createLedgerChannel(
     args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
@@ -439,7 +447,18 @@ export class SingleThreadedWallet
 
     return response.singleChannelOutput();
   }
-
+  /**
+   * Creates a channel.
+   *
+   * @remarks
+   * The channel's nonce will be automatically chosen.
+   * The channel will be registered with the wallet's chain service.
+   * The 0th state will be created and signed.
+   * An OpenChannel objective will be created and approved.
+   *
+   * @param args - Parameters to create the channel with.
+   * @returns A promise that resolves to the channel output.
+   */
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
     const response = WalletResponse.initialize();
 
@@ -447,7 +466,13 @@ export class SingleThreadedWallet
 
     return response.multipleChannelOutput();
   }
-
+  /**
+   * Creates multiple channels with the same parameters. See {@link SingleThreadedWallet.createChannel}.
+   *
+   * @param args - Parameters to create the channels with.
+   * @param numberOfChannels - The number of desired channels.
+   * @returns A promise that resolves to the channel output.
+   */
   async createChannels(
     args: CreateChannelParams,
     numberOfChannels: number
