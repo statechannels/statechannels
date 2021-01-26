@@ -23,7 +23,7 @@ Multiple changes are not recommended, so this section should normally be omitted
 
 Did you need to run manual tests to verify this change? If so, please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce. Please also list any relevant details for your test configuration
 
-# [Optional] :warn: Does this require multiple approvals?
+# [Optional] :warning: Does this require multiple approvals?
 Please explain which reason, if any, why this requires more than one approval.
 - [ ] Is it security related?
 - [ ] Is it a significant process change?
