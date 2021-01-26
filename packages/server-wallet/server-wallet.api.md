@@ -221,6 +221,9 @@ export interface OptionalServerWalletConfig {
 // @public (undocumented)
 export type Outgoing = Notice;
 
+// @public (undocumented)
+export type Output = SingleChannelOutput | MultipleChannelOutput;
+
 // Warning: (ae-forgotten-export) The symbol "PartialConfigObject" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
@@ -255,7 +258,6 @@ export type SingleChannelOutput = {
 };
 
 // Warning: (ae-forgotten-export) The symbol "EventEmitterType" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "WalletInterface" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ChainEventSubscriberInterface" needs to be exported by the entry point index.d.ts
 //
 // @public
@@ -289,13 +291,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
     // (undocumented)
     destroy(): Promise<void>;
-    // (undocumented)
     getChannels(): Promise<MultipleChannelOutput>;
-    // (undocumented)
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     getSigningAddress(): Promise<Address>;
-    // (undocumented)
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
     //
@@ -337,12 +336,21 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
     // (undocumented)
     updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "UpdateChannelFundingParams" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     readonly walletConfig: ServerWalletConfig;
+}
+
+// @public (undocumented)
+export interface UpdateChannelFundingParams {
+    // Warning: (ae-forgotten-export) The symbol "Uint256" needs to be exported by the entry point index.d.ts
+    //
+    // (undocumented)
+    amount: Uint256;
+    // (undocumented)
+    assetHolderAddress?: Address;
+    // (undocumented)
+    channelId: ChannelId;
 }
 
 // @public (undocumented)
@@ -357,6 +365,30 @@ export abstract class Wallet extends SingleThreadedWallet {
     // (undocumented)
     static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet | MultiThreadedWallet>;
 }
+
+// Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export type WalletEvent = ChannelUpdatedEvent;
+
+// @public (undocumented)
+export type WalletInterface = {
+    registerAppDefinition(appDefinition: string): Promise<void>;
+    registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
+    createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
+    joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
+    updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
+    closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
+    getChannels(): Promise<MultipleChannelOutput>;
+    getState(args: GetStateParams): Promise<SingleChannelOutput>;
+    syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
+    syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
+    challenge(challengeState: State): Promise<SingleChannelOutput>;
+    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
+    pushMessage(m: unknown): Promise<MultipleChannelOutput>;
+    pushUpdate(m: unknown): Promise<SingleChannelOutput>;
+    mergeMessages(messages: Output[]): MultipleChannelOutput;
+};
 
 
 ```

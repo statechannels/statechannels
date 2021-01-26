@@ -705,6 +705,13 @@ export class SingleThreadedWallet
     await this.objectiveManager.commenceCloseChannel(channelId, response);
   }
 
+  /**
+   * Gets the latest {@link ChannelResult} for each ledger channel in the wallet's store.
+   *
+   * @param assetHolderAddress - The on chain address of an asset holder contract funding the ledger channels (filters the query).
+   * @param participants - The list of participants in the ledger channel (filters the query).
+   * @returns A promise that resolves to the channel output.
+   */
   async getLedgerChannels(
     assetHolderAddress: string,
     participants: APIParticipant[]
@@ -721,6 +728,11 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
 
+  /**
+   * Gets the latest {@link ChannelResult} for each channel in the wallet's store.
+   *
+   * @returns A promise that resolves to the channel output.
+   */
   async getChannels(): Promise<MultipleChannelOutput> {
     const response = WalletResponse.initialize();
 
@@ -730,6 +742,11 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
 
+  /**
+   * Gets the latest {@link ChannelResult} for a channel.
+   *
+   * @returns A promise that resolves to the channel output.
+   */
   async getState({channelId}: GetStateParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
