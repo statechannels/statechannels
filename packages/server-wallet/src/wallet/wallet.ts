@@ -763,6 +763,17 @@ export class SingleThreadedWallet
     }
   }
 
+  /**
+   * Push a message from a counterparty into the wallet.
+   *
+   * @remarks
+   * Fresh states and Ledger Proposals will be stored.
+   * Requests will be handled.
+   * Objectives with updated channels in scope will be cranked.
+   *
+   * @param rawPayload - The message to be pushed. Will be validated against a schema.
+   * @returns A promise that resolves to the channel output.
+   */
   async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
     const wirePayload = validatePayload(rawPayload);
 
@@ -783,7 +794,15 @@ export class SingleThreadedWallet
   }
 
   /**
-   * For pushing a message containing a single update to a running application channel
+   * Push a message containing a single update to a running application channel.
+   *
+   * @remarks
+   * A single fresh state will be stored.
+   * No fresh requests or objectives will stored.
+   * No objectives will be cranked.
+   *
+   * @param rawPayload - The message to be pushed. Will be validated against a schema.
+   * @returns A promise that resolves to the channel output.
    */
   async pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput> {
     const wirePayload = validatePayload(rawPayload);
