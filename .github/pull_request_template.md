@@ -5,6 +5,7 @@ Then, following a single blank line, a summary of the change and which issue is 
 - [ ] what is the problem being solved
 - [ ] why this is a good approach
 - [ ] what are the shortcomings of this approach, if any
+
 It may include
 - [ ] background information, such as "Fixes #"
 - [ ] benchmark results
