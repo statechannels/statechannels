@@ -37,7 +37,7 @@ type ChannelUpdatedEvent = {
 
 export type WalletEvent = ChannelUpdatedEvent;
 
-export type WalletInterface = {
+export interface WalletInterface {
   // App utilities
   registerAppDefinition(appDefinition: string): Promise<void>;
   registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
@@ -62,4 +62,4 @@ export type WalletInterface = {
   // Wallet <-> Wallet communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
-};
+}
