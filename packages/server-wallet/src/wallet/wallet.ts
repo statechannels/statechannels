@@ -745,6 +745,7 @@ export class SingleThreadedWallet
   /**
    * Gets the latest {@link ChannelResult} for a channel.
    *
+   * @privateRemarks TODO: Consider renaming this to getChannel() to match getChannels()
    * @returns A promise that resolves to the channel output.
    */
   async getState({channelId}: GetStateParams): Promise<SingleChannelOutput> {
