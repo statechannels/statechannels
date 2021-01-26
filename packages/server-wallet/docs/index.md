@@ -1,4 +1,4 @@
 # Architecture Notes
 
 - [Specification](./spec.md)
-- [Implemenation](./implementation.md)
+- [Implementation](./implementation.md)
