@@ -336,7 +336,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
     updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
     // (undocumented)
     updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
