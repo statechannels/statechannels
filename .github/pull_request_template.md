@@ -39,7 +39,7 @@ Please explain which reason, if any, why this requires more than one approval.
 - [ ] I have commented my code wherever necessary
 - [ ] I have added tests that prove my fix is effective or that my feature works
 ## Project management
-- [ ] I have applied the [appropriate labels](https://github.com/statechannels/statechannels/issues/3177)
+- [ ] I have applied the [appropriate labels](https://www.notion.so/Team-working-agreements-2a95c926bb5642e5a5c42e4b74a9dd24#b304e56734a74dfbb341b8b4b27b1c0c)
 - [ ] I have linked to relevant issues
 - [ ] I have added dependent tickets
 - [ ] I have assigned myself to this PR
