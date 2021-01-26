@@ -45,4 +45,4 @@ Please explain which reason, if any, why this requires more than one approval.
 - [ ] I have linked to all relevant issues (can be 0)
 - [ ] I have added all dependent tickets (can be 0)
 - [ ] I have assigned myself to this PR
-- [ ] I have associated this PR to a GitHub Project
+- [ ] I have chosen the appropriate pipeline on zenhub
