@@ -11,6 +11,7 @@ import {
   AllocationItem,
   Errors,
   StateVariables,
+  NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 
@@ -208,7 +209,7 @@ export class LedgerManager {
       const stateToSign = {
         turnNum: nextTurnNum,
         outcome,
-        appData: '0x00',
+        appData: NULL_APP_DATA,
         isFinal: false,
       };
 
