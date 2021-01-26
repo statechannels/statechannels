@@ -353,8 +353,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     readonly walletConfig: ServerWalletConfig;
-    // (undocumented)
-    warmUpThreads(): Promise<void>;
 }
 
 // @public (undocumented)

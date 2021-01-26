@@ -2,7 +2,7 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {Wallet, Message as Payload} from '../../src';
+import {Wallet, Message as Payload, MultiThreadedWallet} from '../../src';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
@@ -20,7 +20,7 @@ export default class ReceiverController {
   private constructor(private readonly wallet: Wallet) {}
 
   public async warmup(): Promise<void> {
-    this.wallet.warmUpThreads();
+    this.wallet instanceof MultiThreadedWallet && (await this.wallet.warmUpThreads());
   }
 
   private readonly myParticipantID: string = 'receiver';

@@ -800,10 +800,6 @@ export class SingleThreadedWallet
     );
     this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
-
-  async warmUpThreads(): Promise<void> {
-    // no-op for single-threaded-wallet
-  }
 }
 
 // TODO: This should be removed, and not used externally.
