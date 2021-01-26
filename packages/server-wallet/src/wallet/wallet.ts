@@ -599,6 +599,19 @@ export class SingleThreadedWallet
     return response.singleChannelOutput(false);
   }
 
+  /**
+   * Updates a channel with a new state.
+   *
+   * @remarks
+   * Signs and stores the new state, returns the result in a message for counterparties.
+   * Throws an error if the channel is not known to this wallet.
+   * Throws an error if no objectives are known that have this channel in scope.
+   *
+   * @param channelId - The id of the channel to update.
+   * @param allocations - New allocations describing a new outcome (distribution of assets) for the channel.
+   * @param appData - New application-specific data.
+   * @returns A promise that resolves to the channel output.
+   */
   async updateChannel({
     channelId,
     allocations,
