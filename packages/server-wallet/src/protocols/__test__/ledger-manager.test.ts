@@ -47,6 +47,10 @@ function simpleEthAllocation(...items: PreAllocationItem[]): SimpleAllocation {
 let store: Store;
 let ledgerManager: LedgerManager;
 
+beforeAll(async () => {
+  await DBAdmin.migrateDatabase(defaultTestConfig());
+});
+
 beforeEach(async () => {
   store = new Store(
     knex,
@@ -696,7 +700,7 @@ describe('exchanging signed ledger state updates', () => {
 
       // protocol deviation:
       const stateWithUnexpectedOutcome = ledgerChannel.wirePayload(4, [0, 1337], [1]); // signed by Bob only
-      store.pushMessage(stateWithUnexpectedOutcome);
+      await store.pushMessage(stateWithUnexpectedOutcome);
 
       // crank the ledger manager
       const response = new WalletResponse();

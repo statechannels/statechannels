@@ -9,6 +9,11 @@ import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
 let w: Wallet;
+
+beforeAll(async () => {
+  await DBAdmin.migrateDatabase(defaultTestConfig());
+});
+
 beforeEach(async () => {
   w = await Wallet.create(defaultTestConfig());
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
