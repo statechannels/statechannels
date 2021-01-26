@@ -36,7 +36,7 @@ Please explain which reason, if any, why this requires more than one approval.
 ### Code quality
 - [ ] I have written clear commit messages
 - [ ] I have performed a self-review of my own code
-- [ ] I have scoped this change as narrowly as possible
+- [ ] This change does not have an unduly wide scope
 - [ ] I have separated logic changes from refactor changes (formatting, renames, etc.)
 - [ ] I have commented my code wherever necessary (can be 0)
 - [ ] I have added tests that prove my fix is effective or that my feature works
