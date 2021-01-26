@@ -80,7 +80,7 @@ export class LedgerManager {
       // TODO: remove if possible
       protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
 
-      // exchange proposals - when do I need to do this?
+      // exchange proposals
       const crankAgain3 = await this.exchangeProposals(protocolState, tx);
       requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain3;
 
@@ -163,7 +163,7 @@ export class LedgerManager {
     await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
     await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
 
-    return true; // requiesAnotherCrankUponCompletion
+    return true; // requiresAnotherCrankUponCompletion
   }
 
   private async exchangeSignedLedgerStates(
