@@ -15,7 +15,7 @@ It may include
 The summary may omit some of these details if this PR fixes a single ticket that includes these details. It is the reviewer's discretion. 
 
 ## Changes [Optional] 
-Multiple changes are not recommended, so this section should normally be omitted. Unforunately, they are sometimes unavoidable. If there are multiple logical changes, list them separately.
+Multiple changes are not recommended, so this section should normally be omitted. Unfortunately, they are sometimes unavoidable. If there are multiple logical changes, list them separately.
 
 1. `'foo'` is replaced by `'bar'`
 2. `'fizzbuzz'` is optimized for gas
