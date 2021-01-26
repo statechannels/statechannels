@@ -24,6 +24,7 @@ const timingMetrics = false;
 let store: Store;
 
 beforeEach(async () => {
+  await DBAdmin.truncateDataBaseFromKnex(knex);
   store = new Store(
     knex,
     defaultTestConfig().metricsConfiguration.timingMetrics,
@@ -32,10 +33,6 @@ beforeEach(async () => {
   );
 
   await seedAlicesSigningWallet(knex);
-});
-
-afterEach(async () => {
-  await DBAdmin.truncateDataBaseFromKnex(knex);
 });
 
 describe('when there is no challenge or finalized channel', () => {
