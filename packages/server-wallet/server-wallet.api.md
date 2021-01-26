@@ -303,9 +303,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     holdingUpdated({ channelId, amount, assetHolderAddress }: HoldingUpdatedArg): Promise<void>;
-    // (undocumented)
     joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
     joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     knex: Knex;
