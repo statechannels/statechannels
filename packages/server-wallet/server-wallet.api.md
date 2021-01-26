@@ -280,9 +280,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     channelFinalized(arg: ChannelFinalizedArg): Promise<void>;
-    // (undocumented)
     closeChannel({ channelId }: CloseChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet>;

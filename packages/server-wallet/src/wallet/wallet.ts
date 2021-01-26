@@ -661,6 +661,16 @@ export class SingleThreadedWallet
     return this.store.lockApp(channelId, criticalCode, handleMissingChannel, true);
   }
 
+  /**
+   * Attempts to collaboratively close a list of channels.
+   *
+   * @remarks
+   * Signs, stores, and sends an isFinal=true state for each channel in the list.
+   * Creates, approves and cranks a CloseChannel objective for each channel in the list. See {@link SingleThreadedWallet.closeChannel}.
+   *
+   * @param channelId - The id of the channel to try and close.
+   * @returns A promise that resolves to the channel output.
+   */
   async closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
     const response = WalletResponse.initialize();
 
@@ -671,6 +681,17 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
 
+  /**
+   * Attempts to collaboratively close a channel.
+   *
+   * @remarks
+   * Signs, stores, and sends an isFinal=true state.
+   * Creates, approves and cranks a CloseChannel objective for the supplied channel.
+   * This objective continues working after this call resolves, and will attempt to defund the channel.
+   *
+   * @param channelId - The id of the channel to try and close.
+   * @returns A promise that resolves to the channel output.
+   */
   async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
