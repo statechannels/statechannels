@@ -310,9 +310,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     ledgerManager: LedgerManager;
     // (undocumented)
     logger: Logger;
-    // Warning: (ae-forgotten-export) The symbol "Output" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     static mergeOutputs(output: Output[]): MultipleChannelOutput;
     // Warning: (ae-forgotten-export) The symbol "ObjectiveManager" needs to be exported by the entry point index.d.ts
     //
@@ -371,23 +368,36 @@ export abstract class Wallet extends SingleThreadedWallet {
 export type WalletEvent = ChannelUpdatedEvent;
 
 // @public (undocumented)
-export type WalletInterface = {
-    registerAppDefinition(appDefinition: string): Promise<void>;
-    registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
-    createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
-    joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
-    updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
-    closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
-    getChannels(): Promise<MultipleChannelOutput>;
-    getState(args: GetStateParams): Promise<SingleChannelOutput>;
-    syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-    syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
+export interface WalletInterface {
+    // (undocumented)
     challenge(challengeState: State): Promise<SingleChannelOutput>;
-    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    getChannels(): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    getState(args: GetStateParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
     pushMessage(m: unknown): Promise<MultipleChannelOutput>;
+    // (undocumented)
     pushUpdate(m: unknown): Promise<SingleChannelOutput>;
-    mergeMessages(messages: Output[]): MultipleChannelOutput;
-};
+    // (undocumented)
+    registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
+    // (undocumented)
+    registerAppDefinition(appDefinition: string): Promise<void>;
+    // (undocumented)
+    syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
+    // (undocumented)
+    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
+}
 
 
 ```
