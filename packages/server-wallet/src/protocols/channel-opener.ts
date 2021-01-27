@@ -52,7 +52,7 @@ export class ChannelOpener {
 
       // If we haven't set the initial support entry then we set it now
       if (!channel.initialSupport || channel.initialSupport.length === 0) {
-        await Channel.setInitialSupport(channel.channelId, channel.support, tx);
+        await this.store.updateInitialSupport(channel.channelId, channel.support);
       }
 
       // if we have a full pre fund setup, delegate to the funding process to (a) see if
