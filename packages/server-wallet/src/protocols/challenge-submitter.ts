@@ -61,7 +61,7 @@ export class ChallengeSubmitter {
 
       await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
 
-      if (!channel.initialSupport || channel.initialSupport.length === 0) {
+      if (channel.initialSupport.length === 0) {
         this.logger.error(
           {channelId: channel.channelId},
           'There is no initial support stored for the channel'
