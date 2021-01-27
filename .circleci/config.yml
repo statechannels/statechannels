@@ -109,7 +109,7 @@ jobs:
           file: prepare-stats
       - <<: *restore_dep
       - run: yarn --cache-folder ~.cache/yarn
-      - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation and/or preparation artifacts (e.g. yarn.lock or api-reports)
+      - run: git diff --exit-code # Fails the job if you forgot to check in tracked installation and/or preparation artifacts (e.g. yarn.lock)
       - run: yarn lint:check
       - <<: *save_dep
 
@@ -275,6 +275,9 @@ jobs:
             - run:
                 name: build docs-website
                 command: yarn lerna run build-docs-website --stream
+            - run: 
+                name: ensure api-reports checked in
+                command: git diff --exit-code
             - run:
                 name: deploy docs-website (production)
                 command: >
@@ -293,6 +296,9 @@ jobs:
             - run:
                 name: build docs-website
                 command: yarn lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build-docs-website --stream
+            - run: 
+                name: ensure api-reports checked in
+                command: git diff --exit-code
             - run:
                 name: deploy docs-website (preview)
                 command: >
