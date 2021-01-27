@@ -5,7 +5,8 @@ import {WALLET_VERSION} from './version';
 
 export function createLogger(config: ServerWalletConfig): pino.Logger {
   const destination =
-    config.loggingConfiguration.logDestination?.toLocaleLowerCase() !== 'console'
+    config.loggingConfiguration.logDestination &&
+    config.loggingConfiguration.logDestination.toLocaleLowerCase() !== 'console'
       ? pino.destination(config.loggingConfiguration.logDestination)
       : undefined;
 
