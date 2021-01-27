@@ -141,7 +141,6 @@ export type SubmitChallenge = _Objective<
   'SubmitChallenge',
   {
     targetChannelId: string;
-    challengeState: State;
   }
 >;
 

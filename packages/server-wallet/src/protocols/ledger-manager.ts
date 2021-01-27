@@ -137,6 +137,14 @@ export class LedgerManager {
             case 'MarkLedgerFundingRequestsAsComplete': {
               const {fundedChannels, defundedChannels, ledgerChannelId} = action;
 
+              // The following behavior is specific to CHALLENGING_V0 requirements
+              // It will eventually be removed
+              // START CHALLENGING_VO
+              if (channel.initialSupport.length === 0 && channel.isSupported) {
+                await this.store.setInitialSupport(channel.channelId, channel.support, tx);
+              }
+              // END CHALLENGING_VO
+
               /**
                * After we have completed some funding requests (i.e., a new ledger state
                * has been signed), we can confidently clear now-stale proposals from the DB.

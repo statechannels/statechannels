@@ -20,12 +20,28 @@ beforeEach(async () => {
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
   await seedAlicesSigningWallet(w.knex);
 });
+it('throws an error when challenging with a non ledger channel', async () => {
+  const c = channel({
+    channelNonce: 1,
+    vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+    initialSupport: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+  });
+  await Channel.query(w.knex).insert(c);
 
+  const {channelId} = c;
+
+  expect(c.isLedger).toBe(false);
+
+  await expect(w.challenge(channelId)).rejects.toThrow('Only ledger channels support challenging');
+});
 it('submits a challenge when no challenge exists for a channel', async () => {
   const spy = jest.spyOn(w.chainService, 'challenge');
   const c = channel({
     channelNonce: 1,
+    // Set a random address so this will be a "ledger" channel
+    assetHolderAddress: '0xC4d65072D3a32E6E25D5A97c857D892D6aa6F2A4',
     vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+    initialSupport: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
   });
   await Channel.query(w.knex).insert(c);
 
@@ -33,13 +49,11 @@ it('submits a challenge when no challenge exists for a channel', async () => {
 
   const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, channelId);
 
+  expect(c.isLedger).toBe(true);
   expect(current.channelMode).toEqual('Open');
-  const challengeState = {
-    ...c.channelConstants,
-    ..._.pick(c.latest, ['turnNum', 'outcome', 'appData', 'isFinal']),
-  };
-  await w.challenge(challengeState);
-  expect(spy).toHaveBeenCalledWith([expect.objectContaining(challengeState)], alice().privateKey);
+
+  await w.challenge(channelId);
+  expect(spy).toHaveBeenCalledWith(c.initialSupport, alice().privateKey);
 });
 
 it('stores the challenge state on the challenge created event', async () => {

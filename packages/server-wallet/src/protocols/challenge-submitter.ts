@@ -29,7 +29,7 @@ export class ChallengeSubmitter {
     objective: DBSubmitChallengeObjective,
     response: WalletResponse
   ): Promise<void> {
-    const {targetChannelId: channelToLock, challengeState} = objective.data;
+    const {targetChannelId: channelToLock} = objective.data;
 
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelToLock, tx);
@@ -61,9 +61,16 @@ export class ChallengeSubmitter {
 
       await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
 
-      const signedState = await this.signState(channel, challengeState, tx);
+      if (channel.initialSupport.length === 0) {
+        this.logger.error(
+          {channelId: channel.channelId},
+          'There is no initial support stored for the channel'
+        );
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
+        return;
+      }
 
-      await this.chainService.challenge([signedState], channel.signingWallet.privateKey);
+      await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
 
       await this.store.markObjectiveStatus(objective, 'succeeded', tx);
       response.queueChannel(channel);

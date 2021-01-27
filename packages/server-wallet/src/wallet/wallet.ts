@@ -19,8 +19,6 @@ import {
   PrivateKey,
   makeDestination,
   deserializeRequest,
-  calculateChannelId,
-  State,
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -142,7 +140,7 @@ export class SingleThreadedWallet
 
     if (!valid) {
       errors.forEach(error =>
-        this.logger.error({error}, `Validation error occured ${error.message}`)
+        this.logger.error({error}, `Validation error occurred ${error.message}`)
       );
       throw new ConfigValidationError(errors);
     }
@@ -269,8 +267,7 @@ export class SingleThreadedWallet
     }
   }
 
-  async challenge(challengeState: State): Promise<SingleChannelOutput> {
-    const channelId = calculateChannelId(challengeState);
+  async challenge(channelId: string): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     await this.knex.transaction(async tx => {
@@ -278,12 +275,17 @@ export class SingleThreadedWallet
       if (!channel) {
         throw new Error(`No channel found for channel id ${channelId}`);
       }
+      // START CHALLENGING_V0
+      if (!channel.isLedger) {
+        throw new Error('Only ledger channels support challenging');
+      }
+      // END CHALLENGING_V0
 
       const {objectiveId} = await this.store.ensureObjective(
         {
           type: 'SubmitChallenge',
           participants: [],
-          data: {targetChannelId: channelId, challengeState},
+          data: {targetChannelId: channelId},
         },
         tx
       );

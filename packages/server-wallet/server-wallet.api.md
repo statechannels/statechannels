@@ -271,7 +271,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     chainService: ChainServiceInterface;
     // (undocumented)
-    challenge(challengeState: State): Promise<SingleChannelOutput>;
+    challenge(channelId: string): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "ChallengeRegisteredArg" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)

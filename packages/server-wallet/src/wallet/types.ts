@@ -7,7 +7,7 @@ import {
   ChannelId,
   ChannelResult,
 } from '@statechannels/client-api-schema';
-import {Address as CoreAddress, State} from '@statechannels/wallet-core';
+import {Address as CoreAddress} from '@statechannels/wallet-core';
 
 import {Outgoing} from '../protocols/actions';
 import {Bytes32, Uint256} from '../type-aliases';
@@ -56,7 +56,7 @@ export type WalletInterface = {
   syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
   syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
 
-  challenge(challengeState: State): Promise<SingleChannelOutput>;
+  challenge(channelId: string): Promise<SingleChannelOutput>;
 
   updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
   // Wallet <-> Wallet communication
