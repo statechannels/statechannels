@@ -276,7 +276,7 @@ jobs:
                 name: build docs-website
                 command: yarn lerna run build-docs-website --stream
             - run: 
-                name: ensure api-reports checked in
+                name: ensure api-reports checked in (yarn lerna run generate-api)
                 command: git diff --exit-code
             - run:
                 name: deploy docs-website (production)
@@ -297,7 +297,7 @@ jobs:
                 name: build docs-website
                 command: yarn lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build-docs-website --stream
             - run: 
-                name: ensure api-reports checked in
+                name: ensure api-reports checked in (yarn lerna run generate-api)
                 command: git diff --exit-code
             - run:
                 name: deploy docs-website (preview)
