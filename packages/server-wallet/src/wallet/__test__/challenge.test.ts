@@ -26,6 +26,7 @@ it('submits a challenge when no challenge exists for a channel', async () => {
   const c = channel({
     channelNonce: 1,
     vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+    initialSupport: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
   });
   await Channel.query(w.knex).insert(c);
 
@@ -34,12 +35,9 @@ it('submits a challenge when no challenge exists for a channel', async () => {
   const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, channelId);
 
   expect(current.channelMode).toEqual('Open');
-  const challengeState = {
-    ...c.channelConstants,
-    ..._.pick(c.latest, ['turnNum', 'outcome', 'appData', 'isFinal']),
-  };
-  await w.challenge(challengeState);
-  expect(spy).toHaveBeenCalledWith([expect.objectContaining(challengeState)], alice().privateKey);
+
+  await w.challenge(channelId);
+  expect(spy).toHaveBeenCalledWith([expect.objectContaining(c.initialSupport)], alice().privateKey);
 });
 
 it('stores the challenge state on the challenge created event', async () => {

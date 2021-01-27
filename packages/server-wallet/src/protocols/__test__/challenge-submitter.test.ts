@@ -45,16 +45,11 @@ describe(`challenge-submitter`, () => {
     // Add a existing request
     await ChainServiceRequest.insertOrUpdate(c.channelId, 'challenge', knex);
 
-    const challengeState = {
-      ...c.channelConstants,
-      ..._.pick(c.latest, ['appData', 'outcome', 'isFinal', 'turnNum']),
-    };
-
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {challengeState, targetChannelId: c.channelId},
+      data: {targetChannelId: c.channelId},
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));
@@ -72,7 +67,7 @@ describe(`challenge-submitter`, () => {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {challengeState, targetChannelId: c.channelId},
+      data: {targetChannelId: c.channelId},
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));
@@ -95,7 +90,7 @@ describe(`challenge-submitter`, () => {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {challengeState, targetChannelId: c.channelId},
+      data: {targetChannelId: c.channelId},
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));

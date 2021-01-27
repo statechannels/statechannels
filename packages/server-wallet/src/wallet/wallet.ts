@@ -19,8 +19,6 @@ import {
   PrivateKey,
   makeDestination,
   deserializeRequest,
-  calculateChannelId,
-  State,
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -107,6 +105,7 @@ export class SingleThreadedWallet
     const wallet = new SingleThreadedWallet(walletConfig);
 
     await wallet.registerExistingChannelsWithChainService();
+
     return wallet;
   }
 
@@ -269,8 +268,7 @@ export class SingleThreadedWallet
     }
   }
 
-  async challenge(challengeState: State): Promise<SingleChannelOutput> {
-    const channelId = calculateChannelId(challengeState);
+  async challenge(channelId: string): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     await this.knex.transaction(async tx => {
@@ -283,7 +281,7 @@ export class SingleThreadedWallet
         {
           type: 'SubmitChallenge',
           participants: [],
-          data: {targetChannelId: channelId, challengeState},
+          data: {targetChannelId: channelId},
         },
         tx
       );
@@ -737,6 +735,7 @@ export class SingleThreadedWallet
 
   // ChainEventSubscriberInterface implementation
   async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
+    console.log(channelId);
     const response = WalletResponse.initialize();
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
