@@ -62,6 +62,13 @@ async function main() {
         if (line.startsWith('|')) {
           line = line.replace(/\\\|/g, '&#124;');
         }
+
+        // I don't know why api-documenter wants to insert an html comment like this <!-- -->
+        // But it will upset docusaurus, and we don't need it.
+        // So, remove:
+        if (line.includes('<!-- -->')) {
+          line = line.replace(/<!-- -->/g, '');
+        }
         if (!skip) {
           output.push(line);
         }
