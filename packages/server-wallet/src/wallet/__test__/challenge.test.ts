@@ -49,6 +49,7 @@ it('submits a challenge when no challenge exists for a channel', async () => {
 
   const current = await AdjudicatorStatusModel.getAdjudicatorStatus(w.knex, channelId);
 
+  expect(c.isLedger).toBe(true);
   expect(current.channelMode).toEqual('Open');
 
   await w.challenge(channelId);
