@@ -136,6 +136,8 @@ export class SingleThreadedWallet
     // This allows us to log out any config validation errors
     this.logger = createLogger(populatedConfig);
 
+    this.logger.trace({walletConfig: populatedConfig}, 'Wallet initializing');
+
     const {errors, valid} = validateServerWalletConfig(populatedConfig);
 
     if (!valid) {
@@ -163,7 +165,10 @@ export class SingleThreadedWallet
     }
 
     if (this.walletConfig.chainServiceConfiguration.attachChainService) {
-      this.chainService = new ChainService(this.walletConfig.chainServiceConfiguration);
+      this.chainService = new ChainService({
+        ...this.walletConfig.chainServiceConfiguration,
+        logger: this.logger,
+      });
     } else {
       this.chainService = new MockChainService();
     }
