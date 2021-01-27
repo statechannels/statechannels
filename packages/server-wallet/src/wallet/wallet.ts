@@ -275,9 +275,11 @@ export class SingleThreadedWallet
       if (!channel) {
         throw new Error(`No channel found for channel id ${channelId}`);
       }
+      // START CHALLENGING_V0
       if (!channel.isLedger) {
         throw new Error('Only ledger channels support challenging');
       }
+      // END CHALLENGING_V0
 
       const {objectiveId} = await this.store.ensureObjective(
         {

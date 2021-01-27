@@ -156,7 +156,7 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('adjudicatorStatus')
       .first();
   }
-
+  // CHALLENGING_V0 temporary method
   static async setInitialSupport(
     channelId: string,
     support: SignedState[],
