@@ -188,7 +188,7 @@ const crankAndAssert = async (
   if (storesInitialSupport) {
     expect(updateInitialSupportSpy).toHaveBeenCalled();
   } else {
-    expect(updateInitialSupportSpy).not.toHaveLength(0);
+    expect(updateInitialSupportSpy).not.toHaveBeenCalled();
   }
   // check that funds were deposited
   if (fundsToDeposit > 0) {

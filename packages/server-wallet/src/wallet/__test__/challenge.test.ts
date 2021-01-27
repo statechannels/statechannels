@@ -37,7 +37,7 @@ it('submits a challenge when no challenge exists for a channel', async () => {
   expect(current.channelMode).toEqual('Open');
 
   await w.challenge(channelId);
-  expect(spy).toHaveBeenCalledWith([expect.objectContaining(c.initialSupport)], alice().privateKey);
+  expect(spy).toHaveBeenCalledWith(c.initialSupport, alice().privateKey);
 });
 
 it('stores the challenge state on the challenge created event', async () => {

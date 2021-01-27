@@ -1,4 +1,3 @@
-import {State} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {Store} from '../../wallet/store';
@@ -77,14 +76,10 @@ describe(`challenge-submitter`, () => {
   it(`calls challenge when no challenge exists`, async () => {
     const c = channel({
       vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
+      initialSupport: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
     });
 
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-
-    const challengeState = {
-      ...c.channelConstants,
-      ..._.pick(c.latest, ['appData', 'outcome', 'isFinal', 'turnNum']),
-    };
 
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
@@ -96,14 +91,12 @@ describe(`challenge-submitter`, () => {
     await knex.transaction(tx => store.ensureObjective(obj, tx));
     await await crankAndAssert(obj, {
       callsChallenge: true,
-      challengeState,
       completesObj: true,
     });
   });
 });
 
 interface AssertionParams {
-  challengeState?: State;
   callsChallenge?: boolean;
   completesObj?: boolean;
 }
@@ -121,14 +114,7 @@ const crankAndAssert = async (
   await challengeSubmitter.crank(objective, response);
 
   if (callsChallenge) {
-    if (args.challengeState) {
-      expect(spy).toHaveBeenCalledWith(
-        [expect.objectContaining(args.challengeState)],
-        expect.anything()
-      );
-    } else {
-      expect(spy).toHaveBeenCalled();
-    }
+    expect(spy).toHaveBeenCalled();
   } else {
     expect(spy).not.toHaveBeenCalled();
   }
