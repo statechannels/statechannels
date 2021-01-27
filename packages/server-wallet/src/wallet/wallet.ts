@@ -105,7 +105,6 @@ export class SingleThreadedWallet
     const wallet = new SingleThreadedWallet(walletConfig);
 
     await wallet.registerExistingChannelsWithChainService();
-
     return wallet;
   }
 

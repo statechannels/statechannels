@@ -76,7 +76,6 @@ it('stores the challenge state on the challenge created event', async () => {
 it('creates a defundChannel objective on channel finalized', async () => {
   const c = channel({
     channelNonce: 1,
-
     vars: [stateWithHashSignedBy([alice(), bob()])({turnNum: 1})],
   });
   await Channel.query(w.knex).insert(c);
