@@ -735,8 +735,12 @@ export class Store {
     });
   }
 
-  async updateInitialSupport(channelId: string, support: SignedState[]): Promise<void> {
-    await Channel.setInitialSupport(channelId, support, this.knex);
+  async setInitialSupport(
+    channelId: string,
+    support: SignedState[],
+    tx?: Transaction
+  ): Promise<void> {
+    await Channel.setInitialSupport(channelId, support, tx ?? this.knex);
   }
 
   async updateFunding(

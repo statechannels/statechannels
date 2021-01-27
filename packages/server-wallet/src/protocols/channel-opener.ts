@@ -50,11 +50,6 @@ export class ChannelOpener {
         return;
       }
 
-      // If we haven't set the initial support entry then we set it now
-      if (!channel.initialSupport || channel.initialSupport.length === 0) {
-        await this.store.updateInitialSupport(channel.channelId, channel.support);
-      }
-
       // if we have a full pre fund setup, delegate to the funding process to (a) see if
       // the channel is funded, and (b) take action if not
       const funded = await this.crankChannelFunder(objective, channel, response, tx);

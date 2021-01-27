@@ -59,7 +59,7 @@ describe(`funding phase`, () => {
   describe(`as participant 0`, () => {
     it(`submits the transaction if it is my turn`, async () => {
       const obj = await setup({participant: 0, statesHeld: [0, 1], totalFunds: 0});
-      await crankAndAssert(obj, {fundsToDeposit: 5, storeInitialSupport: true});
+      await crankAndAssert(obj, {fundsToDeposit: 5});
       // and then doesn't submit it a second time
       await crankAndAssert(obj, {fundsToDeposit: 0});
       // then let's "wait" for 10 minutes for the fund request to the chain service to get stale
@@ -161,7 +161,6 @@ interface AssertionParams {
   statesToSign?: number[];
   fundsToDeposit?: number;
   completesObj?: boolean;
-  storeInitialSupport?: boolean;
 }
 
 const crankAndAssert = async (
@@ -171,13 +170,12 @@ const crankAndAssert = async (
   const statesToSign = args.statesToSign || [];
   const fundsToDeposit = args.fundsToDeposit || 0;
   const completesObj = args.completesObj || false;
-  const storesInitialSupport = args.storeInitialSupport || false;
 
   const chainService = new MockChainService();
   const channelOpener = ChannelOpener.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'fundChannel');
-  const updateInitialSupportSpy = jest.spyOn(store, 'updateInitialSupport');
+
   await channelOpener.crank(objective, response);
 
   // expect there to be an outgoing message in the response
@@ -185,11 +183,6 @@ const crankAndAssert = async (
     statesToSign.map((n: number) => testChan.wireState(Number(n)))
   );
 
-  if (storesInitialSupport) {
-    expect(updateInitialSupportSpy).toHaveBeenCalled();
-  } else {
-    expect(updateInitialSupportSpy).not.toHaveBeenCalled();
-  }
   // check that funds were deposited
   if (fundsToDeposit > 0) {
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({amount: BN.from(fundsToDeposit)}));
