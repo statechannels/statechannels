@@ -1,7 +1,8 @@
-const {readdir, createReadStream, writeFile} = require('fs-extra');
 const {createInterface} = require('readline');
 const {join, parse} = require('path');
 const {exec} = require('child_process');
+
+const {readdir, createReadStream, writeFile} = require('fs-extra');
 
 // copied from https://github.com/faastjs/faast.js/blob/3f498554d5a662bb3f98beab7e6d7eeeb4505f9c/build/make-docs.js
 
@@ -68,6 +69,13 @@ async function main() {
         // So, remove:
         if (line.includes('<!-- -->')) {
           line = line.replace(/<!-- -->/g, '');
+        }
+        // For some reason <b> </b> tags break markdown links :shrug:
+        if (line.includes('<b>')) {
+          line = line.replace('<b>', '**');
+        }
+        if (line.includes('</b>')) {
+          line = line.replace('</b>', '**');
         }
         if (!skip) {
           output.push(line);
