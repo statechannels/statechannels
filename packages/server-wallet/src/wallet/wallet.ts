@@ -738,7 +738,6 @@ export class SingleThreadedWallet
 
   // ChainEventSubscriberInterface implementation
   async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
-    console.log(channelId);
     const response = WalletResponse.initialize();
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
