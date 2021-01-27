@@ -175,14 +175,12 @@ const crankAndAssert = async (
   const channelOpener = ChannelOpener.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'fundChannel');
-
   await channelOpener.crank(objective, response);
 
   // expect there to be an outgoing message in the response
   expect(response._signedStates).toMatchObject(
     statesToSign.map((n: number) => testChan.wireState(Number(n)))
   );
-
   // check that funds were deposited
   if (fundsToDeposit > 0) {
     expect(spy).toHaveBeenCalledWith(expect.objectContaining({amount: BN.from(fundsToDeposit)}));
