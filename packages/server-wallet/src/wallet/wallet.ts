@@ -706,7 +706,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Gets the latest {@link ChannelResult} for each ledger channel in the wallet's store.
+   * Gets the latest state for each ledger channel in the wallet's store.
    *
    * @param assetHolderAddress - The on chain address of an asset holder contract funding the ledger channels (filters the query).
    * @param participants - The list of participants in the ledger channel (filters the query).
@@ -729,7 +729,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Gets the latest {@link ChannelResult} for each channel in the wallet's store.
+   * Gets the latest state for each channel in the wallet's store.
    *
    * @returns A promise that resolves to the channel output.
    */
@@ -743,7 +743,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Gets the latest {@link ChannelResult} for a channel.
+   * Gets the latest state for a channel.
    *
    * @privateRemarks TODO: Consider renaming this to getChannel() to match getChannels()
    * @returns A promise that resolves to the channel output.
