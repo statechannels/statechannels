@@ -140,7 +140,7 @@ export class SingleThreadedWallet
 
     if (!valid) {
       errors.forEach(error =>
-        this.logger.error({error}, `Validation error occured ${error.message}`)
+        this.logger.error({error}, `Validation error occurred ${error.message}`)
       );
       throw new ConfigValidationError(errors);
     }
