@@ -43,11 +43,6 @@ const config: ServerWalletConfig = {
   },
 };
 
-afterAll(async () => {
-  await payerClient.destroy();
-  await knexPayer.destroy();
-});
-
 const CHALLENGE_DURATION = 86_400;
 
 const [payer, receiver] = [aliceP(), bobP()];
@@ -62,10 +57,13 @@ const receiverAmount = 500;
 
 beforeEach(async () => {
   await knexPayer.migrate.latest({directory: './src/db/migrations'});
-
   await DBAdmin.truncateDataBaseFromKnex(knexPayer);
-
   await SWPayer.query().insert(alice());
+});
+
+afterAll(async () => {
+  await payerClient.destroy();
+  await knexPayer.destroy();
 });
 
 test('the wallet handles the basic challenging v0 behavior', async () => {
