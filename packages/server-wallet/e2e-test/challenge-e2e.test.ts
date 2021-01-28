@@ -1,5 +1,7 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {utils} from 'ethers';
+import {utils, BigNumber, providers} from 'ethers';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
+import {BN, Participant, simpleEthAllocation} from '@statechannels/wallet-core';
 
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
@@ -18,6 +20,7 @@ import {knexReceiver, knexPayer, payerConfig} from './e2e-utils';
 jest.setTimeout(100_000); // Starting up Receiver's server can take ~5 seconds
 
 describe('challenging', () => {
+  let channelId: string;
   let payerClient: PayerClient;
   let ChannelPayer: typeof Channel;
   let ChannelReceiver: typeof Channel;
@@ -47,7 +50,7 @@ describe('challenging', () => {
     await knexPayer.destroy();
     await knexReceiver.destroy();
   });
-  let channelId: string;
+
   beforeAll(async () => {
     await knexPayer.migrate.latest({directory: './src/db/migrations'});
     await knexReceiver.migrate.latest({directory: './src/db/migrations'});
@@ -56,7 +59,9 @@ describe('challenging', () => {
 
     [SWPayer, SWReceiver] = [knexPayer, knexReceiver].map(knex => SigningWallet.bindKnex(knex));
   });
-
+  const [payer, receiver] = [aliceP(), bobP()];
+  const aliceDeposit = 100;
+  const bobDeposit = 500;
   beforeEach(async () => {
     await Promise.all(
       [knexPayer, knexReceiver].map(knex => DBAdmin.truncateDataBaseFromKnex(knex))
@@ -68,15 +73,23 @@ describe('challenging', () => {
     // Adds Bob to Receiver's Database
     await SWReceiver.query().insert(bob());
 
-    const [payer, receiver] = [aliceP(), bobP()];
     const seed = withSupportedState()({
       channelNonce: 987654321, // something unique for this test
       participants: [payer, receiver],
-      vars: [stateVars({turnNum: 3})],
+      vars: [
+        stateVars({
+          turnNum: 3,
+          outcome: simpleEthAllocation([
+            {amount: BN.from(aliceDeposit), destination: payer.destination},
+            {amount: BN.from(bobDeposit), destination: receiver.destination},
+          ]),
+        }),
+      ],
+
       chainId: utils.hexlify(chainNetworkID),
       challengeDuration: CHALLENGE_DURATION,
-      // Set a random address so this will be a "ledger" channel
-      assetHolderAddress: '0xC4d65072D3a32E6E25D5A97c857D892D6aa6F2A4',
+
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     });
 
     await ChannelPayer.query().insert([{...seed, initialSupport: seed.support}]); // Fixture uses alice() default
@@ -85,10 +98,26 @@ describe('challenging', () => {
     ]);
 
     channelId = seed.channelId;
+
     payerClient = await PayerClient.create(alice().privateKey, `http://127.0.0.1:65535`, config);
+    // Deposit the funds on chain
+    const amount = BN.add(aliceDeposit, bobDeposit);
+    const transResponse = await payerClient.wallet.chainService.fundChannel({
+      amount,
+      channelId,
+      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+      expectedHeld: BN.from(0),
+    });
+    await transResponse.wait();
   });
 
   it('can challenge', async () => {
+    let aliceBalance = await getBalance(payerClient.provider, aliceP());
+    let bobBalance = await getBalance(payerClient.provider, bobP());
+
+    expect(aliceBalance.toNumber()).toBe(0);
+    expect(bobBalance.toNumber()).toBe(0);
+
     await payerClient.challenge(channelId);
     await payerClient.mineBlocks(5);
     const {channelMode} = await AdjudicatorStatusModel.getAdjudicatorStatus(knexPayer, channelId);
@@ -101,5 +130,20 @@ describe('challenging', () => {
       channelId
     );
     expect(reloadedChannelMode).toEqual('Finalized');
+    await payerClient.mineBlocks(5);
+
+    aliceBalance = await getBalance(payerClient.provider, aliceP());
+    bobBalance = await getBalance(payerClient.provider, bobP());
+
+    expect(aliceBalance.toNumber()).toBe(aliceDeposit);
+    expect(bobBalance.toNumber()).toBe(bobDeposit);
   });
 });
+
+async function getBalance(
+  provider: providers.JsonRpcProvider,
+  participant: Participant
+): Promise<BigNumber> {
+  const address = `0x${participant.destination.slice(-40)}`;
+  return provider.getBalance(address);
+}

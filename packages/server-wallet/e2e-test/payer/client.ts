@@ -4,6 +4,7 @@ import {Wallet, constants, providers} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
+import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {MultiThreadedWallet, Wallet as ServerWallet} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
@@ -18,7 +19,7 @@ export default class PayerClient {
   private constructor(
     private readonly pk: Bytes32,
     private readonly receiverHttpServerURL: string,
-    private readonly wallet: ServerWallet
+    public readonly wallet: ServerWallet
   ) {
     this.config = wallet.walletConfig;
     this.provider = new providers.JsonRpcProvider(this.config.chainServiceConfiguration.provider);
@@ -95,10 +96,10 @@ export default class PayerClient {
         participants: [this.me, receiver],
         allocations: [
           {
-            assetHolderAddress: AddressZero,
+            assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
             allocationItems: [
               {
-                amount: BN.from(0),
+                amount: BN.from(500),
                 destination: this.destination,
               },
               {amount: BN.from(0), destination: receiver.destination},
@@ -127,7 +128,7 @@ export default class PayerClient {
   public async mineFutureBlock(timeIncrease: number): Promise<void> {
     const currentBlock = await this.provider.getBlock(this.provider.getBlockNumber());
     const expectedTimestamp = currentBlock.timestamp + timeIncrease;
-    await this.provider.send('evm_increaseTime', [timeIncrease]);
+
     const blockMined = new Promise<void>(resolve => {
       this.provider.on('block', async (blockTag: providers.BlockTag) => {
         const block = await this.provider.getBlock(blockTag);
@@ -137,15 +138,26 @@ export default class PayerClient {
         }
       });
     });
-
-    await this.mineBlocks();
+    await this.provider.send('evm_increaseTime', [timeIncrease]);
+    await this.provider.send('evm_mine', []);
 
     await blockMined;
   }
   public async mineBlocks(confirmations = 5): Promise<void> {
+    const blocksMined = new Promise<void>(resolve => {
+      let counter = confirmations;
+      this.provider.on('block', async () => {
+        counter = counter - 1;
+        if (counter <= 0) {
+          resolve();
+        }
+      });
+    });
     for (const _i in _.range(confirmations)) {
       await this.provider.send('evm_mine', []);
     }
+
+    await blocksMined;
   }
   public async challenge(channelId: string): Promise<ChannelResult> {
     const {channelResult} = await this.wallet.challenge(channelId);
