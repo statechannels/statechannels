@@ -272,7 +272,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     chainService: ChainServiceInterface;
-    // (undocumented)
     challenge(channelId: string): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "ChallengeRegisteredArg" needs to be exported by the entry point index.d.ts
     //
@@ -289,11 +288,9 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
     createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
-    // (undocumented)
     destroy(): Promise<void>;
     getChannels(): Promise<MultipleChannelOutput>;
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
@@ -323,14 +320,10 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     store: Store;
-    // (undocumented)
     syncChannel({ channelId }: SyncChannelParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "Bytes32" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
     syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
-    // (undocumented)
     updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
     updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
     // (undocumented)
@@ -357,7 +350,7 @@ export function validateServerWalletConfig(config: Record<string, any>): {
 };
 
 // @public
-export abstract class Wallet extends SingleThreadedWallet {
+export abstract class Wallet extends SingleThreadedWallet implements WalletInterface {
     // (undocumented)
     static create(walletConfig: IncomingServerWalletConfig): Promise<SingleThreadedWallet | MultiThreadedWallet>;
 }
@@ -370,7 +363,7 @@ export type WalletEvent = ChannelUpdatedEvent;
 // @public (undocumented)
 export interface WalletInterface {
     // (undocumented)
-    challenge(challengeState: State): Promise<SingleChannelOutput>;
+    challenge(channelId: string): Promise<SingleChannelOutput>;
     // (undocumented)
     closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
     // (undocumented)
