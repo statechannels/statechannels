@@ -204,21 +204,6 @@ describe('when the channel is finalized on chain', () => {
   });
 });
 
-it('should fail the objective when the channel does not exist', async () => {
-  const chainService = new MockChainService();
-  const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
-
-  // Create an objective for a channel that does exist in the database
-  const objective = createPendingObjective(channel().channelId);
-  await knex.transaction(tx => ObjectiveModel.insert(objective, tx));
-
-  // Crank the protocol
-  await channelDefunder.crank(objective, WalletResponse.initialize());
-  // Check the results
-  const reloadedObjective = await store.getObjective(objective.objectiveId);
-  expect(reloadedObjective.status).toEqual('failed');
-});
-
 it('should fail when using non-direct funding', async () => {
   const chainService = new MockChainService();
   const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
