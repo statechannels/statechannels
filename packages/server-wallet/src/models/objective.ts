@@ -16,13 +16,13 @@ function extractReferencedChannels(objective: Objective): string[] {
     case 'CloseChannel':
     case 'VirtuallyFund':
     case 'SubmitChallenge':
+    case 'DefundChannel':
       return [objective.data.targetChannelId];
     case 'FundGuarantor':
       return [objective.data.guarantorId];
     case 'FundLedger':
     case 'CloseLedger':
       return [objective.data.ledgerId];
-
     default:
       return [];
   }
