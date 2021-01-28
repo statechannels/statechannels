@@ -19,17 +19,25 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 12.16.3
-
-      - name: yarn install 
-        # skip the prepare step here, as lerna publish will run prepare before publishing
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
-          SKIP_PREPARE=true yarn install && git diff --exit-code
-
+      
       - name: Configure CI Git User
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"
 
+      - id: alreadyPublished
+        name: Check if a canary has already been published at this commit
+        continue-on-error: true
+        run: | # This step exits 1 if we have not already published this commit; then, the reset of the steps are triggered and we should get an overall success. Otherwise, exit 0 and skip the remaining steps.
+          if [[ $(npm view @statechannels/server-wallet dist-tags.next) =~ $(git rev-parse --short HEAD) ]]; then exit 0; else exit 1; fi
+
+      - name: yarn install 
+        if: steps.alreadyPublished.outcome == 'failure'
+        # skip the prepare step here, as lerna publish will run prepare before publishing
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > .npmrc
+          SKIP_PREPARE=true yarn install && git diff --exit-code
+
       - name: publish packages to npm
+        if: steps.alreadyPublished.outcome == 'failure'
         run: yarn run lerna publish --canary --force-publish --exact --preid next.$(git rev-parse --short HEAD) --dist-tag next --yes
