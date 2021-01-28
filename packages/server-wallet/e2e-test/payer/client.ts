@@ -142,6 +142,12 @@ export default class PayerClient {
 
     await blockMined;
   }
+
+  /**
+   * Mines the specified amount of blocks.
+   * Waits to detect the block events before resolving
+   * @param confirmations The amount of blocks to mine
+   */
   public async mineBlocks(confirmations = 5): Promise<void> {
     const blocksMined = new Promise<void>(resolve => {
       let counter = confirmations;
@@ -152,6 +158,7 @@ export default class PayerClient {
         }
       });
     });
+
     for (const _i in _.range(confirmations)) {
       await this.provider.send('evm_mine', []);
     }
