@@ -18,19 +18,18 @@ import {LOG_PATH} from './logger';
 import {knexPayer, payerConfig} from './e2e-utils';
 
 jest.setTimeout(100_000);
+
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(
   process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
 );
 
-let payerClient: PayerClient;
 const ChannelPayer = Channel.bindKnex(knexPayer);
 const SWPayer = SigningWallet.bindKnex(knexPayer);
 
 const chainNetworkID = Number.parseInt(process.env.CHAIN_NETWORK_ID ?? '9002');
-
 const provider = process.env.RPC_ENDPOINT;
-
 const pk = process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey;
+
 const config: ServerWalletConfig = {
   ...payerConfig,
   loggingConfiguration: {logLevel: 'trace', logDestination: LOG_PATH},
@@ -44,17 +43,10 @@ const config: ServerWalletConfig = {
 };
 
 const CHALLENGE_DURATION = 86_400;
-
 const [payer, receiver] = [aliceP(), bobP()];
-/**
- * The amount of funds allocated to the payer in the outcome
- */
-const payerAmount = 100;
-/**
- * The amount of funds allocated to the receiver in the outcome
- */
-const receiverAmount = 500;
+const [payerAmount, receiverAmount] = [100, 500];
 
+let payerClient: PayerClient;
 beforeEach(async () => {
   await knexPayer.migrate.latest({directory: './src/db/migrations'});
   await DBAdmin.truncateDataBaseFromKnex(knexPayer);
@@ -97,8 +89,8 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
   expect(await getChannelMode(channelId)).toEqual('Finalized');
 
   // We expect the balances to be updated based on the outcome
-  payerBalance = await getBalance(payerClient.provider, aliceP());
-  receiverBalance = await getBalance(payerClient.provider, bobP());
+  payerBalance = await getBalance(payerClient.provider, payer);
+  receiverBalance = await getBalance(payerClient.provider, receiver);
   expect(payerBalance).toBe(payerAmount);
   expect(receiverBalance).toBe(receiverAmount);
 });
