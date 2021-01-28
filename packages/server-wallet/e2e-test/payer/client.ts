@@ -1,6 +1,6 @@
 import axios from 'axios';
 import {ChannelResult, Participant} from '@statechannels/client-api-schema';
-import {Wallet, constants} from 'ethers';
+import {Wallet, constants, providers} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
@@ -14,12 +14,14 @@ import {ONE_DAY} from '../../src/__test__/test-helpers';
 
 export default class PayerClient {
   readonly config: ServerWalletConfig;
+  readonly provider: providers.JsonRpcProvider;
   private constructor(
     private readonly pk: Bytes32,
     private readonly receiverHttpServerURL: string,
     private readonly wallet: ServerWallet
   ) {
     this.config = wallet.walletConfig;
+    this.provider = new providers.JsonRpcProvider(this.config.chainServiceConfiguration.provider);
   }
   public static async create(
     pk: Bytes32,
@@ -38,6 +40,7 @@ export default class PayerClient {
     this.wallet instanceof MultiThreadedWallet && (await this.wallet.warmUpThreads());
   }
   public async destroy(): Promise<void> {
+    this.provider.removeAllListeners();
     await this.wallet.destroy();
   }
   private time = timerFactory(defaultConfig.metricsConfiguration.timingMetrics, 'payerClient');
@@ -114,6 +117,38 @@ export default class PayerClient {
 
     const {channelResult} = await this.wallet.getState({channelId});
 
+    return channelResult;
+  }
+  /**
+   * Mines a block that with a timestamp =  currentBlock.timestamp + timeIncrease
+   * This is useful for testing time related functionality
+   * @param timeIncrease The amount of time in seconds to add to the current date time
+   */
+  public async mineFutureBlock(timeIncrease: number): Promise<void> {
+    const currentBlock = await this.provider.getBlock(this.provider.getBlockNumber());
+    const expectedTimestamp = currentBlock.timestamp + timeIncrease;
+    await this.provider.send('evm_increaseTime', [timeIncrease]);
+    const blockMined = new Promise<void>(resolve => {
+      this.provider.on('block', async (blockTag: providers.BlockTag) => {
+        const block = await this.provider.getBlock(blockTag);
+
+        if (block.timestamp >= expectedTimestamp) {
+          resolve();
+        }
+      });
+    });
+
+    await this.mineBlocks();
+
+    await blockMined;
+  }
+  public async mineBlocks(confirmations = 5): Promise<void> {
+    for (const _i in _.range(confirmations)) {
+      await this.provider.send('evm_mine', []);
+    }
+  }
+  public async challenge(channelId: string): Promise<ChannelResult> {
+    const {channelResult} = await this.wallet.challenge(channelId);
     return channelResult;
   }
 
