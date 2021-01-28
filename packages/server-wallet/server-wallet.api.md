@@ -62,7 +62,7 @@ import { ValidationErrorItem } from 'joi';
 // @public
 export type ChainServiceConfiguration = {
     attachChainService: boolean;
-} & Partial<ChainServiceArgs>;
+} & Partial<Exclude<ChainServiceArgs, 'logger'>>;
 
 // @public
 export type DatabaseConfiguration = RequiredDatabaseConfiguration & OptionalDatabaseConfiguration;
@@ -271,7 +271,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     chainService: ChainServiceInterface;
     // (undocumented)
-    challenge(challengeState: State): Promise<SingleChannelOutput>;
+    challenge(channelId: string): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "ChallengeRegisteredArg" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -353,8 +353,6 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     readonly walletConfig: ServerWalletConfig;
-    // (undocumented)
-    warmUpThreads(): Promise<void>;
 }
 
 // @public (undocumented)

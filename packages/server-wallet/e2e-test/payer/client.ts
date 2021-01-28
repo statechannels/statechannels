@@ -3,8 +3,9 @@ import {ChannelResult, Participant} from '@statechannels/client-api-schema';
 import {Wallet, constants} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
+import _ from 'lodash';
 
-import {Wallet as ServerWallet} from '../../src';
+import {MultiThreadedWallet, Wallet as ServerWallet} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
@@ -25,15 +26,16 @@ export default class PayerClient {
     receiverHttpServerURL: string,
     config?: ServerWalletConfig
   ): Promise<PayerClient> {
+    const mergedConfig = _.assign(payerConfig, config);
     const wallet = recordFunctionMetrics(
-      await ServerWallet.create(config ?? payerConfig),
+      await ServerWallet.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
     return new PayerClient(pk, receiverHttpServerURL, wallet);
   }
 
   public async warmup(): Promise<void> {
-    await this.wallet.warmUpThreads();
+    this.wallet instanceof MultiThreadedWallet && (await this.wallet.warmUpThreads());
   }
   public async destroy(): Promise<void> {
     await this.wallet.destroy();

@@ -24,6 +24,7 @@ import {getPayloadFor} from '../../__test__/test-helpers';
 import {ProposeLedgerUpdate} from '../actions';
 import {LedgerProposal} from '../../models/ledger-proposal';
 import {DBAdmin} from '../..';
+import {Channel} from '../../models/channel';
 
 // TEST HELPERS
 // There are many test cases in this file. These helpers make the tests cases more readable.
@@ -96,6 +97,11 @@ describe('marking ledger requests as complete', () => {
       channelToBeFunded: appChannel.channelId,
       status: 'succeeded',
     });
+
+    // Verify CHALLENGING_VO behavior
+    const reloadedLedger = await Channel.forId(ledgerChannel.channelId, knex);
+    expect(reloadedLedger.initialSupport[0]).toMatchObject({turnNum: 5});
+    expect(reloadedLedger.initialSupport[0].signatures).toHaveLength(2);
   });
 
   it('detects completed defunding requests from the outcome of supported state', async () => {

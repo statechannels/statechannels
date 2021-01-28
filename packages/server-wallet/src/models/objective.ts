@@ -3,7 +3,6 @@ import {
   Objective,
   OpenChannel,
   CloseChannel,
-  State,
   SharedObjective,
   SubmitChallenge,
   DefundChannel,
@@ -49,7 +48,7 @@ export type DBDefundChannelObjective = {
 };
 
 export type DBSubmitChallengeObjective = {
-  data: {targetChannelId: string; challengeState: State};
+  data: {targetChannelId: string};
   objectiveId: string;
   status: ObjectiveStatus;
   type: 'SubmitChallenge';

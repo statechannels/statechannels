@@ -19,8 +19,6 @@ import {
   PrivateKey,
   makeDestination,
   deserializeRequest,
-  calculateChannelId,
-  State,
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -136,11 +134,13 @@ export class SingleThreadedWallet
     // This allows us to log out any config validation errors
     this.logger = createLogger(populatedConfig);
 
+    this.logger.trace({walletConfig: populatedConfig}, 'Wallet initializing');
+
     const {errors, valid} = validateServerWalletConfig(populatedConfig);
 
     if (!valid) {
       errors.forEach(error =>
-        this.logger.error({error}, `Validation error occured ${error.message}`)
+        this.logger.error({error}, `Validation error occurred ${error.message}`)
       );
       throw new ConfigValidationError(errors);
     }
@@ -163,7 +163,10 @@ export class SingleThreadedWallet
     }
 
     if (this.walletConfig.chainServiceConfiguration.attachChainService) {
-      this.chainService = new ChainService(this.walletConfig.chainServiceConfiguration);
+      this.chainService = new ChainService({
+        ...this.walletConfig.chainServiceConfiguration,
+        logger: this.logger,
+      });
     } else {
       this.chainService = new MockChainService();
     }
@@ -264,8 +267,7 @@ export class SingleThreadedWallet
     }
   }
 
-  async challenge(challengeState: State): Promise<SingleChannelOutput> {
-    const channelId = calculateChannelId(challengeState);
+  async challenge(channelId: string): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
 
     await this.knex.transaction(async tx => {
@@ -273,12 +275,17 @@ export class SingleThreadedWallet
       if (!channel) {
         throw new Error(`No channel found for channel id ${channelId}`);
       }
+      // START CHALLENGING_V0
+      if (!channel.isLedger) {
+        throw new Error('Only ledger channels support challenging');
+      }
+      // END CHALLENGING_V0
 
       const {objectiveId} = await this.store.ensureObjective(
         {
           type: 'SubmitChallenge',
           participants: [],
-          data: {targetChannelId: channelId, challengeState},
+          data: {targetChannelId: channelId},
         },
         tx
       );
@@ -799,10 +806,6 @@ export class SingleThreadedWallet
       makeAddress(a.assetHolderAddress)
     );
     this.chainService.registerChannel(channelId, assetHolderAddresses, this);
-  }
-
-  async warmUpThreads(): Promise<void> {
-    // no-op for single-threaded-wallet
   }
 }
 

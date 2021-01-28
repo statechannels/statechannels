@@ -8,6 +8,7 @@ import {
   Zero,
   Address,
   toNitroState,
+  SignedState,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -84,6 +85,8 @@ export class Channel extends Model implements RequiredColumns {
   readonly assetHolderAddress!: string; // only Ledger channels have this
   readonly fundingLedgerChannelId!: Bytes32; // only App channels funded by Ledger have this
 
+  readonly initialSupport!: SignedState[];
+
   static get jsonSchema(): JSONSchema {
     return {
       type: 'object',
@@ -142,7 +145,7 @@ export class Channel extends Model implements RequiredColumns {
     },
   };
 
-  static jsonAttributes = ['vars', 'participants'];
+  static jsonAttributes = ['vars', 'participants', 'initialSupport'];
 
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     return Channel.query(txOrKnex)
@@ -152,6 +155,14 @@ export class Channel extends Model implements RequiredColumns {
       .withGraphFetched('chainServiceRequests')
       .withGraphFetched('adjudicatorStatus')
       .first();
+  }
+  // CHALLENGING_V0 temporary method
+  static async setInitialSupport(
+    channelId: string,
+    support: SignedState[],
+    txOrKnex: TransactionOrKnex
+  ): Promise<void> {
+    await Channel.query(txOrKnex).findOne({channelId}).patch({initialSupport: support});
   }
 
   static async setLedger(

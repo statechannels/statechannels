@@ -5,10 +5,11 @@ import {WALLET_VERSION} from './version';
 
 export function createLogger(config: ServerWalletConfig): pino.Logger {
   const destination =
-    config.loggingConfiguration.logLevel &&
+    config.loggingConfiguration.logDestination &&
     config.loggingConfiguration.logDestination.toLocaleLowerCase() !== 'console'
       ? pino.destination(config.loggingConfiguration.logDestination)
       : undefined;
+
   return (destination
     ? pino({level: config.loggingConfiguration.logLevel}, destination)
     : pino({level: config.loggingConfiguration.logLevel})

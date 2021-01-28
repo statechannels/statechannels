@@ -53,6 +53,14 @@ export class LedgerManager {
         return;
       }
 
+      // The following behavior is specific to CHALLENGING_V0 requirements
+      // It will eventually be removed
+      // START CHALLENGING_VO
+      if (channel.initialSupport.length === 0 && channel.isSupported) {
+        await this.store.setInitialSupport(channel.channelId, channel.support, tx);
+      }
+      // END CHALLENGING_VO
+
       let protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
 
       if (!hasUnhandledLedgerRequests(protocolState)) {
