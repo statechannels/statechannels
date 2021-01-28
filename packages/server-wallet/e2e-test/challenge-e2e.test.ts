@@ -1,7 +1,6 @@
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {utils, BigNumber, providers} from 'ethers';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
-import {BN, Participant, simpleEthAllocation} from '@statechannels/wallet-core';
+import {utils, BigNumber, providers, constants} from 'ethers';
+import {BN, makeAddress, Participant, simpleEthAllocation} from '@statechannels/wallet-core';
 
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
@@ -18,7 +17,10 @@ import {LOG_PATH} from './logger';
 import {knexReceiver, knexPayer, payerConfig} from './e2e-utils';
 
 jest.setTimeout(100_000); // Starting up Receiver's server can take ~5 seconds
-
+const ETH_ASSET_HOLDER_ADDRESS = makeAddress(
+  // eslint-disable-next-line no-process-env
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
+);
 describe('challenging', () => {
   let channelId: string;
   let payerClient: PayerClient;
