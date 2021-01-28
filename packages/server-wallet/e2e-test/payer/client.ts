@@ -4,7 +4,6 @@ import {Wallet, constants, providers} from 'ethers';
 const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {MultiThreadedWallet, Wallet as ServerWallet} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
@@ -96,10 +95,10 @@ export default class PayerClient {
         participants: [this.me, receiver],
         allocations: [
           {
-            assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+            assetHolderAddress: AddressZero,
             allocationItems: [
               {
-                amount: BN.from(500),
+                amount: BN.from(0),
                 destination: this.destination,
               },
               {amount: BN.from(0), destination: receiver.destination},
