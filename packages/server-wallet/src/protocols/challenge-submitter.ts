@@ -34,7 +34,14 @@ export class ChallengeSubmitter {
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelToLock, tx);
       if (!channel) {
-        this.logger.warn(`No channel exists for channel ${channelToLock}`);
+        this.logger.error(`No channel exists for channel ${channelToLock}`);
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
+        return;
+      }
+
+      if (!channel.signingWallet) {
+        this.logger.error(`No signing wallet fetched for channel ${channelToLock}`);
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
         return;
       }
 
@@ -42,12 +49,9 @@ export class ChallengeSubmitter {
         ? channel.adjudicatorStatus.toResult().channelMode
         : 'Open';
       if (status !== 'Open') {
-        this.logger.warn('There is an existing challenge or the channel is finalized on chain');
+        this.logger.error('There is an existing challenge or the channel is finalized on chain');
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
         return;
-      }
-
-      if (!channel.signingWallet) {
-        throw new Error(`No signing wallet fetched for channel ${channelToLock}`);
       }
 
       const existingRequest = await ChainServiceRequest.query(tx)
@@ -55,7 +59,8 @@ export class ChallengeSubmitter {
         .first();
 
       if (existingRequest) {
-        this.logger.warn('There is already an existing request', existingRequest);
+        this.logger.error('There is already an existing request', existingRequest);
+        await this.store.markObjectiveStatus(objective, 'failed', tx);
         return;
       }
 
