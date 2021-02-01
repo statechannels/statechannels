@@ -9,9 +9,9 @@ import {alice} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {ServerWalletConfig} from '../src';
 import {Channel} from '../src/models/channel';
-import {SigningWallet} from '../src/models/signing-wallet';
 import {DBAdmin} from '../src/db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../src/models/adjudicator-status';
+import {seedAlicesSigningWallet} from '../src/db/seeds/1_signing_wallet_seeds';
 
 import PayerClient from './payer/client';
 import {LOG_PATH} from './logger';
@@ -24,7 +24,6 @@ const ETH_ASSET_HOLDER_ADDRESS = makeAddress(
 );
 
 const ChannelPayer = Channel.bindKnex(knexPayer);
-const SWPayer = SigningWallet.bindKnex(knexPayer);
 
 const chainNetworkID = Number.parseInt(process.env.CHAIN_NETWORK_ID ?? '9002');
 const provider = process.env.RPC_ENDPOINT;
@@ -48,9 +47,8 @@ const [payerAmount, receiverAmount] = [100, 500];
 
 let payerClient: PayerClient;
 beforeEach(async () => {
-  await knexPayer.migrate.latest({directory: './src/db/migrations'});
-  await DBAdmin.truncateDataBaseFromKnex(knexPayer);
-  await SWPayer.query().insert(alice());
+  await DBAdmin.migrateDatabaseFromKnex(knexPayer);
+  await seedAlicesSigningWallet(knexPayer);
 });
 
 afterAll(async () => {
