@@ -104,6 +104,7 @@ async function fundChannel(payerClient: PayerClient, channelId: string) {
   });
   await transResponse.wait();
 }
+
 async function insertChannel() {
   const seed = withSupportedState()({
     vars: [
@@ -119,9 +120,11 @@ async function insertChannel() {
   await ChannelPayer.query().insert([{...seed, initialSupport: seed.support}]); // Fixture uses alice() default
   return seed.channelId;
 }
+
 async function getChannelMode(channelId: string) {
   return (await AdjudicatorStatusModel.getAdjudicatorStatus(knexPayer, channelId)).channelMode;
 }
+
 async function getBalance(
   provider: providers.JsonRpcProvider,
   participant: Participant
