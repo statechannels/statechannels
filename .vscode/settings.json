@@ -13,7 +13,11 @@
   ],
   "typescript.tsdk": "node_modules/typescript/lib",
   "editor.wordWrapColumn": 100,
-  "editor.defaultFormatter": "dbaeumer.vscode-eslint"
+  "editor.defaultFormatter": "dbaeumer.vscode-eslint",
+  "editor.formatOnSave": true
+  ,"editor.codeActionsOnSave": {
+    "source.fixAll.eslint": true
+  },
 }
 
 
