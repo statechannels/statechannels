@@ -152,7 +152,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
     * @return true if the later state is a validTransition from its predecessor, reverts otherwise.
     */
     function validTransition(
-        uint256 nParticipants,
+        uint8 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         IForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint48 turnNumB,

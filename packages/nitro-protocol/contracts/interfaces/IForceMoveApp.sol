@@ -24,6 +24,6 @@ interface IForceMoveApp {
         VariablePart calldata a,
         VariablePart calldata b,
         uint48 turnNumB,
-        uint256 nParticipants
+        uint8 nParticipants
     ) external pure returns (bool);
 }

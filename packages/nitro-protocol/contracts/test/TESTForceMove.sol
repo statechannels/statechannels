@@ -53,8 +53,8 @@ contract TESTForceMove is ForceMove {
     function acceptableWhoSignedWhat(
         uint8[] memory whoSignedWhat,
         uint48 largestTurnNum,
-        uint256 nParticipants,
-        uint256 nStates
+        uint8 nParticipants,
+        uint8 nStates
     ) public pure returns (bool) {
         return _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates);
     }
