@@ -59,7 +59,7 @@ afterAll(async () => {
 test('the wallet handles the basic challenging v0 behavior', async () => {
   const channelId = await insertChannel();
 
-  payerClient = await PayerClient.create(alice().privateKey, `http://127.0.0.1:65535`, config);
+  payerClient = await PayerClient.create(alice().privateKey, 'fake_url', config);
   // Make sure the channel has funds so the defund will work
   await fundChannel(payerClient, channelId);
 
