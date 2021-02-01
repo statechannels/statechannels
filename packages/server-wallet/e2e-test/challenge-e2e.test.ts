@@ -64,10 +64,10 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
   await fundChannel(payerClient, channelId);
 
   // We expect both payer and receiver to have no funds in their destination
-  let payerBalance = await getBalance(payerClient.provider, payer);
-  let receiverBalance = await getBalance(payerClient.provider, receiver);
-  expect(payerBalance).toBe(0);
-  expect(receiverBalance).toBe(0);
+  const initPayerBalance = await getBalance(payerClient.provider, payer);
+  const initReceiverBalance = await getBalance(payerClient.provider, receiver);
+  expect(initPayerBalance).toBe(0);
+  expect(initReceiverBalance).toBe(0);
 
   // We expect the channel to be in an open status
   expect(await getChannelMode(channelId)).toEqual('Open');
@@ -87,10 +87,10 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
   expect(await getChannelMode(channelId)).toEqual('Finalized');
 
   // We expect the balances to be updated based on the outcome
-  payerBalance = await getBalance(payerClient.provider, payer);
-  receiverBalance = await getBalance(payerClient.provider, receiver);
-  expect(payerBalance).toBe(payerAmount);
-  expect(receiverBalance).toBe(receiverAmount);
+  const finalPayerBalance = await getBalance(payerClient.provider, payer);
+  const finalReceiverBalance = await getBalance(payerClient.provider, receiver);
+  expect(finalPayerBalance).toBe(payerAmount);
+  expect(finalReceiverBalance).toBe(receiverAmount);
 });
 
 // Helpers
