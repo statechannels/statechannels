@@ -1,12 +1,12 @@
 /* eslint-disable no-process-env */
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {utils, providers, constants} from 'ethers';
-import {BN, makeAddress, Participant, simpleEthAllocation} from '@statechannels/wallet-core';
+import {BN, makeAddress, Participant} from '@statechannels/wallet-core';
 
 import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
 import {alice} from '../src/wallet/__test__/fixtures/signing-wallets';
-import {withSupportedState} from '../src/models/__test__/fixtures/channel';
+import {channel, withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {ServerWalletConfig} from '../src';
 import {Channel} from '../src/models/channel';
 import {DBAdmin} from '../src/db-admin/db-admin';
@@ -41,9 +41,9 @@ const config: ServerWalletConfig = {
   },
 };
 
-const CHALLENGE_DURATION = 86_400;
+const challengeDuration = channel().challengeDuration;
 const [payer, receiver] = [aliceP(), bobP()];
-const [payerAmount, receiverAmount] = [100, 500];
+const [payerAmount, receiverAmount] = [1, 3];
 
 let payerClient: PayerClient;
 beforeEach(async () => {
@@ -81,7 +81,7 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
 
   // Mine a block with a timestamp of current + CHALLENGE_DURATION
   // this triggers the challenge expiry
-  await payerClient.mineFutureBlock(CHALLENGE_DURATION);
+  await payerClient.mineFutureBlock(challengeDuration);
 
   // We expect the channel to be marked as finalized
   expect(await getChannelMode(channelId)).toEqual('Finalized');
@@ -106,19 +106,13 @@ async function fundChannel(payerClient: PayerClient, channelId: string) {
 }
 async function insertChannel() {
   const seed = withSupportedState()({
-    channelNonce: 987654321, // something unique for this test
-    participants: [payer, receiver],
     vars: [
       stateVars({
         turnNum: 3,
-        outcome: simpleEthAllocation([
-          {amount: BN.from(payerAmount), destination: payer.destination},
-          {amount: BN.from(receiverAmount), destination: receiver.destination},
-        ]),
       }),
     ],
     chainId: utils.hexlify(chainNetworkID),
-    challengeDuration: CHALLENGE_DURATION,
+    challengeDuration: challengeDuration,
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
   });
 
