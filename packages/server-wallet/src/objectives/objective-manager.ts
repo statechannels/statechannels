@@ -3,7 +3,7 @@ import {unreachable} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
 import {ChannelOpener} from '../protocols/channel-opener';
-import {ChannelCloser} from '../protocols/close-channel';
+import {ChannelCloser} from '../protocols/channel-closer';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
