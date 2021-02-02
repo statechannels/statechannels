@@ -123,16 +123,12 @@ export class Channel extends Model implements RequiredColumns {
       modelClass: AdjudicatorStatusModel,
       join: {from: 'channels.channelId', to: 'adjudicator_status.channelId'},
     },
-    objectivesChannels: {
+    objectives: {
       relation: Model.ManyToManyRelation,
       modelClass: ObjectiveModel,
       join: {
         from: 'channels.channelId',
-        through: {
-          from: 'objectives_channels.channelId',
-          to: 'objectives_channels.objectiveId',
-        },
-        to: 'objectives.objectiveId',
+        to: 'objectives.targetChannelId',
       },
     },
     chainServiceRequests: {

@@ -40,11 +40,8 @@ export class TestLedgerChannel extends TestChannel {
     return {
       participants: this.participants,
       type: 'OpenChannel',
-      data: {
-        role: 'ledger',
-        targetChannelId: this.channelId,
-        fundingStrategy: 'Direct',
-      },
+      targetChannelId: this.channelId,
+      data: {role: 'ledger', fundingStrategy: 'Direct'},
     };
   }
 

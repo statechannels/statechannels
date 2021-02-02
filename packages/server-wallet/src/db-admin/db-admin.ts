@@ -9,7 +9,7 @@ import _ from 'lodash';
 import {SigningWallet} from '../models/signing-wallet';
 import {Channel} from '../models/channel';
 import {Nonce} from '../models/nonce';
-import {ObjectiveModel, ObjectiveChannelModel} from '../models/objective';
+import {ObjectiveModel} from '../models/objective';
 import {Funding} from '../models/funding';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest} from '../models/ledger-request';
@@ -135,7 +135,6 @@ const defaultTables = [
   Channel,
   Nonce,
   ObjectiveModel,
-  ObjectiveChannelModel,
   Funding,
   AppBytecode,
   LedgerRequest,

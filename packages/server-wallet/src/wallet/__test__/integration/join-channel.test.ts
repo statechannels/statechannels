@@ -62,11 +62,8 @@ describe('directly funded app', () => {
       {
         type: 'OpenChannel',
         participants: c1.participants,
-        data: {
-          targetChannelId: c1.channelId,
-          fundingStrategy: 'Direct',
-          role: 'app',
-        },
+        targetChannelId: c1.channelId,
+        data: {fundingStrategy: 'Direct', role: 'app'},
         status: 'pending',
       },
       w.knex
@@ -76,11 +73,8 @@ describe('directly funded app', () => {
       {
         type: 'OpenChannel',
         participants: c2.participants,
-        data: {
-          targetChannelId: c2.channelId,
-          fundingStrategy: 'Direct',
-          role: 'app',
-        },
+        targetChannelId: c2.channelId,
+        data: {fundingStrategy: 'Direct', role: 'app'},
         status: 'pending',
       },
       w.knex
@@ -130,11 +124,8 @@ describe('directly funded app', () => {
       {
         type: 'OpenChannel',
         participants: current.participants,
-        data: {
-          targetChannelId: current.channelId,
-          fundingStrategy: 'Direct',
-          role: 'app',
-        },
+        targetChannelId: current.channelId,
+        data: {fundingStrategy: 'Direct', role: 'app'},
         status: 'pending',
       },
       w.knex
@@ -169,11 +160,8 @@ describe('directly funded app', () => {
       {
         type: 'OpenChannel',
         participants: current.participants,
-        data: {
-          targetChannelId: current.channelId,
-          fundingStrategy: 'Direct',
-          role: 'app',
-        },
+        targetChannelId: current.channelId,
+        data: {fundingStrategy: 'Direct', role: 'app'},
         status: 'pending',
       },
       w.knex
@@ -265,12 +253,8 @@ describe('ledger funded app scenarios', () => {
       {
         type: 'OpenChannel',
         participants: channel.participants,
-        data: {
-          targetChannelId: channel.channelId,
-          fundingStrategy: 'Ledger',
-          fundingLedgerChannelId: ledger.channelId,
-          role: 'app',
-        },
+        targetChannelId: channel.channelId,
+        data: {fundingStrategy: 'Ledger', fundingLedgerChannelId: ledger.channelId, role: 'app'},
         status: 'approved',
       },
       w.knex

@@ -284,11 +284,9 @@ describe('when the application protocol returns an action', () => {
         type: 'OpenChannel',
         status: 'approved',
         participants: c.participants,
-        data: {
-          targetChannelId: c.channelId,
-          fundingStrategy: 'Fake', // Could also be Direct, funding is empty
-          role: 'app',
-        },
+        targetChannelId: c.channelId,
+        // Could also be Direct, funding is empty
+        data: {fundingStrategy: 'Fake', role: 'app'},
       },
       wallet.knex
     );
@@ -330,10 +328,8 @@ describe('when the application protocol returns an action', () => {
         {
           type: 'CloseChannel',
           participants: [],
-          data: {
-            targetChannelId: channelId,
-            fundingStrategy: 'Direct',
-          },
+          targetChannelId: channelId,
+          data: {fundingStrategy: 'Direct'},
         },
       ],
     });
@@ -537,12 +533,8 @@ describe('ledger funded app scenarios', () => {
         type: 'OpenChannel',
         status: 'approved',
         participants: channel.participants,
-        data: {
-          targetChannelId: channel.channelId,
-          fundingStrategy: 'Ledger',
-          fundingLedgerChannelId: ledger.channelId,
-          role: 'app',
-        },
+        targetChannelId: channel.channelId,
+        data: {fundingStrategy: 'Ledger', fundingLedgerChannelId: ledger.channelId, role: 'app'},
       },
       wallet.knex
     );

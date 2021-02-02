@@ -44,7 +44,7 @@ export class ChannelCloser {
   }
 
   public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
-    const channelToLock = objective.data.targetChannelId;
+    const channelToLock = objective.targetChannelId;
 
     let attemptAnotherProtocolStep = true;
 
@@ -52,7 +52,7 @@ export class ChannelCloser {
       await this.store.lockApp(channelToLock, async tx => {
         const protocolState = await getCloseChannelProtocolState(
           this.store,
-          objective.data.targetChannelId,
+          objective.targetChannelId,
           tx
         );
         const nextAction = recordFunctionMetrics(protocol(protocolState), this.timingMetrics);

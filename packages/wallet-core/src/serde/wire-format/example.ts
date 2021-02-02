@@ -131,11 +131,8 @@ export const wireMessageFormat: WireMessage = {
     objectives: [
       {
         type: 'OpenChannel',
-        data: {
-          targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
-          fundingStrategy: 'Direct',
-          role: 'app'
-        },
+        targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
+        data: {fundingStrategy: 'Direct', role: 'app'},
         participants: [
           {
             destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
@@ -165,11 +162,8 @@ export const internalMessageFormat: Payload = {
   objectives: [
     {
       type: 'OpenChannel',
-      data: {
-        targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
-        fundingStrategy: 'Direct',
-        role: 'app'
-      },
+      targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
+      data: {fundingStrategy: 'Direct', role: 'app'},
       participants: [
         {
           destination: makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'),

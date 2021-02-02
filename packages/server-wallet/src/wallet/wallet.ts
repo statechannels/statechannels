@@ -282,11 +282,7 @@ export class SingleThreadedWallet
       // END CHALLENGING_V0
 
       const {objectiveId} = await this.store.ensureObjective(
-        {
-          type: 'SubmitChallenge',
-          participants: [],
-          data: {targetChannelId: channelId},
-        },
+        {type: 'SubmitChallenge', participants: [], targetChannelId: channelId},
         tx
       );
 
@@ -784,11 +780,7 @@ export class SingleThreadedWallet
     );
     await this.knex.transaction(async tx => {
       const {objectiveId} = await this.store.ensureObjective(
-        {
-          type: 'DefundChannel',
-          participants: [],
-          data: {targetChannelId: arg.channelId},
-        },
+        {type: 'DefundChannel', participants: [], targetChannelId: arg.channelId},
         tx
       );
       await this.store.approveObjective(objectiveId, tx);

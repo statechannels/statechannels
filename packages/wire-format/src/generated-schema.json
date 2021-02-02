@@ -122,13 +122,9 @@
                 "Unknown"
               ],
               "type": "string"
-            },
-            "targetChannelId": {
-              "$ref": "#/definitions/Bytes32"
             }
           },
           "required": [
-            "targetChannelId",
             "fundingStrategy"
           ],
           "type": "object"
@@ -139,37 +135,32 @@
           },
           "type": "array"
         },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
         "type": {
           "const": "CloseChannel",
           "type": "string"
         }
       },
       "required": [
-        "type",
-        "data"
+        "data",
+        "targetChannelId",
+        "type"
       ],
       "type": "object"
     },
     "CloseLedger": {
       "additionalProperties": false,
       "properties": {
-        "data": {
-          "additionalProperties": false,
-          "properties": {
-            "ledgerId": {
-              "$ref": "#/definitions/Bytes32"
-            }
-          },
-          "required": [
-            "ledgerId"
-          ],
-          "type": "object"
-        },
         "participants": {
           "items": {
             "$ref": "#/definitions/Participant"
           },
           "type": "array"
+        },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
         },
         "type": {
           "const": "CloseLedger",
@@ -178,7 +169,7 @@
       },
       "required": [
         "type",
-        "data"
+        "targetChannelId"
       ],
       "type": "object"
     },
@@ -188,9 +179,6 @@
         "data": {
           "additionalProperties": false,
           "properties": {
-            "guarantorId": {
-              "$ref": "#/definitions/Bytes32"
-            },
             "jointChannelId": {
               "$ref": "#/definitions/Bytes32"
             },
@@ -200,39 +188,6 @@
           },
           "required": [
             "jointChannelId",
-            "ledgerId",
-            "guarantorId"
-          ],
-          "type": "object"
-        },
-        "participants": {
-          "items": {
-            "$ref": "#/definitions/Participant"
-          },
-          "type": "array"
-        },
-        "type": {
-          "const": "FundGuarantor",
-          "type": "string"
-        }
-      },
-      "required": [
-        "type",
-        "data"
-      ],
-      "type": "object"
-    },
-    "FundLedger": {
-      "additionalProperties": false,
-      "properties": {
-        "data": {
-          "additionalProperties": false,
-          "properties": {
-            "ledgerId": {
-              "$ref": "#/definitions/Bytes32"
-            }
-          },
-          "required": [
             "ledgerId"
           ],
           "type": "object"
@@ -243,6 +198,33 @@
           },
           "type": "array"
         },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
+        "type": {
+          "const": "FundGuarantor",
+          "type": "string"
+        }
+      },
+      "required": [
+        "data",
+        "targetChannelId",
+        "type"
+      ],
+      "type": "object"
+    },
+    "FundLedger": {
+      "additionalProperties": false,
+      "properties": {
+        "participants": {
+          "items": {
+            "$ref": "#/definitions/Participant"
+          },
+          "type": "array"
+        },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
         "type": {
           "const": "FundLedger",
           "type": "string"
@@ -250,7 +232,7 @@
       },
       "required": [
         "type",
-        "data"
+        "targetChannelId"
       ],
       "type": "object"
     },
@@ -349,13 +331,9 @@
                 "ledger"
               ],
               "type": "string"
-            },
-            "targetChannelId": {
-              "$ref": "#/definitions/Bytes32"
             }
           },
           "required": [
-            "targetChannelId",
             "fundingStrategy"
           ],
           "type": "object"
@@ -366,14 +344,18 @@
           },
           "type": "array"
         },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
         "type": {
           "const": "OpenChannel",
           "type": "string"
         }
       },
       "required": [
-        "type",
-        "data"
+        "data",
+        "targetChannelId",
+        "type"
       ],
       "type": "object"
     },
@@ -511,13 +493,9 @@
           "properties": {
             "jointChannelId": {
               "$ref": "#/definitions/Bytes32"
-            },
-            "targetChannelId": {
-              "$ref": "#/definitions/Bytes32"
             }
           },
           "required": [
-            "targetChannelId",
             "jointChannelId"
           ],
           "type": "object"
@@ -528,14 +506,18 @@
           },
           "type": "array"
         },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        },
         "type": {
           "const": "VirtuallyFund",
           "type": "string"
         }
       },
       "required": [
-        "type",
-        "data"
+        "data",
+        "targetChannelId",
+        "type"
       ],
       "type": "object"
     }

@@ -94,9 +94,7 @@ it('creates a defundChannel objective on channel finalized', async () => {
     objectiveId,
     status: 'approved',
     type: 'DefundChannel',
-    data: {
-      targetChannelId: c.channelId,
-    },
+    targetChannelId: c.channelId,
     participants: [],
   });
 });

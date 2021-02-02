@@ -29,7 +29,7 @@ export class ChallengeSubmitter {
     objective: DBSubmitChallengeObjective,
     response: WalletResponse
   ): Promise<void> {
-    const {targetChannelId: channelToLock} = objective.data;
+    const {targetChannelId: channelToLock} = objective;
 
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelToLock, tx);

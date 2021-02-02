@@ -88,68 +88,31 @@ export type SignedStateWithHash = SignedState & Hashed;
 export type SignedStateVariables = StateVariables & Signed;
 export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
 
-type _Objective<Name, Data> = {
+type BaseObjective<Name extends string> = {
   participants?: Participant[];
   type: Name;
-  data: Data;
+  targetChannelId: string;
 };
+type _Objective<Name extends string, Data = never> = [Data] extends [never]
+  ? BaseObjective<Name>
+  : BaseObjective<Name> & {data: Data};
+
 export type OpenChannel = _Objective<
   'OpenChannel',
   {
-    targetChannelId: string;
     fundingStrategy: FundingStrategy;
     role?: 'app' | 'ledger'; // Default should be app
     fundingLedgerChannelId?: string;
   }
 >;
-export type CloseChannel = _Objective<
-  'CloseChannel',
-  {
-    targetChannelId: string;
-    fundingStrategy: FundingStrategy;
-  }
->;
-export type VirtuallyFund = _Objective<
-  'VirtuallyFund',
-  {
-    targetChannelId: string;
-    jointChannelId: string;
-  }
->;
-export type FundGuarantor = _Objective<
-  'FundGuarantor',
-  {
-    jointChannelId: string;
-    ledgerId: string;
-    guarantorId: string;
-  }
->;
-export type FundLedger = _Objective<
-  'FundLedger',
-  {
-    ledgerId: string;
-  }
->;
-export type CloseLedger = _Objective<
-  'CloseLedger',
-  {
-    ledgerId: string;
-  }
->;
-
-export type SubmitChallenge = _Objective<
-  'SubmitChallenge',
-  {
-    targetChannelId: string;
-  }
->;
-
-export type DefundChannel = _Objective<
-  'DefundChannel',
-  {
-    targetChannelId: string;
-  }
->;
+// TODO: Why is fundingStrategy on CloseChannel?
+export type CloseChannel = _Objective<'CloseChannel', {fundingStrategy: FundingStrategy}>;
+export type VirtuallyFund = _Objective<'VirtuallyFund', {jointChannelId: string}>;
+export type FundGuarantor = _Objective<'FundGuarantor', {jointChannelId: string; ledgerId: string}>;
+export type FundLedger = _Objective<'FundLedger'>;
+export type CloseLedger = _Objective<'CloseLedger'>;
+export type SubmitChallenge = _Objective<'SubmitChallenge'>;
+export type DefundChannel = _Objective<'DefundChannel'>;
 
 export type SharedObjective =
   | OpenChannel
@@ -173,19 +136,7 @@ export const isSubmitChallenge = guard<SubmitChallenge>('SubmitChallenge');
 export const isDefundChannel = guard<DefundChannel>('DefundChannel');
 
 export function objectiveId(objective: Objective): string {
-  switch (objective.type) {
-    case 'OpenChannel':
-    case 'CloseChannel':
-    case 'VirtuallyFund':
-    case 'SubmitChallenge':
-    case 'DefundChannel':
-      return [objective.type, objective.data.targetChannelId].join('-');
-    case 'FundGuarantor':
-      return [objective.type, objective.data.guarantorId].join('-');
-    case 'FundLedger':
-    case 'CloseLedger':
-      return [objective.type, objective.data.ledgerId].join('-');
-  }
+  return [objective.type, objective.targetChannelId].join('-');
 }
 
 type GetChannel = {type: 'GetChannel'; channelId: string};

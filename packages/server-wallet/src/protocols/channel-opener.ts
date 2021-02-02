@@ -30,7 +30,7 @@ export class ChannelOpener {
   }
 
   public async crank(objective: DBOpenChannelObjective, response: WalletResponse): Promise<void> {
-    const channelToLock = objective.data.targetChannelId;
+    const channelToLock = objective.targetChannelId;
 
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelToLock, tx);

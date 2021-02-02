@@ -323,7 +323,7 @@ export class Store {
           objective =>
             isSubmitChallenge(objective) || isOpenChannel(objective) || isCloseChannel(objective)
         )
-        .map(objective => objective.data.targetChannelId);
+        .map(objective => objective.targetChannelId);
 
       return {
         channelIds: stateChannelIds.concat(objectiveChannelIds),
@@ -400,8 +400,7 @@ export class Store {
     objective: DefundChannel,
     tx: Transaction
   ): Promise<DBObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
+    const {targetChannelId} = objective;
     // fetch the channel to make sure the channel exists
     const channel = await this.getChannelState(targetChannelId, tx);
     if (!channel) {
@@ -422,8 +421,7 @@ export class Store {
     objective: SubmitChallenge,
     tx: Transaction
   ): Promise<DBObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
+    const {targetChannelId} = objective;
     // fetch the channel to make sure the channel exists
     const channel = await this.getChannelState(targetChannelId, tx);
     if (!channel) {
@@ -445,7 +443,8 @@ export class Store {
     tx: Transaction
   ): Promise<DBObjective> {
     const {
-      data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
+      targetChannelId: channelId,
+      data: {fundingStrategy, fundingLedgerChannelId, role},
     } = objective;
 
     // fetch the channel to make sure the channel exists
@@ -462,12 +461,8 @@ export class Store {
       participants: [],
       status: 'pending',
       type: objective.type,
-      data: {
-        fundingStrategy,
-        fundingLedgerChannelId,
-        targetChannelId: channelId,
-        role,
-      },
+      targetChannelId: channelId,
+      data: {fundingStrategy, fundingLedgerChannelId, role},
     };
 
     if (role === 'ledger')
@@ -498,7 +493,8 @@ export class Store {
     tx: Transaction
   ): Promise<DBObjective> {
     const {
-      data: {targetChannelId, fundingStrategy},
+      targetChannelId,
+      data: {fundingStrategy},
     } = objective;
 
     // fetch the channel to make sure the channel exists
@@ -513,10 +509,8 @@ export class Store {
       status: 'approved',
       type: objective.type,
       participants: [],
-      data: {
-        targetChannelId,
-        fundingStrategy,
-      },
+      targetChannelId,
+      data: {fundingStrategy},
     };
 
     try {
@@ -720,8 +714,8 @@ export class Store {
       const objectiveParams = {
         type: 'OpenChannel' as const,
         participants,
+        targetChannelId: channelId,
         data: {
-          targetChannelId: channelId,
           fundingStrategy,
           fundingLedgerChannelId,
           role,

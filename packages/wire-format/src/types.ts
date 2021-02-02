@@ -75,57 +75,32 @@ export interface SignedState {
   signatures: string[];
 }
 
-type _Objective<Name, Data> = {
+type _Objective<Name extends string> = {
   participants?: Participant[];
   type: Name;
-  data: Data;
+  targetChannelId: Bytes32;
 };
+
+type _ObjectiveWithData<Name extends string, Data> = _Objective<Name> & {data: Data};
+
 type FundingStrategy = 'Direct' | 'Ledger' | 'Virtual' | 'Fake' | 'Unknown';
-export type OpenChannel = _Objective<
+export type OpenChannel = _ObjectiveWithData<
   'OpenChannel',
   {
-    targetChannelId: Bytes32;
     fundingStrategy: FundingStrategy;
     role?: 'app' | 'ledger'; // Default should be app
     fundingLedgerChannelId?: Address;
   }
 >;
-export type CloseChannel = _Objective<
-  'CloseChannel',
-  {
-    targetChannelId: Bytes32;
-    fundingStrategy: FundingStrategy;
-  }
->;
-export type VirtuallyFund = _Objective<
-  'VirtuallyFund',
-  {
-    targetChannelId: Bytes32;
-    jointChannelId: Bytes32;
-  }
->;
-export type FundGuarantor = _Objective<
+export type CloseChannel = _ObjectiveWithData<'CloseChannel', {fundingStrategy: FundingStrategy}>;
+export type VirtuallyFund = _ObjectiveWithData<'VirtuallyFund', {jointChannelId: Bytes32}>;
+export type FundGuarantor = _ObjectiveWithData<
   'FundGuarantor',
-  {
-    jointChannelId: Bytes32;
-    ledgerId: Bytes32;
-    guarantorId: Bytes32;
-  }
+  {jointChannelId: Bytes32; ledgerId: Bytes32}
 >;
 
-export type FundLedger = _Objective<
-  'FundLedger',
-  {
-    ledgerId: Bytes32;
-  }
->;
-
-export type CloseLedger = _Objective<
-  'CloseLedger',
-  {
-    ledgerId: Bytes32;
-  }
->;
+export type FundLedger = _Objective<'FundLedger'>;
+export type CloseLedger = _Objective<'CloseLedger'>;
 
 export type Objective =
   | OpenChannel

@@ -1,6 +1,5 @@
 import {
   objectiveId,
-  Objective,
   OpenChannel,
   CloseChannel,
   SharedObjective,
@@ -9,24 +8,6 @@ import {
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
-
-function extractReferencedChannels(objective: Objective): string[] {
-  switch (objective.type) {
-    case 'OpenChannel':
-    case 'CloseChannel':
-    case 'VirtuallyFund':
-    case 'SubmitChallenge':
-    case 'DefundChannel':
-      return [objective.data.targetChannelId];
-    case 'FundGuarantor':
-      return [objective.data.guarantorId];
-    case 'FundLedger':
-    case 'CloseLedger':
-      return [objective.data.ledgerId];
-    default:
-      return [];
-  }
-}
 
 type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 
@@ -44,11 +25,11 @@ export type DBDefundChannelObjective = {
   type: 'DefundChannel';
   objectiveId: string;
   status: ObjectiveStatus;
-  data: {targetChannelId: string};
+  targetChannelId: string;
 };
 
 export type DBSubmitChallengeObjective = {
-  data: {targetChannelId: string};
+  targetChannelId: string;
   objectiveId: string;
   status: ObjectiveStatus;
   type: 'SubmitChallenge';
@@ -62,9 +43,6 @@ export function isSharedObjective(
 
 /**
  * A DBObjective is a wire objective with a status and an objectiveId
- *
- * Limited to 'OpenChannel' and 'CloseChannel', which are the only objectives
- * that are currently supported by the server wallet
  */
 export type DBObjective =
   | DBOpenChannelObjective
@@ -81,21 +59,12 @@ export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
   return _.omit(dbObj, ['objectiveId', 'status']);
 };
 
-export class ObjectiveChannelModel extends Model {
-  readonly objectiveId!: DBObjective['objectiveId'];
-  readonly channelId!: string;
-
-  static tableName = 'objectives_channels';
-  static get idColumn(): string[] {
-    return ['objectiveId', 'channelId'];
-  }
-}
-
 export class ObjectiveModel extends Model {
   readonly objectiveId!: DBObjective['objectiveId'];
+  readonly targetChannelId!: DBObjective['targetChannelId'];
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
-  readonly data!: DBObjective['data'];
+  readonly data?: (DBOpenChannelObjective | DBCloseChannelObjective)['data'];
 
   static tableName = 'objectives';
   static get idColumn(): string[] {
@@ -110,16 +79,12 @@ export class ObjectiveModel extends Model {
     const {Channel} = require('./channel');
 
     return {
-      objectivesChannels: {
-        relation: Model.ManyToManyRelation,
+      channel: {
+        relation: Model.BelongsToOneRelation,
         modelClass: Channel,
         join: {
-          from: 'objectives.objectiveId',
-          through: {
-            from: 'objectives_channels.objectiveId',
-            to: 'objectives_channels.channelId',
-          },
-          to: 'channels.channelId',
+          from: 'objectives.target_channel_id',
+          to: 'channel.channel_id',
         },
       },
     };
@@ -132,23 +97,18 @@ export class ObjectiveModel extends Model {
     tx: TransactionOrKnex
   ): Promise<ObjectiveModel> {
     const id: string = objectiveId(objectiveToBeStored);
+    const {type, targetChannelId, status} = objectiveToBeStored;
 
+    // FIXME: Refactor
     return tx.transaction(async trx => {
       const objective = await ObjectiveModel.query(trx).insert({
+        status,
+        type,
+        data: 'data' in objectiveToBeStored ? objectiveToBeStored.data : undefined,
         objectiveId: id,
-        status: objectiveToBeStored.status,
-        type: objectiveToBeStored.type,
-        data: objectiveToBeStored.data,
+        targetChannelId,
       });
 
-      // Associate the objective with any channel that it references
-      // By inserting an ObjectiveChannel row for each channel
-      // Requires objective and channels to exist
-      await Promise.all(
-        extractReferencedChannels(objectiveToBeStored).map(async value =>
-          ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
-        )
-      );
       return objective;
     });
   }
@@ -173,21 +133,16 @@ export class ObjectiveModel extends Model {
     targetChannelIds: string[],
     tx: TransactionOrKnex
   ): Promise<DBObjective[]> {
-    const objectiveIds = (
-      await ObjectiveChannelModel.query(tx)
-        .column('objectiveId')
-        .select()
-        .whereIn('channelId', targetChannelIds)
-    ).map(oc => oc.objectiveId);
-
-    return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
+    return (await ObjectiveModel.query(tx).whereIn('targetChannelId', targetChannelIds)).map(m =>
+      m.toObjective()
+    );
   }
 
   toObjective(): DBObjective {
     return {
       ...this,
       participants: [],
-      data: this.data as any, // Here we will trust that the row respects our types
+      data: JSON.parse(this.data as any), // Here we will trust that the row respects our types
     };
   }
 }

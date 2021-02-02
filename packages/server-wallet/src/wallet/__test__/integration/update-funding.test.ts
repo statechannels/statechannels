@@ -43,11 +43,8 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     {
       type: 'OpenChannel',
       participants: c1.participants,
-      data: {
-        targetChannelId: c1.channelId,
-        fundingStrategy: 'Direct',
-        role: 'app',
-      },
+      targetChannelId: c1.channelId,
+      data: {fundingStrategy: 'Direct', role: 'app'},
       status: 'approved',
     },
     w.knex
@@ -57,11 +54,8 @@ it('sends the post fund setup when the funding event is provided for multiple ch
     {
       type: 'OpenChannel',
       participants: c2.participants,
-      data: {
-        targetChannelId: c2.channelId,
-        fundingStrategy: 'Direct',
-        role: 'app',
-      },
+      targetChannelId: c2.channelId,
+      data: {fundingStrategy: 'Direct', role: 'app'},
       status: 'approved',
     },
     w.knex
@@ -113,11 +107,8 @@ it('sends the post fund setup when the funding event is provided', async () => {
     {
       type: 'OpenChannel',
       participants: c.participants,
-      data: {
-        targetChannelId: c.channelId,
-        fundingStrategy: 'Direct',
-        role: 'app',
-      },
+      targetChannelId: c.channelId,
+      data: {fundingStrategy: 'Direct', role: 'app'},
       status: 'approved',
     },
     w.knex
@@ -158,11 +149,8 @@ it('emits new channel result when the funding event is provided via holdingUpdat
     {
       type: 'OpenChannel',
       participants: c.participants,
-      data: {
-        targetChannelId: c.channelId,
-        fundingStrategy: 'Direct',
-        role: 'app',
-      },
+      targetChannelId: c.channelId,
+      data: {fundingStrategy: 'Direct', role: 'app'},
       status: 'approved',
     },
     w.knex

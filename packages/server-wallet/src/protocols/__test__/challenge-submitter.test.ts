@@ -48,7 +48,7 @@ describe(`challenge-submitter`, () => {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {targetChannelId: c.channelId},
+      targetChannelId: c.channelId,
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));
@@ -66,7 +66,7 @@ describe(`challenge-submitter`, () => {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {targetChannelId: c.channelId},
+      targetChannelId: c.channelId,
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));
@@ -85,7 +85,7 @@ describe(`challenge-submitter`, () => {
       type: 'SubmitChallenge',
       status: 'pending',
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
-      data: {targetChannelId: c.channelId},
+      targetChannelId: c.channelId,
     };
 
     await knex.transaction(tx => store.ensureObjective(obj, tx));

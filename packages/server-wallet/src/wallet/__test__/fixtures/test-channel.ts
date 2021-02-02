@@ -184,10 +184,8 @@ export class TestChannel {
     return {
       participants: this.participants,
       type: 'OpenChannel',
-      data: {
-        targetChannelId: this.channelId,
-        fundingStrategy: this.fundingStrategy,
-      },
+      targetChannelId: this.channelId,
+      data: {fundingStrategy: this.fundingStrategy},
     };
   }
 
@@ -195,10 +193,8 @@ export class TestChannel {
     return {
       participants: this.participants,
       type: 'CloseChannel',
-      data: {
-        targetChannelId: this.channelId,
-        fundingStrategy: this.fundingStrategy,
-      },
+      targetChannelId: this.channelId,
+      data: {fundingStrategy: this.fundingStrategy},
     };
   }
 

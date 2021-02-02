@@ -29,7 +29,7 @@ export class ChannelDefunder {
     objective: DBDefundChannelObjective,
     _response: WalletResponse
   ): Promise<void> {
-    const {targetChannelId: channelId} = objective.data;
+    const {targetChannelId: channelId} = objective;
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelId, tx);
 

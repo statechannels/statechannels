@@ -243,6 +243,6 @@ function createPendingObjective(channelId: string): DBDefundChannelObjective {
     type: 'DefundChannel',
     status: 'pending',
     objectiveId: ['DefundChannel', channelId].join('-'),
-    data: {targetChannelId: channelId},
+    targetChannelId: channelId,
   };
 }
