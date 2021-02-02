@@ -8,7 +8,7 @@ import {DBCloseChannelObjective} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
-import {ChannelCloser} from '../close-channel';
+import {ChannelCloser} from '../channel-closer';
 
 const FINAL = 10; // this will be A's state to sign
 const testChan = TestChannel.create({aBal: 5, bBal: 5, finalFrom: FINAL});
