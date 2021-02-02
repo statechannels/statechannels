@@ -38,7 +38,7 @@ export class ChannelCloser {
 
     while (attemptAnotherProtocolStep) {
       await this.store.lockApp(channelToLock, async tx => {
-        const protocolState = await getCloseChannelProtocolState(
+        const protocolState = await this.getCloseChannelProtocolState(
           this.store,
           objective.data.targetChannelId,
           tx
@@ -47,13 +47,13 @@ export class ChannelCloser {
           let turnNum;
           if (!ensureAllAllocationItemsAreExternalDestinations(protocolState)) {
             attemptAnotherProtocolStep = false;
-          } else if ((turnNum = this.turnNumberToSign(protocolState))) {
+          } else if ((turnNum = turnNumberToSign(protocolState))) {
             await this.signState(protocolState, turnNum, tx, response);
-          } else if (this.shouldWithdraw(protocolState)) {
+          } else if (shouldWithdraw(protocolState)) {
             await this.withdraw(protocolState, tx);
-          } else if (this.shouldRequestLedgerDefunding(protocolState)) {
+          } else if (shouldRequestLedgerDefunding(protocolState)) {
             await this.requestLedgerDefunding(protocolState, tx);
-          } else if (this.shouldCompleteObjective(protocolState)) {
+          } else if (shouldCompleteObjective(protocolState)) {
             attemptAnotherProtocolStep = false;
             await this.completeObjective(objective, protocolState, tx, response);
           } else {
@@ -67,56 +67,6 @@ export class ChannelCloser {
         }
       });
     }
-  }
-
-  // I want to sign the final state if:
-  // - I haven't yet signed a final state
-  // - and either
-  //    - there's an existing final state (in which case I double sign)
-  //    - or it's my turn (in which case I craft the final state)
-  //
-  private turnNumberToSign(ps: ProtocolState): number | null {
-    if (!ps.app.supported || !ps.app.latestSignedByMe || ps.app.latestSignedByMe.isFinal) {
-      return null;
-    }
-
-    // if there's an existing final state double-sign it
-    if (ps.app.supported.isFinal) {
-      return ps.app.supported.turnNum;
-    }
-    // otherwise, if it's my turn, sign a final state
-    if (isMyTurn(ps)) {
-      return ps.app.supported.turnNum + 1;
-    }
-
-    return null;
-  }
-
-  private shouldWithdraw(ps: ProtocolState): boolean {
-    const {app} = ps;
-    return (
-      everyoneSignedFinalState(app) &&
-      app.fundingStrategy === 'Direct' &&
-      !app.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid()
-    );
-  }
-
-  private shouldRequestLedgerDefunding(ps: ProtocolState): boolean {
-    return (
-      isLedgerFunded(ps.app) &&
-      !ps.ledgerDefundingRequested &&
-      !ps.ledgerDefundingSucceeded &&
-      !!ps.app.supported &&
-      everyoneSignedFinalState(ps.app)
-    );
-  }
-
-  private shouldCompleteObjective(ps: ProtocolState): boolean {
-    return (
-      everyoneSignedFinalState(ps.app) &&
-      ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
-      successfulWithdraw(ps)
-    );
   }
 
   private async signState(
@@ -165,6 +115,35 @@ export class ChannelCloser {
     response.queueChannelState(protocolState.app);
     response.queueSucceededObjective(objective);
   }
+
+  /**
+   * Helper method to retrieve scoped data needed for CloseChannel protocol.
+   */
+  private async getCloseChannelProtocolState(
+    store: Store,
+    channelId: Bytes32,
+    tx: Transaction
+  ): Promise<ProtocolState> {
+    const app = await store.getChannelState(channelId, tx);
+    switch (app.fundingStrategy) {
+      case 'Direct':
+      case 'Fake':
+        return {app};
+      case 'Ledger': {
+        const req = await store.getLedgerRequest(app.channelId, 'defund', tx);
+        return {
+          app,
+          ledgerDefundingRequested: !!req,
+          ledgerDefundingSucceeded: req ? req.status === 'succeeded' : false,
+          ledgerChannelId: req ? req.ledgerChannelId : undefined,
+        };
+      }
+      case 'Unknown':
+      case 'Virtual':
+      default:
+        throw new Error('getCloseChannelProtocolState: Unimplemented funding strategy');
+    }
+  }
 }
 
 export type ProtocolState = {
@@ -173,6 +152,59 @@ export type ProtocolState = {
   ledgerDefundingSucceeded?: boolean;
   ledgerChannelId?: Bytes32;
 };
+
+// Pure, synchronous functions START
+// =================================
+
+// I want to sign the final state if:
+// - I haven't yet signed a final state
+// - and either
+//    - there's an existing final state (in which case I double sign)
+//    - or it's my turn (in which case I craft the final state)
+//
+function turnNumberToSign(ps: ProtocolState): number | null {
+  if (!ps.app.supported || !ps.app.latestSignedByMe || ps.app.latestSignedByMe.isFinal) {
+    return null;
+  }
+
+  // if there's an existing final state double-sign it
+  if (ps.app.supported.isFinal) {
+    return ps.app.supported.turnNum;
+  }
+  // otherwise, if it's my turn, sign a final state
+  if (isMyTurn(ps)) {
+    return ps.app.supported.turnNum + 1;
+  }
+
+  return null;
+}
+
+function shouldWithdraw(ps: ProtocolState): boolean {
+  const {app} = ps;
+  return (
+    everyoneSignedFinalState(app) &&
+    app.fundingStrategy === 'Direct' &&
+    !app.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid()
+  );
+}
+
+function shouldRequestLedgerDefunding(ps: ProtocolState): boolean {
+  return (
+    isLedgerFunded(ps.app) &&
+    !ps.ledgerDefundingRequested &&
+    !ps.ledgerDefundingSucceeded &&
+    !!ps.app.supported &&
+    everyoneSignedFinalState(ps.app)
+  );
+}
+
+function shouldCompleteObjective(ps: ProtocolState): boolean {
+  return (
+    everyoneSignedFinalState(ps.app) &&
+    ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
+    successfulWithdraw(ps)
+  );
+}
 
 function everyoneSignedFinalState({latestSignedByMe, support, supported}: ChannelState): boolean {
   return (
@@ -208,31 +240,5 @@ const ensureAllAllocationItemsAreExternalDestinations = (ps: ProtocolState): boo
 
 const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
-/**
- * Helper method to retrieve scoped data needed for CloseChannel protocol.
- */
-export const getCloseChannelProtocolState = async (
-  store: Store,
-  channelId: Bytes32,
-  tx: Transaction
-): Promise<ProtocolState> => {
-  const app = await store.getChannelState(channelId, tx);
-  switch (app.fundingStrategy) {
-    case 'Direct':
-    case 'Fake':
-      return {app};
-    case 'Ledger': {
-      const req = await store.getLedgerRequest(app.channelId, 'defund', tx);
-      return {
-        app,
-        ledgerDefundingRequested: !!req,
-        ledgerDefundingSucceeded: req ? req.status === 'succeeded' : false,
-        ledgerChannelId: req ? req.ledgerChannelId : undefined,
-      };
-    }
-    case 'Unknown':
-    case 'Virtual':
-    default:
-      throw new Error('getCloseChannelProtocolState: Unimplemented funding strategy');
-  }
-};
+// ==============================
+// Pure, synchronous functions END
