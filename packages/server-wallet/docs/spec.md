@@ -1,8 +1,30 @@
-The goal is to come with a wallet architecture that
+# Nitro wallet architecture
 
-- Is capable of supporting the protocols we will need to implement in the near future
-- Has a clear set of underlying principles that make it easy for developers to make decisions about how to build new features
-- Has a strategy for achieving performance and robust thread-safety, crash-tolerance/recoverability
+This document describes the architectural design of a nitro wallet, and includes development principles designed to ensure performance, thread-safety and crash-tolerance/recoverability.
+
+The following diagram describes the various components in the architecture. The scope of this document is limited to the components left of the dividing line.
+
+```
+                                      |
+                                      |
+                    +---------------+ |      +------------+
+                    |               | |      |            |
+                    | ChainWatcher  <--------> Blockchain |
+                    |               | |      |            |
+                    +-------^-------+ |      +------------+
+                            |         |
+                            |         |
+                            |         |
+                     +------v-----+   |              +----------+
+   +-----------+     |            |   |              |          |
+   |           |     |            |   |  API calls   |          |
+   |   Store   <----->   Wallet   <-------------------   App    |
+   |           |     |            |   |              |          |
+   +-----------+     |            ------------------->          |
+                     +------------+   |  Events      +----------+
+                                      |
+                                      |
+```
 
 ## Wallet Objectives
 
