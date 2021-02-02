@@ -85,7 +85,7 @@ describe('e2e', () => {
   });
 
   it('can create a channel, send signed state via http', async () => {
-    const channel = await payerClient.createPayerChannel(receiver);
+    const {channelResult: channel} = await payerClient.createPayerChannel(receiver);
 
     expect(channel.participants).toStrictEqual([payer, receiver]);
     expect(channel.status).toBe('running');
