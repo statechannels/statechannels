@@ -64,7 +64,7 @@ export class ChannelCloser {
             attemptAnotherProtocolStep = false;
           }
         } catch (error) {
-          this.logger.error({error}, 'Error handling action');
+          this.logger.error({error}, 'Error taking a protocol step');
           await tx.rollback(error);
           attemptAnotherProtocolStep = false;
         }
