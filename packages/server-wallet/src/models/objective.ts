@@ -63,7 +63,7 @@ export function isSharedObjective(
 /**
  * A DBObjective is a wire objective with a status and an objectiveId
  *
- * Limited to 'OpenChannel' and 'CloseChannel', which are the only objectives
+ * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
  */
 export type DBObjective =
