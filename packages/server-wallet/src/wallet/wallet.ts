@@ -346,7 +346,7 @@ export class SingleThreadedWallet
       }
       // END CHALLENGING_V0
 
-      const {objectiveId} = await this.store.ensureObjective(
+      const objective = await this.store.ensureObjective(
         {
           type: 'SubmitChallenge',
           participants: [],
@@ -354,8 +354,9 @@ export class SingleThreadedWallet
         },
         tx
       );
+      this.emit('operationStarted', objective);
 
-      await this.store.approveObjective(objectiveId, tx);
+      await this.store.approveObjective(objective.objectiveId, tx);
 
       response.queueChannel(channel);
     });
@@ -367,7 +368,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Update the wallets knowledge about the funding for some channels
+   * Update the wallet's knowledge about the funding for some channels
    *
    * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
@@ -523,6 +524,7 @@ export class SingleThreadedWallet
       fundingLedgerChannelId
     );
 
+    this.emit('operationStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
