@@ -9,6 +9,7 @@ import {
 } from '@statechannels/client-api-schema';
 import {Address as CoreAddress} from '@statechannels/wallet-core';
 
+import {DBObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
 import {Bytes32, Uint256} from '../type-aliases';
 
@@ -34,7 +35,16 @@ type ChannelUpdatedEvent = {
   value: SingleChannelOutput;
 };
 
-export type WalletEvent = ChannelUpdatedEvent;
+type OperationStarted = {
+  type: 'operationStarted';
+  value: DBObjective;
+};
+type OperationSucceeded = {
+  type: 'operationSucceeded';
+  value: DBObjective;
+};
+
+export type WalletEvent = ChannelUpdatedEvent | OperationStarted | OperationSucceeded;
 
 export interface WalletInterface {
   // App utilities
