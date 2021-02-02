@@ -1,4 +1,9 @@
-import {checkThat, isSimpleAllocation, StateVariables} from '@statechannels/wallet-core';
+import {
+  checkThat,
+  isSimpleAllocation,
+  StateVariables,
+  unreachable,
+} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
@@ -49,10 +54,8 @@ export class ChannelCloser {
             attemptAnotherProtocolStep = false;
           } else if ((turnNum = turnNumberToSign(protocolState))) {
             await this.signState(protocolState, turnNum, tx, response);
-          } else if (shouldWithdraw(protocolState)) {
-            await this.withdraw(protocolState, tx);
-          } else if (shouldRequestLedgerDefunding(protocolState)) {
-            await this.requestLedgerDefunding(protocolState, tx);
+          } else if (shouldDefund(protocolState)) {
+            await this.defund(protocolState, tx);
           } else if (shouldCompleteObjective(protocolState)) {
             attemptAnotherProtocolStep = false;
             await this.completeObjective(objective, protocolState, tx, response);
@@ -83,6 +86,25 @@ export class ChannelCloser {
     const vars: StateVariables = {...protocolState.app.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
     response.queueState(signedState, myIndex, channelId);
+  }
+
+  private async defund(protocolState: ProtocolState, tx: Transaction): Promise<void> {
+    switch (protocolState.app.fundingStrategy) {
+      case 'Direct':
+        this.withdraw(protocolState, tx);
+        break;
+      case 'Ledger':
+        this.requestLedgerDefunding(protocolState, tx);
+        break;
+      case 'Fake':
+      case 'Unknown':
+      case 'Virtual':
+        throw new Error(
+          `Defunding is not implemented for strategy ${protocolState.app.fundingStrategy}`
+        );
+      default:
+        unreachable(protocolState.app.fundingStrategy);
+    }
   }
 
   private async withdraw(protocolState: ProtocolState, tx: Transaction): Promise<void> {
@@ -179,23 +201,21 @@ function turnNumberToSign(ps: ProtocolState): number | null {
   return null;
 }
 
-function shouldWithdraw(ps: ProtocolState): boolean {
-  const {app} = ps;
-  return (
-    everyoneSignedFinalState(app) &&
-    app.fundingStrategy === 'Direct' &&
-    !app.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid()
-  );
-}
-
-function shouldRequestLedgerDefunding(ps: ProtocolState): boolean {
-  return (
-    isLedgerFunded(ps.app) &&
-    !ps.ledgerDefundingRequested &&
-    !ps.ledgerDefundingSucceeded &&
-    !!ps.app.supported &&
-    everyoneSignedFinalState(ps.app)
-  );
+function shouldDefund(ps: ProtocolState): boolean {
+  if (!everyoneSignedFinalState(ps.app)) return false;
+  switch (ps.app.fundingStrategy) {
+    case 'Direct':
+      return !ps.app.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
+    case 'Ledger':
+      return !ps.ledgerDefundingRequested && !ps.ledgerDefundingSucceeded && !!ps.app.supported;
+    case 'Unknown':
+    case 'Fake':
+      return false;
+    case 'Virtual':
+      throw new Error('Virtual channel defunding is not implemented');
+    default:
+      unreachable(ps.app.fundingStrategy);
+  }
 }
 
 function shouldCompleteObjective(ps: ProtocolState): boolean {
