@@ -29,9 +29,8 @@ export type MultipleChannelOutput = {
 
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
-type ChannelUpdatedEventName = 'channelUpdated';
 type ChannelUpdatedEvent = {
-  type: ChannelUpdatedEventName;
+  type: 'channelUpdated';
   value: SingleChannelOutput;
 };
 
