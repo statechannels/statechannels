@@ -95,11 +95,16 @@ describe('e2e', () => {
       (await ChannelPayer.forId(channel.channelId, ChannelPayer.knex())).protocolState
     ).toMatchObject({supported: {turnNum: 3}});
 
-    expect(events).toHaveLength(1);
+    expect(events).toHaveLength(2);
     expect(events).toContainObject({
       event: 'objectiveStarted',
       type: 'OpenChannel',
       status: 'pending',
+    });
+    expect(events).toContainObject({
+      event: 'objectiveSucceeded',
+      type: 'OpenChannel',
+      status: 'succeeded',
     });
   });
 });

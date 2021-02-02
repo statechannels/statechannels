@@ -886,6 +886,8 @@ export class SingleThreadedWallet
       await this.crankUntilIdle(channels, response);
       needToCrank = await this.processLedgerQueue(channels, response);
     }
+
+    response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
   }
 
   private async processLedgerQueue(
