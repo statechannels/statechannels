@@ -85,7 +85,7 @@ describe('e2e', () => {
   });
 
   it('can create a channel, send signed state via http', async () => {
-    const {channelResult: channel} = await payerClient.createPayerChannel(receiver);
+    const {channelResult: channel, events} = await payerClient.createPayerChannel(receiver);
 
     expect(channel.participants).toStrictEqual([payer, receiver]);
     expect(channel.status).toBe('running');
@@ -93,9 +93,10 @@ describe('e2e', () => {
 
     expect(
       (await ChannelPayer.forId(channel.channelId, ChannelPayer.knex())).protocolState
-    ).toMatchObject({
-      supported: {turnNum: 3},
-    });
+    ).toMatchObject({supported: {turnNum: 3}});
+
+    expect(events).toHaveLength(1);
+    expect(events).toContainObject({type: 'OpenChannel', status: 'pending'});
   });
 });
 
