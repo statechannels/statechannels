@@ -354,7 +354,7 @@ export class SingleThreadedWallet
         },
         tx
       );
-      this.emit('operationStarted', objective);
+      this.emit('objectiveStarted', objective);
 
       await this.store.approveObjective(objective.objectiveId, tx);
 
@@ -524,7 +524,7 @@ export class SingleThreadedWallet
       fundingLedgerChannelId
     );
 
-    this.emit('operationStarted', objective);
+    this.emit('objectiveStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);

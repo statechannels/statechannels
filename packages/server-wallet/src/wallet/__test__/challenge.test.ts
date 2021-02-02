@@ -37,7 +37,7 @@ it('throws an error when challenging with a non ledger channel', async () => {
 it('submits a challenge when no challenge exists for a channel', async () => {
   const spy = jest.spyOn(w.chainService, 'challenge');
   const callback = jest.fn();
-  w.once('operationStarted', callback);
+  w.once('objectiveStarted', callback);
   const c = channel({
     channelNonce: 1,
     // Set a random address so this will be a "ledger" channel

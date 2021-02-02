@@ -35,16 +35,16 @@ type ChannelUpdatedEvent = {
   value: SingleChannelOutput;
 };
 
-type OperationStarted = {
-  type: 'operationStarted';
+type ObjectiveStarted = {
+  type: 'objectiveStarted';
   value: DBObjective;
 };
-type OperationSucceeded = {
-  type: 'operationSucceeded';
+type ObjectiveSucceeded = {
+  type: 'objectiveSucceeded';
   value: DBObjective;
 };
 
-export type WalletEvent = ChannelUpdatedEvent | OperationStarted | OperationSucceeded;
+export type WalletEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
 
 export interface WalletInterface {
   // App utilities
