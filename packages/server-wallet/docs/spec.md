@@ -315,10 +315,3 @@ If we have two processes running CrankObjectives simultaneously, it could be tha
 E.g. A sends two packets to B, p0 containing a ledger update, and p1 containing a channel update. It could be that the reply to the ledger update comes in p1, instead of p0.
 
 It seems to me that this is still ok. The important thing is that A's wallet gets the message to B's wallet. We just need to be aware that this could happen.
-
-# Todo
-
-- [ ] Sketch out how virtual funding fits in
-- [ ] Sketch out how ledger top-ups and partial checkouts work
-- [ ] Decide if direct funding goes in step 5 (currently called ProcessLedgerQueue)
-- [ ] Change this doc from a "design doc" to a "description of the current wallet" (and include known shortcomings)
