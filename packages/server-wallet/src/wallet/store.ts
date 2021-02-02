@@ -340,15 +340,19 @@ export class Store {
     await ObjectiveModel.approve(objectiveId, tx || this.knex);
   }
 
-  async markObjectiveStatus(
-    objective: DBObjective,
+  async markObjectiveStatus<O extends DBObjective>(
+    objective: O,
     status: 'succeeded' | 'failed',
     tx?: Transaction
-  ): Promise<void> {
+  ): Promise<O> {
     if (status === 'succeeded') {
-      await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex);
+      return (
+        await ObjectiveModel.succeed(objective.objectiveId, tx || this.knex)
+      ).toObjective() as O;
     } else {
-      await ObjectiveModel.failed(objective.objectiveId, tx || this.knex);
+      return (
+        await ObjectiveModel.failed(objective.objectiveId, tx || this.knex)
+      ).toObjective() as O;
     }
   }
 
