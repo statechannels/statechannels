@@ -91,10 +91,10 @@ export class ChannelCloser {
   private async defund(protocolState: ProtocolState, tx: Transaction): Promise<void> {
     switch (protocolState.app.fundingStrategy) {
       case 'Direct':
-        this.withdraw(protocolState, tx);
+        await this.withdraw(protocolState, tx);
         break;
       case 'Ledger':
-        this.requestLedgerDefunding(protocolState, tx);
+        await this.requestLedgerDefunding(protocolState, tx);
         break;
       case 'Fake':
       case 'Unknown':
