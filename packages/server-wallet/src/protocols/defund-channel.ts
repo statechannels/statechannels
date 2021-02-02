@@ -25,10 +25,7 @@ export class ChannelDefunder {
     return new ChannelDefunder(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(
-    objective: DBDefundChannelObjective,
-    _response: WalletResponse
-  ): Promise<void> {
+  public async crank(objective: DBDefundChannelObjective, response: WalletResponse): Promise<void> {
     const {targetChannelId: channelId} = objective.data;
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelId, tx);
@@ -64,7 +61,8 @@ export class ChannelDefunder {
       } else if (channel.hasConclusionProof) {
         await ChainServiceRequest.insertOrUpdate(channelId, 'withdraw', tx);
         await this.chainService.concludeAndWithdraw(channel.support);
-        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        response.queueSucceededObjective(objective);
         return;
       }
     });
