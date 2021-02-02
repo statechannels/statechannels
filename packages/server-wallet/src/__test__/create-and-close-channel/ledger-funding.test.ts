@@ -33,7 +33,8 @@ const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(),
 });
 
 beforeAll(async () => {
-  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
+  await DBAdmin.createDatabase(aWalletConfig);
+  await DBAdmin.createDatabase(bWalletConfig);
 
   await Promise.all([
     DBAdmin.migrateDatabase(aWalletConfig),
