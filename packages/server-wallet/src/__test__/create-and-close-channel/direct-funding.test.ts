@@ -29,7 +29,8 @@ let participantA: Participant;
 let participantB: Participant;
 
 beforeAll(async () => {
-  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
+  await DBAdmin.createDatabase(aWalletConfig);
+  await DBAdmin.createDatabase(bWalletConfig);
   await Promise.all([
     DBAdmin.migrateDatabase(aWalletConfig),
     DBAdmin.migrateDatabase(bWalletConfig),
