@@ -880,6 +880,18 @@ export class SingleThreadedWallet
     await this.takeActions(channelIds, response);
   }
 
+  /**
+   *
+   * @param channels channels touched by the caller
+   * @param response WalletResponse that is modified in place while cranking objectives
+   *
+   * EMITS: 'objectiveSucceded' for objectives that succeed
+   *
+   * Active objectives for the "touched" channels are cranked. Theoretically, this may touch other
+   * channels, resulting in a cascade of cranked objectives.
+   *
+   *
+   */
   private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
     let needToCrank = true;
     while (needToCrank) {
