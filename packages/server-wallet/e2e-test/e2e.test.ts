@@ -96,7 +96,11 @@ describe('e2e', () => {
     ).toMatchObject({supported: {turnNum: 3}});
 
     expect(events).toHaveLength(1);
-    expect(events).toContainObject({type: 'OpenChannel', status: 'pending'});
+    expect(events).toContainObject({
+      event: 'objectiveStarted',
+      type: 'OpenChannel',
+      status: 'pending',
+    });
   });
 });
 

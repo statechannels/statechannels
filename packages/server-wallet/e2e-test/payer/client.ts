@@ -90,9 +90,9 @@ export default class PayerClient {
 
   public async createPayerChannel(receiver: Participant): Promise<TestChannelResult> {
     const events: WalletEvent[] = [];
-    this.wallet.on('channelUpdated', e => events.push(e));
-    this.wallet.on('objectiveStarted', o => events.push(o));
-    this.wallet.on('objectiveSucceeded', o => events.push(o));
+    const names = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
+    names.map(event => this.wallet.on(event, e => events.push({...e, event})));
+
     const {
       outbox: [{params}],
       channelResults: [{channelId}],
