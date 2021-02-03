@@ -20,6 +20,7 @@ export class WalletResponse {
   private queuedMessages: WireMessage[] = [];
   objectivesToSend: DBObjective[] = [];
   objectivesToApprove: DBObjective[] = [];
+  createdObjectives: DBObjective[] = [];
   succeededObjectives: DBObjective[] = [];
   requests: string[] = [];
 
@@ -76,13 +77,17 @@ export class WalletResponse {
   }
 
   /**
-   * Queues objectives for sending to opponent
+   * Queues objectives for
+   * - sending to opponent
+   * - notifying the app
    */
   queueCreatedObjective(
     objective: DBObjective,
     myIndex: number,
     participants: Participant[]
   ): void {
+    this.createdObjectives.push(objective);
+
     const myParticipantId = participants[myIndex].participantId;
     if (isSharedObjective(objective)) {
       participants.forEach((p, i) => {
