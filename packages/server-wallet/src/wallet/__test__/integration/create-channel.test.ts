@@ -24,11 +24,10 @@ describe('happy path', () => {
     const appData = '0xaf00';
     const callback = jest.fn();
     w.once('objectiveStarted', callback);
-    const createPromise = w.createChannels(createChannelArgs({appData}), 1);
-    await expect(createPromise).resolves.toMatchObject({
-      channelResults: [{channelId: expect.any(String)}],
-    });
-    await expect(createPromise).resolves.toMatchObject({
+    const createResult = await w.createChannels(createChannelArgs({appData}), 1);
+    expect(createResult).toMatchObject({channelResults: [{channelId: expect.any(String)}]});
+
+    expect(createResult).toMatchObject({
       outbox: [
         {
           params: {
@@ -52,7 +51,7 @@ describe('happy path', () => {
       channelResults: [{channelId: expect.any(String), turnNum: 0, appData}],
     });
     expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'OpenChannel'}));
-    const {channelId} = (await createPromise).channelResults[0];
+    const {channelId} = createResult.channelResults[0];
     expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 
     const updated = await Channel.forId(channelId, w.knex);
