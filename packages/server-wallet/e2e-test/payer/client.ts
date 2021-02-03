@@ -11,6 +11,12 @@ import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {defaultConfig, ServerWalletConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
+import {WalletEvent} from '../../src/wallet/types';
+
+type TestChannelResult = {
+  channelResult: ChannelResult;
+  events: WalletEvent[];
+};
 
 export default class PayerClient {
   readonly config: ServerWalletConfig;
@@ -82,7 +88,11 @@ export default class PayerClient {
     return channelResults;
   }
 
-  public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
+  public async createPayerChannel(receiver: Participant): Promise<TestChannelResult> {
+    const events: WalletEvent[] = [];
+    const names = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
+    names.map(event => this.wallet.on(event, e => events.push({...e, event})));
+
     const {
       outbox: [{params}],
       channelResults: [{channelId}],
@@ -117,7 +127,7 @@ export default class PayerClient {
 
     const {channelResult} = await this.wallet.getState({channelId});
 
-    return channelResult;
+    return {channelResult, events};
   }
   /**
    * Mines a block that with a timestamp =  currentBlock.timestamp + timeIncrease

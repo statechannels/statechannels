@@ -133,7 +133,7 @@ export class ChannelCloser {
     tx: Transaction,
     response: WalletResponse
   ): Promise<void> {
-    await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+    objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannelState(protocolState.app);
     response.queueSucceededObjective(objective);
   }

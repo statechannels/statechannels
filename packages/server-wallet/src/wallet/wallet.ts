@@ -346,7 +346,7 @@ export class SingleThreadedWallet
       }
       // END CHALLENGING_V0
 
-      const {objectiveId} = await this.store.ensureObjective(
+      const objective = await this.store.ensureObjective(
         {
           type: 'SubmitChallenge',
           participants: [],
@@ -354,8 +354,9 @@ export class SingleThreadedWallet
         },
         tx
       );
+      this.emit('objectiveStarted', objective);
 
-      await this.store.approveObjective(objectiveId, tx);
+      await this.store.approveObjective(objective.objectiveId, tx);
 
       response.queueChannel(channel);
     });
@@ -367,7 +368,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Update the wallets knowledge about the funding for some channels
+   * Update the wallet's knowledge about the funding for some channels
    *
    * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
@@ -523,6 +524,7 @@ export class SingleThreadedWallet
       fundingLedgerChannelId
     );
 
+    this.emit('objectiveStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
@@ -878,12 +880,24 @@ export class SingleThreadedWallet
     await this.takeActions(channelIds, response);
   }
 
+  /**
+   * Active objectives for the "touched" channels are cranked. Theoretically, this may touch other
+   * channels, resulting in a cascade of cranked objectives.
+   *
+   * @remarks
+   * Emits an 'objectiveSucceded' event for objectives that succeed.
+   *
+   * @param channels channels touched by the caller
+   * @param response WalletResponse that is modified in place while cranking objectives
+   */
   private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
     let needToCrank = true;
     while (needToCrank) {
       await this.crankUntilIdle(channels, response);
       needToCrank = await this.processLedgerQueue(channels, response);
     }
+
+    response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
   }
 
   private async processLedgerQueue(
@@ -985,7 +999,7 @@ export class SingleThreadedWallet
       arg.blockTimestamp
     );
     await this.knex.transaction(async tx => {
-      const {objectiveId} = await this.store.ensureObjective(
+      const objective = await this.store.ensureObjective(
         {
           type: 'DefundChannel',
           participants: [],
@@ -993,7 +1007,8 @@ export class SingleThreadedWallet
         },
         tx
       );
-      await this.store.approveObjective(objectiveId, tx);
+      this.emit('objectiveStarted', objective);
+      await this.store.approveObjective(objective.objectiveId, tx);
     });
 
     await this.takeActions([arg.channelId], response);

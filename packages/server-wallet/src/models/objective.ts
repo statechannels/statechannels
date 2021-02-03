@@ -63,7 +63,7 @@ export function isSharedObjective(
 /**
  * A DBObjective is a wire objective with a status and an objectiveId
  *
- * Limited to 'OpenChannel' and 'CloseChannel', which are the only objectives
+ * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
  */
 export type DBObjective =
@@ -162,11 +162,19 @@ export class ObjectiveModel extends Model {
     await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
   }
 
-  static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'succeeded'});
+  static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
+    return ObjectiveModel.query(tx)
+      .findById(objectiveId)
+      .patch({status: 'succeeded'})
+      .returning('*')
+      .first();
   }
-  static async failed(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'failed'});
+  static async failed(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
+    return ObjectiveModel.query(tx)
+      .findById(objectiveId)
+      .patch({status: 'failed'})
+      .returning('*')
+      .first();
   }
 
   static async forChannelIds(
