@@ -7,7 +7,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
 import {alice} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {channel, withSupportedState} from '../src/models/__test__/fixtures/channel';
-import {ServerWalletConfig} from '../src';
+import {ServerWalletConfig, WalletEvent} from '../src';
 import {Channel} from '../src/models/channel';
 import {DBAdmin} from '../src/db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../src/models/adjudicator-status';
@@ -72,8 +72,26 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
   // We expect the channel to be in an open status
   expect(await getChannelMode(channelId)).toEqual('Open');
 
+  const events: WalletEvent[] = [];
+  const names = ['objectiveStarted', 'objectiveSucceeded'] as const;
+  names.map(event => payerClient.wallet.on(event, e => events.push({...e, event})));
+
   // Call challenge and mine blocks
   await payerClient.challenge(channelId);
+
+  /*
+  the way it should probably work is that SubmitChallenge objective should get replaced by
+  the Challenge objective, which succeeds after
+  - the channel is challenged
+  - challenge times out
+  - funds are withdrawn (edited)
+
+  But for now, the objectives succeeds straight away.
+  */
+  expect(events).toHaveLength(2);
+  expect(events).toContainObject({event: 'objectiveStarted', type: 'SubmitChallenge'});
+  expect(events).toContainObject({event: 'objectiveSucceeded', type: 'SubmitChallenge'});
+
   await payerClient.mineBlocks(5);
 
   // We expect that the challenge should be detected by the wallet
