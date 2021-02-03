@@ -27,6 +27,7 @@ export type SingleChannelOutput = {
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
+  newObjectives: DBObjective[];
 };
 
 export type Output = SingleChannelOutput | MultipleChannelOutput;

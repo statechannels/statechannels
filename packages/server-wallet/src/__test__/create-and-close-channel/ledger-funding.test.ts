@@ -386,7 +386,7 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
@@ -478,7 +478,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
@@ -561,7 +561,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const {
       allocations: [{allocationItems}],
@@ -914,7 +914,7 @@ describe('Automatic channel syncing on successive API calls', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 

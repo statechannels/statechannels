@@ -188,6 +188,7 @@ export class WalletResponse {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
+      newObjectives: this.createdObjectives,
       // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
     };
   }
@@ -257,7 +258,10 @@ export class WalletResponse {
     );
 
     const outbox = mergeOutgoing(outputs.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
-    return {channelResults, outbox};
+    const newObjectives = outputs.flatMap(m =>
+      isSingleChannelMessage(m) ? (m.newObjective ? [m.newObjective] : []) : m.newObjectives
+    );
+    return {channelResults, outbox, newObjectives};
   }
 
   // -------------------------------
