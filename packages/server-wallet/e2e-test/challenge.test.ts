@@ -104,8 +104,9 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
   // We expect the channel to be marked as finalized
   expect(await getChannelMode(channelId)).toEqual('Finalized');
 
-  expect(events).toHaveLength(3);
+  expect(events).toHaveLength(4);
   expect(events).toContainObject({event: 'objectiveStarted', type: 'DefundChannel'});
+  expect(events).toContainObject({event: 'objectiveSucceeded', type: 'DefundChannel'});
 
   // We expect the balances to be updated based on the outcome
   const finalPayerBalance = await getBalance(payerClient.provider, payer);

@@ -55,6 +55,7 @@ export class ChannelDefunder {
           await ChainServiceRequest.insertOrUpdate(channelId, 'pushOutcome', tx);
           await this.chainService.pushOutcomeAndWithdraw(result.states[0], channel.myAddress);
           await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+          response.queueSucceededObjective(objective);
         } else {
           this.logger.trace('Outcome already pushed, doing nothing');
         }
