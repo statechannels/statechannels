@@ -356,9 +356,11 @@ export abstract class Wallet extends SingleThreadedWallet implements WalletInter
 }
 
 // Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ObjectiveStarted" needs to be exported by the entry point index.d.ts
+// Warning: (ae-forgotten-export) The symbol "ObjectiveSucceeded" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type WalletEvent = ChannelUpdatedEvent;
+export type WalletEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
 
 // @public (undocumented)
 export interface WalletInterface {
