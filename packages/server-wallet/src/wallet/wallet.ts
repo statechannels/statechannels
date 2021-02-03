@@ -1001,7 +1001,7 @@ export class SingleThreadedWallet
       arg.blockTimestamp
     );
     await this.knex.transaction(async tx => {
-      const {objectiveId} = await this.store.ensureObjective(
+      const objective = await this.store.ensureObjective(
         {
           type: 'DefundChannel',
           participants: [],
@@ -1009,7 +1009,8 @@ export class SingleThreadedWallet
         },
         tx
       );
-      await this.store.approveObjective(objectiveId, tx);
+      this.emit('objectiveStarted', objective);
+      await this.store.approveObjective(objective.objectiveId, tx);
     });
 
     await this.takeActions([arg.channelId], response);
