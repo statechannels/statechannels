@@ -30,7 +30,7 @@ You can learn more about what state channels are by reading [one](https://l4.ven
 
 This repository is a monorepo, and contains the following packages maintained with [lerna](https://github.com/lerna/lerna) and [yarn workspaces](https://yarnpkg.com/lang/en/docs/workspaces/):
 
-- [docs-websitel](./packages/docs-website/website) : Documentation website
+- [docs-website](./packages/docs-website/website) : Documentation website
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [devtools](./packages/devtools) : Developer tooling
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
@@ -136,6 +136,12 @@ already have an access token in your `.npmrc`.
 These should adhere to the [TSDoc standard](https://github.com/Microsoft/tsdoc). You can try the [TSDoc playground](https://microsoft.github.io/tsdoc/).
 
 Doc comments will appear in our documentation at https://docs.statechannels.org.
+
+## API reports
+We use [api-extractor](https://api-extractor.com/) to help us track changes to the API of some of the packages in this repo. The tool is run via `yarn lerna run generate-api` during our continuous integration suite, and generates an [api report](https://api-extractor.com/pages/setup/configure_api_report/). If you make changes to the external API of a package, you should run this command locally and check in the reports to source control, else you will get a test failure. 
+
+The checked-in report helps faciliate PR review.
+
 
 ## Community
 
