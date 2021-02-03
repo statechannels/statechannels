@@ -252,12 +252,10 @@ export class WalletResponse {
     outputs: (SingleChannelOutput | MultipleChannelOutput)[]
   ): MultipleChannelOutput {
     const channelResults = mergeChannelResults(
-      outputs
-        .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
-        .reduce((cr1, cr2) => cr1.concat(cr2))
+      outputs.flatMap(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
     );
 
-    const outbox = mergeOutgoing(outputs.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
+    const outbox = mergeOutgoing(outputs.flatMap(m => m.outbox));
     const newObjectives = outputs.flatMap(m =>
       isSingleChannelMessage(m) ? (m.newObjective ? [m.newObjective] : []) : m.newObjectives
     );
