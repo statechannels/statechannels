@@ -22,6 +22,7 @@ export interface UpdateChannelFundingParams {
 export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
+  newObjective: DBObjective | undefined;
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];

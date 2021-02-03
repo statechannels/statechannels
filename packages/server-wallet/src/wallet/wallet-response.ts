@@ -212,6 +212,7 @@ export class WalletResponse {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
+      newObjective: this.createdObjectives[0],
       // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
     };
   }
@@ -226,6 +227,7 @@ export class WalletResponse {
       value: {
         channelResult,
         outbox: this.outbox, // TODO: doesn't seem like this should be on this event?
+        newObjective: this.createdObjectives[0], // TODO: This one neither?
       },
     }));
   }
