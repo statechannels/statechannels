@@ -881,16 +881,14 @@ export class SingleThreadedWallet
   }
 
   /**
-   *
-   * @param channels channels touched by the caller
-   * @param response WalletResponse that is modified in place while cranking objectives
-   *
-   * EMITS: 'objectiveSucceded' for objectives that succeed
-   *
    * Active objectives for the "touched" channels are cranked. Theoretically, this may touch other
    * channels, resulting in a cascade of cranked objectives.
    *
+   * @remarks
+   * Emits an 'objectiveSucceded' event for objectives that succeed.
    *
+   * @param channels channels touched by the caller
+   * @param response WalletResponse that is modified in place while cranking objectives
    */
   private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
     let needToCrank = true;
