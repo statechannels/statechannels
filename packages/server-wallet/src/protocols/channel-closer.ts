@@ -49,7 +49,7 @@ export class ChannelCloser {
         }
 
         const turnNum = turnNumberToSign(channel);
-        // Explicitely check undefined just in case we want to sign turnNum 0
+        // Explicitly check undefined just in case we want to sign turnNum 0
         if (turnNum !== undefined) {
           await this.signState(channel, turnNum, tx, response);
         }
