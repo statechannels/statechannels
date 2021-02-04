@@ -9,7 +9,6 @@ import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
 
 import {Store} from '../wallet/store';
-import {Bytes32} from '../type-aliases';
 import {ChainServiceInterface} from '../chain-service';
 import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
@@ -43,25 +42,24 @@ export class ChannelCloser {
 
     while (attemptAnotherProtocolStep) {
       await this.store.lockApp(channelToLock, async tx => {
-        const protocolState = await this.getCloseChannelProtocolState(
-          this.store,
-          objective.data.targetChannelId,
-          tx
-        );
+        const channel = await this.store.getChannel(channelToLock, tx);
+        if (!channel) {
+          throw new Error('Channel must exist');
+        }
         try {
           let turnNum;
-          if (!ensureAllAllocationItemsAreExternalDestinations(protocolState)) {
+          if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
             attemptAnotherProtocolStep = false;
-          } else if ((turnNum = turnNumberToSign(protocolState))) {
-            await this.signState(protocolState, turnNum, tx, response);
-          } else if (shouldDefund(protocolState)) {
-            await this.defund(protocolState, tx);
-          } else if (shouldCompleteObjective(protocolState)) {
+          } else if ((turnNum = turnNumberToSign(channel))) {
+            await this.signState(channel, turnNum, tx, response);
+          } else if (await this.shouldDefund(channel, tx)) {
+            await this.defund(channel, tx);
+          } else if (await this.shouldCompleteObjective(channel, tx)) {
             attemptAnotherProtocolStep = false;
-            await this.completeObjective(objective, protocolState, tx, response);
+            await this.completeObjective(objective, channel, tx, response);
           } else {
-            response.queueChannelState(protocolState.app);
             attemptAnotherProtocolStep = false;
+            response.queueChannel(channel);
           }
         } catch (error) {
           this.logger.error({error}, 'Error taking a protocol step');
@@ -72,108 +70,103 @@ export class ChannelCloser {
     }
   }
 
+  private async shouldDefund(c: Channel, tx: Transaction): Promise<boolean> {
+    const {protocolState: ps} = c;
+    if (!everyoneSignedFinalState(ps)) {
+      return false;
+    }
+    switch (ps.fundingStrategy) {
+      case 'Direct':
+        return !ps.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
+      case 'Ledger': {
+        const ledgerRequest = await this.store.getLedgerRequest(c.channelId, 'defund', tx);
+        return !!ps.supported && (!ledgerRequest || ledgerRequest.status === 'succeeded');
+      }
+      case 'Unknown':
+      case 'Fake':
+        return false;
+      case 'Virtual':
+        throw new Error('Virtual channel defunding is not implemented');
+      default:
+        unreachable(ps.fundingStrategy);
+    }
+  }
+
+  private async shouldCompleteObjective(channel: Channel, tx: Transaction): Promise<boolean> {
+    const ledgerRequest = await this.store.getLedgerRequest(channel.channelId, 'defund', tx);
+    const {protocolState: ps} = channel;
+
+    return (
+      everyoneSignedFinalState(ps) &&
+      ((isLedgerFunded(ps) && ledgerRequest?.status === 'succeeded') || !isLedgerFunded(ps)) &&
+      successfulWithdraw(channel)
+    );
+  }
+
   private async signState(
-    protocolState: ProtocolState,
+    channel: Channel,
     turnNum: number,
     tx: Transaction,
     response: WalletResponse
   ): Promise<void> {
-    if (!protocolState.app.supported) {
+    if (!channel.supported) {
       throw new Error('Must have a supported state');
     }
-    const {myIndex, channelId} = protocolState.app;
-    const channel = await Channel.forId(channelId, tx);
-    const vars: StateVariables = {...protocolState.app.supported, turnNum, isFinal: true};
+    const {myIndex, channelId} = channel;
+
+    const vars: StateVariables = {...channel.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
     response.queueState(signedState, myIndex, channelId);
   }
 
-  private async defund(protocolState: ProtocolState, tx: Transaction): Promise<void> {
-    switch (protocolState.app.fundingStrategy) {
+  private async defund(channel: Channel, tx: Transaction): Promise<void> {
+    const {protocolState} = channel;
+    switch (protocolState.fundingStrategy) {
       case 'Direct':
-        await this.withdraw(protocolState, tx);
+        await this.withdraw(channel, tx);
         break;
       case 'Ledger':
-        await this.requestLedgerDefunding(protocolState, tx);
+        await this.requestLedgerDefunding(channel, tx);
         break;
       case 'Fake':
       case 'Unknown':
       case 'Virtual':
         throw new Error(
-          `Defunding is not implemented for strategy ${protocolState.app.fundingStrategy}`
+          `Defunding is not implemented for strategy ${protocolState.fundingStrategy}`
         );
       default:
-        unreachable(protocolState.app.fundingStrategy);
+        unreachable(protocolState.fundingStrategy);
     }
   }
 
-  private async withdraw(protocolState: ProtocolState, tx: Transaction): Promise<void> {
-    await ChainServiceRequest.insertOrUpdate(protocolState.app.channelId, 'withdraw', tx);
+  private async withdraw(channel: Channel, tx: Transaction): Promise<void> {
+    await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
 
-    // app.supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
+    // supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
     // Note, we are not awaiting transaction submission
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await this.chainService.concludeAndWithdraw([protocolState.app.supported!]);
+    await this.chainService.concludeAndWithdraw([channel.supported!]);
   }
 
-  private async requestLedgerDefunding(
-    protocolState: ProtocolState,
-    tx: Transaction
-  ): Promise<void> {
+  private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
     await LedgerRequest.requestLedgerDefunding(
-      protocolState.app.channelId,
-      protocolState.app.fundingLedgerChannelId as string,
+      channel.channelId,
+      channel.fundingLedgerChannelId,
       tx
     );
   }
 
   private async completeObjective(
     objective: DBCloseChannelObjective,
-    protocolState: ProtocolState,
+    channel: Channel,
     tx: Transaction,
     response: WalletResponse
   ): Promise<void> {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
-    response.queueChannelState(protocolState.app);
+    response.queueChannel(channel);
     response.queueSucceededObjective(objective);
   }
-
-  /**
-   * Helper method to retrieve scoped data needed for CloseChannel protocol.
-   */
-  private async getCloseChannelProtocolState(
-    store: Store,
-    channelId: Bytes32,
-    tx: Transaction
-  ): Promise<ProtocolState> {
-    const app = await store.getChannelState(channelId, tx);
-    switch (app.fundingStrategy) {
-      case 'Direct':
-      case 'Fake':
-        return {app};
-      case 'Ledger': {
-        const req = await store.getLedgerRequest(app.channelId, 'defund', tx);
-        return {
-          app,
-          ledgerDefundingRequested: !!req,
-          ledgerDefundingSucceeded: req ? req.status === 'succeeded' : false,
-          ledgerChannelId: req ? req.ledgerChannelId : undefined,
-        };
-      }
-      case 'Unknown':
-      case 'Virtual':
-      default:
-        throw new Error('getCloseChannelProtocolState: Unimplemented funding strategy');
-    }
-  }
 }
-
-export type ProtocolState = {
-  app: ChannelState;
-  ledgerDefundingRequested?: boolean;
-  ledgerDefundingSucceeded?: boolean;
-  ledgerChannelId?: Bytes32;
-};
 
 // Pure, synchronous functions START
 // =================================
@@ -184,46 +177,21 @@ export type ProtocolState = {
 //    - there's an existing final state (in which case I double sign)
 //    - or it's my turn (in which case I craft the final state)
 //
-function turnNumberToSign(ps: ProtocolState): number | null {
-  if (!ps.app.supported || !ps.app.latestSignedByMe || ps.app.latestSignedByMe.isFinal) {
+function turnNumberToSign({protocolState: ps}: Channel): number | null {
+  if (!ps.supported || !ps.latestSignedByMe || ps.latestSignedByMe.isFinal) {
     return null;
   }
 
   // if there's an existing final state double-sign it
-  if (ps.app.supported.isFinal) {
-    return ps.app.supported.turnNum;
+  if (ps.supported.isFinal) {
+    return ps.supported.turnNum;
   }
   // otherwise, if it's my turn, sign a final state
   if (isMyTurn(ps)) {
-    return ps.app.supported.turnNum + 1;
+    return ps.supported.turnNum + 1;
   }
 
   return null;
-}
-
-function shouldDefund(ps: ProtocolState): boolean {
-  if (!everyoneSignedFinalState(ps.app)) return false;
-  switch (ps.app.fundingStrategy) {
-    case 'Direct':
-      return !ps.app.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
-    case 'Ledger':
-      return !ps.ledgerDefundingRequested && !ps.ledgerDefundingSucceeded && !!ps.app.supported;
-    case 'Unknown':
-    case 'Fake':
-      return false;
-    case 'Virtual':
-      throw new Error('Virtual channel defunding is not implemented');
-    default:
-      unreachable(ps.app.fundingStrategy);
-  }
-}
-
-function shouldCompleteObjective(ps: ProtocolState): boolean {
-  return (
-    everyoneSignedFinalState(ps.app) &&
-    ((isLedgerFunded(ps.app) && ps.ledgerDefundingSucceeded) || !isLedgerFunded(ps.app)) &&
-    successfulWithdraw(ps)
-  );
 }
 
 function everyoneSignedFinalState({latestSignedByMe, support, supported}: ChannelState): boolean {
@@ -238,23 +206,22 @@ function everyoneSignedFinalState({latestSignedByMe, support, supported}: Channe
 
 // TODO: where is the corresponding logic for ledger channels?
 //       should there be a generic logic for computing whether a channel is defunded regardless of funding type?
-function successfulWithdraw({app}: ProtocolState): boolean {
-  if (app.fundingStrategy !== 'Direct') return true;
-  return app.directFundingStatus === 'Defunded';
+function successfulWithdraw(channel: Channel): boolean {
+  if (channel.fundingStrategy !== 'Direct') return true;
+  return channel.protocolState.directFundingStatus === 'Defunded';
 }
 
-const isMyTurn = (ps: ProtocolState): boolean =>
-  !!ps.app.supported &&
-  (ps.app.supported.turnNum + 1) % ps.app.participants.length === ps.app.myIndex;
+const isMyTurn = (ps: ChannelState): boolean =>
+  !!ps.supported && (ps.supported.turnNum + 1) % ps.participants.length === ps.myIndex;
 
 /**
  * Ensure none of its allocation items are other channels being funded by this channel
  * (e.g., if it is a ledger channel). This should cause the protocol to "pause" / "freeze"
  * until no channel depends on this channel for funding.
  */
-const ensureAllAllocationItemsAreExternalDestinations = (ps: ProtocolState): boolean =>
-  !!ps.app.supported &&
-  checkThat(ps.app.supported.outcome, isSimpleAllocation).allocationItems.every(({destination}) =>
+const ensureAllAllocationItemsAreExternalDestinations = ({protocolState: ps}: Channel): boolean =>
+  !!ps.supported &&
+  checkThat(ps.supported.outcome, isSimpleAllocation).allocationItems.every(({destination}) =>
     isExternalDestination(destination)
   );
 
