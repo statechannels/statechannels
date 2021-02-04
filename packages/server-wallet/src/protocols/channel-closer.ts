@@ -48,13 +48,13 @@ export class ChannelCloser {
 
       try {
         if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
+          response.queueChannel(channel);
           return;
         }
 
-        const turnNum = turnNumberToSign(channel);
-        // Explicitly check undefined just in case we want to sign turnNum 0
-        if (turnNum !== undefined) {
-          await this.signState(channel, turnNum, tx, response);
+        if (!(await this.allFinalStatesSigned(channel, tx, response))) {
+          response.queueChannel(channel);
+          return;
         }
 
         if (await this.shouldDefund(channel, tx)) {
@@ -63,6 +63,7 @@ export class ChannelCloser {
 
         if (await this.shouldCompleteObjective(channel, tx)) {
           await this.completeObjective(objective, channel, tx, response);
+          response.queueChannel(channel);
           return;
         }
 
@@ -74,9 +75,36 @@ export class ChannelCloser {
     });
   }
 
+  private async allFinalStatesSigned(
+    channel: Channel,
+    tx: Transaction,
+    response: WalletResponse
+  ): Promise<boolean> {
+    // I want to sign the final state if:
+    // - I haven't yet signed a final state
+    // - and either
+    //    - there's an existing final state (in which case I double sign)
+    //    - or it's my turn (in which case I craft the final state)
+
+    const {latestSignedByMe, supported, support, protocolState} = channel;
+    if (everyoneSignedFinalState(channel)) return true;
+    if (!latestSignedByMe || !supported || !support.length) return false;
+
+    if (isMyTurn(protocolState)) {
+      // I am the first to sign a final state
+      if (!supported.isFinal) {
+        await this.signState(channel, supported.turnNum + 1, tx, response);
+        return false;
+      }
+      await this.signState(channel, supported.turnNum, tx, response);
+      return everyoneSignedFinalState(channel);
+    }
+    return false;
+  }
+
   private async shouldDefund(c: Channel, tx: Transaction): Promise<boolean> {
     const {protocolState: ps} = c;
-    if (!everyoneSignedFinalState(ps)) {
+    if (!everyoneSignedFinalState(c)) {
       return false;
     }
     switch (ps.fundingStrategy) {
@@ -101,7 +129,7 @@ export class ChannelCloser {
     const {protocolState: ps} = channel;
 
     return (
-      everyoneSignedFinalState(ps) &&
+      everyoneSignedFinalState(channel) &&
       ((isLedgerFunded(ps) && ledgerRequest?.status === 'succeeded') || !isLedgerFunded(ps)) &&
       successfulWithdraw(channel)
     );
@@ -175,30 +203,7 @@ export class ChannelCloser {
 // Pure, synchronous functions START
 // =================================
 
-// I want to sign the final state if:
-// - I haven't yet signed a final state
-// - and either
-//    - there's an existing final state (in which case I double sign)
-//    - or it's my turn (in which case I craft the final state)
-//
-function turnNumberToSign({protocolState: ps}: Channel): number | undefined {
-  if (!ps.supported || !ps.latestSignedByMe || ps.latestSignedByMe.isFinal) {
-    return undefined;
-  }
-
-  // if there's an existing final state double-sign it
-  if (ps.supported.isFinal) {
-    return ps.supported.turnNum;
-  }
-  // otherwise, if it's my turn, sign a final state
-  if (isMyTurn(ps)) {
-    return ps.supported.turnNum + 1;
-  }
-
-  return undefined;
-}
-
-function everyoneSignedFinalState({latestSignedByMe, support, supported}: ChannelState): boolean {
+function everyoneSignedFinalState({latestSignedByMe, support, supported}: Channel): boolean {
   return (
     !!latestSignedByMe &&
     !!supported &&
