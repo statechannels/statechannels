@@ -42,6 +42,10 @@ export class ChannelCloser {
       if (!channel) {
         throw new Error('Channel must exist');
       }
+
+      await channel.$fetchGraph('funding', {transaction: tx});
+      await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
+
       try {
         if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
           return;
@@ -77,7 +81,6 @@ export class ChannelCloser {
     }
     switch (ps.fundingStrategy) {
       case 'Direct':
-        await c.$fetchGraph('chainServiceRequests', {transaction: tx});
         return !c.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
       case 'Ledger': {
         const ledgerRequest = await this.store.getLedgerRequest(c.channelId, 'defund', tx);
