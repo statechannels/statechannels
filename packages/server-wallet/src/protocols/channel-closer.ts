@@ -16,8 +16,6 @@ import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {ChainServiceRequest} from '../models/chain-service-request';
 
-import {ChannelState} from './state';
-
 export class ChannelCloser {
   constructor(
     private store: Store,
@@ -81,18 +79,18 @@ export class ChannelCloser {
     //    - there's an existing final state (in which case I double sign)
     //    - or it's my turn (in which case I craft the final state)
 
-    const {latestSignedByMe, supported, support, protocolState} = channel;
-    if (everyoneSignedFinalState(channel)) return true;
+    const {latestSignedByMe, supported, support} = channel;
+    if (channel.hasConclusionProof) return true;
     if (!latestSignedByMe || !supported || !support.length) return false;
 
-    if (isMyTurn(protocolState)) {
+    if (channel.myTurn) {
       // I am the first to sign a final state
       if (!supported.isFinal) {
         await this.signState(channel, supported.turnNum + 1, tx, response);
         return false;
       }
       await this.signState(channel, supported.turnNum, tx, response);
-      return everyoneSignedFinalState(channel);
+      return channel.hasConclusionProof;
     }
     return false;
   }
@@ -176,19 +174,6 @@ export class ChannelCloser {
 
 // Pure, synchronous functions START
 // =================================
-
-function everyoneSignedFinalState({latestSignedByMe, support, supported}: Channel): boolean {
-  return (
-    !!latestSignedByMe &&
-    !!supported &&
-    latestSignedByMe.isFinal &&
-    supported.isFinal &&
-    (support || []).every(s => s.isFinal)
-  );
-}
-
-const isMyTurn = (ps: ChannelState): boolean =>
-  !!ps.supported && (ps.supported.turnNum + 1) % ps.participants.length === ps.myIndex;
 
 /**
  * Ensure none of its allocation items are other channels being funded by this channel
