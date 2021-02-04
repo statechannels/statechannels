@@ -35,6 +35,7 @@ it("signs a final state when it's my turn", async () => {
   await expect(w.closeChannel({channelId})).resolves.toMatchObject({
     outbox: [{params: {recipient: 'bob', sender: 'alice', data: {signedStates: [closingState]}}}],
     channelResult: {channelId, status: 'closing', turnNum: turnNum + 1, appData},
+    newObjective: {type: 'CloseChannel', objectiveId: `CloseChannel-${channelId}`},
   });
 
   const updated = await Channel.forId(channelId, w.knex);
@@ -56,6 +57,7 @@ it("accepts and sends an objective when it isn't my turn", async () => {
   await expect(w.closeChannel({channelId})).resolves.toMatchObject({
     channelResult: {status: 'running'},
     outbox: [{method: 'MessageQueued', params: {data: {objectives: [{type: 'CloseChannel'}]}}}],
+    newObjective: {type: 'CloseChannel', objectiveId: `CloseChannel-${channelId}`},
   });
 });
 
@@ -80,6 +82,10 @@ it("signs a final state when it's my turn for many channels at once", async () =
       status: 'closing',
       turnNum: turnNum + 1,
       appData,
+    })),
+    newObjectives: channelIds.map(id => ({
+      type: 'CloseChannel',
+      objectiveId: `CloseChannel-${id}`,
     })),
   });
 });

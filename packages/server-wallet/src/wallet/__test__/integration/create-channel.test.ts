@@ -25,7 +25,13 @@ describe('happy path', () => {
     const callback = jest.fn();
     w.once('objectiveStarted', callback);
     const createResult = await w.createChannels(createChannelArgs({appData}), 1);
-    expect(createResult).toMatchObject({channelResults: [{channelId: expect.any(String)}]});
+    const channelId = '0x4460dab6d4438f3bf1719720fcced4054a38baf60f315e49995eead80cfa498f';
+    expect(createResult).toMatchObject({channelResults: [{channelId}]});
+    expect(createResult.newObjectives).toHaveLength(1);
+    expect(createResult.newObjectives).toContainObject({
+      type: 'OpenChannel',
+      objectiveId: `OpenChannel-${channelId}`,
+    });
 
     expect(createResult).toMatchObject({
       outbox: [
@@ -51,7 +57,7 @@ describe('happy path', () => {
       channelResults: [{channelId: expect.any(String), turnNum: 0, appData}],
     });
     expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'OpenChannel'}));
-    const {channelId} = createResult.channelResults[0];
+    expect(createResult.channelResults[0].channelId).toEqual(channelId);
     expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 
     const updated = await Channel.forId(channelId, w.knex);
@@ -74,6 +80,7 @@ describe('happy path', () => {
 
     const result = await w.createChannels(createArgs, NUM_CHANNELS);
     expect(result.channelResults).toHaveLength(NUM_CHANNELS);
+    expect(result.newObjectives).toHaveLength(NUM_CHANNELS);
     expect(result.outbox).toHaveLength(1);
 
     expect(await Channel.query(w.knex).resultSize()).toEqual(NUM_CHANNELS);

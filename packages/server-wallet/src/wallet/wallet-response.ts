@@ -20,6 +20,7 @@ export class WalletResponse {
   private queuedMessages: WireMessage[] = [];
   objectivesToSend: DBObjective[] = [];
   objectivesToApprove: DBObjective[] = [];
+  createdObjectives: DBObjective[] = [];
   succeededObjectives: DBObjective[] = [];
   requests: string[] = [];
 
@@ -76,13 +77,17 @@ export class WalletResponse {
   }
 
   /**
-   * Queues objectives for sending to opponent
+   * Queues objectives for
+   * - sending to opponent
+   * - notifying the app
    */
   queueCreatedObjective(
     objective: DBObjective,
     myIndex: number,
     participants: Participant[]
   ): void {
+    this.createdObjectives.push(objective);
+
     const myParticipantId = participants[myIndex].participantId;
     if (isSharedObjective(objective)) {
       participants.forEach((p, i) => {
@@ -183,7 +188,7 @@ export class WalletResponse {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
-      // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
+      newObjectives: this.createdObjectives,
     };
   }
 
@@ -207,7 +212,7 @@ export class WalletResponse {
     return {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
-      // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
+      newObjective: this.createdObjectives[0],
     };
   }
 
@@ -221,6 +226,7 @@ export class WalletResponse {
       value: {
         channelResult,
         outbox: this.outbox, // TODO: doesn't seem like this should be on this event?
+        newObjective: this.createdObjectives[0], // TODO: This one neither?
       },
     }));
   }
@@ -244,13 +250,14 @@ export class WalletResponse {
     outputs: (SingleChannelOutput | MultipleChannelOutput)[]
   ): MultipleChannelOutput {
     const channelResults = mergeChannelResults(
-      outputs
-        .map(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
-        .reduce((cr1, cr2) => cr1.concat(cr2))
+      outputs.flatMap(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
     );
 
-    const outbox = mergeOutgoing(outputs.map(m => m.outbox).reduce((m1, m2) => m1.concat(m2)));
-    return {channelResults, outbox};
+    const outbox = mergeOutgoing(outputs.flatMap(m => m.outbox));
+    const newObjectives = outputs.flatMap(m =>
+      isSingleChannelMessage(m) ? (m.newObjective ? [m.newObjective] : []) : m.newObjectives
+    );
+    return {channelResults, outbox, newObjectives};
   }
 
   // -------------------------------
