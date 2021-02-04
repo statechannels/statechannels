@@ -6,6 +6,7 @@ import {
   SharedObjective,
   SubmitChallenge,
   DefundChannel,
+  Participant,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
@@ -42,6 +43,7 @@ export type DBCloseChannelObjective = CloseChannel & {
 };
 export type DBDefundChannelObjective = {
   type: 'DefundChannel';
+  participants: Participant[];
   objectiveId: string;
   status: ObjectiveStatus;
   data: {targetChannelId: string};
@@ -49,6 +51,7 @@ export type DBDefundChannelObjective = {
 
 export type DBSubmitChallengeObjective = {
   data: {targetChannelId: string};
+  participants: Participant[];
   objectiveId: string;
   status: ObjectiveStatus;
   type: 'SubmitChallenge';
@@ -81,7 +84,6 @@ export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
   return {
     type: dbObj.type,
     data: dbObj.data,
-    // don't forget optional properties
     participants: dbObj.participants,
   };
 };
