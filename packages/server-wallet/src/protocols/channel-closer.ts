@@ -62,13 +62,7 @@ export class ChannelCloser {
           return;
         }
 
-        if (await this.shouldCompleteObjective(channel, tx)) {
-          await this.completeObjective(objective, channel, tx, response);
-          response.queueChannel(channel);
-          return;
-        }
-
-        response.queueChannel(channel);
+        await this.completeObjective(objective, channel, tx, response);
       } catch (error) {
         this.logger.error({error}, 'Error taking a protocol step');
         await tx.rollback(error);
@@ -135,17 +129,6 @@ export class ChannelCloser {
     }
   }
 
-  private async shouldCompleteObjective(channel: Channel, tx: Transaction): Promise<boolean> {
-    const ledgerRequest = await this.store.getLedgerRequest(channel.channelId, 'defund', tx);
-    const {protocolState: ps} = channel;
-
-    return (
-      everyoneSignedFinalState(channel) &&
-      ((isLedgerFunded(ps) && ledgerRequest?.status === 'succeeded') || !isLedgerFunded(ps)) &&
-      successfulWithdraw(channel)
-    );
-  }
-
   private async signState(
     channel: Channel,
     turnNum: number,
@@ -204,13 +187,6 @@ function everyoneSignedFinalState({latestSignedByMe, support, supported}: Channe
   );
 }
 
-// TODO: where is the corresponding logic for ledger channels?
-//       should there be a generic logic for computing whether a channel is defunded regardless of funding type?
-function successfulWithdraw(channel: Channel): boolean {
-  if (channel.fundingStrategy !== 'Direct') return true;
-  return channel.protocolState.directFundingStatus === 'Defunded';
-}
-
 const isMyTurn = (ps: ChannelState): boolean =>
   !!ps.supported && (ps.supported.turnNum + 1) % ps.participants.length === ps.myIndex;
 
@@ -224,8 +200,6 @@ const ensureAllAllocationItemsAreExternalDestinations = ({protocolState: ps}: Ch
   checkThat(ps.supported.outcome, isSimpleAllocation).allocationItems.every(({destination}) =>
     isExternalDestination(destination)
   );
-
-const isLedgerFunded = ({fundingStrategy}: ChannelState): boolean => fundingStrategy === 'Ledger';
 
 // ==============================
 // Pure, synchronous functions END
