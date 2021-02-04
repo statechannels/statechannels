@@ -38,36 +38,37 @@ export class ChannelCloser {
   public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
-    let attemptAnotherProtocolStep = true;
+    await this.store.lockApp(channelToLock, async tx => {
+      const channel = await this.store.getChannel(channelToLock, tx);
+      if (!channel) {
+        throw new Error('Channel must exist');
+      }
+      try {
+        if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
+          return;
+        }
 
-    while (attemptAnotherProtocolStep) {
-      await this.store.lockApp(channelToLock, async tx => {
-        const channel = await this.store.getChannel(channelToLock, tx);
-        if (!channel) {
-          throw new Error('Channel must exist');
+        const turnNum = turnNumberToSign(channel);
+        // Explicitely check undefined just in case we want to sign turnNum 0
+        if (turnNum !== undefined) {
+          await this.signState(channel, turnNum, tx, response);
         }
-        try {
-          let turnNum;
-          if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
-            attemptAnotherProtocolStep = false;
-          } else if ((turnNum = turnNumberToSign(channel))) {
-            await this.signState(channel, turnNum, tx, response);
-          } else if (await this.shouldDefund(channel, tx)) {
-            await this.defund(channel, tx);
-          } else if (await this.shouldCompleteObjective(channel, tx)) {
-            attemptAnotherProtocolStep = false;
-            await this.completeObjective(objective, channel, tx, response);
-          } else {
-            attemptAnotherProtocolStep = false;
-            response.queueChannel(channel);
-          }
-        } catch (error) {
-          this.logger.error({error}, 'Error taking a protocol step');
-          await tx.rollback(error);
-          attemptAnotherProtocolStep = false;
+
+        if (await this.shouldDefund(channel, tx)) {
+          await this.defund(channel, tx);
         }
-      });
-    }
+
+        if (await this.shouldCompleteObjective(channel, tx)) {
+          await this.completeObjective(objective, channel, tx, response);
+          return;
+        }
+
+        response.queueChannel(channel);
+      } catch (error) {
+        this.logger.error({error}, 'Error taking a protocol step');
+        await tx.rollback(error);
+      }
+    });
   }
 
   private async shouldDefund(c: Channel, tx: Transaction): Promise<boolean> {
@@ -177,9 +178,9 @@ export class ChannelCloser {
 //    - there's an existing final state (in which case I double sign)
 //    - or it's my turn (in which case I craft the final state)
 //
-function turnNumberToSign({protocolState: ps}: Channel): number | null {
+function turnNumberToSign({protocolState: ps}: Channel): number | undefined {
   if (!ps.supported || !ps.latestSignedByMe || ps.latestSignedByMe.isFinal) {
-    return null;
+    return undefined;
   }
 
   // if there's an existing final state double-sign it
@@ -191,7 +192,7 @@ function turnNumberToSign({protocolState: ps}: Channel): number | null {
     return ps.supported.turnNum + 1;
   }
 
-  return null;
+  return undefined;
 }
 
 function everyoneSignedFinalState({latestSignedByMe, support, supported}: ChannelState): boolean {
