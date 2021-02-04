@@ -189,7 +189,6 @@ export class WalletResponse {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
       newObjectives: this.createdObjectives,
-      // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
     };
   }
 
@@ -214,7 +213,6 @@ export class WalletResponse {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
       newObjective: this.createdObjectives[0],
-      // objectivesToApprove: this.objectivesToApprove, // TODO: re-enable
     };
   }
 
