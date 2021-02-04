@@ -363,7 +363,7 @@ describe('Closing a ledger channel and preventing it from being used again', () 
   });
 });
 
-describe('Funding multiple channels syncronously (in bulk)', () => {
+describe('Funding multiple channels synchronously (in bulk)', () => {
   const N = 4;
   let ledgerChannelId: Bytes32;
   let appChannelIds: Bytes32[];
