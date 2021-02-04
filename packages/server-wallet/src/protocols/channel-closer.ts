@@ -38,8 +38,7 @@ export class ChannelCloser {
   public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
-    await this.store.lockApp(channelToLock, async tx => {
-      const channel = await this.store.getChannel(channelToLock, tx);
+    await this.store.lockApp(channelToLock, async (tx, channel) => {
       if (!channel) {
         throw new Error('Channel must exist');
       }
@@ -78,7 +77,8 @@ export class ChannelCloser {
     }
     switch (ps.fundingStrategy) {
       case 'Direct':
-        return !ps.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
+        await c.$fetchGraph('chainServiceRequests', {transaction: tx});
+        return !c.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
       case 'Ledger': {
         const ledgerRequest = await this.store.getLedgerRequest(c.channelId, 'defund', tx);
         return !!ps.supported && (!ledgerRequest || ledgerRequest.status === 'succeeded');
