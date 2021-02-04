@@ -32,6 +32,8 @@ const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(),
   database: 'TEST_B',
 });
 
+jest.setTimeout(10_000);
+
 beforeAll(async () => {
   await DBAdmin.createDatabase(aWalletConfig);
   await DBAdmin.createDatabase(bWalletConfig);
