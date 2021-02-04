@@ -78,7 +78,12 @@ export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
       'SubmitChallenge and DefundChannel objectives are not supported as wire objectives'
     );
   }
-  return _.omit(dbObj, ['objectiveId', 'status']);
+  return {
+    type: dbObj.type,
+    data: dbObj.data,
+    // don't forget optional properties
+    participants: dbObj.participants,
+  };
 };
 
 export class ObjectiveChannelModel extends Model {
