@@ -52,13 +52,14 @@ export class ChannelCloser {
           return;
         }
 
-        if (!(await this.allFinalStatesSigned(channel, tx, response))) {
+        if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
           response.queueChannel(channel);
           return;
         }
 
-        if (await this.shouldDefund(channel, tx)) {
-          await this.defund(channel, tx);
+        if (!(await this.isChannelDefunded(channel, tx))) {
+          response.queueChannel(channel);
+          return;
         }
 
         if (await this.shouldCompleteObjective(channel, tx)) {
@@ -75,7 +76,7 @@ export class ChannelCloser {
     });
   }
 
-  private async allFinalStatesSigned(
+  private async areAllFinalStatesSigned(
     channel: Channel,
     tx: Transaction,
     response: WalletResponse
@@ -102,21 +103,31 @@ export class ChannelCloser {
     return false;
   }
 
-  private async shouldDefund(c: Channel, tx: Transaction): Promise<boolean> {
+  private async isChannelDefunded(c: Channel, tx: Transaction): Promise<boolean> {
     const {protocolState: ps} = c;
-    if (!everyoneSignedFinalState(c)) {
-      return false;
-    }
+
     switch (ps.fundingStrategy) {
       case 'Direct':
-        return !c.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid();
+        if (c.protocolState.directFundingStatus === 'Defunded') {
+          return true;
+        }
+        if (!c.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid()) {
+          await this.withdraw(c, tx);
+        }
+        return false;
       case 'Ledger': {
         const ledgerRequest = await this.store.getLedgerRequest(c.channelId, 'defund', tx);
-        return !!ps.supported && (!ledgerRequest || ledgerRequest.status === 'succeeded');
+        if (ledgerRequest && ledgerRequest.status === 'succeeded') {
+          return true;
+        }
+        if (!ledgerRequest || ledgerRequest.status !== 'pending') {
+          await this.requestLedgerDefunding(c, tx);
+        }
+        return false;
       }
       case 'Unknown':
       case 'Fake':
-        return false;
+        return true;
       case 'Virtual':
         throw new Error('Virtual channel defunding is not implemented');
       default:
@@ -149,26 +160,6 @@ export class ChannelCloser {
     const vars: StateVariables = {...channel.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
     response.queueState(signedState, myIndex, channelId);
-  }
-
-  private async defund(channel: Channel, tx: Transaction): Promise<void> {
-    const {protocolState} = channel;
-    switch (protocolState.fundingStrategy) {
-      case 'Direct':
-        await this.withdraw(channel, tx);
-        break;
-      case 'Ledger':
-        await this.requestLedgerDefunding(channel, tx);
-        break;
-      case 'Fake':
-      case 'Unknown':
-      case 'Virtual':
-        throw new Error(
-          `Defunding is not implemented for strategy ${protocolState.fundingStrategy}`
-        );
-      default:
-        unreachable(protocolState.fundingStrategy);
-    }
   }
 
   private async withdraw(channel: Channel, tx: Transaction): Promise<void> {
