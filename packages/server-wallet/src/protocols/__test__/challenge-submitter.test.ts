@@ -47,6 +47,7 @@ describe(`challenge-submitter`, () => {
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
       status: 'pending',
+      participants: [],
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
@@ -65,6 +66,7 @@ describe(`challenge-submitter`, () => {
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
       status: 'pending',
+      participants: [],
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
@@ -84,6 +86,7 @@ describe(`challenge-submitter`, () => {
     const obj: DBSubmitChallengeObjective = {
       type: 'SubmitChallenge',
       status: 'pending',
+      participants: [],
       objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
