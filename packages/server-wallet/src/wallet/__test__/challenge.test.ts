@@ -93,7 +93,7 @@ it('creates a defundChannel objective on channel finalized', async () => {
   const objectiveId = `DefundChannel-${c.channelId}`;
   const objective = await ObjectiveModel.forId(objectiveId, w.knex);
 
-  expect(objective).toEqual({
+  expect(objective).toMatchObject({
     objectiveId,
     status: 'approved',
     type: 'DefundChannel',
@@ -101,6 +101,8 @@ it('creates a defundChannel objective on channel finalized', async () => {
       targetChannelId: c.channelId,
     },
     participants: [],
+    createdAt: expect.anything(),
+    updatedAt: expect.anything(),
   });
 });
 
