@@ -44,17 +44,21 @@ describe(`challenge-submitter`, () => {
     // Add a existing request
     await ChainServiceRequest.insertOrUpdate(c.channelId, 'challenge', knex);
 
-    const obj: DBSubmitChallengeObjective = {
-      type: 'SubmitChallenge',
+    const obj = {
+      type: 'SubmitChallenge' as const,
       status: 'pending',
       participants: [],
-      objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
 
-    await knex.transaction(tx => store.ensureObjective(obj, tx));
-    await await crankAndAssert(obj, {callsChallenge: false, completesObj: false});
+    await knex.transaction(async tx => {
+      await crankAndAssert(await store.ensureSubmitChallengeObjective(obj, tx), {
+        callsChallenge: false,
+        completesObj: false,
+      });
+    });
   });
+
   it(`takes no action if there is an existing challenge`, async () => {
     const c = channel();
 
@@ -63,16 +67,19 @@ describe(`challenge-submitter`, () => {
     const challengeState = stateSignedBy([alice()])();
     await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 100, [challengeState]);
 
-    const obj: DBSubmitChallengeObjective = {
-      type: 'SubmitChallenge',
+    const obj = {
+      type: 'SubmitChallenge' as const,
       status: 'pending',
       participants: [],
-      objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
 
-    await knex.transaction(tx => store.ensureObjective(obj, tx));
-    await await crankAndAssert(obj, {callsChallenge: false, completesObj: false});
+    await knex.transaction(async tx => {
+      await crankAndAssert(await store.ensureSubmitChallengeObjective(obj, tx), {
+        callsChallenge: false,
+        completesObj: false,
+      });
+    });
   });
 
   it(`calls challenge when no challenge exists`, async () => {
@@ -83,18 +90,18 @@ describe(`challenge-submitter`, () => {
 
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    const obj: DBSubmitChallengeObjective = {
-      type: 'SubmitChallenge',
+    const obj = {
+      type: 'SubmitChallenge' as const,
       status: 'pending',
       participants: [],
-      objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
 
-    await knex.transaction(tx => store.ensureObjective(obj, tx));
-    await await crankAndAssert(obj, {
-      callsChallenge: true,
-      completesObj: true,
+    await knex.transaction(async tx => {
+      await crankAndAssert(await store.ensureSubmitChallengeObjective(obj, tx), {
+        callsChallenge: true,
+        completesObj: true,
+      });
     });
   });
 });
