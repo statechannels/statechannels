@@ -6,7 +6,6 @@ import {
   SharedObjective,
   SubmitChallenge,
   DefundChannel,
-  Participant,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';

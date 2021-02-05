@@ -1,7 +1,6 @@
 import {OpenChannel} from '@statechannels/wallet-core';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../channel';
 import {ObjectiveModel, ObjectiveChannelModel} from '../objective';
