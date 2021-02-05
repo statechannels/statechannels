@@ -1,6 +1,7 @@
 import {OpenChannel} from '@statechannels/wallet-core';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../channel';
 import {ObjectiveModel, ObjectiveChannelModel} from '../objective';
@@ -18,7 +19,7 @@ const objective: OpenChannel = {
   },
 };
 beforeEach(async () => {
-  await seedAlicesSigningWallet(knex);
+  await seedAlicesSigningWallet(knex); // this also truncates
 });
 
 describe('Objective > insert', () => {
@@ -43,6 +44,29 @@ describe('Objective > insert', () => {
     expect(await ObjectiveChannelModel.query(knex).select()).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`, channelId: c.channelId},
     ]);
+  });
+
+  it('inserts an objective with a createdAt timestamp', async () => {
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+
+    const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
+    const {createdAt} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
+
+    expect(Date.parse(createdAt) > before).toBe(true);
+    expect(Date.parse(createdAt) < after).toBe(true);
+  });
+
+  it('updates the timestamp on an objective when it succeeds', async () => {
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    const {objectiveId} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+
+    const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
+    const {updatedAt} = await ObjectiveModel.succeed(objectiveId, knex);
+    const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
+
+    expect(Date.parse(updatedAt) > before).toBe(true);
+    expect(Date.parse(updatedAt) < after).toBe(true);
   });
 });
 
