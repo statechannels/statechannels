@@ -34,29 +34,20 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 /**
  * Objectives that are currently supported by the server wallet (wire format)
  */
-export type SupportedWireObjective = OpenChannel | CloseChannel;
+export type SupportedWireObjective = OpenChannel | CloseChannel | DefundChannel | SubmitChallenge;
 
-export type DBOpenChannelObjective = OpenChannel & {objectiveId: string; status: ObjectiveStatus};
-export type DBCloseChannelObjective = CloseChannel & {
+export type DB<T extends SupportedWireObjective> = T & {
   objectiveId: string;
   status: ObjectiveStatus;
+  createdAt: string;
+  updatedAt: string;
 };
-export type DBDefundChannelObjective = {
-  type: 'DefundChannel';
-  participants: Participant[];
-  objectiveId: string;
-  status: ObjectiveStatus;
-  data: {targetChannelId: string};
-};
+export type DBOpenChannelObjective = DB<OpenChannel>;
+export type DBCloseChannelObjective = DB<CloseChannel>;
+export type DBDefundChannelObjective = DB<DefundChannel>;
+export type DBSubmitChallengeObjective = DB<SubmitChallenge>;
 
-export type DBSubmitChallengeObjective = {
-  data: {targetChannelId: string};
-  participants: Participant[];
-  objectiveId: string;
-  status: ObjectiveStatus;
-  type: 'SubmitChallenge';
-};
-
+// TODO: move into wallet core
 export function isSharedObjective(
   objective: DBObjective
 ): objective is DBOpenChannelObjective | DBCloseChannelObjective {
@@ -64,7 +55,7 @@ export function isSharedObjective(
 }
 
 /**
- * A DBObjective is a wire objective with a status and an objectiveId
+ * A DBObjective is a wire objective with a status, an objectiveId, a createdAt and an updatedAt
  *
  * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
@@ -98,7 +89,20 @@ export class ObjectiveChannelModel extends Model {
   }
 }
 
-export class ObjectiveModel extends Model {
+// TODO move to a utility module so it can be reused
+class TimeStampedModel extends Model {
+  createdAt!: DBObjective['createdAt'];
+  updatedAt!: DBObjective['updatedAt'];
+  $beforeInsert() {
+    this.createdAt = new Date().toISOString();
+  }
+
+  $beforeUpdate() {
+    this.updatedAt = new Date().toISOString();
+  }
+}
+
+export class ObjectiveModel extends TimeStampedModel {
   readonly objectiveId!: DBObjective['objectiveId'];
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
@@ -133,15 +137,15 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: (SupportedWireObjective | SubmitChallenge | DefundChannel) & {
+    objectiveToBeStored: SupportedWireObjective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex
-  ): Promise<ObjectiveModel> {
+  ): Promise<DBObjective> {
     const id: string = objectiveId(objectiveToBeStored);
 
     return tx.transaction(async trx => {
-      const objective = await ObjectiveModel.query(trx).insert({
+      const model = await ObjectiveModel.query(trx).insert({
         objectiveId: id,
         status: objectiveToBeStored.status,
         type: objectiveToBeStored.type,
@@ -156,7 +160,7 @@ export class ObjectiveModel extends Model {
           ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
         )
       );
-      return objective;
+      return model.toObjective();
     });
   }
 
