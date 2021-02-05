@@ -16,7 +16,7 @@ A clear and concise description of what the problem is.
 A clear and concise description of what a working solution should resolve, and any required deliverables (i.e. issue cards, prototypes, POCs etc.)
 
 # Describe any ideas you've considered :bulb:
-A clear and concise description of any alternative solutions or features you've considered.
+A clear and concise description of the solutions or features you've considered.
 Implementation suggestions or options may be provided.
 
 **Proposed timebox**
