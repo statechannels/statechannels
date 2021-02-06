@@ -8,8 +8,6 @@ import {ChainServiceInterface} from '../chain-service';
 import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
-import {LedgerRequest} from '../models/ledger-request';
-import {ChainServiceRequest} from '../models/chain-service-request';
 
 import {Defunder} from './defunder';
 
@@ -113,23 +111,6 @@ export class ChannelCloser {
     const vars: StateVariables = {...channel.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
     response.queueState(signedState, myIndex, channelId);
-  }
-
-  private async withdraw(channel: Channel, tx: Transaction): Promise<void> {
-    await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
-
-    // supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
-    // Note, we are not awaiting transaction submission
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await this.chainService.concludeAndWithdraw([channel.supported!]);
-  }
-
-  private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
-    await LedgerRequest.requestLedgerDefunding(
-      channel.channelId,
-      channel.fundingLedgerChannelId,
-      tx
-    );
   }
 
   private async completeObjective(
