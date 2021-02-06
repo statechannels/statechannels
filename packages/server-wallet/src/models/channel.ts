@@ -420,6 +420,15 @@ export class Channel extends Model implements RequiredColumns {
 
   // Does the channel have funds to pay out to all allocation items?
   public get isFullyDirectFunded(): boolean {
+    return this.isDirectFunded(true);
+  }
+
+  // Does the channel have any funds that I can claim?
+  public get isPartlyDirectlyFunded(): boolean {
+    return this.isDirectFunded();
+  }
+
+  private isDirectFunded(fully?: boolean): boolean {
     const outcome = this.supported?.outcome;
     if (!outcome) {
       throw new Error(`Channel passed to isFullyDirectFunded has no supported state`);
@@ -428,23 +437,14 @@ export class Channel extends Model implements RequiredColumns {
     const {assetHolderAddress, allocationItems} = checkThat(outcome, isSimpleAllocation);
     const channelFunds = this.funding.find(f => f.assetHolder === assetHolderAddress);
     if (!channelFunds) return false;
-    const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-    return BN.gte(channelFunds.amount, fullFunding);
-  }
 
-  // Does the channel have any funds that I can claim?
-  public get isPartlyDirectlyFunded(): boolean {
-    const outcome = this.supported?.outcome;
-    if (!outcome) {
-      throw new Error(`Channel passed to isDefunded has no supported state`);
+    if (fully) {
+      const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+      return BN.gte(channelFunds.amount, fullFunding);
+    } else {
+      const fundingBeforeMe = this.fundingMilestones[0];
+      return BN.gt(channelFunds.amount, fundingBeforeMe);
     }
-
-    const {assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
-    const channelFunds = this.funding.find(f => f.assetHolder === assetHolderAddress);
-    if (!channelFunds) return false;
-
-    const fundingBeforeMe = this.fundingMilestones[0];
-    return BN.gt(channelFunds.amount, fundingBeforeMe);
   }
 
   /**
