@@ -65,7 +65,7 @@ export class LedgerFunder {
   ): Promise<boolean> {
     // for time being ledger must be a direct channel
     // TODO: in the future check "funding table"
-    if (!ledger.isDirectFunded) return false;
+    if (!ledger.isFullyDirectFunded) return false;
 
     // ledger is running
     if (!ledger.isRunning) return false;

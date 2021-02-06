@@ -9,6 +9,10 @@ import {
   Address,
   toNitroState,
   SignedState,
+  Uint256,
+  checkThat,
+  isSimpleAllocation,
+  BN,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -414,8 +418,71 @@ export class Channel extends Model implements RequiredColumns {
     return !!this.supported && this.supported.turnNum >= 2 * this.nParticipants - 1;
   }
 
-  public get isDirectFunded(): boolean {
-    return this.protocolState.directFundingStatus === 'Funded';
+  // Does the channel have funds to pay out to all allocation items?
+  public get isFullyDirectFunded(): boolean {
+    const outcome = this.supported?.outcome;
+    if (!outcome) {
+      throw new Error(`Channel passed to isFullyDirectFunded has no supported state`);
+    }
+
+    const {assetHolderAddress, allocationItems} = checkThat(outcome, isSimpleAllocation);
+    const channelFunds = this.funding.find(f => f.assetHolder === assetHolderAddress);
+    if (!channelFunds) return false;
+    const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+    return BN.gte(channelFunds.amount, fullFunding);
+  }
+
+  // Does the channel have any funds that I can claim?
+  public get isPartlyDirectlyFunded(): boolean {
+    const outcome = this.supported?.outcome;
+    if (!outcome) {
+      throw new Error(`Channel passed to isDefunded has no supported state`);
+    }
+
+    const {assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
+    const channelFunds = this.funding.find(f => f.assetHolder === assetHolderAddress);
+    if (!channelFunds) return false;
+
+    const fundingBeforeMe = this.fundingMilestones[0];
+    return BN.gt(channelFunds.amount, fundingBeforeMe);
+  }
+
+  /**
+   * Returns a triple of balance [targetBefore, targetAfter, targetTotal], where
+   *  - targetBefore is the balance where I should start depositing
+   *  - targetAfter should be the balance where I stop depositing
+   *  - targetTotal is the total amount that should be in the channel
+   *
+   * @param channel
+   */
+  public get fundingMilestones(): [Uint256, Uint256, Uint256] {
+    /**
+     * The below logic assumes:
+     *  1. Each destination occurs at most once.
+     *  2. We only care about a single destination.
+     * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
+     */
+    const supported = this.supported;
+    if (!supported) {
+      throw new Error(`Channel passed to DriectFunder has no supported state`);
+    }
+
+    const myDestination = this.participants[this.myIndex].destination;
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
+    if (!myAllocationItem) {
+      throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
+    }
+
+    const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== myDestination);
+    const targetBefore = allocationsBefore.map(a => a.amount).reduce(BN.add, BN.from(0));
+
+    const targetAfter = BN.add(targetBefore, myAllocationItem.amount);
+
+    const total = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+
+    return [targetBefore, targetAfter, total];
   }
 
   private mySignature(signatures: SignatureEntry[]): boolean {
