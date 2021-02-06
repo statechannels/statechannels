@@ -97,7 +97,7 @@ export function deserializeState(state: SignedStateWire): SignedState {
 }
 
 export function deserializeObjective(objective: ObjectiveWire): SharedObjective {
-  const participants = objective.participants?.map(p => ({
+  const participants = objective.participants.map(p => ({
     ...p,
     signingAddress: makeAddress(p.signingAddress),
     destination: makeDestination(p.destination)

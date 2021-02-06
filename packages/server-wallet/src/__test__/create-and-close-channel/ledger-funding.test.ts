@@ -32,6 +32,8 @@ const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(),
   database: 'TEST_B',
 });
 
+jest.setTimeout(10_000);
+
 beforeAll(async () => {
   await DBAdmin.createDatabase(aWalletConfig);
   await DBAdmin.createDatabase(bWalletConfig);
@@ -363,7 +365,7 @@ describe('Closing a ledger channel and preventing it from being used again', () 
   });
 });
 
-describe('Funding multiple channels syncronously (in bulk)', () => {
+describe('Funding multiple channels synchronously (in bulk)', () => {
   const N = 4;
   let ledgerChannelId: Bytes32;
   let appChannelIds: Bytes32[];
@@ -386,7 +388,7 @@ describe('Funding multiple channels syncronously (in bulk)', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
@@ -478,7 +480,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 
@@ -561,7 +563,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const {
       allocations: [{allocationItems}],
@@ -914,7 +916,7 @@ describe('Automatic channel syncing on successive API calls', () => {
 
     const {channelResults} = await a.getChannels();
 
-    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: []});
+    await expect(b.getChannels()).resolves.toEqual({channelResults, outbox: [], newObjectives: []});
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
 

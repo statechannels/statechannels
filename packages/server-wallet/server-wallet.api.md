@@ -164,6 +164,7 @@ export type MetricsConfiguration = {
 export type MultipleChannelOutput = {
     outbox: Outgoing[];
     channelResults: ChannelResult[];
+    newObjectives: DBObjective[];
 };
 
 // @public
@@ -255,6 +256,7 @@ export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWall
 export type SingleChannelOutput = {
     outbox: Outgoing[];
     channelResult: ChannelResult;
+    newObjective: DBObjective | undefined;
 };
 
 // Warning: (ae-forgotten-export) The symbol "EventEmitterType" needs to be exported by the entry point index.d.ts
@@ -394,5 +396,9 @@ export interface WalletInterface {
     updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
 }
 
+
+// Warnings were encountered during analysis:
+//
+// src/wallet/types.ts:30:3 - (ae-forgotten-export) The symbol "DBObjective" needs to be exported by the entry point index.d.ts
 
 ```

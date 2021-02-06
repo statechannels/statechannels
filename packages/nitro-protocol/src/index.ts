@@ -6,6 +6,7 @@ import FULLErc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolde
 import FULLEthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import FULLTestNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import FULLTestAssetHolderArtifact from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
+import FULLCountingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 
 // https://hardhat.org/guides/compile-contracts.html#artifacts
 const fields = [
@@ -41,6 +42,7 @@ export const ContractArtifacts = {
  * They should NEVER be used in a production environment.
  */
 export const TestContractArtifacts = {
+  CountingAppArtifact: minimize(FULLCountingAppArtifact),
   TestNitroAdjudicatorArtifact: minimize(FULLTestNitroAdjudicatorArtifact),
   TestAssetHolderArtifact: minimize(FULLTestAssetHolderArtifact),
   TokenArtifact: minimize(FULLTokenArtifact),
