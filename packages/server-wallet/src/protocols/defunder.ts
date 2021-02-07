@@ -34,16 +34,8 @@ export class Defunder {
     switch (ps.fundingStrategy) {
       case 'Direct':
         return await this.directDefunder(channel, tx);
-      case 'Ledger': {
-        const ledgerRequest = await this.store.getLedgerRequest(channel.channelId, 'defund', tx);
-        if (ledgerRequest && ledgerRequest.status === 'succeeded') {
-          return {isChannelDefunded: true, didSubmitTransaction: false};
-        }
-        if (!ledgerRequest || ledgerRequest.status !== 'pending') {
-          await this.requestLedgerDefunding(channel, tx);
-        }
-        return {isChannelDefunded: false, didSubmitTransaction: false};
-      }
+      case 'Ledger':
+        return this.ledgerDefunder(channel, tx);
       case 'Unknown':
       case 'Fake':
         return {isChannelDefunded: true, didSubmitTransaction: false};
@@ -89,6 +81,17 @@ export class Defunder {
     }
 
     return {isChannelDefunded: false, didSubmitTransaction};
+  }
+
+  private async ledgerDefunder(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+    const ledgerRequest = await this.store.getLedgerRequest(channel.channelId, 'defund', tx);
+    if (ledgerRequest && ledgerRequest.status === 'succeeded') {
+      return {isChannelDefunded: true, didSubmitTransaction: false};
+    }
+    if (!ledgerRequest || ledgerRequest.status !== 'pending') {
+      await this.requestLedgerDefunding(channel, tx);
+    }
+    return {isChannelDefunded: false, didSubmitTransaction: false};
   }
 
   private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
