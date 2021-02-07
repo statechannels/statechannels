@@ -433,7 +433,7 @@ export class Channel extends Model implements ChannelColumns {
   private isDirectFunded(fully?: boolean): boolean {
     const outcome = this.supported?.outcome;
     if (!outcome) {
-      throw new Error(`Channel passed to isFullyDirectFunded has no supported state`);
+      throw new Error(`Channel passed to isDirectFunded has no supported state`);
     }
 
     const {assetHolderAddress, allocationItems} = checkThat(outcome, isSimpleAllocation);
