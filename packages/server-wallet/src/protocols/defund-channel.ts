@@ -49,8 +49,8 @@ export class ChannelDefunder {
         this.timingMetrics
       ).isChannelDefunded(channel, tx);
 
-      // Note that that the objective succeeds regardless of whether the channel is defunded.
-      // This objetive will likey get replaced by a ChallengeObjective
+      // A better methodology is likely to create a Challenge objective that succeeds after a
+      // channel has been defunded (instead of succeeding an objective on transaction submission)
       if (didSubmitTransaction) {
         await this.store.markObjectiveStatus(objective, 'succeeded', tx);
         response.queueSucceededObjective(objective);
