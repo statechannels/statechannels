@@ -1,5 +1,4 @@
 import {makeAddress, State} from '@statechannels/wallet-core';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {DBAdmin} from '../../db-admin/db-admin';
 import {defaultTestConfig} from '../..';
@@ -14,14 +13,19 @@ import {ErorringMockChainService, MockChainService} from '../../chain-service';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {ChannelDefunder} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
-import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
-import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
+import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
+import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
 import {Funding} from '../../models/funding';
+import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;
 
 let store: Store;
+
+const FINAL = 10; // this will be A's state to sign
+const testChan = TestChannel.create({aBal: 5, bBal: 5});
+const testChan2 = TestChannel.create({aBal: 5, bBal: 5, finalFrom: FINAL});
 
 beforeEach(async () => {
   await DBAdmin.truncateDataBaseFromKnex(knex);
@@ -41,11 +45,13 @@ describe('when there is no challenge or finalized channel', () => {
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel();
-    await Channel.query(knex).insert(c);
+    await testChan.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
+    });
 
     // Set the objective in the database
-    const objective = await createPendingObjective(c.channelId);
+    const objective = await createPendingObjective(testChan.channelId);
     await knex.transaction(tx => store.ensureObjective(objective, tx));
 
     const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
@@ -66,16 +72,16 @@ describe('when there is an active challenge', () => {
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Set up a channel with a conclusion proof
-    const c = channel({
-      channelNonce: 1,
-      vars: [stateWithHashSignedBy([alice(), bob()])({isFinal: true})],
+    // Create the channel in the database
+    await testChan2.insertInto(store, {
+      participant: 0,
+      states: [10, 11],
     });
-    await Channel.query(knex).insert(c);
 
-    await setAdjudicatorStatus('active', c);
+    await setAdjudicatorStatus('active', testChan2.channelId);
 
     // Store objective
-    const objective = createPendingObjective(c.channelId);
+    const objective = createPendingObjective(testChan2.channelId);
     await knex.transaction(tx => ObjectiveModel.insert(objective, tx));
     // Setup spies
     const concludeSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
@@ -94,14 +100,16 @@ describe('when there is an active challenge', () => {
     const chainService = new MockChainService();
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
-    // Setup a channel with no conclusion proof
-    const c = channel();
-    await Channel.query(knex).insert(c);
+    // Create the channel in the database
+    await testChan.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
+    });
 
-    await setAdjudicatorStatus('active', c);
+    await setAdjudicatorStatus('active', testChan.channelId);
 
     // Store the objective
-    const objective = createPendingObjective(c.channelId);
+    const objective = createPendingObjective(testChan.channelId);
     await knex.transaction(tx => store.ensureObjective(objective, tx));
 
     // Crank the protocol
@@ -119,19 +127,24 @@ describe('when the channel is finalized on chain', () => {
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel({
-      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    await testChan.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
     });
-    await Channel.query(knex).insert(c);
 
     // If there is a funding entry that means the outcome has not been pushed
-    await Funding.updateFunding(knex, c.channelId, '0x05', makeAddress(c.assetHolderAddress));
+    await Funding.updateFunding(
+      knex,
+      testChan.channelId,
+      '0x05',
+      makeAddress(testChan.assetHolderAddress)
+    );
 
     const challengeState = stateSignedBy([alice()])();
-    await setAdjudicatorStatus('finalized', c, challengeState);
+    await setAdjudicatorStatus('finalized', testChan.channelId, challengeState);
 
     // Set the objective in the database
-    const objective = await createPendingObjective(c.channelId);
+    const objective = await createPendingObjective(testChan.channelId);
     await knex.transaction(tx => store.ensureObjective(objective, tx));
 
     const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
@@ -140,7 +153,10 @@ describe('when the channel is finalized on chain', () => {
     await channelDefunder.crank(objective, WalletResponse.initialize());
 
     // Check the results
-    expect(pushSpy).toHaveBeenCalledWith(expect.objectContaining(challengeState), c.myAddress);
+    expect(pushSpy).toHaveBeenCalledWith(
+      expect.objectContaining(challengeState),
+      testChan.participantA.signingAddress
+    );
     const reloadedObjective = await store.getObjective(objective.objectiveId);
     expect(reloadedObjective.status).toEqual('succeeded');
   });
@@ -150,16 +166,16 @@ describe('when the channel is finalized on chain', () => {
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel({
-      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    await testChan.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
     });
-    await Channel.query(knex).insert(c);
 
     // Set a finalized channel with a final state
-    await setAdjudicatorStatus('finalized', c);
+    await setAdjudicatorStatus('finalized', testChan.channelId);
 
     // Store the objective
-    const obj = createPendingObjective(c.channelId);
+    const obj = createPendingObjective(testChan.channelId);
     await knex.transaction(tx => store.ensureObjective(obj, tx));
 
     const pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
@@ -178,19 +194,24 @@ describe('when the channel is finalized on chain', () => {
     const channelDefunder = ChannelDefunder.create(store, chainService, logger, timingMetrics);
 
     // Create the channel in the database
-    const c = channel({
-      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+    await testChan.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
     });
-    await Channel.query(knex).insert(c);
 
     // If there is a funding entry that means the outcome has not been pushed
-    await Funding.updateFunding(knex, c.channelId, '0x05', makeAddress(c.assetHolderAddress));
+    await Funding.updateFunding(
+      knex,
+      testChan.channelId,
+      '0x05',
+      makeAddress(testChan.assetHolderAddress)
+    );
 
     const challengeState = stateSignedBy([alice()])();
-    await setAdjudicatorStatus('finalized', c, challengeState);
+    await setAdjudicatorStatus('finalized', testChan.channelId, challengeState);
 
     // Set the objective in the database
-    const objective = await createPendingObjective(c.channelId);
+    const objective = await createPendingObjective(testChan.channelId);
     await knex.transaction(tx => store.ensureObjective(objective, tx));
 
     // Crank the protocol
@@ -227,14 +248,14 @@ it('should fail when using non-direct funding', async () => {
 // Helpers
 async function setAdjudicatorStatus(
   status: 'finalized' | 'active',
-  channel: Channel,
+  channelId: string,
   state?: Partial<State>
 ): Promise<void> {
-  await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, channel.channelId, 100, [
+  await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, channelId, 100, [
     stateSignedBy([alice()])(state),
   ]);
   if (status === 'finalized') {
-    await AdjudicatorStatusModel.setFinalized(knex, channel.channelId, 22, 200);
+    await AdjudicatorStatusModel.setFinalized(knex, channelId, 22, 200);
   }
 }
 
