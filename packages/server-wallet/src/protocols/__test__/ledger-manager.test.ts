@@ -29,6 +29,8 @@ import {Channel} from '../../models/channel';
 // TEST HELPERS
 // There are many test cases in this file. These helpers make the tests cases more readable.
 
+jest.setTimeout(10_000);
+
 type PreAllocationItem = [string | Fixture<Participant>, number];
 
 function allocationItem(preAllocationItem: PreAllocationItem): AllocationItem {
