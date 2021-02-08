@@ -67,7 +67,9 @@ export type ComputedColumns = {
   readonly channelId: Bytes32;
 };
 
-export class Channel extends Model implements RequiredColumns {
+type ChannelColumns = RequiredColumns & ComputedColumns;
+
+export class Channel extends Model implements ChannelColumns {
   readonly id!: number;
 
   channelId!: Bytes32;
