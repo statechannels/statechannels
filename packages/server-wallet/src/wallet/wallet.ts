@@ -351,6 +351,8 @@ export class SingleThreadedWallet
           type: 'SubmitChallenge',
           participants: [],
           data: {targetChannelId: channelId},
+          status: 'pending',
+          objectiveId: '', // will be overwritten by the ORM
         },
         tx
       );
@@ -1004,6 +1006,8 @@ export class SingleThreadedWallet
           type: 'DefundChannel',
           participants: [],
           data: {targetChannelId: arg.channelId},
+          status: 'pending',
+          objectiveId: 'test',
         },
         tx
       );

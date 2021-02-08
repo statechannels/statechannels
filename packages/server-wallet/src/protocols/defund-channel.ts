@@ -1,11 +1,10 @@
 import {Logger} from 'pino';
-import {makeAddress} from '@statechannels/wallet-core';
+import {DefundChannel, makeAddress} from '@statechannels/wallet-core';
 import {BigNumber} from 'ethers';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
-import {DBDefundChannelObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -25,7 +24,7 @@ export class ChannelDefunder {
     return new ChannelDefunder(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(objective: DBDefundChannelObjective, response: WalletResponse): Promise<void> {
+  public async crank(objective: DefundChannel, response: WalletResponse): Promise<void> {
     const {targetChannelId: channelId} = objective.data;
     await this.store.transaction(async tx => {
       const channel = await this.store.getAndLockChannel(channelId, tx);

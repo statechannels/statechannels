@@ -1,5 +1,6 @@
 import {
   checkThat,
+  CloseChannel,
   isSimpleAllocation,
   StateVariables,
   unreachable,
@@ -10,7 +11,6 @@ import {isExternalDestination} from '@statechannels/nitro-protocol';
 
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
-import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
@@ -33,7 +33,7 @@ export class ChannelCloser {
     return new ChannelCloser(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
+  public async crank(objective: CloseChannel, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
     await this.store.lockApp(channelToLock, async (tx, channel) => {
@@ -161,7 +161,7 @@ export class ChannelCloser {
   }
 
   private async completeObjective(
-    objective: DBCloseChannelObjective,
+    objective: CloseChannel,
     channel: Channel,
     tx: Transaction,
     response: WalletResponse

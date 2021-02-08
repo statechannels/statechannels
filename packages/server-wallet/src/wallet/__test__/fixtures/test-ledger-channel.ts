@@ -39,6 +39,8 @@ export class TestLedgerChannel extends TestChannel {
   public get openChannelObjective(): SharedObjective {
     return {
       participants: this.participants,
+      objectiveId: '',
+      status: 'pending',
       type: 'OpenChannel',
       data: {
         role: 'ledger',

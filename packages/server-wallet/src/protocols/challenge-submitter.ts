@@ -1,11 +1,10 @@
-import {SignedState, State} from '@statechannels/wallet-core';
+import {SignedState, State, SubmitChallenge} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
-import {DBSubmitChallengeObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -25,10 +24,7 @@ export class ChallengeSubmitter {
   ): ChallengeSubmitter {
     return new ChallengeSubmitter(store, chainService, logger, timingMetrics);
   }
-  public async crank(
-    objective: DBSubmitChallengeObjective,
-    response: WalletResponse
-  ): Promise<void> {
+  public async crank(objective: SubmitChallenge, response: WalletResponse): Promise<void> {
     const {targetChannelId: channelToLock} = objective.data;
 
     await this.store.transaction(async tx => {

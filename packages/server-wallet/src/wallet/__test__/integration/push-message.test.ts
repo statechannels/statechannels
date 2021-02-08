@@ -279,9 +279,10 @@ describe('when the application protocol returns an action', () => {
     const c = channel({vars: [addHash(state)]});
     await Channel.query(wallet.knex).insert(c);
 
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         status: 'approved',
         participants: c.participants,
         data: {
@@ -532,9 +533,10 @@ describe('ledger funded app scenarios', () => {
 
     // Add the objective into the wallets store (normally would have happened
     // during createChannel or pushMessage call by the wallet)
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         status: 'approved',
         participants: channel.participants,
         data: {

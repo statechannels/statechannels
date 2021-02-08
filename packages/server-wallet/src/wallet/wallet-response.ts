@@ -1,11 +1,17 @@
 import _ from 'lodash';
 import {ChannelResult} from '@statechannels/client-api-schema';
-import {Participant, serializeMessage, SignedState, Outcome} from '@statechannels/wallet-core';
+import {
+  Participant,
+  serializeMessage,
+  SignedState,
+  Outcome,
+  isSharedObjective,
+} from '@statechannels/wallet-core';
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
 
 import {Notice, Outgoing} from '../protocols/actions';
 import {Channel} from '../models/channel';
-import {DBObjective, isSharedObjective, toWireObjective} from '../models/objective';
+import {DBObjective} from '../models/objective';
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
@@ -97,7 +103,7 @@ export class WalletResponse {
               WALLET_VERSION,
               {
                 walletVersion: WALLET_VERSION,
-                objectives: [toWireObjective(objective)],
+                objectives: [objective],
               },
               p.participantId,
               myParticipantId

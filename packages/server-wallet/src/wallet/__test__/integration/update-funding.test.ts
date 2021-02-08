@@ -39,7 +39,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
   await Channel.query(w.knex).insert(c2);
   const channelIds = [c1, c2].map(c => c.channelId);
 
-  await ObjectiveModel.insert(
+  await ObjectiveModel.ensure(
     {
       type: 'OpenChannel',
       participants: c1.participants,
@@ -49,11 +49,12 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         role: 'app',
       },
       status: 'approved',
+      objectiveId: '',
     },
     w.knex
   );
 
-  await ObjectiveModel.insert(
+  await ObjectiveModel.ensure(
     {
       type: 'OpenChannel',
       participants: c2.participants,
@@ -63,6 +64,7 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         role: 'app',
       },
       status: 'approved',
+      objectiveId: '',
     },
     w.knex
   );
@@ -109,7 +111,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
 
-  await ObjectiveModel.insert(
+  await ObjectiveModel.ensure(
     {
       type: 'OpenChannel',
       participants: c.participants,
@@ -119,6 +121,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
         role: 'app',
       },
       status: 'approved',
+      objectiveId: '',
     },
     w.knex
   );
@@ -154,7 +157,7 @@ it('emits new channel result when the funding event is provided via holdingUpdat
   await Channel.query(w.knex).insert(c);
   const {channelId} = c;
 
-  await ObjectiveModel.insert(
+  await ObjectiveModel.ensure(
     {
       type: 'OpenChannel',
       participants: c.participants,
@@ -164,6 +167,7 @@ it('emits new channel result when the funding event is provided via holdingUpdat
         role: 'app',
       },
       status: 'approved',
+      objectiveId: '',
     },
     w.knex
   );

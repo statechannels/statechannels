@@ -16,6 +16,8 @@ const objective: OpenChannel = {
     fundingStrategy: 'Direct',
     role: 'app',
   },
+  status: 'pending',
+  objectiveId: 'test',
 };
 beforeEach(async () => {
   await seedAlicesSigningWallet(knex);
@@ -24,7 +26,7 @@ beforeEach(async () => {
 describe('Objective > insert', () => {
   it('fails to insert / associate an objective when it references a channel that does not exist', async () => {
     // For some reason this does not catch the error :/
-    await expect(ObjectiveModel.insert({...objective, status: 'pending'}, knex)).rejects.toThrow();
+    await expect(ObjectiveModel.ensure(objective, knex)).rejects.toThrow();
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([]);
 
@@ -34,7 +36,7 @@ describe('Objective > insert', () => {
   it('inserts and associates an objective with all channels that it references (channels exist)', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    await ObjectiveModel.ensure({...objective, status: 'pending'}, knex);
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`},
@@ -50,7 +52,7 @@ describe('Objective > forChannelIds', () => {
   it('retrieves objectives associated with a given channelId', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    await ObjectiveModel.ensure({...objective, status: 'pending'}, knex);
 
     expect(await ObjectiveModel.forChannelIds([c.channelId], knex)).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`},

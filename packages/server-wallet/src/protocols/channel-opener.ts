@@ -1,10 +1,9 @@
 import {Logger} from 'pino';
-import {unreachable} from '@statechannels/wallet-core';
+import {OpenChannel, unreachable} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
-import {DBOpenChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
@@ -29,7 +28,7 @@ export class ChannelOpener {
     return new ChannelOpener(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(objective: DBOpenChannelObjective, response: WalletResponse): Promise<void> {
+  public async crank(objective: OpenChannel, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
     await this.store.transaction(async tx => {
@@ -60,7 +59,7 @@ export class ChannelOpener {
       }
 
       if (channel.postfundSupported) {
-        objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+        await this.store.markObjectiveStatus(objective, 'succeeded', tx);
 
         response.queueSucceededObjective(objective);
       }
@@ -70,7 +69,7 @@ export class ChannelOpener {
   }
 
   private async crankChannelFunder(
-    objective: DBOpenChannelObjective,
+    objective: OpenChannel,
     channel: Channel,
     response: WalletResponse,
     tx: Transaction

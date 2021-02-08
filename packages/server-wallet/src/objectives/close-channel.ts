@@ -17,6 +17,8 @@ export class CloseChannelObjective {
             type: 'CloseChannel',
             participants: [],
             data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
+            objectiveId: '', // will be overwritten by the store
+            status: 'pending',
           },
           tx
         );

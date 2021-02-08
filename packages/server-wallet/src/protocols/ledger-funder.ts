@@ -1,4 +1,4 @@
-import {BN, checkThat, isSimpleAllocation} from '@statechannels/wallet-core';
+import {BN, checkThat, isSimpleAllocation, OpenChannel} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
@@ -6,7 +6,6 @@ import {Logger} from 'pino';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
-import {DBOpenChannelObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -33,7 +32,7 @@ export class LedgerFunder {
    * Returns true if the channel is funded, false otherwise
    */
   public async crank(
-    objective: DBOpenChannelObjective,
+    objective: OpenChannel,
     channel: Channel,
     response: WalletResponse,
     tx: Transaction

@@ -1,10 +1,10 @@
-import {makeAddress, State} from '@statechannels/wallet-core';
+import {DefundChannel, makeAddress, State} from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {DBAdmin} from '../../db-admin/db-admin';
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
-import {DBDefundChannelObjective, ObjectiveModel} from '../../models/objective';
+import {ObjectiveModel} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -76,7 +76,7 @@ describe('when there is an active challenge', () => {
 
     // Store objective
     const objective = createPendingObjective(c.channelId);
-    await knex.transaction(tx => ObjectiveModel.insert(objective, tx));
+    await knex.transaction(tx => ObjectiveModel.ensure(objective, tx));
     // Setup spies
     const concludeSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
 
@@ -238,7 +238,7 @@ async function setAdjudicatorStatus(
   }
 }
 
-function createPendingObjective(channelId: string): DBDefundChannelObjective {
+function createPendingObjective(channelId: string): DefundChannel {
   return {
     type: 'DefundChannel',
     status: 'pending',

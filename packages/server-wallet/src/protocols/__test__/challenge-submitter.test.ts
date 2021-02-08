@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import {SubmitChallenge} from '@statechannels/wallet-core';
 
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
@@ -6,7 +7,6 @@ import {defaultTestConfig} from '../../config';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
-import {DBSubmitChallengeObjective} from '../../models/objective';
 import {ChallengeSubmitter} from '../challenge-submitter';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -44,7 +44,7 @@ describe(`challenge-submitter`, () => {
     // Add a existing request
     await ChainServiceRequest.insertOrUpdate(c.channelId, 'challenge', knex);
 
-    const obj: DBSubmitChallengeObjective = {
+    const obj: SubmitChallenge = {
       type: 'SubmitChallenge',
       status: 'pending',
       participants: [],
@@ -63,7 +63,7 @@ describe(`challenge-submitter`, () => {
     const challengeState = stateSignedBy([alice()])();
     await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 100, [challengeState]);
 
-    const obj: DBSubmitChallengeObjective = {
+    const obj: SubmitChallenge = {
       type: 'SubmitChallenge',
       status: 'pending',
       participants: [],
@@ -83,7 +83,7 @@ describe(`challenge-submitter`, () => {
 
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    const obj: DBSubmitChallengeObjective = {
+    const obj: SubmitChallenge = {
       type: 'SubmitChallenge',
       status: 'pending',
       participants: [],
@@ -104,10 +104,7 @@ interface AssertionParams {
   completesObj?: boolean;
 }
 
-const crankAndAssert = async (
-  objective: DBSubmitChallengeObjective,
-  args: AssertionParams
-): Promise<void> => {
+const crankAndAssert = async (objective: SubmitChallenge, args: AssertionParams): Promise<void> => {
   const completesObj = args.completesObj || false;
   const callsChallenge = args.callsChallenge || false;
   const chainService = new MockChainService();

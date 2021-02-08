@@ -58,9 +58,10 @@ describe('directly funded app', () => {
     await Channel.query(w.knex).insert(c2);
     const channelIds = [c1, c2].map(c => c.channelId);
 
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         participants: c1.participants,
         data: {
           targetChannelId: c1.channelId,
@@ -72,9 +73,10 @@ describe('directly funded app', () => {
       w.knex
     );
 
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         participants: c2.participants,
         data: {
           targetChannelId: c2.channelId,
@@ -126,9 +128,10 @@ describe('directly funded app', () => {
 
     expect(current.protocolState).toMatchObject({latest: preFS0, supported: undefined});
 
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         participants: current.participants,
         data: {
           targetChannelId: current.channelId,
@@ -165,9 +168,10 @@ describe('directly funded app', () => {
     const channelId = c.channelId;
     const current = await Channel.forId(channelId, w.knex);
     expect(current.latest).toMatchObject(preFS0);
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         participants: current.participants,
         data: {
           targetChannelId: current.channelId,
@@ -261,9 +265,10 @@ describe('ledger funded app scenarios', () => {
   const putTestChannelInsideWallet = async (args: Objection.PartialModelObject<Channel>) => {
     const channel = await Channel.query(w.knex).insert(args);
 
-    await ObjectiveModel.insert(
+    await ObjectiveModel.ensure(
       {
         type: 'OpenChannel',
+        objectiveId: '',
         participants: channel.participants,
         data: {
           targetChannelId: channel.channelId,
