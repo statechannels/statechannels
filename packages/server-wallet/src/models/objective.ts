@@ -49,6 +49,7 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
+  // note lack of participants
 
   static tableName = 'objectives';
   static get idColumn(): string[] {
@@ -82,12 +83,12 @@ export class ObjectiveModel extends Model {
     objectiveToBeStored: DBObjective,
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
-    const id: string = objectiveId(objectiveToBeStored);
+    objectiveToBeStored.objectiveId = objectiveId(objectiveToBeStored);
+    delete (objectiveToBeStored as any).participants; // Note removal of participants field
     return tx.transaction(async trx => {
-      trx.onConflict('objective_id').merge(); // Don't error out if we have already inserted.
       const objective = await ObjectiveModel.query(trx)
         .insert(objectiveToBeStored)
-        .onConflict('objective_id')
+        .onConflict('objectiveId') // Do not throw a UniqueViolationError if objective exists
         .ignore(); // TODO: consider usinge merge({chosenSubProperties})
 
       // Associate the objective with any channel that it references
@@ -95,7 +96,10 @@ export class ObjectiveModel extends Model {
       // Requires objective and channels to exist
       await Promise.all(
         extractReferencedChannels(objectiveToBeStored).map(async value =>
-          ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
+          ObjectiveChannelModel.query(trx).insert({
+            objectiveId: objectiveToBeStored.objectiveId,
+            channelId: value,
+          })
         )
       );
       return objective.toObjective();
@@ -143,7 +147,7 @@ export class ObjectiveModel extends Model {
   toObjective(): DBObjective {
     return {
       ...this,
-      participants: [],
+      participants: [], // note reattachment of null participants field
       data: this.data as any, // This is necessary, but messes up the union type
     };
   }
