@@ -424,7 +424,7 @@ export class Channel extends Model implements RequiredColumns {
   }
 
   // Does the channel have any funds that I can claim?
-  public get isPartlyDirectlyFunded(): boolean {
+  public get isPartlyDirectFunded(): boolean {
     return this.isDirectFunded();
   }
 
