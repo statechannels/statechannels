@@ -3,10 +3,8 @@ import {
   Objective,
   OpenChannel,
   CloseChannel,
-  SharedObjective,
   SubmitChallenge,
   DefundChannel,
-  Participant,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
@@ -29,39 +27,10 @@ function extractReferencedChannels(objective: Objective): string[] {
   }
 }
 
-type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-
 /**
  * Objectives that are currently supported by the server wallet (wire format)
  */
 export type SupportedWireObjective = OpenChannel | CloseChannel;
-
-export type DBOpenChannelObjective = OpenChannel & {objectiveId: string; status: ObjectiveStatus};
-export type DBCloseChannelObjective = CloseChannel & {
-  objectiveId: string;
-  status: ObjectiveStatus;
-};
-export type DBDefundChannelObjective = {
-  type: 'DefundChannel';
-  participants: Participant[];
-  objectiveId: string;
-  status: ObjectiveStatus;
-  data: {targetChannelId: string};
-};
-
-export type DBSubmitChallengeObjective = {
-  data: {targetChannelId: string};
-  participants: Participant[];
-  objectiveId: string;
-  status: ObjectiveStatus;
-  type: 'SubmitChallenge';
-};
-
-export function isSharedObjective(
-  objective: DBObjective
-): objective is DBOpenChannelObjective | DBCloseChannelObjective {
-  return objective.type === 'OpenChannel' || objective.type === 'CloseChannel';
-}
 
 /**
  * A DBObjective is a wire objective with a status and an objectiveId
@@ -69,25 +38,7 @@ export function isSharedObjective(
  * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
  */
-export type DBObjective =
-  | DBOpenChannelObjective
-  | DBCloseChannelObjective
-  | DBSubmitChallengeObjective
-  | DBDefundChannelObjective;
-
-export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
-  if (dbObj.type === 'SubmitChallenge' || dbObj.type === 'DefundChannel') {
-    throw new Error(
-      'SubmitChallenge and DefundChannel objectives are not supported as wire objectives'
-    );
-  }
-  return {
-    type: dbObj.type,
-    data: dbObj.data,
-    participants: dbObj.participants,
-  };
-};
-
+export type DBObjective = OpenChannel | CloseChannel | SubmitChallenge | DefundChannel;
 export class ObjectiveChannelModel extends Model {
   readonly objectiveId!: DBObjective['objectiveId'];
   readonly channelId!: string;
@@ -132,21 +83,17 @@ export class ObjectiveModel extends Model {
     };
   }
 
-  static async insert(
-    objectiveToBeStored: (SupportedWireObjective | SubmitChallenge | DefundChannel) & {
-      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-    },
+  static async ensure(
+    objectiveToBeStored: SupportedWireObjective | SubmitChallenge | DefundChannel,
     tx: TransactionOrKnex
-  ): Promise<ObjectiveModel> {
+  ): Promise<DBObjective> {
     const id: string = objectiveId(objectiveToBeStored);
-
     return tx.transaction(async trx => {
-      const objective = await ObjectiveModel.query(trx).insert({
-        objectiveId: id,
-        status: objectiveToBeStored.status,
-        type: objectiveToBeStored.type,
-        data: objectiveToBeStored.data,
-      });
+      trx.onConflict('objective_id').merge(); // Don't error out if we have already inserted.
+      const objective = await ObjectiveModel.query(trx)
+        .insert(objectiveToBeStored)
+        .onConflict('objective_id')
+        .ignore(); // TODO: consider usinge merge({chosenSubProperties})
 
       // Associate the objective with any channel that it references
       // By inserting an ObjectiveChannel row for each channel
@@ -156,7 +103,7 @@ export class ObjectiveModel extends Model {
           ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
         )
       );
-      return objective;
+      return objective.toObjective();
     });
   }
 
@@ -202,7 +149,7 @@ export class ObjectiveModel extends Model {
     return {
       ...this,
       participants: [],
-      data: this.data as any, // Here we will trust that the row respects our types
+      data: this.data as any, // This is necessary, but messes up the union type
     };
   }
 }
