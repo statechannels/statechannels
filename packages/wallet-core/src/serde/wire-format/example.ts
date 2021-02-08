@@ -165,6 +165,8 @@ export const internalMessageFormat: Payload = {
   objectives: [
     {
       type: 'OpenChannel',
+      objectiveId: '',
+      status: 'pending',
       data: {
         targetChannelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967',
         fundingStrategy: 'Direct',

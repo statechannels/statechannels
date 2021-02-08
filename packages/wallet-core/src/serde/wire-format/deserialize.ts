@@ -103,7 +103,7 @@ export function deserializeObjective(objective: ObjectiveWire): SharedObjective 
     destination: makeDestination(p.destination)
   }));
 
-  return {...objective, participants};
+  return {...objective, participants, objectiveId: '', status: 'pending'}; // status is local information only, so default to 'pending'. This could cause issues when an objective is received multiple times
 }
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity

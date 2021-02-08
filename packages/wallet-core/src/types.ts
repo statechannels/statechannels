@@ -88,10 +88,14 @@ export type SignedStateWithHash = SignedState & Hashed;
 export type SignedStateVariables = StateVariables & Signed;
 export type SignedStateVarsWithHash = SignedStateVariables & Hashed;
 
+export type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+
 type _Objective<Name, Data> = {
   participants: Participant[];
   type: Name;
   data: Data;
+  objectiveId: string;
+  status: ObjectiveStatus;
 };
 export type OpenChannel = _Objective<
   'OpenChannel',
@@ -159,6 +163,16 @@ export type SharedObjective =
   | FundLedger
   | CloseLedger;
 
+export function isSharedObjective(objective: Objective): objective is SharedObjective {
+  return (
+    objective.type === 'OpenChannel' ||
+    objective.type === 'CloseChannel' ||
+    objective.type === 'VirtuallyFund' ||
+    objective.type === 'FundGuarantor' ||
+    objective.type === 'FundLedger' ||
+    objective.type == 'CloseLedger'
+  );
+}
 export type Objective = SharedObjective | SubmitChallenge | DefundChannel;
 
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
@@ -201,7 +215,7 @@ export type ChannelRequest = GetChannel | ProposeLedgerUpdate;
 export interface Payload {
   walletVersion: string;
   signedStates?: SignedState[];
-  objectives?: SharedObjective[];
+  objectives?: SharedObjective[]; // TODO: this should be WireObjective[] ?
   requests?: ChannelRequest[];
 }
 
