@@ -1,5 +1,5 @@
 import {constants} from 'ethers';
-import {makeAddress} from '@statechannels/wallet-core';
+import {BN, makeAddress} from '@statechannels/wallet-core';
 
 import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -7,6 +7,10 @@ import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {dropNonVariables} from '../../state-utils';
 import {Funding} from '../funding';
+import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {defaultTestConfig} from '../../config';
+import {Store} from '../../wallet/store';
+import {DBAdmin} from '../../db-admin/db-admin';
 
 import {channel} from './fixtures/channel';
 
@@ -98,5 +102,89 @@ describe('fundingStatus', () => {
 
       expect(channel.channelResult.fundingStatus).not.toBeUndefined();
     });
+  });
+});
+
+const testChannelObj = TestChannel.create({aBal: 5, bBal: 3});
+let testChannel: Channel;
+let store: Store;
+
+function compareMilestones(milestoneStr: string[], milestoneNum: number[]) {
+  expect(milestoneStr.map(BN.from)).toEqual(milestoneNum.map(BN.from));
+}
+describe('Channel funding', () => {
+  beforeEach(async () => {
+    await DBAdmin.truncateDataBaseFromKnex(knex);
+
+    store = new Store(
+      knex,
+      defaultTestConfig().metricsConfiguration.timingMetrics,
+      defaultTestConfig().skipEvmValidation,
+      '0'
+    );
+  });
+
+  it('Funding milestones correct for A', async () => {
+    await testChannelObj.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
+    });
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    compareMilestones(testChannel.fundingMilestones, [0, 5, 8]);
+  });
+
+  it('Funding milestones correct for B', async () => {
+    await testChannelObj.insertInto(store, {
+      participant: 1,
+      states: [0, 1],
+    });
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    compareMilestones(testChannel.fundingMilestones, [5, 8, 8]);
+  });
+
+  it('Check funding for A', async () => {
+    await testChannelObj.insertInto(store, {
+      participant: 0,
+      states: [0, 1],
+      funds: 0,
+    });
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    expect(testChannel.isPartlyDirectlyFunded).toEqual(false);
+    expect(testChannel.isFullyDirectFunded).toEqual(false);
+
+    // Update funding and refetch channel
+    await store.updateFunding(testChannel.channelId, BN.from(1), testChannelObj.assetHolderAddress);
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isFullyDirectFunded).toEqual(false);
+
+    // Update funding and refetch channel
+    await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.assetHolderAddress);
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isFullyDirectFunded).toEqual(true);
+  });
+
+  it('Check funding for B', async () => {
+    await testChannelObj.insertInto(store, {
+      participant: 1,
+      states: [0, 1],
+      funds: 5,
+    });
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    expect(testChannel.isPartlyDirectlyFunded).toEqual(false);
+    expect(testChannel.isFullyDirectFunded).toEqual(false);
+
+    // Update funding and refetch channel
+    await store.updateFunding(testChannel.channelId, BN.from(6), testChannelObj.assetHolderAddress);
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isFullyDirectFunded).toEqual(false);
+
+    // Update funding and refetch channel
+    await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.assetHolderAddress);
+    testChannel = await Channel.forId(testChannelObj.channelId, knex);
+    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isFullyDirectFunded).toEqual(true);
   });
 });
