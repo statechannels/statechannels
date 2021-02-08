@@ -47,7 +47,7 @@ export class Defunder {
   }
 
   private async directDefunder(channel: Channel, tx: Transaction): Promise<DefunderResult> {
-    if (!channel.isPartlyDirectlyFunded) {
+    if (!channel.isPartlyDirectFunded) {
       return {isChannelDefunded: true, didSubmitTransaction: false};
     }
 
