@@ -28,15 +28,10 @@ function extractReferencedChannels(objective: Objective): string[] {
 }
 
 /**
- * Objectives that are currently supported by the server wallet (wire format)
- */
-export type SupportedWireObjective = OpenChannel | CloseChannel;
-
 /**
- * A DBObjective is a wire objective with a status and an objectiveId
+ * A DBObjective is a wallet-core.Objective that is supported by the server wallet. 
  *
- * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
- * that are currently supported by the server wallet
+ * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel'
  */
 export type DBObjective = OpenChannel | CloseChannel | SubmitChallenge | DefundChannel;
 export class ObjectiveChannelModel extends Model {
@@ -50,7 +45,7 @@ export class ObjectiveChannelModel extends Model {
 }
 
 export class ObjectiveModel extends Model {
-  readonly objectiveId!: DBObjective['objectiveId'];
+  objectiveId!: DBObjective['objectiveId'];
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
@@ -84,7 +79,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async ensure(
-    objectiveToBeStored: SupportedWireObjective | SubmitChallenge | DefundChannel,
+    objectiveToBeStored: DBObjective,
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
     const id: string = objectiveId(objectiveToBeStored);
