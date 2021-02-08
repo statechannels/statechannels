@@ -5,7 +5,7 @@ import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {Channel} from '../../models/channel';
-import {ObjectiveModel} from '../../models/objective';
+import {DBObjective, ObjectiveModel} from '../../models/objective';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {alice, bob} from './fixtures/signing-wallets';
@@ -93,7 +93,7 @@ it('creates a defundChannel objective on channel finalized', async () => {
   const objectiveId = `DefundChannel-${c.channelId}`;
   const objective = await ObjectiveModel.forId(objectiveId, w.knex);
 
-  expect(objective).toEqual({
+  expect(objective).toEqual<DBObjective>({
     objectiveId,
     status: 'approved',
     type: 'DefundChannel',
@@ -101,6 +101,8 @@ it('creates a defundChannel objective on channel finalized', async () => {
       targetChannelId: c.channelId,
     },
     participants: [],
+    createdAt: expect.anything(),
+    progressLastMadeAt: expect.anything(),
   });
 });
 
