@@ -6,7 +6,6 @@ import {
   SharedObjective,
   SubmitChallenge,
   DefundChannel,
-  Participant,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
@@ -31,31 +30,17 @@ function extractReferencedChannels(objective: Objective): string[] {
 
 type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 
-/**
- * Objectives that are currently supported by the server wallet (wire format)
- */
-export type SupportedWireObjective = OpenChannel | CloseChannel;
-
-export type DBOpenChannelObjective = OpenChannel & {objectiveId: string; status: ObjectiveStatus};
-export type DBCloseChannelObjective = CloseChannel & {
+type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
-};
-export type DBDefundChannelObjective = {
-  type: 'DefundChannel';
-  participants: Participant[];
-  objectiveId: string;
-  status: ObjectiveStatus;
-  data: {targetChannelId: string};
+  createdAt: string;
+  progressLastMadeAt: string;
 };
 
-export type DBSubmitChallengeObjective = {
-  data: {targetChannelId: string};
-  participants: Participant[];
-  objectiveId: string;
-  status: ObjectiveStatus;
-  type: 'SubmitChallenge';
-};
+export type DBOpenChannelObjective = WalletObjective<OpenChannel>;
+export type DBCloseChannelObjective = WalletObjective<CloseChannel>;
+export type DBDefundChannelObjective = WalletObjective<DefundChannel>;
+export type DBSubmitChallengeObjective = WalletObjective<SubmitChallenge>;
 
 export function isSharedObjective(
   objective: DBObjective
@@ -63,11 +48,14 @@ export function isSharedObjective(
   return objective.type === 'OpenChannel' || objective.type === 'CloseChannel';
 }
 
+type SupportedObjective = OpenChannel | CloseChannel | SubmitChallenge | DefundChannel;
 /**
- * A DBObjective is a wire objective with a status and an objectiveId
+ * A DBObjective is a wire objective with a status, timestamps and an objectiveId
  *
  * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
+ *
+ * TODO: rename to WalletObjective
  */
 export type DBObjective =
   | DBOpenChannelObjective
@@ -103,6 +91,8 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
+  createdAt!: string;
+  progressLastMadeAt!: string;
 
   static tableName = 'objectives';
   static get idColumn(): string[] {
@@ -133,7 +123,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: (SupportedWireObjective | SubmitChallenge | DefundChannel) & {
+    objectiveToBeStored: SupportedObjective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
     },
     tx: TransactionOrKnex
@@ -146,6 +136,8 @@ export class ObjectiveModel extends Model {
         status: objectiveToBeStored.status,
         type: objectiveToBeStored.type,
         data: objectiveToBeStored.data,
+        createdAt: new Date().toISOString(),
+        progressLastMadeAt: new Date().toISOString(),
       });
 
       // Associate the objective with any channel that it references
