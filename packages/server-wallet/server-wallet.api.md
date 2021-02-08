@@ -293,6 +293,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     destroy(): Promise<void>;
     getChannels(): Promise<MultipleChannelOutput>;
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
+    getObjective(objectiveId: string): Promise<DBObjective>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
