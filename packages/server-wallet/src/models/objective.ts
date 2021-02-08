@@ -149,8 +149,12 @@ export class ObjectiveModel extends Model {
       // By inserting an ObjectiveChannel row for each channel
       // Requires objective and channels to exist
       await Promise.all(
-        extractReferencedChannels(objectiveToBeStored).map(async value =>
-          ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
+        extractReferencedChannels(objectiveToBeStored).map(
+          async value =>
+            ObjectiveChannelModel.query(trx)
+              .insert({objectiveId: id, channelId: value})
+              .onConflict(['objectiveId', 'channelId'])
+              .ignore() // this makes it an upsert
         )
       );
       return model.toObjective();
