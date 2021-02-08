@@ -61,11 +61,11 @@ describe('Objective > insert', () => {
     const {objectiveId} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
 
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
-    const {updatedAt} = await ObjectiveModel.succeed(objectiveId, knex);
+    const {progressLastMadeAt} = await ObjectiveModel.succeed(objectiveId, knex);
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
 
-    expect(Date.parse(updatedAt) > before).toBe(true);
-    expect(Date.parse(updatedAt) < after).toBe(true);
+    expect(Date.parse(progressLastMadeAt) > before).toBe(true);
+    expect(Date.parse(progressLastMadeAt) < after).toBe(true);
   });
 });
 
