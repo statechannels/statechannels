@@ -9,7 +9,6 @@ import {
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
-import {time} from 'console';
 
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
