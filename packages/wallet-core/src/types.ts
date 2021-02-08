@@ -215,7 +215,7 @@ export type ChannelRequest = GetChannel | ProposeLedgerUpdate;
 export interface Payload {
   walletVersion: string;
   signedStates?: SignedState[];
-  objectives?: SharedObjective[]; // TODO: this should be WireObjective[] ?
+  objectives?: SharedObjective[];
   requests?: ChannelRequest[];
 }
 

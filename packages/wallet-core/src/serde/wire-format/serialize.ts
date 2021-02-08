@@ -5,7 +5,8 @@ import {
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Guarantee as GuaranteeWire,
-  Message as WireMessage
+  Message as WireMessage,
+  Objective as WireObjective
 } from '@statechannels/wire-format';
 
 import {
@@ -15,7 +16,8 @@ import {
   SimpleAllocation,
   Payload,
   SimpleGuarantee,
-  ChannelRequest
+  ChannelRequest,
+  SharedObjective
 } from '../../types';
 import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
@@ -28,7 +30,7 @@ export function serializeMessage(
   channelId?: string
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
-  const objectives = message.objectives;
+  const objectives = message.objectives?.map(serializeObjective);
   const requests = message.requests?.map(serializeRequest);
   return {
     recipient,
@@ -105,4 +107,11 @@ function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
 function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
   const {destination, amount} = allocationItem;
   return {destination, amount: formatAmount(amount)};
+}
+
+function serializeObjective(objective: SharedObjective): WireObjective {
+  const clone = {...objective};
+  delete (clone as any).status;
+  delete (clone as any).objectiveId;
+  return clone;
 }
