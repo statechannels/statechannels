@@ -100,7 +100,7 @@ export class ChannelCloser {
 
     switch (ps.fundingStrategy) {
       case 'Direct':
-        if (!c.isPartlyDirectlyFunded) {
+        if (!c.isPartlyDirectFunded) {
           return true;
         }
         if (!c.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid()) {
