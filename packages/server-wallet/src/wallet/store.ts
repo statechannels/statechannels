@@ -1,6 +1,5 @@
 import {Transaction, TransactionOrKnex, UniqueViolationError} from 'objection';
 import {
-  Objective,
   Outcome,
   SignedStateWithHash,
   SignedStateVarsWithHash,
@@ -12,18 +11,15 @@ import {
   isOpenChannel,
   isCloseChannel,
   SignedState,
-  objectiveId,
   isSimpleAllocation,
   checkThat,
-  CloseChannel,
-  OpenChannel,
   makePrivateKey,
   makeAddress,
   Address,
   PrivateKey,
-  SubmitChallenge,
   isSubmitChallenge,
-  DefundChannel,
+  Objective,
+  OpenChannel,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -385,152 +381,19 @@ export class Store {
    * Ensure the provided objective is stored in the database.
    * Returns the objective as a DBObjective
    */
-  async ensureObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
+  async ensureObjective<O extends DBObjective>(
+    objective: Objective,
+    tx: Transaction
+  ): Promise<DBObjective> {
     switch (objective.type) {
       case 'OpenChannel':
-        return this.ensureOpenChannelObjective(objective, tx);
       case 'CloseChannel':
-        return this.ensureCloseChannelObjective(objective, tx);
       case 'SubmitChallenge':
-        return this.ensureSubmitChallengeObjective(objective, tx);
       case 'DefundChannel':
-        return this.ensureDefundChannelObjective(objective, tx);
+        return ObjectiveModel.ensure(objective, tx) as Promise<O>;
       default:
         throw new StoreError(StoreError.reasons.unimplementedObjective);
     }
-  }
-
-  private async ensureDefundChannelObjective(
-    objective: DefundChannel,
-    tx: Transaction
-  ): Promise<DBObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
-    }
-
-    try {
-      await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
-    } catch (e) {
-      // If the objective exists our job is done
-      if (e.name !== 'UniqueViolationError') throw e;
-    }
-
-    return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
-  }
-
-  private async ensureSubmitChallengeObjective(
-    objective: SubmitChallenge,
-    tx: Transaction
-  ): Promise<DBObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
-    }
-
-    try {
-      await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
-    } catch (e) {
-      // If the objective exists our job is done
-      if (!(e instanceof UniqueViolationError)) throw e;
-    }
-
-    return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
-  }
-
-  private async ensureOpenChannelObjective(
-    objective: OpenChannel,
-    tx: Transaction
-  ): Promise<DBObjective> {
-    const {
-      data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
-    } = objective;
-
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(channelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId});
-    }
-
-    if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
-      throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
-
-    const objectiveToBeStored: DBObjective = {
-      objectiveId: objectiveId(objective),
-      participants: [],
-      status: 'pending',
-      type: objective.type,
-      data: {
-        fundingStrategy,
-        fundingLedgerChannelId,
-        targetChannelId: channelId,
-        role,
-      },
-    };
-
-    if (role === 'ledger')
-      await Channel.setLedger(
-        channelId,
-        checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-        tx
-      );
-
-    try {
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
-    } catch (e) {
-      // If the objective exists our job is done
-      if (!(e instanceof UniqueViolationError)) throw e;
-    }
-
-    await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId})
-      .returning('*')
-      .first();
-
-    return objectiveToBeStored;
-  }
-
-  private async ensureCloseChannelObjective(
-    objective: CloseChannel,
-    tx: Transaction
-  ): Promise<DBObjective> {
-    const {
-      data: {targetChannelId, fundingStrategy},
-    } = objective;
-
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel)
-      throw new StoreError(StoreError.reasons.channelMissing, {
-        channelId: targetChannelId,
-      });
-
-    const objectiveToBeStored: DBObjective = {
-      objectiveId: objectiveId(objective),
-      status: 'approved',
-      type: objective.type,
-      participants: [],
-      data: {
-        targetChannelId,
-        fundingStrategy,
-      },
-    };
-
-    try {
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
-    } catch (e) {
-      // If the objective exists our job is done
-      if (!(e instanceof UniqueViolationError)) throw e;
-    }
-
-    return objectiveToBeStored;
   }
 
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
@@ -721,7 +584,7 @@ export class Store {
         tx
       );
 
-      const objectiveParams = {
+      const o: OpenChannel = {
         type: 'OpenChannel' as const,
         participants,
         data: {
@@ -730,9 +593,11 @@ export class Store {
           fundingLedgerChannelId,
           role,
         },
+        status: 'pending',
+        objectiveId: 'test',
       };
 
-      const objective = await this.ensureObjective(objectiveParams, tx);
+      const objective = await this.ensureObjective(o, tx);
       await this.approveObjective(objective.objectiveId, tx);
 
       return {channel: await this.getChannelState(channelId, tx), firstSignedState, objective};
