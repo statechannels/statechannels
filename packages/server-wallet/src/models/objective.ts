@@ -9,6 +9,7 @@ import {
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
+import {time} from 'console';
 
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
@@ -172,6 +173,14 @@ export class ObjectiveModel extends Model {
     return ObjectiveModel.query(tx)
       .findById(objectiveId)
       .patch({status: 'failed'})
+      .returning('*')
+      .first();
+  }
+
+  static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
+    return ObjectiveModel.query(tx)
+      .findById(objectiveId)
+      .patch({progressLastMadeAt: new Date().toISOString()})
       .returning('*')
       .first();
   }
