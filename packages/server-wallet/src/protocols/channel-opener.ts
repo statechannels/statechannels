@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
-import {DBOpenChannelObjective} from '../models/objective';
+import {DBOpenChannelObjective, ObjectiveModel} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
@@ -42,6 +42,7 @@ export class ChannelOpener {
       // if we haven't signed the pre-fund, sign it
       if (!channel.prefundSigned) {
         await this.signPrefundSetup(channel, response, tx);
+        await ObjectiveModel.progressMade(objective.objectiveId, tx);
       }
 
       // if we don't have a supported preFundSetup, we're done for now
@@ -57,6 +58,7 @@ export class ChannelOpener {
       // if the channel is funded and I haven't signed the post-fund, sign it
       if (funded && !channel.postfundSigned) {
         await this.signPostfundSetup(channel, response, tx);
+        await ObjectiveModel.progressMade(objective.objectiveId, tx);
       }
 
       if (channel.postfundSupported) {

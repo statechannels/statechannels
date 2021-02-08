@@ -6,7 +6,7 @@ import {Logger} from 'pino';
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
-import {DBOpenChannelObjective} from '../models/objective';
+import {DBOpenChannelObjective, ObjectiveModel} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -65,6 +65,7 @@ export class DirectFunder {
       expectedHeld: BN.from(currentAmount),
       amount: BN.from(amountToDeposit),
     });
+    await ObjectiveModel.progressMade(objective.objectiveId, tx);
 
     return false;
   }

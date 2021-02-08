@@ -6,7 +6,7 @@ import {Logger} from 'pino';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
-import {DBOpenChannelObjective} from '../models/objective';
+import {DBOpenChannelObjective, ObjectiveModel} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -55,6 +55,7 @@ export class LedgerFunder {
 
     // otherwise request funding
     await this.requestLedgerFunding(channel.channelId, ledgerId, tx);
+    await ObjectiveModel.progressMade(objective.objectiveId, tx);
     return false;
   }
 
