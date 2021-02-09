@@ -67,7 +67,7 @@ export function addState(
   if (existing) {
     existing.signatures = _.uniqBy([...existing.signatures, ...signatures], 'signature');
   } else {
-    ret.push(signedState);
+    ret.push(dropNonVariables(signedState));
   }
 
   return ret;
