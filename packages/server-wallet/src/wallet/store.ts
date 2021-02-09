@@ -43,7 +43,14 @@ import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} f
 import {isReverseSorted, pick} from '../utilities/helpers';
 import {Funding, TransferredOutEntry} from '../models/funding';
 import {Nonce} from '../models/nonce';
-import {ObjectiveModel, DBObjective} from '../models/objective';
+import {
+  ObjectiveModel,
+  DBObjective,
+  DBCloseChannelObjective,
+  DBOpenChannelObjective,
+  DBSubmitChallengeObjective,
+  DBDefundChannelObjective,
+} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
@@ -400,10 +407,10 @@ export class Store {
     }
   }
 
-  private async ensureDefundChannelObjective(
+  async ensureDefundChannelObjective(
     objective: DefundChannel,
     tx: Transaction
-  ): Promise<DBObjective> {
+  ): Promise<DBDefundChannelObjective> {
     const {data} = objective;
     const {targetChannelId} = data;
     // fetch the channel to make sure the channel exists
@@ -412,42 +419,43 @@ export class Store {
       throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
     }
 
-    try {
-      await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
-    } catch (e) {
-      // If the objective exists our job is done
-      if (e.name !== 'UniqueViolationError') throw e;
-    }
+    const objectiveToBeStored = {...objective, status: 'pending' as const};
 
-    return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
-  }
-
-  private async ensureSubmitChallengeObjective(
-    objective: SubmitChallenge,
-    tx: Transaction
-  ): Promise<DBObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
-    }
-
-    try {
-      await ObjectiveModel.insert({...objective, status: 'pending'}, tx);
-    } catch (e) {
+    return ObjectiveModel.insert(objectiveToBeStored, tx).catch(e => {
       // If the objective exists our job is done
       if (!(e instanceof UniqueViolationError)) throw e;
-    }
-
-    return {...objective, status: 'pending', objectiveId: objectiveId(objective)};
+      return ObjectiveModel.forId(objectiveId(objectiveToBeStored), tx);
+    }) as Promise<DBDefundChannelObjective>;
   }
 
-  private async ensureOpenChannelObjective(
+  async ensureSubmitChallengeObjective(
+    objective: SubmitChallenge,
+    tx: Transaction
+  ): Promise<DBSubmitChallengeObjective> {
+    const {data} = objective;
+    const {targetChannelId} = data;
+    // fetch the channel to make sure the channel exists
+    const channel = await this.getChannelState(targetChannelId, tx);
+    if (!channel) {
+      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
+    }
+
+    const objectiveToBeStored = {
+      ...objective,
+      status: 'pending' as const,
+    };
+
+    return ObjectiveModel.insert(objectiveToBeStored, tx).catch(e => {
+      // If the objective exists our job is done
+      if (!(e instanceof UniqueViolationError)) throw e;
+      return ObjectiveModel.forId(objectiveId(objectiveToBeStored), tx);
+    }) as Promise<DBSubmitChallengeObjective>;
+  }
+
+  async ensureOpenChannelObjective(
     objective: OpenChannel,
     tx: Transaction
-  ): Promise<DBObjective> {
+  ): Promise<DBOpenChannelObjective> {
     const {
       data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
     } = objective;
@@ -461,10 +469,9 @@ export class Store {
     if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
       throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
-    const objectiveToBeStored: DBObjective = {
-      objectiveId: objectiveId(objective),
+    const objectiveToBeStored = {
       participants: [],
-      status: 'pending',
+      status: 'pending' as const,
       type: objective.type,
       data: {
         fundingStrategy,
@@ -481,26 +488,23 @@ export class Store {
         tx
       );
 
-    try {
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
-    } catch (e) {
-      // If the objective exists our job is done
-      if (!(e instanceof UniqueViolationError)) throw e;
-    }
-
     await Channel.query(tx)
       .where({channelId: channel.channelId})
       .patch({fundingStrategy, fundingLedgerChannelId})
       .returning('*')
       .first();
 
-    return objectiveToBeStored;
+    return ObjectiveModel.insert(objectiveToBeStored, tx).catch(e => {
+      // If the objective exists our job is done
+      if (!(e instanceof UniqueViolationError)) throw e;
+      return ObjectiveModel.forId(objectiveId(objectiveToBeStored), tx);
+    }) as Promise<DBOpenChannelObjective>;
   }
 
-  private async ensureCloseChannelObjective(
+  async ensureCloseChannelObjective(
     objective: CloseChannel,
     tx: Transaction
-  ): Promise<DBObjective> {
+  ): Promise<DBCloseChannelObjective> {
     const {
       data: {targetChannelId, fundingStrategy},
     } = objective;
@@ -512,9 +516,8 @@ export class Store {
         channelId: targetChannelId,
       });
 
-    const objectiveToBeStored: DBObjective = {
-      objectiveId: objectiveId(objective),
-      status: 'approved',
+    const objectiveToBeStored = {
+      status: 'approved' as const,
       type: objective.type,
       participants: [],
       data: {
@@ -523,14 +526,11 @@ export class Store {
       },
     };
 
-    try {
-      await ObjectiveModel.insert(objectiveToBeStored, tx);
-    } catch (e) {
+    return ObjectiveModel.insert(objectiveToBeStored, tx).catch(e => {
       // If the objective exists our job is done
       if (!(e instanceof UniqueViolationError)) throw e;
-    }
-
-    return objectiveToBeStored;
+      return ObjectiveModel.forId(objectiveId(objectiveToBeStored), tx);
+    }) as Promise<DBCloseChannelObjective>;
   }
 
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
