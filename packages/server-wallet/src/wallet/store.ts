@@ -12,7 +12,6 @@ import {
   isOpenChannel,
   isCloseChannel,
   SignedState,
-  objectiveId,
   isSimpleAllocation,
   checkThat,
   CloseChannel,
