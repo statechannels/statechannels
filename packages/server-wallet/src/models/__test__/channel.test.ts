@@ -51,28 +51,23 @@ describe('validation', () => {
 describe('fundingStatus', () => {
   it("should be undefined if funding wasn't fetched from db", async () => {
     const c1 = channel({vars: [stateWithHashSignedBy()()]});
-    await Channel.transaction(knex, async tx => {
-      const {channelId} = await Channel.query(tx).insert(c1);
-      await Funding.updateFunding(tx, channelId, '0x0a', makeAddress(constants.AddressZero));
-    });
+    const {channelId} = await Channel.query(knex).insert(c1);
+    await Funding.updateFunding(knex, channelId, '0x0a', makeAddress(constants.AddressZero));
 
-    await Channel.transaction(knex, async () => {
+    {
       const channel = await Channel.query(knex).first();
-
       expect(channel.channelResult.fundingStatus).toBeUndefined();
-    });
+    }
   });
+
   it('should not be undefined if funding was fetched from db', async () => {
     const c1 = channel({vars: [stateWithHashSignedBy()()]});
-    await Channel.transaction(knex, async tx => {
-      const {channelId} = await Channel.query(tx).insert(c1);
-      await Funding.updateFunding(tx, channelId, '0x0a', makeAddress(constants.AddressZero));
-    });
+    const {channelId} = await Channel.query(knex).insert(c1);
+    await Funding.updateFunding(knex, channelId, '0x0a', makeAddress(constants.AddressZero));
 
-    await Channel.transaction(knex, async () => {
+    {
       const channel = await Channel.query(knex).withGraphJoined('funding').first();
-
       expect(channel.channelResult.fundingStatus).not.toBeUndefined();
-    });
+    }
   });
 });
