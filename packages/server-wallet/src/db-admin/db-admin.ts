@@ -32,7 +32,13 @@ export class DBAdmin {
    * @param config The wallet configuration object with a database specified
    */
   static async createDatabase(config: IncomingServerWalletConfig): Promise<void> {
-    await exec(`createdb ${getDbNameFromConfig(config)} $PSQL_ARGS`);
+    try {
+      await exec(`createdb ${getDbNameFromConfig(config)} $PSQL_ARGS`);
+    } catch (e) {
+      if (!(e.stderr && e.stderr.includes(' already exists'))) {
+        throw e;
+      } // ignore error if db already exists
+    }
   }
 
   /**
