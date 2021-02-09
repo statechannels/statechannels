@@ -318,6 +318,40 @@ describe('when the application protocol returns an action', () => {
     });
   });
 
+  it.each([0, 2])(
+    'emits objectiveStarted when a %i-threaded wallet receives a new objective',
+    async () => {
+      const turnNum = 6;
+      const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
+
+      const c = channel({vars: [addHash(state)]});
+      await Channel.query(wallet.knex).insert(c);
+
+      const {channelId} = c;
+      const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
+
+      const callback = jest.fn();
+      wallet.once('objectiveStarted', callback);
+
+      const p = wallet.pushMessage({
+        walletVersion: WALLET_VERSION,
+        signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
+        objectives: [
+          {
+            type: 'CloseChannel',
+            participants: [],
+            data: {
+              targetChannelId: channelId,
+              fundingStrategy: 'Direct',
+            },
+          },
+        ],
+      });
+      await expect(p.then(r => r.newObjectives)).resolves.toHaveLength(1);
+      expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'CloseChannel'}));
+    }
+  );
+
   it('forms a conclusion proof when the peer wishes to close the channel', async () => {
     const turnNum = 6;
     const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
@@ -326,8 +360,8 @@ describe('when the application protocol returns an action', () => {
     await Channel.query(wallet.knex).insert(c);
 
     const {channelId} = c;
-
     const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
+
     const p = wallet.pushMessage({
       walletVersion: WALLET_VERSION,
       signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
