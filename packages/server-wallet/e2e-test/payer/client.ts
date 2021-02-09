@@ -9,7 +9,7 @@ import {MultiThreadedWallet, Wallet as ServerWallet} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
-import {defaultConfig, ServerWalletConfig} from '../../src/config';
+import {DeepPartial, defaultConfig, ServerWalletConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
 import {WalletEvent} from '../../src/wallet/types';
 
@@ -32,9 +32,9 @@ export default class PayerClient {
   public static async create(
     pk: Bytes32,
     receiverHttpServerURL: string,
-    config?: ServerWalletConfig
+    partialConfig?: DeepPartial<ServerWalletConfig>
   ): Promise<PayerClient> {
-    const mergedConfig = _.assign(payerConfig, config);
+    const mergedConfig = _.assign(payerConfig, partialConfig);
     const wallet = recordFunctionMetrics(
       await ServerWallet.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
