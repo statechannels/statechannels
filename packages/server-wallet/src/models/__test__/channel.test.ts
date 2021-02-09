@@ -149,19 +149,19 @@ describe('Channel funding', () => {
       funds: 0,
     });
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    expect(testChannel.isPartlyDirectlyFunded).toEqual(false);
+    expect(testChannel.isPartlyDirectFunded).toEqual(false);
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
     await store.updateFunding(testChannel.channelId, BN.from(1), testChannelObj.assetHolderAddress);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
     await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.assetHolderAddress);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(true);
   });
 
@@ -172,19 +172,19 @@ describe('Channel funding', () => {
       funds: 5,
     });
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    expect(testChannel.isPartlyDirectlyFunded).toEqual(false);
+    expect(testChannel.isPartlyDirectFunded).toEqual(false);
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
     await store.updateFunding(testChannel.channelId, BN.from(6), testChannelObj.assetHolderAddress);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
     await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.assetHolderAddress);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    expect(testChannel.isPartlyDirectlyFunded).toEqual(true);
+    expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(true);
   });
 });
