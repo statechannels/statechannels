@@ -525,7 +525,6 @@ export class SingleThreadedWallet
       fundingLedgerChannelId
     );
 
-    this.emit('objectiveStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
@@ -911,6 +910,7 @@ export class SingleThreadedWallet
       needToCrank = await this.processLedgerQueue(channels, response);
     }
 
+    response.createdObjectives.map(o => this.emit('objectiveStarted', o));
     response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
   }
 
