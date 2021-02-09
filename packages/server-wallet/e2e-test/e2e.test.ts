@@ -68,6 +68,7 @@ describe.each([0, 2])('e2e with %i threads', workerThreadAmount => {
     // Create actors
     payerClient = await PayerClient.create(alice().privateKey, `http://127.0.0.1:65535`, {
       workerThreadAmount,
+      loggingConfiguration: {logDestination: '/tmp/server-wallet.e2e-test.log', logLevel: 'trace'},
     });
 
     // Gets participant info for testing convenience
