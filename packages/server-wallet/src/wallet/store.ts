@@ -309,6 +309,7 @@ export class Store {
   ): Promise<{
     channelIds: Bytes32[];
     channelResults: ChannelResult[];
+    storedObjectives: DBObjective[];
   }> {
     return this.knex.transaction(async tx => {
       const channelResults: ChannelResult[] = [];
@@ -323,7 +324,7 @@ export class Store {
       }
 
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
-      const storedObjectives = [];
+      const storedObjectives: DBObjective[] = [];
       for (const o of deserializedObjectives) {
         storedObjectives.push(await this.ensureObjective(o, tx));
       }
@@ -338,6 +339,8 @@ export class Store {
       return {
         channelIds: stateChannelIds.concat(objectiveChannelIds),
         channelResults,
+        // HACK: This will possibly cause the wallet to re-emit `'objectiveStarted'` multiple times
+        storedObjectives,
       };
     });
   }
