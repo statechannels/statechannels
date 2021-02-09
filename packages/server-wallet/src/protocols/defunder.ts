@@ -67,9 +67,11 @@ export class Defunder {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
 
       // supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
+      if (!channel.supported) {
+        throw new Error('channel.supported should be defined in directDefunder');
+      }
       // Note, we are not awaiting transaction submission
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      await this.chainService.concludeAndWithdraw([channel.supported!]);
+      await this.chainService.concludeAndWithdraw([channel.supported]);
       didSubmitTransaction = true;
     } else if (adjudicatorStatus.channelMode === 'Finalized') {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
