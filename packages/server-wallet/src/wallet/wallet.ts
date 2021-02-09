@@ -867,7 +867,11 @@ export class SingleThreadedWallet
     const {
       channelIds: channelIdsFromStates,
       channelResults: fromStoring,
+      storedObjectives,
     } = await this.store.pushMessage(wirePayload);
+
+    // HACK: This will possibly re-emit `'objectiveStarted'` multiple times
+    response.createdObjectives = storedObjectives;
 
     const channelIdsFromRequests: Bytes32[] = [];
     const requests = (wirePayload.requests || []).map(deserializeRequest);
