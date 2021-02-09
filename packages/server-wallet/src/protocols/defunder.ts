@@ -28,7 +28,7 @@ export class Defunder {
     return new Defunder(store, chainService, logger, timingMetrics);
   }
 
-  public async isChannelDefunded(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+  public async crank(channel: Channel, tx: Transaction): Promise<DefunderResult> {
     const {protocolState: ps} = channel;
 
     switch (ps.fundingStrategy) {

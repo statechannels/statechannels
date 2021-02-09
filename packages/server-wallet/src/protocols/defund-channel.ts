@@ -49,7 +49,7 @@ export class ChannelDefunder {
         this.chainService,
         this.logger,
         this.timingMetrics
-      ).isChannelDefunded(channel, tx);
+      ).crank(channel, tx);
 
       // A better methodology is likely to create a Challenge objective that succeeds after a
       // channel has been defunded (instead of succeeding an objective on transaction submission)
