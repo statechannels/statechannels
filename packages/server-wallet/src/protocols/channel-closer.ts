@@ -57,7 +57,7 @@ export class ChannelCloser {
           return;
         }
 
-        if (!(await defunder.isChannelDefunded(channel, tx)).isChannelDefunded) {
+        if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
           response.queueChannel(channel);
           return;
         }
