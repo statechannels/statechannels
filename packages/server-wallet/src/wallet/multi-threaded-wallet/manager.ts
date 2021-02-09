@@ -23,28 +23,30 @@ export class WorkerManager {
   constructor(walletConfig: ServerWalletConfig) {
     this.logger = createLogger(walletConfig).child({module: 'Worker-Manager'});
     this.threadAmount = walletConfig.workerThreadAmount;
-    if (this.threadAmount > 0) {
-      this.pool = new Pool({
-        create: (): Worker => {
-          this.logger.trace('Starting worker');
-
-          const worker = new Worker(path.resolve(__dirname, './loader.js'), {
-            workerData: walletConfig,
-          });
-
-          worker.on('error', err => {
-            throw err;
-          });
-          this.logger.trace('Started worker %o', worker.threadId);
-          return worker;
-        },
-        destroy: (worker: Worker): Promise<number> => worker.terminate(),
-        min: this.threadAmount,
-        max: this.threadAmount,
-        reapIntervalMillis: ONE_DAY,
-        idleTimeoutMillis: ONE_DAY,
-      });
+    if (this.threadAmount === 0) {
+      throw new Error('Invalid walletConfig: threadAmount should not be 0');
     }
+
+    this.pool = new Pool({
+      create: (): Worker => {
+        this.logger.trace('Starting worker');
+
+        const worker = new Worker(path.resolve(__dirname, './loader.js'), {
+          workerData: walletConfig,
+        });
+
+        worker.on('error', err => {
+          throw err;
+        });
+        this.logger.trace('Started worker %o', worker.threadId);
+        return worker;
+      },
+      destroy: (worker: Worker): Promise<number> => worker.terminate(),
+      min: this.threadAmount,
+      max: this.threadAmount,
+      reapIntervalMillis: ONE_DAY,
+      idleTimeoutMillis: ONE_DAY,
+    });
   }
 
   public async warmUpThreads(): Promise<void> {
