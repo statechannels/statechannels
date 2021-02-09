@@ -33,8 +33,8 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
-  createdAt: string;
-  progressLastMadeAt: string;
+  createdAt: Date;
+  progressLastMadeAt: Date;
 };
 
 export type DBOpenChannelObjective = WalletObjective<OpenChannel>;
@@ -91,8 +91,8 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
-  createdAt!: string;
-  progressLastMadeAt!: string;
+  createdAt!: Date;
+  progressLastMadeAt!: Date;
 
   static tableName = 'objectives';
   static get idColumn(): string[] {
@@ -136,8 +136,8 @@ export class ObjectiveModel extends Model {
         status: objectiveToBeStored.status,
         type: objectiveToBeStored.type,
         data: objectiveToBeStored.data,
-        createdAt: new Date().toISOString(),
-        progressLastMadeAt: new Date().toISOString(),
+        createdAt: new Date(Date.now()),
+        progressLastMadeAt: new Date(Date.now()),
       });
 
       // Associate the objective with any channel that it references
@@ -176,12 +176,14 @@ export class ObjectiveModel extends Model {
       .first();
   }
 
-  static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
-    return ObjectiveModel.query(tx)
-      .findById(objectiveId)
-      .patch({progressLastMadeAt: new Date().toISOString()})
-      .returning('*')
-      .first();
+  static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+    return (
+      await ObjectiveModel.query(tx)
+        .findById(objectiveId)
+        .patch({progressLastMadeAt: new Date(Date.now())})
+        .returning('*')
+        .first()
+    ).toObjective();
   }
 
   static async forChannelIds(
