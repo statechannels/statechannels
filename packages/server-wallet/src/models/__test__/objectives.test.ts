@@ -22,6 +22,13 @@ beforeEach(async () => {
 });
 
 describe('Objective > insert', () => {
+  it('returns an objective with Date types for timestamps', async () => {
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    const inserted = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+
+    expect(inserted.createdAt instanceof Date).toBe(true);
+    expect(inserted.progressLastMadeAt instanceof Date).toBe(true);
+  });
   it('fails to insert / associate an objective when it references a channel that does not exist', async () => {
     // For some reason this does not catch the error :/
     await expect(ObjectiveModel.insert({...objective, status: 'pending'}, knex)).rejects.toThrow();
@@ -44,7 +51,6 @@ describe('Objective > insert', () => {
       {objectiveId: `OpenChannel-${c.channelId}`, channelId: c.channelId},
     ]);
   });
-
   it('inserts an objective with a createdAt timestamp', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
@@ -52,8 +58,8 @@ describe('Objective > insert', () => {
     const {createdAt} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
 
-    expect(Date.parse(createdAt) > before).toBe(true);
-    expect(Date.parse(createdAt) < after).toBe(true);
+    expect(createdAt.getTime() > before).toBe(true);
+    expect(createdAt.getTime() < after).toBe(true);
   });
 
   it('updates the progressLastMadeAt timestamp on an objective when progressMade is called', async () => {
@@ -64,8 +70,19 @@ describe('Objective > insert', () => {
     const {progressLastMadeAt} = await ObjectiveModel.progressMade(objectiveId, knex);
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
 
-    expect(Date.parse(progressLastMadeAt) > before).toBe(true);
-    expect(Date.parse(progressLastMadeAt) < after).toBe(true);
+    expect(progressLastMadeAt.getTime() > before).toBe(true);
+    expect(progressLastMadeAt.getTime() < after).toBe(true);
+  });
+});
+
+describe('Objective > forId', () => {
+  it('returns an objective with Date types for timestamps', async () => {
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+
+    const fetchedObjective = await ObjectiveModel.forId(`OpenChannel-${c.channelId}`, knex);
+    expect(fetchedObjective.createdAt instanceof Date).toBe(true);
+    expect(fetchedObjective.progressLastMadeAt instanceof Date).toBe(true);
   });
 });
 

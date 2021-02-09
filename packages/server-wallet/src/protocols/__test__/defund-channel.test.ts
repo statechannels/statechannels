@@ -266,7 +266,7 @@ function createPendingObjective(channelId: string): DBDefundChannelObjective {
     participants: [],
     objectiveId: ['DefundChannel', channelId].join('-'),
     data: {targetChannelId: channelId},
-    createdAt: new Date().toISOString(),
-    progressLastMadeAt: new Date().toISOString(),
+    createdAt: new Date(Date.now()),
+    progressLastMadeAt: new Date(Date.now()),
   };
 }
