@@ -34,7 +34,7 @@ export default class PayerClient {
     receiverHttpServerURL: string,
     partialConfig?: DeepPartial<ServerWalletConfig>
   ): Promise<PayerClient> {
-    const mergedConfig = _.assign(payerConfig, partialConfig);
+    const mergedConfig = _.merge(payerConfig, partialConfig);
     const wallet = recordFunctionMetrics(
       await ServerWallet.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
