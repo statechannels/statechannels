@@ -76,6 +76,7 @@ export const defaultTestConfig = (
         database: DEFAULT_DB_NAME,
         user: DEFAULT_DB_USER,
       },
+      pool: {min: 0, max: 1},
     },
   };
   return _.merge({}, fullDefaultConfig, partialConfig);
