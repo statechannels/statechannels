@@ -289,6 +289,37 @@ export class SingleThreadedWallet
   }
 
   /**
+   * Trigger a response containing a message for counterparties, with all objectives and channels for a set of
+   * @param objectiveIds The ids of the objectives that should be sent to the counterparties
+   * @returns A promise that resolves to an object containing the messages.
+   */
+  public async syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput> {
+    const response = WalletResponse.initialize();
+    const objectives = await this.store.getObjectivesByIds(objectiveIds);
+
+    const fetchedObjectiveIds = objectives.map(o => o.objectiveId);
+    const missingObjectives = _.difference(objectiveIds, fetchedObjectiveIds);
+
+    if (missingObjectives.length > 0) {
+      this.logger.error(
+        {objectiveIds: missingObjectives},
+        'The following objectives cannot be found'
+      );
+      throw new Error('Could not find all objectives');
+    }
+
+    for (const o of objectives) {
+      const channel = await this.store.getChannelState(o.data.targetChannelId);
+      // This will make sure any relevant channel information is synced
+      await this._syncChannel(channel.channelId, response);
+
+      const {participants} = channel;
+      response.queueCreatedObjective(o, channel.myIndex, participants);
+    }
+
+    return response.multipleChannelOutput();
+  }
+  /**
    * Trigger a response containing a message for all counterparties, with all stored states for a given channel.
    *
    * @param channelId - The channel id to be sync'ed

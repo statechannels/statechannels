@@ -279,6 +279,14 @@ export class Store {
     return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
   }
 
+  async getObjectivesByIds(objectiveIds: string[]): Promise<DBObjective[]> {
+    return ObjectiveModel.forIds(objectiveIds, this.knex);
+  }
+
+  async getChannelsByIds(channelIds: string[]): Promise<ChannelState[]> {
+    return (await Channel.forIds(channelIds, this.knex)).map(c => c.protocolState);
+  }
+
   async getChannels(): Promise<ChannelState[]> {
     return (await Channel.query(this.knex)).map(channel => channel.protocolState);
   }

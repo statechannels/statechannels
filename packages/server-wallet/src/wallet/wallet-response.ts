@@ -86,7 +86,9 @@ export class WalletResponse {
     myIndex: number,
     participants: Participant[]
   ): void {
-    this.createdObjectives.push(objective);
+    // TODO: The objective model currently always sets the participants to an empty array when creating the DBObjective
+    // So we override that here
+    this.createdObjectives.push({...objective, participants});
 
     const myParticipantId = participants[myIndex].participantId;
     if (isSharedObjective(objective)) {
