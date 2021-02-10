@@ -22,8 +22,6 @@ import {Bytes32, Uint256} from '../type-aliases';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatus} from '../models/adjudicator-status';
 
-import {ProtocolAction} from './actions';
-
 export type ChannelStateFunding = {
   amount: Uint256;
   transferredOut: {toAddress: Destination; amount: Uint256}[];
@@ -170,12 +168,3 @@ export function directFundingStatus(
 
   return 'Uncategorized';
 }
-
-/*
-A protocol should accept a "protocol state", and return or resolve to
-- either zero or one protocol actions;
-- or, a protocol error
-A protocol should never reject or throw.
-*/
-export type ProtocolResult<A extends ProtocolAction = ProtocolAction> = A | undefined;
-export type Protocol<PS> = (ps: PS) => ProtocolResult;
