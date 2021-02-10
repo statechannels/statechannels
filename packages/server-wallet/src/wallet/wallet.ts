@@ -289,7 +289,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Trigger a response containing a message for counterparties, with all objectives and channels for a set of
+   * Trigger a response containing a message for counterparties, with all objectives and channels for a set of objectives.
    * @param objectiveIds The ids of the objectives that should be sent to the counterparties
    * @returns A promise that resolves to an object containing the messages.
    */
