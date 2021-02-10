@@ -71,7 +71,6 @@ test('Objectives can be synced if a message is lost', async () => {
 test('handles the objective being synced even if no message is lost', async () => {
   const createChannelParams: CreateChannelParams = createChannelArgs();
 
-  // We mimic not receiving a message containing objectives
   const messageResponse = await a.createChannel(createChannelParams);
 
   const channelId = messageResponse.channelResults[0].channelId;
@@ -125,9 +124,10 @@ test('Can successfully push the sync objective message multiple times', async ()
   // We should not see the objective yet
   expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
 
-  // We should be able to push
+  // We push once
   await b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
 
+  // We push again and check the results of the second push
   const {outbox, newObjectives, channelResults} = await b.pushMessage(
     getPayloadFor(bob().participantId, syncResult.outbox)
   );
