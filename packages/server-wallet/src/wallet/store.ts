@@ -400,7 +400,7 @@ export class Store {
       case 'OpenChannel':
         return this.ensureOpenChannelObjective(objective, tx, preApprove);
       case 'CloseChannel':
-        return this.ensureCloseChannelObjective(objective, tx, preApprove);
+        return this.ensureCloseChannelObjective(objective, tx);
       case 'SubmitChallenge':
         return this.ensureSubmitChallengeObjective(objective, tx, preApprove);
       case 'DefundChannel':
@@ -478,8 +478,7 @@ export class Store {
 
   async ensureCloseChannelObjective(
     objective: CloseChannel,
-    tx: Transaction,
-    preApprove = true // TODO: should this always be true?
+    tx: Transaction
   ): Promise<DBCloseChannelObjective> {
     const {
       data: {targetChannelId, fundingStrategy},
@@ -504,7 +503,7 @@ export class Store {
     return ObjectiveModel.insert(
       objectiveToBeStored,
       tx,
-      preApprove
+      true // TODO: should this always be true?
     ) as Promise<DBCloseChannelObjective>;
   }
 
