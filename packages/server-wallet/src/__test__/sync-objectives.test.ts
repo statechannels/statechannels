@@ -70,10 +70,5 @@ test('Objectives can be synced if a message is lost', async () => {
 
 async function getObjective(knex: Knex, objectiveId: string): Promise<DBObjective | undefined> {
   const model = await ObjectiveModel.query(knex).findById(objectiveId);
-
-  if (model) {
-    return model.toObjective();
-  } else {
-    return undefined;
-  }
+  return model?.toObjective();
 }
