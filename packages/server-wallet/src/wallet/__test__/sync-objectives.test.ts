@@ -42,12 +42,35 @@ describe('SyncObjective', () => {
       .withGraphFetched('funding');
     const objective = await ObjectiveModel.insert(openChannelObjective(), testKnex);
 
-    const syncResult = await wallet.syncObjectives([objective.objectiveId]);
-    expect(syncResult.newObjectives).toHaveLength(0);
-    expect(syncResult.channelResults).toEqual([targetChannel.channelResult]);
+    const {channelId} = targetChannel;
 
-    expect((syncResult.outbox[0].params.data as any).objectives).toEqual([
-      expect.objectContaining(_.pick(objective, 'data')),
+    const {newObjectives, outbox, channelResults} = await wallet.syncObjectives([
+      objective.objectiveId,
     ]);
+
+    // There should be no new objectives
+    expect(newObjectives).toHaveLength(0);
+    // We should get the channel result for any channels we need to sync
+    expect(channelResults).toEqual([targetChannel.channelResult]);
+
+    // We only expect 1 outbox
+    expect(outbox).toHaveLength(1);
+
+    // We expect the message to contain the objective as well as the sync channel payload
+    expect(outbox[0]).toMatchObject({
+      method: 'MessageQueued',
+      params: {
+        sender: 'alice',
+        recipient: 'bob',
+        data: {
+          // We expect our latest state for the channel (from syncChannel)
+          signedStates: [expect.objectContaining({turnNum: 0, channelId})],
+          // We expect a getChannel request (from syncChannel)
+          requests: [expect.objectContaining({channelId, type: 'GetChannel'})],
+          // We expect the objective to be in the message
+          objectives: [{type: 'OpenChannel', data: {targetChannelId: channelId}}],
+        },
+      },
+    });
   });
 });
