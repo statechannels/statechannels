@@ -413,7 +413,7 @@ export class Store {
   async ensureDefundChannelObjective(
     objective: DefundChannel,
     tx: Transaction,
-    preApprove: boolean
+    preApprove = false
   ): Promise<DBDefundChannelObjective> {
     const {data} = objective;
     const {targetChannelId} = data;
@@ -429,7 +429,7 @@ export class Store {
   async ensureSubmitChallengeObjective(
     objective: SubmitChallenge,
     tx: Transaction,
-    preApprove: boolean
+    preApprove = false
   ): Promise<DBSubmitChallengeObjective> {
     const {data} = objective;
     const {targetChannelId} = data;
@@ -445,7 +445,7 @@ export class Store {
   async ensureOpenChannelObjective(
     objective: OpenChannel,
     tx: Transaction,
-    preApprove: boolean
+    preApprove = false
   ): Promise<DBOpenChannelObjective> {
     const {
       data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
@@ -479,7 +479,7 @@ export class Store {
   async ensureCloseChannelObjective(
     objective: CloseChannel,
     tx: Transaction,
-    _preApprove: boolean
+    preApprove = true // TODO: should this always be true?
   ): Promise<DBCloseChannelObjective> {
     const {
       data: {targetChannelId, fundingStrategy},
@@ -504,7 +504,7 @@ export class Store {
     return ObjectiveModel.insert(
       objectiveToBeStored,
       tx,
-      true // preApprove TODO: should this always be true?
+      preApprove
     ) as Promise<DBCloseChannelObjective>;
   }
 
