@@ -136,8 +136,8 @@ export class ObjectiveModel extends Model {
         status: objectiveToBeStored.status,
         type: objectiveToBeStored.type,
         data: objectiveToBeStored.data,
-        createdAt: new Date(Date.now()),
-        progressLastMadeAt: new Date(Date.now()),
+        createdAt: new Date(),
+        progressLastMadeAt: new Date(),
       });
 
       // Associate the objective with any channel that it references
@@ -180,7 +180,7 @@ export class ObjectiveModel extends Model {
     return (
       await ObjectiveModel.query(tx)
         .findById(objectiveId)
-        .patch({progressLastMadeAt: new Date(Date.now())})
+        .patch({progressLastMadeAt: new Date()})
         .returning('*')
         .first()
     ).toObjective();
