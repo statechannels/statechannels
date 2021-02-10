@@ -26,5 +26,6 @@ Implementation suggestions or options may be provided.
 Add any other context or screenshots about the feature request here: notion doc, github discussion or ticket
 
 # Project management
+Before closing this card,
 - [ ] I have created any required issues or epics
 - [ ] I have updated the related notion or epic documentation
