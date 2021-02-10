@@ -89,47 +89,11 @@ export class WorkerManager {
   }
 
   public async pushUpdate(args: unknown): Promise<SingleChannelOutput> {
-    this.logger.trace('PushUpdate called');
-    if (!this.pool) throw new Error(`Worker threads are disabled`);
-    const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'PushUpdate', args};
-    const resultPromise = new Promise<SingleChannelOutput>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, SingleChannelOutput>) => {
-        this.pool?.release(worker);
-
-        if (isLeft(response)) {
-          reject(response.left);
-        } else {
-          resolve(response.right);
-        }
-      })
-    );
-
-    worker.postMessage(data);
-
-    return resultPromise;
+    return this.sendOperation({operation: 'PushUpdate', args});
   }
 
   public async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {
-    this.logger.trace('UpdateChannel called');
-    if (!this.pool) throw new Error(`Worker threads are disabled`);
-    const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'UpdateChannel', args};
-    const resultPromise = new Promise<SingleChannelOutput>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, SingleChannelOutput>) => {
-        this.pool?.release(worker);
-        if (isLeft(response)) {
-          this.logger.error(response);
-          reject(response.left);
-        } else {
-          resolve(response.right);
-        }
-      })
-    );
-
-    worker.postMessage(data);
-
-    return resultPromise;
+    return this.sendOperation({operation: 'UpdateChannel', args});
   }
 
   public async destroy(): Promise<void> {
