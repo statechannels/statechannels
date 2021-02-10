@@ -447,6 +447,8 @@ export class SingleThreadedWallet
       'ledger'
     );
 
+    // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
+
     return response.singleChannelOutput();
   }
   /**
@@ -466,6 +468,8 @@ export class SingleThreadedWallet
 
     await this._createChannel(response, args, 'app');
 
+    // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
+
     return response.multipleChannelOutput();
   }
   /**
@@ -484,6 +488,8 @@ export class SingleThreadedWallet
     await Promise.all(
       _.range(numberOfChannels).map(() => this._createChannel(response, args, 'app'))
     );
+
+    // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
 
     return response.multipleChannelOutput();
   }
