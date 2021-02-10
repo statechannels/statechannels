@@ -531,6 +531,7 @@ export class SingleThreadedWallet
       fundingLedgerChannelId
     );
 
+    this.emit('objectiveStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
