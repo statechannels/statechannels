@@ -90,21 +90,20 @@ test('handles the objective being synced even if no message is lost', async () =
     getPayloadFor(bob().participantId, syncResult.outbox)
   );
 
-  // The only result will be a message containing the latest states
+  // The only expected result is a sync channel response
   expect(outbox).toHaveLength(1);
   expect(outbox[0]).toMatchObject({
     method: 'MessageQueued',
     params: {
-      recipient: 'bob',
-      sender: 'alice',
+      recipient: 'alice',
+      sender: 'bob',
       data: {
         signedStates: [expect.objectContaining({turnNum: 0})],
-        requests: [],
       },
     },
   });
   expect(newObjectives).toHaveLength(0);
-  expect(channelResults).toHaveLength(0);
+  expect(channelResults).toHaveLength(1);
 });
 
 test('Can successfully push the sync objective message multiple times', async () => {
@@ -133,21 +132,21 @@ test('Can successfully push the sync objective message multiple times', async ()
     getPayloadFor(bob().participantId, syncResult.outbox)
   );
 
-  // The only result will be a message containing the latest states
+  // The only expected result is a sync channel response
   expect(outbox).toHaveLength(1);
   expect(outbox[0]).toMatchObject({
     method: 'MessageQueued',
     params: {
-      recipient: 'bob',
-      sender: 'alice',
+      recipient: 'alice',
+      sender: 'bob',
       data: {
         signedStates: [expect.objectContaining({turnNum: 0})],
-        requests: [],
       },
     },
   });
   expect(newObjectives).toHaveLength(0);
-  expect(channelResults).toHaveLength(0);
+  expect(channelResults).toHaveLength(1);
+  expect(channelResults[0]).toMatchObject({channelId});
 });
 
 async function getObjective(knex: Knex, objectiveId: string): Promise<DBObjective | undefined> {
