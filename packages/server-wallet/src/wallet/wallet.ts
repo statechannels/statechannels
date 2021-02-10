@@ -319,6 +319,7 @@ export class SingleThreadedWallet
 
     return response.multipleChannelOutput();
   }
+
   /**
    * Trigger a response containing a message for all counterparties, with all stored states for a given channel.
    *
