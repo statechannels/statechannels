@@ -58,6 +58,7 @@ import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
+import {DBObjective} from '../models/objective';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -69,7 +70,6 @@ import {
   WalletEvent,
 } from './types';
 import {WalletResponse} from './wallet-response';
-import {DBObjective} from '../models/objective';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
