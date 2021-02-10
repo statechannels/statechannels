@@ -152,14 +152,7 @@ export class Channel extends Model implements ChannelColumns {
   };
 
   static jsonAttributes = ['vars', 'participants', 'initialSupport'];
-  static async forIds(channelIds: Bytes32[], txOrKnex: TransactionOrKnex): Promise<Channel[]> {
-    return Channel.query(txOrKnex)
-      .whereIn('channelId', channelIds)
-      .withGraphFetched('signingWallet')
-      .withGraphFetched('funding')
-      .withGraphFetched('chainServiceRequests')
-      .withGraphFetched('adjudicatorStatus');
-  }
+
   static async forId(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<Channel> {
     return Channel.query(txOrKnex)
       .where({channelId})
