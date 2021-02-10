@@ -423,13 +423,7 @@ export class Store {
       throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
     }
 
-    const objectiveToBeStored = {...objective, status: 'pending' as const};
-
-    return ObjectiveModel.insert(
-      objectiveToBeStored,
-      tx,
-      preApprove
-    ) as Promise<DBDefundChannelObjective>;
+    return ObjectiveModel.insert(objective, tx, preApprove) as Promise<DBDefundChannelObjective>;
   }
 
   async ensureSubmitChallengeObjective(
@@ -445,16 +439,7 @@ export class Store {
       throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
     }
 
-    const objectiveToBeStored = {
-      ...objective,
-      status: 'pending' as const,
-    };
-
-    return ObjectiveModel.insert(
-      objectiveToBeStored,
-      tx,
-      preApprove
-    ) as Promise<DBSubmitChallengeObjective>;
+    return ObjectiveModel.insert(objective, tx, preApprove) as Promise<DBSubmitChallengeObjective>;
   }
 
   async ensureOpenChannelObjective(
@@ -475,18 +460,6 @@ export class Store {
     if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
       throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
 
-    const objectiveToBeStored = {
-      participants: [],
-      status: 'pending' as const,
-      type: objective.type,
-      data: {
-        fundingStrategy,
-        fundingLedgerChannelId,
-        targetChannelId: channelId,
-        role,
-      },
-    };
-
     if (role === 'ledger')
       await Channel.setLedger(
         channelId,
@@ -500,11 +473,7 @@ export class Store {
       .returning('*')
       .first();
 
-    return ObjectiveModel.insert(
-      objectiveToBeStored,
-      tx,
-      preApprove
-    ) as Promise<DBOpenChannelObjective>;
+    return ObjectiveModel.insert(objective, tx, preApprove) as Promise<DBOpenChannelObjective>;
   }
 
   async ensureCloseChannelObjective(
