@@ -76,13 +76,19 @@ test('handles the objective being synced even if no message is lost', async () =
 
   const channelId = messageResponse.channelResults[0].channelId;
   const objectiveId = `OpenChannel-${channelId}`;
+
+  // The initial message is received
   await b.pushMessage(getPayloadFor(bob().participantId, messageResponse.outbox));
 
   // We expect both objectives to be there
   expect(await getObjective(a.knex, objectiveId)).toBeDefined();
   expect(await getObjective(b.knex, objectiveId)).toBeDefined();
 
-  const {outbox, newObjectives, channelResults} = await a.syncObjectives([objectiveId]);
+  const syncResult = await a.syncObjectives([objectiveId]);
+  // Now we push in the sync payload
+  const {outbox, newObjectives, channelResults} = await b.pushMessage(
+    getPayloadFor(bob().participantId, syncResult.outbox)
+  );
 
   // The only result will be a message containing the latest states
   expect(outbox).toHaveLength(1);
@@ -120,7 +126,7 @@ test('Can successfully push the sync objective message multiple times', async ()
   // We should not see the objective yet
   expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
 
-  // After sync funding should continue as normal
+  // We should be able to push
   await b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
 
   const {outbox, newObjectives, channelResults} = await b.pushMessage(
