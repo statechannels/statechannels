@@ -287,7 +287,6 @@ describe('when the application protocol returns an action', () => {
     await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
-        status: 'approved',
         participants: c.participants,
         data: {
           targetChannelId: c.channelId,
@@ -295,7 +294,8 @@ describe('when the application protocol returns an action', () => {
           role: 'app',
         },
       },
-      wallet.knex
+      wallet.knex,
+      true // preApprove
     );
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
@@ -540,7 +540,6 @@ describe('ledger funded app scenarios', () => {
     await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
-        status: 'approved',
         participants: channel.participants,
         data: {
           targetChannelId: channel.channelId,
@@ -549,7 +548,8 @@ describe('ledger funded app scenarios', () => {
           role: 'app',
         },
       },
-      wallet.knex
+      wallet.knex,
+      true // preApprove
     );
 
     return channel;

@@ -95,7 +95,8 @@ it('creates a defundChannel objective on channel finalized', async () => {
 
   expect(objective).toEqual<DBObjective>({
     objectiveId,
-    status: 'approved',
+    approved: true,
+    status: expect.any(String),
     type: 'DefundChannel',
     data: {
       targetChannelId: c.channelId,

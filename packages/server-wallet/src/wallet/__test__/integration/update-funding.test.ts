@@ -48,9 +48,9 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      status: 'approved',
     },
-    w.knex
+    w.knex,
+    true // preApprove
   );
 
   await ObjectiveModel.insert(
@@ -62,9 +62,9 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      status: 'approved',
     },
-    w.knex
+    w.knex,
+    true // preApprove
   );
 
   const {outbox, channelResults} = await w.updateFundingForChannels(
@@ -118,9 +118,9 @@ it('sends the post fund setup when the funding event is provided', async () => {
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      status: 'approved',
     },
-    w.knex
+    w.knex,
+    true // preApprove
   );
 
   const result = await w.updateFundingForChannels([
@@ -163,9 +163,9 @@ it('emits new channel result when the funding event is provided via holdingUpdat
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      status: 'approved',
     },
-    w.knex
+    w.knex,
+    true // preApprove
   );
 
   const channelUpdatedPromise = new Promise(resolve =>

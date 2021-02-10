@@ -198,7 +198,8 @@ async function setAdjudicatorStatus(
 function createPendingObjective(channelId: string): DBDefundChannelObjective {
   return {
     type: 'DefundChannel',
-    status: 'pending',
+    approved: false,
+    status: '',
     participants: [],
     objectiveId: ['DefundChannel', channelId].join('-'),
     data: {targetChannelId: channelId},

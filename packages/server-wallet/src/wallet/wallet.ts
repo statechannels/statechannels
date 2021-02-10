@@ -940,7 +940,7 @@ export class SingleThreadedWallet
 
     const objectives = (
       await this.store.getObjectives(channels.concat(channelsWithRelevantPendingReqs))
-    ).filter(objective => objective.status === 'approved');
+    ).filter(objective => objective.approved);
 
     // todo(tom): why isn't this just a for loop?
     while (objectives.length) {

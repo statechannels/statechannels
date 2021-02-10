@@ -28,11 +28,10 @@ function extractReferencedChannels(objective: Objective): string[] {
   }
 }
 
-type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
-  status: ObjectiveStatus;
+  approved: boolean;
+  status: string;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
@@ -91,6 +90,7 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
+  readonly approved!: DBObjective['approved'];
   createdAt!: Date;
   progressLastMadeAt!: Date;
 
@@ -122,11 +122,17 @@ export class ObjectiveModel extends Model {
     };
   }
 
+  /**
+   * Insert an objective into the database
+   *
+   * @param objectiveToBeStored An objective to be stored
+   * @param tx A transaction or knex object
+   * @param preApprove A flag for pre-approving the objective. Defaults to false
+   */
   static async insert(
-    objectiveToBeStored: SupportedObjective & {
-      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-    },
-    tx: TransactionOrKnex
+    objectiveToBeStored: SupportedObjective,
+    tx: TransactionOrKnex,
+    preApprove = false
   ): Promise<DBObjective> {
     const id: string = objectiveId(objectiveToBeStored);
 
@@ -134,7 +140,8 @@ export class ObjectiveModel extends Model {
       const model = await ObjectiveModel.query(trx)
         .insert({
           objectiveId: id,
-          status: objectiveToBeStored.status,
+          status: '',
+          approved: preApprove,
           type: objectiveToBeStored.type,
           data: objectiveToBeStored.data,
           createdAt: new Date(),
@@ -167,7 +174,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
+    await ObjectiveModel.query(tx).findById(objectiveId).patch({approved: true});
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
