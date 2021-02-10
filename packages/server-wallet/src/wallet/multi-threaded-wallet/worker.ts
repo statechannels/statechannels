@@ -61,9 +61,9 @@ async function startWorker() {
             right(await timer('UpdateChannel', () => wallet.updateChannel(message.args)))
           );
         case 'PushMessage':
-          logger.debug({args: message.args}, `Worker-%o handling PushMessage`, threadId);
+          logger.debug(`Worker-%o handling PushMessage`, threadId);
           return parentPort?.postMessage(
-            right(await timer('PushMessage', async () => wallet.pushMessage(message.args)))
+            right(await timer('PushMessage', () => wallet.pushMessage(message.args)))
           );
         case 'PushUpdate':
           logger.debug(`Worker-%o handling PushUpdate`, threadId);
