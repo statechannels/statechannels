@@ -46,6 +46,7 @@ export class WorkerManager {
       });
     }
   }
+
   public async warmUpThreads(): Promise<void> {
     this.logger.trace('Warming up threads');
     const acquire = _.range(this.threadAmount).map(() => this.pool?.acquire().promise);
@@ -55,13 +56,19 @@ export class WorkerManager {
       else throw Error('No worker acquired');
     });
   }
-  public async pushMessage(args: unknown): Promise<MultipleChannelOutput> {
-    this.logger.trace('PushMessage called');
+
+  private async sendOperation<
+    T extends SingleChannelOutput | MultipleChannelOutput,
+    O extends StateChannelWorkerData
+  >({operation, args}: O): Promise<T> {
+    this.logger.trace('%s called', operation);
+
     if (!this.pool) throw new Error(`Worker threads are disabled`);
+
     const worker = await this.pool.acquire().promise;
-    const data: StateChannelWorkerData = {operation: 'PushMessage', args};
-    const resultPromise = new Promise<MultipleChannelOutput>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, MultipleChannelOutput>) => {
+
+    const resultPromise = new Promise<T>((resolve, reject) =>
+      worker.once('message', (response: Either<Error, T>) => {
         this.pool?.release(worker);
 
         if (isLeft(response)) {
@@ -72,9 +79,13 @@ export class WorkerManager {
       })
     );
 
-    worker.postMessage(data);
+    worker.postMessage({operation, args});
 
     return resultPromise;
+  }
+
+  public async pushMessage(args: unknown): Promise<MultipleChannelOutput> {
+    return this.sendOperation({operation: 'PushMessage', args});
   }
 
   public async pushUpdate(args: unknown): Promise<SingleChannelOutput> {
