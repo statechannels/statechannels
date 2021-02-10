@@ -102,7 +102,7 @@ describe('when there is an active challenge', () => {
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective.objectiveId);
-    expect(reloadedObjective.status).toEqual('pending');
+    expect(reloadedObjective.status).toEqual(expect.any(String));
   });
 });
 
@@ -165,7 +165,7 @@ describe('when the channel is finalized on chain', () => {
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective.objectiveId);
-    expect(reloadedObjective.status).toEqual('pending');
+    expect(reloadedObjective.status).toEqual(expect.any(String));
   });
 });
 

@@ -99,7 +99,7 @@ describe('e2e', () => {
     expect(events).toContainObject({
       event: 'objectiveStarted',
       type: 'OpenChannel',
-      status: 'pending',
+      status: expect.any(String),
     });
     expect(events).toContainObject({
       event: 'objectiveSucceeded',
