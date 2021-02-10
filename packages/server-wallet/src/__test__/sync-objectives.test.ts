@@ -12,6 +12,7 @@ import {bob} from '../wallet/__test__/fixtures/participants';
 import {getChannelResultFor, getPayloadFor} from './test-helpers';
 
 jest.setTimeout(10_000);
+
 const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
   database: 'TEST_A',
 });
@@ -24,8 +25,8 @@ let b: Wallet;
 
 beforeAll(async () => {
   await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
-  await DBAdmin.createDatabase(aWalletConfig);
-  await DBAdmin.createDatabase(bWalletConfig);
+  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
+
   await Promise.all([
     DBAdmin.migrateDatabase(aWalletConfig),
     DBAdmin.migrateDatabase(bWalletConfig),
@@ -36,6 +37,7 @@ beforeAll(async () => {
   await seedAlicesSigningWallet(a.knex);
   await seedBobsSigningWallet(b.knex);
 });
+
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
   await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
@@ -55,14 +57,11 @@ test('Objectives can be synced if a message is lost', async () => {
   expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
 
   // We would then call sync after some time of waiting and not making progress
-  const syncResult = await a.syncObjectives([objectiveId]);
-
-  // We should not see the objective yet
-  expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
+  const {outbox} = await a.syncObjectives([objectiveId]);
 
   // After sync funding should continue as normal
-  const resultB0 = await b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
-  expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
+  const {channelResults} = await b.pushMessage(getPayloadFor(bob().participantId, outbox));
+  expect(getChannelResultFor(channelId, channelResults)).toMatchObject({
     status: 'proposed',
     turnNum: 0,
   });
@@ -83,10 +82,11 @@ test('handles the objective being synced even if no message is lost', async () =
   expect(await getObjective(a.knex, objectiveId)).toBeDefined();
   expect(await getObjective(b.knex, objectiveId)).toBeDefined();
 
-  const syncResult = await a.syncObjectives([objectiveId]);
+  const {outbox: syncOutbox} = await a.syncObjectives([objectiveId]);
+
   // Now we push in the sync payload
   const {outbox, newObjectives, channelResults} = await b.pushMessage(
-    getPayloadFor(bob().participantId, syncResult.outbox)
+    getPayloadFor(bob().participantId, syncOutbox)
   );
 
   // The only expected result is a sync channel response
@@ -121,13 +121,10 @@ test('Can successfully push the sync objective message multiple times', async ()
   // We would then call sync after some time of waiting and not making progress
   const syncResult = await a.syncObjectives([objectiveId]);
 
-  // We should not see the objective yet
-  expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
-
-  // We push once
+  // We push the message to B
   await b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
 
-  // We push again and check the results of the second push
+  // We push the message to B again and check the results
   const {outbox, newObjectives, channelResults} = await b.pushMessage(
     getPayloadFor(bob().participantId, syncResult.outbox)
   );
