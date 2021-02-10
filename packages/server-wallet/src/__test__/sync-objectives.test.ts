@@ -57,7 +57,7 @@ test('Objectives can be synced if a message is lost', async () => {
   // We would then call sync after some time of waiting and not making progress
   const syncResult = await a.syncObjectives([objectiveId]);
 
-  // We should now see the objective
+  // We should not see the objective yet
   expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
 
   // After sync funding should continue as normal
@@ -66,6 +66,82 @@ test('Objectives can be synced if a message is lost', async () => {
     status: 'proposed',
     turnNum: 0,
   });
+});
+
+test('handles the objective being synced even if no message is lost', async () => {
+  const createChannelParams: CreateChannelParams = createChannelArgs();
+
+  // We mimic not receiving a message containing objectives
+  const messageResponse = await a.createChannel(createChannelParams);
+
+  const channelId = messageResponse.channelResults[0].channelId;
+  const objectiveId = `OpenChannel-${channelId}`;
+  await b.pushMessage(getPayloadFor(bob().participantId, messageResponse.outbox));
+
+  // We expect both objectives to be there
+  expect(await getObjective(a.knex, objectiveId)).toBeDefined();
+  expect(await getObjective(b.knex, objectiveId)).toBeDefined();
+
+  const {outbox, newObjectives, channelResults} = await a.syncObjectives([objectiveId]);
+
+  // The only result will be a message containing the latest states
+  expect(outbox).toHaveLength(1);
+  expect(outbox[0]).toMatchObject({
+    method: 'MessageQueued',
+    params: {
+      recipient: 'bob',
+      sender: 'alice',
+      data: {
+        signedStates: [expect.objectContaining({turnNum: 0})],
+        requests: [],
+      },
+    },
+  });
+  expect(newObjectives).toHaveLength(0);
+  expect(channelResults).toHaveLength(0);
+});
+
+test('Can successfully push the sync objective message multiple times', async () => {
+  const createChannelParams: CreateChannelParams = createChannelArgs();
+
+  // We mimic not receiving a message containing objectives
+  const messageToLose = await a.createChannel(createChannelParams);
+
+  const channelId = messageToLose.channelResults[0].channelId;
+  const objectiveId = `OpenChannel-${channelId}`;
+
+  // Only A should have the objective since we "lost" the message
+  expect(await getObjective(a.knex, objectiveId)).toBeDefined();
+  expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
+
+  // We would then call sync after some time of waiting and not making progress
+  const syncResult = await a.syncObjectives([objectiveId]);
+
+  // We should not see the objective yet
+  expect(await getObjective(b.knex, objectiveId)).toBeUndefined();
+
+  // After sync funding should continue as normal
+  await b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
+
+  const {outbox, newObjectives, channelResults} = await b.pushMessage(
+    getPayloadFor(bob().participantId, syncResult.outbox)
+  );
+
+  // The only result will be a message containing the latest states
+  expect(outbox).toHaveLength(1);
+  expect(outbox[0]).toMatchObject({
+    method: 'MessageQueued',
+    params: {
+      recipient: 'bob',
+      sender: 'alice',
+      data: {
+        signedStates: [expect.objectContaining({turnNum: 0})],
+        requests: [],
+      },
+    },
+  });
+  expect(newObjectives).toHaveLength(0);
+  expect(channelResults).toHaveLength(0);
 });
 
 async function getObjective(knex: Knex, objectiveId: string): Promise<DBObjective | undefined> {
