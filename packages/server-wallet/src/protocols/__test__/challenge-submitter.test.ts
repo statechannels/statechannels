@@ -122,6 +122,6 @@ const crankAndAssert = async (
   if (completesObj) {
     expect(reloadedObjective.status).toEqual('succeeded');
   } else {
-    expect(reloadedObjective.status).toEqual('pending');
+    expect(reloadedObjective.status).not.toEqual('succeeded');
   }
 };
