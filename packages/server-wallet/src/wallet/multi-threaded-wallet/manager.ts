@@ -4,7 +4,7 @@ import path from 'path';
 import {Pool} from 'tarn';
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {Either} from 'fp-ts/lib/Either';
-import {isLeft} from 'fp-ts/lib/These';
+import {isLeft, isRight} from 'fp-ts/lib/These';
 import _ from 'lodash';
 import {Logger} from 'pino';
 
@@ -59,6 +59,14 @@ export class WorkerManager {
     });
   }
 
+  /**
+   *
+   * @param {operation, args}: operation & arguments to send to worker
+   *
+   * Sends {operation, args} to a worker thread.
+   * RESOLVES WHEN: the worker thread sends a "right" message containing a result
+   * REJECTS WHEN: the worker thread sends a "left" message containing an error
+   */
   private async sendOperation<
     T extends SingleChannelOutput | MultipleChannelOutput,
     O extends StateChannelWorkerData
@@ -69,17 +77,23 @@ export class WorkerManager {
 
     const worker = await this.pool.acquire().promise;
 
-    const resultPromise = new Promise<T>((resolve, reject) =>
-      worker.once('message', (response: Either<Error, T>) => {
+    const resultPromise = new Promise<T>((resolve, reject) => {
+      const handler = (response: Either<Error, T>) => {
         this.pool?.release(worker);
 
         if (isLeft(response)) {
           reject(response.left);
-        } else {
+        } else if (isRight(response)) {
+          // WARNING: The correctness of this implementation relies on the fact that a worker
+          // only handles one concurrent operation.
+          // If a worker handles concurrent operations, then we should wait until we get a reply
+          // with the same message id.
+          worker.off('message', handler);
           resolve(response.right);
         }
-      })
-    );
+      };
+      worker.on('message', handler);
+    });
 
     worker.postMessage({operation, args});
 
