@@ -6,10 +6,18 @@ import {createLogger} from '../../logger';
 import {Wallet} from '../..';
 import {timerFactory} from '../../metrics';
 import {ServerWalletConfig} from '../../config';
+import {SingleThreadedWallet} from '..';
+import {WalletEvent} from '../types';
 
 import {isStateChannelWorkerData} from './worker-data';
 
 startWorker();
+
+function relayWalletEvents<E extends WalletEvent>(name: E['type']) {
+  return (value: E['value']): void => {
+    parentPort?.postMessage({type: 'WalletEventEmitted', name, value});
+  };
+}
 
 async function startWorker() {
   // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
@@ -25,7 +33,11 @@ async function startWorker() {
   const logger = createLogger(walletConfig);
 
   logger.debug(`Worker %o starting`, threadId);
-  const wallet = await Wallet.create(walletConfig);
+  const wallet = (await Wallet.create(walletConfig)) as SingleThreadedWallet;
+
+  const events = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
+  events.forEach(name => wallet.on(name, relayWalletEvents(name)));
+
   parentPort?.on('message', async (message: any) => {
     if (isMainThread) {
       parentPort?.postMessage(
@@ -49,9 +61,9 @@ async function startWorker() {
             right(await timer('UpdateChannel', () => wallet.updateChannel(message.args)))
           );
         case 'PushMessage':
-          logger.debug(`Worker-%o handling PushMessage`, threadId);
+          logger.debug({args: message.args}, `Worker-%o handling PushMessage`, threadId);
           return parentPort?.postMessage(
-            right(await timer('PushMessage', () => wallet.pushMessage(message.args)))
+            right(await timer('PushMessage', async () => wallet.pushMessage(message.args)))
           );
         case 'PushUpdate':
           logger.debug(`Worker-%o handling PushUpdate`, threadId);
