@@ -141,14 +141,20 @@ export class ObjectiveModel extends Model {
           progressLastMadeAt: new Date(),
         })
         .returning('*')
-        .first(); // This ensures that the returned object undergoes any type conversion performed during insert
+        .first() // This ensures that the returned object undergoes any type conversion performed during insert
+        .onConflict('objectiveId')
+        .ignore(); // this avoids a UniqueViolationError being thrown
 
       // Associate the objective with any channel that it references
       // By inserting an ObjectiveChannel row for each channel
       // Requires objective and channels to exist
       await Promise.all(
-        extractReferencedChannels(objectiveToBeStored).map(async value =>
-          ObjectiveChannelModel.query(trx).insert({objectiveId: id, channelId: value})
+        extractReferencedChannels(objectiveToBeStored).map(
+          async value =>
+            ObjectiveChannelModel.query(trx)
+              .insert({objectiveId: id, channelId: value})
+              .onConflict(['objectiveId', 'channelId'])
+              .ignore() // this makes it an upsert
         )
       );
       return model.toObjective();
