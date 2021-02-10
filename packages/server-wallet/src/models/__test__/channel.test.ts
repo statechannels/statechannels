@@ -142,7 +142,7 @@ describe('Channel funding', () => {
     compareMilestones(testChannel.fundingMilestones, [5, 8, 8]);
   });
 
-  it('Check funding for A', async () => {
+  it('returns the correct funding status for the first participant', async () => {
     await testChannelObj.insertInto(store, {
       participant: 0,
       states: [0, 1],
