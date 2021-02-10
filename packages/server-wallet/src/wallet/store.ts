@@ -391,24 +391,29 @@ export class Store {
    * Ensure the provided objective is stored in the database.
    * Returns the objective as a DBObjective
    */
-  async ensureObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
+  async ensureObjective(
+    objective: Objective,
+    tx: Transaction,
+    preApprove = false
+  ): Promise<DBObjective> {
     switch (objective.type) {
       case 'OpenChannel':
-        return this.ensureOpenChannelObjective(objective, tx);
+        return this.ensureOpenChannelObjective(objective, tx, preApprove);
       case 'CloseChannel':
-        return this.ensureCloseChannelObjective(objective, tx);
+        return this.ensureCloseChannelObjective(objective, tx, preApprove);
       case 'SubmitChallenge':
-        return this.ensureSubmitChallengeObjective(objective, tx);
+        return this.ensureSubmitChallengeObjective(objective, tx, preApprove);
       case 'DefundChannel':
-        return this.ensureDefundChannelObjective(objective, tx);
+        return this.ensureDefundChannelObjective(objective, tx, preApprove);
       default:
-        throw new StoreError(StoreError.reasons.unimplementedObjective);
+        throw new StoreError(StoreError.reasons.unimplementedObjective, preApprove);
     }
   }
 
   async ensureDefundChannelObjective(
     objective: DefundChannel,
-    tx: Transaction
+    tx: Transaction,
+    preApprove: boolean
   ): Promise<DBDefundChannelObjective> {
     const {data} = objective;
     const {targetChannelId} = data;
@@ -420,12 +425,17 @@ export class Store {
 
     const objectiveToBeStored = {...objective, status: 'pending' as const};
 
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBDefundChannelObjective>;
+    return ObjectiveModel.insert(
+      objectiveToBeStored,
+      tx,
+      preApprove
+    ) as Promise<DBDefundChannelObjective>;
   }
 
   async ensureSubmitChallengeObjective(
     objective: SubmitChallenge,
-    tx: Transaction
+    tx: Transaction,
+    preApprove: boolean
   ): Promise<DBSubmitChallengeObjective> {
     const {data} = objective;
     const {targetChannelId} = data;
@@ -440,12 +450,17 @@ export class Store {
       status: 'pending' as const,
     };
 
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBSubmitChallengeObjective>;
+    return ObjectiveModel.insert(
+      objectiveToBeStored,
+      tx,
+      preApprove
+    ) as Promise<DBSubmitChallengeObjective>;
   }
 
   async ensureOpenChannelObjective(
     objective: OpenChannel,
-    tx: Transaction
+    tx: Transaction,
+    preApprove: boolean
   ): Promise<DBOpenChannelObjective> {
     const {
       data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
@@ -485,12 +500,17 @@ export class Store {
       .returning('*')
       .first();
 
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBOpenChannelObjective>;
+    return ObjectiveModel.insert(
+      objectiveToBeStored,
+      tx,
+      preApprove
+    ) as Promise<DBOpenChannelObjective>;
   }
 
   async ensureCloseChannelObjective(
     objective: CloseChannel,
-    tx: Transaction
+    tx: Transaction,
+    _preApprove: boolean
   ): Promise<DBCloseChannelObjective> {
     const {
       data: {targetChannelId, fundingStrategy},
@@ -504,7 +524,6 @@ export class Store {
       });
 
     const objectiveToBeStored = {
-      status: 'approved' as const,
       type: objective.type,
       participants: [],
       data: {
@@ -513,7 +532,11 @@ export class Store {
       },
     };
 
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBCloseChannelObjective>;
+    return ObjectiveModel.insert(
+      objectiveToBeStored,
+      tx,
+      true // preApprove TODO: should this always be true?
+    ) as Promise<DBCloseChannelObjective>;
   }
 
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
