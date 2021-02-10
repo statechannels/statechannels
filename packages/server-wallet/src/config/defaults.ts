@@ -76,6 +76,10 @@ export const defaultTestConfig = (
         database: DEFAULT_DB_NAME,
         user: DEFAULT_DB_USER,
       },
+      // DO NOT CHANGE DEFAULTS.
+      // `max: 1` is required to detect deadlocks caused by application code that attempts
+      // to acquire a new connection before the connection serving the transaction is released
+      pool: {min: 0, max: 1},
     },
   };
   return _.merge({}, fullDefaultConfig, partialConfig);

@@ -42,30 +42,6 @@ it('does not store extraneous fields in the variables property', async () => {
   });
 });
 
-it('can insert multiple channels instances within a transaction', async () => {
-  const c1 = channel({vars: [stateWithHashSignedBy()()]});
-  const c2 = channel({
-    channelNonce: 1234,
-    vars: [stateWithHashSignedBy()({channelNonce: 1234})],
-  });
-
-  await Channel.transaction(knex, async tx => {
-    await Channel.query(tx).insert(c1);
-
-    expect(await Channel.query(tx).select()).toHaveLength(1);
-
-    await Channel.query(tx).insert(c2);
-    expect(await Channel.query(tx).select()).toHaveLength(2);
-
-    // You can query the DB outside of this transaction,
-    // where the channels have not yet been committed
-    expect(await Channel.query(knex).select()).toHaveLength(0);
-  });
-
-  // The transaction has been committed. Two channels were stored.
-  expect(await Channel.query(knex).select()).toHaveLength(2);
-});
-
 describe('validation', () => {
   it('throws when inserting a model where the channelId is inconsistent', () =>
     expect(
@@ -79,29 +55,24 @@ describe('validation', () => {
 describe('fundingStatus', () => {
   it("should be undefined if funding wasn't fetched from db", async () => {
     const c1 = channel({vars: [stateWithHashSignedBy()()]});
-    await Channel.transaction(knex, async tx => {
-      const {channelId} = await Channel.query(tx).insert(c1);
-      await Funding.updateFunding(tx, channelId, '0x0a', makeAddress(constants.AddressZero));
-    });
+    const {channelId} = await Channel.query(knex).insert(c1);
+    await Funding.updateFunding(knex, channelId, '0x0a', makeAddress(constants.AddressZero));
 
-    await Channel.transaction(knex, async () => {
+    {
       const channel = await Channel.query(knex).first();
-
       expect(channel.channelResult.fundingStatus).toBeUndefined();
-    });
+    }
   });
+
   it('should not be undefined if funding was fetched from db', async () => {
     const c1 = channel({vars: [stateWithHashSignedBy()()]});
-    await Channel.transaction(knex, async tx => {
-      const {channelId} = await Channel.query(tx).insert(c1);
-      await Funding.updateFunding(tx, channelId, '0x0a', makeAddress(constants.AddressZero));
-    });
+    const {channelId} = await Channel.query(knex).insert(c1);
+    await Funding.updateFunding(knex, channelId, '0x0a', makeAddress(constants.AddressZero));
 
-    await Channel.transaction(knex, async () => {
+    {
       const channel = await Channel.query(knex).withGraphJoined('funding').first();
-
       expect(channel.channelResult.fundingStatus).not.toBeUndefined();
-    });
+    }
   });
 });
 

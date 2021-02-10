@@ -1,7 +1,4 @@
-import Objection from 'objection';
-
 import {Store} from '../store';
-import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -21,14 +18,6 @@ beforeAll(async () => {
 });
 
 describe('addSignedState', () => {
-  let tx: Objection.Transaction;
-
-  afterEach(async () => tx.rollback());
-
-  beforeEach(async () => {
-    tx = await Channel.startTransaction(knex);
-  });
-
   it('throws when the signer is not me', async () => {
     const stateSignedByBob = stateWithHashSignedBy([bob()])();
     const channelWithAliceAsSigner = channel();
