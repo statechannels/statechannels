@@ -20,7 +20,7 @@ export class WorkerManager {
   private pool?: Pool<Worker>;
   private threadAmount: number;
   private logger: Logger;
-  constructor(walletConfig: ServerWalletConfig) {
+  constructor(walletConfig: ServerWalletConfig, onNewWorker: (worker: Worker) => void) {
     this.logger = createLogger(walletConfig).child({module: 'Worker-Manager'});
     this.threadAmount = walletConfig.workerThreadAmount;
     if (this.threadAmount === 0) {
@@ -38,6 +38,7 @@ export class WorkerManager {
         worker.on('error', err => {
           throw err;
         });
+        onNewWorker(worker);
         this.logger.trace('Started worker %o', worker.threadId);
         return worker;
       },
