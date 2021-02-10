@@ -18,7 +18,6 @@ import {WalletEvent, MultipleChannelOutput, SingleChannelOutput, Output} from '.
 export class WalletResponse {
   _channelResults: Record<string, ChannelResult> = {};
   private queuedMessages: WireMessage[] = [];
-  objectivesToSend: DBObjective[] = [];
   objectivesToApprove: DBObjective[] = [];
   createdObjectives: DBObjective[] = [];
   succeededObjectives: DBObjective[] = [];
@@ -77,19 +76,9 @@ export class WalletResponse {
   }
 
   /**
-   * Queues objectives for
-   * - sending to opponent
-   * - notifying the app
+   * Queues an objective to be sent to the opponent
    */
-  queueCreatedObjective(
-    objective: DBObjective,
-    myIndex: number,
-    participants: Participant[]
-  ): void {
-    // TODO: The objective model currently always sets the participants to an empty array when creating the DBObjective
-    // So we override that here
-    this.createdObjectives.push({...objective, participants});
-
+  queueSendObjective(objective: DBObjective, myIndex: number, participants: Participant[]): void {
     const myParticipantId = participants[myIndex].participantId;
     if (isSharedObjective(objective)) {
       participants.forEach((p, i) => {
@@ -108,6 +97,21 @@ export class WalletResponse {
         }
       });
     }
+  }
+
+  /**
+   * Queues objectives for
+   * - sending to opponent
+   * - notifying the app
+   */
+  queueCreatedObjective(
+    objective: DBObjective,
+    myIndex: number,
+    participants: Participant[]
+  ): void {
+    this.createdObjectives.push(objective);
+
+    this.queueSendObjective(objective, myIndex, participants);
   }
 
   /**

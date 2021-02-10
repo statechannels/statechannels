@@ -314,7 +314,7 @@ export class SingleThreadedWallet
       await this._syncChannel(channel.channelId, response);
 
       const {participants} = channel;
-      response.queueCreatedObjective(o, channel.myIndex, participants);
+      response.queueSendObjective(o, channel.myIndex, participants);
     }
 
     return response.multipleChannelOutput();

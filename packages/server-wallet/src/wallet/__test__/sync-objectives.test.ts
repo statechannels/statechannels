@@ -9,7 +9,6 @@ import {ObjectiveModel} from '../../models/objective';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {openChannelObjective} from './fixtures/open-channel-objective';
-import {bob, alice as aliceP} from './fixtures/participants';
 import {alice} from './fixtures/signing-wallets';
 import {stateWithHashSignedBy} from './fixtures/states';
 
@@ -44,12 +43,7 @@ describe('SyncObjective', () => {
     const objective = await ObjectiveModel.insert(openChannelObjective(), testKnex);
 
     const syncResult = await wallet.syncObjectives([objective.objectiveId]);
-    // TODO: Currently the objective model differs slightly from what we see on the message
-    const massagedObjective = {
-      ...objective,
-      participants: [aliceP(), bob()],
-    };
-    expect(syncResult.newObjectives).toEqual([massagedObjective]);
+    expect(syncResult.newObjectives).toHaveLength(0);
     expect(syncResult.channelResults).toEqual([targetChannel.channelResult]);
 
     expect((syncResult.outbox[0].params.data as any).objectives).toEqual([
