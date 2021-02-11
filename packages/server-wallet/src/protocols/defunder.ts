@@ -79,6 +79,8 @@ export class Defunder {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
       await this.chainService.pushOutcomeAndWithdraw(
         adjudicatorStatus.states[0],
+        // todo: we are assuming that we submitted the challenge.
+        // This is not a valid assumption as the defunder protocol can be run no matter how the channel was finalized
         channel.myAddress
       );
       didSubmitTransaction = true;
