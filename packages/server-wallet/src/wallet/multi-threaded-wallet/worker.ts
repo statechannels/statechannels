@@ -22,7 +22,7 @@ async function startWorker() {
     workerThreadAmount: 0, // don't want workers to start more workers
   };
 
-  const logger = createLogger(walletConfig);
+  const logger = createLogger(walletConfig).child({threadId});
 
   logger.debug(`Worker %o starting`, threadId);
   const wallet = await Wallet.create(walletConfig);
