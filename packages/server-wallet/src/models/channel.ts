@@ -406,21 +406,22 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   /**
-   * Have all participants signed a preFund state?
+   * Have all participants signed a consistent preFund state?
    */
   public get preFundComplete(): boolean {
     // The existence of any supported state implies a supported prefund state
-    // which implies a full set of signatures (since no state is earlier than a prefund state)
+    // which implies a full set (nParticipants) of consistent preFund signatures has been seen
+    // (since no state is earlier than a prefund state).
     return !!this.supported;
   }
 
   /**
-   * Have all participants signed a postFund state?
+   * Have all participants signed a consistent postFund state?
    */
   public get postFundComplete(): boolean {
     // The existence of a supported state with sufficiently high turnNum
     // (at least the highest postFund state)
-    // implies a full set of nParticipants postFund signatures have been seen.
+    // implies a full set (nParticipants) of consistent postFund signatures has been seen.
     return !!this.supported && this.supported.turnNum >= 2 * this.nParticipants - 1;
   }
 
