@@ -319,7 +319,7 @@ describe('when the application protocol returns an action', () => {
   });
 
   it.each([0, 2])(
-    'emits objectiveStarted when a %i-threaded wallet receives a new objective',
+    'emits objectiveStarted when a wallet with %i worker threads receives a new objective',
     async workerThreadAmount => {
       wallet = await Wallet.create(defaultTestConfig({workerThreadAmount}));
       const turnNum = 6;
