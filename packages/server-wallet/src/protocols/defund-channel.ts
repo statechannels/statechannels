@@ -32,9 +32,6 @@ export class ChannelDefunder {
         return;
       }
 
-      await channel.$fetchGraph('funding', {transaction: tx});
-      await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
-
       // This if-statement should be removed and test cases should be added.
       // Defund channel now (in theory) supports Ledger funded channels.
       if (channel.fundingStrategy !== 'Direct') {

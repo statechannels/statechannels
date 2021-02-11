@@ -30,10 +30,12 @@ export class Defunder {
 
   public async crank(channel: Channel, tx: Transaction): Promise<DefunderResult> {
     const {protocolState: ps} = channel;
+    await channel.$fetchGraph('funding', {transaction: tx});
+    await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
 
     switch (ps.fundingStrategy) {
       case 'Direct':
-        return await this.directDefunder(channel, tx);
+        return this.directDefunder(channel, tx);
       case 'Ledger':
         return this.ledgerDefunder(channel, tx);
       case 'Unknown':
