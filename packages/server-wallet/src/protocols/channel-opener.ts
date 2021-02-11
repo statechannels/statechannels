@@ -50,7 +50,10 @@ export class ChannelOpener {
       let waitingFor = 'theirPreFundState';
 
       // if we don't have a complete preFundSetup, we are still waitingFor theirPreFundState and cannot progress
-      if (!channel.preFundComplete) return;
+      if (!channel.preFundComplete) {
+        await updateWaitingFor();
+        return;
+      }
 
       // otherwise, we might be waiting on funding
       waitingFor = 'funding';
@@ -60,7 +63,10 @@ export class ChannelOpener {
       const funded = await this.crankChannelFunder(objective, channel, response, tx);
 
       // if the channel is not funded, we are still waitingFor funding and cannot progress
-      if (!funded) return;
+      if (!funded) {
+        await updateWaitingFor();
+        return;
+      }
 
       // otherwise, we might be waitingFor theirPostFundState
       waitingFor = 'theirPostFundState';
@@ -71,14 +77,22 @@ export class ChannelOpener {
       }
 
       // If we are still waitingFor theirPostFundState, we cannot complete
-      if (!channel.postFundComplete) return;
+      if (!channel.postFundComplete) {
+        await updateWaitingFor();
+        return;
+      }
 
-      waitingFor = '';
       objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
       response.queueSucceededObjective(objective);
+      waitingFor = '';
+      await updateWaitingFor();
+      return;
 
-      if (objective.waitingFor !== waitingFor) {
-        await ObjectiveModel.updateWaitingFor(objective.objectiveId, waitingFor, tx);
+      async function updateWaitingFor() {
+        if (objective.waitingFor !== waitingFor) {
+          console.log('updating waiting for to ', waitingFor);
+          await ObjectiveModel.updateWaitingFor(objective.objectiveId, waitingFor, tx);
+        }
       }
     });
   }
