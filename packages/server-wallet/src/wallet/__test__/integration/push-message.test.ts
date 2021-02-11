@@ -320,7 +320,8 @@ describe('when the application protocol returns an action', () => {
 
   it.each([0, 2])(
     'emits objectiveStarted when a %i-threaded wallet receives a new objective',
-    async () => {
+    async workerThreadAmount => {
+      wallet = await Wallet.create(defaultTestConfig({workerThreadAmount}));
       const turnNum = 6;
       const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
 
