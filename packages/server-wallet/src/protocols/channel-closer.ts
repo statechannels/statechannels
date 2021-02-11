@@ -36,9 +36,6 @@ export class ChannelCloser {
         throw new Error('Channel must exist');
       }
 
-      await channel.$fetchGraph('funding', {transaction: tx});
-      await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
-
       try {
         if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
           response.queueChannel(channel);
