@@ -90,14 +90,18 @@ export class Defunder {
   }
 
   private async ledgerDefunder(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+    const didSubmitTransaction = false;
+    if (!channel.hasConclusionProof) {
+      return {isChannelDefunded: false, didSubmitTransaction};
+    }
     const ledgerRequest = await this.store.getLedgerRequest(channel.channelId, 'defund', tx);
     if (ledgerRequest && ledgerRequest.status === 'succeeded') {
-      return {isChannelDefunded: true, didSubmitTransaction: false};
+      return {isChannelDefunded: true, didSubmitTransaction};
     }
     if (!ledgerRequest || ledgerRequest.status !== 'pending') {
       await this.requestLedgerDefunding(channel, tx);
     }
-    return {isChannelDefunded: false, didSubmitTransaction: false};
+    return {isChannelDefunded: false, didSubmitTransaction};
   }
 
   private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
