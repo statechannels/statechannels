@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.8.8](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.4...@statechannels/wire-format@0.8.8) (2021-02-11)
+
+
+### Bug Fixes
+
+* add nonce to channel proposals to handle out-of-sync / adverse network situations ([9f79bc4](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/9f79bc4a556703f3cf40c3f44fba3f0d6c28ae8e))
+* make participants a required property ([86ea421](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/86ea421552045b837906383ef04c51c76f41bbf1))
+
+
+
+
+
 ## [0.8.7](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.4...@statechannels/wire-format@0.8.7) (2021-02-05)
 
 

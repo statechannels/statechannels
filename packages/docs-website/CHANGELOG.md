@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.7.0](https://github.com/statechannels/statechannels/compare/docs-website@0.3.35...docs-website@0.7.0) (2021-02-11)
+
+
+### Features
+
+* replace AssetTransferred with AllocationUpdated event ([#3074](https://github.com/statechannels/statechannels/issues/3074)) ([bef8424](https://github.com/statechannels/statechannels/commit/bef8424605e7bb956d7bdc971ac4eae1628f6bfb))
+
+
+
+
+
 # [0.6.0](https://github.com/statechannels/statechannels/compare/docs-website@0.3.35...docs-website@0.6.0) (2021-02-05)
 
 
