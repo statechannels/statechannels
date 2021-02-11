@@ -309,6 +309,9 @@ export class SingleThreadedWallet
     }
 
     for (const o of objectives) {
+      // NOTE: Currently we're fetching the channel twice
+      // Once here and one in syncChannel
+      // This could be refactored if performance is an issue
       const channel = await this.store.getChannelState(o.data.targetChannelId);
       // This will make sure any relevant channel information is synced
       await this._syncChannel(channel.channelId, response);
