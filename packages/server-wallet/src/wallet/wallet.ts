@@ -1054,7 +1054,8 @@ export class SingleThreadedWallet
     await this.store.markAdjudicatorStatusAsFinalized(
       arg.channelId,
       arg.blockNumber,
-      arg.blockTimestamp
+      arg.blockTimestamp,
+      arg.finalizedAt
     );
     await this.knex.transaction(async tx => {
       const objective = await this.store.ensureObjective(

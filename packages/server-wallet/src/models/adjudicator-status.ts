@@ -41,11 +41,17 @@ export class AdjudicatorStatusModel extends Model implements RequiredColumns {
     knex: Knex,
     channelId: string,
     blockNumber: number,
-    blockTimestamp: number
+    blockTimestamp: number,
+    finalizesAt: number
   ): Promise<AdjudicatorStatus> {
-    const existing = await AdjudicatorStatusModel.query(knex).where({channelId});
+    const existing = await AdjudicatorStatusModel.query(knex).where({channelId}).first();
     if (!existing) {
-      await AdjudicatorStatusModel.query(knex).insert({channelId, blockNumber, blockTimestamp});
+      await AdjudicatorStatusModel.query(knex).insert({
+        channelId,
+        blockNumber,
+        blockTimestamp,
+        finalizesAt,
+      });
     }
     const result = await AdjudicatorStatusModel.query(knex)
       .patch({blockNumber, blockTimestamp})
