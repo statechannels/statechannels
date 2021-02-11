@@ -69,10 +69,11 @@ export class WorkerManager {
   /**
    *
    * @param {operation, args}: operation & arguments to send to worker
+   * @returns a promise that
+   *   - resolves when the worker thread sends a "right" message, containing a result
+   *   - rejects rejects worker thread sends a "left" message, containing an error
    *
    * Sends {operation, args} to a worker thread.
-   * RESOLVES WHEN: the worker thread sends a "right" message containing a result
-   * REJECTS WHEN: the worker thread sends a "left" message containing an error
    */
   private async sendOperation<
     T extends SingleChannelOutput | MultipleChannelOutput,
