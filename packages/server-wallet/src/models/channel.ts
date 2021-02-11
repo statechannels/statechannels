@@ -387,7 +387,7 @@ export class Channel extends Model implements ChannelColumns {
 
     const noFinalStates = _.every(this.sortedStates, s => !s.isFinal);
 
-    return this.postfundSupported && noFinalStates;
+    return this.postFundComplete && noFinalStates;
   }
 
   /**
@@ -406,17 +406,21 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   /**
-   * Is a prefund state (or later) supported
+   * Have all participants signed a preFund state?
    */
-  public get prefundSupported(): boolean {
-    // all states are later than the prefund, so we just check if have any supported state
+  public get preFundComplete(): boolean {
+    // The existence of any supported state implies a supported prefund state
+    // which implies a full set of signatures (since no state is earlier than a prefund state)
     return !!this.supported;
   }
 
   /**
-   * Is a postfund state (or later) supported
+   * Have all participants signed a postFund state?
    */
-  public get postfundSupported(): boolean {
+  public get postFundComplete(): boolean {
+    // The existence of a supported state with sufficiently high turnNum
+    // (at least the highest postFund state)
+    // implies a full set of nParticipants postFund signatures have been seen.
     return !!this.supported && this.supported.turnNum >= 2 * this.nParticipants - 1;
   }
 
