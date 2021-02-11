@@ -44,8 +44,8 @@ export class ChannelOpener {
         await this.signPrefundSetup(channel, response, tx);
       }
 
-      // if we don't have a supported preFundSetup, we're done for now
-      if (!channel.prefundSupported) {
+      // if we don't have a complete preFundSetup, we're done for now
+      if (!channel.preFundComplete) {
         response.queueChannel(channel); // always queue the channel if we've potentially touched it
         return;
       }
@@ -59,7 +59,7 @@ export class ChannelOpener {
         await this.signPostfundSetup(channel, response, tx);
       }
 
-      if (channel.postfundSupported) {
+      if (channel.postFundComplete) {
         objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
 
         response.queueSucceededObjective(objective);
