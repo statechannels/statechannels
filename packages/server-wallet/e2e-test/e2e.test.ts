@@ -58,7 +58,7 @@ afterAll(async () => {
   await knexReceiver.destroy();
 });
 
-describe.each([0, 2])('e2e with %i threads', workerThreadAmount => {
+describe.each([0, 2])('e2e with %i worker threads', workerThreadAmount => {
   let payerClient: PayerClient;
 
   let payer: Participant;
