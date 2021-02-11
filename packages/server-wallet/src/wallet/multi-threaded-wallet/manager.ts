@@ -20,6 +20,12 @@ export class WorkerManager {
   private pool?: Pool<Worker>;
   private threadAmount: number;
   private logger: Logger;
+
+  /**
+   *
+   * @param walletConfig server wallet config to be passed to the worker wallet
+   * @param onNewWorker callback that is executed when a new worker is created
+   */
   constructor(walletConfig: ServerWalletConfig, onNewWorker: (worker: Worker) => void) {
     this.logger = createLogger(walletConfig).child({module: 'Worker-Manager'});
     this.threadAmount = walletConfig.workerThreadAmount;
