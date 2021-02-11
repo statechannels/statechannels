@@ -4,13 +4,14 @@ import {Store} from '../store';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
+import {constructKnex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {signState} from '../../utilities/signatures';
 
 import {stateWithHashSignedBy} from './fixtures/states';
 import {bob, alice} from './fixtures/signing-wallets';
 
+const knex = constructKnex({pool: {max: 2}});
 let tx: Objection.Transaction;
 
 let store: Store;

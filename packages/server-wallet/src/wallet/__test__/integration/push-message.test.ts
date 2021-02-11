@@ -10,10 +10,12 @@ import {
   serializeRequest,
   serializeOutcome,
   NULL_APP_DATA,
+  SignedState,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {PartialModelObject} from 'objection';
 import {constants} from 'ethers';
+import _ from 'lodash';
 
 import {Channel} from '../../../models/channel';
 import {addHash} from '../../../state-utils';
@@ -35,6 +37,9 @@ import {
   getSignedStateFor,
   getRequestFor,
 } from '../../../__test__/test-helpers';
+
+const dropNonVariables = (s: SignedState): any =>
+  _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
 
 jest.setTimeout(20_000);
 
@@ -78,7 +83,7 @@ it('stores states contained in the message, in a single channel model', async ()
   expect(channelsAfter[0].vars).toHaveLength(2);
 
   // The Channel model adds the state hash before persisting
-  expect(channelsAfter[0].vars).toMatchObject(signedStates);
+  expect(channelsAfter[0].vars).toMatchObject(signedStates.map(s => dropNonVariables(s)));
 });
 
 it('ignores duplicate states', async () => {
@@ -105,7 +110,7 @@ it('ignores duplicate states', async () => {
   expect(channelsAfter[0].vars).toHaveLength(2);
 
   // The Channel model adds the state hash before persisting
-  expect(channelsAfter[0].vars).toMatchObject(signedStates);
+  expect(channelsAfter[0].vars).toMatchObject(signedStates.map(s => dropNonVariables(s)));
 });
 
 it('adds signatures to existing states', async () => {
@@ -225,7 +230,7 @@ describe('channel results', () => {
     const stateVar = signedStates[1];
     const record = await Channel.forId(calculateChannelId(stateVar), wallet.knex);
 
-    expect(record.vars[0]).toMatchObject(stateVar);
+    expect(record.vars[0]).toMatchObject(dropNonVariables(stateVar));
   });
 });
 

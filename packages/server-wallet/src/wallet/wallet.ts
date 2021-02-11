@@ -58,6 +58,7 @@ import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
+import {DBObjective} from '../models/objective';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -742,6 +743,15 @@ export class SingleThreadedWallet
     channelStates.forEach(cs => response.queueChannelState(cs));
 
     return response.multipleChannelOutput();
+  }
+
+  /**
+   * Gets the objective for a given id.
+   *
+   * @returns A promise that resolves to a DBObjective, with a progressLastMadeAt timestamp
+   */
+  async getObjective(objectiveId: string): Promise<DBObjective> {
+    return this.store.getObjective(objectiveId);
   }
 
   /**

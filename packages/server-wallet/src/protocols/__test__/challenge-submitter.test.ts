@@ -1,4 +1,5 @@
 import _ from 'lodash';
+import {SubmitChallenge} from '@statechannels/wallet-core';
 
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
@@ -44,16 +45,14 @@ describe(`challenge-submitter`, () => {
     // Add a existing request
     await ChainServiceRequest.insertOrUpdate(c.channelId, 'challenge', knex);
 
-    const obj: DBSubmitChallengeObjective = {
+    const obj: SubmitChallenge = {
       type: 'SubmitChallenge',
-      status: 'pending',
       participants: [],
-      objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
 
-    await knex.transaction(tx => store.ensureObjective(obj, tx));
-    await await crankAndAssert(obj, {callsChallenge: false, completesObj: false});
+    const dbObjective = await knex.transaction(tx => store.ensureSubmitChallengeObjective(obj, tx));
+    await await crankAndAssert(dbObjective, {callsChallenge: false, completesObj: false});
   });
   it(`takes no action if there is an existing challenge`, async () => {
     const c = channel();
@@ -63,16 +62,14 @@ describe(`challenge-submitter`, () => {
     const challengeState = stateSignedBy([alice()])();
     await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 100, [challengeState]);
 
-    const obj: DBSubmitChallengeObjective = {
+    const obj: SubmitChallenge = {
       type: 'SubmitChallenge',
-      status: 'pending',
       participants: [],
-      objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
 
-    await knex.transaction(tx => store.ensureObjective(obj, tx));
-    await await crankAndAssert(obj, {callsChallenge: false, completesObj: false});
+    const objective = await knex.transaction(tx => store.ensureSubmitChallengeObjective(obj, tx));
+    await await crankAndAssert(objective, {callsChallenge: false, completesObj: false});
   });
 
   it(`calls challenge when no challenge exists`, async () => {
@@ -83,16 +80,14 @@ describe(`challenge-submitter`, () => {
 
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    const obj: DBSubmitChallengeObjective = {
+    const obj: SubmitChallenge = {
       type: 'SubmitChallenge',
-      status: 'pending',
       participants: [],
-      objectiveId: ['SubmitChallenge', c.channelId].join('-'),
       data: {targetChannelId: c.channelId},
     };
 
-    await knex.transaction(tx => store.ensureObjective(obj, tx));
-    await await crankAndAssert(obj, {
+    const objective = await knex.transaction(tx => store.ensureSubmitChallengeObjective(obj, tx));
+    await await crankAndAssert(objective, {
       callsChallenge: true,
       completesObj: true,
     });

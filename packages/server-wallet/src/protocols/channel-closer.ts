@@ -1,9 +1,4 @@
-import {
-  checkThat,
-  isSimpleAllocation,
-  StateVariables,
-  unreachable,
-} from '@statechannels/wallet-core';
+import {checkThat, isSimpleAllocation, StateVariables} from '@statechannels/wallet-core';
 import {Transaction} from 'knex';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
@@ -13,8 +8,8 @@ import {ChainServiceInterface} from '../chain-service';
 import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
-import {LedgerRequest} from '../models/ledger-request';
-import {ChainServiceRequest} from '../models/chain-service-request';
+
+import {Defunder} from './defunder';
 
 export class ChannelCloser {
   constructor(
@@ -50,12 +45,19 @@ export class ChannelCloser {
           return;
         }
 
+        const defunder = Defunder.create(
+          this.store,
+          this.chainService,
+          this.logger,
+          this.timingMetrics
+        );
+
         if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
           response.queueChannel(channel);
           return;
         }
 
-        if (!(await this.isChannelDefunded(channel, tx))) {
+        if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
           response.queueChannel(channel);
           return;
         }
@@ -95,38 +97,6 @@ export class ChannelCloser {
     return false;
   }
 
-  private async isChannelDefunded(c: Channel, tx: Transaction): Promise<boolean> {
-    const {protocolState: ps} = c;
-
-    switch (ps.fundingStrategy) {
-      case 'Direct':
-        if (c.protocolState.directFundingStatus === 'Defunded') {
-          return true;
-        }
-        if (!c.chainServiceRequests.find(csr => csr.request === 'withdraw')?.isValid()) {
-          await this.withdraw(c, tx);
-        }
-        return false;
-      case 'Ledger': {
-        const ledgerRequest = await this.store.getLedgerRequest(c.channelId, 'defund', tx);
-        if (ledgerRequest && ledgerRequest.status === 'succeeded') {
-          return true;
-        }
-        if (!ledgerRequest || ledgerRequest.status !== 'pending') {
-          await this.requestLedgerDefunding(c, tx);
-        }
-        return false;
-      }
-      case 'Unknown':
-      case 'Fake':
-        return true;
-      case 'Virtual':
-        throw new Error('Virtual channel defunding is not implemented');
-      default:
-        unreachable(ps.fundingStrategy);
-    }
-  }
-
   private async signState(
     channel: Channel,
     turnNum: number,
@@ -141,23 +111,6 @@ export class ChannelCloser {
     const vars: StateVariables = {...channel.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
     response.queueState(signedState, myIndex, channelId);
-  }
-
-  private async withdraw(channel: Channel, tx: Transaction): Promise<void> {
-    await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
-
-    // supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
-    // Note, we are not awaiting transaction submission
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await this.chainService.concludeAndWithdraw([channel.supported!]);
-  }
-
-  private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
-    await LedgerRequest.requestLedgerDefunding(
-      channel.channelId,
-      channel.fundingLedgerChannelId,
-      tx
-    );
   }
 
   private async completeObjective(
