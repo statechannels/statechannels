@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/nitro-protocol",
   "description": "A protocol for state channel networks",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "author": "statechannels",
   "browser": "dist/nitro-protocol.min.js",
   "bugs": "https://github.com/statechannels/monorepo/issues",
@@ -14,8 +14,8 @@
   },
   "devDependencies": {
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
-    "@statechannels/devtools": "0.5.4",
-    "@statechannels/jest-gas-reporter": "0.4.8",
+    "@statechannels/devtools": "0.5.5",
+    "@statechannels/jest-gas-reporter": "0.4.9",
     "@types/eslint": "7.2.3",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "26.0.15",

@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.13.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.12...@statechannels/wallet-core@0.13.0) (2021-02-11)
+
+
+### Bug Fixes
+
+* add nonce to channel proposals to handle out-of-sync / adverse network situations ([9f79bc4](https://github.com/statechannels/statechannels/commit/9f79bc4a556703f3cf40c3f44fba3f0d6c28ae8e))
+* make participants a required property ([86ea421](https://github.com/statechannels/statechannels/commit/86ea421552045b837906383ef04c51c76f41bbf1))
+
+
+### Features
+
+* call challenge with initial support state ([eb3c85c](https://github.com/statechannels/statechannels/commit/eb3c85cfdcb4a5df1ef91d9f8177f482ea4b327a))
+* Defund Channel Protocol ([#3133](https://github.com/statechannels/statechannels/issues/3133)) ([8e7ba80](https://github.com/statechannels/statechannels/commit/8e7ba808578f498debeea874730846697ecf6edf))
+* store challenge state ([#3127](https://github.com/statechannels/statechannels/issues/3127)) ([7268ac1](https://github.com/statechannels/statechannels/commit/7268ac1f088b0ecaba8014cc5fa467533c7bb1c5))
+
+
+
+
+
 # [0.12.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.12...@statechannels/wallet-core@0.12.0) (2021-02-05)
 
 

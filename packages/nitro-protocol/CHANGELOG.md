@@ -3,6 +3,46 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.16.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.11.1...@statechannels/nitro-protocol@0.16.0) (2021-02-11)
+
+
+### Bug Fixes
+
+* correct nitro-protocol dependencies ([84df179](https://github.com/statechannels/monorepo/commit/84df17933738a0c7719cf586146321a3fc34468f))
+* don't use unsupported chars ([850fb50](https://github.com/statechannels/monorepo/commit/850fb509edb23a4926837bc05af0d17c7e3a3b9b))
+* ensure isExternalDestination is exported ([af4a741](https://github.com/statechannels/monorepo/commit/af4a74137ec5925fa1d300aa6a544950bf6d3730))
+* move TokenArtifact to TestContractArtifacts ([d236f6f](https://github.com/statechannels/monorepo/commit/d236f6ff7bb44aecde2a10312cd5a2f730fa42c7))
+* prevent underflow ([6522107](https://github.com/statechannels/monorepo/commit/65221077c1a9045f0efae7c1b18714b6e48ae251))
+* pushOutcome transaction creator should not assume challenger address ([4eb1114](https://github.com/statechannels/monorepo/commit/4eb1114b9a88320153107a5acf009e929af951e1))
+* update reason strings in client and tests ([b0aa183](https://github.com/statechannels/monorepo/commit/b0aa183f1dd1ece9ca2acf11082db01c2b6d6dca))
+
+
+### Features
+
+* accept a list of indices in transfer method ([#3049](https://github.com/statechannels/monorepo/issues/3049)) ([30fdf52](https://github.com/statechannels/monorepo/commit/30fdf520b3890f4d22ef4bbb721580702192c5d0))
+* add a mocked out chain service channelFinalized API ([2e31d92](https://github.com/statechannels/monorepo/commit/2e31d92f8e0997cf9ca9924ff6f38d2ba9530dd4))
+* add computeNewAllocationWithGuarantee() ([11f5fe7](https://github.com/statechannels/monorepo/commit/11f5fe7bd38e0be96b3e46f769c0cb2079583711))
+* add requieValidProtocolTransition fn ([fdb8725](https://github.com/statechannels/monorepo/commit/fdb8725b6654b393413ebc14efd57d2036ac1bca))
+* basic chain service challenging ([0f7b66f](https://github.com/statechannels/monorepo/commit/0f7b66fa97fba539cf56837c9e68fe3013b979ae))
+* claim method acceps indices array ([7137255](https://github.com/statechannels/monorepo/commit/7137255542a7438545d362a7281c0a148b388755))
+* ensure all reason strings are distinct ([1c87198](https://github.com/statechannels/monorepo/commit/1c8719894de88d57012ebd7654ba6ba13e13604f))
+* export CountingAppArtifact ([3758f6c](https://github.com/statechannels/monorepo/commit/3758f6ca24c49ef17073c64f8ef96598f234f45c))
+* reason string if FMA.validTrans = false ([46d1503](https://github.com/statechannels/monorepo/commit/46d15035302a3ec28a24ce8d06089e41561f48b7))
+* replace AssetTransferred with AllocationUpdated event ([#3074](https://github.com/statechannels/monorepo/issues/3074)) ([bef8424](https://github.com/statechannels/monorepo/commit/bef8424605e7bb956d7bdc971ac4eae1628f6bfb))
+
+
+### Performance Improvements
+
+* all reason strings 32 bytes or less ([f903269](https://github.com/statechannels/monorepo/commit/f903269957e0473bb70a957862e6841581ad8c74))
+* do not rehash unecessary data ([89f5f26](https://github.com/statechannels/monorepo/commit/89f5f2629302f6c2eb5a4c112e5f1582467c889c))
+* remove claimAll from AssetHolder interface ([#3108](https://github.com/statechannels/monorepo/issues/3108)) ([63c0150](https://github.com/statechannels/monorepo/commit/63c01508aec80e91a3dfff7a06e2dfd0f3a651e2))
+* remove transferAll from API ([59284d9](https://github.com/statechannels/monorepo/commit/59284d92d856881913fcb7f2f49b0401cac64473))
+* shorten revert-reason ([5847227](https://github.com/statechannels/monorepo/commit/5847227a5d7c7590a73446968d09ce23c3d9fd43))
+
+
+
+
+
 # [0.15.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.11.1...@statechannels/nitro-protocol@0.15.0) (2021-02-05)
 
 

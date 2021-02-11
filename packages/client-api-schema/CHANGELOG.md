@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.10.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.5.1...@statechannels/client-api-schema@0.10.0) (2021-02-11)
+
+
+### Features
+
+* implement challenge status ([92002ad](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/92002ad3849a4e877dfc55dfb184a836c432f7d4))
+* require challenge duration ([ca92e6c](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/ca92e6c6e0b2e019686ff1caf54f452f6e096fe5))
+
+
+
+
+
 # [0.9.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.5.1...@statechannels/client-api-schema@0.9.0) (2021-02-05)
 
 
