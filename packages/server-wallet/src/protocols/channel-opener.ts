@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {Transaction} from 'knex';
 
 import {Store} from '../wallet/store';
-import {DBOpenChannelObjective} from '../models/objective';
+import {DBOpenChannelObjective, ObjectiveModel} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
@@ -38,34 +38,48 @@ export class ChannelOpener {
       if (!channel) {
         throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
       }
+      // always queue the channel if we've potentially touched it
+      response.queueChannel(channel);
 
       // if we haven't signed the pre-fund, sign it
       if (!channel.prefundSigned) {
         await this.signPrefundSetup(channel, response, tx);
       }
 
-      // if we don't have a complete preFundSetup, we're done for now
-      if (!channel.preFundComplete) {
-        response.queueChannel(channel); // always queue the channel if we've potentially touched it
-        return;
-      }
+      // We might be waitingFor theirPreFundState
+      let waitingFor = 'theirPreFundState';
+
+      // if we don't have a complete preFundSetup, we are still waitingFor theirPreFundState and cannot progress
+      if (!channel.preFundComplete) return;
+
+      // otherwise, we might be waiting on funding
+      waitingFor = 'funding';
 
       // if we have a full pre fund setup, delegate to the funding process to (a) see if
       // the channel is funded, and (b) take action if not
       const funded = await this.crankChannelFunder(objective, channel, response, tx);
+
+      // if the channel is not funded, we are still waitingFor funding and cannot progress
+      if (!funded) return;
+
+      // otherwise, we might be waitingFor theirPostFundState
+      waitingFor = 'theirPostFundState';
 
       // if the channel is funded and I haven't signed the post-fund, sign it
       if (funded && !channel.postfundSigned) {
         await this.signPostfundSetup(channel, response, tx);
       }
 
-      if (channel.postFundComplete) {
-        objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+      // If we are still waitingFor theirPostFundState, we cannot complete
+      if (!channel.postFundComplete) return;
 
-        response.queueSucceededObjective(objective);
+      waitingFor = '';
+      objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+      response.queueSucceededObjective(objective);
+
+      if (objective.waitingFor !== waitingFor) {
+        await ObjectiveModel.updateWaitingFor(objective.objectiveId, waitingFor, tx);
       }
-
-      response.queueChannel(channel); // always queue the channel if we've potentially touched it
     });
   }
 
