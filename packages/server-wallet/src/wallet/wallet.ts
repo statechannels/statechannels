@@ -876,7 +876,9 @@ export class SingleThreadedWallet
       storedObjectives,
     } = await this.store.pushMessage(wirePayload);
 
-    // HACK: This will possibly re-emit `'objectiveStarted'` multiple times
+    // HACK (1): This may cause the wallet to re-emit `'objectiveStarted'` multiple times
+    // For instance, a peer who sends me an objective `o`, and then triggers `syncObjectives`
+    // including `o`, will cause my wallet to emit `'objectiveStarted'` for `o` twice.
     response.createdObjectives = storedObjectives;
 
     const channelIdsFromRequests: Bytes32[] = [];
