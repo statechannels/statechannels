@@ -62,12 +62,16 @@ describe('Objective > insert', () => {
     expect(createdAt.getTime() < after).toBe(true);
   });
 
-  it('updates the progressLastMadeAt timestamp on an objective when progressMade is called', async () => {
+  it('updates the progressLastMadeAt timestamp on an objective when updateWaitingFor is called', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
     const {objectiveId} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
 
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
-    const {progressLastMadeAt} = await ObjectiveModel.progressMade(objectiveId, knex);
+    const {progressLastMadeAt} = await ObjectiveModel.updateWaitingFor(
+      objectiveId,
+      'somethingElse',
+      knex
+    );
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
 
     expect(progressLastMadeAt.getTime() > before).toBe(true);

@@ -33,6 +33,7 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
+  waitingFor: string;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
@@ -91,6 +92,7 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
+  readonly waitingFor!: DBObjective['waitingFor'];
   createdAt!: Date;
   progressLastMadeAt!: Date;
 
@@ -139,6 +141,7 @@ export class ObjectiveModel extends Model {
           data: objectiveToBeStored.data,
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
+          waitingFor: '',
         })
         .returning('*')
         .first() // This ensures that the returned object undergoes any type conversion performed during insert
@@ -185,11 +188,15 @@ export class ObjectiveModel extends Model {
       .first();
   }
 
-  static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+  static async updateWaitingFor(
+    objectiveId: string,
+    waitingFor: string,
+    tx: TransactionOrKnex
+  ): Promise<DBObjective> {
     return (
       await ObjectiveModel.query(tx)
         .findById(objectiveId)
-        .patch({progressLastMadeAt: new Date()})
+        .patch({progressLastMadeAt: new Date(), waitingFor})
         .returning('*')
         .first()
     ).toObjective();
