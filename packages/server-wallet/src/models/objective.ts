@@ -166,6 +166,11 @@ export class ObjectiveModel extends Model {
     return model.toObjective();
   }
 
+  static async forIds(objectiveIds: string[], tx: TransactionOrKnex): Promise<DBObjective[]> {
+    const model = await ObjectiveModel.query(tx).findByIds(objectiveIds);
+    return model.map(m => m.toObjective());
+  }
+
   static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
     await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
   }
