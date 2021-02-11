@@ -90,7 +90,6 @@ export class ChannelOpener {
 
       async function updateWaitingFor() {
         if (objective.waitingFor !== waitingFor) {
-          console.log('updating waiting for to ', waitingFor);
           await ObjectiveModel.updateWaitingFor(objective.objectiveId, waitingFor, tx);
         }
       }
