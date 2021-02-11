@@ -3,7 +3,6 @@ import {parentPort, isMainThread, workerData, threadId} from 'worker_threads';
 import {left, right} from 'fp-ts/lib/Either';
 
 import {createLogger} from '../../logger';
-import {Wallet} from '../..';
 import {timerFactory} from '../../metrics';
 import {ServerWalletConfig} from '../../config';
 import {SingleThreadedWallet} from '..';
@@ -33,7 +32,7 @@ async function startWorker() {
   const logger = createLogger(walletConfig);
 
   logger.debug(`Worker %o starting`, threadId);
-  const wallet = (await Wallet.create(walletConfig)) as SingleThreadedWallet;
+  const wallet = await SingleThreadedWallet.create(walletConfig);
 
   const events = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
   events.forEach(name => wallet.on(name, relayWalletEvents(name)));
