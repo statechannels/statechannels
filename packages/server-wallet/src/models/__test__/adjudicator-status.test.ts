@@ -43,7 +43,7 @@ describe('AdjudicatorStatus model', () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     await AdjudicatorStatusModel.insertAdjudicatorStatus(knex, c.channelId, 5, [challengeState]);
-    await AdjudicatorStatusModel.setFinalized(knex, c.channelId, 2, 10);
+    await AdjudicatorStatusModel.setFinalized(knex, c.channelId, 2, 10, 5);
 
     const result = await AdjudicatorStatusModel.getAdjudicatorStatus(knex, c.channelId);
 
