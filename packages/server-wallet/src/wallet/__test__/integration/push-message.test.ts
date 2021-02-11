@@ -333,7 +333,7 @@ describe('when the application protocol returns an action', () => {
       const callback = jest.fn();
       wallet.once('objectiveStarted', callback);
 
-      const p = wallet.pushMessage({
+      const result = await wallet.pushMessage({
         walletVersion: WALLET_VERSION,
         signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
         objectives: [
@@ -347,7 +347,7 @@ describe('when the application protocol returns an action', () => {
           },
         ],
       });
-      await expect(p.then(r => r.newObjectives)).resolves.toHaveLength(1);
+      expect(result.newObjectives).toHaveLength(1);
       expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'CloseChannel'}));
     }
   );
