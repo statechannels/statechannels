@@ -16,6 +16,13 @@ describe('AdjudicatorStatus model', () => {
 
   afterAll(async () => await knex.destroy());
 
+  it('inserts an adjudicator status row if the row does not exist', async () => {
+    const c = channel();
+    await Channel.query(knex).insert(c);
+    const result = await AdjudicatorStatusModel.setFinalized(knex, c.channelId, 5, 5, 5);
+    expect(result).toMatchObject({channelMode: 'Finalized'});
+  });
+
   it('returns an active challenge status when the challenge is not finalized (finalizesAt>blockNumber)', async () => {
     const c = channel();
     const challengeState = stateSignedBy([alice()])();
