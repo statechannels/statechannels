@@ -749,9 +749,16 @@ export class Store {
   async markAdjudicatorStatusAsFinalized(
     channelId: string,
     blockNumber: number,
-    blockTimestamp: number
+    blockTimestamp: number,
+    finalizedAt: number
   ): Promise<void> {
-    await AdjudicatorStatusModel.setFinalized(this.knex, channelId, blockNumber, blockTimestamp);
+    await AdjudicatorStatusModel.setFinalized(
+      this.knex,
+      channelId,
+      blockNumber,
+      blockTimestamp,
+      finalizedAt
+    );
   }
 
   async updateTransferredOut(
