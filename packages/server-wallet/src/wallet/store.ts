@@ -335,7 +335,9 @@ export class Store {
       return {
         channelIds: stateChannelIds.concat(objectiveChannelIds),
         channelResults,
-        // HACK: This will possibly cause the wallet to re-emit `'objectiveStarted'` multiple times
+        // HACK (1): This may cause the wallet to re-emit `'objectiveStarted'` multiple times
+        // For instance, a peer who sends me an objective `o`, and then triggers `syncObjectives`
+        // including `o`, will cause my wallet to emit `'objectiveStarted'` for `o` twice.
         storedObjectives,
       };
     });
