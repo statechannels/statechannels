@@ -31,7 +31,7 @@ import {DBAdmin} from '../../../db-admin/db-admin';
 import {LedgerRequest} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/wallet-error';
-import {Wallet} from '../..';
+import {MultiThreadedWallet, Wallet} from '../..';
 import {
   getChannelResultFor,
   getSignedStateFor,
@@ -44,14 +44,20 @@ const dropNonVariables = (s: SignedState): any =>
 jest.setTimeout(20_000);
 
 let wallet: Wallet;
+let multiThreadedWallet: MultiThreadedWallet;
 
 beforeAll(async () => {
   await DBAdmin.migrateDatabase(defaultTestConfig());
   wallet = await Wallet.create(defaultTestConfig());
+
+  multiThreadedWallet = await MultiThreadedWallet.create(
+    defaultTestConfig({workerThreadAmount: 2})
+  );
 });
 
 afterAll(async () => {
   await wallet.destroy();
+  await multiThreadedWallet.destroy();
 });
 beforeEach(async () => seedAlicesSigningWallet(wallet.knex));
 
@@ -318,23 +324,23 @@ describe('when the application protocol returns an action', () => {
     });
   });
 
-  it.each([0, 2])(
-    'emits objectiveStarted when a wallet with %i worker threads receives a new objective',
-    async workerThreadAmount => {
-      wallet = await Wallet.create(defaultTestConfig({workerThreadAmount}));
+  it.each(['with', 'without'] as const)(
+    'emits objectiveStarted when a wallet %s worker threads receives a new objective',
+    async withOrWithout => {
+      const _wallet: Wallet = withOrWithout === 'with' ? wallet : multiThreadedWallet;
       const turnNum = 6;
       const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
 
       const c = channel({vars: [addHash(state)]});
-      await Channel.query(wallet.knex).insert(c);
+      await Channel.query(_wallet.knex).insert(c);
 
       const {channelId} = c;
       const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
 
       const callback = jest.fn();
-      wallet.once('objectiveStarted', callback);
+      _wallet.once('objectiveStarted', callback);
 
-      const result = await wallet.pushMessage({
+      const result = await _wallet.pushMessage({
         walletVersion: WALLET_VERSION,
         signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
         objectives: [
