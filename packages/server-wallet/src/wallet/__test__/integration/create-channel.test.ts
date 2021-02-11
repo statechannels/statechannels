@@ -78,6 +78,7 @@ describe('happy path', () => {
       progressLastMadeAt: expect.any(Date),
       status: 'approved',
       participants: [],
+      waitingFor: '',
       type: 'OpenChannel',
       data: expect.anything(),
     });
