@@ -42,17 +42,17 @@ export class ChannelCloser {
           return;
         }
 
+        if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
+          response.queueChannel(channel);
+          return;
+        }
+
         const defunder = Defunder.create(
           this.store,
           this.chainService,
           this.logger,
           this.timingMetrics
         );
-
-        if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
-          response.queueChannel(channel);
-          return;
-        }
 
         if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
           response.queueChannel(channel);
