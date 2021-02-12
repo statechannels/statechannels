@@ -32,10 +32,6 @@ export class ChannelCloser {
     const channelToLock = objective.data.targetChannelId;
 
     await this.store.lockApp(channelToLock, async (tx, channel) => {
-      if (!channel) {
-        throw new Error('Channel must exist');
-      }
-
       try {
         if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
           response.queueChannel(channel);
