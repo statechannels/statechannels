@@ -66,8 +66,6 @@ The following diagram describes the various components in the architecture. The 
                                                       +------------------+
 ```
 
-TODO: show external messages separately
-
 # The responsibilities of a state channel wallet
 
 As in the Hippocratic oath: /primum non nocere,/ (first, do no harm).
@@ -122,17 +120,22 @@ It has a _name_ and _parameters_. The parameters include a _scope_, which is a l
 Objectives are spawned:
 
 1. During request handling, i.e. during an API call. The API call resolves when the objective is committed to the wallet's store.
+
+Some objecties are "shared" and involve other participants. They are therefore communicated across "the wire" to other wallets. Therefore we also have objectives being spawned in a wallet:
+
 2. When a message is received from a counterparty. An implementation detail: this is also received via a (special) API method `pushMessage`.
 
 ### Approval
 
+Approval of an objective requires all channels in its scope to be known to the wallet (i.e.) in it's store.
+
 Approval will be _automatic_ if the objective is spawned via 1. Otherwise, if it is spawned via 2, the app will be notified of a new objective and invited to approve it.
 
-To approve an objective is to transfer ownership of those channels to the objective for the lifetime of the objective or until another more important objective is approved that takes ownership. This means that updates cannot be made to a channel in the scope of an approved objective that is still alive.
+To approve an objective is to transfer ownership of those channels to the objective for the lifetime of the objective or until another more important objective is approved that takes ownership. This means that updates cannot be made to a channel in the scope of an approved objective that is still alive. This includes updates by any other objectives as well as explicit updates from the app.
 
 ### Cranking
 
-Objectives are _cranked_. This means that when certain events happen, the wallet attempts to make progress toward the Objective goal. It does this by reading relevant, scoped data from the database, deciding on an action to take (signing a state or a transaction) and then committing the result.
+Aproved Objectives are _cranked_. This means that when certain events happen, the wallet attempts to make progress toward the Objective goal. It does this by reading relevant, scoped data from the database, deciding on an action to take (signing a state or a transaction) and then committing the result.
 
 In practice, a _cranker_ is a function that accepts a store and a _response_ object. It starts a database transaction; reads from the store; decides whether to write to the database; writes to the database; mutates the response and then finishes the transaction.
 
