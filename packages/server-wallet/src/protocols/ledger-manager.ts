@@ -47,61 +47,67 @@ export class LedgerManager {
   async crank(ledgerChannelId: string, response: WalletResponse): Promise<boolean> {
     let requiresAnotherCrankUponCompletion = false;
 
-    await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
-      // TODO: Move these checks inside the DB query when fetching ledgers to process
-      if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
-        return;
-      }
+    await this.store
+      .lockApp(ledgerChannelId, async (tx, channel) => {
+        // TODO: Move these checks inside the DB query when fetching ledgers to process
+        if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
+          return;
+        }
 
-      // The following behavior is specific to CHALLENGING_V0 requirements
-      // It will eventually be removed
-      // START CHALLENGING_VO
-      if (channel.initialSupport.length === 0 && channel.isSupported) {
-        await this.store.setInitialSupport(channel.channelId, channel.support, tx);
-      }
-      // END CHALLENGING_VO
+        // The following behavior is specific to CHALLENGING_V0 requirements
+        // It will eventually be removed
+        // START CHALLENGING_VO
+        if (channel.initialSupport.length === 0 && channel.isSupported) {
+          await this.store.setInitialSupport(channel.channelId, channel.support, tx);
+        }
+        // END CHALLENGING_VO
 
-      let protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+        let protocolState = await getProcessLedgerQueueProtocolState(
+          this.store,
+          ledgerChannelId,
+          tx
+        );
 
-      if (!hasUnhandledLedgerRequests(protocolState)) {
+        if (!hasUnhandledLedgerRequests(protocolState)) {
+          if (!requiresAnotherCrankUponCompletion) {
+            // pessimistically add state and proposal to outbox
+            await this.addStateAndProposalToOutbox(protocolState, response);
+          }
+          response.queueChannelState(protocolState.fundingChannel);
+          return;
+        }
+
+        const crankAgain = await this.markIncludedRequestsAsComplete(protocolState, tx);
+        requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain;
+
+        // refresh the protocol state to be safe
+        // TODO: remove if possible
+        protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+
+        if (finishedExchangingProposals(protocolState)) {
+          const crankAgain2 = await this.exchangeSignedLedgerStates(protocolState, response, tx);
+          requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain2;
+        }
+
+        // refresh the protocol state to be safe
+        // TODO: remove if possible
+        protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+
+        // exchange proposals
+        const crankAgain3 = await this.exchangeProposals(protocolState, tx);
+        requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain3;
+
+        // refresh the protocol state to be safe
+        // TODO: remove if possible
+        protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+
         if (!requiresAnotherCrankUponCompletion) {
           // pessimistically add state and proposal to outbox
           await this.addStateAndProposalToOutbox(protocolState, response);
         }
         response.queueChannelState(protocolState.fundingChannel);
-        return;
-      }
-
-      const crankAgain = await this.markIncludedRequestsAsComplete(protocolState, tx);
-      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain;
-
-      // refresh the protocol state to be safe
-      // TODO: remove if possible
-      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
-
-      if (finishedExchangingProposals(protocolState)) {
-        const crankAgain2 = await this.exchangeSignedLedgerStates(protocolState, response, tx);
-        requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain2;
-      }
-
-      // refresh the protocol state to be safe
-      // TODO: remove if possible
-      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
-
-      // exchange proposals
-      const crankAgain3 = await this.exchangeProposals(protocolState, tx);
-      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain3;
-
-      // refresh the protocol state to be safe
-      // TODO: remove if possible
-      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
-
-      if (!requiresAnotherCrankUponCompletion) {
-        // pessimistically add state and proposal to outbox
-        await this.addStateAndProposalToOutbox(protocolState, response);
-      }
-      response.queueChannelState(protocolState.fundingChannel);
-    });
+      })
+      .catch(err => this.logger.error({err, ledgerChannelId}, 'Cannot crank LedgerManager'));
 
     return requiresAnotherCrankUponCompletion;
   }

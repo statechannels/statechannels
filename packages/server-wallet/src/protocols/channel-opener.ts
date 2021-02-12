@@ -32,41 +32,43 @@ export class ChannelOpener {
   public async crank(objective: DBOpenChannelObjective, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
-    await this.store.transaction(async tx => {
-      const channel = await this.store.getAndLockChannel(channelToLock, tx);
+    await this.store
+      .transaction(async tx => {
+        const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
-      if (!channel) {
-        throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
-      }
+        if (!channel) {
+          throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
+        }
 
-      // if we haven't signed the pre-fund, sign it
-      if (!channel.prefundSigned) {
-        await this.signPrefundSetup(channel, response, tx);
-      }
+        // if we haven't signed the pre-fund, sign it
+        if (!channel.prefundSigned) {
+          await this.signPrefundSetup(channel, response, tx);
+        }
 
-      // if we don't have a complete preFundSetup, we're done for now
-      if (!channel.preFundComplete) {
+        // if we don't have a complete preFundSetup, we're done for now
+        if (!channel.preFundComplete) {
+          response.queueChannel(channel); // always queue the channel if we've potentially touched it
+          return;
+        }
+
+        // if we have a full pre fund setup, delegate to the funding process to (a) see if
+        // the channel is funded, and (b) take action if not
+        const funded = await this.crankChannelFunder(objective, channel, response, tx);
+
+        // if the channel is funded and I haven't signed the post-fund, sign it
+        if (funded && !channel.postfundSigned) {
+          await this.signPostfundSetup(channel, response, tx);
+        }
+
+        if (channel.postFundComplete) {
+          objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+
+          response.queueSucceededObjective(objective);
+        }
+
         response.queueChannel(channel); // always queue the channel if we've potentially touched it
-        return;
-      }
-
-      // if we have a full pre fund setup, delegate to the funding process to (a) see if
-      // the channel is funded, and (b) take action if not
-      const funded = await this.crankChannelFunder(objective, channel, response, tx);
-
-      // if the channel is funded and I haven't signed the post-fund, sign it
-      if (funded && !channel.postfundSigned) {
-        await this.signPostfundSetup(channel, response, tx);
-      }
-
-      if (channel.postFundComplete) {
-        objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
-
-        response.queueSucceededObjective(objective);
-      }
-
-      response.queueChannel(channel); // always queue the channel if we've potentially touched it
-    });
+      })
+      .catch(err => this.logger.error({err, objective}, 'Cannot crank ChannelOpener'));
   }
 
   private async crankChannelFunder(

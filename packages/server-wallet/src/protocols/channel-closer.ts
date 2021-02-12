@@ -31,8 +31,8 @@ export class ChannelCloser {
   public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
 
-    await this.store.lockApp(channelToLock, async (tx, channel) => {
-      try {
+    await this.store
+      .lockApp(channelToLock, async (tx, channel) => {
         if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
           response.queueChannel(channel);
           return;
@@ -56,11 +56,8 @@ export class ChannelCloser {
         }
 
         await this.completeObjective(objective, channel, tx, response);
-      } catch (error) {
-        this.logger.error({error}, 'Error taking a protocol step');
-        await tx.rollback(error);
-      }
-    });
+      })
+      .catch(err => this.logger.error({err, objective}, 'Cannot crank ChannelCloser'));
   }
 
   private async areAllFinalStatesSigned(
