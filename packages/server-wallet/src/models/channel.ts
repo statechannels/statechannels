@@ -13,6 +13,7 @@ import {
   checkThat,
   isSimpleAllocation,
   BN,
+  unreachable,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -427,15 +428,15 @@ export class Channel extends Model implements ChannelColumns {
 
   // Does the channel have funds to pay out to all allocation items?
   public get isFullyDirectFunded(): boolean {
-    return this.isDirectFunded(true);
+    return this.isDirectFunded('FullyFunded');
   }
 
   // Does the channel have any funds that I can claim?
   public get isPartlyDirectFunded(): boolean {
-    return this.isDirectFunded();
+    return this.isDirectFunded('PartlyFunded');
   }
 
-  private isDirectFunded(fully?: boolean): boolean {
+  private isDirectFunded(threshold: 'FullyFunded' | 'PartlyFunded'): boolean {
     const outcome = this.supported?.outcome;
     if (!outcome) {
       throw new Error(`Channel passed to isDirectFunded has no supported state`);
@@ -445,12 +446,17 @@ export class Channel extends Model implements ChannelColumns {
     const channelFunds = this.funding.find(f => f.assetHolder === assetHolderAddress);
     if (!channelFunds) return false;
 
-    if (fully) {
-      const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
-      return BN.gte(channelFunds.amount, fullFunding);
-    } else {
-      const fundingBeforeMe = this.fundingMilestones[0];
-      return BN.gt(channelFunds.amount, fundingBeforeMe);
+    switch (threshold) {
+      case 'FullyFunded': {
+        const fullFunding = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+        return BN.gte(channelFunds.amount, fullFunding);
+      }
+      case 'PartlyFunded': {
+        const fundingBeforeMe = this.fundingMilestones[0];
+        return BN.gt(channelFunds.amount, fundingBeforeMe);
+      }
+      default:
+        unreachable(threshold);
     }
   }
 
