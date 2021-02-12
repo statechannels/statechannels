@@ -34,25 +34,36 @@ A state channel wallet has the following _runtime dependencies_:
 The following diagram describes the various components in the architecture. The scope of this document is limited to the components left of the dividing line.
 
 ```
-                                      |
-                                      |
-                    +---------------+ |      +------------+
-                    |               | |      |            |
-                    | ChainWatcher  <--------> Blockchain |
-                    |               | |      |            |
-                    +-------^-------+ |      +------------+
-                            |         |
-                            |         |
-                            |         |
-                     +------v-----+   |              +----------+
-   +-----------+     |            |   |              |          |
-   |           |     |            |   |  API calls   |          |
-   |   Store   <----->   Wallet   <-------------------   App    |
-   |           |     |            |   |              |          |
-   +-----------+     |            ------------------->          |
-                     +------------+   |  Events      +----------+
-                                      |
-                                      |
+                                                    |
+                     +-----------------+            |     +--------------+
+                     |                 |            |     |              |
+                     |  CHAIN-SERVICE  <------------------>  BLOCKCHAIN  |
+                     |                 |            |     |              |
+                     +--------^--------+            |     +--------------+
+                              |                     |
+                              |                     |
+                        +-----v----+                |     +----------+
+                        |          |                |     |          |
+                        |          |                |     |          |
+                        |          |  API Request   |     |          |
+                        |          <-----------------------          |
+                        |          |  API Response  |     |          |
+         +---------+    |          ----------------------->          |
+         |         |    |          |                |     |          |
+         |  STORE  <--->|  WALLET  |  Events        |     |   APP    |
+         |         |    |          ----------------------->          |
+         +---------+    |          |                |     |          |
+                        |          |                |     |          |
+                        |          |  pushMessage   |     |          |
+                        |          <---------------------------+     |
+                        |          |                |     |    |     |
+                        |          |                |     |    |     |
+                        +----------+                |     +----|-----+
+                                                    |          |
+                                                    | +--------|---------+
+                                                    | |  COUNTERPARTY    |
+                                                    | |  WALLETS         |
+                                                      +------------------+
 ```
 
 TODO: show external messages separately
