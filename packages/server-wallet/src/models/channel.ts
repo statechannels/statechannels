@@ -452,7 +452,7 @@ export class Channel extends Model implements ChannelColumns {
         return BN.gte(channelFunds.amount, fullFunding);
       }
       case 'PartlyFunded': {
-        const fundingBeforeMe = this.fundingMilestones[0];
+        const fundingBeforeMe = this.fundingMilestones.targetBefore;
         return BN.gt(channelFunds.amount, fundingBeforeMe);
       }
       default:
@@ -468,7 +468,11 @@ export class Channel extends Model implements ChannelColumns {
    *
    * @param channel
    */
-  public get fundingMilestones(): [Uint256, Uint256, Uint256] {
+  public get fundingMilestones(): {
+    targetBefore: Uint256;
+    targetAfter: Uint256;
+    targetTotal: Uint256;
+  } {
     /**
      * The below logic assumes:
      *  1. Each destination occurs at most once.
@@ -493,9 +497,9 @@ export class Channel extends Model implements ChannelColumns {
 
     const targetAfter = BN.add(targetBefore, myAllocationItem.amount);
 
-    const total = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+    const targetTotal = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
 
-    return [targetBefore, targetAfter, total];
+    return {targetBefore, targetAfter, targetTotal};
   }
 
   private mySignature(signatures: SignatureEntry[]): boolean {

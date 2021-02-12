@@ -80,9 +80,9 @@ const testChannelObj = TestChannel.create({aBal: 5, bBal: 3});
 let testChannel: Channel;
 let store: Store;
 
-function compareMilestones(milestoneStr: string[], milestoneNum: number[]) {
-  expect(milestoneStr.map(BN.from)).toEqual(milestoneNum.map(BN.from));
-}
+const toBn = (obj: {[key: string]: string | number}) =>
+  Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, BN.from(v)]));
+
 describe('Channel funding', () => {
   beforeEach(async () => {
     await DBAdmin.truncateDataBaseFromKnex(knex);
@@ -101,7 +101,13 @@ describe('Channel funding', () => {
       states: [0, 1],
     });
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    compareMilestones(testChannel.fundingMilestones, [0, 5, 8]);
+    expect(toBn(testChannel.fundingMilestones)).toEqual(
+      toBn({
+        targetBefore: 0,
+        targetAfter: 5,
+        targetTotal: 8,
+      })
+    );
   });
 
   it('Funding milestones correct for B', async () => {
@@ -110,7 +116,13 @@ describe('Channel funding', () => {
       states: [0, 1],
     });
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
-    compareMilestones(testChannel.fundingMilestones, [5, 8, 8]);
+    expect(toBn(testChannel.fundingMilestones)).toEqual(
+      toBn({
+        targetBefore: 5,
+        targetAfter: 8,
+        targetTotal: 8,
+      })
+    );
   });
 
   it('returns the correct funding status for the first participant', async () => {
