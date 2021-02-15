@@ -13,7 +13,7 @@ import {
   MockChainService,
 } from '../../chain-service';
 import {WalletResponse} from '../../wallet/wallet-response';
-import {ChannelDefunder} from '../defund-channel';
+import {ChannelDefunder, WaitingFor} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
@@ -198,7 +198,7 @@ function createPendingObjective(channelId: string): DBDefundChannelObjective {
     type: 'DefundChannel',
     status: 'pending',
     participants: [],
-    waitingFor: '',
+    waitingFor: WaitingFor.transactionSubmission,
     objectiveId: ['DefundChannel', channelId].join('-'),
     data: {targetChannelId: channelId},
     createdAt: new Date(Date.now()),

@@ -5,6 +5,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {DBOpenChannelObjective} from '../../../models/objective';
+import {WaitingFor} from '../../../protocols/channel-opener';
 
 let w: Wallet;
 beforeEach(async () => {
@@ -78,7 +79,7 @@ describe('happy path', () => {
       progressLastMadeAt: expect.any(Date),
       status: 'approved',
       participants: [],
-      waitingFor: '',
+      waitingFor: WaitingFor.theirPreFundSetup,
       type: 'OpenChannel',
       data: expect.anything(),
     });

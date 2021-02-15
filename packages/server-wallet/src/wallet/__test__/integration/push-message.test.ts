@@ -37,6 +37,7 @@ import {
   getSignedStateFor,
   getRequestFor,
 } from '../../../__test__/test-helpers';
+import {WaitingFor} from '../../../protocols/channel-opener';
 
 const dropNonVariables = (s: SignedState): any =>
   _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
@@ -294,6 +295,7 @@ describe('when the application protocol returns an action', () => {
           fundingStrategy: 'Fake', // Could also be Direct, funding is empty
           role: 'app',
         },
+        waitingFor: WaitingFor.theirPreFundSetup,
       },
       wallet.knex
     );
@@ -548,6 +550,7 @@ describe('ledger funded app scenarios', () => {
           fundingLedgerChannelId: ledger.channelId,
           role: 'app',
         },
+        waitingFor: WaitingFor.theirPreFundSetup,
       },
       wallet.knex
     );
