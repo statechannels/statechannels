@@ -1,8 +1,8 @@
-import {makeAddress, Objective, State} from '@statechannels/wallet-core';
+import {makeAddress, State} from '@statechannels/wallet-core';
 
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
-import {DBDefundChannelObjective, DBObjective} from '../../models/objective';
+import {DBDefundChannelObjective} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
