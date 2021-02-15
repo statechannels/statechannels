@@ -618,13 +618,6 @@ export class SingleThreadedWallet
    */
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
     const response = WalletResponse.initialize();
-    const channel = await this.store.getChannelState(channelId);
-
-    if (!channel)
-      throw new JoinChannel.JoinChannelError(
-        JoinChannel.JoinChannelError.reasons.channelNotFound,
-        channelId
-      );
 
     const objectives = await this.store.getObjectives([channelId]);
 
