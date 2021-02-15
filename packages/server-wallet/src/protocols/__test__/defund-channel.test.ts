@@ -1,8 +1,8 @@
-import {makeAddress, State} from '@statechannels/wallet-core';
+import {makeAddress, Objective, State} from '@statechannels/wallet-core';
 
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
-import {DBDefundChannelObjective} from '../../models/objective';
+import {DBDefundChannelObjective, DBObjective} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -73,7 +73,7 @@ beforeEach(async () => {
 describe('when there is no challenge or finalized channel', () => {
   it('should do nothing', async () => {
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await crankChannelDefunder(objective);
 
     // Check the results
     expect(pushSpy).not.toHaveBeenCalled();
@@ -85,7 +85,7 @@ describe('when there is an active challenge', () => {
   it('should submit a conclude transaction if there is a conclusion proof', async () => {
     await setAdjudicatorStatus('active', testChan2.channelId);
     // Crank the protocol
-    await channelDefunder.crank(objective2, WalletResponse.initialize());
+    await crankChannelDefunder(objective2);
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective2.objectiveId);
@@ -98,7 +98,7 @@ describe('when there is an active challenge', () => {
     await setAdjudicatorStatus('active', testChan.channelId);
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await crankChannelDefunder(objective);
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective.objectiveId);
@@ -120,7 +120,7 @@ describe('when the channel is finalized on chain', () => {
     await setAdjudicatorStatus('finalized', testChan.channelId, challengeState);
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await crankChannelDefunder(objective);
 
     // Check the results
     expect(pushSpy).toHaveBeenCalledWith(
@@ -136,7 +136,7 @@ describe('when the channel is finalized on chain', () => {
     await setAdjudicatorStatus('finalized', testChan.channelId);
 
     // Crank the protocol
-    await channelDefunder.crank(objective, WalletResponse.initialize());
+    await crankChannelDefunder(objective);
 
     // Check the results
     expect(withdrawSpy).not.toHaveBeenCalled();
@@ -159,9 +159,7 @@ describe('when the channel is finalized on chain', () => {
     await setAdjudicatorStatus('finalized', testChan.channelId, challengeState);
 
     // Crank the protocol
-    await expect(channelDefunder.crank(objective, WalletResponse.initialize())).rejects.toThrow(
-      'Failed to submit transaction'
-    );
+    await expect(crankChannelDefunder(objective)).rejects.toThrow('Failed to submit transaction');
 
     // Check the results
     const reloadedObjective = await store.getObjective(objective.objectiveId);
@@ -174,7 +172,7 @@ it('should fail when using non-direct funding', async () => {
   await Channel.query(knex).where({channelId: testChan.channelId}).patch({fundingStrategy: 'Fake'});
 
   // Crank the protocol
-  await channelDefunder.crank(objective, WalletResponse.initialize());
+  await crankChannelDefunder(objective);
 
   // Check the results
   const reloadedObjective = await store.getObjective(objective.objectiveId);
@@ -205,4 +203,10 @@ function createPendingObjective(channelId: string): DBDefundChannelObjective {
     createdAt: new Date(Date.now()),
     progressLastMadeAt: new Date(Date.now()),
   };
+}
+
+async function crankChannelDefunder(objective: DBDefundChannelObjective) {
+  return store.transaction(async tx => {
+    return channelDefunder.crank(objective, WalletResponse.initialize(), tx);
+  });
 }
