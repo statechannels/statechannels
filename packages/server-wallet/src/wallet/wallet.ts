@@ -33,7 +33,6 @@ import {ValidationErrorItem} from 'joi';
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
-import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
 import {PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
