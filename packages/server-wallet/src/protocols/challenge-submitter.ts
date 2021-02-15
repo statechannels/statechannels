@@ -9,6 +9,10 @@ import {DBSubmitChallengeObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
+export const enum WaitingFor {
+  TODO = 'TODO',
+}
+
 export class ChallengeSubmitter {
   constructor(
     private store: Store,
@@ -29,13 +33,13 @@ export class ChallengeSubmitter {
     objective: DBSubmitChallengeObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<void> {
+  ): Promise<WaitingFor> {
     const {targetChannelId: channelToLock} = objective.data;
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
     if (!channel) {
       this.logger.warn(`No channel exists for channel ${channelToLock}`);
-      return;
+      return WaitingFor.TODO;
     }
 
     const status = channel.adjudicatorStatus
@@ -43,7 +47,7 @@ export class ChallengeSubmitter {
       : 'Open';
     if (status !== 'Open') {
       this.logger.warn('There is an existing challenge or the channel is finalized on chain');
-      return;
+      return WaitingFor.TODO;
     }
 
     if (!channel.signingWallet) {
@@ -56,7 +60,7 @@ export class ChallengeSubmitter {
 
     if (existingRequest) {
       this.logger.warn('There is already an existing request', existingRequest);
-      return;
+      return WaitingFor.TODO;
     }
 
     await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
@@ -67,7 +71,7 @@ export class ChallengeSubmitter {
         'There is no initial support stored for the channel'
       );
       await this.store.markObjectiveStatus(objective, 'failed', tx);
-      return;
+      return WaitingFor.TODO;
     }
 
     await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
@@ -75,6 +79,7 @@ export class ChallengeSubmitter {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannel(channel);
     response.queueSucceededObjective(objective);
+    return WaitingFor.TODO;
   }
 
   /**

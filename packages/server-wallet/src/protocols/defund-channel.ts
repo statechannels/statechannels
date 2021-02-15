@@ -2,12 +2,16 @@ import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
-import {Channel} from '../models/channel';
+
 import {DBDefundChannelObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
 import {Defunder} from './defunder';
+
+export const enum WaitingFor {
+  TODO = 'TODO',
+}
 
 export class ChannelDefunder {
   constructor(
@@ -29,7 +33,7 @@ export class ChannelDefunder {
     objective: DBDefundChannelObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<void> {
+  ): Promise<WaitingFor> {
     const {targetChannelId: channelId} = objective.data;
     const channel = await this.store.getAndLockChannel(channelId, tx);
     if (!channel) {
@@ -45,7 +49,7 @@ export class ChannelDefunder {
       // TODO: https://github.com/statechannels/statechannels/issues/3124
       this.logger.error(`Only direct funding is currently supported.`);
       await this.store.markObjectiveStatus(objective, 'failed', tx);
-      return;
+      return WaitingFor.TODO;
     }
 
     const {didSubmitTransaction} = await Defunder.create(
@@ -61,5 +65,6 @@ export class ChannelDefunder {
       await this.store.markObjectiveStatus(objective, 'succeeded', tx);
       response.queueSucceededObjective(objective);
     }
+    return WaitingFor.TODO;
   }
 }
