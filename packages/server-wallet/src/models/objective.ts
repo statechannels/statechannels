@@ -10,6 +10,8 @@ import {
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
 
+import {WaitingFor} from '../objectives/objective-manager';
+
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
     case 'OpenChannel':
@@ -217,7 +219,7 @@ export class ObjectiveModel extends Model {
 
   static async updateWaitingFor(
     objectiveId: string,
-    waitingFor: string,
+    waitingFor: WaitingFor,
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
     return (
