@@ -58,6 +58,10 @@ import {createLogger} from '../logger';
 import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
+import {WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
+import {WaitingFor as ChallengeSubmitterWaitingFor} from '../protocols/challenge-submitter';
+import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
+import {WaitingFor as CloseChannelWaitingFor} from '../protocols/channel-closer';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -427,7 +431,11 @@ export class Store {
       throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
     }
 
-    const objectiveToBeStored = {...objective, status: 'pending' as const};
+    const objectiveToBeStored = {
+      ...objective,
+      status: 'pending' as const,
+      waitingFor: DefundChannelWaitingFor.transactionSubmission,
+    };
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBDefundChannelObjective>;
   }
@@ -447,6 +455,7 @@ export class Store {
     const objectiveToBeStored = {
       ...objective,
       status: 'pending' as const,
+      waitingFor: ChallengeSubmitterWaitingFor.nothing,
     };
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBSubmitChallengeObjective>;
@@ -471,6 +480,7 @@ export class Store {
 
     const objectiveToBeStored = {
       participants: [],
+      waitingFor: OpenChannelWaitingFor.theirPreFundSetup,
       status: 'pending' as const,
       type: objective.type,
       data: {
@@ -514,6 +524,7 @@ export class Store {
 
     const objectiveToBeStored = {
       status: 'approved' as const,
+      waitingFor: CloseChannelWaitingFor.allAllocationItemsToBeExternalDestination,
       type: objective.type,
       participants: [],
       data: {
