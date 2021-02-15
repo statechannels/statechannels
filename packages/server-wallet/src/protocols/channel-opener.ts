@@ -13,9 +13,9 @@ import {DirectFunder} from './direct-funder';
 import {LedgerFunder} from './ledger-funder';
 
 export const enum WaitingFor {
-  theirPreFundSetup = 'theirPreFundSetup',
-  theirPostFundState = 'theirPostFundSetup',
-  funding = 'funding', // TODO reuse ChannelFunder.waitingFor,
+  theirPreFundSetup = 'ChannelOpener.theirPreFundSetup',
+  theirPostFundState = 'ChannelOpener.theirPostFundSetup',
+  funding = 'ChannelOpener.funding', // TODO reuse ChannelFunder.waitingFor,
   nothing = '',
 }
 export class ChannelOpener {

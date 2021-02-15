@@ -10,7 +10,7 @@ import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
 export const enum WaitingFor {
-  nothing = 'nothing',
+  nothing = '',
   // This objective is not shared, therefore there are no other channel participants to wait on
   // The aim of the objective is only to *submit* a challenge, so there are also no blockchain events to wait on
 }
