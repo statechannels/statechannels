@@ -10,7 +10,9 @@ import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
 export const enum WaitingFor {
-  TODO = 'TODO',
+  nothing = 'nothing',
+  // This objective is not shared, therefore there are no other channel participants to wait on
+  // The aim of the objective is only to *submit* a challenge, so there are also no blockchain events to wait on
 }
 
 export class ChallengeSubmitter {
@@ -38,8 +40,7 @@ export class ChallengeSubmitter {
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
     if (!channel) {
-      this.logger.warn(`No channel exists for channel ${channelToLock}`);
-      return WaitingFor.TODO;
+      throw new Error('Channel must exist');
     }
 
     const status = channel.adjudicatorStatus
@@ -47,7 +48,7 @@ export class ChallengeSubmitter {
       : 'Open';
     if (status !== 'Open') {
       this.logger.warn('There is an existing challenge or the channel is finalized on chain');
-      return WaitingFor.TODO;
+      throw new Error('There is an existing challenge or the channel is finalized on chain');
     }
 
     if (!channel.signingWallet) {
@@ -60,7 +61,7 @@ export class ChallengeSubmitter {
 
     if (existingRequest) {
       this.logger.warn('There is already an existing request', existingRequest);
-      return WaitingFor.TODO;
+      throw new Error('There is already an existing request');
     }
 
     await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
@@ -71,7 +72,7 @@ export class ChallengeSubmitter {
         'There is no initial support stored for the channel'
       );
       await this.store.markObjectiveStatus(objective, 'failed', tx);
-      return WaitingFor.TODO;
+      return WaitingFor.nothing;
     }
 
     await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
@@ -79,7 +80,7 @@ export class ChallengeSubmitter {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannel(channel);
     response.queueSucceededObjective(objective);
-    return WaitingFor.TODO;
+    return WaitingFor.nothing;
   }
 
   /**
