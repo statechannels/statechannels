@@ -1,5 +1,5 @@
 import {checkThat, isSimpleAllocation, StateVariables} from '@statechannels/wallet-core';
-import {Transaction} from 'knex';
+import {Transaction} from 'objection';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
 
@@ -28,46 +28,49 @@ export class ChannelCloser {
     return new ChannelCloser(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
+  public async crank(
+    objective: DBCloseChannelObjective,
+    response: WalletResponse,
+    tx: Transaction
+  ): Promise<void> {
     const channelToLock = objective.data.targetChannelId;
+    const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
-    await this.store.lockApp(channelToLock, async (tx, channel) => {
-      if (!channel) {
-        throw new Error('Channel must exist');
+    if (!channel) {
+      throw new Error('Channel must exist');
+    }
+
+    await channel.$fetchGraph('funding', {transaction: tx});
+    await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
+
+    try {
+      if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
+        response.queueChannel(channel);
+        return;
       }
 
-      await channel.$fetchGraph('funding', {transaction: tx});
-      await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
+      const defunder = Defunder.create(
+        this.store,
+        this.chainService,
+        this.logger,
+        this.timingMetrics
+      );
 
-      try {
-        if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
-          response.queueChannel(channel);
-          return;
-        }
-
-        const defunder = Defunder.create(
-          this.store,
-          this.chainService,
-          this.logger,
-          this.timingMetrics
-        );
-
-        if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
-          response.queueChannel(channel);
-          return;
-        }
-
-        if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
-          response.queueChannel(channel);
-          return;
-        }
-
-        await this.completeObjective(objective, channel, tx, response);
-      } catch (error) {
-        this.logger.error({error}, 'Error taking a protocol step');
-        await tx.rollback(error);
+      if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
+        response.queueChannel(channel);
+        return;
       }
-    });
+
+      if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
+        response.queueChannel(channel);
+        return;
+      }
+
+      await this.completeObjective(objective, channel, tx, response);
+    } catch (error) {
+      this.logger.error({error}, 'Error taking a protocol step');
+      await tx.rollback(error);
+    }
   }
 
   private async areAllFinalStatesSigned(

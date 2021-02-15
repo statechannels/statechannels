@@ -39,20 +39,22 @@ export class ObjectiveManager {
    * @param response - response builder; will be modified by the method
    */
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
-    const objective = await this.store.getObjective(objectiveId);
+    return this.store.transaction(async tx => {
+      const objective = await this.store.getObjective(objectiveId, tx);
 
-    switch (objective.type) {
-      case 'OpenChannel':
-        return this.channelOpener.crank(objective, response);
-      case 'CloseChannel':
-        return this.channelCloser.crank(objective, response);
-      case 'SubmitChallenge':
-        return this.challengeSubmitter.crank(objective, response);
-      case 'DefundChannel':
-        return this.channelDefunder.crank(objective, response);
-      default:
-        unreachable(objective);
-    }
+      switch (objective.type) {
+        case 'OpenChannel':
+          return this.channelOpener.crank(objective, response, tx);
+        case 'CloseChannel':
+          return this.channelCloser.crank(objective, response, tx);
+        case 'SubmitChallenge':
+          return this.challengeSubmitter.crank(objective, response, tx);
+        case 'DefundChannel':
+          return this.channelDefunder.crank(objective, response, tx);
+        default:
+          unreachable(objective);
+      }
+    });
   }
 
   private get channelDefunder(): ChannelDefunder {
