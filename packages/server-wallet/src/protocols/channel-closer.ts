@@ -12,7 +12,10 @@ import {Channel} from '../models/channel';
 import {Defunder} from './defunder';
 
 export const enum WaitingFor {
-  TODO = 'TODO',
+  allAllocationItemsToBeExternalDestination = 'allAllocationItemsToBeExternalDestination',
+  theirFinalState = 'theirFinalState', // i.e. other participants' final states
+  defunding = 'defunding',
+  nothing = '',
 }
 
 export class ChannelCloser {
@@ -44,14 +47,14 @@ export class ChannelCloser {
       throw new Error('Channel must exist');
     }
 
+    response.queueChannel(channel);
+
     await channel.$fetchGraph('funding', {transaction: tx});
     await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
 
     try {
-      if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
-        response.queueChannel(channel);
-        return WaitingFor.TODO;
-      }
+      if (!ensureAllAllocationItemsAreExternalDestinations(channel))
+        return WaitingFor.allAllocationItemsToBeExternalDestination;
 
       const defunder = Defunder.create(
         this.store,
@@ -60,22 +63,17 @@ export class ChannelCloser {
         this.timingMetrics
       );
 
-      if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
-        response.queueChannel(channel);
-        return WaitingFor.TODO;
-      }
+      if (!(await this.areAllFinalStatesSigned(channel, tx, response)))
+        return WaitingFor.theirFinalState;
 
-      if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
-        response.queueChannel(channel);
-        return WaitingFor.TODO;
-      }
+      if (!(await defunder.crank(channel, tx)).isChannelDefunded) return WaitingFor.defunding;
 
       await this.completeObjective(objective, channel, tx, response);
     } catch (error) {
       this.logger.error({error}, 'Error taking a protocol step');
       await tx.rollback(error);
     }
-    return WaitingFor.TODO;
+    return WaitingFor.nothing;
   }
 
   private async areAllFinalStatesSigned(
