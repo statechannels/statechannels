@@ -2,18 +2,26 @@ import {Logger} from 'pino';
 import {unreachable} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
-import {ChannelOpener} from '../protocols/channel-opener';
-import {ChannelCloser} from '../protocols/channel-closer';
+import {ChannelOpener, WaitingFor as ChannelOpenerWaitingFor} from '../protocols/channel-opener';
+import {ChannelCloser, WaitingFor as ChannelCloserWaitingFor} from '../protocols/channel-closer';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
-import {ChallengeSubmitter} from '../protocols/challenge-submitter';
-import {ChannelDefunder} from '../protocols/defund-channel';
+import {
+  ChallengeSubmitter,
+  WaitingFor as ChallengeSubmitterWaitingFor,
+} from '../protocols/challenge-submitter';
+import {ChannelDefunder, WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
 import {ObjectiveModel} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
 
+export type WaitingFor =
+  | ChannelOpenerWaitingFor
+  | ChannelCloserWaitingFor
+  | ChallengeSubmitterWaitingFor
+  | DefundChannelWaitingFor;
 export class ObjectiveManager {
   private store: Store;
   private logger: Logger;
@@ -42,7 +50,7 @@ export class ObjectiveManager {
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     return this.store.transaction(async tx => {
       const objective = await this.store.getObjective(objectiveId, tx);
-      let waitingFor: string;
+      let waitingFor: WaitingFor;
       switch (objective.type) {
         case 'OpenChannel':
           waitingFor = await this.channelOpener.crank(objective, response, tx);
