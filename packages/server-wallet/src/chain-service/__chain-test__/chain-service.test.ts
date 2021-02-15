@@ -129,7 +129,7 @@ function fundChannelAndMineBlocks(
   const retVal = fundChannel(expectedHeld, amount, channelId, assetHolderAddress);
   retVal.request.then(async response => {
     await response.wait();
-    mineBlocks();
+    await mineBlocks();
   });
   return retVal;
 }
@@ -361,7 +361,7 @@ describe('concludeAndWithdraw', () => {
     if (!transactionResponse) throw 'Expected transaction response';
     await transactionResponse.wait();
 
-    mineBlocks();
+    await mineBlocks();
     await p;
   });
 
@@ -402,7 +402,7 @@ describe('concludeAndWithdraw', () => {
 
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
-    mineBlocks();
+    await mineBlocks();
     await p;
   });
 
@@ -449,7 +449,7 @@ describe('concludeAndWithdraw', () => {
     expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));
     expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
 
-    mineBlocks();
+    await mineBlocks();
     await p;
   });
 });
