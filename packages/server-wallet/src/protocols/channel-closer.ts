@@ -53,8 +53,10 @@ export class ChannelCloser {
     await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
 
     try {
-      if (!ensureAllAllocationItemsAreExternalDestinations(channel))
+      if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
+        response.queueChannel(channel);
         return WaitingFor.allAllocationItemsToBeExternalDestination;
+      }
 
       const defunder = Defunder.create(
         this.store,
@@ -63,10 +65,15 @@ export class ChannelCloser {
         this.timingMetrics
       );
 
-      if (!(await this.areAllFinalStatesSigned(channel, tx, response)))
+      if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
+        response.queueChannel(channel);
         return WaitingFor.theirFinalState;
+      }
 
-      if (!(await defunder.crank(channel, tx)).isChannelDefunded) return WaitingFor.defunding;
+      if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
+        response.queueChannel(channel);
+        return WaitingFor.defunding;
+      }
 
       await this.completeObjective(objective, channel, tx, response);
     } catch (error) {
