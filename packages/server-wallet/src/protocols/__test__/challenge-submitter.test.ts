@@ -109,7 +109,9 @@ const crankAndAssert = async (
   const challengeSubmitter = ChallengeSubmitter.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'challenge');
-  await challengeSubmitter.crank(objective, response);
+  await store.transaction(async tx => {
+    await challengeSubmitter.crank(objective, response, tx);
+  });
 
   if (callsChallenge) {
     expect(spy).toHaveBeenCalled();

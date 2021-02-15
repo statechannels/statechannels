@@ -2,6 +2,7 @@ import {OpenChannel} from '@statechannels/wallet-core';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
+import {WaitingFor} from '../../protocols/channel-opener';
 import {Channel} from '../channel';
 import {ObjectiveModel, ObjectiveChannelModel} from '../objective';
 
@@ -69,7 +70,7 @@ describe('Objective > insert', () => {
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
     const {progressLastMadeAt} = await ObjectiveModel.updateWaitingFor(
       objectiveId,
-      'somethingElse',
+      WaitingFor.theirPostFundState,
       knex
     );
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
