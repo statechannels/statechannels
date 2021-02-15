@@ -12,9 +12,9 @@ import {Channel} from '../models/channel';
 import {Defunder} from './defunder';
 
 export const enum WaitingFor {
-  allAllocationItemsToBeExternalDestination = 'allAllocationItemsToBeExternalDestination',
-  theirFinalState = 'theirFinalState', // i.e. other participants' final states
-  defunding = 'defunding',
+  allAllocationItemsToBeExternalDestination = 'ChannelCloser.allAllocationItemsToBeExternalDestination',
+  theirFinalState = 'ChannelCloser.theirFinalState', // i.e. other participants' final states
+  defunding = 'ChannelCloser.defunding',
   nothing = '',
 }
 
