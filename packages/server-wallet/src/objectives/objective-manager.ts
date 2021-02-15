@@ -9,6 +9,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChallengeSubmitter} from '../protocols/challenge-submitter';
 import {ChannelDefunder} from '../protocols/defund-channel';
+import {ObjectiveModel} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -41,19 +42,24 @@ export class ObjectiveManager {
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     return this.store.transaction(async tx => {
       const objective = await this.store.getObjective(objectiveId, tx);
-
+      let waitingFor: string;
       switch (objective.type) {
         case 'OpenChannel':
-          return this.channelOpener.crank(objective, response, tx);
+          waitingFor = await this.channelOpener.crank(objective, response, tx);
+          break;
         case 'CloseChannel':
-          return this.channelCloser.crank(objective, response, tx);
+          waitingFor = await this.channelCloser.crank(objective, response, tx);
+          break;
         case 'SubmitChallenge':
-          return this.challengeSubmitter.crank(objective, response, tx);
+          waitingFor = await this.challengeSubmitter.crank(objective, response, tx);
+          break;
         case 'DefundChannel':
-          return this.channelDefunder.crank(objective, response, tx);
+          waitingFor = await this.channelDefunder.crank(objective, response, tx);
+          break;
         default:
           unreachable(objective);
       }
+      await ObjectiveModel.updateWaitingFor(objectiveId, waitingFor, tx);
     });
   }
 

@@ -11,6 +11,10 @@ import {Channel} from '../models/channel';
 
 import {Defunder} from './defunder';
 
+export const enum WaitingFor {
+  TODO = 'TODO',
+}
+
 export class ChannelCloser {
   constructor(
     private store: Store,
@@ -32,7 +36,7 @@ export class ChannelCloser {
     objective: DBCloseChannelObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<void> {
+  ): Promise<WaitingFor> {
     const channelToLock = objective.data.targetChannelId;
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
@@ -46,7 +50,7 @@ export class ChannelCloser {
     try {
       if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
         response.queueChannel(channel);
-        return;
+        return WaitingFor.TODO;
       }
 
       const defunder = Defunder.create(
@@ -58,12 +62,12 @@ export class ChannelCloser {
 
       if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
         response.queueChannel(channel);
-        return;
+        return WaitingFor.TODO;
       }
 
       if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
         response.queueChannel(channel);
-        return;
+        return WaitingFor.TODO;
       }
 
       await this.completeObjective(objective, channel, tx, response);
@@ -71,6 +75,7 @@ export class ChannelCloser {
       this.logger.error({error}, 'Error taking a protocol step');
       await tx.rollback(error);
     }
+    return WaitingFor.TODO;
   }
 
   private async areAllFinalStatesSigned(
