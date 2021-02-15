@@ -27,55 +27,54 @@ export class ChallengeSubmitter {
   }
   public async crank(
     objective: DBSubmitChallengeObjective,
-    response: WalletResponse
+    response: WalletResponse,
+    tx: Transaction
   ): Promise<void> {
     const {targetChannelId: channelToLock} = objective.data;
 
-    await this.store.transaction(async tx => {
-      const channel = await this.store.getAndLockChannel(channelToLock, tx);
-      if (!channel) {
-        this.logger.warn(`No channel exists for channel ${channelToLock}`);
-        return;
-      }
+    const channel = await this.store.getAndLockChannel(channelToLock, tx);
+    if (!channel) {
+      this.logger.warn(`No channel exists for channel ${channelToLock}`);
+      return;
+    }
 
-      const status = channel.adjudicatorStatus
-        ? channel.adjudicatorStatus.toResult().channelMode
-        : 'Open';
-      if (status !== 'Open') {
-        this.logger.warn('There is an existing challenge or the channel is finalized on chain');
-        return;
-      }
+    const status = channel.adjudicatorStatus
+      ? channel.adjudicatorStatus.toResult().channelMode
+      : 'Open';
+    if (status !== 'Open') {
+      this.logger.warn('There is an existing challenge or the channel is finalized on chain');
+      return;
+    }
 
-      if (!channel.signingWallet) {
-        throw new Error(`No signing wallet fetched for channel ${channelToLock}`);
-      }
+    if (!channel.signingWallet) {
+      throw new Error(`No signing wallet fetched for channel ${channelToLock}`);
+    }
 
-      const existingRequest = await ChainServiceRequest.query(tx)
-        .where({channelId: channelToLock, request: 'challenge'})
-        .first();
+    const existingRequest = await ChainServiceRequest.query(tx)
+      .where({channelId: channelToLock, request: 'challenge'})
+      .first();
 
-      if (existingRequest) {
-        this.logger.warn('There is already an existing request', existingRequest);
-        return;
-      }
+    if (existingRequest) {
+      this.logger.warn('There is already an existing request', existingRequest);
+      return;
+    }
 
-      await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
+    await ChainServiceRequest.insertOrUpdate(channelToLock, 'challenge', tx);
 
-      if (channel.initialSupport.length === 0) {
-        this.logger.error(
-          {channelId: channel.channelId},
-          'There is no initial support stored for the channel'
-        );
-        await this.store.markObjectiveStatus(objective, 'failed', tx);
-        return;
-      }
+    if (channel.initialSupport.length === 0) {
+      this.logger.error(
+        {channelId: channel.channelId},
+        'There is no initial support stored for the channel'
+      );
+      await this.store.markObjectiveStatus(objective, 'failed', tx);
+      return;
+    }
 
-      await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
+    await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
 
-      objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
-      response.queueChannel(channel);
-      response.queueSucceededObjective(objective);
-    });
+    objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
+    response.queueChannel(channel);
+    response.queueSucceededObjective(objective);
   }
 
   /**
