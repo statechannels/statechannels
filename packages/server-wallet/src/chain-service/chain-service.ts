@@ -412,12 +412,40 @@ export class ChainService implements ChainServiceInterface {
     contract: Contract,
     channelId: string
   ): Promise<HoldingUpdatedArg> {
-    const holding = BN.from(await contract.holdings(channelId));
+    const currentHolding = BN.from(await contract.holdings(channelId));
+    let confirmedHolding = BN.from(0);
+    try {
+      // https://docs.ethers.io/v5/api/contract/contract/#Contract--metaclass
+      // provider can lose track of the latet block, force it to reload
+      const currentBlock = await this.provider.getBlockNumber();
+      const confirmedBlock = currentBlock - 5; // 6 blocks ago are confimed
+      this.logger.debug(`current blocke is ${currentBlock}, confirmed block is ${confirmedBlock}`);
+      const overrides = {
+        blockTag: confirmedBlock,
+      };
+
+      confirmedHolding = BN.from(await contract.holdings(channelId, overrides));
+      this.logger.debug(`Successfully red confirmedHoldings (${confirmedHolding}) 5 blocks ago.`);
+    } catch (e) {
+      // We should have e.code="CALL_EXCEPTION", but gaven currentHolding query succeeded, this evidence is already sufficient
+      this.logger.debug(
+        `Error caught while trying to query confirmed holding (holdings 6 blocks ago),` +
+          `this is likely due to channel created less than 6 blockes, safe to ignore, error is ${JSON.stringify(
+            e
+          )}`
+      );
+    }
+
+    if (currentHolding !== confirmedHolding) {
+      this.logger.info(
+        `getInitialHoldings: current holding ${currentHolding} mismatches ${confirmedHolding}, returning confirmed holding...`
+      );
+    }
 
     return {
       channelId,
       assetHolderAddress: makeAddress(contract.address),
-      amount: BN.from(holding),
+      amount: BN.from(confirmedHolding),
     };
   }
 

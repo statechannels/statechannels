@@ -290,6 +290,7 @@ describe('registerChannel', () => {
   it('Receives correct initial holding when holdings are not 0', async () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
+    await mineBlocks();
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
