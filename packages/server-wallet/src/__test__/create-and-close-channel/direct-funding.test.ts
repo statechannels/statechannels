@@ -9,6 +9,7 @@ import {BigNumber, ethers} from 'ethers';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
 import {DBAdmin} from '../../db-admin/db-admin';
+import {WaitingFor} from '../../protocols/channel-opener';
 import {Wallet} from '../../wallet';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
 
@@ -96,6 +97,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   // Let's check what wallet a is waiting for. Expect it to be 'theirPreFundSetup' or ''
   // (if the objective has never been cranked)
   const waitingForBefore = (await a.getObjective(`OpenChannel-${channelId}`)).waitingFor;
+  expect([WaitingFor.theirPreFundSetup, '']).toContain(waitingForBefore);
 
   //    > PreFund0A
   const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
@@ -119,6 +121,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   //  a's OpenChannel objective should have made some progress (it is now waiting on something else)
   const waitingForAfter = (await a.getObjective(`OpenChannel-${channelId}`)).waitingFor;
   expect(waitingForAfter).not.toEqual(waitingForBefore);
+  expect(waitingForAfter).toEqual(WaitingFor.funding);
 
   /**
    * In this case, there is no auto-advancing to the running stage. Instead we have
