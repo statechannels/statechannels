@@ -35,7 +35,7 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
-  waitingFor?: WaitingFor;
+  waitingFor: WaitingFor | null;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
@@ -129,7 +129,7 @@ export class ObjectiveModel extends Model {
   static async insert(
     objectiveToBeStored: SupportedObjective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-      waitingFor?: WaitingFor;
+      waitingFor: WaitingFor | null;
     },
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
@@ -144,7 +144,7 @@ export class ObjectiveModel extends Model {
           data: objectiveToBeStored.data,
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
-          waitingFor: objectiveToBeStored.waitingFor,
+          waitingFor: objectiveToBeStored.waitingFor, // the return value is null
         })
         // `Model.query(tx).insert(o)` returns `o` by default.
         // The return value is therefore constrained by the type of `Model`.

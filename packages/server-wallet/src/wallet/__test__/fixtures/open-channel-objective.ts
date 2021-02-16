@@ -10,6 +10,7 @@ const defaultObjective: DBOpenChannelObjective = {
   type: 'OpenChannel',
   objectiveId: ['OpenChannel', channel().channelId].join('-'),
   status: 'pending',
+  waitingFor: null,
   createdAt: new Date(),
   progressLastMadeAt: new Date(),
 };
