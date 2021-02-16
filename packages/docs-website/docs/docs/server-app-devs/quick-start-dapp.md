@@ -14,7 +14,7 @@ Browser-based applications should use a state channel browser wallet (coming soo
 
 ## Installing
 
-You will want to add both `@statechannels/server-wallet` to your project:
+You will want to add `@statechannels/server-wallet` to your project:
 
 ```console
 > yarn add @statechannels/server-wallet
@@ -33,7 +33,7 @@ import {Wallet, IncomingServerWalletConfig} from '@statechannels/server-wallet';
 
 const opts: IncomingServerWalletConfig = {
   databaseConfiguration: {
-    pool: undefined, // for a single threaded walelt
+    pool: undefined, // for a single threaded wallet
     debug: false,
     connection: {host: 'localhost', port: 5432, user: 'postgres'}
   },
