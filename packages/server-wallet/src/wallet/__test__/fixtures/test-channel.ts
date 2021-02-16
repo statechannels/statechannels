@@ -17,6 +17,7 @@ import {
   State,
   NULL_APP_DATA,
   CloseChannel,
+  DefundChannel,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
@@ -200,6 +201,16 @@ export class TestChannel {
         targetChannelId: this.channelId,
         fundingStrategy: this.fundingStrategy,
         transactionSubmitter: this.participants[transactionSubmitterIndex].participantId,
+      },
+    };
+  }
+
+  public defundChannelObjective(): DefundChannel {
+    return {
+      participants: this.participants,
+      type: 'DefundChannel',
+      data: {
+        targetChannelId: this.channelId,
       },
     };
   }
