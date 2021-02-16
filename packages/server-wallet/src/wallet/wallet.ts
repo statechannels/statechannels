@@ -58,7 +58,7 @@ import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
-import {DBObjective} from '../models/objective';
+import {DBObjective, ObjectiveModel} from '../models/objective';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -1005,6 +1005,9 @@ export class SingleThreadedWallet
       const objective = objectives[0];
 
       await this.objectiveManager.crank(objective.objectiveId, response);
+      await ObjectiveModel.progressMade(objective.objectiveId, this.knex);
+      // TODO we assume here ^^ that progress is made each time we crank the objective
+      // and update the progressLastMadeAt timestamp accordingly
 
       // remove objective from list
       objectives.shift();
