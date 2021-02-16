@@ -10,7 +10,6 @@ import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
 export const enum WaitingFor {
-  nothing = '',
   // This objective is not shared, therefore there are no other channel participants to wait on
   // We might pause for some blockchain events / chain service requests, however:
   existingChainServiceRequest = 'ChallengeSubmitter.existingChainServiceRequest',
@@ -37,7 +36,7 @@ export class ChallengeSubmitter {
     objective: DBSubmitChallengeObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<WaitingFor> {
+  ): Promise<WaitingFor | null> {
     const {targetChannelId: channelToLock} = objective.data;
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
@@ -76,7 +75,7 @@ export class ChallengeSubmitter {
         'There is no initial support stored for the channel'
       );
       await this.store.markObjectiveStatus(objective, 'failed', tx);
-      return WaitingFor.nothing;
+      return null;
     }
 
     await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
@@ -84,7 +83,7 @@ export class ChallengeSubmitter {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannel(channel);
     response.queueSucceededObjective(objective);
-    return WaitingFor.nothing;
+    return null;
   }
 
   /**

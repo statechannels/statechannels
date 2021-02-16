@@ -16,7 +16,6 @@ export const enum WaitingFor {
   theirPreFundSetup = 'ChannelOpener.theirPreFundSetup',
   theirPostFundState = 'ChannelOpener.theirPostFundSetup',
   funding = 'ChannelOpener.funding', // TODO reuse ChannelFunder.waitingFor,
-  nothing = '',
 }
 export class ChannelOpener {
   constructor(
@@ -39,7 +38,7 @@ export class ChannelOpener {
     objective: DBOpenChannelObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<WaitingFor> {
+  ): Promise<WaitingFor | null> {
     const channelToLock = objective.data.targetChannelId;
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
@@ -76,7 +75,7 @@ export class ChannelOpener {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueSucceededObjective(objective);
 
-    return WaitingFor.nothing;
+    return null;
   }
 
   private async crankChannelFunder(

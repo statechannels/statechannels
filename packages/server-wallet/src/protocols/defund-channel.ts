@@ -10,7 +10,6 @@ import {Defunder} from './defunder';
 
 export const enum WaitingFor {
   transactionSubmission = 'ChannelDefunder.transactionSubmission',
-  nothing = '',
 }
 
 export class ChannelDefunder {
@@ -33,7 +32,7 @@ export class ChannelDefunder {
     objective: DBDefundChannelObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<WaitingFor> {
+  ): Promise<WaitingFor | null> {
     const {targetChannelId: channelId} = objective.data;
     const channel = await this.store.getAndLockChannel(channelId, tx);
     if (!channel) {
@@ -49,7 +48,7 @@ export class ChannelDefunder {
       // TODO: https://github.com/statechannels/statechannels/issues/3124
       this.logger.error(`Only direct funding is currently supported.`);
       await this.store.markObjectiveStatus(objective, 'failed', tx);
-      return WaitingFor.nothing;
+      return null;
     }
 
     const {didSubmitTransaction} = await Defunder.create(
@@ -64,7 +63,7 @@ export class ChannelDefunder {
     if (didSubmitTransaction) {
       await this.store.markObjectiveStatus(objective, 'succeeded', tx);
       response.queueSucceededObjective(objective);
-      return WaitingFor.nothing;
+      return null;
     } else return WaitingFor.transactionSubmission;
   }
 }

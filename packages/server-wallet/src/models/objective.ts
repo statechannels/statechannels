@@ -220,7 +220,7 @@ export class ObjectiveModel extends Model {
 
   static async updateWaitingFor(
     objectiveId: string,
-    waitingFor: WaitingFor,
+    waitingFor: WaitingFor | null,
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
     return (

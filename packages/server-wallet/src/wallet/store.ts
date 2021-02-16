@@ -455,7 +455,7 @@ export class Store {
     const objectiveToBeStored = {
       ...objective,
       status: 'pending' as const,
-      waitingFor: ChallengeSubmitterWaitingFor.nothing,
+      waitingFor: null,
     };
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBSubmitChallengeObjective>;

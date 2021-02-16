@@ -50,7 +50,7 @@ export class ObjectiveManager {
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     return this.store.transaction(async tx => {
       const objective = await this.store.getObjective(objectiveId, tx);
-      let waitingFor: WaitingFor;
+      let waitingFor: WaitingFor | null;
       switch (objective.type) {
         case 'OpenChannel':
           waitingFor = await this.channelOpener.crank(objective, response, tx);
