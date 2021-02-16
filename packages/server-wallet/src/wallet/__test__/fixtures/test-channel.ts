@@ -198,6 +198,7 @@ export class TestChannel {
       data: {
         targetChannelId: this.channelId,
         fundingStrategy: this.fundingStrategy,
+        transactionSubmitter: this.participantB.participantId,
       },
     };
   }

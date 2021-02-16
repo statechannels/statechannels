@@ -107,6 +107,7 @@ export type CloseChannel = _Objective<
   {
     targetChannelId: string;
     fundingStrategy: FundingStrategy;
+    transactionSubmitter: string;
   }
 >;
 export type VirtuallyFund = _Objective<
@@ -164,7 +165,7 @@ export type Objective = SharedObjective | SubmitChallenge | DefundChannel;
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
-export const isCloseChannel = guard<OpenChannel>('CloseChannel');
+export const isCloseChannel = guard<CloseChannel>('CloseChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');
