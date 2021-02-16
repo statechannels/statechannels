@@ -6,6 +6,7 @@ import {
   SharedObjective,
   SubmitChallenge,
   DefundChannel,
+  unreachable,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
@@ -69,11 +70,31 @@ export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
       'SubmitChallenge and DefundChannel objectives are not supported as wire objectives'
     );
   }
-  return {
-    type: dbObj.type,
-    data: dbObj.data,
-    participants: dbObj.participants,
-  };
+  /**
+   * This switch statement is unfortunate but is necessary to avoid a typescript error.
+   * It seems that the typescript error is the result of:
+   * - The parameter dbObj is a union type.
+   * - The return type is a union type.
+   * - The return value is constructed by creating an object with type, data, and participants fields.
+   * - Typescript considers a return object with "type" OpenChannel and "data" of CloseChannel objective to be a possible return type.
+   * - The above object does not belong to the union return type.
+   */
+  switch (dbObj.type) {
+    case 'OpenChannel':
+      return {
+        type: dbObj.type,
+        data: dbObj.data,
+        participants: dbObj.participants,
+      };
+    case 'CloseChannel':
+      return {
+        type: dbObj.type,
+        data: dbObj.data,
+        participants: dbObj.participants,
+      };
+    default:
+      unreachable(dbObj);
+  }
 };
 
 export class ObjectiveChannelModel extends Model {

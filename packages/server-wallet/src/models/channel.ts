@@ -510,6 +510,13 @@ export class Channel extends Model implements ChannelColumns {
     return this.participants.length;
   }
 
+  nthParticipant(n: number): Participant {
+    if (n >= this.nParticipants) {
+      throw new Error(`Cannot get participant ${n} from ${this.participants}`);
+    }
+    return this.participants[n];
+  }
+
   private get _support(): Array<SignedStateWithHash> {
     // TODO: activate these fields for proper application checks (may be resource hungry)
     const logger = undefined;

@@ -506,7 +506,7 @@ export class Store {
     } = objective;
 
     // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
+    const channel = await this.getChannel(targetChannelId, tx);
     if (!channel)
       throw new StoreError(StoreError.reasons.channelMissing, {
         channelId: targetChannelId,
@@ -519,6 +519,7 @@ export class Store {
       data: {
         targetChannelId,
         fundingStrategy,
+        transactionSubmitter: channel.nthParticipant(1).participantId,
       },
     };
 
