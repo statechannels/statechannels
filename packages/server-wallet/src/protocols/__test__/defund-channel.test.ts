@@ -200,7 +200,6 @@ function createPendingObjective(channelId: string): DBDefundChannelObjective {
     type: 'DefundChannel',
     status: 'pending',
     participants: [],
-    waitingFor: '',
     objectiveId: ['DefundChannel', channelId].join('-'),
     data: {targetChannelId: channelId},
     createdAt: new Date(Date.now()),
