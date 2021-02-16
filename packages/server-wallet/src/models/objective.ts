@@ -212,6 +212,11 @@ export class ObjectiveModel extends Model {
       .first();
   }
 
+  /**
+   * Updates the progressLastMadeAt column for this objective (using the current time)
+   * @param objectiveId The objective to patch
+   * @param tx
+   */
   static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
     return (
       await ObjectiveModel.query(tx)
