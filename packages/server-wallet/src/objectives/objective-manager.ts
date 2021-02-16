@@ -67,7 +67,10 @@ export class ObjectiveManager {
         default:
           unreachable(objective);
       }
-      await ObjectiveModel.updateWaitingFor(objectiveId, waitingFor, tx);
+      if (objective.waitingFor != waitingFor) {
+        // important to only update in the case of a change
+        await ObjectiveModel.updateWaitingFor(objectiveId, waitingFor, tx);
+      }
     });
   }
 
