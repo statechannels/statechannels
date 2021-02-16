@@ -59,7 +59,6 @@ import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
-import {WaitingFor as ChallengeSubmitterWaitingFor} from '../protocols/challenge-submitter';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 import {WaitingFor as CloseChannelWaitingFor} from '../protocols/channel-closer';
 
