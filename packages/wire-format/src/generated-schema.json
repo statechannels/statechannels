@@ -125,11 +125,15 @@
             },
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
+            },
+            "transactionSubmitter": {
+              "type": "string"
             }
           },
           "required": [
             "targetChannelId",
-            "fundingStrategy"
+            "fundingStrategy",
+            "transactionSubmitter"
           ],
           "type": "object"
         },

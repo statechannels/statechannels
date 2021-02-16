@@ -352,6 +352,7 @@ describe('when the application protocol returns an action', () => {
             data: {
               targetChannelId: channelId,
               fundingStrategy: 'Direct',
+              transactionSubmitter: c.nthParticipant(1).participantId,
             },
           },
         ],
@@ -381,6 +382,7 @@ describe('when the application protocol returns an action', () => {
           data: {
             targetChannelId: channelId,
             fundingStrategy: 'Direct',
+            transactionSubmitter: c.nthParticipant(1).participantId,
           },
         },
       ],
