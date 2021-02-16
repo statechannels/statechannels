@@ -418,7 +418,7 @@ export class ChainService implements ChainServiceInterface {
       // https://docs.ethers.io/v5/api/contract/contract/#Contract--metaclass
       // provider can lose track of the latet block, force it to reload
       const currentBlock = await this.provider.getBlockNumber();
-      const confirmedBlock = currentBlock - 5; // 6 blocks ago are confimed
+      const confirmedBlock = currentBlock - this.blockConfirmations; // use absolute
       this.logger.debug(`current blocke is ${currentBlock}, confirmed block is ${confirmedBlock}`);
       const overrides = {
         blockTag: confirmedBlock,
