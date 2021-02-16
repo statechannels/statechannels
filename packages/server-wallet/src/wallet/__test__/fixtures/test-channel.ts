@@ -16,6 +16,7 @@ import {
   simpleEthAllocation,
   State,
   NULL_APP_DATA,
+  CloseChannel,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
@@ -191,14 +192,14 @@ export class TestChannel {
     };
   }
 
-  public get closeChannelObjective(): SharedObjective {
+  public closeChannelObjective(transactionSubmitterIndex = 0): CloseChannel {
     return {
       participants: this.participants,
       type: 'CloseChannel',
       data: {
         targetChannelId: this.channelId,
         fundingStrategy: this.fundingStrategy,
-        transactionSubmitter: this.participantB.participantId,
+        transactionSubmitter: this.participants[transactionSubmitterIndex].participantId,
       },
     };
   }

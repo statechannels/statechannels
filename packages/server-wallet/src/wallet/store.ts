@@ -519,7 +519,7 @@ export class Store {
     tx: Transaction
   ): Promise<DBCloseChannelObjective> {
     const {
-      data: {targetChannelId, fundingStrategy},
+      data: {targetChannelId},
     } = objective;
 
     // fetch the channel to make sure the channel exists
@@ -533,12 +533,8 @@ export class Store {
       status: 'approved' as const,
       waitingFor: CloseChannelWaitingFor.allAllocationItemsToBeExternalDestination,
       type: objective.type,
-      participants: [],
-      data: {
-        targetChannelId,
-        fundingStrategy,
-        transactionSubmitter: channel.nthParticipant(1).participantId,
-      },
+      participants: objective.participants,
+      data: objective.data,
     };
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBCloseChannelObjective>;
