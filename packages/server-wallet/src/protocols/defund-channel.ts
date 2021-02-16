@@ -57,7 +57,7 @@ export class ChannelDefunder implements Cranker<DBDefundChannelObjective> {
       this.chainService,
       this.logger,
       this.timingMetrics
-    ).crank(channel, tx);
+    ).crank(channel, objective, tx);
 
     // A better methodology is likely to create a Challenge objective that succeeds after a
     // channel has been defunded (instead of succeeding an objective on transaction submission)

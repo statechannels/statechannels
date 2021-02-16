@@ -70,7 +70,7 @@ export class ChannelCloser implements Cranker<DBCloseChannelObjective> {
         return WaitingFor.theirFinalState;
       }
 
-      if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
+      if (!(await defunder.crank(channel, objective, tx)).isChannelDefunded) {
         response.queueChannel(channel);
         return WaitingFor.defunding;
       }
