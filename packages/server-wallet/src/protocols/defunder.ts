@@ -9,6 +9,21 @@ import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {Store} from '../wallet/store';
 
+/**
+ * DefunderResult type is the return value of the crank method. The return value of the crank method
+ * should be a boolean in the medium/long term.
+ *
+ * Why is that?
+ * The boolean will represent whether the Defunder protocol has reached the terminal point.
+ * This is the pattern established by the ChannelOpener protocol. The caller of the Defunder
+ * protocol should not be concerned with internal details of whether a transaction is submitted.
+ *
+ * What about didSubmitTransaction?
+ * In the short term, the ChannelDefunder protocol (which invoked the Defunder protocol) completes
+ * upon transaction submission. ChannelDefunder protocol will not be used in the medium term.
+ * Most likely, a ChallengeAndWithdraw protocol (which invokes this Defunder protocol) will
+ * make the ChannelDefunder protocol aboslete.
+ */
 export type DefunderResult = {isChannelDefunded: boolean; didSubmitTransaction: boolean};
 
 export class Defunder {
