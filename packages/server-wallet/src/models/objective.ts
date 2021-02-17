@@ -10,6 +10,8 @@ import {
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
 
+import {WaitingFor} from '../objectives/objective-manager';
+
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
     case 'OpenChannel':
@@ -33,6 +35,7 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
+  waitingFor: WaitingFor;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
@@ -91,6 +94,8 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
+  readonly waitingFor!: DBObjective['waitingFor'];
+  // the default value of waitingFor is '', see Nothing.ToWaitFor type
   createdAt!: Date;
   progressLastMadeAt!: Date;
 
@@ -125,6 +130,7 @@ export class ObjectiveModel extends Model {
   static async insert(
     objectiveToBeStored: SupportedObjective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+      waitingFor: WaitingFor;
     },
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
@@ -139,6 +145,7 @@ export class ObjectiveModel extends Model {
           data: objectiveToBeStored.data,
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
+          waitingFor: objectiveToBeStored.waitingFor,
         })
         // `Model.query(tx).insert(o)` returns `o` by default.
         // The return value is therefore constrained by the type of `Model`.
@@ -212,11 +219,15 @@ export class ObjectiveModel extends Model {
       .first();
   }
 
-  static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+  static async updateWaitingFor(
+    objectiveId: string,
+    waitingFor: WaitingFor,
+    tx: TransactionOrKnex
+  ): Promise<DBObjective> {
     return (
       await ObjectiveModel.query(tx)
         .findById(objectiveId)
-        .patch({progressLastMadeAt: new Date()})
+        .patch({progressLastMadeAt: new Date(), waitingFor})
         .returning('*')
         .first()
     ).toObjective();

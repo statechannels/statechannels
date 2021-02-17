@@ -129,7 +129,9 @@ const crankAndAssert = async (
   const channelCloser = ChannelCloser.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'concludeAndWithdraw');
-  await channelCloser.crank(objective, response);
+  await store.transaction(async tx => {
+    await channelCloser.crank(objective, response, tx);
+  });
 
   // expect there to be an outgoing message in the response
   expect(response._signedStates).toMatchObject(

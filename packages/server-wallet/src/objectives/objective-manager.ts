@@ -2,17 +2,35 @@ import {Logger} from 'pino';
 import {unreachable} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
-import {ChannelOpener} from '../protocols/channel-opener';
-import {ChannelCloser} from '../protocols/channel-closer';
+import {ChannelOpener, WaitingFor as ChannelOpenerWaitingFor} from '../protocols/channel-opener';
+import {ChannelCloser, WaitingFor as ChannelCloserWaitingFor} from '../protocols/channel-closer';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletResponse} from '../wallet/wallet-response';
-import {ChallengeSubmitter} from '../protocols/challenge-submitter';
-import {ChannelDefunder} from '../protocols/defund-channel';
+import {
+  ChallengeSubmitter,
+  WaitingFor as ChallengeSubmitterWaitingFor,
+} from '../protocols/challenge-submitter';
+import {ChannelDefunder, WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
+import {ObjectiveModel} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
 
+// Nothing.ToWaitFor is a special type
+// returned from a cranker when the objective completes
+// it is the default value of waiting_for column
+// on the objectives table in the db
+export enum Nothing {
+  ToWaitFor = '',
+}
+
+export type WaitingFor =
+  | ChannelOpenerWaitingFor
+  | ChannelCloserWaitingFor
+  | ChallengeSubmitterWaitingFor
+  | DefundChannelWaitingFor
+  | Nothing;
 export class ObjectiveManager {
   private store: Store;
   private logger: Logger;
@@ -39,20 +57,30 @@ export class ObjectiveManager {
    * @param response - response builder; will be modified by the method
    */
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
-    const objective = await this.store.getObjective(objectiveId);
-
-    switch (objective.type) {
-      case 'OpenChannel':
-        return this.channelOpener.crank(objective, response);
-      case 'CloseChannel':
-        return this.channelCloser.crank(objective, response);
-      case 'SubmitChallenge':
-        return this.challengeSubmitter.crank(objective, response);
-      case 'DefundChannel':
-        return this.channelDefunder.crank(objective, response);
-      default:
-        unreachable(objective);
-    }
+    return this.store.transaction(async tx => {
+      const objective = await this.store.getObjective(objectiveId, tx);
+      let waitingFor: WaitingFor | null;
+      switch (objective.type) {
+        case 'OpenChannel':
+          waitingFor = await this.channelOpener.crank(objective, response, tx);
+          break;
+        case 'CloseChannel':
+          waitingFor = await this.channelCloser.crank(objective, response, tx);
+          break;
+        case 'SubmitChallenge':
+          waitingFor = await this.challengeSubmitter.crank(objective, response, tx);
+          break;
+        case 'DefundChannel':
+          waitingFor = await this.channelDefunder.crank(objective, response, tx);
+          break;
+        default:
+          unreachable(objective);
+      }
+      if (objective.waitingFor != waitingFor) {
+        // important to only update in the case of a change
+        await ObjectiveModel.updateWaitingFor(objectiveId, waitingFor, tx);
+      }
+    });
   }
 
   private get channelDefunder(): ChannelDefunder {

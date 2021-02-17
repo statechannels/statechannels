@@ -1,5 +1,5 @@
 import {checkThat, isSimpleAllocation, StateVariables} from '@statechannels/wallet-core';
-import {Transaction} from 'knex';
+import {Transaction} from 'objection';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
 
@@ -8,8 +8,15 @@ import {ChainServiceInterface} from '../chain-service';
 import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
+import {Nothing} from '../objectives/objective-manager';
 
 import {Defunder} from './defunder';
+
+export const enum WaitingFor {
+  allAllocationItemsToBeExternalDestination = 'ChannelCloser.allAllocationItemsToBeExternalDestination',
+  theirFinalState = 'ChannelCloser.theirFinalState', // i.e. other participants' final states
+  defunding = 'ChannelCloser.defunding',
+}
 
 export class ChannelCloser {
   constructor(
@@ -28,43 +35,52 @@ export class ChannelCloser {
     return new ChannelCloser(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(objective: DBCloseChannelObjective, response: WalletResponse): Promise<void> {
+  public async crank(
+    objective: DBCloseChannelObjective,
+    response: WalletResponse,
+    tx: Transaction
+  ): Promise<WaitingFor | Nothing> {
     const channelToLock = objective.data.targetChannelId;
+    const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
-    await this.store.lockApp(channelToLock, async (tx, channel) => {
-      if (!channel) {
-        throw new Error('Channel must exist');
+    if (!channel) {
+      throw new Error('Channel must exist');
+    }
+
+    response.queueChannel(channel);
+
+    await channel.$fetchGraph('funding', {transaction: tx});
+    await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
+
+    try {
+      if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
+        response.queueChannel(channel);
+        return WaitingFor.allAllocationItemsToBeExternalDestination;
       }
 
-      try {
-        if (!ensureAllAllocationItemsAreExternalDestinations(channel)) {
-          response.queueChannel(channel);
-          return;
-        }
+      const defunder = Defunder.create(
+        this.store,
+        this.chainService,
+        this.logger,
+        this.timingMetrics
+      );
 
-        const defunder = Defunder.create(
-          this.store,
-          this.chainService,
-          this.logger,
-          this.timingMetrics
-        );
-
-        if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
-          response.queueChannel(channel);
-          return;
-        }
-
-        if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
-          response.queueChannel(channel);
-          return;
-        }
-
-        await this.completeObjective(objective, channel, tx, response);
-      } catch (error) {
-        this.logger.error({error}, 'Error taking a protocol step');
-        await tx.rollback(error);
+      if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
+        response.queueChannel(channel);
+        return WaitingFor.theirFinalState;
       }
-    });
+
+      if (!(await defunder.crank(channel, tx)).isChannelDefunded) {
+        response.queueChannel(channel);
+        return WaitingFor.defunding;
+      }
+
+      await this.completeObjective(objective, channel, tx, response);
+    } catch (error) {
+      this.logger.error({error}, 'Error taking a protocol step');
+      await tx.rollback(error);
+    }
+    return Nothing.ToWaitFor;
   }
 
   private async areAllFinalStatesSigned(
