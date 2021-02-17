@@ -61,6 +61,7 @@ import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 import {WaitingFor as CloseChannelWaitingFor} from '../protocols/channel-closer';
+import {WaitingFor as SubmitChallengeWaitingFor} from '../protocols/challenge-submitter';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -454,7 +455,7 @@ export class Store {
     const objectiveToBeStored = {
       ...objective,
       status: 'pending' as const,
-      waitingFor: null,
+      waitingFor: SubmitChallengeWaitingFor.nothing,
     };
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBSubmitChallengeObjective>;

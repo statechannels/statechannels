@@ -14,6 +14,7 @@ export const enum WaitingFor {
   // We might pause for some blockchain events / chain service requests, however:
   existingChainServiceRequest = 'ChallengeSubmitter.existingChainServiceRequest',
   existingChallenge = 'ChallengeSubmitter.existingChallenge',
+  nothing = '',
 }
 
 export class ChallengeSubmitter {
@@ -36,7 +37,7 @@ export class ChallengeSubmitter {
     objective: DBSubmitChallengeObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<WaitingFor | null> {
+  ): Promise<WaitingFor> {
     const {targetChannelId: channelToLock} = objective.data;
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
@@ -75,7 +76,7 @@ export class ChallengeSubmitter {
         'There is no initial support stored for the channel'
       );
       await this.store.markObjectiveStatus(objective, 'failed', tx);
-      return null;
+      return WaitingFor.nothing;
     }
 
     await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
@@ -83,7 +84,7 @@ export class ChallengeSubmitter {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannel(channel);
     response.queueSucceededObjective(objective);
-    return null;
+    return WaitingFor.nothing;
   }
 
   /**

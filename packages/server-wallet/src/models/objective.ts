@@ -35,7 +35,7 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
-  waitingFor: WaitingFor | null;
+  waitingFor: WaitingFor;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
@@ -129,7 +129,7 @@ export class ObjectiveModel extends Model {
   static async insert(
     objectiveToBeStored: SupportedObjective & {
       status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-      waitingFor: WaitingFor | null;
+      waitingFor: WaitingFor;
     },
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
@@ -220,7 +220,7 @@ export class ObjectiveModel extends Model {
 
   static async updateWaitingFor(
     objectiveId: string,
-    waitingFor: WaitingFor | null,
+    waitingFor: WaitingFor,
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
     return (

@@ -15,6 +15,7 @@ export const enum WaitingFor {
   allAllocationItemsToBeExternalDestination = 'ChannelCloser.allAllocationItemsToBeExternalDestination',
   theirFinalState = 'ChannelCloser.theirFinalState', // i.e. other participants' final states
   defunding = 'ChannelCloser.defunding',
+  nothing = '',
 }
 
 export class ChannelCloser {
@@ -38,7 +39,7 @@ export class ChannelCloser {
     objective: DBCloseChannelObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<WaitingFor | null> {
+  ): Promise<WaitingFor> {
     const channelToLock = objective.data.targetChannelId;
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
@@ -79,7 +80,7 @@ export class ChannelCloser {
       this.logger.error({error}, 'Error taking a protocol step');
       await tx.rollback(error);
     }
-    return null;
+    return WaitingFor.nothing;
   }
 
   private async areAllFinalStatesSigned(
