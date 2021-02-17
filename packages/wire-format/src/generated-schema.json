@@ -126,14 +126,17 @@
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
             },
-            "transactionSubmitter": {
-              "type": "string"
+            "txSubmitterOder": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
             }
           },
           "required": [
             "targetChannelId",
             "fundingStrategy",
-            "transactionSubmitter"
+            "txSubmitterOder"
           ],
           "type": "object"
         },

@@ -1,4 +1,4 @@
-import {isCloseChannel, unreachable} from '@statechannels/wallet-core';
+import {BN, isCloseChannel, unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
@@ -92,22 +92,15 @@ export class Defunder {
 
     let didSubmitTransaction = false;
 
-    /**
-     * Collaboratively concluding a channel on-chain involves:
-     * 1. Submit a conclusion proof to the NitroAdjudicator.
-     * 2. Push the outcome to all AssetHolders.
-     * 3. Transfer out of the channel for all asset holders.
-     *
-     * Steps 1 and 2 require one or two transactions that are submitted by one participant
-     * but affect (and block) both participants. The participant who submits the transaction(s) is
-     * called the primaryTransactionSubmitter.
-     */
-    let isPrimaryTransactionSubmitter = true;
-    if (
-      isCloseChannel(objective) &&
-      objective.data.transactionSubmitter !== channel.myParticipantId
-    ) {
-      isPrimaryTransactionSubmitter = false;
+    let shouldSubmitCollaborativeTx = true;
+    if (isCloseChannel(objective)) {
+      for (const txSubmitter of objective.data.txSubmitterOder) {
+        const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
+        if (allocation && BN.gt(allocation.amount, 0)) {
+          shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
+          break;
+        }
+      }
     }
 
     /**
@@ -119,7 +112,7 @@ export class Defunder {
     if (
       adjudicatorStatus.channelMode !== 'Finalized' &&
       channel.hasConclusionProof &&
-      isPrimaryTransactionSubmitter
+      shouldSubmitCollaborativeTx
     ) {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
 
@@ -130,7 +123,7 @@ export class Defunder {
       // Note, we are not awaiting transaction submission
       await this.chainService.concludeAndWithdraw([channel.supported]);
       didSubmitTransaction = true;
-    } else if (adjudicatorStatus.channelMode === 'Finalized' && isPrimaryTransactionSubmitter) {
+    } else if (adjudicatorStatus.channelMode === 'Finalized' && shouldSubmitCollaborativeTx) {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
       await this.chainService.pushOutcomeAndWithdraw(
         adjudicatorStatus.states[0],
