@@ -29,12 +29,12 @@ let store: Store;
 
 function ensureCloseObjective(
   channel: TestChannel,
-  transactionSubmitterIndex = 0
+  participantIndex = 0
 ): Promise<DBCloseChannelObjective> {
   // add the closeChannel objective and approve
   return store.transaction(async tx => {
     const o = await store.ensureObjective(
-      channel.closeChannelObjective(transactionSubmitterIndex),
+      channel.closeChannelObjective([participantIndex, Math.abs(participantIndex - 1)]),
       tx
     );
     await store.approveObjective(o.objectiveId, tx);
