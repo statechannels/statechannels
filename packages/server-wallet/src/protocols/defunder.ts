@@ -91,7 +91,7 @@ export class Defunder {
     );
 
     let didSubmitTransaction = false;
-    const shouldSubmitCollaborativeTx = this._shouldSubmitCollaborativeTx(channel, objective);
+    const shouldSubmitCollaborativeTx = Defunder._shouldSubmitCollaborativeTx(channel, objective);
 
     /**
      * The below if/else does not account for the following scenario:
@@ -161,8 +161,13 @@ export class Defunder {
    *
    * This method is public for unit testing only
    */
-  public _shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
+  public static _shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
     let shouldSubmitCollaborativeTx = true;
+    /**
+     * Only CloseChannel objective specifies the transaction submitter order.
+     * The DefundChannel objective will be soon replaced with the ChallengeChannel objective.
+     * Challenge channel objective does not result in any collaborative transactions.
+     */
     if (isCloseChannel(objective)) {
       for (const txSubmitter of objective.data.txSubmitterOder) {
         const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
