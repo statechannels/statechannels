@@ -3,7 +3,7 @@ import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
 import {DBDefundChannelObjective} from '../models/objective';
-import {Nothing} from '../objectives/objective-manager';
+import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -13,7 +13,7 @@ export const enum WaitingFor {
   transactionSubmission = 'ChannelDefunder.transactionSubmission',
 }
 
-export class ChannelDefunder {
+export class ChannelDefunder implements Cranker<DBDefundChannelObjective> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,

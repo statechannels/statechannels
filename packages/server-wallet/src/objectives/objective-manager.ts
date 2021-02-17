@@ -1,5 +1,6 @@
 import {Logger} from 'pino';
 import {unreachable} from '@statechannels/wallet-core';
+import {Transaction} from 'knex';
 
 import {Bytes32} from '../type-aliases';
 import {ChannelOpener, WaitingFor as ChannelOpenerWaitingFor} from '../protocols/channel-opener';
@@ -12,7 +13,7 @@ import {
   WaitingFor as ChallengeSubmitterWaitingFor,
 } from '../protocols/challenge-submitter';
 import {ChannelDefunder, WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
-import {ObjectiveModel} from '../models/objective';
+import {DBObjective, ObjectiveModel} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -31,6 +32,10 @@ export type WaitingFor =
   | ChallengeSubmitterWaitingFor
   | DefundChannelWaitingFor
   | Nothing;
+
+export interface Cranker<O extends DBObjective> {
+  crank: (objective: O, response: WalletResponse, tx: Transaction) => Promise<WaitingFor | Nothing>;
+}
 export class ObjectiveManager {
   private store: Store;
   private logger: Logger;
@@ -74,6 +79,15 @@ export class ObjectiveManager {
           waitingFor = await this.channelDefunder.crank(objective, response, tx);
           break;
         default:
+          // NOTE FOR DEVS Implementing a new Objective cranker
+          // 1. Define a WaitingFor enum which contains the "early return" or "pause" points of the objective.
+          //    These pause points will be used to track progress over time, and for debugging.
+          // 2. Import and add it to the WaitingFor union type in this file.
+          // 2. Implement the Cranker<YourDBObjectiveHere> interface
+          // 3. Make as much progress as you can towards the objective (sign states, submit transactions)
+          //    until progress is blocked on an external event (e.g. counterparty State
+          //    or blockchain event). Then return early with the waitingFor string
+          // 4. Wire up your cranker by inserting a new case to this switch block
           unreachable(objective);
       }
       if (objective.waitingFor != waitingFor) {

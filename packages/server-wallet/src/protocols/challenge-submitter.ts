@@ -6,7 +6,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {DBSubmitChallengeObjective} from '../models/objective';
-import {Nothing} from '../objectives/objective-manager';
+import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -17,7 +17,7 @@ export const enum WaitingFor {
   existingChallenge = 'ChallengeSubmitter.existingChallenge',
 }
 
-export class ChallengeSubmitter {
+export class ChallengeSubmitter implements Cranker<DBSubmitChallengeObjective> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,

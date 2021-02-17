@@ -8,7 +8,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
-import {Nothing} from '../objectives/objective-manager';
+import {Cranker, Nothing} from '../objectives/objective-manager';
 
 import {Defunder} from './defunder';
 
@@ -18,7 +18,7 @@ export const enum WaitingFor {
   defunding = 'ChannelCloser.defunding',
 }
 
-export class ChannelCloser {
+export class ChannelCloser implements Cranker<DBCloseChannelObjective> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
