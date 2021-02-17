@@ -6,6 +6,7 @@
 
 import { Address } from '@statechannels/wallet-core';
 import { AllocationItem } from '@statechannels/nitro-protocol';
+import { AllocationItem as AllocationItem_2 } from '@statechannels/wallet-core';
 import { AssetOutcome } from '@statechannels/nitro-protocol';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
