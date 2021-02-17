@@ -91,17 +91,7 @@ export class Defunder {
     );
 
     let didSubmitTransaction = false;
-
-    let shouldSubmitCollaborativeTx = true;
-    if (isCloseChannel(objective)) {
-      for (const txSubmitter of objective.data.txSubmitterOder) {
-        const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
-        if (allocation && BN.gt(allocation.amount, 0)) {
-          shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
-          break;
-        }
-      }
-    }
+    const shouldSubmitCollaborativeTx = this._shouldSubmitCollaborativeTx(channel, objective);
 
     /**
      * The below if/else does not account for the following scenario:
@@ -162,5 +152,26 @@ export class Defunder {
       channel.fundingLedgerChannelId,
       tx
     );
+  }
+
+  /**
+   * Assume that we are going to submit collaborative transaction(s) unless:
+   * 1. There is an agreed upon order of transaction submitters.
+   * 2. There is a transaction submitter before us who has funds in the channel.
+   *
+   * This method is public for unit testing only
+   */
+  public _shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
+    let shouldSubmitCollaborativeTx = true;
+    if (isCloseChannel(objective)) {
+      for (const txSubmitter of objective.data.txSubmitterOder) {
+        const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
+        if (allocation && BN.gt(allocation.amount, 0)) {
+          shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
+          break;
+        }
+      }
+    }
+    return shouldSubmitCollaborativeTx;
   }
 }
