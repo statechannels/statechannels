@@ -8,7 +8,7 @@ import useBaseUrl from '@docusaurus/useBaseUrl';
 By depending on our node.js state channels wallet library, you will be able to rapidly develop a statechannels-powered server application that does not need to manage keys, interface with an ethereum provider or understand nitro-protocol at all. Instead, it only needs to target the @statechannels/server-wallet [API](/typescript-api/server-wallet).
 
 :::note
-This section is for developers building server-based Dapps that require a server-based state channels wallet.
+This section is for developers building server-based Dapps that require a server-based state channels wallet. The instructions are incomplete and should not serve as a reference for deploying your application to production. If you want to do that, please get in touch with our team.
 Browser-based applications should use a state channel browser wallet (coming soon).
 :::
 

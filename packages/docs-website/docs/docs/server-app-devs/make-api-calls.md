@@ -6,7 +6,7 @@ title: Make Wallet API calls
 import Mermaid from '@theme/Mermaid';
 
 :::note
-This page relates to the statechannels server wallet ONLY.
+This page relates to the statechannels server wallet ONLY. It is a work in progress.
 :::
 
 In the following diagram A and B are each a separate server application each with their own statechannels server wallet instance running in the same process.
