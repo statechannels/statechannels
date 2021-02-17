@@ -8,7 +8,7 @@ import {DBOpenChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
-import {Nothing} from '../objectives/objective-manager';
+import {Nothing, Cranker} from '../objectives/objective-manager';
 
 import {DirectFunder} from './direct-funder';
 import {LedgerFunder} from './ledger-funder';
@@ -19,7 +19,7 @@ export enum WaitingFor {
   funding = 'ChannelOpener.funding', // TODO reuse ChannelFunder.waitingFor,
 }
 
-export class ChannelOpener {
+export class ChannelOpener implements Cranker<DBOpenChannelObjective> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
