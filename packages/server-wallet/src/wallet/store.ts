@@ -54,7 +54,7 @@ const defaultLogger = createLogger(defaultTestConfig());
 
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
-
+export type EnsureObjectiveResult = {objective: DBObjective; isNew: boolean};
 const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
   throw new ChannelError(ChannelError.reasons.channelMissing, {channelId});
 };
@@ -299,7 +299,7 @@ export class Store {
   ): Promise<{
     channelIds: Bytes32[];
     channelResults: ChannelResult[];
-    storedObjectives: DBObjective[];
+    newObjectives: DBObjective[];
   }> {
     return this.knex.transaction(async tx => {
       const channelResults: ChannelResult[] = [];
@@ -314,11 +314,16 @@ export class Store {
       }
 
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
+      const newObjectives: DBObjective[] = [];
       const storedObjectives: DBObjective[] = [];
       for (const o of deserializedObjectives) {
         if (isSupportedObjective(o)) {
           const preApprove = o.type == 'CloseChannel'; // Close channel objectives do not need co-operative approval
-          storedObjectives.push(await ObjectiveModel.insert(o, preApprove, tx));
+          const {objective: inserted, isNew} = await ObjectiveModel.insert(o, preApprove, tx);
+          if (isNew) {
+            newObjectives.push(inserted);
+          }
+          storedObjectives.push(inserted);
         } else this.logger.warn('Unsupported objective received');
       }
 
@@ -332,10 +337,7 @@ export class Store {
       return {
         channelIds: stateChannelIds.concat(objectiveChannelIds),
         channelResults,
-        // HACK (1): This may cause the wallet to re-emit `'objectiveStarted'` multiple times
-        // For instance, a peer who sends me an objective `o`, and then triggers `syncObjectives`
-        // including `o`, will cause my wallet to emit `'objectiveStarted'` for `o` twice.
-        storedObjectives,
+        newObjectives,
       };
     });
   }
@@ -630,7 +632,7 @@ export class Store {
         },
       };
 
-      const objective = await ObjectiveModel.insert(
+      const {objective} = await ObjectiveModel.insert(
         o,
         true, // preApproved
         tx,

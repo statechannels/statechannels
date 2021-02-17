@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {SubmitChallenge} from '@statechannels/wallet-core';
+import {checkThat, SubmitChallenge} from '@statechannels/wallet-core';
 
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
@@ -7,7 +7,7 @@ import {defaultTestConfig} from '../../config';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
-import {DBSubmitChallengeObjective, ObjectiveModel} from '../../models/objective';
+import {ObjectiveModel, DBObjective, DBSubmitChallengeObjective} from '../../models/objective';
 import {ChallengeSubmitter} from '../challenge-submitter';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -51,7 +51,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const dbObjective = await knex.transaction(async tx =>
+    const {objective: dbObjective} = await knex.transaction(async tx =>
       ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
     );
 
@@ -71,7 +71,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx =>
+    const {objective} = await knex.transaction(tx =>
       ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
     );
 
@@ -92,7 +92,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx =>
+    const {objective} = await knex.transaction(tx =>
       ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
     );
     await await crankAndAssert(objective, {
@@ -107,10 +107,11 @@ interface AssertionParams {
   completesObj?: boolean;
 }
 
-const crankAndAssert = async (
-  objective: DBSubmitChallengeObjective,
-  args: AssertionParams
-): Promise<void> => {
+function isSubmitChallengeObjective(o: DBObjective): o is DBSubmitChallengeObjective {
+  return o.type === 'SubmitChallenge';
+}
+
+const crankAndAssert = async (objective: DBObjective, args: AssertionParams): Promise<void> => {
   const completesObj = args.completesObj || false;
   const callsChallenge = args.callsChallenge || false;
   const chainService = new MockChainService();
@@ -118,7 +119,7 @@ const crankAndAssert = async (
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'challenge');
   await store.transaction(async tx => {
-    await challengeSubmitter.crank(objective, response, tx);
+    await challengeSubmitter.crank(checkThat(objective, isSubmitChallengeObjective), response, tx);
   });
 
   if (callsChallenge) {

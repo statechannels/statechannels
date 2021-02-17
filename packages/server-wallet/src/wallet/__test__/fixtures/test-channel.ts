@@ -290,7 +290,7 @@ export class TestChannel {
     });
 
     // insert the OpenChannel objective
-    const objective = await ObjectiveModel.insert<DBOpenChannelObjective>(
+    const {objective} = await ObjectiveModel.insert<DBOpenChannelObjective>(
       this.openChannelObjective,
       true,
       store.knex

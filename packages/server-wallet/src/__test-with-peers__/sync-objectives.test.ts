@@ -56,7 +56,7 @@ test('handles the objective being synced even if no message is lost', async () =
   const {outbox: syncOutbox} = await peerWallets.a.syncObjectives([objectiveId]);
 
   // Now we push in the sync payload
-  const {outbox, channelResults} = await peerWallets.b.pushMessage(
+  const {outbox, channelResults, newObjectives} = await peerWallets.b.pushMessage(
     getPayloadFor(bob().participantId, syncOutbox)
   );
 
@@ -73,8 +73,7 @@ test('handles the objective being synced even if no message is lost', async () =
     },
   });
 
-  // TODO: https://github.com/statechannels/statechannels/issues/3289
-  //expect(newObjectives).toHaveLength(0);
+  expect(newObjectives).toHaveLength(0);
 
   expect(channelResults).toHaveLength(1);
 });
@@ -99,7 +98,7 @@ test('Can successfully push the sync objective message multiple times', async ()
   await peerWallets.b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
 
   // We push the message to B again and check the results
-  const {outbox, channelResults} = await peerWallets.b.pushMessage(
+  const {outbox, channelResults, newObjectives} = await peerWallets.b.pushMessage(
     getPayloadFor(bob().participantId, syncResult.outbox)
   );
 
@@ -119,8 +118,7 @@ test('Can successfully push the sync objective message multiple times', async ()
   expect(channelResults).toHaveLength(1);
   expect(channelResults[0]).toMatchObject({channelId});
 
-  // TODO: https://github.com/statechannels/statechannels/issues/3289
-  //expect(newObjectives).toHaveLength(0);
+  expect(newObjectives).toHaveLength(0);
 });
 
 async function getObjective(knex: Knex, objectiveId: string): Promise<DBObjective | undefined> {

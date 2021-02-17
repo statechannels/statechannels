@@ -13,7 +13,7 @@ export class CloseChannelObjective {
     await store.lockApp(
       channelId,
       async (tx, channel) => {
-        const dbObjective = await ObjectiveModel.insert(
+        const {objective: dbObjective} = await ObjectiveModel.insert(
           {
             type: 'CloseChannel',
             participants: [],

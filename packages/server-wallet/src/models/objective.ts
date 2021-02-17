@@ -161,9 +161,9 @@ export class ObjectiveModel extends Model {
     preApproved: boolean,
     tx: TransactionOrKnex,
     waitingFor?: WaitingFor // TODO this type should be correlated to O
-  ): Promise<O> {
+  ): Promise<{objective: O; isNew: boolean}> {
     const id: string = objectiveId(objectiveToBeStored);
-
+    const isNew = await this.doesExist(id, tx);
     return tx.transaction(async trx => {
       const query = ObjectiveModel.query(trx)
         .insert({
@@ -220,7 +220,7 @@ export class ObjectiveModel extends Model {
               .ignore() // this makes it an upsert
         )
       );
-      return model.toObjective<O>();
+      return {objective: model.toObjective<O>(), isNew};
     });
   }
 

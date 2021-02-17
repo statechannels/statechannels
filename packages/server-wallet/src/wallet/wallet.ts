@@ -384,7 +384,7 @@ export class SingleThreadedWallet
       }
       // END CHALLENGING_V0
 
-      const objective = await ObjectiveModel.insert(
+      const {isNew, objective} = await ObjectiveModel.insert(
         {
           type: 'SubmitChallenge',
           participants: [],
@@ -393,8 +393,9 @@ export class SingleThreadedWallet
         true, // preApprove
         tx
       );
-      this.emit('objectiveStarted', objective);
-
+      if (isNew) {
+        this.emit('objectiveStarted', objective);
+      }
       response.queueChannel(channel);
     });
 
@@ -874,13 +875,10 @@ export class SingleThreadedWallet
     const {
       channelIds: channelIdsFromStates,
       channelResults: fromStoring,
-      storedObjectives,
+      newObjectives,
     } = await this.store.pushMessage(wirePayload);
 
-    // HACK (1): This may cause the wallet to re-emit `'objectiveStarted'` multiple times
-    // For instance, a peer who sends me an objective `o`, and then triggers `syncObjectives`
-    // including `o`, will cause my wallet to emit `'objectiveStarted'` for `o` twice.
-    response.createdObjectives = storedObjectives;
+    response.createdObjectives = newObjectives;
 
     const channelIdsFromRequests: Bytes32[] = [];
     const requests = (wirePayload.requests || []).map(deserializeRequest);
@@ -1059,7 +1057,7 @@ export class SingleThreadedWallet
       arg.finalizedAt
     );
     await this.knex.transaction(async tx => {
-      const objective = await ObjectiveModel.insert(
+      const {objective, isNew} = await ObjectiveModel.insert(
         {
           type: 'DefundChannel',
           participants: [],
@@ -1068,7 +1066,9 @@ export class SingleThreadedWallet
         true, // preApproved
         tx
       );
-      this.emit('objectiveStarted', objective);
+      if (isNew) {
+        this.emit('objectiveStarted', objective);
+      }
     });
 
     await this.takeActions([arg.channelId], response);

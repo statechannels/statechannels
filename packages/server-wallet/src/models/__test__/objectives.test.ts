@@ -26,7 +26,7 @@ beforeEach(async () => {
 describe('Objective > insert', () => {
   it('returns an objective with Date types for timestamps', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-    const inserted = await ObjectiveModel.insert(
+    const {objective: inserted} = await ObjectiveModel.insert(
       objective,
       false,
       knex,
@@ -64,12 +64,14 @@ describe('Objective > insert', () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
-    const {createdAt} = await ObjectiveModel.insert(
+    const {objective: inserted} = await ObjectiveModel.insert(
       objective,
       false,
       knex,
       ChannelOpenerWaitingFor.theirPreFundSetup
     );
+    const {createdAt} = inserted;
+
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
 
     expect(createdAt.getTime() > before).toBe(true);
@@ -78,12 +80,13 @@ describe('Objective > insert', () => {
 
   it('updates the progressLastMadeAt timestamp on an objective when updateWaitingFor is called', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-    const {objectiveId} = await ObjectiveModel.insert(
+    const {objective: inserted} = await ObjectiveModel.insert(
       objective,
       false,
       knex,
       ChannelOpenerWaitingFor.theirPreFundSetup
     );
+    const {objectiveId} = inserted;
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
     const {progressLastMadeAt} = await ObjectiveModel.updateWaitingFor(
       objectiveId,
@@ -115,7 +118,8 @@ describe('Objective > doesExist', () => {
 
   it('returns true when an objective does exist', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-    const {objectiveId} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    const {objective: inserted} = await ObjectiveModel.insert(objective, false, knex);
+    const {objectiveId} = inserted;
     const result = await ObjectiveModel.doesExist(objectiveId, knex);
     expect(result).toBe(true);
   });

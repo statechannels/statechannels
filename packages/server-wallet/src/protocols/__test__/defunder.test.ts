@@ -39,7 +39,7 @@ async function ensureCloseObjective(
   participantIndex = 0
 ): Promise<DBCloseChannelObjective> {
   // add a preapproved closeChannel objective
-  const o = await ObjectiveModel.insert(
+  const {objective: o} = await ObjectiveModel.insert(
     channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
     true,
     tx
@@ -52,7 +52,7 @@ async function ensureDefundObjective(
   tx: Transaction
 ): Promise<DBDefundChannelObjective> {
   // add a preapproved defundChannel objective
-  const o = await ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
+  const {objective: o} = await ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
   return o as DBDefundChannelObjective;
 }
 

@@ -60,25 +60,29 @@ beforeEach(async () => {
     states: [FINAL, FINAL + 1],
   });
 
-  objective = await ObjectiveModel.insert<DBDefundChannelObjective>(
-    {
-      type: 'DefundChannel',
-      participants: [],
-      data: {targetChannelId: testChan.channelId},
-    },
-    false,
-    knex
-  );
+  objective = (
+    await ObjectiveModel.insert<DBDefundChannelObjective>(
+      {
+        type: 'DefundChannel',
+        participants: [],
+        data: {targetChannelId: testChan.channelId},
+      },
+      false,
+      knex
+    )
+  ).objective;
 
-  objective2 = await ObjectiveModel.insert<DBDefundChannelObjective>(
-    {
-      type: 'DefundChannel',
-      participants: [],
-      data: {targetChannelId: testChan2.channelId},
-    },
-    false,
-    knex
-  );
+  objective2 = (
+    await ObjectiveModel.insert<DBDefundChannelObjective>(
+      {
+        type: 'DefundChannel',
+        participants: [],
+        data: {targetChannelId: testChan2.channelId},
+      },
+      false,
+      knex
+    )
+  ).objective;
 
   pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
   withdrawSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
