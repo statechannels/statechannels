@@ -89,7 +89,10 @@ export class ObjectiveChannelModel extends Model {
   }
 }
 
-export class ObjectiveModel extends Model {
+type FlattenedDBObjective = {[P in keyof DBObjective]: DBObjective[P]}; // this destroys the correlations in the union type
+type Columns = Omit<FlattenedDBObjective, 'participants'>;
+
+export class ObjectiveModel extends Model implements Columns {
   readonly objectiveId!: DBObjective['objectiveId'];
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
@@ -247,11 +250,25 @@ export class ObjectiveModel extends Model {
     return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
   }
 
-  toObjective(): DBObjective {
-    return {
-      ...this,
-      participants: [],
-      data: this.data as any, // Here we will trust that the row respects our types
+  toObjective<O extends DBObjective = DBObjective>(): O {
+    const withParticipants: FlattenedDBObjective = {
+      objectiveId: this.objectiveId,
+      status: this.status,
+      type: this.type,
+      data: this.data,
+      createdAt: this.createdAt,
+      progressLastMadeAt: this.progressLastMadeAt,
+      waitingFor: this.waitingFor,
+      participants: [] as DBObjective['participants'], // reinstate an empty participants array
     };
+    switch (this.type) {
+      case 'CloseChannel':
+      case 'DefundChannel':
+      case 'OpenChannel':
+      case 'SubmitChallenge':
+        return withParticipants as O;
+      default:
+        throw Error('unimplemented');
+    }
   }
 }
