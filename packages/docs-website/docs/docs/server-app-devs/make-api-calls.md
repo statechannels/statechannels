@@ -48,20 +48,20 @@ B->>A: msg3;
 A->>WalletA: pushMessage(msg3);
 WalletA-->>A: 0xabc: running
 end
-loop 0...m
+loop i=0...m
 note left of WalletB: Running a channel
-A->>WalletA: updateChannel(state-4+2m);
-WalletA-->>A: 0xabc: (state-4+2m)
-WalletA-->>A: outbox: [msg-4+2m]
-A->>B: msg-4+2m
-B->>WalletB: pushMessage(msg-4+2m)
-WalletB-->>B: 0xabc: (state-4+2m)
-B->>WalletB: updateChannel(state-5+2m);
-WalletB-->>B: 0xabc: (state-5+2m);
-WalletB-->>B: outbox: [msg-5+2m]
-B->>A: msg-5+2m
-A->>WalletA: pushMessage(msg-5+2m)
-WalletA-->>A: 0xabc: (state-5+2m)
+A->>WalletA: updateChannel(state-4+2i);
+WalletA-->>A: 0xabc: (state-4+2i)
+WalletA-->>A: outbox: [msg-4+2i]
+A->>B: msg-4+2i
+B->>WalletB: pushMessage(msg-4+2i)
+WalletB-->>B: 0xabc: (state-4+2i)
+B->>WalletB: updateChannel(state-5+2i);
+WalletB-->>B: 0xabc: (state-5+2i);
+WalletB-->>B: outbox: [msg-5+2i]
+B->>A: msg-5+2i
+A->>WalletA: pushMessage(msg-5+2i)
+WalletA-->>A: 0xabc: (state-5+2i)
 end
 rect rgba(0, 0, 255, .1)
 note left of WalletB: Closing a channel
