@@ -143,7 +143,16 @@ Aproved Objectives are _cranked_. This means that when certain events happen, th
 
 (Here, committing means: reinserting into or patching the database; broadcasting states; broadcasting transactions; responding to the API request; emitting an event.)
 
-In practice, a _cranker_ is a function that accepts a store and a _response_ object. It starts a database transaction; reads from the store; decides whether to write to the database; writes to the database; mutates the response and then finishes the transaction.
+In practice, a _cranker_ is a function that accepts a store, a _response_ object, and a newly started database transaction context. It uses the transaction context to
+
+- lock one or more database rows;
+- read from the database;
+- writes to the database if necessary
+- mutates the response object
+
+As a final step, metadata about objective progress is written to the database. The transaction is then commited and the row locks are released.
+
+> Q: Which rows should be locked? One answer is: the objective row and all of the channel rows in the scope of the objective.
 
 An objective will often be blocked on, or waiting for, external events. The wallet will track the length of time an objective is blocked, and expose this information to the app. This allosw the app to choose to spawn a new objective to displace the stalled one. For example, a `SubmitChallenege` objective might displace a `CloseChannel` objective.
 
