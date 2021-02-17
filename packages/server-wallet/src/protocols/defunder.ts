@@ -9,6 +9,21 @@ import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {Store} from '../wallet/store';
 
+/**
+ * DefunderResult type is the return value of the crank method. The return value of the crank method
+ * should be a boolean in the medium/long term.
+ *
+ * Why is that?
+ * The boolean will represent whether the Defunder protocol has reached the terminal point.
+ * This is the pattern established by the ChannelOpener protocol. The caller of the Defunder
+ * protocol should not be concerned with internal details of whether a transaction is submitted.
+ *
+ * What about didSubmitTransaction?
+ * In the short term, the ChannelDefunder protocol (which invoked the Defunder protocol) completes
+ * upon transaction submission. ChannelDefunder protocol will not be used in the medium term.
+ * Most likely, a ChallengeAndWithdraw protocol (which invokes this Defunder protocol) will
+ * make the ChannelDefunder protocol aboslete.
+ */
 export type DefunderResult = {isChannelDefunded: boolean; didSubmitTransaction: boolean};
 
 export class Defunder {
@@ -30,10 +45,12 @@ export class Defunder {
 
   public async crank(channel: Channel, tx: Transaction): Promise<DefunderResult> {
     const {protocolState: ps} = channel;
+    await channel.$fetchGraph('funding', {transaction: tx});
+    await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
 
     switch (ps.fundingStrategy) {
       case 'Direct':
-        return await this.directDefunder(channel, tx);
+        return this.directDefunder(channel, tx);
       case 'Ledger':
         return this.ledgerDefunder(channel, tx);
       case 'Unknown':
@@ -77,6 +94,8 @@ export class Defunder {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
       await this.chainService.pushOutcomeAndWithdraw(
         adjudicatorStatus.states[0],
+        // TODO: we are assuming that we submitted the challenge.
+        // This is not a valid assumption as the defunder protocol can be run no matter how the channel was finalized
         channel.myAddress
       );
       didSubmitTransaction = true;
@@ -86,14 +105,18 @@ export class Defunder {
   }
 
   private async ledgerDefunder(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+    const didSubmitTransaction = false;
+    if (!channel.hasConclusionProof) {
+      return {isChannelDefunded: false, didSubmitTransaction};
+    }
     const ledgerRequest = await this.store.getLedgerRequest(channel.channelId, 'defund', tx);
     if (ledgerRequest && ledgerRequest.status === 'succeeded') {
-      return {isChannelDefunded: true, didSubmitTransaction: false};
+      return {isChannelDefunded: true, didSubmitTransaction};
     }
     if (!ledgerRequest || ledgerRequest.status !== 'pending') {
       await this.requestLedgerDefunding(channel, tx);
     }
-    return {isChannelDefunded: false, didSubmitTransaction: false};
+    return {isChannelDefunded: false, didSubmitTransaction};
   }
 
   private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
