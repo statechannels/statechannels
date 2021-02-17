@@ -17,11 +17,20 @@ import {ObjectiveModel} from '../models/objective';
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
 
+// Nothing.ToWaitFor is a special type
+// returned from a cranker when the objective completes
+// it is the default value of waiting_for column
+// on the objectives table in the db
+export enum Nothing {
+  ToWaitFor = '',
+}
+
 export type WaitingFor =
   | ChannelOpenerWaitingFor
   | ChannelCloserWaitingFor
   | ChallengeSubmitterWaitingFor
-  | DefundChannelWaitingFor;
+  | DefundChannelWaitingFor
+  | Nothing;
 export class ObjectiveManager {
   private store: Store;
   private logger: Logger;

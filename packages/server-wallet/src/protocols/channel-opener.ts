@@ -8,6 +8,7 @@ import {DBOpenChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
+import {Nothing} from '../objectives/objective-manager';
 
 import {DirectFunder} from './direct-funder';
 import {LedgerFunder} from './ledger-funder';
@@ -16,7 +17,6 @@ export enum WaitingFor {
   theirPreFundSetup = 'ChannelOpener.theirPreFundSetup',
   theirPostFundState = 'ChannelOpener.theirPostFundSetup',
   funding = 'ChannelOpener.funding', // TODO reuse ChannelFunder.waitingFor,
-  nothing = '',
 }
 
 export class ChannelOpener {
@@ -40,7 +40,7 @@ export class ChannelOpener {
     objective: DBOpenChannelObjective,
     response: WalletResponse,
     tx: Transaction
-  ): Promise<WaitingFor> {
+  ): Promise<WaitingFor | Nothing> {
     const channelToLock = objective.data.targetChannelId;
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
@@ -77,7 +77,7 @@ export class ChannelOpener {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueSucceededObjective(objective);
 
-    return WaitingFor.nothing;
+    return Nothing.ToWaitFor;
   }
 
   private async crankChannelFunder(

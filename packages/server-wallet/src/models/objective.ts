@@ -95,6 +95,7 @@ export class ObjectiveModel extends Model {
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
   readonly waitingFor!: DBObjective['waitingFor'];
+  // the default value of waitingFor is '', see Nothing.ToWaitFor type
   createdAt!: Date;
   progressLastMadeAt!: Date;
 
@@ -144,7 +145,7 @@ export class ObjectiveModel extends Model {
           data: objectiveToBeStored.data,
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
-          waitingFor: objectiveToBeStored.waitingFor, // the return value is null
+          waitingFor: objectiveToBeStored.waitingFor,
         })
         // `Model.query(tx).insert(o)` returns `o` by default.
         // The return value is therefore constrained by the type of `Model`.
