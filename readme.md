@@ -24,6 +24,11 @@ You can learn more about what state channels are by reading [one](https://l4.ven
   - [Clean](#clean)
   - [Lint](#lint)
   - [Tests](#tests)
+  - [Authoring conventional commits](#authoring-conventional-commits)
+  - [Publishing packages](#publishing-packages)
+    - [Fixing a failed publish](#fixing-a-failed-publish)
+- [Typescript doc comments](#typescript-doc-comments)
+- [API reports](#api-reports)
 - [Community](#community)
 
 ## Packages
@@ -44,10 +49,16 @@ This repository is a monorepo, and contains the following packages maintained wi
 - **[Fix an issue](https://github.com/statechannels/statechannels/issues?state=open)**. statechannels is an [Open Source Project](.github/CONTRIBUTING.md)!
 
 ### Installing dependencies
+  * **yarn** - version 1.22.4, for easy management of specific Yarn versions, we recommend using [Yarn Version Manager (YVM)](https://github.com/tophat/yvm).
+  * **node** - version 2.18.0, for easy management of specific versions, we recommend using [n](https://github.com/tj/n).
+  * **postgres** - we recommend [the postgres app](https://postgresapp.com/). If you choose this installation, make sure you follow [the following steps](https://postgresapp.com/documentation/install.html) to add postgres tools to you $PATH, better verify commands like 'createdb', 'dropdb' runs correctly in your terminal before proceeding.
 
-**Make sure you have Yarn v1.17.3 installed**. For easy management of specific Yarn versions, we recommend using [Yarn Version Manager (YVM)](https://github.com/tophat/yvm).
+```shell
+sudo mkdir -p /etc/paths.d &&
+echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresap
+```
 
-To install the dependencies:
+The rest of the dependencies can be installed by running
 
 ```shell
 yarn
@@ -86,6 +97,12 @@ yarn lint:write
 ```
 
 ### Tests
+
+To create and migrate test db:
+```shell
+cd ./packages/server-wallet/
+./src/test_db.sh server_wallet_test
+``` 
 
 To run all tests:
 

@@ -140,8 +140,30 @@ export class ObjectiveModel extends Model {
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
         })
+        // `Model.query(tx).insert(o)` returns `o` by default.
+        // The return value is therefore constrained by the type of `Model`.
+        // When data is fetched with e.g. `Model.query(tx).findById()`, however,
+        // the return type is dictated by the DB schema and driver, defined elsewhere.
+        // It is possible for these types to differ:
+        // and we are effectively *asserting* that they are the same.
+        // So it is important to check that the objects returned by *find* queries
+        // are of the same type as `Model`.
+        //
+        // This is particularly important for `timestamp` columns,
+        // which can be inserted as a `Date` or a `string` (without error),
+        // but will be parsed into a `Date` when fetched.
+        //
+        // Chaining `.returning('*').first()` is one way to ensure that the returned object
+        // has the same type as a fetched object. But it has a performance cost, and can still
+        // lead to a bad type assertion: for example, if o.createdAt were a `string`,
+        // by using `.returning('*').first()` that property would in fact be a `Date` when fetched.
+        // This could lead to nasty runtime errors not caught at compile-time, because
+        // the property would type asserted as a `string`.
+        //
+        // We use `.returning('*').first()` here because we are ignoring conflicts,
+        // and want to know what was "already there" in that case.
         .returning('*')
-        .first() // This ensures that the returned object undergoes any type conversion performed during insert
+        .first()
         .onConflict('objectiveId')
         .ignore(); // this avoids a UniqueViolationError being thrown
 

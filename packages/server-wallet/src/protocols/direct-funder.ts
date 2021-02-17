@@ -39,7 +39,7 @@ export class DirectFunder {
     tx: Transaction
   ): Promise<boolean> {
     const assetHolderAddress = this.assetHolder(channel);
-    const [targetBefore, targetAfter, targetTotal] = channel.fundingMilestones;
+    const {targetBefore, targetAfter, targetTotal} = channel.fundingMilestones;
 
     const currentFunding = await this.store.getFunding(channel.channelId, assetHolderAddress, tx);
     const currentAmount = currentFunding?.amount || 0;
