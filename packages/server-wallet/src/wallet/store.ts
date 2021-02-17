@@ -61,7 +61,6 @@ import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 import {WaitingFor as CloseChannelWaitingFor} from '../protocols/channel-closer';
-import {WaitingFor as SubmitChallengeWaitingFor} from '../protocols/challenge-submitter';
 import {Nothing} from '../objectives/objective-manager';
 
 const defaultLogger = createLogger(defaultTestConfig());
