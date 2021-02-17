@@ -14,6 +14,7 @@ import {
   isSimpleAllocation,
   BN,
   unreachable,
+  AllocationItem,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -473,24 +474,22 @@ export class Channel extends Model implements ChannelColumns {
     targetAfter: Uint256;
     targetTotal: Uint256;
   } {
-    /**
-     * The below logic assumes:
-     *  1. Each destination occurs at most once.
-     *  2. We only care about a single destination.
-     * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
-     */
     const supported = this.supported;
     if (!supported) {
-      throw new Error(`Channel passed to DriectFunder has no supported state`);
+      throw new Error(`Channel has no supported state`);
+    }
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const myAllocationItem = this.allocationItemForParticipantIndex(this.myIndex);
+    if (!myAllocationItem) {
+      throw new Error(
+        `My destination ${
+          this.participants[this.myIndex].destination
+        } is not in allocations ${allocationItems}`
+      );
     }
 
     const myDestination = this.participants[this.myIndex].destination;
-    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
-
-    const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
-    if (!myAllocationItem) {
-      throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
-    }
 
     const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== myDestination);
     const targetBefore = allocationsBefore.map(a => a.amount).reduce(BN.add, BN.from(0));
@@ -502,19 +501,35 @@ export class Channel extends Model implements ChannelColumns {
     return {targetBefore, targetAfter, targetTotal};
   }
 
+  /**
+   * The below logic assumes:
+   *  1. Each destination occurs at most once.
+   *  2. We only care about a single destination.
+   * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
+   */
+  allocationItemForParticipantIndex(index: number): AllocationItem | undefined {
+    if (index >= this.participants.length) {
+      throw new Error(
+        `${index} is greater than number of participants ${this.participants.length}`
+      );
+    }
+    const supported = this.supported;
+    if (!supported) {
+      throw new Error(`Channel has no supported state`);
+    }
+
+    const myDestination = this.participants[index].destination;
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+    const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
+    return myAllocationItem;
+  }
+
   private mySignature(signatures: SignatureEntry[]): boolean {
     return signatures.some(sig => sig.signer === this.myAddress);
   }
 
   get nParticipants(): number {
     return this.participants.length;
-  }
-
-  nthParticipant(n: number): Participant {
-    if (n >= this.nParticipants) {
-      throw new Error(`Cannot get participant ${n} from ${this.participants}`);
-    }
-    return this.participants[n];
   }
 
   private get _support(): Array<SignedStateWithHash> {
