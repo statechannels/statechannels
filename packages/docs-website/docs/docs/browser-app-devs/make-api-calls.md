@@ -65,25 +65,25 @@ ClientB->>ClientA: msg3;
 ClientA->>WalletA: pushMessage(msg3);
 WalletA-->>-ClientA: ChannelUpdated('running')
 end
-loop 0...m
+loop i=0...m
 note left of WalletB: Running a channel
 ClientA-->>ClientA: Wait for UI
 ClientA->>WalletA: updateChannel(state-A);
 WalletA-->>ClientA: ChannelUpdated(state-A)
 ClientA-->>ClientA: Update UI
-WalletA-->>ClientA: MessageQueued(msg-4+2m)
-ClientA->>ClientB: msg-4+2m
-ClientB->>WalletB: pushMessage(msg-4+2m)
-WalletB-->>ClientB: ChannelUpdated(state-4+2m)
+WalletA-->>ClientA: MessageQueued(msg-4+2i)
+ClientA->>ClientB: msg-4+2i
+ClientB->>WalletB: pushMessage(msg-4+2i)
+WalletB-->>ClientB: ChannelUpdated(state-4+2i)
 ClientB-->>ClientB: Update UI
 ClientB-->>ClientB: Wait for UI
-ClientB->>WalletB: updateChannel(state-5+2m);
-WalletB-->>ClientB: ChannelUpdated(state-5+2m);
+ClientB->>WalletB: updateChannel(state-5+2i);
+WalletB-->>ClientB: ChannelUpdated(state-5+2i);
 ClientB-->>ClientB: Update UI
-WalletB-->>ClientB: MessageQueued(msg-5+2m)
-ClientB->>ClientA: msg-5+2m
-ClientA->>WalletA: pushMessage(msg-5+2m)
-WalletA-->>ClientA: ChannelUpdated(state-5+2m)
+WalletB-->>ClientB: MessageQueued(msg-5+2i)
+ClientB->>ClientA: msg-5+2i
+ClientA->>WalletA: pushMessage(msg-5+2i)
+WalletA-->>ClientA: ChannelUpdated(state-5+2i)
 ClientA-->>ClientA: Update UI
 end
 rect rgba(0, 0, 255, .1)
