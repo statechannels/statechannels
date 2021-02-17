@@ -111,7 +111,19 @@ describe('Objective > forId', () => {
     expect(fetchedObjective.progressLastMadeAt instanceof Date).toBe(true);
   });
 });
+describe('Objective > doesExist', () => {
+  it('returns false when an objective does not exist', async () => {
+    const result = await ObjectiveModel.doesExist('FAKE-ID', knex);
+    expect(result).toBe(false);
+  });
 
+  it('returns true when an objective does exist', async () => {
+    await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
+    const {objectiveId} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    const result = await ObjectiveModel.doesExist(objectiveId, knex);
+    expect(result).toBe(true);
+  });
+});
 describe('Objective > forChannelIds', () => {
   it('retrieves objectives associated with a given channelId', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
