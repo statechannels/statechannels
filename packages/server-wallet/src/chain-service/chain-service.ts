@@ -420,40 +420,30 @@ export class ChainService implements ChainServiceInterface {
     contract: Contract,
     channelId: string
   ): Promise<HoldingUpdatedArg> {
-    const currentHolding = BN.from(await contract.holdings(channelId));
-    let confirmedHolding = BN.from(0);
-    try {
-      // https://docs.ethers.io/v5/api/contract/contract/#Contract--metaclass
-      // provider can lose track of the latet block, force it to reload
-      const currentBlock = await this.provider.getBlockNumber();
-      const confirmedBlock = currentBlock - this.blockConfirmations; // use absolute
-      this.logger.debug(`current blocke is ${currentBlock}, confirmed block is ${confirmedBlock}`);
-      const overrides = {
-        blockTag: confirmedBlock,
-      };
+    const blockNumber = await this.provider.getBlockNumber();
+    const holding = BN.from(await contract.holdings(channelId));
+    const depositEvents = await contract.queryFilter(
+      {
+        address: contract.address,
+      },
+      blockNumber - this.blockConfirmations - 1
+    );
 
-      confirmedHolding = BN.from(await contract.holdings(channelId, overrides));
-      this.logger.debug(`Successfully red confirmedHoldings (${confirmedHolding}) 5 blocks ago.`);
-    } catch (e) {
-      // We should have e.code="CALL_EXCEPTION", but gaven currentHolding query succeeded, this evidence is already sufficient
-      this.logger.debug(
-        `Error caught while trying to query confirmed holding (holdings 6 blocks ago),` +
-          `this is likely due to channel created less than 6 blockes, safe to ignore, error is ${JSON.stringify(
-            e
-          )}`
-      );
-    }
-
-    if (currentHolding !== confirmedHolding) {
-      this.logger.info(
-        `getInitialHoldings: current holding ${currentHolding} mismatches ${confirmedHolding}, returning confirmed holding...`
-      );
+    for (const depositEvent of depositEvents) {
+      if (
+        depositEvent.args &&
+        depositEvent.args[0] === channelId &&
+        depositEvent.event === Deposited
+      ) {
+        this.logger.debug(`Waiting for event: ${JSON.stringify(depositEvent)}`);
+        await this.waitForConfirmations(depositEvent);
+      }
     }
 
     return {
       channelId,
       assetHolderAddress: makeAddress(contract.address),
-      amount: BN.from(confirmedHolding),
+      amount: BN.from(holding),
     };
   }
 

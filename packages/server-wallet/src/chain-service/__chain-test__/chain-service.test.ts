@@ -129,7 +129,7 @@ function fundChannelAndMineBlocks(
   const retVal = fundChannel(expectedHeld, amount, channelId, assetHolderAddress);
   retVal.request.then(async response => {
     await response.wait();
-    await mineBlocks();
+    mineBlocks();
   });
   return retVal;
 }
@@ -296,7 +296,8 @@ describe('registerChannel', () => {
   it('Receives correct initial holding when holdings are not 0', async () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
-    await mineBlocks();
+    const blockDeposited = await provider.getBlockNumber();
+    mineBlocks(); // async
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
@@ -311,6 +312,12 @@ describe('registerChannel', () => {
         },
       })
     );
+
+    const blockReported = await provider.getBlockNumber();
+
+    // chainService.getInitialHoldings will wait for the deposit event
+    // to confirm, before triggering holdingUpdated
+    expect(blockReported).toBeGreaterThanOrEqual(blockDeposited + 5);
   });
 
   it('Channel with multiple asset holders', async () => {
@@ -367,7 +374,7 @@ describe('concludeAndWithdraw', () => {
     if (!transactionResponse) throw 'Expected transaction response';
     await transactionResponse.wait();
 
-    await mineBlocks();
+    mineBlocks();
     await p;
   });
 
@@ -408,7 +415,7 @@ describe('concludeAndWithdraw', () => {
 
     expect(await provider.getBalance(aAddress)).toEqual(BigNumber.from(1));
     expect(await provider.getBalance(bAddress)).toEqual(BigNumber.from(3));
-    await mineBlocks();
+    mineBlocks();
     await p;
   });
 
@@ -455,7 +462,7 @@ describe('concludeAndWithdraw', () => {
     expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));
     expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
 
-    await mineBlocks();
+    mineBlocks();
     await p;
   });
 });
