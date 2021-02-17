@@ -224,6 +224,11 @@ export class ObjectiveModel extends Model {
     });
   }
 
+  static async doesExist(objectiveId: string, tx: TransactionOrKnex): Promise<boolean> {
+    const fetched = await ObjectiveModel.query(tx).findById(objectiveId);
+    return fetched !== null && fetched !== undefined;
+  }
+
   static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
     const model = await ObjectiveModel.query(tx).findById(objectiveId);
     return model.toObjective();
