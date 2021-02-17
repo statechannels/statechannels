@@ -382,7 +382,7 @@ export class SingleThreadedWallet
       }
       // END CHALLENGING_V0
 
-      const objective = await this.store.ensureObjective(
+      const {objective, isNew} = await this.store.ensureObjective(
         {
           type: 'SubmitChallenge',
           participants: [],
@@ -390,9 +390,11 @@ export class SingleThreadedWallet
         },
         tx
       );
-      this.emit('objectiveStarted', objective);
+      if (isNew) {
+        this.emit('objectiveStarted', objective);
 
-      await this.store.approveObjective(objective.objectiveId, tx);
+        await this.store.approveObjective(objective.objectiveId, tx);
+      }
 
       response.queueChannel(channel);
     });
@@ -873,13 +875,10 @@ export class SingleThreadedWallet
     const {
       channelIds: channelIdsFromStates,
       channelResults: fromStoring,
-      storedObjectives,
+      newObjectives,
     } = await this.store.pushMessage(wirePayload);
 
-    // HACK (1): This may cause the wallet to re-emit `'objectiveStarted'` multiple times
-    // For instance, a peer who sends me an objective `o`, and then triggers `syncObjectives`
-    // including `o`, will cause my wallet to emit `'objectiveStarted'` for `o` twice.
-    response.createdObjectives = storedObjectives;
+    response.createdObjectives = newObjectives;
 
     const channelIdsFromRequests: Bytes32[] = [];
     const requests = (wirePayload.requests || []).map(deserializeRequest);
@@ -1058,7 +1057,7 @@ export class SingleThreadedWallet
       arg.finalizedAt
     );
     await this.knex.transaction(async tx => {
-      const objective = await this.store.ensureObjective(
+      const {objective, isNew} = await this.store.ensureObjective(
         {
           type: 'DefundChannel',
           participants: [],
@@ -1066,8 +1065,10 @@ export class SingleThreadedWallet
         },
         tx
       );
-      this.emit('objectiveStarted', objective);
-      await this.store.approveObjective(objective.objectiveId, tx);
+      if (isNew) {
+        this.emit('objectiveStarted', objective);
+        await this.store.approveObjective(objective.objectiveId, tx);
+      }
     });
 
     await this.takeActions([arg.channelId], response);

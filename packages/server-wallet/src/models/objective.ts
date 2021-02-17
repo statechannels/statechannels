@@ -52,6 +52,11 @@ export function isSharedObjective(
 }
 
 type SupportedObjective = OpenChannel | CloseChannel | SubmitChallenge | DefundChannel;
+
+export type ObjectiveToStore = SupportedObjective & {
+  status: ObjectiveStatus;
+  waitingFor: WaitingFor;
+};
 /**
  * A DBObjective is a wire objective with a status, timestamps and an objectiveId
  *
@@ -128,10 +133,7 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert(
-    objectiveToBeStored: SupportedObjective & {
-      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-      waitingFor: WaitingFor;
-    },
+    objectiveToBeStored: ObjectiveToStore,
     tx: TransactionOrKnex
   ): Promise<DBObjective> {
     const id: string = objectiveId(objectiveToBeStored);

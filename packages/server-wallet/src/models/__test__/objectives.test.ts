@@ -119,7 +119,10 @@ describe('Objective > doesExist', () => {
 
   it('returns true when an objective does exist', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-    const {objectiveId} = await ObjectiveModel.insert({...objective, status: 'pending'}, knex);
+    const {objectiveId} = await ObjectiveModel.insert(
+      {...objective, status: 'pending', waitingFor: ChannelOpenerWaitingFor.theirPreFundSetup},
+      knex
+    );
     const result = await ObjectiveModel.doesExist(objectiveId, knex);
     expect(result).toBe(true);
   });

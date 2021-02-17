@@ -270,7 +270,7 @@ export class TestChannel {
 
     const objective = await store.transaction(async tx => {
       // need to do this to set the funding type
-      const o = await store.ensureObjective(this.openChannelObjective, tx);
+      const {objective: o} = await store.ensureObjective(this.openChannelObjective, tx);
       await store.approveObjective(o.objectiveId, tx);
 
       return o as DBOpenChannelObjective;
