@@ -97,7 +97,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   // Let's check what wallet a is waiting for. Expect it to be 'theirPreFundSetup' or ''
   // (if the objective has never been cranked)
   const waitingForBefore = (await a.getObjective(`OpenChannel-${channelId}`)).waitingFor;
-  expect([WaitingFor.theirPreFundSetup, '']).toContain(waitingForBefore);
+  expect(waitingForBefore).toEqual(WaitingFor.theirPreFundSetup);
 
   //    > PreFund0A
   const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
