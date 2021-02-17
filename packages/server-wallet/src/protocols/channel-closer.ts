@@ -8,9 +8,9 @@ import {ChainServiceInterface} from '../chain-service';
 import {DBCloseChannelObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
+import {Nothing} from '../objectives/objective-manager';
 
 import {Defunder} from './defunder';
-import {Nothing} from '../objectives/objective-manager';
 
 export const enum WaitingFor {
   allAllocationItemsToBeExternalDestination = 'ChannelCloser.allAllocationItemsToBeExternalDestination',
