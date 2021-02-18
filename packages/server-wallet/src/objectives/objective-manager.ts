@@ -27,6 +27,7 @@ export enum Nothing {
 }
 
 export type WaitingFor =
+  | 'approval'
   | ChannelOpenerWaitingFor
   | ChannelCloserWaitingFor
   | ChallengeSubmitterWaitingFor
