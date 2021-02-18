@@ -2,8 +2,8 @@ import {
   Address,
   ChannelConstants,
   makeAddress,
+  OpenChannel,
   serializeState,
-  SharedObjective,
   SignedStateWithHash,
   SimpleAllocation,
 } from '@statechannels/wallet-core';
@@ -36,7 +36,7 @@ export class TestLedgerChannel extends TestChannel {
     super(args);
   }
 
-  public get openChannelObjective(): SharedObjective {
+  public get openChannelObjective(): OpenChannel {
     return {
       participants: this.participants,
       type: 'OpenChannel',
