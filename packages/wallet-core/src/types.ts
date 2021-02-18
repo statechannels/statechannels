@@ -123,7 +123,7 @@ export type CloseChannel = _Objective<
      * - participant 0 has no funds in the channel.
      * In the above, participant 0 is expected to NOT submit any collaborative transactions.
      */
-    txSubmitterOder: number[];
+    txSubmitterOrder: number[];
   }
 >;
 export type VirtuallyFund = _Objective<

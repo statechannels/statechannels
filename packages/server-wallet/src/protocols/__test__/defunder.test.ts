@@ -72,19 +72,19 @@ describe('Collaborative transaction submitter', () => {
 
     const objective = {
       type: 'CloseChannel',
-      data: {txSubmitterOder: [0, 1]},
+      data: {txSubmitterOrder: [0, 1]},
     } as DBCloseChannelObjective;
     expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
 
     const objective2 = {
       type: 'CloseChannel',
-      data: {txSubmitterOder: [1, 0]},
+      data: {txSubmitterOrder: [1, 0]},
     } as DBCloseChannelObjective;
     expect(shouldSubmitCollaborativeTx(channel, objective2)).toEqual(false);
 
     const objective3 = ({
       type: 'CloseChannel',
-      data: {txSubmitterOder: []},
+      data: {txSubmitterOrder: []},
     } as unknown) as DBCloseChannelObjective;
     expect(shouldSubmitCollaborativeTx(channel, objective3)).toEqual(true);
 
@@ -103,13 +103,13 @@ describe('Collaborative transaction submitter', () => {
 
     const objective = {
       type: 'CloseChannel',
-      data: {txSubmitterOder: [0, 1]},
+      data: {txSubmitterOrder: [0, 1]},
     } as DBCloseChannelObjective;
     expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(false);
 
     const objective2 = {
       type: 'CloseChannel',
-      data: {txSubmitterOder: [1, 0]},
+      data: {txSubmitterOrder: [1, 0]},
     } as DBCloseChannelObjective;
     expect(shouldSubmitCollaborativeTx(channel, objective2)).toEqual(true);
   });
