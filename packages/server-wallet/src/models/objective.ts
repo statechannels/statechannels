@@ -52,6 +52,14 @@ export function isSharedObjective(
 }
 
 type SupportedObjective = OpenChannel | CloseChannel | SubmitChallenge | DefundChannel;
+export function isSupportedObjective(o: Objective): o is SupportedObjective {
+  return (
+    o.type === 'OpenChannel' ||
+    o.type === 'CloseChannel' ||
+    o.type === 'SubmitChallenge' ||
+    o.type === 'DefundChannel'
+  );
+}
 /**
  * A DBObjective is a wire objective with a status, timestamps and an objectiveId
  *
@@ -127,25 +135,24 @@ export class ObjectiveModel extends Model {
     };
   }
 
-  static async insert(
-    objectiveToBeStored: SupportedObjective & {
-      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-      waitingFor: WaitingFor;
-    },
-    tx: TransactionOrKnex
-  ): Promise<DBObjective> {
+  static async insert<O extends DBObjective = DBObjective>(
+    objectiveToBeStored: SupportedObjective, // TODO this should be correlated to O
+    preApproved: boolean,
+    tx: TransactionOrKnex,
+    waitingFor?: WaitingFor // TODO this should be correlated to O
+  ): Promise<O> {
     const id: string = objectiveId(objectiveToBeStored);
 
     return tx.transaction(async trx => {
-      const model = await ObjectiveModel.query(trx)
+      const query = ObjectiveModel.query(trx)
         .insert({
           objectiveId: id,
-          status: objectiveToBeStored.status,
+          status: preApproved ? 'approved' : 'pending',
           type: objectiveToBeStored.type,
           data: objectiveToBeStored.data,
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
-          waitingFor: objectiveToBeStored.waitingFor,
+          waitingFor: waitingFor ?? 'approval',
         })
         // `Model.query(tx).insert(o)` returns `o` by default.
         // The return value is therefore constrained by the type of `Model`.
@@ -170,9 +177,15 @@ export class ObjectiveModel extends Model {
         // We use `.returning('*').first()` here because we are ignoring conflicts,
         // and want to know what was "already there" in that case.
         .returning('*')
-        .first()
+        .first();
+
+      const model = await query
         .onConflict('objectiveId')
-        .ignore(); // this avoids a UniqueViolationError being thrown
+        .merge({status: preApproved ? 'approved' : 'pending'});
+      // this avoids a UniqueViolationError being thrown
+      // and turns the query into an upsert. We are either:
+      // - re-approving the objective.
+      // - re-queueing the objective for approval
 
       // Associate the objective with any channel that it references
       // By inserting an ObjectiveChannel row for each channel
@@ -186,7 +199,7 @@ export class ObjectiveModel extends Model {
               .ignore() // this makes it an upsert
         )
       );
-      return model.toObjective();
+      return model.toObjective<O>();
     });
   }
 
@@ -253,11 +266,25 @@ export class ObjectiveModel extends Model {
     return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
   }
 
-  toObjective(): DBObjective {
-    return {
-      ...this,
-      participants: [],
-      data: this.data as any, // Here we will trust that the row respects our types
+  toObjective<O extends DBObjective = DBObjective>(): O {
+    const withParticipants = {
+      objectiveId: this.objectiveId,
+      status: this.status,
+      type: this.type,
+      data: this.data,
+      createdAt: this.createdAt,
+      progressLastMadeAt: this.progressLastMadeAt,
+      waitingFor: this.waitingFor,
+      participants: [] as DBObjective['participants'], // reinstate an empty participants array
     };
+    switch (this.type) {
+      case 'CloseChannel':
+      case 'DefundChannel':
+      case 'OpenChannel':
+      case 'SubmitChallenge':
+        return withParticipants as O;
+      default:
+        throw Error('unimplemented');
+    }
   }
 }
