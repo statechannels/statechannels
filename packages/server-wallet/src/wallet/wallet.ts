@@ -595,22 +595,7 @@ export class SingleThreadedWallet
 
     await Promise.all(
       objectives.map(async objective => {
-        const channelId = objective.data.targetChannelId;
-        if (objective.type === 'OpenChannel') {
-          if (objective.data.role === 'ledger') {
-            const channel = await this.store.getChannelState(channelId);
-            await Channel.setLedger(
-              channelId,
-              checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-              this.store.knex
-            );
-          }
-          const {fundingStrategy, fundingLedgerChannelId} = objective.data;
-          await Channel.query(this.store.knex)
-            .where({channelId})
-            .patch({fundingStrategy, fundingLedgerChannelId});
-          await this.store.approveObjective(objective.objectiveId);
-        }
+        await this.store.approveObjective(objective.objectiveId);
       })
     );
 
@@ -650,18 +635,6 @@ export class SingleThreadedWallet
 
     const objective = objectives[0];
     if (objective.type === 'OpenChannel') {
-      // TODO move this code to the objective manager?
-      await this.store.transaction(async tx => {
-        if (objective.data.role === 'ledger') {
-          await Channel.setLedger(
-            channelId,
-            checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-            tx
-          );
-        }
-        const {fundingStrategy, fundingLedgerChannelId} = objective.data;
-        await Channel.query(tx).where({channelId}).patch({fundingStrategy, fundingLedgerChannelId});
-      });
       await this.store.approveObjective(objectives[0].objectiveId);
     }
 
