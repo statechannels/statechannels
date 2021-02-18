@@ -115,7 +115,7 @@ export class TestLedgerChannel extends TestChannel {
   }
 
   /**
-   * Calls addSigningKey, pushMessage, updateFunding, ensureObjective and approveObjective on the supplied store.
+   * Calls addSigningKey, pushMessage, updateFunding, and adds the OpenChannel Objective to the supplied store.
    * Also makes the required patches to indicate this channel is a ledger channel
    */
   public async insertInto(

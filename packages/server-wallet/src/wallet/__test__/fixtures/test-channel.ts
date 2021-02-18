@@ -256,7 +256,7 @@ export class TestChannel {
   }
 
   /**
-   * Calls addSigningKey, pushMessage, updateFunding, ensureObjective and approveObjective on the supplied store.
+   * Calls addSigningKey, pushMessage, updateFunding, on the supplied store, and adds the OpenChannel objective
    */
   public async insertInto(
     store: Store,
