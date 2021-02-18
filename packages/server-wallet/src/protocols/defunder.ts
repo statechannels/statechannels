@@ -159,8 +159,6 @@ export class Defunder {
  * Assume that we are going to submit collaborative transaction(s) unless:
  * 1. There is an agreed upon order of transaction submitters.
  * 2. There is a transaction submitter before us who has funds in the channel.
- *
- * This method is public for unit testing only
  */
 export function shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
   let shouldSubmitCollaborativeTx = true;
