@@ -102,7 +102,7 @@ describe.each([0, 2])('e2e with %i worker threads', workerThreadAmount => {
     expect(events).toContainObject({
       event: 'objectiveStarted',
       type: 'OpenChannel',
-      status: 'pending',
+      status: 'approved',
     });
     expect(events).toContainObject({
       event: 'objectiveSucceeded',
