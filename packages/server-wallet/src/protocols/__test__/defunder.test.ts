@@ -43,7 +43,7 @@ function ensureCloseObjective(
 }
 
 function ensureDefundObjective(channel: TestChannel): Promise<DBDefundChannelObjective> {
-  // add the closeChannel objective and approve
+  // add the defundChannel objective and approve
   return store.transaction(async tx => {
     const o = await store.ensureObjective(channel.defundChannelObjective(), tx);
     await store.approveObjective(o.objectiveId, tx);
