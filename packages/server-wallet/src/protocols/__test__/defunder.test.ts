@@ -104,6 +104,27 @@ describe('Collaborative transaction submitter', () => {
     } as DBDefundChannelObjective;
     expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
   });
+
+  it('shouldSubmitCollaborativeTx is correct for participant with no funds', async () => {
+    const testChannel2 = TestChannel.create({
+      aBal: 0,
+      bBal: 3,
+      finalFrom: 4,
+    });
+
+    await testChannel2.insertInto(store, {
+      participant: 0,
+      states: [3, 4],
+    });
+    const channel = await Channel.forId(testChannel2.channelId, testKnex);
+
+    testShouldSubmitCollaborativeTx(channel, [0, 1], false);
+
+    const objective = {
+      type: 'DefundChannel',
+    } as DBDefundChannelObjective;
+    expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
+  });
 });
 
 describe('Direct channel defunding', () => {
