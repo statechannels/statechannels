@@ -58,7 +58,7 @@ import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
-import {DBObjective} from '../models/objective';
+import {DBObjective, ObjectiveModel} from '../models/objective';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -382,17 +382,16 @@ export class SingleThreadedWallet
       }
       // END CHALLENGING_V0
 
-      const objective = await this.store.ensureObjective(
+      const objective = await ObjectiveModel.insert(
         {
           type: 'SubmitChallenge',
           participants: [],
           data: {targetChannelId: channelId},
         },
+        true, // preApprove
         tx
       );
       this.emit('objectiveStarted', objective);
-
-      await this.store.approveObjective(objective.objectiveId, tx);
 
       response.queueChannel(channel);
     });
@@ -1058,16 +1057,16 @@ export class SingleThreadedWallet
       arg.finalizedAt
     );
     await this.knex.transaction(async tx => {
-      const objective = await this.store.ensureObjective(
+      const objective = await ObjectiveModel.insert(
         {
           type: 'DefundChannel',
           participants: [],
           data: {targetChannelId: arg.channelId},
         },
+        true, // preApproved
         tx
       );
       this.emit('objectiveStarted', objective);
-      await this.store.approveObjective(objective.objectiveId, tx);
     });
 
     await this.takeActions([arg.channelId], response);
