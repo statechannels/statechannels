@@ -12,7 +12,6 @@ import {ObjectiveModel} from '../../../models/objective';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {defaultTestConfig} from '../../../config';
-import {WaitingFor} from '../../../protocols/channel-opener';
 
 const AddressZero = makeAddress(ethers.constants.AddressZero);
 
