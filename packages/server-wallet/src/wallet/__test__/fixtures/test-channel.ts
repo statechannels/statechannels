@@ -21,6 +21,7 @@ import {
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
+import {Channel} from '../../../models/channel';
 
 import {DBOpenChannelObjective, ObjectiveModel} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
@@ -256,7 +257,7 @@ export class TestChannel {
   }
 
   /**
-   * Calls addSigningKey, pushMessage, updateFunding, on the supplied store, and adds the OpenChannel objective
+   * Calls addSigningKey, pushMessage, updateFunding, on the supplied store, patches the fundingStrategy, and adds the OpenChannel objective
    */
   public async insertInto(
     store: Store,
@@ -281,6 +282,12 @@ export class TestChannel {
       await store.updateFunding(this.channelId, BN.from(funds), this.assetHolderAddress);
     }
 
+    // patch the funding strategy
+    await Channel.query(store.knex).where({channelId: this.channelId}).patch({
+      fundingStrategy: this.fundingStrategy,
+    });
+
+    // insert the OpenChannel objective
     const objective = await ObjectiveModel.insert<DBOpenChannelObjective>(
       this.openChannelObjective,
       true,
