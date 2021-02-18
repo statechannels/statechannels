@@ -34,7 +34,7 @@ function ensureCloseObjective(
   // add the closeChannel objective and approve
   return store.transaction(async tx => {
     const o = await store.ensureObjective(
-      channel.closeChannelObjective([participantIndex, Math.abs(participantIndex - 1)]),
+      channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
       tx
     );
     await store.approveObjective(o.objectiveId, tx);

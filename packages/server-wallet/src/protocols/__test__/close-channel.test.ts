@@ -101,7 +101,7 @@ const setup = async (
   // add the closeChannel objective and approve
   const objective = await store.transaction(async tx => {
     const o = await store.ensureObjective(
-      testChan.closeChannelObjective([participant, Math.abs(participant - 1)]),
+      testChan.closeChannelObjective([participant, 1 - participant]),
       tx
     );
     await store.approveObjective(o.objectiveId, tx);
