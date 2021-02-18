@@ -440,7 +440,7 @@ export class Channel extends Model implements ChannelColumns {
   private isDirectFunded(threshold: 'FullyFunded' | 'PartlyFunded'): boolean {
     const outcome = this.supported?.outcome;
     if (!outcome) {
-      throw new Error(`Channel passed to isDirectFunded has no supported state`);
+      throw new ChannelError(ChannelError.reasons.noSupportedState);
     }
 
     const {assetHolderAddress, allocationItems} = checkThat(outcome, isSimpleAllocation);
@@ -476,17 +476,15 @@ export class Channel extends Model implements ChannelColumns {
   } {
     const supported = this.supported;
     if (!supported) {
-      throw new Error(`Channel has no supported state`);
+      throw new ChannelError(ChannelError.reasons.noSupportedState);
     }
     const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
 
     const myAllocationItem = this.allocationItemForParticipantIndex(this.myIndex);
     if (!myAllocationItem) {
-      throw new Error(
-        `My destination ${
-          this.participants[this.myIndex].destination
-        } is not in allocations ${allocationItems}`
-      );
+      throw new ChannelError(ChannelError.reasons.destinationNotInAllocations, {
+        destination: this.participants[this.myIndex].destination,
+      });
     }
 
     const myDestination = this.participants[this.myIndex].destination;
@@ -509,13 +507,14 @@ export class Channel extends Model implements ChannelColumns {
    */
   allocationItemForParticipantIndex(index: number): AllocationItem | undefined {
     if (index >= this.participants.length) {
-      throw new Error(
-        `${index} is greater than number of participants ${this.participants.length}`
-      );
+      throw new ChannelError(ChannelError.reasons.indexNotInChannel, {
+        index,
+        numChannelParticipant: this.participants.length,
+      });
     }
     const supported = this.supported;
     if (!supported) {
-      throw new Error(`Channel has no supported state`);
+      throw new ChannelError(ChannelError.reasons.noSupportedState);
     }
 
     const myDestination = this.participants[index].destination;
@@ -603,7 +602,11 @@ export class ChannelError extends WalletError {
   static readonly reasons = {
     invalidChannelId: 'Invalid channel id',
     incorrectHash: 'Incorrect hash',
-    channelMissing: 'No channel found with id.',
+    channelMissing: 'No channel found with id',
+    noSupportedState: 'The channel is expected to contain supported state',
+    indexNotInChannel:
+      'The participant index is greater than the number of participants in the channel',
+    destinationNotInAllocations: 'The destination is not in the channel allocatons',
   } as const;
 
   constructor(reason: Values<typeof ChannelError.reasons>, public readonly data: any = undefined) {
