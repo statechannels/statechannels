@@ -200,8 +200,14 @@ export class ObjectiveModel extends Model {
     return model.map(m => m.toObjective());
   }
 
-  static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
+  static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+    return (
+      await ObjectiveModel.query(tx)
+        .findById(objectiveId)
+        .patch({status: 'approved'})
+        .returning('*')
+        .first()
+    ).toObjective();
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
