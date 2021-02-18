@@ -47,7 +47,9 @@ export class ChannelDefunder implements Cranker<DBDefundChannelObjective> {
     // Defund channel now (in theory) supports Ledger funded channels.
     if (channel.fundingStrategy !== 'Direct') {
       // TODO: https://github.com/statechannels/statechannels/issues/3124
-      this.logger.error(`Only direct funding is currently supported.`);
+      this.logger.error(
+        `Only direct funding is currently supported, but channel ${channel.channelId} has the ${channel.fundingStrategy} strategy`
+      );
       await this.store.markObjectiveStatus(objective, 'failed', tx);
       return Nothing.ToWaitFor;
     }
