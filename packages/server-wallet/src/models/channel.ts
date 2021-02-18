@@ -502,7 +502,7 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   /**
-   * The below logic assumes:
+   * WARNING: The below logic assumes
    *  1. Each destination occurs at most once.
    *  2. We only care about a single destination.
    * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
