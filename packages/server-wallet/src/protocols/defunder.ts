@@ -153,30 +153,30 @@ export class Defunder {
       tx
     );
   }
+}
 
+/**
+ * Assume that we are going to submit collaborative transaction(s) unless:
+ * 1. There is an agreed upon order of transaction submitters.
+ * 2. There is a transaction submitter before us who has funds in the channel.
+ *
+ * This method is public for unit testing only
+ */
+export function shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
+  let shouldSubmitCollaborativeTx = true;
   /**
-   * Assume that we are going to submit collaborative transaction(s) unless:
-   * 1. There is an agreed upon order of transaction submitters.
-   * 2. There is a transaction submitter before us who has funds in the channel.
-   *
-   * This method is public for unit testing only
+   * Only CloseChannel objective specifies the transaction submitter order.
+   * The DefundChannel objective will be soon replaced with the ChallengeChannel objective.
+   * Challenge channel objective does not result in any collaborative transactions.
    */
-  public static _shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
-    let shouldSubmitCollaborativeTx = true;
-    /**
-     * Only CloseChannel objective specifies the transaction submitter order.
-     * The DefundChannel objective will be soon replaced with the ChallengeChannel objective.
-     * Challenge channel objective does not result in any collaborative transactions.
-     */
-    if (isCloseChannel(objective)) {
-      for (const txSubmitter of objective.data.txSubmitterOder) {
-        const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
-        if (allocation && BN.gt(allocation.amount, 0)) {
-          shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
-          break;
-        }
+  if (isCloseChannel(objective)) {
+    for (const txSubmitter of objective.data.txSubmitterOder) {
+      const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
+      if (allocation && BN.gt(allocation.amount, 0)) {
+        shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
+        break;
       }
     }
-    return shouldSubmitCollaborativeTx;
   }
+  return shouldSubmitCollaborativeTx;
 }

@@ -10,7 +10,7 @@ import {LedgerRequest} from '../../models/ledger-request';
 import {DBCloseChannelObjective, DBDefundChannelObjective} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
-import {Defunder} from '../defunder';
+import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
 
 const testChannel = TestChannel.create({
   aBal: 5,
@@ -74,24 +74,24 @@ describe('Collaborative transaction submitter', () => {
       type: 'CloseChannel',
       data: {txSubmitterOder: [0, 1]},
     } as DBCloseChannelObjective;
-    expect(Defunder._shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
+    expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
 
     const objective2 = {
       type: 'CloseChannel',
       data: {txSubmitterOder: [1, 0]},
     } as DBCloseChannelObjective;
-    expect(Defunder._shouldSubmitCollaborativeTx(channel, objective2)).toEqual(false);
+    expect(shouldSubmitCollaborativeTx(channel, objective2)).toEqual(false);
 
     const objective3 = ({
       type: 'CloseChannel',
       data: {txSubmitterOder: []},
     } as unknown) as DBCloseChannelObjective;
-    expect(Defunder._shouldSubmitCollaborativeTx(channel, objective3)).toEqual(true);
+    expect(shouldSubmitCollaborativeTx(channel, objective3)).toEqual(true);
 
     const objective4 = {
       type: 'DefundChannel',
     } as DBDefundChannelObjective;
-    expect(Defunder._shouldSubmitCollaborativeTx(channel, objective4)).toEqual(true);
+    expect(shouldSubmitCollaborativeTx(channel, objective4)).toEqual(true);
   });
 
   it('_shouldSubmitCollaborativeTx is correct for participant 1', async () => {
@@ -105,13 +105,13 @@ describe('Collaborative transaction submitter', () => {
       type: 'CloseChannel',
       data: {txSubmitterOder: [0, 1]},
     } as DBCloseChannelObjective;
-    expect(Defunder._shouldSubmitCollaborativeTx(channel, objective)).toEqual(false);
+    expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(false);
 
     const objective2 = {
       type: 'CloseChannel',
       data: {txSubmitterOder: [1, 0]},
     } as DBCloseChannelObjective;
-    expect(Defunder._shouldSubmitCollaborativeTx(channel, objective2)).toEqual(true);
+    expect(shouldSubmitCollaborativeTx(channel, objective2)).toEqual(true);
   });
 });
 
