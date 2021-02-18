@@ -352,7 +352,7 @@ describe('when the application protocol returns an action', () => {
             data: {
               targetChannelId: channelId,
               fundingStrategy: 'Direct',
-              txSubmitterOder: [1, 0],
+              txSubmitterOrder: [1, 0],
             },
           },
         ],
@@ -382,7 +382,7 @@ describe('when the application protocol returns an action', () => {
           data: {
             targetChannelId: channelId,
             fundingStrategy: 'Direct',
-            txSubmitterOder: [1, 0],
+            txSubmitterOrder: [1, 0],
           },
         },
       ],

@@ -19,7 +19,7 @@ export class CloseChannelObjective {
             data: {
               targetChannelId: channelId,
               fundingStrategy: channel.fundingStrategy,
-              txSubmitterOder: [1, 0],
+              txSubmitterOrder: [1, 0],
             },
           },
           tx

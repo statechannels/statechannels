@@ -193,14 +193,14 @@ export class TestChannel {
     };
   }
 
-  public closeChannelObjective(txSubmitterOder = [0, 1]): CloseChannel {
+  public closeChannelObjective(txSubmitterOrder = [0, 1]): CloseChannel {
     return {
       participants: this.participants,
       type: 'CloseChannel',
       data: {
         targetChannelId: this.channelId,
         fundingStrategy: this.fundingStrategy,
-        txSubmitterOder,
+        txSubmitterOrder,
       },
     };
   }

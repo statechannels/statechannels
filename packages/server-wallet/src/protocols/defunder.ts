@@ -168,7 +168,7 @@ export function shouldSubmitCollaborativeTx(channel: Channel, objective: Objecti
    * Challenge channel objective does not result in any collaborative transactions.
    */
   if (isCloseChannel(objective)) {
-    for (const txSubmitter of objective.data.txSubmitterOder) {
+    for (const txSubmitter of objective.data.txSubmitterOrder) {
       const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
       if (allocation && BN.gt(allocation.amount, 0)) {
         shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
