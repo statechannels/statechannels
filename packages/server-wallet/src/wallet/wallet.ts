@@ -20,6 +20,8 @@ import {
   makeDestination,
   deserializeRequest,
   NULL_APP_DATA,
+  checkThat,
+  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -59,6 +61,7 @@ import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
 import {DBObjective} from '../models/objective';
+import {Channel} from '../models/channel';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -631,8 +634,22 @@ export class SingleThreadedWallet
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    if (objectives[0].type === 'OpenChannel')
+    const objective = objectives[0];
+    if (objective.type === 'OpenChannel') {
+      // TODO move this code to the objective manager?
+      await this.store.transaction(async tx => {
+        if (objective.data.role === 'ledger') {
+          await Channel.setLedger(
+            channelId,
+            checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
+            tx
+          );
+        }
+        const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+        await Channel.query(tx).where({channelId}).patch({fundingStrategy, fundingLedgerChannelId});
+      });
       await this.store.approveObjective(objectives[0].objectiveId);
+    }
 
     await this.takeActions([channelId], response);
 

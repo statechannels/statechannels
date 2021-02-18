@@ -491,15 +491,6 @@ export class Store {
       },
     };
 
-    if (role === 'ledger')
-      await Channel.setLedger(
-        channelId,
-        checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-        tx
-      );
-
-    await Channel.query(tx).where({channelId}).patch({fundingStrategy, fundingLedgerChannelId});
-
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBOpenChannelObjective>;
   }
 
@@ -708,6 +699,7 @@ export class Store {
     return await this.knex.transaction(async tx => {
       const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
       const {channelId, participants} = channel;
+
       const firstSignedState = await this.signState(
         channel,
         {
@@ -719,6 +711,13 @@ export class Store {
         },
         tx
       );
+
+      if (role === 'ledger')
+        await Channel.setLedger(
+          channelId,
+          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
+          tx
+        );
 
       const objectiveParams = {
         type: 'OpenChannel' as const,
