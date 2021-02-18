@@ -9,13 +9,15 @@ import {
 } from '@statechannels/wallet-core';
 import {Payload, SignedState as WireState} from '@statechannels/wire-format';
 
+import {Channel} from '../../../models/channel';
 import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest} from '../../../models/ledger-request';
+import {DBOpenChannelObjective} from '../../../models/objective';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
 import {stateWithHashSignedBy} from './states';
-import {TestChannel, Bals} from './test-channel';
+import {TestChannel, Bals, InsertionParams} from './test-channel';
 
 interface TestChannelArgs {
   aBal?: number;
@@ -110,5 +112,22 @@ export class TestLedgerChannel extends TestChannel {
     return store.transaction(tx =>
       LedgerProposal.storeProposal({channelId: this.channelId, signingAddress, proposal, nonce}, tx)
     );
+  }
+
+  /**
+   * Calls addSigningKey, pushMessage, updateFunding, ensureObjective and approveObjective on the supplied store.
+   * Also makes the required patches to indicate this channel is a ledger channel
+   */
+  public async insertInto(
+    store: Store,
+    args: InsertionParams = {}
+  ): Promise<DBOpenChannelObjective> {
+    const objective = await super.insertInto(store, args);
+    await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
+    const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+    await Channel.query(store.knex)
+      .where({channelId: this.channelId})
+      .patch({fundingStrategy, fundingLedgerChannelId});
+    return objective;
   }
 }
