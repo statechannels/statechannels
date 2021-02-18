@@ -20,8 +20,6 @@ import {
   makeDestination,
   deserializeRequest,
   NULL_APP_DATA,
-  checkThat,
-  isSimpleAllocation,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -61,7 +59,6 @@ import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
 import {DBObjective} from '../models/objective';
-import {Channel} from '../models/channel';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -594,9 +591,10 @@ export class SingleThreadedWallet
     const objectives = await this.store.getObjectives(channelIds);
 
     await Promise.all(
-      objectives.map(async objective => {
-        await this.store.approveObjective(objective.objectiveId);
-      })
+      objectives.map(
+        async ({type, objectiveId}) =>
+          type === 'OpenChannel' && (await this.store.approveObjective(objectiveId))
+      )
     );
 
     await this.takeActions(channelIds, response);
@@ -633,10 +631,8 @@ export class SingleThreadedWallet
     if (objectives.length === 0)
       throw new Error(`Could not find objective for channel ${channelId}`);
 
-    const objective = objectives[0];
-    if (objective.type === 'OpenChannel') {
+    if (objectives[0].type === 'OpenChannel')
       await this.store.approveObjective(objectives[0].objectiveId);
-    }
 
     await this.takeActions([channelId], response);
 
