@@ -51,6 +51,14 @@ function ensureDefundObjective(channel: TestChannel): Promise<DBDefundChannelObj
   });
 }
 
+function testShouldSubmitCollaborativeTx(channel: Channel, order: number[], outcome: boolean) {
+  const objective = ({
+    type: 'CloseChannel',
+    data: {txSubmitterOrder: order},
+  } as unknown) as DBCloseChannelObjective;
+  expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(outcome);
+}
+
 beforeEach(async () => {
   await DBAdmin.truncateDataBaseFromKnex(testKnex);
 
@@ -63,30 +71,16 @@ beforeEach(async () => {
 });
 
 describe('Collaborative transaction submitter', () => {
-  it('_shouldSubmitCollaborativeTx is correct for participant 0', async () => {
+  it('shouldSubmitCollaborativeTx is correct for participant 0', async () => {
     await testChannel.insertInto(store, {
       participant: 0,
       states: [3, 4],
     });
     const channel = await Channel.forId(testChannel.channelId, testKnex);
 
-    const objective = {
-      type: 'CloseChannel',
-      data: {txSubmitterOrder: [0, 1]},
-    } as DBCloseChannelObjective;
-    expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
-
-    const objective2 = {
-      type: 'CloseChannel',
-      data: {txSubmitterOrder: [1, 0]},
-    } as DBCloseChannelObjective;
-    expect(shouldSubmitCollaborativeTx(channel, objective2)).toEqual(false);
-
-    const objective3 = ({
-      type: 'CloseChannel',
-      data: {txSubmitterOrder: []},
-    } as unknown) as DBCloseChannelObjective;
-    expect(shouldSubmitCollaborativeTx(channel, objective3)).toEqual(true);
+    testShouldSubmitCollaborativeTx(channel, [0, 1], true);
+    testShouldSubmitCollaborativeTx(channel, [1, 0], false);
+    testShouldSubmitCollaborativeTx(channel, [], true);
 
     const objective4 = {
       type: 'DefundChannel',
@@ -94,24 +88,21 @@ describe('Collaborative transaction submitter', () => {
     expect(shouldSubmitCollaborativeTx(channel, objective4)).toEqual(true);
   });
 
-  it('_shouldSubmitCollaborativeTx is correct for participant 1', async () => {
+  it('shouldSubmitCollaborativeTx is correct for participant 1', async () => {
     await testChannel.insertInto(store, {
       participant: 1,
       states: [3, 4],
     });
     const channel = await Channel.forId(testChannel.channelId, testKnex);
 
-    const objective = {
-      type: 'CloseChannel',
-      data: {txSubmitterOrder: [0, 1]},
-    } as DBCloseChannelObjective;
-    expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(false);
+    testShouldSubmitCollaborativeTx(channel, [0, 1], false);
+    testShouldSubmitCollaborativeTx(channel, [1, 0], true);
+    testShouldSubmitCollaborativeTx(channel, [], true);
 
-    const objective2 = {
-      type: 'CloseChannel',
-      data: {txSubmitterOrder: [1, 0]},
-    } as DBCloseChannelObjective;
-    expect(shouldSubmitCollaborativeTx(channel, objective2)).toEqual(true);
+    const objective = {
+      type: 'DefundChannel',
+    } as DBDefundChannelObjective;
+    expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
   });
 });
 
