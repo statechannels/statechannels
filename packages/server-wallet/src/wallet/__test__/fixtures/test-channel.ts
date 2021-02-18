@@ -10,7 +10,6 @@ import {
   Participant,
   PrivateKey,
   serializeState,
-  SharedObjective,
   SignedStateWithHash,
   SimpleAllocation,
   simpleEthAllocation,
@@ -18,11 +17,12 @@ import {
   NULL_APP_DATA,
   CloseChannel,
   DefundChannel,
+  OpenChannel,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
 
-import {DBOpenChannelObjective} from '../../../models/objective';
+import {DBOpenChannelObjective, ObjectiveModel} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
@@ -182,7 +182,7 @@ export class TestChannel {
     return calculateChannelId(this.channelConstants);
   }
 
-  public get openChannelObjective(): SharedObjective {
+  public get openChannelObjective(): OpenChannel {
     return {
       participants: this.participants,
       type: 'OpenChannel',
@@ -281,13 +281,11 @@ export class TestChannel {
       await store.updateFunding(this.channelId, BN.from(funds), this.assetHolderAddress);
     }
 
-    const objective = await store.transaction(async tx => {
-      // need to do this to set the funding type
-      const o = await store.ensureObjective(this.openChannelObjective, tx);
-      await store.approveObjective(o.objectiveId, tx);
-
-      return o as DBOpenChannelObjective;
-    });
+    const objective = await ObjectiveModel.insert<DBOpenChannelObjective>(
+      this.openChannelObjective,
+      true,
+      store.knex
+    );
 
     return objective;
   }
