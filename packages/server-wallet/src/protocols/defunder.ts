@@ -94,7 +94,7 @@ export class Defunder {
     const shouldSubmitTx = shouldSubmitCollaborativeTx(channel, objective);
 
     /**
-     * The below if/else does not account for the following scenario:
+     * TODO: The below if/else does not account for the following scenario:
      * - Channel is finalized.
      * - Outcomes have been pushed to AssetHolders.
      * - Transfer needs to be called on each AssetHolder
