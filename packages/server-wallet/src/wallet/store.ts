@@ -356,7 +356,27 @@ export class Store {
   }
 
   async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
-    await ObjectiveModel.approve(objectiveId, tx || this.knex);
+    const objective = await ObjectiveModel.approve(objectiveId, tx || this.knex);
+
+    if (objective.type === 'OpenChannel') {
+      // If we approve an OpenChannel objective that stipulates
+      // an existing channel is a ledger channel
+      // we need to patch the DB to mark that channel as a ledger channel
+      // This code should probably live elsewhere
+      const channelId = objective.data.targetChannelId;
+      if (objective.data.role === 'ledger') {
+        const channel = await this.getChannelState(channelId, tx);
+        await Channel.setLedger(
+          channelId,
+          checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
+          tx || this.knex
+        );
+      }
+      const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+      await Channel.query(tx || this.knex)
+        .where({channelId})
+        .patch({fundingStrategy, fundingLedgerChannelId});
+    }
   }
 
   async markObjectiveStatus<O extends DBObjective>(
@@ -490,19 +510,6 @@ export class Store {
         role,
       },
     };
-
-    if (role === 'ledger')
-      await Channel.setLedger(
-        channelId,
-        checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-        tx
-      );
-
-    await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId})
-      .returning('*')
-      .first();
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBOpenChannelObjective>;
   }
@@ -712,6 +719,7 @@ export class Store {
     return await this.knex.transaction(async tx => {
       const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
       const {channelId, participants} = channel;
+
       const firstSignedState = await this.signState(
         channel,
         {
@@ -723,6 +731,13 @@ export class Store {
         },
         tx
       );
+
+      if (role === 'ledger')
+        await Channel.setLedger(
+          channelId,
+          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
+          tx
+        );
 
       const objectiveParams = {
         type: 'OpenChannel' as const,
