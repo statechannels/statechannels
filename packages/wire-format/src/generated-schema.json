@@ -19,10 +19,7 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": [
-        "assetHolderAddress",
-        "allocationItems"
-      ],
+      "required": ["assetHolderAddress", "allocationItems"],
       "type": "object"
     },
     "AllocationItem": {
@@ -35,10 +32,7 @@
           "$ref": "#/definitions/Bytes32"
         }
       },
-      "required": [
-        "destination",
-        "amount"
-      ],
+      "required": ["destination", "amount"],
       "type": "object"
     },
     "Allocations": {
@@ -70,10 +64,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "channelId"
-          ],
+          "required": ["type", "channelId"],
           "type": "object"
         },
         {
@@ -96,13 +87,7 @@
               "type": "string"
             }
           },
-          "required": [
-            "type",
-            "nonce",
-            "channelId",
-            "outcome",
-            "signingAddress"
-          ],
+          "required": ["type", "nonce", "channelId", "outcome", "signingAddress"],
           "type": "object"
         }
       ]
@@ -114,30 +99,20 @@
           "additionalProperties": false,
           "properties": {
             "fundingStrategy": {
-              "enum": [
-                "Direct",
-                "Ledger",
-                "Virtual",
-                "Fake",
-                "Unknown"
-              ],
+              "enum": ["Direct", "Ledger", "Virtual", "Fake", "Unknown"],
               "type": "string"
             },
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
             },
-            "txSubmitterOder": {
+            "txSubmitterOrder": {
               "items": {
                 "type": "number"
               },
               "type": "array"
             }
           },
-          "required": [
-            "targetChannelId",
-            "fundingStrategy",
-            "txSubmitterOder"
-          ],
+          "required": ["targetChannelId", "fundingStrategy", "txSubmitterOrder"],
           "type": "object"
         },
         "participants": {
@@ -151,11 +126,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
+      "required": ["participants", "type", "data"],
       "type": "object"
     },
     "CloseLedger": {
@@ -168,9 +139,7 @@
               "$ref": "#/definitions/Bytes32"
             }
           },
-          "required": [
-            "ledgerId"
-          ],
+          "required": ["ledgerId"],
           "type": "object"
         },
         "participants": {
@@ -184,11 +153,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
+      "required": ["participants", "type", "data"],
       "type": "object"
     },
     "FundGuarantor": {
@@ -207,11 +172,7 @@
               "$ref": "#/definitions/Bytes32"
             }
           },
-          "required": [
-            "jointChannelId",
-            "ledgerId",
-            "guarantorId"
-          ],
+          "required": ["jointChannelId", "ledgerId", "guarantorId"],
           "type": "object"
         },
         "participants": {
@@ -225,11 +186,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
+      "required": ["participants", "type", "data"],
       "type": "object"
     },
     "FundLedger": {
@@ -242,9 +199,7 @@
               "$ref": "#/definitions/Bytes32"
             }
           },
-          "required": [
-            "ledgerId"
-          ],
+          "required": ["ledgerId"],
           "type": "object"
         },
         "participants": {
@@ -258,11 +213,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
+      "required": ["participants", "type", "data"],
       "type": "object"
     },
     "Guarantee": {
@@ -281,11 +232,7 @@
           "$ref": "#/definitions/Bytes32"
         }
       },
-      "required": [
-        "assetHolderAddress",
-        "targetChannelId",
-        "destinations"
-      ],
+      "required": ["assetHolderAddress", "targetChannelId", "destinations"],
       "type": "object"
     },
     "Guarantees": {
@@ -307,10 +254,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "recipient",
-        "data"
-      ],
+      "required": ["recipient", "data"],
       "type": "object"
     },
     "Objective": {
@@ -345,30 +289,18 @@
               "$ref": "#/definitions/Address"
             },
             "fundingStrategy": {
-              "enum": [
-                "Direct",
-                "Ledger",
-                "Virtual",
-                "Fake",
-                "Unknown"
-              ],
+              "enum": ["Direct", "Ledger", "Virtual", "Fake", "Unknown"],
               "type": "string"
             },
             "role": {
-              "enum": [
-                "app",
-                "ledger"
-              ],
+              "enum": ["app", "ledger"],
               "type": "string"
             },
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
             }
           },
-          "required": [
-            "targetChannelId",
-            "fundingStrategy"
-          ],
+          "required": ["targetChannelId", "fundingStrategy"],
           "type": "object"
         },
         "participants": {
@@ -382,11 +314,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
+      "required": ["participants", "type", "data"],
       "type": "object"
     },
     "Outcome": {
@@ -412,11 +340,7 @@
           "$ref": "#/definitions/Address"
         }
       },
-      "required": [
-        "participantId",
-        "signingAddress",
-        "destination"
-      ],
+      "required": ["participantId", "signingAddress", "destination"],
       "type": "object"
     },
     "Payload": {
@@ -444,9 +368,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "walletVersion"
-      ],
+      "required": ["walletVersion"],
       "type": "object"
     },
     "SignedState": {
@@ -528,10 +450,7 @@
               "$ref": "#/definitions/Bytes32"
             }
           },
-          "required": [
-            "targetChannelId",
-            "jointChannelId"
-          ],
+          "required": ["targetChannelId", "jointChannelId"],
           "type": "object"
         },
         "participants": {
@@ -545,11 +464,7 @@
           "type": "string"
         }
       },
-      "required": [
-        "participants",
-        "type",
-        "data"
-      ],
+      "required": ["participants", "type", "data"],
       "type": "object"
     }
   }
