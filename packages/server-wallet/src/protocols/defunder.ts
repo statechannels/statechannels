@@ -91,7 +91,7 @@ export class Defunder {
     );
 
     let didSubmitTransaction = false;
-    const shouldSubmitCollaborativeTx = Defunder._shouldSubmitCollaborativeTx(channel, objective);
+    const shouldSubmitTx = shouldSubmitCollaborativeTx(channel, objective);
 
     /**
      * The below if/else does not account for the following scenario:
@@ -102,7 +102,7 @@ export class Defunder {
     if (
       adjudicatorStatus.channelMode !== 'Finalized' &&
       channel.hasConclusionProof &&
-      shouldSubmitCollaborativeTx
+      shouldSubmitTx
     ) {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
 
@@ -113,7 +113,7 @@ export class Defunder {
       // Note, we are not awaiting transaction submission
       await this.chainService.concludeAndWithdraw([channel.supported]);
       didSubmitTransaction = true;
-    } else if (adjudicatorStatus.channelMode === 'Finalized' && shouldSubmitCollaborativeTx) {
+    } else if (adjudicatorStatus.channelMode === 'Finalized' && shouldSubmitTx) {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
       await this.chainService.pushOutcomeAndWithdraw(
         adjudicatorStatus.states[0],
