@@ -21,8 +21,8 @@ import {
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
-import {Channel} from '../../../models/channel';
 
+import {Channel} from '../../../models/channel';
 import {DBOpenChannelObjective, ObjectiveModel} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';

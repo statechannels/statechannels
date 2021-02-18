@@ -23,7 +23,6 @@ import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {ObjectiveModel} from '../../../models/objective';
-import {WaitingFor} from '../../../protocols/channel-opener';
 
 let w: Wallet;
 beforeEach(async () => {
