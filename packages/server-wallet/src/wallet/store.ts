@@ -498,11 +498,7 @@ export class Store {
         tx
       );
 
-    await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId})
-      .returning('*')
-      .first();
+    await Channel.query(tx).where({channelId}).patch({fundingStrategy, fundingLedgerChannelId});
 
     return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBOpenChannelObjective>;
   }
