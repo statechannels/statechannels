@@ -68,9 +68,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        waitingFor: WaitingFor.theirPreFundSetup,
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -83,9 +82,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        waitingFor: WaitingFor.theirPreFundSetup,
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -138,9 +136,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        waitingFor: WaitingFor.theirPreFundSetup,
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -178,9 +175,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        waitingFor: WaitingFor.theirPreFundSetup,
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -276,9 +272,8 @@ describe('ledger funded app scenarios', () => {
           fundingLedgerChannelId: ledger.channelId,
           role: 'app',
         },
-        waitingFor: WaitingFor.theirPreFundSetup,
-        status: 'approved',
       },
+      false,
       w.knex
     );
 

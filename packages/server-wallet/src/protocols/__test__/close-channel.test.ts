@@ -4,7 +4,7 @@ import {MockChainService} from '../../chain-service';
 import {defaultTestConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
-import {DBCloseChannelObjective} from '../../models/objective';
+import {DBCloseChannelObjective, ObjectiveModel} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
@@ -100,12 +100,12 @@ const setup = async (
 
   // add the closeChannel objective and approve
   const objective = await store.transaction(async tx => {
-    const o = await store.ensureObjective(
+    const o = await ObjectiveModel.insert<DBCloseChannelObjective>(
       testChan.closeChannelObjective([participant, 1 - participant]),
+      true, // preApproved
       tx
     );
-    await store.approveObjective(o.objectiveId, tx);
-    return o as DBCloseChannelObjective;
+    return o;
   });
 
   return objective;
