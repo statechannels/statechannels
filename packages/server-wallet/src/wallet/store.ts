@@ -409,6 +409,15 @@ export class Store {
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
+  /**
+   * Gets and locks the objective with the supplied id
+   * @param objectiveId
+   * @param tx
+   */
+  async getAndLockObjective(objectiveId: string, tx: Transaction): Promise<DBObjective> {
+    return (await ObjectiveModel.query(tx).findById(objectiveId).forUpdate()).toObjective();
+  }
+
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
     return Channel.isLedger(channelId, tx || this.knex);
   }
