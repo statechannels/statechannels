@@ -5,7 +5,7 @@ import {Message as WireMessage, SignedState as WireState} from '@statechannels/w
 
 import {Notice, Outgoing} from '../protocols/actions';
 import {Channel} from '../models/channel';
-import {DBObjective, isSharedObjective, toWireObjective} from '../models/objective';
+import {WalletObjective, isSharedObjective, toWireObjective} from '../models/objective';
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
@@ -18,9 +18,9 @@ import {WalletEvent, MultipleChannelOutput, SingleChannelOutput, Output} from '.
 export class WalletResponse {
   _channelResults: Record<string, ChannelResult> = {};
   private queuedMessages: WireMessage[] = [];
-  objectivesToApprove: DBObjective[] = [];
-  createdObjectives: DBObjective[] = [];
-  succeededObjectives: DBObjective[] = [];
+  objectivesToApprove: WalletObjective[] = [];
+  createdObjectives: WalletObjective[] = [];
+  succeededObjectives: WalletObjective[] = [];
   requests: string[] = [];
 
   static initialize(): WalletResponse {
@@ -78,7 +78,11 @@ export class WalletResponse {
   /**
    * Queues an objective to be sent to the opponent
    */
-  queueSendObjective(objective: DBObjective, myIndex: number, participants: Participant[]): void {
+  queueSendObjective(
+    objective: WalletObjective,
+    myIndex: number,
+    participants: Participant[]
+  ): void {
     const myParticipantId = participants[myIndex].participantId;
     if (isSharedObjective(objective)) {
       participants.forEach((p, i) => {
@@ -105,7 +109,7 @@ export class WalletResponse {
    * - notifying the app
    */
   queueCreatedObjective(
-    objective: DBObjective,
+    objective: WalletObjective,
     myIndex: number,
     participants: Participant[]
   ): void {
@@ -117,14 +121,14 @@ export class WalletResponse {
   /**
    * Queues objectives for approval by the user
    */
-  queueReceivedObjective(objective: DBObjective): void {
+  queueReceivedObjective(objective: WalletObjective): void {
     this.objectivesToApprove.push(objective);
   }
 
   /**
    * Queue succeeded objectives, so we can emit events
    */
-  queueSucceededObjective(objective: DBObjective): void {
+  queueSucceededObjective(objective: WalletObjective): void {
     this.succeededObjectives.push(objective);
   }
 

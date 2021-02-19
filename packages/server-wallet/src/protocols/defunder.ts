@@ -1,4 +1,10 @@
-import {BN, isCloseChannel, unreachable} from '@statechannels/wallet-core';
+import {
+  DefundChannel,
+  CloseChannel,
+  BN,
+  isCloseChannel,
+  unreachable,
+} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
@@ -7,7 +13,7 @@ import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
-import {DBCloseChannelObjective, DBDefundChannelObjective} from '../models/objective';
+import {WalletObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 
 /**
@@ -26,7 +32,7 @@ import {Store} from '../wallet/store';
  * make the ChannelDefunder protocol aboslete.
  */
 export type DefunderResult = {isChannelDefunded: boolean; didSubmitTransaction: boolean};
-type Objective = DBCloseChannelObjective | DBDefundChannelObjective;
+type Objective = WalletObjective<CloseChannel> | WalletObjective<DefundChannel>;
 
 export class Defunder {
   constructor(

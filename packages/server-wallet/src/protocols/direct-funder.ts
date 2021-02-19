@@ -1,4 +1,4 @@
-import {Address, BN, checkThat, isSimpleAllocation} from '@statechannels/wallet-core';
+import {Address, BN, checkThat, isSimpleAllocation, OpenChannel} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
@@ -6,7 +6,7 @@ import {Logger} from 'pino';
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
-import {DBOpenChannelObjective} from '../models/objective';
+import {WalletObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
 
@@ -33,7 +33,7 @@ export class DirectFunder {
    * Returns true if the channel is funded, false otherwise
    */
   public async crank(
-    objective: DBOpenChannelObjective,
+    objective: WalletObjective<OpenChannel>,
     channel: Channel,
     response: WalletResponse,
     tx: Transaction

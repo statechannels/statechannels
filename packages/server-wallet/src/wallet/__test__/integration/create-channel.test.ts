@@ -1,10 +1,12 @@
+import {OpenChannel} from '@statechannels/wallet-core';
+
 import {Channel} from '../../../models/channel';
 import {Wallet} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
-import {DBOpenChannelObjective} from '../../../models/objective';
+import {WalletObjective} from '../../../models/objective';
 import {WaitingFor} from '../../../protocols/channel-opener';
 
 let w: Wallet;
@@ -73,7 +75,7 @@ describe('happy path', () => {
       latestSignedByMe: expectedState,
       supported: undefined,
     });
-    expect(await w.getObjective(objectiveId)).toMatchObject<DBOpenChannelObjective>({
+    expect(await w.getObjective(objectiveId)).toMatchObject<WalletObjective<OpenChannel>>({
       objectiveId,
       createdAt: expect.any(Date),
       progressLastMadeAt: expect.any(Date),

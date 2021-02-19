@@ -1,3 +1,4 @@
+import {CloseChannel, DefundChannel} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 
 import {defaultTestConfig} from '../..';
@@ -9,11 +10,7 @@ import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {Channel} from '../../models/channel';
 import {Funding} from '../../models/funding';
 import {LedgerRequest} from '../../models/ledger-request';
-import {
-  DBCloseChannelObjective,
-  DBDefundChannelObjective,
-  ObjectiveModel,
-} from '../../models/objective';
+import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
@@ -37,30 +34,32 @@ async function ensureCloseObjective(
   channel: TestChannel,
   tx: Transaction,
   participantIndex = 0
-): Promise<DBCloseChannelObjective> {
-  // add a preapproved closeChannel objective
+): Promise<WalletObjective<CloseChannel>> {
+  // add the closeChannel objective and approve
   const o = await ObjectiveModel.insert(
     channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
     true,
     tx
   );
-  return o as DBCloseChannelObjective;
+  await store.approveObjective(o.objectiveId, tx);
+  return o;
 }
 
 async function ensureDefundObjective(
   channel: TestChannel,
   tx: Transaction
-): Promise<DBDefundChannelObjective> {
-  // add a preapproved defundChannel objective
-  const o = await ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
-  return o as DBDefundChannelObjective;
+): Promise<WalletObjective<DefundChannel>> {
+  // add the defundChannel objective and approve
+  const o = await ObjectiveModel.insert(channel.defundChannelObjective(), false, tx);
+  await store.approveObjective(o.objectiveId, tx);
+  return o;
 }
 
 function testShouldSubmitCollaborativeTx(channel: Channel, order: number[], outcome: boolean) {
   const objective = ({
     type: 'CloseChannel',
     data: {txSubmitterOrder: order},
-  } as unknown) as DBCloseChannelObjective;
+  } as unknown) as WalletObjective<CloseChannel>;
   expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(outcome);
 }
 
@@ -89,7 +88,7 @@ describe('Collaborative transaction submitter', () => {
 
     const objective4 = {
       type: 'DefundChannel',
-    } as DBDefundChannelObjective;
+    } as WalletObjective<DefundChannel>;
     expect(shouldSubmitCollaborativeTx(channel, objective4)).toEqual(true);
   });
 
@@ -106,7 +105,7 @@ describe('Collaborative transaction submitter', () => {
 
     const objective = {
       type: 'DefundChannel',
-    } as DBDefundChannelObjective;
+    } as WalletObjective<DefundChannel>;
     expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
   });
 
@@ -127,7 +126,7 @@ describe('Collaborative transaction submitter', () => {
 
     const objective = {
       type: 'DefundChannel',
-    } as DBDefundChannelObjective;
+    } as WalletObjective<DefundChannel>;
     expect(shouldSubmitCollaborativeTx(channel, objective)).toEqual(true);
   });
 });
