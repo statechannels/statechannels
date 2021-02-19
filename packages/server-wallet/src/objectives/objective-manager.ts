@@ -13,7 +13,7 @@ import {
   WaitingFor as ChallengeSubmitterWaitingFor,
 } from '../protocols/challenge-submitter';
 import {ChannelDefunder, WaitingFor as DefundChannelWaitingFor} from '../protocols/defund-channel';
-import {DBObjective, ObjectiveModel} from '../models/objective';
+import {WalletObjective, ObjectiveModel} from '../models/objective';
 
 import {ObjectiveManagerParams} from './types';
 import {CloseChannelObjective} from './close-channel';
@@ -34,7 +34,7 @@ export type WaitingFor =
   | DefundChannelWaitingFor
   | Nothing;
 
-export interface Cranker<O extends DBObjective> {
+export interface Cranker<O extends WalletObjective> {
   crank: (objective: O, response: WalletResponse, tx: Transaction) => Promise<WaitingFor | Nothing>;
 }
 export class ObjectiveManager {
@@ -84,7 +84,7 @@ export class ObjectiveManager {
           // 1. Define a WaitingFor enum which contains the "early return" or "pause" points of the objective.
           //    These pause points will be used to track progress over time, and for debugging.
           // 2. Import and add it to the WaitingFor union type in this file.
-          // 2. Implement the Cranker<YourDBObjectiveHere> interface
+          // 2. Implement the Cranker<YourWalletObjectiveHere> interface
           // 3. Make as much progress as you can towards the objective (sign states, submit transactions)
           //    until progress is blocked on an external event (e.g. counterparty State
           //    or blockchain event). Then return early with the waitingFor string

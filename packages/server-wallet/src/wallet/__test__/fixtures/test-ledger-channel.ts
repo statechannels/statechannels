@@ -14,7 +14,7 @@ import {Channel} from '../../../models/channel';
 import {defaultTestConfig} from '../../../config';
 import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest} from '../../../models/ledger-request';
-import {DBOpenChannelObjective} from '../../../models/objective';
+import {WalletObjective} from '../../../models/objective';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
@@ -123,7 +123,7 @@ export class TestLedgerChannel extends TestChannel {
   public async insertInto(
     store: Store,
     args: InsertionParams = {}
-  ): Promise<DBOpenChannelObjective> {
+  ): Promise<WalletObjective<OpenChannel>> {
     const objective = await super.insertInto(store, args);
     await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
     const {fundingStrategy, fundingLedgerChannelId} = objective.data;

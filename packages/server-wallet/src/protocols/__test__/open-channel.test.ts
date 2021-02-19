@@ -1,4 +1,4 @@
-import {BN} from '@statechannels/wallet-core';
+import {BN, OpenChannel} from '@statechannels/wallet-core';
 
 import {ChannelOpener} from '../channel-opener';
 import {Store} from '../../wallet/store';
@@ -8,7 +8,7 @@ import {WalletResponse} from '../../wallet/wallet-response';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
-import {DBOpenChannelObjective} from '../../models/objective';
+import {WalletObjective} from '../../models/objective';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
 import {DBAdmin} from '../..';
 
@@ -150,7 +150,7 @@ interface SetupParams {
   totalFunds?: number;
 }
 
-const setup = async (args: SetupParams): Promise<DBOpenChannelObjective> => {
+const setup = async (args: SetupParams): Promise<WalletObjective<OpenChannel>> => {
   const {participant, statesHeld} = args;
   const totalFunds = args.totalFunds || 0;
 
@@ -164,7 +164,7 @@ interface AssertionParams {
 }
 
 const crankAndAssert = async (
-  objective: DBOpenChannelObjective,
+  objective: WalletObjective<OpenChannel>,
   args: AssertionParams
 ): Promise<void> => {
   const statesToSign = args.statesToSign || [];
