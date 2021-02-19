@@ -103,7 +103,7 @@ Here, “explicit permission” shall be implied by an API call. “Implicit per
 - greater abstraction of the details of nitro protocol
 - greater performance and robustness of a responsible wallet
 - easier coordination between counterparties
-- short lived request-response cycle over the API
+- short-lived request/response cycle over the API
 
 > An objective is a proposal for a goal which The App asserts that it wants to achieve.
 
@@ -154,7 +154,7 @@ As a final step, metadata about objective progress is written to the database. T
 
 > Q: Which rows should be locked? One answer is: the objective row and all of the channel rows in the scope of the objective.
 
-An objective will often be blocked on, or waiting for, external events. The wallet will track the length of time an objective is blocked, and expose this information to the app. This allosw the app to choose to spawn a new objective to displace the stalled one. For example, a `SubmitChallenege` objective might displace a `CloseChannel` objective.
+An objective will often be blocked on, or waiting for, external events. The wallet will track the length of time an objective is blocked, and expose this information to the app. This allows the app to choose to spawn a new objective to displace the stalled one. For example, a `SubmitChallenege` objective might displace a `CloseChannel` objective.
 
 > Q: does the app have to first reject the stalled objective? It's scope could be different to the new objective's, so it seems like the only safe thing to do is to release the _entire_ scope of the stalled objective.
 
