@@ -180,4 +180,4 @@ TODO
 
 # Processing the Ledger Queue
 
-TODO
+Requests to update a ledger channel are _not_ handled by objectives. This is because, in contrast to objectives, we do not want to reject requests from the app that target a ledger channel that is already locked by an objective. We have a queueing system for such updates.
