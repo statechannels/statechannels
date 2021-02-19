@@ -33,22 +33,26 @@ function extractReferencedChannels(objective: Objective): string[] {
 
 type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 
-type WalletObjective<O extends Objective> = O & {
+/**
+ * A WalletObjective is a wire objective with a status, timestamps and an objectiveId
+ *
+ * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
+ * that are currently supported by the server wallet
+ *
+ */
+type ExtraProperties = {
   objectiveId: string;
   status: ObjectiveStatus;
   waitingFor: WaitingFor;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
-
-export type DBOpenChannelObjective = WalletObjective<OpenChannel>;
-export type DBCloseChannelObjective = WalletObjective<CloseChannel>;
-export type DBDefundChannelObjective = WalletObjective<DefundChannel>;
-export type DBSubmitChallengeObjective = WalletObjective<SubmitChallenge>;
+export type WalletObjective<O extends SupportedObjective = SupportedObjective> = O &
+  ExtraProperties;
 
 export function isSharedObjective(
-  objective: DBObjective
-): objective is DBOpenChannelObjective | DBCloseChannelObjective {
+  objective: WalletObjective<SupportedObjective>
+): objective is WalletObjective<OpenChannel> | WalletObjective<CloseChannel> {
   return objective.type === 'OpenChannel' || objective.type === 'CloseChannel';
 }
 
@@ -62,20 +66,14 @@ export function isSupportedObjective(o: Objective): o is SupportedObjective {
   );
 }
 /**
- * A DBObjective is a wire objective with a status, timestamps and an objectiveId
+ * A WalletObjective is a wire objective with a status, timestamps and an objectiveId
  *
  * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
  *
- * TODO: rename to WalletObjective
  */
-export type DBObjective =
-  | DBOpenChannelObjective
-  | DBCloseChannelObjective
-  | DBSubmitChallengeObjective
-  | DBDefundChannelObjective;
 
-export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
+export const toWireObjective = (dbObj: WalletObjective<SupportedObjective>): SharedObjective => {
   if (dbObj.type === 'SubmitChallenge' || dbObj.type === 'DefundChannel') {
     throw new Error(
       'SubmitChallenge and DefundChannel objectives are not supported as wire objectives'
@@ -109,7 +107,7 @@ export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
 };
 
 export class ObjectiveChannelModel extends Model {
-  readonly objectiveId!: DBObjective['objectiveId'];
+  readonly objectiveId!: string;
   readonly channelId!: string;
 
   static tableName = 'objectives_channels';
@@ -119,11 +117,11 @@ export class ObjectiveChannelModel extends Model {
 }
 
 export class ObjectiveModel extends Model {
-  readonly objectiveId!: DBObjective['objectiveId'];
-  readonly status!: DBObjective['status'];
-  readonly type!: DBObjective['type'];
-  readonly data!: DBObjective['data'];
-  readonly waitingFor!: DBObjective['waitingFor'];
+  readonly objectiveId!: ExtraProperties['objectiveId'];
+  readonly status!: ExtraProperties['status'];
+  readonly type!: SupportedObjective['type'];
+  readonly data!: SupportedObjective['data'];
+  readonly waitingFor!: ExtraProperties['waitingFor'];
   // the default value of waitingFor is '', see Nothing.ToWaitFor type
   createdAt!: Date;
   progressLastMadeAt!: Date;
@@ -156,12 +154,12 @@ export class ObjectiveModel extends Model {
     };
   }
 
-  static async insert<O extends DBObjective = DBObjective>(
-    objectiveToBeStored: SupportedObjective, // TODO this type should be correlated to O
+  static async insert<O extends SupportedObjective = SupportedObjective>(
+    objectiveToBeStored: O,
     preApproved: boolean,
     tx: TransactionOrKnex,
-    waitingFor?: WaitingFor // TODO this type should be correlated to O
-  ): Promise<O> {
+    waitingFor?: WaitingFor // TODO this should be correlated to O
+  ): Promise<WalletObjective<O>> {
     const id: string = objectiveId(objectiveToBeStored);
 
     return tx.transaction(async trx => {
@@ -220,21 +218,27 @@ export class ObjectiveModel extends Model {
               .ignore() // this makes it an upsert
         )
       );
-      return model.toObjective<O>();
+      return model.toObjective<WalletObjective<O>>();
     });
   }
 
-  static async forId(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+  static async forId(
+    objectiveId: string,
+    tx: TransactionOrKnex
+  ): Promise<WalletObjective<SupportedObjective>> {
     const model = await ObjectiveModel.query(tx).findById(objectiveId);
     return model.toObjective();
   }
 
-  static async forIds(objectiveIds: string[], tx: TransactionOrKnex): Promise<DBObjective[]> {
+  static async forIds(objectiveIds: string[], tx: TransactionOrKnex): Promise<WalletObjective[]> {
     const model = await ObjectiveModel.query(tx).findByIds(objectiveIds);
     return model.map(m => m.toObjective());
   }
 
-  static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+  static async approve(
+    objectiveId: string,
+    tx: TransactionOrKnex
+  ): Promise<WalletObjective<SupportedObjective>> {
     return (
       await ObjectiveModel.query(tx)
         .findById(objectiveId)
@@ -263,7 +267,7 @@ export class ObjectiveModel extends Model {
     objectiveId: string,
     waitingFor: WaitingFor,
     tx: TransactionOrKnex
-  ): Promise<DBObjective> {
+  ): Promise<WalletObjective<SupportedObjective>> {
     return (
       await ObjectiveModel.query(tx)
         .findById(objectiveId)
@@ -276,7 +280,7 @@ export class ObjectiveModel extends Model {
   static async forChannelIds(
     targetChannelIds: string[],
     tx: TransactionOrKnex
-  ): Promise<DBObjective[]> {
+  ): Promise<WalletObjective[]> {
     const objectiveIds = (
       await ObjectiveChannelModel.query(tx)
         .column('objectiveId')
@@ -287,25 +291,27 @@ export class ObjectiveModel extends Model {
     return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
   }
 
-  toObjective<O extends DBObjective = DBObjective>(): O {
-    const withParticipants = {
-      objectiveId: this.objectiveId,
-      status: this.status,
+  toObjective<O extends SupportedObjective = SupportedObjective>(): WalletObjective<O> {
+    // Reconstruct the Objective, taking on trust that we inserted it properly
+    const o = {
       type: this.type,
       data: this.data,
+      participants: [] as SupportedObjective['participants'], // reinstate an empty participants array
+    } as O;
+
+    const wO: WalletObjective<O> = {
+      ...o,
+      objectiveId: this.objectiveId,
+      status: this.status,
       createdAt: this.createdAt,
       progressLastMadeAt: this.progressLastMadeAt,
       waitingFor: this.waitingFor,
-      participants: [] as DBObjective['participants'], // reinstate an empty participants array
     };
-    switch (this.type) {
-      case 'CloseChannel':
-      case 'DefundChannel':
-      case 'OpenChannel':
-      case 'SubmitChallenge':
-        return withParticipants as O;
-      default:
-        throw Error('unimplemented');
+
+    if (isSupportedObjective(o)) {
+      return wO as WalletObjective<O>;
     }
+
+    throw Error('unsupported');
   }
 }
