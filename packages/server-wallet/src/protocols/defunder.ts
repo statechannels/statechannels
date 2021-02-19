@@ -1,4 +1,4 @@
-import {unreachable} from '@statechannels/wallet-core';
+import {BN, isCloseChannel, unreachable} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
@@ -7,6 +7,7 @@ import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
+import {DBCloseChannelObjective, DBDefundChannelObjective} from '../models/objective';
 import {Store} from '../wallet/store';
 
 /**
@@ -25,6 +26,7 @@ import {Store} from '../wallet/store';
  * make the ChannelDefunder protocol aboslete.
  */
 export type DefunderResult = {isChannelDefunded: boolean; didSubmitTransaction: boolean};
+type Objective = DBCloseChannelObjective | DBDefundChannelObjective;
 
 export class Defunder {
   constructor(
@@ -43,16 +45,20 @@ export class Defunder {
     return new Defunder(store, chainService, logger, timingMetrics);
   }
 
-  public async crank(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+  public async crank(
+    channel: Channel,
+    objective: Objective,
+    tx: Transaction
+  ): Promise<DefunderResult> {
     const {protocolState: ps} = channel;
     await channel.$fetchGraph('funding', {transaction: tx});
     await channel.$fetchGraph('chainServiceRequests', {transaction: tx});
 
     switch (ps.fundingStrategy) {
       case 'Direct':
-        return this.directDefunder(channel, tx);
+        return this.directDefunder(channel, objective, tx);
       case 'Ledger':
-        return this.ledgerDefunder(channel, tx);
+        return this.ledgerDefunder(channel, objective, tx);
       case 'Unknown':
       case 'Fake':
         return {isChannelDefunded: true, didSubmitTransaction: false};
@@ -63,7 +69,11 @@ export class Defunder {
     }
   }
 
-  private async directDefunder(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+  private async directDefunder(
+    channel: Channel,
+    objective: Objective,
+    tx: Transaction
+  ): Promise<DefunderResult> {
     if (!channel.isPartlyDirectFunded) {
       return {isChannelDefunded: true, didSubmitTransaction: false};
     }
@@ -79,8 +89,21 @@ export class Defunder {
       tx,
       channel.channelId
     );
+
     let didSubmitTransaction = false;
-    if (adjudicatorStatus.channelMode !== 'Finalized' && channel.hasConclusionProof) {
+    const shouldSubmitTx = shouldSubmitCollaborativeTx(channel, objective);
+
+    /**
+     * TODO: The below if/else does not account for the following scenario:
+     * - Channel is finalized.
+     * - Outcomes have been pushed to AssetHolders.
+     * - Transfer needs to be called on each AssetHolder
+     */
+    if (
+      adjudicatorStatus.channelMode !== 'Finalized' &&
+      channel.hasConclusionProof &&
+      shouldSubmitTx
+    ) {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'withdraw', tx);
 
       // supported is defined (if the wallet is functioning correctly), but the compiler is not aware of that
@@ -90,7 +113,7 @@ export class Defunder {
       // Note, we are not awaiting transaction submission
       await this.chainService.concludeAndWithdraw([channel.supported]);
       didSubmitTransaction = true;
-    } else if (adjudicatorStatus.channelMode === 'Finalized') {
+    } else if (adjudicatorStatus.channelMode === 'Finalized' && shouldSubmitTx) {
       await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
       await this.chainService.pushOutcomeAndWithdraw(
         adjudicatorStatus.states[0],
@@ -104,7 +127,11 @@ export class Defunder {
     return {isChannelDefunded: false, didSubmitTransaction};
   }
 
-  private async ledgerDefunder(channel: Channel, tx: Transaction): Promise<DefunderResult> {
+  private async ledgerDefunder(
+    channel: Channel,
+    objective: Objective,
+    tx: Transaction
+  ): Promise<DefunderResult> {
     const didSubmitTransaction = false;
     if (!channel.hasConclusionProof) {
       return {isChannelDefunded: false, didSubmitTransaction};
@@ -126,4 +153,28 @@ export class Defunder {
       tx
     );
   }
+}
+
+/**
+ * Assume that we are going to submit collaborative transaction(s) unless:
+ * 1. There is an agreed upon order of transaction submitters.
+ * 2. There is a transaction submitter before us who has funds in the channel.
+ */
+export function shouldSubmitCollaborativeTx(channel: Channel, objective: Objective): boolean {
+  let shouldSubmitCollaborativeTx = true;
+  /**
+   * Only CloseChannel objective specifies the transaction submitter order.
+   * The DefundChannel objective will be soon replaced with the ChallengeChannel objective.
+   * Challenge channel objective does not result in any collaborative transactions.
+   */
+  if (isCloseChannel(objective)) {
+    for (const txSubmitter of objective.data.txSubmitterOrder) {
+      const allocation = channel.allocationItemForParticipantIndex(txSubmitter);
+      if (allocation && BN.gt(allocation.amount, 0)) {
+        shouldSubmitCollaborativeTx = txSubmitter === channel.myIndex;
+        break;
+      }
+    }
+  }
+  return shouldSubmitCollaborativeTx;
 }

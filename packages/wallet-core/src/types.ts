@@ -107,6 +107,23 @@ export type CloseChannel = _Objective<
   {
     targetChannelId: string;
     fundingStrategy: FundingStrategy;
+    /**
+     * Collaboratively concluding a channel on-chain involves the following:
+     * 1. Submit a conclusion proof to the NitroAdjudicator.
+     * 2. Push the outcome to all AssetHolders.
+     * 3. Transfer out of the channel for all asset holders.
+     *
+     * Steps 1 and 2 require one or two transactions that are submitted by one participant
+     * but affect (and block) both participants. txSubmitterOrder defines the order in which
+     * participants will try to submit the collaborative transactions.
+     *
+     * CAVEAT:
+     * Let's say 2 participants are concluding a channel with:
+     * - txSubmitterOrder of [0, 1]
+     * - participant 0 has no funds in the channel.
+     * In the above, participant 0 is expected to NOT submit any collaborative transactions.
+     */
+    txSubmitterOrder: number[];
   }
 >;
 export type VirtuallyFund = _Objective<
@@ -164,7 +181,7 @@ export type Objective = SharedObjective | SubmitChallenge | DefundChannel;
 const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): o is T =>
   o.type === name;
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
-export const isCloseChannel = guard<OpenChannel>('CloseChannel');
+export const isCloseChannel = guard<CloseChannel>('CloseChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export const isFundLedger = guard<FundLedger>('FundLedger');

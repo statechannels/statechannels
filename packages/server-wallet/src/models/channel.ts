@@ -14,6 +14,7 @@ import {
   isSimpleAllocation,
   BN,
   unreachable,
+  AllocationItem,
 } from '@statechannels/wallet-core';
 import {JSONSchema, Model, Pojo, QueryContext, ModelOptions, TransactionOrKnex} from 'objection';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
@@ -439,7 +440,7 @@ export class Channel extends Model implements ChannelColumns {
   private isDirectFunded(threshold: 'FullyFunded' | 'PartlyFunded'): boolean {
     const outcome = this.supported?.outcome;
     if (!outcome) {
-      throw new Error(`Channel passed to isDirectFunded has no supported state`);
+      throw new ChannelError(ChannelError.reasons.noSupportedState);
     }
 
     const {assetHolderAddress, allocationItems} = checkThat(outcome, isSimpleAllocation);
@@ -473,24 +474,20 @@ export class Channel extends Model implements ChannelColumns {
     targetAfter: Uint256;
     targetTotal: Uint256;
   } {
-    /**
-     * The below logic assumes:
-     *  1. Each destination occurs at most once.
-     *  2. We only care about a single destination.
-     * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
-     */
     const supported = this.supported;
     if (!supported) {
-      throw new Error(`Channel passed to DriectFunder has no supported state`);
+      throw new ChannelError(ChannelError.reasons.noSupportedState);
+    }
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const myAllocationItem = this.allocationItemForParticipantIndex(this.myIndex);
+    if (!myAllocationItem) {
+      throw new ChannelError(ChannelError.reasons.destinationNotInAllocations, {
+        destination: this.participants[this.myIndex].destination,
+      });
     }
 
     const myDestination = this.participants[this.myIndex].destination;
-    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
-
-    const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
-    if (!myAllocationItem) {
-      throw new Error(`My destination ${myDestination} is not in allocations ${allocationItems}`);
-    }
 
     const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== myDestination);
     const targetBefore = allocationsBefore.map(a => a.amount).reduce(BN.add, BN.from(0));
@@ -500,6 +497,30 @@ export class Channel extends Model implements ChannelColumns {
     const targetTotal = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
 
     return {targetBefore, targetAfter, targetTotal};
+  }
+
+  /**
+   * WARNING: The below logic assumes
+   *  1. Each destination occurs at most once.
+   *  2. We only care about a single destination.
+   * One reason to drop (2), for instance, is to support ledger top-ups with as few state updates as possible.
+   */
+  allocationItemForParticipantIndex(index: number): AllocationItem | undefined {
+    if (index >= this.participants.length) {
+      throw new ChannelError(ChannelError.reasons.indexNotInChannel, {
+        index,
+        numChannelParticipant: this.participants.length,
+      });
+    }
+    const supported = this.supported;
+    if (!supported) {
+      throw new ChannelError(ChannelError.reasons.noSupportedState);
+    }
+
+    const myDestination = this.participants[index].destination;
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+    const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
+    return myAllocationItem;
   }
 
   private mySignature(signatures: SignatureEntry[]): boolean {
@@ -581,7 +602,11 @@ export class ChannelError extends WalletError {
   static readonly reasons = {
     invalidChannelId: 'Invalid channel id',
     incorrectHash: 'Incorrect hash',
-    channelMissing: 'No channel found with id.',
+    channelMissing: 'No channel found with id',
+    noSupportedState: 'The channel is expected to contain supported state',
+    indexNotInChannel:
+      'The participant index is greater than the number of participants in the channel',
+    destinationNotInAllocations: 'The destination is not in the channel allocatons',
   } as const;
 
   constructor(reason: Values<typeof ChannelError.reasons>, public readonly data: any = undefined) {

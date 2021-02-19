@@ -125,11 +125,18 @@
             },
             "targetChannelId": {
               "$ref": "#/definitions/Bytes32"
+            },
+            "txSubmitterOrder": {
+              "items": {
+                "type": "number"
+              },
+              "type": "array"
             }
           },
           "required": [
             "targetChannelId",
-            "fundingStrategy"
+            "fundingStrategy",
+            "txSubmitterOrder"
           ],
           "type": "object"
         },

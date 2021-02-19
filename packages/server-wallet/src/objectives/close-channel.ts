@@ -17,7 +17,11 @@ export class CloseChannelObjective {
           {
             type: 'CloseChannel',
             participants: [],
-            data: {targetChannelId: channelId, fundingStrategy: channel.fundingStrategy},
+            data: {
+              targetChannelId: channelId,
+              fundingStrategy: channel.fundingStrategy,
+              txSubmitterOrder: [1, 0],
+            },
           },
           true,
           tx
