@@ -27,7 +27,7 @@ import {
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
 import {ChannelResult, FundingStrategy} from '@statechannels/client-api-schema';
-import {ethers} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import Knex from 'knex';
 import {Logger} from 'pino';
 import pMap from 'p-map';
@@ -663,7 +663,7 @@ export class Store {
     // Get the Channel row from the database (create if needed)
     const channel =
       (await Channel.forId(channelId, tx)) ||
-      (await createChannel(state, 'Unknown', undefined, tx));
+      (await createChannel(state, 'Unknown', undefined, this.chainNetworkID, tx));
 
     const {supported} = channel;
     if (supported && shouldValidateTransition(state, channel)) {
@@ -714,7 +714,13 @@ export class Store {
     fundingLedgerChannelId?: Bytes32
   ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: DBObjective}> {
     return await this.knex.transaction(async tx => {
-      const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
+      const channel = await createChannel(
+        constants,
+        fundingStrategy,
+        fundingLedgerChannelId,
+        this.chainNetworkID,
+        tx
+      );
       const {channelId, participants} = channel;
 
       const firstSignedState = await this.signState(
@@ -856,6 +862,7 @@ async function createChannel(
   constants: ChannelConstants,
   fundingStrategy: FundingStrategy,
   fundingLedgerChannelId: Bytes32 | undefined,
+  chainId: number | string,
   txOrKnex: TransactionOrKnex
 ): Promise<Channel> {
   if (fundingLedgerChannelId) {
@@ -865,6 +872,11 @@ async function createChannel(
       throw new StoreError(StoreError.reasons.expiredFundingLedgerChannelId);
   }
 
+  if (!BigNumber.from(constants.chainId).eq(chainId)) {
+    throw new Error(
+      `Cannot create a channel with ${constants.chainId}. It is not an allowed chainId`
+    );
+  }
   const addresses = constants.participants.map(p => p.signingAddress);
 
   const signingWallet = await SigningWallet.query(txOrKnex).whereIn('address', addresses).first();
