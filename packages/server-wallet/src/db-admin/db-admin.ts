@@ -23,6 +23,8 @@ import {
   IncomingServerWalletConfig,
 } from '../config';
 
+type DBConnectionConfig = {database: string; user: string};
+
 /**
  * A collection of static utility methods for db admin
  */
@@ -32,13 +34,7 @@ export class DBAdmin {
    * @param config The wallet configuration object with a database specified
    */
   static async createDatabase(config: IncomingServerWalletConfig): Promise<void> {
-    try {
-      await exec(`createdb ${getDbNameFromConfig(config)} $PSQL_ARGS`);
-    } catch (e) {
-      if (!(e.stderr && e.stderr.includes(' already exists'))) {
-        throw e;
-      } // ignore error if db already exists
-    }
+    await createDbIfDoesntExist(getDbConnectionConfigFromConfig(config));
   }
 
   /**
@@ -46,7 +42,7 @@ export class DBAdmin {
    * @param knex The knex instance which should have a db name specified
    */
   static async createDatabaseFromKnex(knex: Knex): Promise<void> {
-    await exec(`createdb ${getDbNameFromKnex(knex)} $PSQL_ARGS`);
+    await createDbIfDoesntExist(getDbConnectionConfigFromKnex(knex));
   }
 
   /**
@@ -54,7 +50,7 @@ export class DBAdmin {
    * @param config The wallet configuration object containing the database configuration to use
    */
   static async dropDatabase(config: IncomingServerWalletConfig): Promise<void> {
-    await exec(`dropdb ${getDbNameFromConfig(config)} --if-exists $PSQL_ARGS`);
+    await dropDbIfExists(getDbConnectionConfigFromConfig(config));
   }
 
   /**
@@ -62,7 +58,7 @@ export class DBAdmin {
    * @param knex The knex instance which should have a db name specified
    */
   static async dropDatabaseFromKnex(knex: Knex): Promise<void> {
-    await exec(`dropdb ${getDbNameFromKnex(knex)} --if-exists $PSQL_ARGS`);
+    await dropDbIfExists(getDbConnectionConfigFromKnex(knex));
   }
 
   /**
@@ -127,13 +123,30 @@ function getKnexFromConfig(config: IncomingServerWalletConfig): Knex {
   const populatedConfig = _.assign({}, defaultConfig, config);
   return Knex(extractDBConfigFromServerWalletConfig(populatedConfig));
 }
-function getDbNameFromKnex(knex: Knex): string {
-  return knex.client.config.connection.database;
+function getDbConnectionConfigFromKnex(knex: Knex): DBConnectionConfig {
+  const {database, user} = knex.client.config.connection;
+  return {database, user};
 }
 
-function getDbNameFromConfig(config: IncomingServerWalletConfig): string {
+function getDbConnectionConfigFromConfig(config: IncomingServerWalletConfig): DBConnectionConfig {
   const populatedConfig = _.assign({}, defaultConfig, config);
-  return getDatabaseConnectionConfig(populatedConfig).database;
+  const {database, user} = getDatabaseConnectionConfig(populatedConfig);
+  return {database, user};
+}
+
+async function createDbIfDoesntExist(config: DBConnectionConfig): Promise<void> {
+  try {
+    await exec(`createdb ${config.database} -U ${config.user} $PSQL_ARGS`);
+  } catch (e) {
+    // ignore error if db already exists
+    if (!(e.stderr && e.stderr.includes(' already exists'))) {
+      throw e;
+    }
+  }
+}
+
+async function dropDbIfExists(config: DBConnectionConfig): Promise<void> {
+  await exec(`dropdb ${config.database} -U ${config.user} --if-exists $PSQL_ARGS`);
 }
 
 const defaultTables = [
