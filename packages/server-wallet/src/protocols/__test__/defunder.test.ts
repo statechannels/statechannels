@@ -7,7 +7,11 @@ import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {Channel} from '../../models/channel';
 import {Funding} from '../../models/funding';
 import {LedgerRequest} from '../../models/ledger-request';
-import {DBCloseChannelObjective, DBDefundChannelObjective} from '../../models/objective';
+import {
+  DBCloseChannelObjective,
+  DBDefundChannelObjective,
+  ObjectiveModel,
+} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
@@ -33,8 +37,9 @@ function ensureCloseObjective(
 ): Promise<DBCloseChannelObjective> {
   // add the closeChannel objective and approve
   return store.transaction(async tx => {
-    const o = await store.ensureObjective(
+    const o = await ObjectiveModel.insert(
       channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
+      true,
       tx
     );
     await store.approveObjective(o.objectiveId, tx);
@@ -45,7 +50,7 @@ function ensureCloseObjective(
 function ensureDefundObjective(channel: TestChannel): Promise<DBDefundChannelObjective> {
   // add the defundChannel objective and approve
   return store.transaction(async tx => {
-    const o = await store.ensureObjective(channel.defundChannelObjective(), tx);
+    const o = await ObjectiveModel.insert(channel.defundChannelObjective(), false, tx);
     await store.approveObjective(o.objectiveId, tx);
     return o as DBDefundChannelObjective;
   });
