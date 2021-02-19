@@ -80,8 +80,8 @@
   },
   "main": "lib/src/index.js",
   "scripts": {
-    "db:create": "createdb $SERVER_DB_NAME",
-    "db:drop": "dropdb $SERVER_DB_NAME",
+    "db:create": "createdb $SERVER_DB_NAME -U postgres",
+    "db:drop": "dropdb $SERVER_DB_NAME -U postgres",
     "db:migrate": "npx knex migrate:latest --cwd src/db-admin",
     "db:rollback": "npx knex migrate:rollback --cwd src/db-admin",
     "db:seed": "npx knex seed:run --cwd src/db-admin",
