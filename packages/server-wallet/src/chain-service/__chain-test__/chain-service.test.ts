@@ -291,7 +291,7 @@ describe('registerChannel', () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
     const blockDeposited = await provider.getBlockNumber();
-    mineBlocks(); // async
+    mineBlocks();
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
@@ -307,10 +307,8 @@ describe('registerChannel', () => {
       })
     );
 
+    // by the time holdingUpdated is called, it should be 5 blocks away
     const blockReported = await provider.getBlockNumber();
-
-    // chainService.getInitialHoldings will wait for the deposit event
-    // to confirm, before triggering holdingUpdated
     expect(blockReported).toBeGreaterThanOrEqual(blockDeposited + 5);
   });
 
