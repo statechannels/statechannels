@@ -426,7 +426,7 @@ export class ChainService implements ChainServiceInterface {
       {
         address: contract.address,
       },
-      blockNumber - this.blockConfirmations - 1
+      blockNumber - this.blockConfirmations + 1
     );
 
     for (const depositEvent of depositEvents) {
