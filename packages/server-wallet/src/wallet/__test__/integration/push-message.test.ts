@@ -123,7 +123,7 @@ it('ignores duplicate states', async () => {
 it('throws for channels with different chain id', async () => {
   const signedStates = [stateSignedBy([alice()])({turnNum: five})];
 
-  signedStates[0].chainId = wallet.store.chainNetworkID + '0xdeadbeef';
+  signedStates[0].chainId = wallet.store.chainNetworkID + 'deadbeef';
 
   await expect(
     wallet.pushMessage({
