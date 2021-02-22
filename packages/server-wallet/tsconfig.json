@@ -25,5 +25,6 @@
       "path": "../wallet-core"
     }
   ],
-  "include": ["src", "e2e-test", "deployment", "jest"]
+  "include": ["src", "e2e-test", "deployment", "jest"],
+  "exclude": ["**/node_modules", "**/.*/"]
 }
