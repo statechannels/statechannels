@@ -1,11 +1,11 @@
 import Objection from 'objection';
 import {SignedState as WireSignedState} from '@statechannels/wire-format';
+import {utils} from 'ethers';
 
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-
 let store: Store;
 
 beforeAll(async () => {
@@ -47,7 +47,7 @@ describe('addSignedState', () => {
       participants: [],
       channelNonce: 1,
       channelId,
-      chainId: '0x01',
+      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
       signatures: [BOB_SIGNATURE],
     };
