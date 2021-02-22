@@ -42,7 +42,7 @@ function ensureCloseObjective(
       true,
       tx
     );
-    await store.approveObjective(o.objectiveId, tx);
+
     return o as DBCloseChannelObjective;
   });
 }
@@ -50,8 +50,7 @@ function ensureCloseObjective(
 function ensureDefundObjective(channel: TestChannel): Promise<DBDefundChannelObjective> {
   // add the defundChannel objective and approve
   return store.transaction(async tx => {
-    const o = await ObjectiveModel.insert(channel.defundChannelObjective(), false, tx);
-    await store.approveObjective(o.objectiveId, tx);
+    const o = await ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
     return o as DBDefundChannelObjective;
   });
 }
