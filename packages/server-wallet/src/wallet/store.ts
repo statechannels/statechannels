@@ -23,6 +23,7 @@ import {
   SubmitChallenge,
   isSubmitChallenge,
   DefundChannel,
+  BN,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -657,9 +658,9 @@ export class Store {
       fastDeserializeState(channelId, wireState)
     );
 
-    if (deserializedState.chainId !== this.chainNetworkID)
+    if (!BN.eq(deserializedState.chainId, this.chainNetworkID))
       throw Error(
-        `This channel can only be concluded on a chain with id ${deserializedState.chainId}, but this wallet uses chain id: ${this.chainNetworkID})`
+        `This channel can only be concluded on a chain with id ${deserializedState.chainId}, but this wallet uses chain id: ${this.chainNetworkID}.`
       );
 
     // Compute the stateHash for the new state
