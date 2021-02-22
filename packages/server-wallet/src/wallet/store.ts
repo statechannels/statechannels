@@ -657,6 +657,11 @@ export class Store {
       fastDeserializeState(channelId, wireState)
     );
 
+    if (deserializedState.chainId !== this.chainNetworkID)
+      throw Error(
+        `This channel can only be concluded on a chain with id ${deserializedState.chainId}, but this wallet uses chain id: ${this.chainNetworkID})`
+      );
+
     // Compute the stateHash for the new state
     const state = addHash(deserializedState);
 
