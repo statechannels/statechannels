@@ -144,7 +144,7 @@ describe('Direct channel defunding', () => {
     const objective = await ensureCloseObjective(testChannel);
     const objective2 = await ensureCloseObjective(testChannel, 1);
 
-    testKnex.transaction(async tx => {
+    await testKnex.transaction(async tx => {
       // Defunder should take no actions as there is no conclusion proof.
       expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: false,
