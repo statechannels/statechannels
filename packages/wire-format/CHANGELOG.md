@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.9.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.8...@statechannels/wire-format@0.9.0) (2021-02-23)
+
+
+### Features
+
+* specify the transacton-submitting participant when closing a channel ([2fd7aef](http://statechannels/monorepo/blob/master/packages/client-api-schema/commits/2fd7aef662dc3e6c3ba8d5ff47afc496b4695c30))
+
+
+
+
+
 ## [0.8.8](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/wire-format@0.8.4...@statechannels/wire-format@0.8.8) (2021-02-11)
 
 

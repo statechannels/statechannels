@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.10.1](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.10.0...@statechannels/client-api-schema@0.10.1) (2021-02-23)
+
+**Note:** Version bump only for package @statechannels/client-api-schema
+
+
+
+
+
 # [0.10.0](http://statechannels/monorepo/blob/master/packages/client-api-schema/compare/@statechannels/client-api-schema@0.5.1...@statechannels/client-api-schema@0.10.0) (2021-02-11)
 
 
