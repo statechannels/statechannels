@@ -19,6 +19,7 @@ import {
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
+import {defaultTestConfig} from '../../config';
 import {
   alice,
   alice as aliceParticipant,
@@ -81,11 +82,14 @@ beforeAll(async () => {
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
   /* eslint-disable no-process-env */
-  chainService = new ChainService({
-    provider: rpcEndpoint,
-    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
-    allowanceMode: 'MaxUint',
-  });
+  chainService = new ChainService(
+    {
+      provider: rpcEndpoint,
+      pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
+      allowanceMode: 'MaxUint',
+    },
+    defaultTestConfig().networkConfiguration.chainNetworkID
+  );
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 });
 

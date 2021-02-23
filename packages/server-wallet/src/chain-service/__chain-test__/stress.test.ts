@@ -4,6 +4,7 @@ import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
+import {defaultTestNetworkConfiguration} from '../../config';
 import {ChainService} from '../chain-service';
 
 const pk = ETHERLIME_ACCOUNTS[0].privateKey;
@@ -26,11 +27,14 @@ let chainService: ChainService;
 
 beforeEach(() => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
-  chainService = new ChainService({
-    provider: rpcEndpoint,
-    pk: privateKey,
-    allowanceMode: 'MaxUint',
-  });
+  chainService = new ChainService(
+    {
+      provider: rpcEndpoint,
+      pk: privateKey,
+      allowanceMode: 'MaxUint',
+    },
+    defaultTestNetworkConfiguration.chainNetworkID
+  );
 });
 
 afterEach(() => chainService.destructor());
