@@ -1,6 +1,7 @@
 import _ from 'lodash';
 
 import {
+  ChainServiceConfiguration,
   DeepPartial,
   LoggingConfiguration,
   NetworkConfiguration,
@@ -31,7 +32,7 @@ export const defaultLoggingConfiguration: LoggingConfiguration = {
 
 export const defaultMetricsConfiguration = {timingMetrics: false};
 
-export const defaultChainServiceConfiguration = {
+export const defaultChainServiceConfiguration: ChainServiceConfiguration = {
   attachChainService: false,
 };
 
