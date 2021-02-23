@@ -81,17 +81,15 @@ export class ChainService implements ChainServiceInterface {
 
   private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
 
-  constructor(
-    {
-      provider,
-      pk,
-      pollingInterval,
-      logger,
-      blockConfirmations,
-      allowanceMode,
-    }: Partial<ChainServiceArgs>,
-    chainNetworkId: number
-  ) {
+  constructor({
+    provider,
+    pk, // TODO require pk to be defined and remove if (!pk) throw (below)
+    pollingInterval,
+    logger,
+    blockConfirmations,
+    allowanceMode,
+    chainNetworkId,
+  }: Partial<ChainServiceArgs> & {chainNetworkId: number}) {
     if (!pk) throw new Error('ChainService: Private key not provided');
     this.provider = new providers.JsonRpcProvider(provider, chainNetworkId);
     this.ethWallet = new NonceManager(new Wallet(pk, this.provider));
