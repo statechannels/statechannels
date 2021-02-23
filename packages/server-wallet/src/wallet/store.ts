@@ -316,7 +316,7 @@ export class Store {
       const storedObjectives: DBObjective[] = [];
       for (const o of deserializedObjectives) {
         if (isSupportedObjective(o)) {
-          const preApprove = o.type == 'CloseChannel'; // special case
+          const preApprove = o.type == 'CloseChannel'; // Close channel objectives do not need co-operative approval
           storedObjectives.push(await ObjectiveModel.insert(o, preApprove, tx));
         } else this.logger.warn('Unsupported objective received');
       }
