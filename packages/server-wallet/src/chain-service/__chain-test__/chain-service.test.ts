@@ -82,14 +82,12 @@ beforeAll(async () => {
   // - Deploys the token contract.
   // - And therefore has tokens allocated to it.
   /* eslint-disable no-process-env */
-  chainService = new ChainService(
-    {
-      provider: rpcEndpoint,
-      pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
-      allowanceMode: 'MaxUint',
-    },
-    defaultTestConfig().networkConfiguration.chainNetworkID
-  );
+  chainService = new ChainService({
+    provider: rpcEndpoint,
+    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
+    allowanceMode: 'MaxUint',
+    chainNetworkId: defaultTestConfig().networkConfiguration.chainNetworkID,
+  });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 });
 
