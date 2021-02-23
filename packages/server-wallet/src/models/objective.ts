@@ -157,10 +157,10 @@ export class ObjectiveModel extends Model {
   }
 
   static async insert<O extends DBObjective = DBObjective>(
-    objectiveToBeStored: SupportedObjective, // TODO this should be correlated to O
+    objectiveToBeStored: SupportedObjective, // TODO this type should be correlated to O
     preApproved: boolean,
     tx: TransactionOrKnex,
-    waitingFor?: WaitingFor // TODO this should be correlated to O
+    waitingFor?: WaitingFor // TODO this type should be correlated to O
   ): Promise<O> {
     const id: string = objectiveId(objectiveToBeStored);
 
