@@ -10,9 +10,11 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {flow} from 'fp-ts/lib/function';
+import {utils} from 'ethers';
 
 import {SigningWallet} from '../../../models/signing-wallet';
 import {addHash} from '../../../state-utils';
+import {defaultTestConfig} from '../../../config';
 
 import {Fixture, fixture, overwriteOutcome} from './utils';
 import {alice, bob} from './participants';
@@ -29,7 +31,7 @@ const defaultState: State = {
   ]),
   participants: [alice(), bob()],
   channelNonce: 1,
-  chainId: '0x01',
+  chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
   challengeDuration: 9001,
 };
 

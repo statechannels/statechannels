@@ -58,7 +58,8 @@ type HasDatabaseConnectionConfigObject = {
   databaseConfiguration: {connection: {host: string; port: number; database: string}};
 };
 export const defaultTestNetworkConfiguration: NetworkConfiguration = {
-  chainNetworkID: 0,
+  // eslint-disable-next-line no-process-env
+  chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID ?? '0'),
 };
 
 export const defaultTestConfig = (
