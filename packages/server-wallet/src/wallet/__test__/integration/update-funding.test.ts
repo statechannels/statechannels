@@ -12,7 +12,6 @@ import {ObjectiveModel} from '../../../models/objective';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {defaultTestConfig} from '../../../config';
-import {WaitingFor} from '../../../protocols/channel-opener';
 
 const AddressZero = makeAddress(ethers.constants.AddressZero);
 
@@ -49,9 +48,8 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      waitingFor: WaitingFor.theirPreFundSetup,
-      status: 'approved',
     },
+    true,
     w.knex
   );
 
@@ -64,9 +62,8 @@ it('sends the post fund setup when the funding event is provided for multiple ch
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      waitingFor: WaitingFor.theirPreFundSetup,
-      status: 'approved',
     },
+    true,
     w.knex
   );
 
@@ -121,9 +118,8 @@ it('sends the post fund setup when the funding event is provided', async () => {
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      waitingFor: WaitingFor.theirPreFundSetup,
-      status: 'approved',
     },
+    true,
     w.knex
   );
 
@@ -167,9 +163,8 @@ it('emits new channel result when the funding event is provided via holdingUpdat
         fundingStrategy: 'Direct',
         role: 'app',
       },
-      waitingFor: WaitingFor.theirPreFundSetup,
-      status: 'approved',
     },
+    true,
     w.knex
   );
 

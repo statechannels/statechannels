@@ -2,22 +2,24 @@ import {
   Address,
   ChannelConstants,
   makeAddress,
+  OpenChannel,
   serializeState,
-  SharedObjective,
   SignedStateWithHash,
   SimpleAllocation,
 } from '@statechannels/wallet-core';
 import {Payload, SignedState as WireState} from '@statechannels/wire-format';
 import {utils} from 'ethers';
 
+import {Channel} from '../../../models/channel';
 import {defaultTestConfig} from '../../../config';
 import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest} from '../../../models/ledger-request';
+import {DBOpenChannelObjective} from '../../../models/objective';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
 import {stateWithHashSignedBy} from './states';
-import {TestChannel, Bals} from './test-channel';
+import {TestChannel, Bals, InsertionParams} from './test-channel';
 
 interface TestChannelArgs {
   aBal?: number;
@@ -38,7 +40,7 @@ export class TestLedgerChannel extends TestChannel {
     super(args);
   }
 
-  public get openChannelObjective(): SharedObjective {
+  public get openChannelObjective(): OpenChannel {
     return {
       participants: this.participants,
       type: 'OpenChannel',
@@ -112,5 +114,22 @@ export class TestLedgerChannel extends TestChannel {
     return store.transaction(tx =>
       LedgerProposal.storeProposal({channelId: this.channelId, signingAddress, proposal, nonce}, tx)
     );
+  }
+
+  /**
+   * Calls addSigningKey, pushMessage, updateFunding, and adds the OpenChannel Objective to the supplied store.
+   * Also makes the required patches to indicate this channel is a ledger channel
+   */
+  public async insertInto(
+    store: Store,
+    args: InsertionParams = {}
+  ): Promise<DBOpenChannelObjective> {
+    const objective = await super.insertInto(store, args);
+    await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
+    const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+    await Channel.query(store.knex)
+      .where({channelId: this.channelId})
+      .patch({fundingStrategy, fundingLedgerChannelId});
+    return objective;
   }
 }

@@ -1,3 +1,5 @@
+import {Transaction} from 'objection';
+
 import {defaultTestConfig} from '../..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
 import {MockChainService} from '../../chain-service';
@@ -7,7 +9,11 @@ import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {Channel} from '../../models/channel';
 import {Funding} from '../../models/funding';
 import {LedgerRequest} from '../../models/ledger-request';
-import {DBCloseChannelObjective, DBDefundChannelObjective} from '../../models/objective';
+import {
+  DBCloseChannelObjective,
+  DBDefundChannelObjective,
+  ObjectiveModel,
+} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
@@ -27,28 +33,27 @@ const testLedgerChannel = TestChannel.create({
 
 let store: Store;
 
-function ensureCloseObjective(
+async function ensureCloseObjective(
   channel: TestChannel,
+  tx: Transaction,
   participantIndex = 0
 ): Promise<DBCloseChannelObjective> {
-  // add the closeChannel objective and approve
-  return store.transaction(async tx => {
-    const o = await store.ensureObjective(
-      channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
-      tx
-    );
-    await store.approveObjective(o.objectiveId, tx);
-    return o as DBCloseChannelObjective;
-  });
+  // add a preapproved closeChannel objective
+  const o = await ObjectiveModel.insert(
+    channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
+    true,
+    tx
+  );
+  return o as DBCloseChannelObjective;
 }
 
-function ensureDefundObjective(channel: TestChannel): Promise<DBDefundChannelObjective> {
-  // add the defundChannel objective and approve
-  return store.transaction(async tx => {
-    const o = await store.ensureObjective(channel.defundChannelObjective(), tx);
-    await store.approveObjective(o.objectiveId, tx);
-    return o as DBDefundChannelObjective;
-  });
+async function ensureDefundObjective(
+  channel: TestChannel,
+  tx: Transaction
+): Promise<DBDefundChannelObjective> {
+  // add a preapproved defundChannel objective
+  const o = await ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
+  return o as DBDefundChannelObjective;
 }
 
 function testShouldSubmitCollaborativeTx(channel: Channel, order: number[], outcome: boolean) {
@@ -141,10 +146,9 @@ describe('Direct channel defunding', () => {
 
     let channel = await Channel.forId(testChannel.channelId, testKnex);
     const defunder = new Defunder(store, chainService, logger);
-    const objective = await ensureCloseObjective(testChannel);
-    const objective2 = await ensureCloseObjective(testChannel, 1);
 
     await testKnex.transaction(async tx => {
+      const objective = await ensureCloseObjective(testChannel, tx, 1);
       // Defunder should take no actions as there is no conclusion proof.
       expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: false,
@@ -157,13 +161,14 @@ describe('Direct channel defunding', () => {
       channel = await store.addSignedState(channel.channelId, state, tx);
 
       // Defunder should NOT submit a transaction since we are not the transaction submitter.
-      expect(await defunder.crank(channel, objective2, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
       });
       expect(spy).not.toHaveBeenCalled();
 
       // Defunder should submit a transaction since there is a conclusion proof and we are the transaction submitter.
+      objective.data.txSubmitterOrder = [0, 1];
       expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: true,
         isChannelDefunded: false,
@@ -209,9 +214,10 @@ describe('Direct channel defunding', () => {
       state3,
     ]);
     await AdjudicatorStatusModel.setFinalized(testKnex, channel.channelId, 1, 1, 1);
-    const objective = await ensureDefundObjective(testChannel);
 
     await testKnex.transaction(async tx => {
+      const objective = await ensureDefundObjective(testChannel, tx);
+
       expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: true,
         isChannelDefunded: false,
@@ -241,10 +247,11 @@ describe('Ledger funded channel defunding', () => {
     const chainService = new MockChainService();
     const logger = createLogger(defaultTestConfig());
     const defunder = new Defunder(store, chainService, logger);
-    const objective = await ensureCloseObjective(testLedgerChannel);
 
     let channel = await Channel.forId(testLedgerChannel.channelId, testKnex);
     await testKnex.transaction(async tx => {
+      const objective = await ensureCloseObjective(testLedgerChannel, tx);
+
       // There is no conclusion proof
       expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: false,

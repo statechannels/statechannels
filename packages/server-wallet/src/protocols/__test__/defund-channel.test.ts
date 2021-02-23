@@ -2,7 +2,7 @@ import {makeAddress, State} from '@statechannels/wallet-core';
 
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
-import {DBDefundChannelObjective} from '../../models/objective';
+import {DBDefundChannelObjective, ObjectiveModel} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -13,7 +13,7 @@ import {
   MockChainService,
 } from '../../chain-service';
 import {WalletResponse} from '../../wallet/wallet-response';
-import {ChannelDefunder, WaitingFor} from '../defund-channel';
+import {ChannelDefunder} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
 import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
@@ -60,11 +60,25 @@ beforeEach(async () => {
     states: [FINAL, FINAL + 1],
   });
 
-  objective = createPendingObjective(testChan.channelId);
-  objective2 = createPendingObjective(testChan2.channelId);
+  objective = await ObjectiveModel.insert<DBDefundChannelObjective>(
+    {
+      type: 'DefundChannel',
+      participants: [],
+      data: {targetChannelId: testChan.channelId},
+    },
+    false,
+    knex
+  );
 
-  await knex.transaction(tx => store.ensureObjective(objective, tx));
-  await knex.transaction(tx => store.ensureObjective(objective2, tx));
+  objective2 = await ObjectiveModel.insert<DBDefundChannelObjective>(
+    {
+      type: 'DefundChannel',
+      participants: [],
+      data: {targetChannelId: testChan2.channelId},
+    },
+    false,
+    knex
+  );
 
   pushSpy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
   withdrawSpy = jest.spyOn(chainService, 'concludeAndWithdraw');
@@ -191,19 +205,6 @@ async function setAdjudicatorStatus(
   if (status === 'finalized') {
     await AdjudicatorStatusModel.setFinalized(knex, channelId, 22, 200, 100);
   }
-}
-
-function createPendingObjective(channelId: string): DBDefundChannelObjective {
-  return {
-    type: 'DefundChannel',
-    status: 'pending',
-    participants: [],
-    waitingFor: WaitingFor.transactionSubmission,
-    objectiveId: ['DefundChannel', channelId].join('-'),
-    data: {targetChannelId: channelId},
-    createdAt: new Date(Date.now()),
-    progressLastMadeAt: new Date(Date.now()),
-  };
 }
 
 async function crankChannelDefunder(objective: DBDefundChannelObjective) {
