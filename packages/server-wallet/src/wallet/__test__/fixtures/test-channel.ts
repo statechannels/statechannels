@@ -21,7 +21,9 @@ import {
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
+import {utils} from 'ethers';
 
+import {defaultTestConfig} from '../../../config';
 import {DBOpenChannelObjective} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';
@@ -173,7 +175,7 @@ export class TestChannel {
       appDefinition: makeAddress('0x000000000000000000000000000000000000adef'),
       participants: this.participants,
       channelNonce: this.channelNonce,
-      chainId: '0x01',
+      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
     };
   }

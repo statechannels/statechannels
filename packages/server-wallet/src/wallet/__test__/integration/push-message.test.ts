@@ -120,6 +120,18 @@ it('ignores duplicate states', async () => {
   expect(channelsAfter[0].vars).toMatchObject(signedStates.map(s => dropNonVariables(s)));
 });
 
+it('throws for channels with different chain id', async () => {
+  let signedState = serializeState(stateSignedBy([alice()])({turnNum: five}));
+  signedState = {...signedState, chainId: wallet.store.chainNetworkID + 'deadbeef'};
+
+  await expect(
+    wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
+      signedStates: [signedState],
+    })
+  ).rejects.toThrow();
+});
+
 it('adds signatures to existing states', async () => {
   const channelsBefore = await Channel.query(wallet.knex).select();
   expect(channelsBefore).toHaveLength(0);
@@ -225,7 +237,7 @@ describe('channel results', () => {
       signedStates: signedStates.map(s => serializeState(s)),
     });
 
-    await expectResults(p, [{turnNum: six, appData: '0x0f00'}, {turnNum: five}]);
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
     const channelsAfter = await Channel.query(wallet.knex).select();
 

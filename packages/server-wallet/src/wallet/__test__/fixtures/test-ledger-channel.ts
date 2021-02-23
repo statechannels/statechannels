@@ -8,7 +8,9 @@ import {
   SimpleAllocation,
 } from '@statechannels/wallet-core';
 import {Payload, SignedState as WireState} from '@statechannels/wire-format';
+import {utils} from 'ethers';
 
+import {defaultTestConfig} from '../../../config';
 import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
@@ -54,7 +56,7 @@ export class TestLedgerChannel extends TestChannel {
       appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
       participants: this.participants,
       channelNonce: this.channelNonce,
-      chainId: '0x01',
+      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
     };
   }
