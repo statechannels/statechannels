@@ -64,7 +64,7 @@ export class ObjectiveManager {
    */
   async crank(objectiveId: string, response: WalletResponse): Promise<void> {
     return this.store.transaction(async tx => {
-      const objective = await this.store.getObjective(objectiveId, tx);
+      const objective = await this.store.getAndLockObjective(objectiveId, tx);
       let waitingFor: WaitingFor | null;
       switch (objective.type) {
         case 'OpenChannel':
