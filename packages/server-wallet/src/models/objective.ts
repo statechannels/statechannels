@@ -299,7 +299,7 @@ export class ObjectiveModel extends Model {
       participants: [] as SupportedObjective['participants'], // reinstate an empty participants array
     } as O;
 
-    const wO: WalletObjective<O> = {
+    const walletObjective: WalletObjective<O> = {
       ...o,
       objectiveId: this.objectiveId,
       status: this.status,
@@ -309,7 +309,7 @@ export class ObjectiveModel extends Model {
     };
 
     if (isSupportedObjective(o)) {
-      return wO as WalletObjective<O>;
+      return walletObjective as WalletObjective<O>;
     }
 
     throw Error('unsupported');
