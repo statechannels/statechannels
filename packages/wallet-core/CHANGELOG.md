@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.14.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.13.0...@statechannels/wallet-core@0.14.0) (2021-02-23)
+
+
+### Features
+
+* specify the transacton-submitting participant when closing a channel ([2fd7aef](https://github.com/statechannels/statechannels/commit/2fd7aef662dc3e6c3ba8d5ff47afc496b4695c30))
+
+
+
+
+
 # [0.13.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.9.12...@statechannels/wallet-core@0.13.0) (2021-02-11)
 
 
