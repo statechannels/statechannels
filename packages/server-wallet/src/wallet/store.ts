@@ -414,7 +414,7 @@ export class Store {
    * @param objectiveId
    * @param tx
    */
-  async getAndLockObjective(objectiveId: string, tx: Transaction): Promise<DBObjective> {
+  async getAndLockObjective(objectiveId: string, tx: Transaction): Promise<WalletObjective> {
     return (await ObjectiveModel.query(tx).findById(objectiveId).forUpdate()).toObjective();
   }
 

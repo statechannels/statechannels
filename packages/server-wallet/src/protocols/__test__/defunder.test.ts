@@ -36,23 +36,19 @@ async function ensureCloseObjective(
   participantIndex = 0
 ): Promise<WalletObjective<CloseChannel>> {
   // add the closeChannel objective and approve
-  const o = await ObjectiveModel.insert(
+  return ObjectiveModel.insert(
     channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
     true,
     tx
   );
-  await store.approveObjective(o.objectiveId, tx);
-  return o;
 }
 
 async function ensureDefundObjective(
   channel: TestChannel,
   tx: Transaction
 ): Promise<WalletObjective<DefundChannel>> {
-  // add the defundChannel objective and approve
-  const o = await ObjectiveModel.insert(channel.defundChannelObjective(), false, tx);
-  await store.approveObjective(o.objectiveId, tx);
-  return o;
+  // add a preapproved defundChannel objective and approve
+  return ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
 }
 
 function testShouldSubmitCollaborativeTx(channel: Channel, order: number[], outcome: boolean) {
