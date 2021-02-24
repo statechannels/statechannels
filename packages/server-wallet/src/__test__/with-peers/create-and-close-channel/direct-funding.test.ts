@@ -12,9 +12,9 @@ import {
   participantA,
   participantB,
   peersTeardown,
-} from '../../../jest/with-peers-setup-teardown';
-import {WaitingFor} from '../../protocols/channel-opener';
-import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
+} from '../../../../jest/with-peers-setup-teardown';
+import {WaitingFor} from '../../../protocols/channel-opener';
+import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../test-helpers';
 
 const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);

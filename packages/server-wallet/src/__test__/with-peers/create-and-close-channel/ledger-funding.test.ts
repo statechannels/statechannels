@@ -2,16 +2,16 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Outgoing} from '../..';
-import {Bytes32} from '../../type-aliases';
+import {Outgoing} from '../../..';
+import {Bytes32} from '../../../type-aliases';
 import {
   crashAndRestart,
   getChannelResultFor,
   getPayloadFor,
   interParticipantChannelResultsAreEqual,
   ONE_DAY,
-} from '../test-helpers';
-import {DBAdmin} from '../../db-admin/db-admin';
+} from '../../test-helpers';
+import {DBAdmin} from '../../../db-admin/db-admin';
 import {
   peerWallets,
   getPeersSetup,
@@ -20,7 +20,7 @@ import {
   participantB,
   aWalletConfig,
   bWalletConfig,
-} from '../../../jest/with-peers-setup-teardown';
+} from '../../../../jest/with-peers-setup-teardown';
 
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 

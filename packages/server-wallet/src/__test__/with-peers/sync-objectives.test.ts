@@ -1,12 +1,11 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
 import Knex from 'knex';
 
-import {peerWallets, getPeersSetup, peersTeardown} from '../../jest/with-peers-setup-teardown';
-import {DBObjective, ObjectiveModel} from '../models/objective';
-import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
-import {bob} from '../wallet/__test__/fixtures/participants';
-
-import {getChannelResultFor, getPayloadFor} from './test-helpers';
+import {peerWallets, getPeersSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
+import {DBObjective, ObjectiveModel} from '../../models/objective';
+import {createChannelArgs} from '../../wallet/__test__/fixtures/create-channel';
+import {bob} from '../../wallet/__test__/fixtures/participants';
+import {getChannelResultFor, getPayloadFor} from '../test-helpers';
 
 jest.setTimeout(10_000);
 
