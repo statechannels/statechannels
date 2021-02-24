@@ -4,6 +4,7 @@ import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
+import {defaultTestNetworkConfiguration} from '../../config';
 import {ChainService} from '../chain-service';
 
 const pk = ETHERLIME_ACCOUNTS[0].privateKey;
@@ -30,6 +31,7 @@ beforeEach(() => {
     provider: rpcEndpoint,
     pk: privateKey,
     allowanceMode: 'MaxUint',
+    chainNetworkId: defaultTestNetworkConfiguration.chainNetworkID,
   });
 });
 

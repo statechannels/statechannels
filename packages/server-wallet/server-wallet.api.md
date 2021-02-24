@@ -101,9 +101,7 @@ export const DEFAULT_DB_NAME = "server_wallet_test";
 export const DEFAULT_DB_USER = "postgres";
 
 // @public (undocumented)
-export const defaultChainServiceConfiguration: {
-    attachChainService: boolean;
-};
+export const defaultChainServiceConfiguration: ChainServiceConfiguration;
 
 // @public
 export const defaultConfig: OptionalServerWalletConfig;

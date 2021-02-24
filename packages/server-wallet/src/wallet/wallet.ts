@@ -153,6 +153,7 @@ export class SingleThreadedWallet
       this.chainService = new ChainService({
         ...this.walletConfig.chainServiceConfiguration,
         logger: this.logger,
+        chainNetworkId: this.walletConfig.networkConfiguration.chainNetworkID,
       });
     } else {
       this.chainService = new MockChainService();

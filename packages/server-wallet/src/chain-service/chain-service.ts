@@ -83,14 +83,15 @@ export class ChainService implements ChainServiceInterface {
 
   constructor({
     provider,
-    pk,
+    pk, // TODO require pk to be defined and remove if (!pk) throw (below)
     pollingInterval,
     logger,
     blockConfirmations,
     allowanceMode,
-  }: Partial<ChainServiceArgs>) {
+    chainNetworkId,
+  }: Partial<ChainServiceArgs> & {chainNetworkId: number}) {
     if (!pk) throw new Error('ChainService: Private key not provided');
-    this.provider = new providers.JsonRpcProvider(provider);
+    this.provider = new providers.JsonRpcProvider(provider, chainNetworkId);
     this.ethWallet = new NonceManager(new Wallet(pk, this.provider));
     this.blockConfirmations = blockConfirmations ?? 5;
     this.logger = logger
