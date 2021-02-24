@@ -13,7 +13,7 @@ export class CloseChannelObjective {
     await store.lockApp(
       channelId,
       async (tx, channel) => {
-        const wO = await ObjectiveModel.insert(
+        const walletObjective = await ObjectiveModel.insert(
           {
             type: 'CloseChannel',
             participants: [],
@@ -27,7 +27,7 @@ export class CloseChannelObjective {
           tx
         );
         // add new objective to the response
-        response.queueCreatedObjective(wO, channel.myIndex, channel.participants);
+        response.queueCreatedObjective(walletObjective, channel.myIndex, channel.participants);
       },
       () => {
         throw new CloseChannelError(CloseChannelError.reasons.channelMissing, {channelId});

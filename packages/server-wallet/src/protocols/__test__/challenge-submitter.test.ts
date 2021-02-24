@@ -51,9 +51,11 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const wO = await knex.transaction(async tx => ObjectiveModel.insert(obj, false, tx));
+    const walletObjective = await knex.transaction(async tx =>
+      ObjectiveModel.insert(obj, false, tx)
+    );
 
-    await await crankAndAssert(wO, {callsChallenge: false, completesObj: false});
+    await await crankAndAssert(walletObjective, {callsChallenge: false, completesObj: false});
   });
   it(`takes no action if there is an existing challenge`, async () => {
     const c = channel();
