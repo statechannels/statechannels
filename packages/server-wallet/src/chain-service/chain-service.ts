@@ -6,6 +6,7 @@ import {
   getChallengeRegisteredEvent,
   getChannelId,
   Transactions,
+  Uint256,
 } from '@statechannels/nitro-protocol';
 import {
   Address,
@@ -18,7 +19,7 @@ import {
   toNitroSignedState,
   toNitroState,
 } from '@statechannels/wallet-core';
-import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
+import {constants, Contract, ContractInterface, ethers, Event, providers, Wallet} from 'ethers';
 import {Observable} from 'rxjs';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
@@ -39,6 +40,7 @@ import {
   FundChannelArg,
   HoldingUpdatedArg,
 } from './types';
+import {EventTracker} from './event-tracker';
 
 const Deposited = 'Deposited' as const;
 const AllocationUpdated = 'AllocationUpdated';
@@ -72,7 +74,7 @@ export class ChainService implements ChainServiceInterface {
   private allowanceMode: AllowanceMode;
   private assetHolderToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
   private addressToContract: Map<Address, Contract> = new Map();
-  private channelToSubscribers: Map<Bytes32, ChainEventSubscriberInterface[]> = new Map();
+  private channelToEventTrackers: Map<Bytes32, EventTracker[]> = new Map();
   // For convenience, can also use addressToContract map
   private nitroAdjudicator: Contract;
 
@@ -114,7 +116,7 @@ export class ChainService implements ChainServiceInterface {
 
       const {channelId, challengeStates, finalizesAt} = event;
 
-      this.channelToSubscribers.get(event.channelId)?.map(subscriber =>
+      this.channelToEventTrackers.get(event.channelId)?.map(subscriber =>
         subscriber.challengeRegistered({
           channelId,
           challengeStates: challengeStates.map(s => fromNitroSignedState(s)),
@@ -330,9 +332,10 @@ export class ChainService implements ChainServiceInterface {
   ): void {
     this.logger.info({channelId, assetHolders}, 'registerChannel: entry');
 
-    this.channelToSubscribers.set(channelId, [
-      ...(this.channelToSubscribers.get(channelId) ?? []),
-      subscriber,
+    const eventTracker = new EventTracker(subscriber);
+    this.channelToEventTrackers.set(channelId, [
+      ...(this.channelToEventTrackers.get(channelId) ?? []),
+      eventTracker,
     ]);
 
     assetHolders.map(assetHolder => {
@@ -340,9 +343,7 @@ export class ChainService implements ChainServiceInterface {
       const contract = this.getOrAddContractMapping(assetHolder);
       if (!contract) throw new Error('The addressToContract mapping should contain the contract');
       // Fetch the current contract holding, and emit as an event
-      this.getInitialHoldings(contract, channelId).then(initialHoldings =>
-        subscriber.holdingUpdated(initialHoldings)
-      );
+      this.getInitialHoldings(contract, channelId, eventTracker);
     });
 
     // This method is async so it will continue to run after the method has been exited
@@ -352,7 +353,7 @@ export class ChainService implements ChainServiceInterface {
 
   unregisterChannel(channelId: Bytes32): void {
     this.logger.info({channelId}, 'unregisterChannel: entry');
-    this.channelToSubscribers.set(channelId, []);
+    this.channelToEventTrackers.set(channelId, []);
   }
 
   private async checkFinalizingChannels(block: providers.Block): Promise<void> {
@@ -369,7 +370,7 @@ export class ChainService implements ChainServiceInterface {
       // Will the wallet sign new states or deposit into the channel based on this event?
       // The answer is likely no.
       // So we probably want to emit this event as soon as possible.
-      this.channelToSubscribers.get(channelId)?.map(subscriber =>
+      this.channelToEventTrackers.get(channelId)?.map(subscriber =>
         subscriber.channelFinalized({
           channelId,
           blockNumber: block.number,
@@ -410,33 +411,99 @@ export class ChainService implements ChainServiceInterface {
 
   private async getInitialHoldings(
     contract: Contract,
-    channelId: string
-  ): Promise<HoldingUpdatedArg> {
-    const blockNumber = await this.provider.getBlockNumber();
-    const holding = BN.from(await contract.holdings(channelId));
-    const depositEvents = await contract.queryFilter(
-      {
-        address: contract.address,
-      },
-      blockNumber - this.blockConfirmations + 1
-    );
+    channelId: string,
+    eventTracker: EventTracker
+  ): Promise<void> {
+    const currentBlock = await this.provider.getBlockNumber();
+    const confirmedBlock = currentBlock - this.blockConfirmations + 1;
+    const currentHolding = BN.from(await contract.holdings(channelId));
+    let confirmedHolding = BN.from(0);
+    try {
+      // https://docs.ethers.io/v5/api/contract/contract/#Contract--metaclass
+      // provider can lose track of the latet block, force it to reload
+      const overrides = {
+        blockTag: confirmedBlock,
+      };
 
-    for (const depositEvent of depositEvents) {
-      if (
-        depositEvent.args &&
-        depositEvent.args[0] === channelId &&
-        depositEvent.event === Deposited
-      ) {
-        this.logger.debug(`Waiting for event: ${JSON.stringify(depositEvent)}`);
-        await this.waitForConfirmations(depositEvent);
-      }
+      confirmedHolding = BN.from(await contract.holdings(channelId, overrides));
+      this.logger.debug(
+        `Successfully red confirmedHoldings (${confirmedHolding}), from block ${confirmedBlock}.`
+      );
+    } catch (e) {
+      // We should have e.code="CALL_EXCEPTION", but gaven currentHolding query succeeded,
+      // the cause of exception is obvious
+      this.logger.debug(
+        `Error caught while trying to query confirmed holding in block ${confirmedBlock},` +
+          `this is likely due to the channel is new, safe to ignore, error is ${JSON.stringify(e)}`
+      );
     }
 
-    return {
-      channelId,
-      assetHolderAddress: makeAddress(contract.address),
-      amount: BN.from(holding),
-    };
+    this.logger.debug(
+      `getConfirmedHoldings: from block ${confirmedBlock}, confirmed holding ${confirmedHolding}, current holding ${currentHolding}.`
+    );
+
+    eventTracker.holdingUpdated(
+      {
+        channelId: channelId,
+        assetHolderAddress: makeAddress(contract.address),
+        amount: confirmedHolding,
+      },
+      confirmedBlock
+    );
+
+    // getInitialHoldings return confirmed holdings immediately, but make sure custoemr receives an event if unconfirmed
+    // events later confirms
+
+    for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
+      e => e.blockNumber
+    )) {
+      await this.waitForConfirmations(ethersEvent);
+
+      switch (ethersEvent.event) {
+        case Deposited:
+          eventTracker.holdingUpdated(
+            {
+              channelId: channelId,
+              assetHolderAddress: makeAddress(contract.address),
+              amount: ethersEvent.args ? ethersEvent.args[1] : BN.from(0),
+            },
+            ethersEvent.blockNumber
+          );
+          break;
+        case AllocationUpdated:
+          {
+            const tx = await this.provider.getTransaction(ethersEvent.transactionHash);
+            const initialHoldings = ethersEvent.args ? ethersEvent.args[1] : BN.from(0);
+            const {
+              newAssetOutcome,
+              newHoldings,
+              externalPayouts,
+              internalPayouts,
+            } = computeNewAssetOutcome(
+              contract.address,
+              nitroAdjudicatorAddress,
+              {channelId, initialHoldings},
+              tx
+            );
+            eventTracker.assetOutcomeUpdated(
+              {
+                channelId: channelId,
+                assetHolderAddress: makeAddress(contract.address),
+                newHoldings: BN.from(newHoldings),
+                externalPayouts: externalPayouts,
+                internalPayouts: internalPayouts,
+                newAssetOutcome: newAssetOutcome,
+              },
+              ethersEvent.blockNumber
+            );
+          }
+          break;
+        default:
+          this.logger.error(
+            `event of type ${ethersEvent.event || 'unknown'} observed in holdingUpdated, ignored.`
+          );
+      }
+    }
   }
 
   private async waitForConfirmations(event: Event): Promise<void> {
@@ -505,13 +572,13 @@ export class ChainService implements ChainServiceInterface {
           `Observed ${event.type} event on-chain; beginning to wait for confirmations`
         );
         await this.waitForConfirmations(event.ethersEvent);
-        this.channelToSubscribers.get(event.channelId)?.forEach(subscriber => {
+        this.channelToEventTrackers.get(event.channelId)?.forEach(eventTracker => {
           switch (event.type) {
             case Deposited:
-              subscriber.holdingUpdated(event);
+              eventTracker.holdingUpdated(event, event.ethersEvent.blockNumber);
               break;
             case AllocationUpdated:
-              subscriber.assetOutcomeUpdated(event);
+              eventTracker.assetOutcomeUpdated(event, event.ethersEvent.blockNumber);
               break;
             default:
               throw new Error('Unexpected event from contract observable');

@@ -17,7 +17,7 @@ import {
   Uint256,
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
-import _ from 'lodash';
+import _, {minBy} from 'lodash';
 
 import {
   alice,
@@ -57,6 +57,17 @@ async function mineBlock(timestamp?: number) {
 async function mineBlocks() {
   for (const _i of _.range(5)) {
     await mineBlock();
+  }
+}
+
+// Mine blocks in a slower speed, leave time for async events
+// to be processed
+async function mineBlocksSlow(steps: number) {
+  for (const _i of _.range(steps)) {
+    await mineBlock();
+    await new Promise(resolve => {
+      setTimeout(resolve, 500);
+    });
   }
 }
 
@@ -287,11 +298,11 @@ describe('registerChannel', () => {
     await p;
   });
 
-  it('Receives correct initial holding when holdings are not 0', async () => {
+  it('Receives correct initial holding when holdings are confirmed', async () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
     const blockDeposited = await provider.getBlockNumber();
-    mineBlocks();
+    await mineBlocks(); // wait for deposit to be confirmed thenr egister channel
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
@@ -306,10 +317,6 @@ describe('registerChannel', () => {
         },
       })
     );
-
-    // by the time holdingUpdated is called, it should be 5 blocks away
-    const blockReported = await provider.getBlockNumber();
-    expect(blockReported).toBeGreaterThanOrEqual(blockDeposited + 5);
   });
 
   it('Channel with multiple asset holders', async () => {
