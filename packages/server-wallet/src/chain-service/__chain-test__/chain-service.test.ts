@@ -193,6 +193,12 @@ async function setUpConclude(isEth = true) {
   };
 }
 
+describe('chainid mismatch detection', () => {
+  it('throws an error when the chainid is wrong', async () => {
+    await expect(chainService.checkChainId(987654321)).rejects.toThrow('ChainId mismatch');
+  });
+});
+
 describe('fundChannel', () => {
   it('Successfully funds channel with 2 participants, rejects invalid 3rd', async () => {
     const channelId = await waitForChannelFunding(0, 5);
