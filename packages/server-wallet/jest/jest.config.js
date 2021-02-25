@@ -12,4 +12,5 @@ module.exports = {
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|ts)$'],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
   globals: {'ts-jest': {tsconfig: './tsconfig.json'}},
+  testRunner: "jest-circus/runner"
 };
