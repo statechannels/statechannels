@@ -17,6 +17,8 @@ jest.mock('../../chain-service/mock-chain-service', () => {
   return {
     MockChainService: jest.fn().mockImplementation(() => {
       return {
+        // eslint-disable-next-line @typescript-eslint/no-empty-function
+        checkChainId: () => {},
         registerChannel: registerChannelMock,
       };
     }),
