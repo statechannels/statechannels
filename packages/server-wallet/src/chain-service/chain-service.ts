@@ -340,7 +340,7 @@ export class ChainService implements ChainServiceInterface {
   ): void {
     this.logger.info({channelId, assetHolders}, 'registerChannel: entry');
 
-    const eventTracker = new EventTracker(subscriber);
+    const eventTracker = new EventTracker(subscriber, this.logger);
     this.channelToEventTrackers.set(channelId, [
       ...(this.channelToEventTrackers.get(channelId) ?? []),
       eventTracker,
@@ -473,15 +473,16 @@ export class ChainService implements ChainServiceInterface {
             {
               channelId: channelId,
               assetHolderAddress: makeAddress(contract.address),
-              amount: ethersEvent.args ? ethersEvent.args[1] : BN.from(0),
+              amount: ethersEvent.args ? BN.from(ethersEvent.args[1]) : BN.from(0),
             },
-            ethersEvent.blockNumber
+            ethersEvent.blockNumber,
+            ethersEvent.logIndex
           );
           break;
         case AllocationUpdated:
           {
             const tx = await this.provider.getTransaction(ethersEvent.transactionHash);
-            const initialHoldings = ethersEvent.args ? ethersEvent.args[1] : BN.from(0);
+            const initialHoldings = ethersEvent.args ? BN.from(ethersEvent.args[1]) : BN.from(0);
             const {
               newAssetOutcome,
               newHoldings,
@@ -502,7 +503,8 @@ export class ChainService implements ChainServiceInterface {
                 internalPayouts: internalPayouts,
                 newAssetOutcome: newAssetOutcome,
               },
-              ethersEvent.blockNumber
+              ethersEvent.blockNumber,
+              ethersEvent.logIndex
             );
           }
           break;
@@ -583,10 +585,18 @@ export class ChainService implements ChainServiceInterface {
         this.channelToEventTrackers.get(event.channelId)?.forEach(eventTracker => {
           switch (event.type) {
             case Deposited:
-              eventTracker.holdingUpdated(event, event.ethersEvent.blockNumber);
+              eventTracker.holdingUpdated(
+                event,
+                event.ethersEvent.blockNumber,
+                event.ethersEvent.logIndex
+              );
               break;
             case AllocationUpdated:
-              eventTracker.assetOutcomeUpdated(event, event.ethersEvent.blockNumber);
+              eventTracker.assetOutcomeUpdated(
+                event,
+                event.ethersEvent.blockNumber,
+                event.ethersEvent.logIndex
+              );
               break;
             default:
               throw new Error('Unexpected event from contract observable');
