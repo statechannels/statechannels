@@ -319,6 +319,35 @@ describe('registerChannel', () => {
     );
   });
 
+  /*
+  it('Receives 0 initial holding when holdings are not confirmed', async () => {
+    const channelId = randomChannelId();
+    await waitForChannelFunding(0, 5, channelId);
+    const blockDeposited = await provider.getBlockNumber();
+    const p = mineBlocksSlow(30);
+
+    console.log('Block before register channel:' + (await provider.getBlockNumber()));
+    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      ...defaultNoopListeners,
+      holdingUpdated: arg => {
+        provider
+          .getBlockNumber()
+          .then(x => console.log('Callback called at ' + x + ': ' + JSON.stringify(arg)));
+      },
+    });
+
+    console.log('Block after register channel:' + (await provider.getBlockNumber()));
+
+    await p;
+    //await mineBlocks();
+    //for (let i = 0; i < 30; i++) {
+    //await new Promise(resolve => {
+    //  setTimeout(resolve, 1000);
+    //});
+    //  await mineBlock();
+    //}
+  });
+*/
   it('Channel with multiple asset holders', async () => {
     const channelId = randomChannelId();
     let resolve: (value: unknown) => void;
@@ -349,8 +378,10 @@ describe('registerChannel', () => {
       ...defaultNoopListeners,
       holdingUpdated,
     });
-    fundChannelAndMineBlocks(0, 5, channelId, ethAssetHolderAddress);
-    fundChannelAndMineBlocks(0, 5, channelId, erc20AssetHolderAddress);
+
+    mineBlocksSlow(20);
+    fundChannel(0, 5, channelId, ethAssetHolderAddress);
+    fundChannel(0, 5, channelId, erc20AssetHolderAddress);
     await p;
   });
 });
