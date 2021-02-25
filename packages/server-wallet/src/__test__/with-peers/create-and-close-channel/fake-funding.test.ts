@@ -1,61 +1,26 @@
 import {
   CreateChannelParams,
-  Participant,
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
+import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
-import {DBAdmin} from '../../db-admin/db-admin';
-import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
-import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../test-helpers';
-let a: Wallet;
-let b: Wallet;
-
-const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
-  database: 'TEST_A',
-});
-const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
-  database: 'TEST_B',
-});
+import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../test-helpers';
+import {
+  peerWallets,
+  getPeersSetup,
+  participantA,
+  participantB,
+  peersTeardown,
+} from '../../../../jest/with-peers-setup-teardown';
 
 let channelId: string;
-let participantA: Participant;
-let participantB: Participant;
 
-beforeAll(async () => {
-  await DBAdmin.createDatabase(aWalletConfig);
-  await DBAdmin.createDatabase(bWalletConfig);
-  await Promise.all([
-    DBAdmin.migrateDatabase(aWalletConfig),
-    DBAdmin.migrateDatabase(bWalletConfig),
-  ]);
-  a = await Wallet.create(aWalletConfig);
-  b = await Wallet.create(bWalletConfig);
-});
-afterAll(async () => {
-  await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
-});
+beforeAll(getPeersSetup());
+afterAll(peersTeardown);
 
 it('Create a fake-funded channel between two wallets ', async () => {
-  participantA = {
-    signingAddress: await a.getSigningAddress(),
-    participantId: 'a',
-    destination: makeDestination(
-      '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
-    ),
-  };
-  participantB = {
-    signingAddress: await b.getSigningAddress(),
-    participantId: 'b',
-    destination: makeDestination(
-      '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
-    ),
-  };
-
   const assetHolderAddress = makeAddress(constants.AddressZero);
   const aBal = BigNumber.from(1).toHexString();
 
@@ -75,7 +40,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   //        A <> B
   // PreFund0
-  const aCreateChannelOutput = await a.createChannel(channelParams);
+  const aCreateChannelOutput = await peerWallets.a.createChannel(channelParams);
 
   channelId = aCreateChannelOutput.channelResults[0].channelId;
 
@@ -85,7 +50,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // A sends PreFund0 to B
-  const bProposeChannelPushOutput = await b.pushMessage(
+  const bProposeChannelPushOutput = await peerWallets.b.pushMessage(
     getPayloadFor(participantB.participantId, aCreateChannelOutput.outbox)
   );
 
@@ -95,7 +60,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // after joinChannel, B signs PreFund1 and PostFund3
-  const bJoinChannelOutput = await b.joinChannel({channelId});
+  const bJoinChannelOutput = await peerWallets.b.joinChannel({channelId});
 
   expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
     status: 'opening',
@@ -103,7 +68,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // B sends signed PreFund1 and PostFund3 to A
-  const aPushJoinChannelOutput = await a.pushMessage(
+  const aPushJoinChannelOutput = await peerWallets.a.pushMessage(
     getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
@@ -112,7 +77,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // A sends PostFund2 to B
-  const bPushPostFundOutput = await b.pushMessage(
+  const bPushPostFundOutput = await peerWallets.b.pushMessage(
     getPayloadFor(participantB.participantId, aPushJoinChannelOutput.outbox)
   );
   expect(getChannelResultFor(channelId, bPushPostFundOutput.channelResults)).toMatchObject({
@@ -125,14 +90,14 @@ it('Create a fake-funded channel between two wallets ', async () => {
   };
 
   // A generates isFinal4
-  const aCloseChannelResult = await a.closeChannel(closeChannelParams);
+  const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
 
   expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
     status: 'closing',
     turnNum: 4,
   });
 
-  const bPushMessageResult = await b.pushMessage(
+  const bPushMessageResult = await peerWallets.b.pushMessage(
     getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
   );
 
@@ -143,7 +108,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   });
 
   // A pushed the countersigned isFinal4
-  const aPushMessageResult = await a.pushMessage(
+  const aPushMessageResult = await peerWallets.a.pushMessage(
     getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
   );
 
