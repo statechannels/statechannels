@@ -11,6 +11,7 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {alice, bob} from './fixtures/signing-wallets';
 import {stateWithHashSignedBy} from './fixtures/states';
 const registerChannelMock = jest.fn();
+const checkChainIdMock = jest.fn();
 // This is based on jest docs on mocking es6 class mocking:
 //https://jestjs.io/docs/en/es6-class-mocks
 jest.mock('../../chain-service/mock-chain-service', () => {
@@ -18,14 +19,14 @@ jest.mock('../../chain-service/mock-chain-service', () => {
     MockChainService: jest.fn().mockImplementation(() => {
       return {
         // eslint-disable-next-line @typescript-eslint/no-empty-function
-        checkChainId: () => {},
+        checkChainId: checkChainIdMock,
         registerChannel: registerChannelMock,
       };
     }),
   };
 });
 
-test('the wallet registers existing channels with the chain service on starting up', async () => {
+test('the wallet checks the chain id and registers existing channels with the chain service on starting up', async () => {
   await DBAdmin.truncateDataBaseFromKnex(testKnex);
 
   await seedAlicesSigningWallet(testKnex);
@@ -40,6 +41,7 @@ test('the wallet registers existing channels with the chain service on starting 
 
   await waitForExpect(() => {
     expect(registerChannelMock).toHaveBeenCalledWith(c.channelId, [ETH_ASSET_HOLDER_ADDRESS], w);
+    expect(checkChainIdMock).toHaveBeenCalled();
   });
 
   // We explicitly call destroy on knex to avoid triggering any destroy calls on our mocked out chain service
