@@ -37,7 +37,7 @@ let a: Wallet;
 let b: Wallet;
 
 const bWalletConfig: ServerWalletConfig = {
-  ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_B'}),
+  ...overwriteConfigWithDatabaseConnection(config, {database: 'SERVER_WALLET_TEST_B'}),
   chainServiceConfiguration: {
     attachChainService: true,
     provider: rpcEndpoint,
@@ -47,7 +47,7 @@ const bWalletConfig: ServerWalletConfig = {
   },
 };
 const aWalletConfig: ServerWalletConfig = {
-  ...overwriteConfigWithDatabaseConnection(config, {database: 'TEST_A'}),
+  ...overwriteConfigWithDatabaseConnection(config, {database: 'SERVER_WALLET_TEST_A'}),
   chainServiceConfiguration: {
     attachChainService: true,
     provider: rpcEndpoint,

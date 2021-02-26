@@ -13,10 +13,10 @@ interface TestPeerWallets {
 }
 
 export const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
-  database: 'TEST_A',
+  database: 'SERVER_WALLET_TEST_A',
 });
 export const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
-  database: 'TEST_B',
+  database: 'SERVER_WALLET_TEST_B',
 });
 export let participantA: Participant;
 export let participantB: Participant;
