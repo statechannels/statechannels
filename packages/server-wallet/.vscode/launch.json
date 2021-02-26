@@ -60,6 +60,24 @@
         "NODE_ENV": "test",
         "SERVER_DB_NAME": "server_wallet_payer"
       }
+    },
+    {
+      "name": "Jest withPeers Current",
+      "type": "node",
+      "request": "launch",
+      "args": [
+        "node_modules/.bin/jest",
+        "--runInBand",
+        "--config=${workspaceRoot}/jest/jest.with-peers.config.js",
+        "${relativeFile}"
+      ],
+      "cwd": "${workspaceRoot}",
+      "protocol": "inspector",
+      "console": "integratedTerminal",
+      "internalConsoleOptions": "neverOpen",
+      "env": {
+        "NODE_ENV": "test"
+      }
     }
   ]
 }

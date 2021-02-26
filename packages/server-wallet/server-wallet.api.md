@@ -6,6 +6,7 @@
 
 import { Address } from '@statechannels/wallet-core';
 import { AllocationItem } from '@statechannels/nitro-protocol';
+import { AllocationItem as AllocationItem_2 } from '@statechannels/wallet-core';
 import { AssetOutcome } from '@statechannels/nitro-protocol';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
@@ -100,9 +101,7 @@ export const DEFAULT_DB_NAME = "server_wallet_test";
 export const DEFAULT_DB_USER = "postgres";
 
 // @public (undocumented)
-export const defaultChainServiceConfiguration: {
-    attachChainService: boolean;
-};
+export const defaultChainServiceConfiguration: ChainServiceConfiguration;
 
 // @public
 export const defaultConfig: OptionalServerWalletConfig;

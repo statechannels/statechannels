@@ -7,7 +7,7 @@ import {defaultTestConfig} from '../../config';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
-import {DBSubmitChallengeObjective} from '../../models/objective';
+import {DBSubmitChallengeObjective, ObjectiveModel} from '../../models/objective';
 import {ChallengeSubmitter} from '../challenge-submitter';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -51,7 +51,10 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const dbObjective = await knex.transaction(tx => store.ensureSubmitChallengeObjective(obj, tx));
+    const dbObjective = await knex.transaction(async tx =>
+      ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
+    );
+
     await await crankAndAssert(dbObjective, {callsChallenge: false, completesObj: false});
   });
   it(`takes no action if there is an existing challenge`, async () => {
@@ -68,7 +71,10 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx => store.ensureSubmitChallengeObjective(obj, tx));
+    const objective = await knex.transaction(tx =>
+      ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
+    );
+
     await await crankAndAssert(objective, {callsChallenge: false, completesObj: false});
   });
 
@@ -86,7 +92,9 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx => store.ensureSubmitChallengeObjective(obj, tx));
+    const objective = await knex.transaction(tx =>
+      ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
+    );
     await await crankAndAssert(objective, {
       callsChallenge: true,
       completesObj: true,
@@ -109,7 +117,9 @@ const crankAndAssert = async (
   const challengeSubmitter = ChallengeSubmitter.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'challenge');
-  await challengeSubmitter.crank(objective, response);
+  await store.transaction(async tx => {
+    await challengeSubmitter.crank(objective, response, tx);
+  });
 
   if (callsChallenge) {
     expect(spy).toHaveBeenCalled();

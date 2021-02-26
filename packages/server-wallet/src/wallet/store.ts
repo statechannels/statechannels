@@ -1,6 +1,5 @@
 import {Transaction, TransactionOrKnex, UniqueViolationError} from 'objection';
 import {
-  Objective,
   Outcome,
   SignedStateWithHash,
   SignedStateVarsWithHash,
@@ -14,15 +13,13 @@ import {
   SignedState,
   isSimpleAllocation,
   checkThat,
-  CloseChannel,
   OpenChannel,
   makePrivateKey,
   makeAddress,
   Address,
   PrivateKey,
-  SubmitChallenge,
   isSubmitChallenge,
-  DefundChannel,
+  BN,
 } from '@statechannels/wallet-core';
 import {Payload as WirePayload, SignedState as WireSignedState} from '@statechannels/wire-format';
 import _ from 'lodash';
@@ -42,14 +39,7 @@ import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} f
 import {isReverseSorted, pick} from '../utilities/helpers';
 import {Funding, TransferredOutEntry} from '../models/funding';
 import {Nonce} from '../models/nonce';
-import {
-  ObjectiveModel,
-  DBObjective,
-  DBCloseChannelObjective,
-  DBOpenChannelObjective,
-  DBSubmitChallengeObjective,
-  DBDefundChannelObjective,
-} from '../models/objective';
+import {ObjectiveModel, DBObjective, isSupportedObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
@@ -58,6 +48,7 @@ import {createLogger} from '../logger';
 import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
+import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 
 const defaultLogger = createLogger(defaultTestConfig());
 
@@ -85,7 +76,6 @@ export class Store {
       this.getChannelState = recordFunctionMetrics(this.getChannelState);
       this.getStates = recordFunctionMetrics(this.getStates);
       this.getChannels = recordFunctionMetrics(this.getChannels);
-      this.ensureObjective = recordFunctionMetrics(this.ensureObjective);
       this.pushMessage = recordFunctionMetrics(this.pushMessage);
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
 
@@ -326,7 +316,10 @@ export class Store {
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
       const storedObjectives: DBObjective[] = [];
       for (const o of deserializedObjectives) {
-        storedObjectives.push(await this.ensureObjective(o, tx));
+        if (isSupportedObjective(o)) {
+          const preApprove = o.type == 'CloseChannel'; // Close channel objectives do not need co-operative approval
+          storedObjectives.push(await ObjectiveModel.insert(o, preApprove, tx));
+        } else this.logger.warn('Unsupported objective received');
       }
 
       const objectiveChannelIds = storedObjectives
@@ -352,7 +345,27 @@ export class Store {
   }
 
   async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
-    await ObjectiveModel.approve(objectiveId, tx || this.knex);
+    const objective = await ObjectiveModel.approve(objectiveId, tx || this.knex);
+
+    if (objective.type === 'OpenChannel') {
+      // If we approve an OpenChannel objective that stipulates
+      // an existing channel is a ledger channel
+      // we need to patch the DB to mark that channel as a ledger channel
+      // This code should probably live elsewhere
+      const channelId = objective.data.targetChannelId;
+      if (objective.data.role === 'ledger') {
+        const channel = await this.getChannelState(channelId, tx);
+        await Channel.setLedger(
+          channelId,
+          checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
+          tx || this.knex
+        );
+      }
+      const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+      await Channel.query(tx || this.knex)
+        .where({channelId})
+        .patch({fundingStrategy, fundingLedgerChannelId});
+    }
   }
 
   async markObjectiveStatus<O extends DBObjective>(
@@ -397,132 +410,12 @@ export class Store {
   }
 
   /**
-   * Ensure the provided objective is stored in the database.
-   * Returns the objective as a DBObjective
+   * Gets and locks the objective with the supplied id
+   * @param objectiveId
+   * @param tx
    */
-  async ensureObjective(objective: Objective, tx: Transaction): Promise<DBObjective> {
-    switch (objective.type) {
-      case 'OpenChannel':
-        return this.ensureOpenChannelObjective(objective, tx);
-      case 'CloseChannel':
-        return this.ensureCloseChannelObjective(objective, tx);
-      case 'SubmitChallenge':
-        return this.ensureSubmitChallengeObjective(objective, tx);
-      case 'DefundChannel':
-        return this.ensureDefundChannelObjective(objective, tx);
-      default:
-        throw new StoreError(StoreError.reasons.unimplementedObjective);
-    }
-  }
-
-  async ensureDefundChannelObjective(
-    objective: DefundChannel,
-    tx: Transaction
-  ): Promise<DBDefundChannelObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
-    }
-
-    const objectiveToBeStored = {...objective, status: 'pending' as const};
-
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBDefundChannelObjective>;
-  }
-
-  async ensureSubmitChallengeObjective(
-    objective: SubmitChallenge,
-    tx: Transaction
-  ): Promise<DBSubmitChallengeObjective> {
-    const {data} = objective;
-    const {targetChannelId} = data;
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId: targetChannelId});
-    }
-
-    const objectiveToBeStored = {
-      ...objective,
-      status: 'pending' as const,
-    };
-
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBSubmitChallengeObjective>;
-  }
-
-  async ensureOpenChannelObjective(
-    objective: OpenChannel,
-    tx: Transaction
-  ): Promise<DBOpenChannelObjective> {
-    const {
-      data: {targetChannelId: channelId, fundingStrategy, fundingLedgerChannelId, role},
-    } = objective;
-
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(channelId, tx);
-    if (!channel) {
-      throw new StoreError(StoreError.reasons.channelMissing, {channelId});
-    }
-
-    if (!_.includes(['Ledger', 'Direct', 'Fake'], objective.data.fundingStrategy))
-      throw new StoreError(StoreError.reasons.unimplementedFundingStrategy, {fundingStrategy});
-
-    const objectiveToBeStored = {
-      participants: [],
-      status: 'pending' as const,
-      type: objective.type,
-      data: {
-        fundingStrategy,
-        fundingLedgerChannelId,
-        targetChannelId: channelId,
-        role,
-      },
-    };
-
-    if (role === 'ledger')
-      await Channel.setLedger(
-        channelId,
-        checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-        tx
-      );
-
-    await Channel.query(tx)
-      .where({channelId: channel.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId})
-      .returning('*')
-      .first();
-
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBOpenChannelObjective>;
-  }
-
-  async ensureCloseChannelObjective(
-    objective: CloseChannel,
-    tx: Transaction
-  ): Promise<DBCloseChannelObjective> {
-    const {
-      data: {targetChannelId, fundingStrategy},
-    } = objective;
-
-    // fetch the channel to make sure the channel exists
-    const channel = await this.getChannelState(targetChannelId, tx);
-    if (!channel)
-      throw new StoreError(StoreError.reasons.channelMissing, {
-        channelId: targetChannelId,
-      });
-
-    const objectiveToBeStored = {
-      status: 'approved' as const,
-      type: objective.type,
-      participants: [],
-      data: {
-        targetChannelId,
-        fundingStrategy,
-      },
-    };
-
-    return ObjectiveModel.insert(objectiveToBeStored, tx) as Promise<DBCloseChannelObjective>;
+  async getAndLockObjective(objectiveId: string, tx: Transaction): Promise<DBObjective> {
+    return (await ObjectiveModel.query(tx).findById(objectiveId).forUpdate()).toObjective();
   }
 
   async isLedger(channelId: Bytes32, tx?: Transaction): Promise<boolean> {
@@ -642,6 +535,11 @@ export class Store {
       fastDeserializeState(channelId, wireState)
     );
 
+    if (!BN.eq(deserializedState.chainId, this.chainNetworkID))
+      throw Error(
+        `This channel can only be concluded on a chain with id ${deserializedState.chainId}, but this wallet uses chain id: ${this.chainNetworkID}.`
+      );
+
     // Compute the stateHash for the new state
     const state = addHash(deserializedState);
 
@@ -701,6 +599,7 @@ export class Store {
     return await this.knex.transaction(async tx => {
       const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
       const {channelId, participants} = channel;
+
       const firstSignedState = await this.signState(
         channel,
         {
@@ -713,7 +612,14 @@ export class Store {
         tx
       );
 
-      const objectiveParams = {
+      if (role === 'ledger')
+        await Channel.setLedger(
+          channelId,
+          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
+          tx
+        );
+
+      const o: OpenChannel = {
         type: 'OpenChannel' as const,
         participants,
         data: {
@@ -724,9 +630,12 @@ export class Store {
         },
       };
 
-      const objective = await this.ensureObjective(objectiveParams, tx);
-      await this.approveObjective(objective.objectiveId, tx);
-
+      const objective = await ObjectiveModel.insert(
+        o,
+        true, // preApproved
+        tx,
+        OpenChannelWaitingFor.theirPreFundSetup
+      );
       return {channel: await this.getChannelState(channelId, tx), firstSignedState, objective};
     });
   }

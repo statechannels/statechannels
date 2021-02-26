@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.23.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.21.0...@statechannels/server-wallet@1.23.0) (2021-02-23)
+
+
+### Bug Fixes
+
+* always use postgres user ([e8efa3c](https://github.com/statechannels/statechannels/commit/e8efa3cc59cede80975c395c25ab141a2e95b614))
+* correctly wire up finalizesAt parameter for channelFinalized wallet API ([e3adc1d](https://github.com/statechannels/statechannels/commit/e3adc1d51d9c0eaa8deb7bbcc25f763f27c0e1f6))
+* do not add to new objectives ([b7431e5](https://github.com/statechannels/statechannels/commit/b7431e53af7af21421b91aca98f64720d9c4c9a2))
+* do not assume that a ledger channel is directly funded ([370a0a9](https://github.com/statechannels/statechannels/commit/370a0a918f86dff9f36f569b6aa2a5a3b0cba2bd))
+* emit objectiveStarted on pushMessage ([51e3019](https://github.com/statechannels/statechannels/commit/51e301987a331b85552432aba8face40f5cdabd6))
+* multi-threaded wallet re-emits events that worker-wallet emitted ([1bce47a](https://github.com/statechannels/statechannels/commit/1bce47af9fddec360da91005ea013b98d77cb393))
+* MultiThreadedWallet errors when passed a single-threaded config ([f62221a](https://github.com/statechannels/statechannels/commit/f62221a3cd851b27ad5c7f7c3f529714644c1543))
+
+
+### Features
+
+* specify the transacton-submitting participant when closing a channel ([2fd7aef](https://github.com/statechannels/statechannels/commit/2fd7aef662dc3e6c3ba8d5ff47afc496b4695c30))
+* throw error when trying to add a state ([b1174b2](https://github.com/statechannels/statechannels/commit/b1174b2e1e900c03b5ce0019b94bbdf3d5588343))
+* wallet exposes a sync objectives method ([40d1c14](https://github.com/statechannels/statechannels/commit/40d1c14961c91cd82a1c0791cf1752208bc93ae0))
+* worker threads include threadId in log statements ([787f84c](https://github.com/statechannels/statechannels/commit/787f84cf3f4d0a993ed30d9c8f6012a77f86afdc))
+
+
+
+
+
 # [1.22.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.21.0...@statechannels/server-wallet@1.22.0) (2021-02-12)
 
 

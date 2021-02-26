@@ -7,7 +7,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
 import {alice} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {channel, withSupportedState} from '../src/models/__test__/fixtures/channel';
-import {ServerWalletConfig, WalletEvent} from '../src';
+import {defaultTestNetworkConfiguration, ServerWalletConfig, WalletEvent} from '../src';
 import {Channel} from '../src/models/channel';
 import {DBAdmin} from '../src/db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../src/models/adjudicator-status';
@@ -25,14 +25,13 @@ const ETH_ASSET_HOLDER_ADDRESS = makeAddress(
 
 const ChannelPayer = Channel.bindKnex(knexPayer);
 
-const chainNetworkID = Number.parseInt(process.env.CHAIN_NETWORK_ID ?? '9002');
 const provider = process.env.RPC_ENDPOINT;
 const pk = process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey;
 
 const config: ServerWalletConfig = {
   ...payerConfig,
   loggingConfiguration: {logLevel: 'trace', logDestination: LOG_PATH},
-  networkConfiguration: {chainNetworkID},
+  networkConfiguration: defaultTestNetworkConfiguration,
   chainServiceConfiguration: {
     attachChainService: true,
     provider,
@@ -134,7 +133,7 @@ async function insertChannel() {
         turnNum: 3,
       }),
     ],
-    chainId: utils.hexlify(chainNetworkID),
+    chainId: utils.hexlify(defaultTestNetworkConfiguration.chainNetworkID),
     challengeDuration: challengeDuration,
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
   });

@@ -1,16 +1,16 @@
 {
   "name": "@statechannels/server-wallet",
   "description": "http server statechannel wallet",
-  "version": "1.22.0",
+  "version": "1.23.0",
   "author": "",
   "dependencies": {
     "@connext/pure-evm-wasm": "0.1.4",
     "@ethersproject/experimental": "5.0.5",
-    "@statechannels/client-api-schema": "0.10.0",
+    "@statechannels/client-api-schema": "0.10.1",
     "@statechannels/nitro-protocol": "0.16.0",
-    "@statechannels/wallet-core": "0.13.0",
+    "@statechannels/wallet-core": "0.14.0",
     "@statechannels/wasm-utils": "0.1.6",
-    "@statechannels/wire-format": "0.8.8",
+    "@statechannels/wire-format": "0.9.0",
     "ethers": "5.0.12",
     "eventemitter3": "4.0.7",
     "fp-ts": "2.7.0",
@@ -27,6 +27,7 @@
     "tarn": "3.0.0"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "7.13.1",
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "0.5.5",
     "@types/autocannon": "4.1.0",
@@ -79,8 +80,8 @@
   },
   "main": "lib/src/index.js",
   "scripts": {
-    "db:create": "createdb $SERVER_DB_NAME",
-    "db:drop": "dropdb $SERVER_DB_NAME",
+    "db:create": "createdb $SERVER_DB_NAME -U postgres",
+    "db:drop": "dropdb $SERVER_DB_NAME -U postgres",
     "db:migrate": "npx knex migrate:latest --cwd src/db-admin",
     "db:rollback": "npx knex migrate:rollback --cwd src/db-admin",
     "db:seed": "npx knex seed:run --cwd src/db-admin",
@@ -101,7 +102,8 @@
     "test:chain": "jest -c ./jest/jest.chain.config.js --runInBand",
     "test:ci": "yarn test --bail && yarn test:chain --bail",
     "test:e2e": "./src/test_db.sh server_wallet_payer server_wallet_receiver; yarn tsc; yarn jest -c ./jest/jest.e2e.config.js --runInBand",
-    "test:stress": "./src/test_db.sh server_wallet_payer server_wallet_receiver; yarn tsc; NODE_ENV=test npx ts-node ./e2e-test/scripts/stress-test.ts"
+    "test:stress": "./src/test_db.sh server_wallet_payer server_wallet_receiver; yarn tsc; NODE_ENV=test npx ts-node ./e2e-test/scripts/stress-test.ts",
+    "test:with-peers": "yarn jest -c ./jest/jest.with-peers.config.js --runInBand"
   },
   "types": "lib/src/index.d.ts"
 }

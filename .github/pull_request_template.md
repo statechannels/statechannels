@@ -45,4 +45,4 @@ Please explain which reason, if any, why this requires more than one approval.
 - [ ] I have linked to all relevant issues (can be 0)
 - [ ] I have added all dependent tickets (can be 0)
 - [ ] I have assigned myself to this PR
-- [ ] I have chosen the appropriate pipeline on zenhub
+- [ ] I have chosen the appropriate [pipeline](https://www.notion.so/Team-working-agreements-2a95c926bb5642e5a5c42e4b74a9dd24#d534e68e7edc46fe8a4cda61b2258c4e) on zenhub for the linked issue

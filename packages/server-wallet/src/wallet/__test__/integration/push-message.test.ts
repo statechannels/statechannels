@@ -119,6 +119,18 @@ it('ignores duplicate states', async () => {
   expect(channelsAfter[0].vars).toMatchObject(signedStates.map(s => dropNonVariables(s)));
 });
 
+it('throws for channels with different chain id', async () => {
+  let signedState = serializeState(stateSignedBy([alice()])({turnNum: five}));
+  signedState = {...signedState, chainId: wallet.store.chainNetworkID + 'deadbeef'};
+
+  await expect(
+    wallet.pushMessage({
+      walletVersion: WALLET_VERSION,
+      signedStates: [signedState],
+    })
+  ).rejects.toThrow();
+});
+
 it('adds signatures to existing states', async () => {
   const channelsBefore = await Channel.query(wallet.knex).select();
   expect(channelsBefore).toHaveLength(0);
@@ -224,7 +236,7 @@ describe('channel results', () => {
       signedStates: signedStates.map(s => serializeState(s)),
     });
 
-    await expectResults(p, [{turnNum: six, appData: '0x0f00'}, {turnNum: five}]);
+    await expectResults(p, [{turnNum: five}, {turnNum: six, appData: '0x0f00'}]);
 
     const channelsAfter = await Channel.query(wallet.knex).select();
 
@@ -293,7 +305,6 @@ describe('when the application protocol returns an action', () => {
     await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
-        status: 'approved',
         participants: c.participants,
         data: {
           targetChannelId: c.channelId,
@@ -301,6 +312,7 @@ describe('when the application protocol returns an action', () => {
           role: 'app',
         },
       },
+      true,
       wallet.knex
     );
 
@@ -350,6 +362,7 @@ describe('when the application protocol returns an action', () => {
             data: {
               targetChannelId: channelId,
               fundingStrategy: 'Direct',
+              txSubmitterOrder: [1, 0],
             },
           },
         ],
@@ -379,6 +392,7 @@ describe('when the application protocol returns an action', () => {
           data: {
             targetChannelId: channelId,
             fundingStrategy: 'Direct',
+            txSubmitterOrder: [1, 0],
           },
         },
       ],
@@ -581,7 +595,6 @@ describe('ledger funded app scenarios', () => {
     await ObjectiveModel.insert(
       {
         type: 'OpenChannel',
-        status: 'approved',
         participants: channel.participants,
         data: {
           targetChannelId: channel.channelId,
@@ -590,6 +603,7 @@ describe('ledger funded app scenarios', () => {
           role: 'app',
         },
       },
+      true,
       wallet.knex
     );
 

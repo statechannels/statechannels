@@ -1,7 +1,7 @@
 {
   "name": "@statechannels/client-api-schema",
   "description": "JSON-RPC Schema and TypeScript typings for the State Channels Client API",
-  "version": "0.10.0",
+  "version": "0.10.1",
   "author": "snario <liam@l4v.io>",
   "contributors": [
     "Alex Gap <alex.gap@consensys.net>",
@@ -11,7 +11,7 @@
     "ajv": "6.11.0"
   },
   "devDependencies": {
-    "@microsoft/api-extractor": "7.11.2",
+    "@microsoft/api-extractor": "7.13.1",
     "@types/eslint": "7.2.3",
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "26.0.15",

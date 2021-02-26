@@ -175,7 +175,9 @@ const crankAndAssert = async (
   const channelOpener = ChannelOpener.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'fundChannel');
-  await channelOpener.crank(objective, response);
+  await store.transaction(async tx => {
+    await channelOpener.crank(objective, response, tx);
+  });
 
   // expect there to be an outgoing message in the response
   expect(response._signedStates).toMatchObject(

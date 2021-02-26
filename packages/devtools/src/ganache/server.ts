@@ -154,7 +154,11 @@ export class GanacheServer {
       }
     };
 
-    this.server = ganache.server({...serverOptions, _chainId: this.chainId} as any);
+    this.server = ganache.server({
+      ...serverOptions,
+      _chainId: this.chainId,
+      _chainIdRpc: this.chainId // see https://github.com/trufflesuite/ganache-core/tree/master#options
+    } as any);
 
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.server.listen(this.port, () => {});

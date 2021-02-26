@@ -67,8 +67,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -81,8 +81,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -135,8 +135,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -174,8 +174,8 @@ describe('directly funded app', () => {
           fundingStrategy: 'Direct',
           role: 'app',
         },
-        status: 'pending',
       },
+      false,
       w.knex
     );
 
@@ -271,8 +271,8 @@ describe('ledger funded app scenarios', () => {
           fundingLedgerChannelId: ledger.channelId,
           role: 'app',
         },
-        status: 'approved',
       },
+      false,
       w.knex
     );
 

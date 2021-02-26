@@ -10,17 +10,22 @@ import {
   Participant,
   PrivateKey,
   serializeState,
-  SharedObjective,
   SignedStateWithHash,
   SimpleAllocation,
   simpleEthAllocation,
   State,
   NULL_APP_DATA,
+  CloseChannel,
+  DefundChannel,
+  OpenChannel,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
+import {utils} from 'ethers';
 
-import {DBOpenChannelObjective} from '../../../models/objective';
+import {Channel} from '../../../models/channel';
+import {DBOpenChannelObjective, ObjectiveModel} from '../../../models/objective';
+import {defaultTestConfig} from '../../../config';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
@@ -171,7 +176,7 @@ export class TestChannel {
       appDefinition: makeAddress('0x000000000000000000000000000000000000adef'),
       participants: this.participants,
       channelNonce: this.channelNonce,
-      chainId: '0x01',
+      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
     };
   }
@@ -180,7 +185,7 @@ export class TestChannel {
     return calculateChannelId(this.channelConstants);
   }
 
-  public get openChannelObjective(): SharedObjective {
+  public get openChannelObjective(): OpenChannel {
     return {
       participants: this.participants,
       type: 'OpenChannel',
@@ -191,13 +196,24 @@ export class TestChannel {
     };
   }
 
-  public get closeChannelObjective(): SharedObjective {
+  public closeChannelObjective(txSubmitterOrder = [0, 1]): CloseChannel {
     return {
       participants: this.participants,
       type: 'CloseChannel',
       data: {
         targetChannelId: this.channelId,
         fundingStrategy: this.fundingStrategy,
+        txSubmitterOrder,
+      },
+    };
+  }
+
+  public defundChannelObjective(): DefundChannel {
+    return {
+      participants: this.participants,
+      type: 'DefundChannel',
+      data: {
+        targetChannelId: this.channelId,
       },
     };
   }
@@ -243,7 +259,7 @@ export class TestChannel {
   }
 
   /**
-   * Calls addSigningKey, pushMessage, updateFunding, ensureObjective and approveObjective on the supplied store.
+   * Calls addSigningKey, pushMessage, updateFunding, on the supplied store, patches the fundingStrategy, and adds the OpenChannel objective
    */
   public async insertInto(
     store: Store,
@@ -268,13 +284,17 @@ export class TestChannel {
       await store.updateFunding(this.channelId, BN.from(funds), this.assetHolderAddress);
     }
 
-    const objective = await store.transaction(async tx => {
-      // need to do this to set the funding type
-      const o = await store.ensureObjective(this.openChannelObjective, tx);
-      await store.approveObjective(o.objectiveId, tx);
-
-      return o as DBOpenChannelObjective;
+    // patch the funding strategy
+    await Channel.query(store.knex).where({channelId: this.channelId}).patch({
+      fundingStrategy: this.fundingStrategy,
     });
+
+    // insert the OpenChannel objective
+    const objective = await ObjectiveModel.insert<DBOpenChannelObjective>(
+      this.openChannelObjective,
+      true,
+      store.knex
+    );
 
     return objective;
   }

@@ -4,7 +4,7 @@ import {MockChainService} from '../../chain-service';
 import {defaultTestConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
-import {DBCloseChannelObjective} from '../../models/objective';
+import {DBCloseChannelObjective, ObjectiveModel} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
@@ -100,9 +100,12 @@ const setup = async (
 
   // add the closeChannel objective and approve
   const objective = await store.transaction(async tx => {
-    const o = await store.ensureObjective(testChan.closeChannelObjective, tx);
-    await store.approveObjective(o.objectiveId, tx);
-    return o as DBCloseChannelObjective;
+    const o = await ObjectiveModel.insert<DBCloseChannelObjective>(
+      testChan.closeChannelObjective([participant, 1 - participant]),
+      true, // preApproved
+      tx
+    );
+    return o;
   });
 
   return objective;
@@ -129,7 +132,9 @@ const crankAndAssert = async (
   const channelCloser = ChannelCloser.create(store, chainService, logger, timingMetrics);
   const response = WalletResponse.initialize();
   const spy = jest.spyOn(chainService, 'concludeAndWithdraw');
-  await channelCloser.crank(objective, response);
+  await store.transaction(async tx => {
+    await channelCloser.crank(objective, response, tx);
+  });
 
   // expect there to be an outgoing message in the response
   expect(response._signedStates).toMatchObject(

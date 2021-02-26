@@ -16,12 +16,12 @@ Running those applications "off chain" means avoiding most of the monetary and t
 
 This site is a work in progress, and documents the parts of our stack which we feel are mature enough for the wider community to tinker with.
 
-## 🎮 [Application developers](./app-devs/intro.md)
+## 🎮 [Node.js Application developers](./server-app-devs/intro.md)
 
-This section is for any developers who want to get started writing a web application that runs statechannels tech, without having to spend time understanding how the underlying protocols work. These developers:
+This section is for any developers who want to get started writing a server-side application that runs statechannels tech, without having to spend time understanding how the underlying protocols work. These developers:
 
 - Need to write a single [Solidity](https://solidity.readthedocs.io/en/v0.6.0/) contract implementing the `ForceMoveApp` interface
-- Are happy to lean on our deployed state channels wallet.
+- Are happy to lean on our state channels wallet library code.
 
 ## ⚙️ [Engineers and Researchers](./protocol-docs/quick-start.md)
 

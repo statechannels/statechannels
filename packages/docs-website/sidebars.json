@@ -1,13 +1,12 @@
 {
   "docs": {
     "Overview": ["docs/overview", "docs/products"],
-    "App Developers": [
-      "docs/app-devs/app-devs-intro",
-      "docs/app-devs/quick-start-contracts",
-      "docs/app-devs/quick-start-dapp",
-      "docs/app-devs/hook-up-messaging",
-      "docs/app-devs/make-api-calls",
-      "docs/app-devs/recommended-patterns"
+    "Server Developers": [
+      "docs/server-app-devs/app-devs-intro",
+      "docs/server-app-devs/quick-start-contracts",
+      "docs/server-app-devs/quick-start-dapp",
+      "docs/server-app-devs/hook-up-messaging",
+      "docs/server-app-devs/make-api-calls"
     ],
     "Protocol Docs": [
       "docs/protocol-docs/wallet-devs-intro",

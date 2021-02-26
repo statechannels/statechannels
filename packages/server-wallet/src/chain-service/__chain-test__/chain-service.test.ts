@@ -17,6 +17,7 @@ import {
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 
+import {defaultTestConfig} from '../../config';
 import {
   alice,
   alice as aliceParticipant,
@@ -94,6 +95,7 @@ beforeAll(async () => {
     provider: rpcEndpoint,
     pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
     allowanceMode: 'MaxUint',
+    chainNetworkId: defaultTestConfig().networkConfiguration.chainNetworkID,
   });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 });

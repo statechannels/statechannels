@@ -6,9 +6,12 @@ import {
   SharedObjective,
   SubmitChallenge,
   DefundChannel,
+  unreachable,
 } from '@statechannels/wallet-core';
 import {Model, TransactionOrKnex} from 'objection';
 import _ from 'lodash';
+
+import {WaitingFor} from '../objectives/objective-manager';
 
 function extractReferencedChannels(objective: Objective): string[] {
   switch (objective.type) {
@@ -33,6 +36,7 @@ type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeed
 type WalletObjective<O extends Objective> = O & {
   objectiveId: string;
   status: ObjectiveStatus;
+  waitingFor: WaitingFor;
   createdAt: Date;
   progressLastMadeAt: Date;
 };
@@ -49,6 +53,14 @@ export function isSharedObjective(
 }
 
 type SupportedObjective = OpenChannel | CloseChannel | SubmitChallenge | DefundChannel;
+export function isSupportedObjective(o: Objective): o is SupportedObjective {
+  return (
+    o.type === 'OpenChannel' ||
+    o.type === 'CloseChannel' ||
+    o.type === 'SubmitChallenge' ||
+    o.type === 'DefundChannel'
+  );
+}
 /**
  * A DBObjective is a wire objective with a status, timestamps and an objectiveId
  *
@@ -69,11 +81,31 @@ export const toWireObjective = (dbObj: DBObjective): SharedObjective => {
       'SubmitChallenge and DefundChannel objectives are not supported as wire objectives'
     );
   }
-  return {
-    type: dbObj.type,
-    data: dbObj.data,
-    participants: dbObj.participants,
-  };
+  /**
+   * This switch statement is unfortunate but is necessary to avoid a typescript error.
+   * It seems that the typescript error is the result of:
+   * - The parameter dbObj is a union type.
+   * - The return type is a union type.
+   * - The return value is constructed by creating an object with type, data, and participants fields.
+   * - Typescript considers a return object with "type" OpenChannel and "data" of CloseChannel objective to be a possible return type.
+   * - The above object does not belong to the union return type.
+   */
+  switch (dbObj.type) {
+    case 'OpenChannel':
+      return {
+        type: dbObj.type,
+        data: dbObj.data,
+        participants: dbObj.participants,
+      };
+    case 'CloseChannel':
+      return {
+        type: dbObj.type,
+        data: dbObj.data,
+        participants: dbObj.participants,
+      };
+    default:
+      unreachable(dbObj);
+  }
 };
 
 export class ObjectiveChannelModel extends Model {
@@ -91,6 +123,8 @@ export class ObjectiveModel extends Model {
   readonly status!: DBObjective['status'];
   readonly type!: DBObjective['type'];
   readonly data!: DBObjective['data'];
+  readonly waitingFor!: DBObjective['waitingFor'];
+  // the default value of waitingFor is '', see Nothing.ToWaitFor type
   createdAt!: Date;
   progressLastMadeAt!: Date;
 
@@ -122,23 +156,24 @@ export class ObjectiveModel extends Model {
     };
   }
 
-  static async insert(
-    objectiveToBeStored: SupportedObjective & {
-      status: 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
-    },
-    tx: TransactionOrKnex
-  ): Promise<DBObjective> {
+  static async insert<O extends DBObjective = DBObjective>(
+    objectiveToBeStored: SupportedObjective, // TODO this type should be correlated to O
+    preApproved: boolean,
+    tx: TransactionOrKnex,
+    waitingFor?: WaitingFor // TODO this type should be correlated to O
+  ): Promise<O> {
     const id: string = objectiveId(objectiveToBeStored);
 
     return tx.transaction(async trx => {
-      const model = await ObjectiveModel.query(trx)
+      const query = ObjectiveModel.query(trx)
         .insert({
           objectiveId: id,
-          status: objectiveToBeStored.status,
+          status: preApproved ? 'approved' : 'pending',
           type: objectiveToBeStored.type,
           data: objectiveToBeStored.data,
           createdAt: new Date(),
           progressLastMadeAt: new Date(),
+          waitingFor: waitingFor ?? 'approval',
         })
         // `Model.query(tx).insert(o)` returns `o` by default.
         // The return value is therefore constrained by the type of `Model`.
@@ -163,9 +198,15 @@ export class ObjectiveModel extends Model {
         // We use `.returning('*').first()` here because we are ignoring conflicts,
         // and want to know what was "already there" in that case.
         .returning('*')
-        .first()
+        .first();
+
+      const model = await query
         .onConflict('objectiveId')
-        .ignore(); // this avoids a UniqueViolationError being thrown
+        .merge({status: preApproved ? 'approved' : 'pending'});
+      // this avoids a UniqueViolationError being thrown
+      // and turns the query into an upsert. We are either:
+      // - re-approving the objective.
+      // - re-queueing the objective for approval
 
       // Associate the objective with any channel that it references
       // By inserting an ObjectiveChannel row for each channel
@@ -179,7 +220,7 @@ export class ObjectiveModel extends Model {
               .ignore() // this makes it an upsert
         )
       );
-      return model.toObjective();
+      return model.toObjective<O>();
     });
   }
 
@@ -193,8 +234,14 @@ export class ObjectiveModel extends Model {
     return model.map(m => m.toObjective());
   }
 
-  static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<void> {
-    await ObjectiveModel.query(tx).findById(objectiveId).patch({status: 'approved'});
+  static async approve(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+    return (
+      await ObjectiveModel.query(tx)
+        .findById(objectiveId)
+        .patch({status: 'approved'})
+        .returning('*')
+        .first()
+    ).toObjective();
   }
 
   static async succeed(objectiveId: string, tx: TransactionOrKnex): Promise<ObjectiveModel> {
@@ -212,11 +259,15 @@ export class ObjectiveModel extends Model {
       .first();
   }
 
-  static async progressMade(objectiveId: string, tx: TransactionOrKnex): Promise<DBObjective> {
+  static async updateWaitingFor(
+    objectiveId: string,
+    waitingFor: WaitingFor,
+    tx: TransactionOrKnex
+  ): Promise<DBObjective> {
     return (
       await ObjectiveModel.query(tx)
         .findById(objectiveId)
-        .patch({progressLastMadeAt: new Date()})
+        .patch({progressLastMadeAt: new Date(), waitingFor})
         .returning('*')
         .first()
     ).toObjective();
@@ -236,11 +287,25 @@ export class ObjectiveModel extends Model {
     return (await ObjectiveModel.query(tx).findByIds(objectiveIds)).map(m => m.toObjective());
   }
 
-  toObjective(): DBObjective {
-    return {
-      ...this,
-      participants: [],
-      data: this.data as any, // Here we will trust that the row respects our types
+  toObjective<O extends DBObjective = DBObjective>(): O {
+    const withParticipants = {
+      objectiveId: this.objectiveId,
+      status: this.status,
+      type: this.type,
+      data: this.data,
+      createdAt: this.createdAt,
+      progressLastMadeAt: this.progressLastMadeAt,
+      waitingFor: this.waitingFor,
+      participants: [] as DBObjective['participants'], // reinstate an empty participants array
     };
+    switch (this.type) {
+      case 'CloseChannel':
+      case 'DefundChannel':
+      case 'OpenChannel':
+      case 'SubmitChallenge':
+        return withParticipants as O;
+      default:
+        throw Error('unimplemented');
+    }
   }
 }

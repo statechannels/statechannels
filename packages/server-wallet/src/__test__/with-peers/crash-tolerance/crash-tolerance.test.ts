@@ -1,59 +1,25 @@
 import {
-  CreateChannelParams,
-  Participant,
   Allocation,
   CloseChannelParams,
+  CreateChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, ethers, constants} from 'ethers';
+import {makeAddress} from '@statechannels/wallet-core';
+import {BigNumber, constants, ethers} from 'ethers';
 
-import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../config';
-import {DBAdmin} from '../../db-admin/db-admin';
-import {Wallet} from '../../wallet';
-import {getChannelResultFor, getPayloadFor, crashAndRestart, ONE_DAY} from '../test-helpers';
-const aWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
-  database: 'TEST_A',
-});
-const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestConfig(), {
-  database: 'TEST_B',
-});
-let a: Wallet;
-let b: Wallet;
+import {
+  getPeersSetup,
+  participantA,
+  participantB,
+  peersTeardown,
+  peerWallets,
+} from '../../../../jest/with-peers-setup-teardown';
+import {crashAndRestart, getChannelResultFor, getPayloadFor, ONE_DAY} from '../../test-helpers';
 
 let channelId: string;
-let participantA: Participant;
-let participantB: Participant;
-
 jest.setTimeout(10_000);
 
-beforeAll(async () => {
-  await Promise.all([DBAdmin.createDatabase(aWalletConfig), DBAdmin.createDatabase(bWalletConfig)]);
-  await Promise.all([
-    DBAdmin.migrateDatabase(aWalletConfig),
-    DBAdmin.migrateDatabase(bWalletConfig),
-  ]);
-  a = await Wallet.create(aWalletConfig);
-  b = await Wallet.create(bWalletConfig); // Wallet that will "crash"
-
-  participantA = {
-    signingAddress: await a.getSigningAddress(),
-    participantId: 'a',
-    destination: makeDestination(
-      '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
-    ),
-  };
-  participantB = {
-    signingAddress: await b.getSigningAddress(),
-    participantId: 'b',
-    destination: makeDestination(
-      '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
-    ),
-  };
-});
-afterAll(async () => {
-  await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
-});
+beforeAll(getPeersSetup());
+afterAll(peersTeardown);
 
 it('Create a directly-funded channel between two wallets, of which one crashes midway through ', async () => {
   const allocation: Allocation = {
@@ -75,7 +41,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
 
   //        A <> B
   // PreFund0
-  const resultA0 = await a.createChannel(createChannelParams);
+  const resultA0 = await peerWallets.a.createChannel(createChannelParams);
 
   channelId = resultA0.channelResults[0].channelId;
 
@@ -85,7 +51,9 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   });
 
   //    > PreFund0A
-  const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
+  const resultB0 = await peerWallets.b.pushMessage(
+    getPayloadFor(participantB.participantId, resultA0.outbox)
+  );
 
   expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
     status: 'proposed',
@@ -93,17 +61,19 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   });
 
   // Destory Wallet b and restart
-  b = await crashAndRestart(b);
+  peerWallets.b = await crashAndRestart(peerWallets.b);
 
   //      PreFund0B
-  const resultB1 = await b.joinChannel({channelId});
+  const resultB1 = await peerWallets.b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });
 
   //  PreFund0B <
-  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB1.outbox));
+  const resultA1 = await peerWallets.a.pushMessage(
+    getPayloadFor(participantA.participantId, resultB1.outbox)
+  );
 
   /**
    * In this case, there is no auto-advancing to the running stage. Instead we have
@@ -124,8 +94,8 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   }; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
-  await a.updateFundingForChannels([depositByA]);
-  await b.updateFundingForChannels([depositByA]);
+  await peerWallets.a.updateFundingForChannels([depositByA]);
+  await peerWallets.b.updateFundingForChannels([depositByA]);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
   const depositByB = {
@@ -134,8 +104,8 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     amount: BigNumber.from(2).toHexString(),
   }; // B sends 1 ETH (2 total)
   // < PostFund3B
-  const resultA2 = await a.updateFundingForChannels([depositByB]);
-  const resultB2 = await b.updateFundingForChannels([depositByB]);
+  const resultA2 = await peerWallets.a.updateFundingForChannels([depositByB]);
+  const resultB2 = await peerWallets.b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
@@ -149,14 +119,18 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   });
 
   //  > PostFund3A
-  const resultB3 = await b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
+  const resultB3 = await peerWallets.b.pushMessage(
+    getPayloadFor(participantB.participantId, resultA2.outbox)
+  );
   expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
 
   //  PostFund3B <
-  const resultA3 = await a.pushMessage(getPayloadFor(participantA.participantId, resultB2.outbox));
+  const resultA3 = await peerWallets.a.pushMessage(
+    getPayloadFor(participantA.participantId, resultB2.outbox)
+  );
   expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
@@ -167,14 +141,14 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   };
 
   // A generates isFinal4
-  const aCloseChannelResult = await a.closeChannel(closeChannelParams);
+  const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
 
   expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
     status: 'closing',
     turnNum: 4,
   });
 
-  const bPushMessageResult = await b.pushMessage(
+  const bPushMessageResult = await peerWallets.b.pushMessage(
     getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
   );
 
@@ -185,7 +159,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   });
 
   // A pushed the countersigned isFinal4
-  const aPushMessageResult = await a.pushMessage(
+  const aPushMessageResult = await peerWallets.a.pushMessage(
     getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
   );
 
