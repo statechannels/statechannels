@@ -14,10 +14,8 @@ import {
   simpleEthAllocation,
   simpleTokenAllocation,
   State,
-  Uint256,
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
-import _, {minBy} from 'lodash';
 
 import {
   alice,
@@ -307,7 +305,6 @@ describe('registerChannel', () => {
   it('Receives correct initial holding when holdings are confirmed', async () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
-    const blockDeposited = await provider.getBlockNumber();
     await mineBlocks(); // wait for deposit to be confirmed thenr egister channel
 
     await new Promise(resolve =>
@@ -325,35 +322,26 @@ describe('registerChannel', () => {
     );
   });
 
-  /*
   it('Receives 0 initial holding when holdings are not confirmed', async () => {
     const channelId = randomChannelId();
-    await waitForChannelFunding(0, 5, channelId);
-    const blockDeposited = await provider.getBlockNumber();
-    const p = mineBlocksSlow(30);
-
-    console.log('Block before register channel:' + (await provider.getBlockNumber()));
-    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-      ...defaultNoopListeners,
-      holdingUpdated: arg => {
-        provider
-          .getBlockNumber()
-          .then(x => console.log('Callback called at ' + x + ': ' + JSON.stringify(arg)));
-      },
+    const expected = [0, 5, 8, 10];
+    waitForChannelFunding(0, 5, channelId);
+    waitForChannelFunding(5, 3, channelId);
+    const p = new Promise(resolve => {
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        ...defaultNoopListeners,
+        holdingUpdated: arg => {
+          expect(arg.amount).toEqual(BN.from(expected[0]));
+          expected.shift();
+          if (!expected.length) resolve(true);
+        },
+      });
     });
-
-    console.log('Block after register channel:' + (await provider.getBlockNumber()));
-
+    fundChannel(8, 2, channelId, ethAssetHolderAddress);
+    mineBlocksSlow(20);
     await p;
-    //await mineBlocks();
-    //for (let i = 0; i < 30; i++) {
-    //await new Promise(resolve => {
-    //  setTimeout(resolve, 1000);
-    //});
-    //  await mineBlock();
-    //}
   });
-*/
+
   it('Channel with multiple asset holders', async () => {
     const channelId = randomChannelId();
     let resolve: (value: unknown) => void;
@@ -489,6 +477,52 @@ describe('concludeAndWithdraw', () => {
     const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
     if (!transactionResponse) throw 'Expected transaction response';
     await transactionResponse.wait();
+
+    const erc20Contract: Contract = new Contract(
+      erc20Address,
+      TestContractArtifacts.TokenArtifact.abi,
+      provider
+    );
+    expect(await erc20Contract.balanceOf(aAddress)).toEqual(BigNumber.from(1));
+    expect(await erc20Contract.balanceOf(bAddress)).toEqual(BigNumber.from(3));
+
+    mineBlocks();
+    await p;
+  });
+
+  it('Unconfirmed concludeAndWithdraw while registering channel works as expected', async () => {
+    const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
+
+    const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
+      channelId,
+      assetHolderAddress: erc20AssetHolderAddress,
+      newHoldings: '0x00' as Uint256,
+      externalPayouts: [
+        {
+          amount: BN.from(1),
+          destination: makeDestination(aAddress).toLowerCase(),
+        },
+        {
+          amount: BN.from(3),
+          destination: makeDestination(bAddress).toLowerCase(),
+        },
+      ],
+      internalPayouts: [],
+      newAssetOutcome: '0x00',
+    };
+
+    const transactionResponse = await chainService.concludeAndWithdraw([{...state, signatures}]);
+    if (!transactionResponse) throw 'Expected transaction response';
+    await transactionResponse.wait();
+    const p = new Promise<void>(resolve =>
+      chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
+        ...defaultNoopListeners,
+        assetOutcomeUpdated: arg => {
+          expect(arg).toMatchObject(assetOutcomeUpdated);
+          resolve();
+        },
+      })
+    );
 
     const erc20Contract: Contract = new Contract(
       erc20Address,
