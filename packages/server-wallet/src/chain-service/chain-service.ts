@@ -474,7 +474,7 @@ export class ChainService implements ChainServiceInterface {
             {
               channelId: channelId,
               assetHolderAddress: makeAddress(contract.address),
-              amount: ethersEvent.args ? BN.from(ethersEvent.args[1]) : BN.from(0),
+              amount: ethersEvent.args ? BN.from(ethersEvent.args[2]) : BN.from(0),
             },
             ethersEvent.blockNumber,
             ethersEvent.logIndex
