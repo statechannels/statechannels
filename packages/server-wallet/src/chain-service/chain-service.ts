@@ -427,7 +427,7 @@ export class ChainService implements ChainServiceInterface {
 
       confirmedHolding = BN.from(await contract.holdings(channelId, overrides));
       this.logger.debug(
-        `Successfully red confirmedHoldings (${confirmedHolding}), from block ${confirmedBlock}.`
+        `Successfully read confirmedHoldings (${confirmedHolding}), from block ${confirmedBlock}.`
       );
     } catch (e) {
       // We should have e.code="CALL_EXCEPTION", but gaven currentHolding query succeeded,
