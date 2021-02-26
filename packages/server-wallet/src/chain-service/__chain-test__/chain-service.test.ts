@@ -14,8 +14,10 @@ import {
   simpleEthAllocation,
   simpleTokenAllocation,
   State,
+  Uint256,
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
+import _ from 'lodash';
 
 import {defaultTestConfig} from '../../config';
 import {
