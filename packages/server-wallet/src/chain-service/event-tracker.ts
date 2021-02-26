@@ -9,6 +9,14 @@ import {
   ChainEventSubscriberInterface,
 } from './types';
 
+/**
+ * This class is a wrapper of ChainEventSubscriberInterface.
+ * Purpose - 2 functions can trigger AssetHolder events to be played to ChainEventSubscriberInterface
+ *    1. chainservice.getInitialHoldings
+ *    2. chainservice.addAssetHolderObservable
+ * Some events can be played twice by both functions, order not prodictable,
+ * this class ensures each event is played once and in the right order
+ */
 export class EventTracker {
   private logger: Logger;
   private assetHolderMap: Map<Address, {blockNumber: number; logIndex: number}>;
@@ -45,10 +53,11 @@ export class EventTracker {
     this.assetHolderMap = new Map<string, {blockNumber: number; logIndex: number}>();
   }
 
+  // Pass event to managed subscriber only if new
   holdingUpdated(
     arg: HoldingUpdatedArg,
     blockNumber: number,
-    logIndex: number = Number.MAX_SAFE_INTEGER
+    logIndex: number = Number.MAX_SAFE_INTEGER // if no logIndex passed in then this is from getInitialHoldings
   ): void {
     if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
       this.managedSubscriber.holdingUpdated(arg);
@@ -63,6 +72,8 @@ export class EventTracker {
       );
     }
   }
+
+  // Pass event to managed subscriber only if new
   assetOutcomeUpdated(
     arg: AssetOutcomeUpdatedArg,
     blockNumber: number,
@@ -82,9 +93,12 @@ export class EventTracker {
     }
   }
 
+  // This event is not from AssetHolder so no check needed
   channelFinalized(arg: ChannelFinalizedArg): void {
     this.managedSubscriber.channelFinalized(arg);
   }
+
+  // This event is not from AssetHolder so no check needed
   challengeRegistered(arg: ChallengeRegisteredArg): void {
     this.managedSubscriber.challengeRegistered(arg);
   }

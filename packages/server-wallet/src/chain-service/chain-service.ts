@@ -420,7 +420,7 @@ export class ChainService implements ChainServiceInterface {
     let confirmedHolding = BN.from(0);
     try {
       // https://docs.ethers.io/v5/api/contract/contract/#Contract--metaclass
-      // provider can lose track of the latet block, force it to reload
+      // provider can lose track of the latest block, force it to reload
       const overrides = {
         blockTag: confirmedBlock,
       };
@@ -442,6 +442,7 @@ export class ChainService implements ChainServiceInterface {
       `getConfirmedHoldings: from block ${confirmedBlock}, confirmed holding ${confirmedHolding}, current holding ${currentHolding}.`
     );
 
+    // Report confirmed holding immediately
     eventTracker.holdingUpdated(
       {
         channelId: channelId,
@@ -451,9 +452,9 @@ export class ChainService implements ChainServiceInterface {
       confirmedBlock
     );
 
-    // getInitialHoldings return confirmed holdings immediately, but make sure custoemr receives an event if unconfirmed
-    // events later confirms
-
+    // We're unsure if the same events are also played by contract observer callback,
+    // but need to play it regardless, so subscribers won't miss anything.
+    // See EventTracker documentation
     for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
       e => e.blockNumber
     )) {
