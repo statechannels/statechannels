@@ -48,6 +48,7 @@ export interface ChainEventSubscriberInterface {
 }
 
 interface ChainEventEmitterInterface {
+  checkChainId(networkChainId: number): Promise<void>;
   registerChannel(
     channelId: Bytes32,
     assetHolders: Address[],

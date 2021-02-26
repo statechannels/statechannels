@@ -105,6 +105,8 @@ export class SingleThreadedWallet
   ): Promise<SingleThreadedWallet> {
     const wallet = new SingleThreadedWallet(walletConfig);
 
+    await wallet.chainService.checkChainId(walletConfig.networkConfiguration.chainNetworkID);
+
     await wallet.registerExistingChannelsWithChainService();
     return wallet;
   }
@@ -153,7 +155,6 @@ export class SingleThreadedWallet
       this.chainService = new ChainService({
         ...this.walletConfig.chainServiceConfiguration,
         logger: this.logger,
-        chainNetworkId: this.walletConfig.networkConfiguration.chainNetworkID,
       });
     } else {
       this.chainService = new MockChainService();
