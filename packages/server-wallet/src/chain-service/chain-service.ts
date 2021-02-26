@@ -6,7 +6,6 @@ import {
   getChallengeRegisteredEvent,
   getChannelId,
   Transactions,
-  Uint256,
 } from '@statechannels/nitro-protocol';
 import {
   Address,
@@ -19,7 +18,7 @@ import {
   toNitroSignedState,
   toNitroState,
 } from '@statechannels/wallet-core';
-import {constants, Contract, ContractInterface, ethers, Event, providers, Wallet} from 'ethers';
+import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
 import {Observable} from 'rxjs';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
@@ -458,6 +457,7 @@ export class ChainService implements ChainServiceInterface {
       e => e.blockNumber
     )) {
       await this.waitForConfirmations(ethersEvent);
+      this.logger.debug(`getInitialHoldings: playing event ${JSON.stringify(ethersEvent)}`);
 
       switch (ethersEvent.event) {
         case Deposited:

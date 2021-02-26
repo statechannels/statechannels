@@ -1,5 +1,4 @@
 import {Address} from '@statechannels/nitro-protocol/src/contract/types';
-import {Event} from 'ethers';
 import {Logger} from 'pino';
 
 import {
