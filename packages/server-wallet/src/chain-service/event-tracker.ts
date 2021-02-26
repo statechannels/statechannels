@@ -14,7 +14,7 @@ import {
  * Purpose - 2 functions can trigger AssetHolder events to be played to ChainEventSubscriberInterface
  *    1. chainservice.getInitialHoldings
  *    2. chainservice.addAssetHolderObservable
- * Some events can be played twice by both functions, order not prodictable,
+ * Some events can be played twice by both functions, order not predictable,
  * this class ensures each event is played once and in the right order
  */
 export class EventTracker {
