@@ -18,7 +18,16 @@ import {
   toNitroSignedState,
   toNitroState,
 } from '@statechannels/wallet-core';
-import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
+import {
+  constants,
+  Contract,
+  ContractInterface,
+  ethers,
+  Event,
+  EventFilter,
+  providers,
+  Wallet,
+} from 'ethers';
 import {Observable} from 'rxjs';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
@@ -109,7 +118,7 @@ export class ChainService implements ChainServiceInterface {
       ContractArtifacts.NitroAdjudicatorArtifact.abi
     );
 
-    this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
+    this.subscribeToConfirmedEvents(this.nitroAdjudicator, ChallengeRegistered, (...args) => {
       const event = getChallengeRegisteredEvent(args);
       this.addFinalizingChannel({channelId: event.channelId, finalizesAtS: event.finalizesAt});
 
@@ -124,7 +133,7 @@ export class ChainService implements ChainServiceInterface {
       );
     });
 
-    this.nitroAdjudicator.on(Concluded, (channelId, finalizesAtS) => {
+    this.subscribeToConfirmedEvents(this.nitroAdjudicator, Concluded, (channelId, finalizesAtS) => {
       this.addFinalizingChannel({channelId, finalizesAtS});
     });
 
@@ -462,6 +471,34 @@ export class ChainService implements ChainServiceInterface {
     // We're unsure if the same events are also played by contract observer callback,
     // but need to play it regardless, so subscribers won't miss anything.
     // See EventTracker documentation
+    await this.queryConfirmedEvents(contract, {}, confirmedBlock, async (...args) => {
+      const eventType = args.slice(-1)[0].event;
+      switch (eventType) {
+        case Deposited:
+          {
+            const depostedEvent = await this.getDepositedEvent(contract, ...args);
+            eventTracker.holdingUpdated(
+              depostedEvent,
+              depostedEvent.ethersEvent.blockNumber,
+              depostedEvent.ethersEvent.logIndex
+            );
+          }
+          break;
+        case AllocationUpdated:
+          {
+            const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(contract, ...args);
+            eventTracker.assetOutcomeUpdated(
+              allocationUpdatedEvent,
+              allocationUpdatedEvent.ethersEvent.blockNumber,
+              allocationUpdatedEvent.ethersEvent.logIndex
+            );
+          }
+          break;
+        default:
+          this.logger.error(`event of type ${eventType} observed in holdingUpdated, ignored.`);
+      }
+    });
+
     for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
       e => e.blockNumber
     )) {
@@ -539,41 +576,13 @@ export class ChainService implements ChainServiceInterface {
     // Create an observable that emits events on contract events
     const obs = new Observable<AssetHolderEvent>(subs => {
       // TODO: add other event types
-      assetHolderContract.on(
-        Deposited,
-        (destination, _amountDeposited, destinationHoldings, event) =>
-          subs.next({
-            type: Deposited,
-            channelId: destination,
-            assetHolderAddress: makeAddress(assetHolderContract.address),
-            amount: BN.from(destinationHoldings),
-            ethersEvent: event,
-          })
-      );
-      assetHolderContract.on(AllocationUpdated, async (channelId, initialHoldings, event) => {
-        const tx = await this.provider.getTransaction(event.transactionHash);
-        const {
-          newAssetOutcome,
-          newHoldings,
-          externalPayouts,
-          internalPayouts,
-        } = computeNewAssetOutcome(
-          assetHolderContract.address,
-          nitroAdjudicatorAddress,
-          {channelId, initialHoldings},
-          tx
-        );
-
-        return subs.next({
-          type: AllocationUpdated,
-          channelId,
-          assetHolderAddress: makeAddress(assetHolderContract.address),
-          newAssetOutcome,
-          externalPayouts,
-          internalPayouts,
-          newHoldings: BN.from(newHoldings),
-          ethersEvent: event,
-        });
+      this.subscribeToConfirmedEvents(assetHolderContract, Deposited, async (...args) => {
+        const depositedEvent = await this.getDepositedEvent(assetHolderContract, ...args);
+        return subs.next(depositedEvent);
+      });
+      this.subscribeToConfirmedEvents(assetHolderContract, AllocationUpdated, async (...args) => {
+        const allocationUpdatedEvent = await this.getDepositedEvent(assetHolderContract, ...args);
+        return subs.next(allocationUpdatedEvent);
       });
     });
     obs.subscribe({
@@ -664,6 +673,71 @@ export class ChainService implements ChainServiceInterface {
         }
       }
     }
+  }
+
+  private subscribeToConfirmedEvents(
+    contract: Contract,
+    eventFilter: EventFilter | string,
+    listener: (...args: Array<any>) => void
+  ): void {
+    contract.on(eventFilter, (...args) => {
+      this.waitForConfirmations(args.slice(-1)[0]);
+      listener(...args);
+    });
+  }
+
+  private async queryConfirmedEvents(
+    contract: Contract,
+    eventFilter: EventFilter,
+    fromBlock: number,
+    listener: (...args: Array<any>) => void
+  ): Promise<void> {
+    for (const ethersEvent of (await contract.queryFilter(eventFilter, fromBlock)).sort(
+      e => e.blockNumber
+    )) {
+      this.waitForConfirmations(ethersEvent);
+      listener(...(ethersEvent.args || []), ethersEvent);
+    }
+  }
+
+  private async getDepositedEvent(
+    contract: Contract,
+    ...args: Array<any>
+  ): Promise<DepositedEvent> {
+    const [destination, _amountDeposited, destinationHoldings, ethersEvent] = args;
+    return {
+      type: Deposited,
+      channelId: destination,
+      assetHolderAddress: makeAddress(contract.address),
+      amount: BN.from(destinationHoldings),
+      ethersEvent: ethersEvent,
+    };
+  }
+
+  private async getAllocationUpdatedEvent(
+    contract: Contract,
+    ...args: Array<any>
+  ): Promise<AllocationUpdatedEvent> {
+    const [channelId, initialHoldings, ethersEvent] = args;
+    const tx = await this.provider.getTransaction(ethersEvent.transactionHash);
+
+    const {newAssetOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewAssetOutcome(
+      contract.address,
+      nitroAdjudicatorAddress,
+      {channelId, initialHoldings},
+      tx
+    );
+
+    return {
+      type: AllocationUpdated,
+      channelId: channelId,
+      assetHolderAddress: makeAddress(contract.address),
+      newHoldings: BN.from(newHoldings),
+      externalPayouts: externalPayouts,
+      internalPayouts: internalPayouts,
+      newAssetOutcome: newAssetOutcome,
+      ethersEvent: ethersEvent,
+    };
   }
 
   /**
