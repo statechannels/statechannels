@@ -490,60 +490,6 @@ export class ChainService implements ChainServiceInterface {
           this.logger.error(`event of type ${eventType} observed in holdingUpdated, ignored.`);
       }
     });
-
-    for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
-      e => e.blockNumber
-    )) {
-      await this.waitForConfirmations(ethersEvent);
-      this.logger.debug(`getInitialHoldings: playing event ${JSON.stringify(ethersEvent)}`);
-
-      switch (ethersEvent.event) {
-        case Deposited:
-          eventTracker.holdingUpdated(
-            {
-              channelId: channelId,
-              assetHolderAddress: makeAddress(contract.address),
-              amount: ethersEvent.args ? BN.from(ethersEvent.args[2]) : BN.from(0),
-            },
-            ethersEvent.blockNumber,
-            ethersEvent.logIndex
-          );
-          break;
-        case AllocationUpdated:
-          {
-            const tx = await this.provider.getTransaction(ethersEvent.transactionHash);
-            const initialHoldings = ethersEvent.args ? BN.from(ethersEvent.args[1]) : BN.from(0);
-            const {
-              newAssetOutcome,
-              newHoldings,
-              externalPayouts,
-              internalPayouts,
-            } = computeNewAssetOutcome(
-              contract.address,
-              nitroAdjudicatorAddress,
-              {channelId, initialHoldings},
-              tx
-            );
-            eventTracker.assetOutcomeUpdated(
-              {
-                channelId: channelId,
-                assetHolderAddress: makeAddress(contract.address),
-                newHoldings: BN.from(newHoldings),
-                externalPayouts: externalPayouts,
-                internalPayouts: internalPayouts,
-                newAssetOutcome: newAssetOutcome,
-              },
-              ethersEvent.blockNumber,
-              ethersEvent.logIndex
-            );
-          }
-          break;
-        default:
-          this.logger.error(
-            `event of type ${ethersEvent.event || 'unknown'} observed in holdingUpdated, ignored.`
-          );
-      }
-    }
   }
 
   private async waitForConfirmations(event: Event): Promise<void> {
@@ -586,7 +532,6 @@ export class ChainService implements ChainServiceInterface {
           {channelId: event.channelId, tx: event.ethersEvent?.transactionHash},
           `Observed ${event.type} event on-chain; beginning to wait for confirmations`
         );
-        await this.waitForConfirmations(event.ethersEvent);
         this.channelToEventTrackers.get(event.channelId)?.forEach(eventTracker => {
           switch (event.type) {
             case Deposited:
