@@ -22,7 +22,6 @@ import {
   constants,
   Contract,
   ContractInterface,
-  ethers,
   Event,
   EventFilter,
   providers,
@@ -581,7 +580,10 @@ export class ChainService implements ChainServiceInterface {
         return subs.next(depositedEvent);
       });
       this.subscribeToConfirmedEvents(assetHolderContract, AllocationUpdated, async (...args) => {
-        const allocationUpdatedEvent = await this.getDepositedEvent(assetHolderContract, ...args);
+        const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(
+          assetHolderContract,
+          ...args
+        );
         return subs.next(allocationUpdatedEvent);
       });
     });
