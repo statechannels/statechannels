@@ -591,6 +591,7 @@ describe('challenge', () => {
           })
         )
     );
+    mineBlocksSlow(20);
     await Promise.all(
       channelIds.map(channelId => waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress))
     );
@@ -661,6 +662,8 @@ describe('challenge', () => {
         challengeRegistered,
       })
     );
+
+    mineBlocksSlow(20);
 
     await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
 
