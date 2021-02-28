@@ -469,21 +469,25 @@ export class ChainService implements ChainServiceInterface {
         case Deposited:
           {
             const depostedEvent = await this.getDepositedEvent(contract, ...args);
-            eventTracker.holdingUpdated(
-              depostedEvent,
-              depostedEvent.ethersEvent.blockNumber,
-              depostedEvent.ethersEvent.logIndex
-            );
+            if (depostedEvent.channelId === channelId) {
+              eventTracker.holdingUpdated(
+                depostedEvent,
+                depostedEvent.ethersEvent.blockNumber,
+                depostedEvent.ethersEvent.logIndex
+              );
+            }
           }
           break;
         case AllocationUpdated:
           {
             const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(contract, ...args);
-            eventTracker.assetOutcomeUpdated(
-              allocationUpdatedEvent,
-              allocationUpdatedEvent.ethersEvent.blockNumber,
-              allocationUpdatedEvent.ethersEvent.logIndex
-            );
+            if (allocationUpdatedEvent.channelId === channelId) {
+              eventTracker.assetOutcomeUpdated(
+                allocationUpdatedEvent,
+                allocationUpdatedEvent.ethersEvent.blockNumber,
+                allocationUpdatedEvent.ethersEvent.logIndex
+              );
+            }
           }
           break;
         default:
