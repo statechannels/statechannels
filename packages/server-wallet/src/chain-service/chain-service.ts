@@ -97,10 +97,9 @@ export class ChainService implements ChainServiceInterface {
     logger,
     blockConfirmations,
     allowanceMode,
-    chainNetworkId,
-  }: Partial<ChainServiceArgs> & {chainNetworkId: number}) {
+  }: Partial<ChainServiceArgs>) {
     if (!pk) throw new Error('ChainService: Private key not provided');
-    this.provider = new providers.JsonRpcProvider(provider, chainNetworkId);
+    this.provider = new providers.JsonRpcProvider(provider);
     this.ethWallet = new NonceManager(new Wallet(pk, this.provider));
     this.blockConfirmations = blockConfirmations ?? 5;
     this.logger = logger
@@ -140,6 +139,14 @@ export class ChainService implements ChainServiceInterface {
     this.provider.on('block', async (blockTag: providers.BlockTag) =>
       this.checkFinalizingChannels(await this.provider.getBlock(blockTag))
     );
+  }
+
+  public async checkChainId(networkChainId: number): Promise<void> {
+    const rpcChainId = (await this.provider.getNetwork()).chainId;
+    if (rpcChainId !== networkChainId)
+      throw Error(
+        `ChainId mismatch: ${networkChainId} is required but provider reports ${rpcChainId}`
+      );
   }
 
   // Only used for unit tests

@@ -36,6 +36,10 @@ const mockTransactoinResponse: providers.TransactionResponse = {
 };
 
 export class MockChainService implements ChainServiceInterface {
+  async checkChainId(_networkChainId: number): Promise<void> {
+    // noop, a mock chain service will have the "correct" chain id
+  }
+
   fundChannel(_arg: FundChannelArg): Promise<providers.TransactionResponse> {
     return Promise.resolve(mockTransactoinResponse);
   }

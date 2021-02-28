@@ -19,7 +19,6 @@ import {
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig} from '../../config';
 import {
   alice,
   alice as aliceParticipant,
@@ -97,7 +96,6 @@ beforeAll(async () => {
     provider: rpcEndpoint,
     pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
     allowanceMode: 'MaxUint',
-    chainNetworkId: defaultTestConfig().networkConfiguration.chainNetworkID,
   });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
 });
@@ -205,6 +203,12 @@ async function setUpConclude(isEth = true) {
     signatures,
   };
 }
+
+describe('chainid mismatch detection', () => {
+  it('throws an error when the chainid is wrong', async () => {
+    await expect(chainService.checkChainId(987654321)).rejects.toThrow('ChainId mismatch');
+  });
+});
 
 describe('fundChannel', () => {
   it('Successfully funds channel with 2 participants, rejects invalid 3rd', async () => {
