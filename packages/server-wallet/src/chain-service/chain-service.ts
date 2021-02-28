@@ -631,8 +631,8 @@ export class ChainService implements ChainServiceInterface {
     eventFilter: EventFilter | string,
     listener: (...args: Array<any>) => void
   ): void {
-    contract.on(eventFilter, (...args) => {
-      this.waitForConfirmations(args.slice(-1)[0]);
+    contract.on(eventFilter, async (...args) => {
+      await this.waitForConfirmations(args.slice(-1)[0]);
       listener(...args);
     });
   }
@@ -646,7 +646,7 @@ export class ChainService implements ChainServiceInterface {
     for (const ethersEvent of (await contract.queryFilter(eventFilter, fromBlock)).sort(
       e => e.blockNumber
     )) {
-      this.waitForConfirmations(ethersEvent);
+      await this.waitForConfirmations(ethersEvent);
       listener(...(ethersEvent.args || []), ethersEvent);
     }
   }
