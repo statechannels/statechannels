@@ -34,7 +34,7 @@ export class EventTracker {
     } else if (blockNumber > (this.assetHolderMap.get(assetHolderAddress)?.blockNumber || 0)) {
       this.assetHolderMap.set(assetHolderAddress, {blockNumber: blockNumber, logIndex: logIndex});
       return true;
-    } else if (blockNumber == (this.assetHolderMap.get(assetHolderAddress)?.blockNumber || 0)) {
+    } else if (blockNumber === (this.assetHolderMap.get(assetHolderAddress)?.blockNumber || 0)) {
       if (logIndex > (this.assetHolderMap.get(assetHolderAddress)?.logIndex || 0)) {
         this.assetHolderMap.set(assetHolderAddress, {blockNumber: blockNumber, logIndex: logIndex});
         return true;
