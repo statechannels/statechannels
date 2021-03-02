@@ -468,37 +468,12 @@ export class ChainService implements ChainServiceInterface {
     // We're unsure if the same events are also played by contract observer callback,
     // but need to play it regardless, so subscribers won't miss anything.
     // See EventTracker documentation
-    // await this.queryConfirmedEvents(contract, {}, confirmedBlock, async (...args) => {
-    //   const eventType = args.slice(-1)[0].event;
-    //   switch (eventType) {
-    //     case Deposited:
-    //       {
-    //         const depostedEvent = await this.getDepositedEvent(contract, args.slice(-1)[0]);
-    //         if (depostedEvent.channelId === channelId) {
-    //           eventTracker.holdingUpdated(
-    //             depostedEvent,
-    //             depostedEvent.ethersEvent.blockNumber,
-    //             depostedEvent.ethersEvent.logIndex
-    //           );
-    //         }
-    //       }
-    //       break;
-    //     case AllocationUpdated:
-    //       {
-    //         const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(contract, ...args);
-    //         if (allocationUpdatedEvent.channelId === channelId) {
-    //           eventTracker.assetOutcomeUpdated(
-    //             allocationUpdatedEvent,
-    //             allocationUpdatedEvent.ethersEvent.blockNumber,
-    //             allocationUpdatedEvent.ethersEvent.logIndex
-    //           );
-    //         }
-    //       }
-    //       break;
-    //     default:
-    //       this.logger.error(`event of type ${eventType} observed in holdingUpdated, ignored.`);
-    //   }
-    // });
+    for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
+      e => e.blockNumber
+    )) {
+      await this.waitForConfirmations(ethersEvent);
+      this.onAssetHolderEvent(contract, ethersEvent);
+    }
   }
 
   private async waitForConfirmations(event: Event): Promise<void> {
