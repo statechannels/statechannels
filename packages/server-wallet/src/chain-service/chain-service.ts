@@ -27,7 +27,6 @@ import {
   providers,
   Wallet,
 } from 'ethers';
-import {Observable} from 'rxjs';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
@@ -78,7 +77,7 @@ export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private allowanceMode: AllowanceMode;
-  private assetHolderToObservable: Map<Address, Observable<Event>> = new Map();
+  private registeredContracts: Set<Address> = new Set();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToEventTrackers: Map<Bytes32, EventTracker[]> = new Map();
   // For convenience, can also use addressToContract map
@@ -513,31 +512,19 @@ export class ChainService implements ChainServiceInterface {
   }
 
   private setUpAssetHolderListener(assetHolderAddress: Address): void {
-    if (!this.assetHolderToObservable.get(assetHolderAddress)) {
+    if (!this.registeredContracts.has(assetHolderAddress)) {
       const contract = this.getOrAddContractMapping(assetHolderAddress);
-      const obs = this.addAssetHolderObservable(contract);
-      this.assetHolderToObservable.set(assetHolderAddress, obs);
+      this.listenForContractEvents(contract);
+      this.registeredContracts.add(assetHolderAddress);
     }
   }
 
-  private addAssetHolderObservable(assetHolderContract: Contract): Observable<Event> {
-    // Create an observable that emits events on contract events
-    const obs = new Observable<Event>(subs => {
-      // Listen to all contract events
-      assetHolderContract.on({}, async (ethersEvent: Event) => {
-        await this.waitForConfirmations(ethersEvent);
-        subs.next(ethersEvent);
-      });
+  private listenForContractEvents(assetHolderContract: Contract): void {
+    // Listen to all contract events
+    assetHolderContract.on({}, async (ethersEvent: Event) => {
+      await this.waitForConfirmations(ethersEvent);
+      this.onAssetHolderEvent(assetHolderContract, ethersEvent);
     });
-    obs.subscribe({
-      next: this.onAssetHolderEventConstructor(assetHolderContract),
-    });
-
-    return obs;
-  }
-
-  private onAssetHolderEventConstructor(assetHolderContract: Contract) {
-    return (ethersEvent: Event) => this.onAssetHolderEvent(assetHolderContract, ethersEvent);
   }
 
   private async onAssetHolderEvent(
