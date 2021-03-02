@@ -307,7 +307,7 @@ describe('registerChannel', () => {
   it('Receives correct initial holding when holdings are confirmed', async () => {
     const channelId = randomChannelId();
     await waitForChannelFunding(0, 5, channelId);
-    await mineBlocks(); // wait for deposit to be confirmed thenr egister channel
+    await mineBlocks(); // wait for deposit to be confirmed then register channel
 
     await new Promise(resolve =>
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
