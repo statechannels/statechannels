@@ -6,14 +6,14 @@ import {
 import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
-import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../test-helpers';
+import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
 import {
   peerWallets,
   getPeersSetup,
   participantA,
   participantB,
   peersTeardown,
-} from '../../../../jest/with-peers-setup-teardown';
+} from '../../../jest/with-peers-setup-teardown';
 
 let channelId: string;
 
