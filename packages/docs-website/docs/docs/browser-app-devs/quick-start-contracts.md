@@ -17,7 +17,7 @@ The `ForceMoveApp` interface calls for an application-specific `validTransition(
 
 ## Examples
 
-For example, one can implement a simple counting application, where the stae of the channel can only be updated by incrementing a counter variable:
+For example, one can implement a simple counting application, where the state of the channel can only be updated by incrementing a counter variable:
 
 In `/contracts/CountingApp.sol`:
 
