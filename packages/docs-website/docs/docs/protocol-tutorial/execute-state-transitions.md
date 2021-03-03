@@ -351,7 +351,7 @@ await(await tx).wait();
 
 ## Shortcutting `validTransition`
 
-Notice that a state may be supported simply by having a full set of signatures (on from each participant). In such a case, there will be no `validTransiiton` check made by the chain. 
+Notice that a state may be supported simply by having a full set of signatures (one from each participant). In such a case, there will be no `validTransiiton` check made by the chain. 
 
 State updates can always be made via unanimous consensus.
 
