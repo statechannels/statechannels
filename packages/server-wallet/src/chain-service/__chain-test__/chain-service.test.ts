@@ -324,27 +324,6 @@ describe('registerChannel', () => {
     );
   });
 
-  it('Receives 0 initial holding when holdings are not confirmed', async () => {
-    const channelId = randomChannelId();
-    const expected = [0, 5, 8, 10];
-    waitForChannelFunding(0, 5, channelId);
-    waitForChannelFunding(5, 3, channelId);
-    const p = new Promise(resolve => {
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
-        ...defaultNoopListeners,
-        holdingUpdated: arg => {
-          expect(arg.amount).toEqual(BN.from(expected[0]));
-          expected.shift();
-          if (!expected.length) resolve(true);
-        },
-      });
-    });
-    fundChannel(8, 2, channelId, ethAssetHolderAddress);
-    const q = mineBlocksSlow(10);
-    await p;
-    await q;
-  });
-
   it('Channel with multiple asset holders', async () => {
     const channelId = randomChannelId();
     let resolve: (value: unknown) => void;
@@ -376,11 +355,46 @@ describe('registerChannel', () => {
       holdingUpdated,
     });
 
-    const q = mineBlocksSlow(10);
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);
+    await mineBlocksSlow(10);
     await p;
-    await q;
+  });
+});
+
+describe('unconfirmedEvents', () => {
+  it('Unconfirmed deposits are not missed', async () => {
+    const channelId = randomChannelId();
+    await waitForChannelFunding(0, 1, channelId);
+    await waitForChannelFunding(1, 1, channelId);
+    await waitForChannelFunding(2, 1, channelId);
+    await waitForChannelFunding(3, 1, channelId);
+    await waitForChannelFunding(4, 1, channelId);
+    await waitForChannelFunding(5, 1, channelId);
+    await waitForChannelFunding(6, 1, channelId);
+    await waitForChannelFunding(7, 1, channelId);
+    await waitForChannelFunding(8, 1, channelId);
+
+    // Some depositied events are unconfirmed when we register channel,
+    // make sure they're not missed
+    let lastNumber = -1;
+    const p = new Promise(resolve => {
+      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+        ...defaultNoopListeners,
+        holdingUpdated: arg => {
+          const received = parseInt(BN.from(arg.amount));
+          if (lastNumber >= 0) {
+            expect(lastNumber + 1).toEqual(received);
+          }
+          lastNumber = received;
+          if (lastNumber === 10) resolve(true);
+        },
+      });
+    });
+
+    waitForChannelFunding(9, 1, channelId, ethAssetHolderAddress);
+    await mineBlocksSlow(10);
+    await p;
   });
 });
 
@@ -593,7 +607,6 @@ describe('challenge', () => {
           })
         )
     );
-    const q = mineBlocksSlow(10);
     await Promise.all(
       channelIds.map(channelId => waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress))
     );
@@ -619,7 +632,7 @@ describe('challenge', () => {
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(2));
     expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(6));
-    await q;
+    await mineBlocksSlow(10);
   });
 
   it('triggers challenge registered when a challenge is raised', async () => {
@@ -666,8 +679,6 @@ describe('challenge', () => {
       })
     );
 
-    const q = mineBlocksSlow(10);
-
     await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
 
     await (await chainService.challenge([state0, state1], aWallet().privateKey)).wait();
@@ -685,7 +696,7 @@ describe('challenge', () => {
     );
 
     expect(result.channelId).toEqual(channelId);
-    await q;
+    await mineBlocksSlow(10);
   });
 });
 
