@@ -34,7 +34,7 @@ function extractReferencedChannels(objective: Objective): string[] {
 type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 
 /**
- * A WalletObjective is a wire objective with a status, timestamps and an objectiveId
+ * A WalletObjective is a wire objective with a status, waitingFor state-string, timestamps and an objectiveId
  *
  * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
  * that are currently supported by the server wallet
@@ -65,13 +65,6 @@ export function isSupportedObjective(o: Objective): o is SupportedObjective {
     o.type === 'DefundChannel'
   );
 }
-/**
- * A WalletObjective is a wire objective with a status, timestamps and an objectiveId
- *
- * Limited to 'OpenChannel', 'CloseChannel', 'SubmitChallenge' and 'DefundChannel' which are the only objectives
- * that are currently supported by the server wallet
- *
- */
 
 export const toWireObjective = (dbObj: WalletObjective<SupportedObjective>): SharedObjective => {
   if (dbObj.type === 'SubmitChallenge' || dbObj.type === 'DefundChannel') {
