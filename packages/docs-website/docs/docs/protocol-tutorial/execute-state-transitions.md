@@ -84,7 +84,7 @@ struct FixedPart {
 }
 ```
 
-which contains information which must be identical in every state channel update, and
+which contains information which cannot be changed for the lifetime of the channel (unless by [unanimous consensus](#shortcutting-validtransition)), and
 
 ```solidity
 struct VariablePart {
@@ -93,7 +93,7 @@ struct VariablePart {
 }
 ```
 
-which contains fields which are allowed to change. These structs are part of the contract API, and we can import helper functions to extract a javascript encoding of them:
+which contains fields which are allowed to be changed by the current mover (see below). These structs are part of the contract API, and we can import helper functions to extract a javascript encoding of them:
 
 ```typescript
 import {getFixedPart, getVariablePart} from '@statechannels/nitro-protocol';
@@ -348,3 +348,13 @@ const tx = NitroAdjudicator.checkpoint(
 );
 await(await tx).wait();
 ```
+
+## Shortcutting `validTransition`
+
+Notice that a state may be supported simply by having a full set of signatures (on from each participant). In such a case, there will be no `validTransiiton` check made by the chain. 
+
+State updates can always be made via unanimous consensus.
+
+This mechanism can be used to dynamically update the `FixedPart.challengeDuration` and/or the `FixedPart.appDefinition`. 
+
+The other members of [`FixedPart`](#fixed-and-variable-parts) cannot be changed, even by unanimous consensus, because that would imply a change in [`channelId`](./deposit-assets#compute-a-channel-id).
