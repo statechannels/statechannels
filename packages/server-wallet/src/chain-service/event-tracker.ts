@@ -30,20 +30,20 @@ export class EventTracker {
   }
 
   private isNewEvent(assetHolderAddress: Address, blockNumber: number, logIndex: number): boolean {
-    const latest = this.assetHolderMap.get(assetHolderAddress);
+    const eventRecord = this.assetHolderMap.get(assetHolderAddress);
     this.logger.debug(
       `EventTracker.isNewEvent: ${assetHolderAddress}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
-        latest || {}
+        eventRecord || {}
       )}`
     );
 
     let isNew = false;
     if (!this.assetHolderMap.has(assetHolderAddress)) {
       isNew = true;
-    } else if (blockNumber > (latest || 0)) {
+    } else if (blockNumber > (eventRecord?.blockNumber || 0)) {
       isNew = true;
-    } else if (blockNumber === (latest?.blockNumber || 0)) {
-      if (logIndex > (latest?.logIndex || 0)) {
+    } else if (blockNumber === (eventRecord?.blockNumber || 0)) {
+      if (logIndex > (eventRecord?.logIndex || 0)) {
         isNew = true;
       }
     }
