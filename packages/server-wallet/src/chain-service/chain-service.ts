@@ -27,7 +27,6 @@ import {
   providers,
   Wallet,
 } from 'ethers';
-import {Observable} from 'rxjs';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
@@ -50,7 +49,7 @@ import {
 import {EventTracker} from './event-tracker';
 
 const Deposited = 'Deposited' as const;
-const AllocationUpdated = 'AllocationUpdated';
+const AllocationUpdated = 'AllocationUpdated' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 const Concluded = 'Concluded' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
@@ -58,7 +57,6 @@ type AllocationUpdatedEvent = {
   type: 'AllocationUpdated';
   ethersEvent: Event;
 } & AssetOutcomeUpdatedArg;
-type AssetHolderEvent = DepositedEvent | AllocationUpdatedEvent;
 
 // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
 /* eslint-disable no-process-env, */
@@ -79,7 +77,7 @@ export class ChainService implements ChainServiceInterface {
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private allowanceMode: AllowanceMode;
-  private assetHolderToObservable: Map<Address, Observable<AssetHolderEvent>> = new Map();
+  private registeredContracts: Set<Address> = new Set();
   private addressToContract: Map<Address, Contract> = new Map();
   private channelToEventTrackers: Map<Bytes32, EventTracker[]> = new Map();
   // For convenience, can also use addressToContract map
@@ -470,37 +468,12 @@ export class ChainService implements ChainServiceInterface {
     // We're unsure if the same events are also played by contract observer callback,
     // but need to play it regardless, so subscribers won't miss anything.
     // See EventTracker documentation
-    await this.queryConfirmedEvents(contract, {}, confirmedBlock, async (...args) => {
-      const eventType = args.slice(-1)[0].event;
-      switch (eventType) {
-        case Deposited:
-          {
-            const depostedEvent = await this.getDepositedEvent(contract, ...args);
-            if (depostedEvent.channelId === channelId) {
-              eventTracker.holdingUpdated(
-                depostedEvent,
-                depostedEvent.ethersEvent.blockNumber,
-                depostedEvent.ethersEvent.logIndex
-              );
-            }
-          }
-          break;
-        case AllocationUpdated:
-          {
-            const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(contract, ...args);
-            if (allocationUpdatedEvent.channelId === channelId) {
-              eventTracker.assetOutcomeUpdated(
-                allocationUpdatedEvent,
-                allocationUpdatedEvent.ethersEvent.blockNumber,
-                allocationUpdatedEvent.ethersEvent.logIndex
-              );
-            }
-          }
-          break;
-        default:
-          this.logger.error(`event of type ${eventType} observed in holdingUpdated, ignored.`);
-      }
-    });
+    for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
+      e => e.blockNumber
+    )) {
+      await this.waitForConfirmations(ethersEvent);
+      this.onAssetHolderEvent(contract, ethersEvent);
+    }
   }
 
   private async waitForConfirmations(event: Event): Promise<void> {
@@ -514,59 +487,58 @@ export class ChainService implements ChainServiceInterface {
   }
 
   private setUpAssetHolderListener(assetHolderAddress: Address): void {
-    if (!this.assetHolderToObservable.get(assetHolderAddress)) {
+    if (!this.registeredContracts.has(assetHolderAddress)) {
       const contract = this.getOrAddContractMapping(assetHolderAddress);
-      const obs = this.addAssetHolderObservable(contract);
-      this.assetHolderToObservable.set(assetHolderAddress, obs);
+      this.listenForContractEvents(contract);
+      this.registeredContracts.add(assetHolderAddress);
     }
   }
 
-  private addAssetHolderObservable(assetHolderContract: Contract): Observable<AssetHolderEvent> {
-    // Create an observable that emits events on contract events
-    const obs = new Observable<AssetHolderEvent>(subs => {
-      // TODO: add other event types
-      this.subscribeToConfirmedEvents(assetHolderContract, Deposited, async (...args) => {
-        const depositedEvent = await this.getDepositedEvent(assetHolderContract, ...args);
-        return subs.next(depositedEvent);
-      });
-      this.subscribeToConfirmedEvents(assetHolderContract, AllocationUpdated, async (...args) => {
-        const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(
-          assetHolderContract,
-          ...args
-        );
-        return subs.next(allocationUpdatedEvent);
-      });
+  private listenForContractEvents(assetHolderContract: Contract): void {
+    // Listen to all contract events
+    assetHolderContract.on({}, async (ethersEvent: Event) => {
+      await this.waitForConfirmations(ethersEvent);
+      this.onAssetHolderEvent(assetHolderContract, ethersEvent);
     });
-    obs.subscribe({
-      next: async event => {
-        this.logger.debug(
-          {channelId: event.channelId, tx: event.ethersEvent?.transactionHash},
-          `Observed ${event.type} event on-chain; beginning to wait for confirmations`
-        );
-        this.channelToEventTrackers.get(event.channelId)?.forEach(eventTracker => {
-          switch (event.type) {
-            case Deposited:
-              eventTracker.holdingUpdated(
-                event,
-                event.ethersEvent.blockNumber,
-                event.ethersEvent.logIndex
-              );
-              break;
-            case AllocationUpdated:
-              eventTracker.assetOutcomeUpdated(
-                event,
-                event.ethersEvent.blockNumber,
-                event.ethersEvent.logIndex
-              );
-              break;
-            default:
-              throw new Error('Unexpected event from contract observable');
-          }
-        });
-      },
-    });
+  }
 
-    return obs;
+  private async onAssetHolderEvent(
+    assetHolderContract: Contract,
+    ethersEvent: Event
+  ): Promise<void> {
+    switch (ethersEvent.event) {
+      case Deposited:
+        {
+          const depostedEvent = await this.getDepositedEvent(assetHolderContract, ethersEvent);
+          this.channelToEventTrackers.get(depostedEvent.channelId)?.forEach(eventTracker => {
+            eventTracker.holdingUpdated(
+              depostedEvent,
+              depostedEvent.ethersEvent.blockNumber,
+              depostedEvent.ethersEvent.logIndex
+            );
+          });
+        }
+        break;
+      case AllocationUpdated:
+        {
+          const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(
+            assetHolderContract,
+            ethersEvent
+          );
+          this.channelToEventTrackers
+            .get(allocationUpdatedEvent.channelId)
+            ?.forEach(eventTracker => {
+              eventTracker.assetOutcomeUpdated(
+                allocationUpdatedEvent,
+                allocationUpdatedEvent.ethersEvent.blockNumber,
+                allocationUpdatedEvent.ethersEvent.logIndex
+              );
+            });
+        }
+        break;
+      default:
+        this.logger.error(`Unexpected event ${ethersEvent}`);
+    }
   }
 
   private async increaseAllowance(assetHolderAddress: Address, amount: string): Promise<void> {
@@ -651,26 +623,29 @@ export class ChainService implements ChainServiceInterface {
     }
   }
 
-  private async getDepositedEvent(
-    contract: Contract,
-    ...args: Array<any>
-  ): Promise<DepositedEvent> {
-    const [destination, _amountDeposited, destinationHoldings, ethersEvent] = args;
+  private async getDepositedEvent(contract: Contract, event: Event): Promise<DepositedEvent> {
+    if (!event.args) {
+      throw new Error('Deposited event must have args');
+    }
+    const [destination, _amountDeposited, destinationHoldings] = event.args;
     return {
       type: Deposited,
       channelId: destination,
       assetHolderAddress: makeAddress(contract.address),
       amount: BN.from(destinationHoldings),
-      ethersEvent: ethersEvent,
+      ethersEvent: event,
     };
   }
 
   private async getAllocationUpdatedEvent(
     contract: Contract,
-    ...args: Array<any>
+    event: Event
   ): Promise<AllocationUpdatedEvent> {
-    const [channelId, initialHoldings, ethersEvent] = args;
-    const tx = await this.provider.getTransaction(ethersEvent.transactionHash);
+    if (!event.args) {
+      throw new Error('Allocation event must have args');
+    }
+    const [channelId, initialHoldings] = event.args;
+    const tx = await this.provider.getTransaction(event.transactionHash);
 
     const {newAssetOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewAssetOutcome(
       contract.address,
@@ -687,7 +662,7 @@ export class ChainService implements ChainServiceInterface {
       externalPayouts: externalPayouts,
       internalPayouts: internalPayouts,
       newAssetOutcome: newAssetOutcome,
-      ethersEvent: ethersEvent,
+      ethersEvent: event,
     };
   }
 
