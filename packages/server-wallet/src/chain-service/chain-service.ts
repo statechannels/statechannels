@@ -18,15 +18,7 @@ import {
   toNitroSignedState,
   toNitroState,
 } from '@statechannels/wallet-core';
-import {
-  constants,
-  Contract,
-  ContractInterface,
-  Event,
-  EventFilter,
-  providers,
-  Wallet,
-} from 'ethers';
+import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
@@ -115,7 +107,7 @@ export class ChainService implements ChainServiceInterface {
       ContractArtifacts.NitroAdjudicatorArtifact.abi
     );
 
-    this.subscribeToConfirmedEvents(this.nitroAdjudicator, ChallengeRegistered, (...args) => {
+    this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
       const event = getChallengeRegisteredEvent(args);
       this.addFinalizingChannel({channelId: event.channelId, finalizesAtS: event.finalizesAt});
 
@@ -130,7 +122,7 @@ export class ChainService implements ChainServiceInterface {
       );
     });
 
-    this.subscribeToConfirmedEvents(this.nitroAdjudicator, Concluded, (channelId, finalizesAtS) => {
+    this.nitroAdjudicator.on(Concluded, (channelId, finalizesAtS) => {
       this.addFinalizingChannel({channelId, finalizesAtS});
     });
 
@@ -595,31 +587,6 @@ export class ChainService implements ChainServiceInterface {
           break;
         }
       }
-    }
-  }
-
-  private subscribeToConfirmedEvents(
-    contract: Contract,
-    eventFilter: EventFilter | string,
-    listener: (...args: Array<any>) => void
-  ): void {
-    contract.on(eventFilter, async (...args) => {
-      await this.waitForConfirmations(args.slice(-1)[0]);
-      listener(...args);
-    });
-  }
-
-  private async queryConfirmedEvents(
-    contract: Contract,
-    eventFilter: EventFilter,
-    fromBlock: number,
-    listener: (...args: Array<any>) => void
-  ): Promise<void> {
-    for (const ethersEvent of (await contract.queryFilter(eventFilter, fromBlock)).sort(
-      e => e.blockNumber
-    )) {
-      await this.waitForConfirmations(ethersEvent);
-      listener(...(ethersEvent.args || []), ethersEvent);
     }
   }
 

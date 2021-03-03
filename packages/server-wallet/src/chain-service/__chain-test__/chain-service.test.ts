@@ -340,8 +340,9 @@ describe('registerChannel', () => {
       });
     });
     fundChannel(8, 2, channelId, ethAssetHolderAddress);
-    mineBlocksSlow(20);
+    const q = mineBlocksSlow(10);
     await p;
+    await q;
   });
 
   it('Channel with multiple asset holders', async () => {
@@ -375,10 +376,11 @@ describe('registerChannel', () => {
       holdingUpdated,
     });
 
-    mineBlocksSlow(20);
+    const q = mineBlocksSlow(10);
     fundChannel(0, 5, channelId, ethAssetHolderAddress);
     fundChannel(0, 5, channelId, erc20AssetHolderAddress);
     await p;
+    await q;
   });
 });
 
@@ -591,7 +593,7 @@ describe('challenge', () => {
           })
         )
     );
-    mineBlocksSlow(20);
+    const q = mineBlocksSlow(10);
     await Promise.all(
       channelIds.map(channelId => waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress))
     );
@@ -617,6 +619,7 @@ describe('challenge', () => {
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(2));
     expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(6));
+    await q;
   });
 
   it('triggers challenge registered when a challenge is raised', async () => {
@@ -663,7 +666,7 @@ describe('challenge', () => {
       })
     );
 
-    mineBlocksSlow(20);
+    const q = mineBlocksSlow(10);
 
     await waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress);
 
@@ -682,6 +685,7 @@ describe('challenge', () => {
     );
 
     expect(result.channelId).toEqual(channelId);
+    await q;
   });
 });
 
