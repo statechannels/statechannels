@@ -420,7 +420,7 @@ export class ChainService implements ChainServiceInterface {
     eventTracker: EventTracker
   ): Promise<void> {
     const currentBlock = await this.provider.getBlockNumber();
-    const confirmedBlock = currentBlock - this.blockConfirmations + 1;
+    const confirmedBlock = currentBlock - this.blockConfirmations;
     const currentHolding = BN.from(await contract.holdings(channelId));
     let confirmedHolding = BN.from(0);
     try {
@@ -435,11 +435,13 @@ export class ChainService implements ChainServiceInterface {
         `Successfully read confirmedHoldings (${confirmedHolding}), from block ${confirmedBlock}.`
       );
     } catch (e) {
-      // We should have e.code="CALL_EXCEPTION", but gaven currentHolding query succeeded,
+      // We should have e.code="CALL_EXCEPTION", but given currentHolding query succeeded,
       // the cause of exception is obvious
-      this.logger.debug(
-        `Error caught while trying to query confirmed holding in block ${confirmedBlock},` +
-          `this is likely due to the channel is new, safe to ignore, error is ${JSON.stringify(e)}`
+      this.logger.error(
+        `Error caught while trying to query confirmed holding in block ${confirmedBlock}. ` +
+          `This is likely because the channel is new and is safe to ignore. The error is ${JSON.stringify(
+            e
+          )}`
       );
     }
 
@@ -460,9 +462,8 @@ export class ChainService implements ChainServiceInterface {
     // We're unsure if the same events are also played by contract observer callback,
     // but need to play it regardless, so subscribers won't miss anything.
     // See EventTracker documentation
-    for (const ethersEvent of (await contract.queryFilter({}, confirmedBlock)).sort(
-      e => e.blockNumber
-    )) {
+    const ethersEvents = (await contract.queryFilter({}, confirmedBlock)).sort(e => e.blockNumber);
+    for (const ethersEvent of ethersEvents) {
       await this.waitForConfirmations(ethersEvent);
       this.onAssetHolderEvent(contract, ethersEvent);
     }
