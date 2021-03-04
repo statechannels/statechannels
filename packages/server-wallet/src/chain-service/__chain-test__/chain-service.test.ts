@@ -60,17 +60,6 @@ async function mineBlocks() {
   }
 }
 
-// Mine blocks in a slower speed, leave time for async events
-// to be processed
-async function mineBlocksSlow(steps: number) {
-  for (const _i of _.range(steps)) {
-    await mineBlock();
-    await new Promise(resolve => {
-      setTimeout(resolve, 500);
-    });
-  }
-}
-
 jest.setTimeout(20_000);
 // The test nitro adjudicator allows us to set channel storage
 const testAdjudicator = new Contract(
@@ -355,9 +344,10 @@ describe('registerChannel', () => {
       holdingUpdated,
     });
 
-    fundChannel(0, 5, channelId, ethAssetHolderAddress);
-    fundChannel(0, 5, channelId, erc20AssetHolderAddress);
-    await mineBlocksSlow(10);
+    await waitForChannelFunding(0, 5, channelId, ethAssetHolderAddress);
+    await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
+    // No need to wait for block mining. The promise below will not resolve until after the 5th block is mined
+    mineBlocks();
     await p;
   });
 });
@@ -365,35 +355,40 @@ describe('registerChannel', () => {
 describe('unconfirmedEvents', () => {
   it('Unconfirmed deposits are not missed', async () => {
     const channelId = randomChannelId();
-    await waitForChannelFunding(0, 1, channelId);
-    await waitForChannelFunding(1, 1, channelId);
-    await waitForChannelFunding(2, 1, channelId);
-    await waitForChannelFunding(3, 1, channelId);
-    await waitForChannelFunding(4, 1, channelId);
-    await waitForChannelFunding(5, 1, channelId);
-    await waitForChannelFunding(6, 1, channelId);
-    await waitForChannelFunding(7, 1, channelId);
-    await waitForChannelFunding(8, 1, channelId);
+    for (const expectedHeld of _.range(10)) {
+      await waitForChannelFunding(expectedHeld, 1, channelId);
+    }
 
     // Some depositied events are unconfirmed when we register channel,
     // make sure they're not missed
-    let lastNumber = -1;
+    let lastObservedAmount = -1;
+    let numberOfEventsObserved = 0;
     const p = new Promise(resolve => {
       chainService.registerChannel(channelId, [ethAssetHolderAddress], {
         ...defaultNoopListeners,
         holdingUpdated: arg => {
-          const received = parseInt(BN.from(arg.amount));
-          if (lastNumber >= 0) {
-            expect(lastNumber + 1).toEqual(received);
+          const received = parseInt(arg.amount);
+
+          console.log(`Received is ${received}`);
+          if (lastObservedAmount >= 0 && numberOfEventsObserved !== 1) {
+            // To understand why duplicate events are possible, consult chain-service getInitialHoldings
+            if (numberOfEventsObserved === 1) {
+              expect([lastObservedAmount, lastObservedAmount + 1]).toContain(received);
+            } else {
+              expect(received).toEqual(lastObservedAmount + 1);
+            }
           }
-          lastNumber = received;
-          if (lastNumber === 10) resolve(true);
+          if (received === 10) {
+            resolve(true);
+            return;
+          }
+          lastObservedAmount = received;
+          numberOfEventsObserved++;
+          mineBlock();
         },
       });
     });
 
-    waitForChannelFunding(9, 1, channelId, ethAssetHolderAddress);
-    await mineBlocksSlow(10);
     await p;
   });
 });
@@ -461,7 +456,7 @@ describe('concludeAndWithdraw', () => {
     await p;
   });
 
-  it('Successful concludeAndWithdraw with erc20 allocation', async () => {
+  it('Register channel -> concludeAndWithdraw -> mine confirmation blocks for erc20', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
@@ -508,7 +503,7 @@ describe('concludeAndWithdraw', () => {
     await p;
   });
 
-  it('Unconfirmed concludeAndWithdraw while registering channel works as expected', async () => {
+  it('concludeAndWithdraw -> register channel -> mine confirmation blocks for erc20', async () => {
     const {channelId, aAddress, bAddress, state, signatures} = await setUpConclude(false);
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
@@ -632,7 +627,6 @@ describe('challenge', () => {
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(2));
     expect(await provider.getBalance(bDestinationAddress)).toEqual(BigNumber.from(6));
-    await mineBlocksSlow(10);
   });
 
   it('triggers challenge registered when a challenge is raised', async () => {
@@ -696,7 +690,6 @@ describe('challenge', () => {
     );
 
     expect(result.channelId).toEqual(channelId);
-    await mineBlocksSlow(10);
   });
 });
 
