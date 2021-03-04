@@ -369,7 +369,6 @@ describe('unconfirmedEvents', () => {
         holdingUpdated: arg => {
           const received = parseInt(arg.amount);
 
-          console.log(`Received is ${received}`);
           if (lastObservedAmount >= 0 && numberOfEventsObserved !== 1) {
             // To understand why duplicate events are possible, consult chain-service getInitialHoldings
             if (numberOfEventsObserved === 1) {
