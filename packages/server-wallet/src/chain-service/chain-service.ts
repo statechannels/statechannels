@@ -449,7 +449,19 @@ export class ChainService implements ChainServiceInterface {
       `getConfirmedHoldings: from block ${confirmedBlock}, confirmed holding ${confirmedHolding}, current holding ${currentHolding}.`
     );
 
-    // Report confirmed holding immediately
+    /**
+     * Report confirmed holding immediately.
+     *
+     * TODO: below can result in duplicate notifications to subscribers. Consider the following:
+     * 1. Funds are deposited on block 0, generating a deposit event D.
+     * 2. Events are defined as confirmed when the 5th block is mined after a transaction.
+     * 3. A channel is registered with the chain service at block 5.
+     * 4. We check for confirmed events:
+     *      D is confirmed, so holdingUpdated is called with the block number 0 and the correct log index.
+     * 5. We check for confirmed holdings:
+     *      Holdings in block 5 are confirmed, so holdingUpdated is called with block number of 0 and the DEFAULT log index.
+     * 6. Subscribers are notified of the holdings twice.
+     */
     eventTracker.holdingUpdated(
       {
         channelId: channelId,
