@@ -6,7 +6,7 @@ import '../interfaces/IForceMoveApp.sol';
 import '../Outcome.sol';
 
 /**
- * @dev The HashLock contract complies with the ForceMoveApp interface and implements a time-limited hashlocked payment
+ * @dev The HashLock contract complies with the ForceMoveApp interface and implements a hashlocked payment
  */
 contract HashLock is IForceMoveApp {
     struct AppData {
@@ -18,11 +18,10 @@ contract HashLock is IForceMoveApp {
         VariablePart memory a,
         VariablePart memory b,
         uint48 turnNumB,
-        uint256 nParticipants,
+        uint256
     ) public override pure returns (bool) {
-
         // is this the first and only swap?
-        require(turnNumB == 4);
+        require(turnNumB == 4, 'turnNumB != 4');
 
         // Decode variables.
         // Assumptions:
@@ -38,15 +37,18 @@ contract HashLock is IForceMoveApp {
         require(keccak256(preImage) == h, 'Incorrect preimage');
 
         // slots for each participant unchanged
-        require(allocationA[0].destination == allocationB[0].destination);
-        require(allocationA[1].destination == allocationB[1].destination);
+        require(
+            allocationA[0].destination == allocationB[0].destination &&
+                allocationA[1].destination == allocationB[1].destination,
+            'destinations may not change'
+        );
 
         // was the payment made?
-        require(allocationA[0].amount == allocationB[1].amount);
-        require(allocationA[1].amount == allocationB[0].amount);
-
-        // is this the first and only swap?
-        require(turnNumB == 4);
+        require(
+            allocationA[0].amount == allocationB[1].amount &&
+                allocationA[1].amount == allocationB[0].amount,
+            'amounts must be permuted'
+        );
 
         return true;
     }
@@ -78,6 +80,6 @@ contract HashLock is IForceMoveApp {
         );
 
         // Throws unless there are exactly 2 allocations
-        require(allocation.length == 2, 'There must be exactly 2 allocation');
+        require(allocation.length == 2, 'allocation.length != 2');
     }
 }
