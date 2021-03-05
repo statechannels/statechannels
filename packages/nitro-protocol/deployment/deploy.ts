@@ -7,6 +7,7 @@ import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20Asset
 import ethAssetHolderArtifact from '../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import singleAssetPaymentsArtifact from '../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
+import hashLockArtifact from '../artifacts/contracts/examples/HashLock.sol/HashLock.json';
 import testAssetHolderArtifact1 from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import testAssetHolderArtifact2 from '../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
 import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
@@ -27,6 +28,7 @@ export async function deploy(): Promise<Record<string, string>> {
   const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(nitroAdjudicatorArtifact as any);
 
   const COUNTING_APP_ADDRESS = await deployer.deploy(countingAppArtifact as any);
+  const HASH_LOCK_ADDRESS = await deployer.deploy(hashLockArtifact as any);
   const SINGLE_ASSET_PAYMENT_ADDRESS = await deployer.deploy(singleAssetPaymentsArtifact as any);
   const TEST_NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(testNitroAdjudicatorArtifact as any);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(trivialAppArtifact as any);
@@ -63,6 +65,7 @@ export async function deploy(): Promise<Record<string, string>> {
   return {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
+    HASH_LOCK_ADDRESS,
     SINGLE_ASSET_PAYMENT_ADDRESS,
     TRIVIAL_APP_ADDRESS,
     TEST_FORCE_MOVE_ADDRESS,
