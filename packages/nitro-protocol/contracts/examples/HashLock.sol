@@ -17,9 +17,13 @@ contract HashLock is IForceMoveApp {
     function validTransition(
         VariablePart memory a,
         VariablePart memory b,
-        uint48,
-        uint256
+        uint48 turnNumB,
+        uint256 nParticipants,
     ) public override pure returns (bool) {
+
+        // is this the first and only swap?
+        require(turnNumB == 4);
+
         // Decode variables.
         // Assumptions:
         //  - single asset in this channel
@@ -40,6 +44,9 @@ contract HashLock is IForceMoveApp {
         // was the payment made?
         require(allocationA[0].amount == allocationB[1].amount);
         require(allocationA[1].amount == allocationB[0].amount);
+
+        // is this the first and only swap?
+        require(turnNumB == 4);
 
         return true;
     }
