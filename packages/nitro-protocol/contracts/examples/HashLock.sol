@@ -50,13 +50,27 @@ contract HashLock is IForceMoveApp {
         returns (Outcome.AllocationItem[] memory allocation)
     {
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+
+        // Throws if more than one asset
+        require(outcome.length == 1, 'outcome: Only one asset allowed');
+
         Outcome.AssetOutcome memory assetOutcome = abi.decode(
             outcome[0].assetOutcomeBytes,
             (Outcome.AssetOutcome)
         );
+
+        // Throws unless the assetoutcome is an allocation
+        require(
+            assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            'AssetOutcome must be Allocation'
+        );
+
         allocation = abi.decode(
             assetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
+
+        // Throws unless there are exactly 2 allocations
+        require(allocation.length == 2, 'There must be exactly 2 allocation');
     }
 }
