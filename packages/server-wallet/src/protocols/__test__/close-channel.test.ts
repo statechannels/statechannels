@@ -1,10 +1,12 @@
+import {CloseChannel} from '@statechannels/wallet-core';
+
 import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {MockChainService} from '../../chain-service';
 import {defaultTestConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
-import {DBCloseChannelObjective, ObjectiveModel} from '../../models/objective';
+import {WalletObjective, ObjectiveModel} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
@@ -88,7 +90,7 @@ interface SetupParams {
 const setup = async (
   testChan: TestChannel,
   args: SetupParams
-): Promise<DBCloseChannelObjective> => {
+): Promise<WalletObjective<CloseChannel>> => {
   const {participant, statesHeld} = args;
   const totalFunds = args.totalFunds !== undefined ? args.totalFunds : testChan.startBal;
 
@@ -100,7 +102,7 @@ const setup = async (
 
   // add the closeChannel objective and approve
   const objective = await store.transaction(async tx => {
-    const o = await ObjectiveModel.insert<DBCloseChannelObjective>(
+    const o = await ObjectiveModel.insert(
       testChan.closeChannelObjective([participant, 1 - participant]),
       true, // preApproved
       tx
@@ -118,7 +120,7 @@ interface AssertionParams {
 }
 
 const crankAndAssert = async (
-  objective: DBCloseChannelObjective,
+  objective: WalletObjective<CloseChannel>,
   args: AssertionParams
 ): Promise<void> => {
   const statesToSign = args.statesToSign || [];

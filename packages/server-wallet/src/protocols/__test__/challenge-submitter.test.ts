@@ -7,7 +7,7 @@ import {defaultTestConfig} from '../../config';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
-import {DBSubmitChallengeObjective, ObjectiveModel} from '../../models/objective';
+import {WalletObjective, ObjectiveModel} from '../../models/objective';
 import {ChallengeSubmitter} from '../challenge-submitter';
 import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -51,11 +51,11 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const dbObjective = await knex.transaction(async tx =>
-      ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
+    const walletObjective = await knex.transaction(async tx =>
+      ObjectiveModel.insert(obj, false, tx)
     );
 
-    await await crankAndAssert(dbObjective, {callsChallenge: false, completesObj: false});
+    await await crankAndAssert(walletObjective, {callsChallenge: false, completesObj: false});
   });
   it(`takes no action if there is an existing challenge`, async () => {
     const c = channel();
@@ -71,9 +71,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx =>
-      ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
-    );
+    const objective = await knex.transaction(tx => ObjectiveModel.insert(obj, false, tx));
 
     await await crankAndAssert(objective, {callsChallenge: false, completesObj: false});
   });
@@ -92,9 +90,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx =>
-      ObjectiveModel.insert<DBSubmitChallengeObjective>(obj, false, tx)
-    );
+    const objective = await knex.transaction(tx => ObjectiveModel.insert(obj, false, tx));
     await await crankAndAssert(objective, {
       callsChallenge: true,
       completesObj: true,
@@ -108,7 +104,7 @@ interface AssertionParams {
 }
 
 const crankAndAssert = async (
-  objective: DBSubmitChallengeObjective,
+  objective: WalletObjective<SubmitChallenge>,
   args: AssertionParams
 ): Promise<void> => {
   const completesObj = args.completesObj || false;

@@ -1,11 +1,11 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
 import Knex from 'knex';
 
-import {peerWallets, getPeersSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
-import {DBObjective, ObjectiveModel} from '../../models/objective';
-import {createChannelArgs} from '../../wallet/__test__/fixtures/create-channel';
-import {bob} from '../../wallet/__test__/fixtures/participants';
-import {getChannelResultFor, getPayloadFor} from '../test-helpers';
+import {peerWallets, getPeersSetup, peersTeardown} from '../../jest/with-peers-setup-teardown';
+import {WalletObjective, ObjectiveModel} from '../models/objective';
+import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
+import {bob} from '../wallet/__test__/fixtures/participants';
+import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 jest.setTimeout(10_000);
 
@@ -123,7 +123,7 @@ test('Can successfully push the sync objective message multiple times', async ()
   //expect(newObjectives).toHaveLength(0);
 });
 
-async function getObjective(knex: Knex, objectiveId: string): Promise<DBObjective | undefined> {
+async function getObjective(knex: Knex, objectiveId: string): Promise<WalletObjective | undefined> {
   const model = await ObjectiveModel.query(knex).findById(objectiveId);
   return model?.toObjective();
 }

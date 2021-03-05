@@ -1,11 +1,11 @@
-import {SignedState, State} from '@statechannels/wallet-core';
+import {SignedState, State, SubmitChallenge} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
-import {DBSubmitChallengeObjective} from '../models/objective';
+import {WalletObjective} from '../models/objective';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
@@ -17,7 +17,7 @@ export const enum WaitingFor {
   existingChallenge = 'ChallengeSubmitter.existingChallenge',
 }
 
-export class ChallengeSubmitter implements Cranker<DBSubmitChallengeObjective> {
+export class ChallengeSubmitter implements Cranker<WalletObjective<SubmitChallenge>> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
@@ -34,7 +34,7 @@ export class ChallengeSubmitter implements Cranker<DBSubmitChallengeObjective> {
     return new ChallengeSubmitter(store, chainService, logger, timingMetrics);
   }
   public async crank(
-    objective: DBSubmitChallengeObjective,
+    objective: WalletObjective<SubmitChallenge>,
     response: WalletResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {

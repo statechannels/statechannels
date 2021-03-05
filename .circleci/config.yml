@@ -173,6 +173,20 @@ jobs:
           no_output_timeout: 30m
       - upload_artifacts
 
+  server-wallet-with-peers-test:
+    <<: *postgres
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet-with-peers-test
+          working_directory: packages/server-wallet
+          command: yarn test:with-peers
+          no_output_timeout: 30m
+      - upload_artifacts
+
   server-wallet-stress-test-threaded:
     <<: *postgres
     resource_class: xlarge
@@ -295,7 +309,9 @@ workflows:
       - server-wallet-stress-test-threaded:
           requires:
             - prepare
-
+      - server-wallet-with-peers-test:
+          requires:
+            - prepare
       - server-wallet-e2e-test:
           requires:
             - prepare

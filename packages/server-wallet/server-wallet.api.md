@@ -31,7 +31,6 @@ import { Payload as Message } from '@statechannels/wallet-core';
 import { MessageQueuedNotification } from '@statechannels/client-api-schema';
 import { Model } from 'objection';
 import { ModelOptions } from 'objection';
-import { Objective } from '@statechannels/wallet-core';
 import { OpenChannel } from '@statechannels/wallet-core';
 import { Outcome } from '@statechannels/wallet-core';
 import { Participant } from '@statechannels/wallet-core';
@@ -163,7 +162,7 @@ export type MetricsConfiguration = {
 export type MultipleChannelOutput = {
     outbox: Outgoing[];
     channelResults: ChannelResult[];
-    newObjectives: DBObjective[];
+    newObjectives: WalletObjective[];
 };
 
 // @public
@@ -255,7 +254,7 @@ export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWall
 export type SingleChannelOutput = {
     outbox: Outgoing[];
     channelResult: ChannelResult;
-    newObjective: DBObjective | undefined;
+    newObjective: WalletObjective | undefined;
 };
 
 // Warning: (ae-forgotten-export) The symbol "EventEmitterType" needs to be exported by the entry point index.d.ts
@@ -292,7 +291,7 @@ export class SingleThreadedWallet extends EventEmitter<EventEmitterType> impleme
     destroy(): Promise<void>;
     getChannels(): Promise<MultipleChannelOutput>;
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
-    getObjective(objectiveId: string): Promise<DBObjective>;
+    getObjective(objectiveId: string): Promise<WalletObjective>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
@@ -400,6 +399,6 @@ export interface WalletInterface {
 
 // Warnings were encountered during analysis:
 //
-// src/wallet/types.ts:30:3 - (ae-forgotten-export) The symbol "DBObjective" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:30:3 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 
 ```

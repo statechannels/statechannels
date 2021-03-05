@@ -1,8 +1,8 @@
-import {makeAddress, State} from '@statechannels/wallet-core';
+import {DefundChannel, makeAddress, State} from '@statechannels/wallet-core';
 
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
-import {DBDefundChannelObjective, ObjectiveModel} from '../../models/objective';
+import {WalletObjective, ObjectiveModel} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -31,8 +31,8 @@ const FINAL = 10; // this will be A's state to sign
 const testChan = TestChannel.create({aBal: 5, bBal: 5});
 const testChan2 = TestChannel.create({aBal: 5, bBal: 5, finalFrom: FINAL});
 
-let objective: DBDefundChannelObjective;
-let objective2: DBDefundChannelObjective;
+let objective: WalletObjective<DefundChannel>;
+let objective2: WalletObjective<DefundChannel>;
 
 let pushSpy: jest.SpyInstance;
 let withdrawSpy: jest.SpyInstance;
@@ -60,7 +60,7 @@ beforeEach(async () => {
     states: [FINAL, FINAL + 1],
   });
 
-  objective = await ObjectiveModel.insert<DBDefundChannelObjective>(
+  objective = await ObjectiveModel.insert(
     {
       type: 'DefundChannel',
       participants: [],
@@ -70,7 +70,7 @@ beforeEach(async () => {
     knex
   );
 
-  objective2 = await ObjectiveModel.insert<DBDefundChannelObjective>(
+  objective2 = await ObjectiveModel.insert(
     {
       type: 'DefundChannel',
       participants: [],
@@ -207,7 +207,7 @@ async function setAdjudicatorStatus(
   }
 }
 
-async function crankChannelDefunder(objective: DBDefundChannelObjective) {
+async function crankChannelDefunder(objective: WalletObjective<DefundChannel>) {
   return store.transaction(async tx => {
     return channelDefunder.crank(objective, WalletResponse.initialize(), tx);
   });

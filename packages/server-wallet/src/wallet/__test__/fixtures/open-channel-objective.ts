@@ -1,11 +1,13 @@
-import {DBOpenChannelObjective} from '../../../models/objective';
+import {OpenChannel} from '@statechannels/wallet-core';
+
+import {WalletObjective} from '../../../models/objective';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {WaitingFor} from '../../../protocols/channel-opener';
 
 import {alice, bob} from './participants';
 import {fixture} from './utils';
 
-const defaultObjective: DBOpenChannelObjective = {
+const defaultObjective: WalletObjective<OpenChannel> = {
   data: {targetChannelId: channel().channelId, role: 'app', fundingStrategy: 'Direct'},
   participants: [alice(), bob()],
   type: 'OpenChannel',

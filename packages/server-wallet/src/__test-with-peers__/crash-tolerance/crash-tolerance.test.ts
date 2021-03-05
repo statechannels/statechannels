@@ -12,8 +12,13 @@ import {
   participantB,
   peersTeardown,
   peerWallets,
-} from '../../../../jest/with-peers-setup-teardown';
-import {crashAndRestart, getChannelResultFor, getPayloadFor, ONE_DAY} from '../../test-helpers';
+} from '../../../jest/with-peers-setup-teardown';
+import {
+  crashAndRestart,
+  getChannelResultFor,
+  getPayloadFor,
+  ONE_DAY,
+} from '../../__test__/test-helpers';
 
 let channelId: string;
 jest.setTimeout(10_000);

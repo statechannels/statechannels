@@ -1,10 +1,10 @@
 import {Logger} from 'pino';
-import {unreachable} from '@statechannels/wallet-core';
+import {OpenChannel, unreachable} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'objection';
 
 import {Store} from '../wallet/store';
-import {DBOpenChannelObjective} from '../models/objective';
+import {WalletObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
@@ -19,7 +19,7 @@ export enum WaitingFor {
   funding = 'ChannelOpener.funding', // TODO reuse ChannelFunder.waitingFor,
 }
 
-export class ChannelOpener implements Cranker<DBOpenChannelObjective> {
+export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
@@ -37,7 +37,7 @@ export class ChannelOpener implements Cranker<DBOpenChannelObjective> {
   }
 
   public async crank(
-    objective: DBOpenChannelObjective,
+    objective: WalletObjective<OpenChannel>,
     response: WalletResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {
@@ -81,7 +81,7 @@ export class ChannelOpener implements Cranker<DBOpenChannelObjective> {
   }
 
   private async crankChannelFunder(
-    objective: DBOpenChannelObjective,
+    objective: WalletObjective<OpenChannel>,
     channel: Channel,
     response: WalletResponse,
     tx: Transaction

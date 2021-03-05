@@ -1,11 +1,16 @@
-import {checkThat, isSimpleAllocation, StateVariables} from '@statechannels/wallet-core';
+import {
+  checkThat,
+  CloseChannel,
+  isSimpleAllocation,
+  StateVariables,
+} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
 
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
-import {DBCloseChannelObjective} from '../models/objective';
+import {WalletObjective} from '../models/objective';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
 import {Cranker, Nothing} from '../objectives/objective-manager';
@@ -18,7 +23,7 @@ export const enum WaitingFor {
   defunding = 'ChannelCloser.defunding',
 }
 
-export class ChannelCloser implements Cranker<DBCloseChannelObjective> {
+export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
@@ -36,7 +41,7 @@ export class ChannelCloser implements Cranker<DBCloseChannelObjective> {
   }
 
   public async crank(
-    objective: DBCloseChannelObjective,
+    objective: WalletObjective<CloseChannel>,
     response: WalletResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {
@@ -127,7 +132,7 @@ export class ChannelCloser implements Cranker<DBCloseChannelObjective> {
   }
 
   private async completeObjective(
-    objective: DBCloseChannelObjective,
+    objective: WalletObjective<CloseChannel>,
     channel: Channel,
     tx: Transaction,
     response: WalletResponse

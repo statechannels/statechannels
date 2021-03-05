@@ -1,8 +1,9 @@
+import {DefundChannel} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
 import {ChainServiceInterface} from '../chain-service';
-import {DBDefundChannelObjective} from '../models/objective';
+import {WalletObjective} from '../models/objective';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../wallet/store';
 import {WalletResponse} from '../wallet/wallet-response';
@@ -13,7 +14,7 @@ export const enum WaitingFor {
   transactionSubmission = 'ChannelDefunder.transactionSubmission',
 }
 
-export class ChannelDefunder implements Cranker<DBDefundChannelObjective> {
+export class ChannelDefunder implements Cranker<WalletObjective<DefundChannel>> {
   constructor(
     private store: Store,
     private chainService: ChainServiceInterface,
@@ -30,7 +31,7 @@ export class ChannelDefunder implements Cranker<DBDefundChannelObjective> {
   }
 
   public async crank(
-    objective: DBDefundChannelObjective,
+    objective: WalletObjective<DefundChannel>,
     response: WalletResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {

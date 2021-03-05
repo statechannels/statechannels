@@ -24,8 +24,8 @@ import {SignedState as WireState, Payload} from '@statechannels/wire-format';
 import {utils} from 'ethers';
 
 import {Channel} from '../../../models/channel';
-import {DBOpenChannelObjective, ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
+import {WalletObjective, ObjectiveModel} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
@@ -264,7 +264,7 @@ export class TestChannel {
   public async insertInto(
     store: Store,
     args: InsertionParams = {}
-  ): Promise<DBOpenChannelObjective> {
+  ): Promise<WalletObjective<OpenChannel>> {
     const {states, participant, bals} = {states: [0], participant: 0, ...args};
 
     // load the signingKey for the appopriate participant
@@ -290,11 +290,7 @@ export class TestChannel {
     });
 
     // insert the OpenChannel objective
-    const objective = await ObjectiveModel.insert<DBOpenChannelObjective>(
-      this.openChannelObjective,
-      true,
-      store.knex
-    );
+    const objective = await ObjectiveModel.insert(this.openChannelObjective, true, store.knex);
 
     return objective;
   }

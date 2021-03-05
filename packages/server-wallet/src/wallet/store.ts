@@ -39,7 +39,7 @@ import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} f
 import {isReverseSorted, pick} from '../utilities/helpers';
 import {Funding, TransferredOutEntry} from '../models/funding';
 import {Nonce} from '../models/nonce';
-import {ObjectiveModel, DBObjective, isSupportedObjective} from '../models/objective';
+import {ObjectiveModel, WalletObjective, isSupportedObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
@@ -269,7 +269,7 @@ export class Store {
     return {states: vars.map(ss => _.merge(ss, channelConstants)), channelState};
   }
 
-  async getObjectivesByIds(objectiveIds: string[]): Promise<DBObjective[]> {
+  async getObjectivesByIds(objectiveIds: string[]): Promise<WalletObjective[]> {
     return ObjectiveModel.forIds(objectiveIds, this.knex);
   }
 
@@ -299,7 +299,7 @@ export class Store {
   ): Promise<{
     channelIds: Bytes32[];
     channelResults: ChannelResult[];
-    storedObjectives: DBObjective[];
+    storedObjectives: WalletObjective[];
   }> {
     return this.knex.transaction(async tx => {
       const channelResults: ChannelResult[] = [];
@@ -314,7 +314,7 @@ export class Store {
       }
 
       const deserializedObjectives = message.objectives?.map(deserializeObjective) || [];
-      const storedObjectives: DBObjective[] = [];
+      const storedObjectives: WalletObjective[] = [];
       for (const o of deserializedObjectives) {
         if (isSupportedObjective(o)) {
           const preApprove = o.type == 'CloseChannel'; // Close channel objectives do not need co-operative approval
@@ -340,7 +340,7 @@ export class Store {
     });
   }
 
-  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<DBObjective[]> {
+  async getObjectives(channelIds: Bytes32[], tx?: Transaction): Promise<WalletObjective[]> {
     return await ObjectiveModel.forChannelIds(channelIds, tx || this.knex);
   }
 
@@ -368,7 +368,7 @@ export class Store {
     }
   }
 
-  async markObjectiveStatus<O extends DBObjective>(
+  async markObjectiveStatus<O extends WalletObjective>(
     objective: O,
     status: 'succeeded' | 'failed',
     tx?: Transaction
@@ -404,7 +404,7 @@ export class Store {
     await AppBytecode.upsertBytecode(chainNetworkId, appDefinition, bytecode, this.knex);
   }
 
-  async getObjective(objectiveId: string, tx?: TransactionOrKnex): Promise<DBObjective> {
+  async getObjective(objectiveId: string, tx?: TransactionOrKnex): Promise<WalletObjective> {
     tx = tx || this.knex; // TODO: make tx required
     return await ObjectiveModel.forId(objectiveId, tx);
   }
@@ -414,7 +414,7 @@ export class Store {
    * @param objectiveId
    * @param tx
    */
-  async getAndLockObjective(objectiveId: string, tx: Transaction): Promise<DBObjective> {
+  async getAndLockObjective(objectiveId: string, tx: Transaction): Promise<WalletObjective> {
     return (await ObjectiveModel.query(tx).findById(objectiveId).forUpdate()).toObjective();
   }
 
@@ -595,7 +595,7 @@ export class Store {
     fundingStrategy: FundingStrategy,
     role: 'app' | 'ledger' = 'app',
     fundingLedgerChannelId?: Bytes32
-  ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: DBObjective}> {
+  ): Promise<{channel: ChannelState; firstSignedState: SignedState; objective: WalletObjective}> {
     return await this.knex.transaction(async tx => {
       const channel = await createChannel(constants, fundingStrategy, fundingLedgerChannelId, tx);
       const {channelId, participants} = channel;

@@ -58,7 +58,7 @@ import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
-import {DBObjective, ObjectiveModel} from '../models/objective';
+import {WalletObjective, ObjectiveModel} from '../models/objective';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -790,9 +790,9 @@ export class SingleThreadedWallet
   /**
    * Gets the objective for a given id.
    *
-   * @returns A promise that resolves to a DBObjective, with a progressLastMadeAt timestamp
+   * @returns A promise that resolves to a WalletObjective, with a progressLastMadeAt timestamp
    */
-  async getObjective(objectiveId: string): Promise<DBObjective> {
+  async getObjective(objectiveId: string): Promise<WalletObjective> {
     return this.store.getObjective(objectiveId);
   }
 
