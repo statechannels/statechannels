@@ -112,10 +112,11 @@ const accepts1 = '{ETH: {A: 1}}';
 const accepts2 = '{ETH: {A: 1}, ETH2: {A: 2}}';
 const accepts3 = '{ETH2: {A: 1, B: 1}}';
 const accepts4 = '{ERC20: {A: 1, B: 1}}';
-const accepts5 = '{ERC20: {At: 1, Bt: 1}} (At and Bt already have some TOK)';
-const accepts6 = '10 TOK payouts';
-const accepts7 = '50 TOK payouts';
-const accepts8 = '100 TOK payouts';
+const accepts5 = '{ERC20: {A: 1}}';
+const accepts6 = '{ERC20: {At: 1, Bt: 1}} (At and Bt already have some TOK)';
+const accepts7 = '10 TOK payouts';
+const accepts8 = '50 TOK payouts';
+const accepts9 = '100 TOK payouts';
 
 const oneState = {
   whoSignedWhat: [0, 0, 0],
@@ -131,10 +132,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
     ${accepts2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{}}      | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
     ${accepts3} | ${{ETH2: {A: 1, B: 1}}}        | ${{ETH2: {c: 2}}}              | ${{ETH2: {c: 0}}}              | ${{}}      | ${{ETH2: {A: 1, B: 1}}}        | ${undefined}
     ${accepts4} | ${{ERC20: {A: 1, B: 1}}}       | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {A: 1, B: 1}}}       | ${undefined}
-    ${accepts5} | ${{ERC20: {At: 1, Bt: 1}}}     | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {At: 1, Bt: 1}}}     | ${undefined}
-    ${accepts6} | ${tenPayouts}                  | ${{ERC20: {c: 10}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${tenPayouts}                  | ${undefined}
-    ${accepts7} | ${fiftyPayouts}                | ${{ERC20: {c: 50}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${fiftyPayouts}                | ${undefined}
-    ${accepts8} | ${oneHundredPayouts}           | ${{ERC20: {c: 100}}}           | ${{ERC20: {c: 0}}}             | ${{}}      | ${oneHundredPayouts}           | ${undefined}
+    ${accepts5} | ${{ERC20: {A: 1}}}             | ${{ERC20: {c: 1}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {A: 1}}}             | ${undefined}
+    ${accepts6} | ${{ERC20: {At: 1, Bt: 1}}}     | ${{ERC20: {c: 2}}}             | ${{ERC20: {c: 0}}}             | ${{}}      | ${{ERC20: {At: 1, Bt: 1}}}     | ${undefined}
+    ${accepts7} | ${tenPayouts}                  | ${{ERC20: {c: 10}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${tenPayouts}                  | ${undefined}
+    ${accepts8} | ${fiftyPayouts}                | ${{ERC20: {c: 50}}}            | ${{ERC20: {c: 0}}}             | ${{}}      | ${fiftyPayouts}                | ${undefined}
+    ${accepts9} | ${oneHundredPayouts}           | ${{ERC20: {c: 100}}}           | ${{ERC20: {c: 0}}}             | ${{}}      | ${oneHundredPayouts}           | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
