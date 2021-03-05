@@ -55,7 +55,7 @@ const correctPreImage: HashLockData = {
 
 const incorrectPreImage: HashLockData = {
   preImage: '0xdeadc0de',
-  // ^^^^ important fields (RECEIVER)
+  // ^^^^ important field (RECEIVER)
   h: HashZero,
 };
 
@@ -63,7 +63,7 @@ describe('validTransition', () => {
   it.each`
     isValid  | dataA                 | balancesA                   | turnNumB | dataB                | balancesB                   | description
     ${true}  | ${conditionalPayment} | ${{Sender: 1, Receiver: 0}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1}} | ${'Receiver unlocks the conditional payment'}
-    ${false} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 2}} | ${'Receiver cannot unlock with incorrect preimage'}
+    ${false} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1}} | ${'Receiver cannot unlock with incorrect preimage'}
   `(
     '$description',
     async ({
@@ -115,8 +115,10 @@ describe('validTransition', () => {
         );
         expect(isValidFromCall).toBe(true);
       } else {
-        await expectRevert(() =>
-          hashTimeLock.validTransition(variablePartA, variablePartB, turnNumB, numParticipants)
+        await expectRevert(
+          () =>
+            hashTimeLock.validTransition(variablePartA, variablePartB, turnNumB, numParticipants),
+          'Incorrect preimage'
         );
       }
     }

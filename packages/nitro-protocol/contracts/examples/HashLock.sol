@@ -31,7 +31,7 @@ contract HashLock is IForceMoveApp {
         bytes32 h = abi.decode(a.appData, (AppData)).h;
 
         // is the preimage correct?
-        require(keccak256(preImage) == h);
+        require(keccak256(preImage) == h, 'Incorrect preimage');
 
         // slots for each participant unchanged
         require(allocationA[0].destination == allocationB[0].destination);
