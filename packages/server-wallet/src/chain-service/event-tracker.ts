@@ -33,17 +33,17 @@ export class EventTracker {
     const eventRecord = this.assetHolderMap.get(assetHolderAddress);
     this.logger.debug(
       `EventTracker.isNewEvent: ${assetHolderAddress}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
-        eventRecord || {}
+        eventRecord
       )}`
     );
 
     let isNew = false;
-    if (!this.assetHolderMap.has(assetHolderAddress)) {
+    if (!eventRecord) {
       isNew = true;
-    } else if (blockNumber > (eventRecord?.blockNumber || 0)) {
+    } else if (blockNumber > eventRecord.blockNumber) {
       isNew = true;
-    } else if (blockNumber === (eventRecord?.blockNumber || 0)) {
-      if (logIndex > (eventRecord?.logIndex || 0)) {
+    } else if (blockNumber === eventRecord.blockNumber) {
+      if (logIndex > eventRecord.logIndex) {
         isNew = true;
       }
     }
