@@ -6,9 +6,9 @@ import '../interfaces/IForceMoveApp.sol';
 import '../Outcome.sol';
 
 /**
- * @dev The HashLock contract complies with the ForceMoveApp interface and implements a hashlocked payment
+ * @dev The HashLockedSwap contract complies with the ForceMoveApp interface and implements a HashLockedSwaped payment
  */
-contract HashLock is IForceMoveApp {
+contract HashLockedSwap is IForceMoveApp {
     struct AppData {
         bytes32 h;
         bytes preImage;
