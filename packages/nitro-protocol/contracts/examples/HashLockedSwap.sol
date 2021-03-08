@@ -34,7 +34,7 @@ contract HashLockedSwap is IForceMoveApp {
         bytes32 h = abi.decode(a.appData, (AppData)).h;
 
         // is the preimage correct?
-        require(keccak256(preImage) == h, 'Incorrect preimage');
+        require(sha256(preImage) == h, 'Incorrect preimage');
 
         // slots for each participant unchanged
         require(
