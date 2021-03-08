@@ -7,7 +7,7 @@ import FULLEthAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.so
 import FULLTestNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import FULLTestAssetHolderArtifact from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import FULLCountingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
-import FULLHashLockArtifact from '../artifacts/contracts/examples/HashLock.sol/HashLock.json';
+import FULLHashLockedSwapArtifact from '../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
 
 // https://hardhat.org/guides/compile-contracts.html#artifacts
 const fields = [
@@ -35,7 +35,7 @@ export const ContractArtifacts = {
   NitroAdjudicatorArtifact: minimize(FULLNitroAdjudicatorArtifact),
   Erc20AssetHolderArtifact: minimize(FULLErc20AssetHolderArtifact),
   EthAssetHolderArtifact: minimize(FULLEthAssetHolderArtifact),
-  HashLock: minimize(FULLHashLockArtifact),
+  HashLockedSwap: minimize(FULLHashLockedSwapArtifact),
 };
 
 /*

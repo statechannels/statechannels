@@ -2,7 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, ethers, utils} from 'ethers';
 
 const {HashZero} = ethers.constants;
-import HashLockArtifact from '../../../../artifacts/contracts/examples/HashLock.sol/HashLock.json';
+import HashLockedSwapArtifact from '../../../../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
 import {Bytes32} from '../../../../src';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
@@ -16,12 +16,12 @@ import {
 
 // Utilities
 // TODO: move to a src file
-interface HashLockData {
+interface HashLockedSwapData {
   h: Bytes32;
   preImage: Bytes;
 }
 
-function encodeHashLockData(data: HashLockData): string {
+function encodeHashLockedSwapData(data: HashLockedSwapData): string {
   return utils.defaultAbiCoder.encode(['tuple(bytes32 h, bytes preImage)'], [data]);
 }
 // *****
@@ -37,23 +37,27 @@ const addresses = {
 const provider = getTestProvider();
 
 beforeAll(async () => {
-  hashTimeLock = await setupContracts(provider, HashLockArtifact, process.env.HASH_LOCK_ADDRESS);
+  hashTimeLock = await setupContracts(
+    provider,
+    HashLockedSwapArtifact,
+    process.env.HASH_LOCK_ADDRESS
+  );
 });
 
 const preImage = '0xdeadbeef';
-const conditionalPayment: HashLockData = {
+const conditionalPayment: HashLockedSwapData = {
   h: utils.keccak256(preImage),
   // ^^^^ important field (SENDER)
   preImage: '0x',
 };
 
-const correctPreImage: HashLockData = {
+const correctPreImage: HashLockedSwapData = {
   preImage: preImage,
   // ^^^^ important field (RECEIVER)
   h: HashZero,
 };
 
-const incorrectPreImage: HashLockData = {
+const incorrectPreImage: HashLockedSwapData = {
   preImage: '0xdeadc0de',
   // ^^^^ important field (RECEIVER)
   h: HashZero,
@@ -91,7 +95,7 @@ describe('validTransition', () => {
       ];
       const variablePartA: VariablePart = {
         outcome: encodeOutcome(outcomeA),
-        appData: encodeHashLockData(dataA),
+        appData: encodeHashLockedSwapData(dataA),
       };
       balancesB = replaceAddressesAndBigNumberify(balancesB, addresses);
       const allocationB: Allocation = [];
@@ -103,7 +107,7 @@ describe('validTransition', () => {
       ];
       const variablePartB: VariablePart = {
         outcome: encodeOutcome(outcomeB),
-        appData: encodeHashLockData(dataB),
+        appData: encodeHashLockedSwapData(dataB),
       };
 
       if (isValid) {
