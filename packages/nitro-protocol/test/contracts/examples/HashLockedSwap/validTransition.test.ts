@@ -46,7 +46,7 @@ beforeAll(async () => {
 
 const preImage = '0xdeadbeef';
 const conditionalPayment: HashLockedSwapData = {
-  h: utils.keccak256(preImage),
+  h: utils.sha256(preImage),
   // ^^^^ important field (SENDER)
   preImage: '0x',
 };
