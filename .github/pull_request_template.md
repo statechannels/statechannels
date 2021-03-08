@@ -42,7 +42,7 @@ Please explain which reason, if any, why this requires more than one approval.
 - [ ] I have added tests that prove my fix is effective or that my feature works, if necessary
 ### Project management
 - [ ] I have applied the [appropriate labels](https://www.notion.so/Team-working-agreements-2a95c926bb5642e5a5c42e4b74a9dd24#b304e56734a74dfbb341b8b4b27b1c0c)
-- [ ] I have linked to all relevant issues (can be 0)
-- [ ] I have added all dependent tickets (can be 0)
+- [ ] I have [linked to all relevant issues](https://help.zenhub.com/support/solutions/articles/43000010350-connecting-pull-requests-to-github-issues) (can be 0)
+- [ ] I have [linked to all dependent issues](https://help.zenhub.com/support/solutions/articles/43000010349-create-github-issue-dependencies) (can be 0)
 - [ ] I have assigned myself to this PR
 - [ ] I have chosen the appropriate [pipeline](https://www.notion.so/Team-working-agreements-2a95c926bb5642e5a5c42e4b74a9dd24#d534e68e7edc46fe8a4cda61b2258c4e) on zenhub for the linked issue
