@@ -35,6 +35,12 @@ contract HashLockedSwap is IForceMoveApp {
 
         // is the preimage correct?
         require(sha256(preImage) == h, 'Incorrect preimage');
+        // NOTE ON GAS COSTS
+        // The gas cost of hashing depends on the choice of hash function
+        // and the length of the the preImage.
+        // sha256 is twice as expensive as keccak256
+        // https://ethereum.stackexchange.com/a/3200
+        // But is compatible with bitcoin.
 
         // slots for each participant unchanged
         require(
