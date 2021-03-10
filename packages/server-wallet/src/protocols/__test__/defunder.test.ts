@@ -13,6 +13,7 @@ import {LedgerRequest} from '../../models/ledger-request';
 import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {Store} from '../../wallet/store';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
 import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
 
 const testChannel = TestChannel.create({
@@ -21,11 +22,12 @@ const testChannel = TestChannel.create({
   finalFrom: 4,
 });
 
-const testLedgerChannel = TestChannel.create({
+const ledger = TestLedgerChannel.create({});
+const testLedgerFundedChannel = TestChannel.create({
   aBal: 5,
   bBal: 3,
   finalFrom: 4,
-  fundingStrategy: 'Ledger',
+  fundingLedgerChannelId: ledger.channelId,
 });
 
 let store: Store;
@@ -232,8 +234,21 @@ describe('Direct channel defunding', () => {
 
 describe('Ledger funded channel defunding', () => {
   it('Ledger channel is defunded', async () => {
+    ledger.insertInto(store, {
+      states: [
+        {
+          turn: 6,
+          bals: [
+            [ledger.participantA.destination, 0],
+            [ledger.participantB.destination, 0],
+            [testLedgerFundedChannel.channelId, 11],
+          ],
+          signedBy: 'both',
+        },
+      ],
+    });
     // Channel has yet to be concluded
-    await testLedgerChannel.insertInto(store, {
+    await testLedgerFundedChannel.insertInto(store, {
       participant: 0,
       states: [3, 4],
       funds: 8,
@@ -243,9 +258,9 @@ describe('Ledger funded channel defunding', () => {
     const logger = createLogger(defaultTestConfig());
     const defunder = new Defunder(store, chainService, logger);
 
-    let channel = await Channel.forId(testLedgerChannel.channelId, testKnex);
+    let channel = await Channel.forId(testLedgerFundedChannel.channelId, testKnex);
     await testKnex.transaction(async tx => {
-      const objective = await ensureCloseObjective(testLedgerChannel, tx);
+      const objective = await ensureCloseObjective(testLedgerFundedChannel, tx);
 
       // There is no conclusion proof
       expect(await defunder.crank(channel, objective, tx)).toEqual({
@@ -254,7 +269,11 @@ describe('Ledger funded channel defunding', () => {
       });
       expect(await store.getLedgerRequest(channel.channelId, 'defund', tx)).toBeUndefined();
 
-      channel = await store.addSignedState(channel.channelId, testLedgerChannel.wireState(5), tx);
+      channel = await store.addSignedState(
+        channel.channelId,
+        testLedgerFundedChannel.wireState(5),
+        tx
+      );
       expect(await defunder.crank(channel, objective, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
@@ -263,7 +282,7 @@ describe('Ledger funded channel defunding', () => {
       // Defunder should store a ledger defunding request
       expect(await store.getLedgerRequest(channel.channelId, 'defund', tx)).toMatchObject({
         channelToBeFunded: channel.channelId,
-        status: 'pending',
+        status: 'queued',
         type: 'defund',
       });
 

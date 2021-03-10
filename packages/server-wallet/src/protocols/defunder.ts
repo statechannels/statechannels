@@ -3,6 +3,7 @@ import {
   CloseChannel,
   BN,
   isCloseChannel,
+  makeDestination,
   unreachable,
 } from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
@@ -146,16 +147,26 @@ export class Defunder {
     if (ledgerRequest && ledgerRequest.status === 'succeeded') {
       return {isChannelDefunded: true, didSubmitTransaction};
     }
-    if (!ledgerRequest || ledgerRequest.status !== 'pending') {
+    if (!ledgerRequest) {
       await this.requestLedgerDefunding(channel, tx);
     }
     return {isChannelDefunded: false, didSubmitTransaction};
   }
 
   private async requestLedgerDefunding(channel: Channel, tx: Transaction): Promise<void> {
+    const ledger = await this.store.getChannel(channel.fundingLedgerChannelId, tx);
+    if (!ledger) throw new Error(`ledger defunder: ledger doesn't exist`);
+
+    const myAmount = channel.myAmount;
+    const theirAmount = channel.opponentAmount;
+    const [amountA, amountB] =
+      ledger.myIndex === 0 ? [myAmount, theirAmount] : [theirAmount, myAmount];
+
     await LedgerRequest.requestLedgerDefunding(
       channel.channelId,
-      channel.fundingLedgerChannelId,
+      makeDestination(channel.fundingLedgerChannelId),
+      amountA,
+      amountB,
       tx
     );
   }

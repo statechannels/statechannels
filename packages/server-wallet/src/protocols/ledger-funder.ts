@@ -53,8 +53,11 @@ export class LedgerFunder {
     // if we already requested funding return false
     if (await this.alreadyRequestedFunding(channel.channelId, tx)) return false;
 
+    // NOTE FOR TOMORROW:
+    // it seems like the open channel algorithm doens't notice that the channel is funded
+
     // otherwise request funding
-    await this.requestLedgerFunding(channel.channelId, ledgerId, tx);
+    await this.requestLedgerFunding(channel, ledger, tx);
     return false;
   }
 
@@ -68,11 +71,22 @@ export class LedgerFunder {
   }
 
   private async requestLedgerFunding(
-    channelId: string,
-    ledgerId: string,
+    channel: Channel,
+    ledger: Channel,
     tx: Transaction
   ): Promise<void> {
-    await LedgerRequest.requestLedgerFunding(channelId, ledgerId, tx);
+    const myAmount = channel.myAmount;
+    const theirAmount = channel.opponentAmount;
+    const [amountA, amountB] =
+      ledger.myIndex === 0 ? [myAmount, theirAmount] : [theirAmount, myAmount];
+
+    await LedgerRequest.requestLedgerFunding(
+      channel.channelId,
+      ledger.channelId,
+      amountA,
+      amountB,
+      tx
+    );
   }
 
   private async alreadyRequestedFunding(channelId: string, tx: Transaction): Promise<boolean> {

@@ -1,5 +1,5 @@
 import {constants} from 'ethers';
-import {BN, makeAddress} from '@statechannels/wallet-core';
+import {BN, Destination, makeAddress} from '@statechannels/wallet-core';
 
 import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -47,7 +47,7 @@ describe('validation', () => {
     expect(
       Channel.query(knex).insert({
         ...channel({vars: [stateWithHashSignedBy()()]}),
-        channelId: 'wrongId',
+        channelId: 'wrongId' as Destination,
       })
     ).rejects.toThrow(ChannelError.reasons.invalidChannelId));
 });
