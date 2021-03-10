@@ -1,3 +1,4 @@
+import _ from 'lodash';
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import {
   Address,
@@ -18,6 +19,7 @@ import {
   CloseChannel,
   DefundChannel,
   OpenChannel,
+  Destination,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
@@ -29,6 +31,7 @@ import {WalletObjective, ObjectiveModel} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
+import {Bytes32} from '../../../type-aliases';
 
 import {alice, bob} from './participants';
 import {alice as aliceWallet, bob as bobWallet} from './signing-wallets';
@@ -44,6 +47,7 @@ interface TestChannelArgs {
   bBal?: number;
   finalFrom?: number;
   fundingStrategy?: FundingStrategy;
+  fundingLedgerChannelId?: Bytes32;
 }
 
 export type Bals = [string, number][] | [number, number];
@@ -59,6 +63,7 @@ export class TestChannel {
   public channelNonce: number;
   public finalFrom?: number;
   public fundingStrategy: FundingStrategy;
+  public fundingLedgerChannelId: Bytes32 | undefined;
   static maximumNonce = 0;
 
   public get participants(): Participant[] {
@@ -73,7 +78,9 @@ export class TestChannel {
   }
 
   protected constructor(args: TestChannelArgs) {
-    this.fundingStrategy = args.fundingStrategy || 'Direct';
+    this.fundingLedgerChannelId = args.fundingLedgerChannelId;
+    this.fundingStrategy =
+      args.fundingStrategy || (args.fundingLedgerChannelId ? 'Ledger' : 'Direct');
     this.startBals = [
       ['a', args.aBal ?? 5],
       ['b', args.bBal ?? 5],
@@ -112,26 +119,32 @@ export class TestChannel {
     };
   }
 
-  public signedStateWithHash(n: number, bals?: Bals): SignedStateWithHash {
-    return stateWithHashSignedBy([this.signingWallets[n % 2]])(this.state(n, bals));
+  public signedStateWithHash(n: number, bals?: Bals, signedBy?: SignedBy): SignedStateWithHash {
+    if (_.isUndefined(signedBy)) signedBy = n % 2 === 0 ? 0 : 1; // default to the signer
+    const signers = signedBy === 'both' ? [0, 1] : [signedBy];
+    return stateWithHashSignedBy(signers.map(x => this.signingWallets[x]))(this.state(n, bals));
   }
 
   /**
    * Gives the nth state in the history, signed by the correct participant
    */
-  public wireState(n: number, bals?: Bals): WireState {
-    return serializeState(this.signedStateWithHash(n, bals));
+  public wireState(n: number, bals?: Bals, signedBy?: SignedBy): WireState {
+    return serializeState(this.signedStateWithHash(n, bals, signedBy));
   }
 
-  public wirePayload(n: number, bals?: Bals): Payload {
+  public wirePayload(n: number, bals?: Bals, signedBy?: SignedBy): Payload {
     return {
       walletVersion: WALLET_VERSION,
-      signedStates: [this.wireState(n, bals)],
+      signedStates: [this.wireState(n, bals, signedBy)],
     };
   }
 
   public get startOutcome(): SimpleAllocation {
     return this.toOutcome(this.startBals);
+  }
+
+  public get isLedger(): boolean {
+    return false;
   }
 
   public toOutcome(bals: Bals): SimpleAllocation {
@@ -181,8 +194,8 @@ export class TestChannel {
     };
   }
 
-  public get channelId(): string {
-    return calculateChannelId(this.channelConstants);
+  public get channelId(): Destination {
+    return makeDestination(calculateChannelId(this.channelConstants));
   }
 
   public get openChannelObjective(): OpenChannel {
@@ -192,6 +205,7 @@ export class TestChannel {
       data: {
         targetChannelId: this.channelId,
         fundingStrategy: this.fundingStrategy,
+        fundingLedgerChannelId: this.fundingLedgerChannelId,
       },
     };
   }
@@ -258,6 +272,20 @@ export class TestChannel {
     }
   }
 
+  public async insertState(
+    store: Store,
+    state: StateWithBals | number,
+    bals?: Bals
+  ): Promise<number> {
+    if (typeof state === 'number') {
+      await store.pushMessage(this.wirePayload(Number(state), bals));
+      return Number(state);
+    } else {
+      await store.pushMessage(this.wirePayload(Number(state.turn), state.bals, state.signedBy));
+      return Number(state.turn);
+    }
+  }
+
   /**
    * Calls addSigningKey, pushMessage, updateFunding, on the supplied store, patches the fundingStrategy, and adds the OpenChannel objective
    */
@@ -270,14 +298,35 @@ export class TestChannel {
     // load the signingKey for the appopriate participant
     await store.addSigningKey(this.signingKeys[participant]);
 
-    // load in the states
-    for (const stateNum of states) {
-      await store.pushMessage(this.wirePayload(Number(stateNum), bals));
+    const turnNums = [] as number[];
+    // we need to insert the first state, then do the objective, then the other states (sigh)
+    // or otherwise the store doesn't skip validations on ledger channels
+    const [first, ...rest] = states;
+    const turnNum = await this.insertState(store, first, bals);
+    turnNums.push(turnNum);
+
+    // insert the OpenChannel objective
+    const objective = await ObjectiveModel.insert(this.openChannelObjective, true, store.knex);
+
+    // make it a ledger here
+    if (this.isLedger) {
+      await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
+    }
+
+    const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+    await Channel.query(store.knex)
+      .where({channelId: this.channelId})
+      .patch({fundingStrategy, fundingLedgerChannelId});
+
+    // load in the other states
+    for (const state of rest) {
+      const turnNum = await this.insertState(store, state, bals);
+      turnNums.push(turnNum);
     }
 
     // if no funds are passed in, fully fund the channel iff we're into post fund setup
     const funds =
-      args.funds !== undefined ? args.funds : Math.max(...states) > 1 ? this.startBal : 0;
+      args.funds !== undefined ? args.funds : Math.max(...turnNums) > 1 ? this.startBal : 0;
 
     // set the funds as specified
     if (funds > 0) {
@@ -289,18 +338,23 @@ export class TestChannel {
       fundingStrategy: this.fundingStrategy,
     });
 
-    // insert the OpenChannel objective
-    const objective = await ObjectiveModel.insert(this.openChannelObjective, true, store.knex);
-
     return objective;
   }
 }
 
 export interface InsertionParams {
   participant?: 0 | 1;
-  states?: number[];
+  states?: number[] | StateWithBals[];
   funds?: number;
   bals?: Bals;
+}
+
+export type SignedBy = 0 | 1 | 'both';
+
+interface StateWithBals {
+  turn: number;
+  bals: Bals;
+  signedBy: SignedBy;
 }
 
 function combineArrays<T>(a1: T[] | undefined, a2: T[] | undefined): T[] | undefined {

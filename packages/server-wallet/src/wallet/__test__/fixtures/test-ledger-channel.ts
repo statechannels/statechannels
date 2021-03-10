@@ -1,25 +1,23 @@
+import _ from 'lodash';
 import {
   Address,
+  BN,
   ChannelConstants,
+  Destination,
   makeAddress,
   OpenChannel,
-  serializeState,
-  SignedStateWithHash,
   SimpleAllocation,
 } from '@statechannels/wallet-core';
-import {Payload, SignedState as WireState} from '@statechannels/wire-format';
 import {utils} from 'ethers';
+import {Payload} from '@statechannels/wire-format';
 
-import {Channel} from '../../../models/channel';
 import {defaultTestConfig} from '../../../config';
 import {LedgerProposal} from '../../../models/ledger-proposal';
-import {LedgerRequest} from '../../../models/ledger-request';
-import {WalletObjective} from '../../../models/objective';
+import {LedgerRequest, LedgerRequestStatus} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
-import {stateWithHashSignedBy} from './states';
-import {TestChannel, Bals, InsertionParams} from './test-channel';
+import {TestChannel, Bals, SignedBy} from './test-channel';
 
 interface TestChannelArgs {
   aBal?: number;
@@ -52,6 +50,10 @@ export class TestLedgerChannel extends TestChannel {
     };
   }
 
+  public get isLedger(): boolean {
+    return true;
+  }
+
   // Override appDefinition to indicate a ledger channel
   public get channelConstants(): ChannelConstants {
     return {
@@ -66,42 +68,54 @@ export class TestLedgerChannel extends TestChannel {
   /**
    * Gives the nth state in the history, signed by the provided participant(s) -- default is both
    */
-  public wirePayload(n: number, bals?: Bals, signerIndices: number[] = [n % 1, n % 2]): Payload {
+  public wirePayload(n: number, bals?: Bals, signedBy?: SignedBy): Payload {
     return {
       walletVersion: WALLET_VERSION,
-      signedStates: [this.wireState(n, bals, signerIndices)],
+      signedStates: [this.wireState(n, bals, _.isUndefined(signedBy) ? 'both' : signedBy)],
     };
   }
 
-  /**
-   * Gives the nth state in the history, signed by the provided participant(s) -- default is both
-   */
-  public wireState(n: number, bals?: Bals, signerIndices: number[] = [n % 1, n % 2]): WireState {
-    return serializeState(this.signedStateWithHash(n, bals, signerIndices));
-  }
-
-  /**
-   * Gives the nth state in the history, signed by the provided participant(s) -- default is both
-   */
-  public signedStateWithHash(
-    n: number,
-    bals?: Bals,
-    signerIndices: number[] = [n % 2]
-  ): SignedStateWithHash {
-    return stateWithHashSignedBy(signerIndices.map(i => this.signingWallets[i]))(
-      this.state(n, bals)
+  public async insertFundingRequest(
+    store: Store,
+    {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
+  ): Promise<void> {
+    return store.transaction(
+      async tx =>
+        await LedgerRequest.setRequest(
+          {
+            ledgerChannelId: this.channelId,
+            type: 'fund',
+            channelToBeFunded,
+            amountA: BN.from(amtA),
+            amountB: BN.from(amtB),
+            status,
+            missedOpportunityCount: missedOps || 0,
+            lastSeenAgreedState: lastSeen || null,
+          },
+          tx
+        )
     );
   }
 
-  public async insertFundingRequest(store: Store, channelToBeFunded: string): Promise<void> {
-    return store.transaction(tx =>
-      LedgerRequest.requestLedgerFunding(channelToBeFunded, this.channelId, tx)
-    );
-  }
-
-  public async insertDefundingRequest(store: Store, channelToBeFunded: string): Promise<void> {
-    return store.transaction(tx =>
-      LedgerRequest.requestLedgerDefunding(channelToBeFunded, this.channelId, tx)
+  public async insertDefundingRequest(
+    store: Store,
+    {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
+  ): Promise<void> {
+    return store.transaction(
+      async tx =>
+        await LedgerRequest.setRequest(
+          {
+            ledgerChannelId: this.channelId,
+            type: 'defund',
+            channelToBeFunded,
+            amountA: BN.from(amtA),
+            amountB: BN.from(amtB),
+            status,
+            missedOpportunityCount: missedOps || 0,
+            lastSeenAgreedState: lastSeen || null,
+          },
+          tx
+        )
     );
   }
 
@@ -115,21 +129,13 @@ export class TestLedgerChannel extends TestChannel {
       LedgerProposal.storeProposal({channelId: this.channelId, signingAddress, proposal, nonce}, tx)
     );
   }
+}
 
-  /**
-   * Calls addSigningKey, pushMessage, updateFunding, and adds the OpenChannel Objective to the supplied store.
-   * Also makes the required patches to indicate this channel is a ledger channel
-   */
-  public async insertInto(
-    store: Store,
-    args: InsertionParams = {}
-  ): Promise<WalletObjective<OpenChannel>> {
-    const objective = await super.insertInto(store, args);
-    await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
-    const {fundingStrategy, fundingLedgerChannelId} = objective.data;
-    await Channel.query(store.knex)
-      .where({channelId: this.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId});
-    return objective;
-  }
+interface RequestParams {
+  channelToBeFunded: Destination;
+  amtA: number;
+  amtB: number;
+  status: LedgerRequestStatus;
+  missedOps?: number;
+  lastSeen?: number;
 }
