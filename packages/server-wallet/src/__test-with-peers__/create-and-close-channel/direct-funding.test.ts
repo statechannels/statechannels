@@ -15,6 +15,8 @@ import {
 } from '../../../jest/with-peers-setup-teardown';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
 import {setupTestMessagingService} from '../../message-service/test-message-service';
+import {expectLatestStateToMatch} from '../utils';
+
 const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
 
@@ -80,13 +82,11 @@ it('Create a directly funded channel between two wallets ', async () => {
   }; // B sends 1 ETH (2 total)
 
   // Results before funding is complete
-  let aLatestState = await peerWallets.a.getState({channelId});
-  let bLatestState = await peerWallets.b.getState({channelId});
-  expect(aLatestState.channelResult).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'opening',
     turnNum: 0,
   });
-  expect(bLatestState.channelResult).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'opening',
     turnNum: 0,
   });
@@ -96,17 +96,14 @@ it('Create a directly funded channel between two wallets ', async () => {
   await ms.send(resultA2.outbox.map(o => o.params));
   await ms.send(resultB2.outbox.map(o => o.params));
 
-  aLatestState = await peerWallets.a.getState({channelId});
-  bLatestState = await peerWallets.b.getState({channelId});
-  expect(aLatestState.channelResult).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
     turnNum: 3,
   });
-  expect(bLatestState.channelResult).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'running',
     turnNum: 3,
   });
-
   const closeChannelParams: CloseChannelParams = {
     channelId,
   };
@@ -129,16 +126,12 @@ it('Create a directly funded channel between two wallets ', async () => {
     status: 'closing',
     turnNum: 4,
   });
-  aLatestState = await peerWallets.a.getState({channelId});
-  bLatestState = await peerWallets.b.getState({channelId});
-  expect(aLatestState.channelResult).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'closed',
     turnNum: 4,
   });
-
   // A pushed the countersigned isFinal4
-
-  expect(bLatestState.channelResult).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'closed',
     turnNum: 4,
   });
