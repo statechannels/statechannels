@@ -23,7 +23,7 @@ const startReceiver = async (
   let server: ChildProcess;
   if (profiling === 'FlameGraph') {
     server = exec(`npx clinic flame --collect-only -- node ./lib/e2e-test/receiver/server.js`);
-  } else if (profiling == 'Doctor') {
+  } else if (profiling === 'Doctor') {
     server = exec(`npx clinic doctor --collect-only -- node  ./lib/e2e-test/receiver/server.js`);
   } else {
     server = exec(
