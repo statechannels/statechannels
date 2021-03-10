@@ -6,7 +6,7 @@ import {
 import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
-import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
+import {ONE_DAY} from '../../__test__/test-helpers';
 import {
   peerWallets,
   getPeersSetup,
@@ -14,6 +14,8 @@ import {
   participantB,
   peersTeardown,
 } from '../../../jest/with-peers-setup-teardown';
+import {setupTestMessagingService} from '../../message-service/test-message-service';
+import {expectLatestStateToMatch} from '../utils';
 
 let channelId: string;
 
@@ -38,49 +40,40 @@ it('Create a fake-funded channel between two wallets ', async () => {
     challengeDuration: ONE_DAY,
   };
 
+  const wallets = [
+    {participantId: participantA.participantId, wallet: peerWallets.a},
+    {participantId: participantB.participantId, wallet: peerWallets.b},
+  ];
+
+  const ms = await setupTestMessagingService(wallets);
+
   //        A <> B
   // PreFund0
   const aCreateChannelOutput = await peerWallets.a.createChannel(channelParams);
-
+  await ms.send(aCreateChannelOutput.outbox.map(o => o.params));
   channelId = aCreateChannelOutput.channelResults[0].channelId;
 
-  expect(getChannelResultFor(channelId, aCreateChannelOutput.channelResults)).toMatchObject({
+  expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'opening',
     turnNum: 0,
   });
 
   // A sends PreFund0 to B
-  const bProposeChannelPushOutput = await peerWallets.b.pushMessage(
-    getPayloadFor(participantB.participantId, aCreateChannelOutput.outbox)
-  );
-
-  expect(getChannelResultFor(channelId, bProposeChannelPushOutput.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'proposed',
     turnNum: 0,
   });
 
   // after joinChannel, B signs PreFund1 and PostFund3
   const bJoinChannelOutput = await peerWallets.b.joinChannel({channelId});
+  await ms.send(bJoinChannelOutput.outbox.map(o => o.params));
 
-  expect(getChannelResultFor(channelId, [bJoinChannelOutput.channelResult])).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  // B sends signed PreFund1 and PostFund3 to A
-  const aPushJoinChannelOutput = await peerWallets.a.pushMessage(
-    getPayloadFor(participantA.participantId, bJoinChannelOutput.outbox)
-  );
-  expect(getChannelResultFor(channelId, aPushJoinChannelOutput.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
     turnNum: 3,
   });
 
-  // A sends PostFund2 to B
-  const bPushPostFundOutput = await peerWallets.b.pushMessage(
-    getPayloadFor(participantB.participantId, aPushJoinChannelOutput.outbox)
-  );
-  expect(getChannelResultFor(channelId, bPushPostFundOutput.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'running',
     turnNum: 3,
   });
@@ -91,28 +84,14 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   // A generates isFinal4
   const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
+  await ms.send(aCloseChannelResult.outbox.map(o => o.params));
 
-  expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
-    status: 'closing',
-    turnNum: 4,
-  });
-
-  const bPushMessageResult = await peerWallets.b.pushMessage(
-    getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
-  );
-
-  // B pushed isFinal4, generated countersigned isFinal4
-  expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'closed',
     turnNum: 4,
   });
 
-  // A pushed the countersigned isFinal4
-  const aPushMessageResult = await peerWallets.a.pushMessage(
-    getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
-  );
-
-  expect(getChannelResultFor(channelId, aPushMessageResult.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'closed',
     turnNum: 4,
   });
