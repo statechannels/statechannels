@@ -22,7 +22,7 @@ import _ from 'lodash';
 import {hashState} from '@statechannels/wasm-utils';
 import {BigNumber} from 'ethers';
 
-import {Bytes32, Uint48} from '../type-aliases';
+import {Bytes32, Uint48, Destination} from '../type-aliases';
 import {
   ChannelState,
   toChannelResult,
@@ -36,9 +36,9 @@ import {validateTransition} from '../utilities/validate-transition';
 import {SigningWallet} from './signing-wallet';
 import {Funding} from './funding';
 import {ObjectiveModel} from './objective';
-import {LedgerRequest} from './ledger-request';
 import {ChainServiceRequest} from './chain-service-request';
 import {AdjudicatorStatusModel} from './adjudicator-status';
+import {State} from './channel/state';
 
 export const REQUIRED_COLUMNS = [
   'chainId',
@@ -66,7 +66,7 @@ export interface RequiredColumns {
 }
 
 export type ComputedColumns = {
-  readonly channelId: Bytes32;
+  readonly channelId: Destination;
 };
 
 type ChannelColumns = RequiredColumns & ComputedColumns;
@@ -74,7 +74,7 @@ type ChannelColumns = RequiredColumns & ComputedColumns;
 export class Channel extends Model implements ChannelColumns {
   readonly id!: number;
 
-  channelId!: Bytes32;
+  channelId!: Destination;
   vars!: SignedStateVarsWithHash[];
 
   readonly chainId!: Bytes32;
@@ -195,17 +195,6 @@ export class Channel extends Model implements ChannelColumns {
     return Channel.query(txOrKnex)
       .select()
       .where({assetHolderAddress, participants: JSON.stringify(participants)});
-  }
-
-  static allChannelsWithPendingLedgerRequests(txOrKnex: TransactionOrKnex): Promise<Channel[]> {
-    return txOrKnex.transaction(async trx => {
-      return Channel.query(trx)
-        .select()
-        .whereIn(
-          'channelId',
-          (await LedgerRequest.getAllPendingRequests(trx)).map(l => l.channelToBeFunded)
-        );
-    });
   }
 
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
@@ -352,6 +341,39 @@ export class Channel extends Model implements ChannelColumns {
 
   get latest(): SignedStateWithHash {
     return {...this.channelConstants, ...this.signedStates[0]};
+  }
+
+  get latestTurnNum(): number {
+    return this.latest.turnNum;
+  }
+
+  /**
+   * Return the unique state at a given turnNumber
+   *
+   * @remarks
+   * Returns undefined if there is no state, or if there's more than one state, with turnNum
+   *
+   * @param turnNum - The turnNum that the state should have
+   * @returns The unique state if there is one, undefined otherwise
+   */
+  public uniqueStateAt(turnNum: number): State | undefined {
+    const states = this.signedStates.filter(s => s.turnNum === turnNum);
+    if (states.length !== 1) return undefined;
+    return new State(states[0]);
+  }
+
+  /**
+   * Return the latest state that all participants have signed
+   *
+   * @remarks
+   * Returns undefined if there is no such state, or if there's more than one state, with turnNum
+   *
+   * @returns The unique state if there is one, undefined otherwise
+   */
+  public get latestFullySignedState(): State | undefined {
+    const states = this.signedStates.filter(s => s.signatures.length === this.participants.length);
+    if (states.length !== 1) return undefined;
+    return new State(states[0]);
   }
 
   private get _supported(): SignedStateWithHash | undefined {
@@ -521,6 +543,41 @@ export class Channel extends Model implements ChannelColumns {
     const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
     const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
     return myAllocationItem;
+  }
+
+  public get myAmount(): Uint256 {
+    const supported = this.supported;
+    if (!supported) {
+      throw new Error(`Trying to get myFundingAmount for channel with no supported state`);
+    }
+    const myDestination = this.participants[this.myIndex].destination;
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const myAllocationItem = _.find(allocationItems, ai => ai.destination === myDestination);
+    if (!myAllocationItem) {
+      return BN.from(0);
+    }
+
+    return myAllocationItem.amount;
+  }
+
+  // errors if not a two-person channel
+  public get opponentAmount(): Uint256 {
+    const supported = this.supported;
+    if (!supported) throw new Error(`opponentFundingAmount: channel has no supported state`);
+
+    if (this.participants.length > 2)
+      throw new Error(`opponentFundingAmount: channel has more than 2 participants`);
+
+    const theirDestination = this.participants[1 - this.myIndex].destination;
+    const {allocationItems} = checkThat(supported.outcome, isSimpleAllocation);
+
+    const theirAllocationItem = _.find(allocationItems, ai => ai.destination === theirDestination);
+    if (!theirAllocationItem) {
+      return BN.from(0);
+    }
+
+    return theirAllocationItem.amount;
   }
 
   private mySignature(signatures: SignatureEntry[]): boolean {
