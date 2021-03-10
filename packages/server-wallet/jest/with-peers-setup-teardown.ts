@@ -1,11 +1,14 @@
+import {Participant} from '@statechannels/client-api-schema';
+import {makeDestination} from '@statechannels/wallet-core';
+
 import {Wallet} from '../src/wallet';
 import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
 } from '../src/db/seeds/1_signing_wallet_seeds';
-import {Participant} from '@statechannels/client-api-schema';
-import {makeDestination} from '@statechannels/wallet-core';
+import {MessageServiceInterface} from '../src/message-service/types';
+import {setupTestMessagingService} from '../src/message-service/test-message-service';
 
 interface TestPeerWallets {
   a: Wallet;
@@ -21,8 +24,14 @@ export const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestCo
 export let participantA: Participant;
 export let participantB: Participant;
 export let peerWallets: TestPeerWallets;
+/**
+ * A messaging service that links the two peer wallets.
+ * If this is not used it will have no effect.
+ * It can be used to automatically transport messages between the two participants.
+ */
+export let messagingService: MessageServiceInterface;
 
-export function getPeersSetup(withWalletSeeding: boolean = false): jest.Lifecycle {
+export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
   return async () => {
     await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
 
@@ -60,6 +69,11 @@ export function getPeersSetup(withWalletSeeding: boolean = false): jest.Lifecycl
         '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
       ),
     };
+
+    messagingService = await setupTestMessagingService([
+      {participantId: participantA.participantId, wallet: peerWallets.a},
+      {participantId: participantB.participantId, wallet: peerWallets.b},
+    ]);
   };
 }
 

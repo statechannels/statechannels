@@ -12,9 +12,9 @@ import {
   participantA,
   participantB,
   peersTeardown,
+  messagingService,
 } from '../../../jest/with-peers-setup-teardown';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
-import {setupTestMessagingService} from '../../message-service/test-message-service';
 import {expectLatestStateToMatch} from '../utils';
 
 const {AddressZero} = ethers.constants;
@@ -48,21 +48,16 @@ it('Create a directly funded channel between two wallets ', async () => {
     fundingStrategy: 'Direct',
     challengeDuration: ONE_DAY,
   };
-  const wallets = [
-    {participantId: participantA.participantId, wallet: peerWallets.a},
-    {participantId: participantB.participantId, wallet: peerWallets.b},
-  ];
-  const ms = await setupTestMessagingService(wallets);
 
   //        A <> B
   // PreFund0
   const resultA0 = await peerWallets.a.createChannel(createChannelParams);
-  await ms.send(resultA0.outbox.map(o => o.params));
+  await messagingService.send(resultA0.outbox.map(o => o.params));
   channelId = resultA0.channelResults[0].channelId;
 
   //      PreFund0B
   const resultB1 = await peerWallets.b.joinChannel({channelId});
-  await ms.send(resultB1.outbox.map(o => o.params));
+  await messagingService.send(resultB1.outbox.map(o => o.params));
 
   const depositByA = {
     channelId,
@@ -93,8 +88,8 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   const resultA2 = await peerWallets.a.updateFundingForChannels([depositByB]);
   const resultB2 = await peerWallets.b.updateFundingForChannels([depositByB]);
-  await ms.send(resultA2.outbox.map(o => o.params));
-  await ms.send(resultB2.outbox.map(o => o.params));
+  await messagingService.send(resultA2.outbox.map(o => o.params));
+  await messagingService.send(resultB2.outbox.map(o => o.params));
 
   await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
@@ -118,7 +113,7 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   // A generates isFinal4
   const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
-  await ms.send(aCloseChannelResult.outbox.map(o => o.params));
+  await messagingService.send(aCloseChannelResult.outbox.map(o => o.params));
   // it shouldn't error if close channel is called twice
   await peerWallets.a.closeChannel(closeChannelParams);
 
