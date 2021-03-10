@@ -270,6 +270,16 @@ export class ObjectiveModel extends Model {
     ).toObjective();
   }
 
+  static async approvedObjectiveIds(
+    targetChannelIds: string[],
+    tx: TransactionOrKnex
+  ): Promise<string[]> {
+    // todo: make this more efficient
+    return (await this.forChannelIds(targetChannelIds, tx))
+      .filter(x => x.status === 'approved')
+      .map(x => x.objectiveId);
+  }
+
   static async forChannelIds(
     targetChannelIds: string[],
     tx: TransactionOrKnex

@@ -41,7 +41,7 @@ import {Funding, TransferredOutEntry} from '../models/funding';
 import {Nonce} from '../models/nonce';
 import {ObjectiveModel, WalletObjective, isSupportedObjective} from '../models/objective';
 import {AppBytecode} from '../models/app-bytecode';
-import {LedgerRequest, LedgerRequestType} from '../models/ledger-request';
+import {LedgerRequest} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
@@ -344,6 +344,14 @@ export class Store {
     return await ObjectiveModel.forChannelIds(channelIds, tx || this.knex);
   }
 
+  async getApprovedObjectiveIds(channelIds: Bytes32[], tx?: Transaction): Promise<string[]> {
+    return await ObjectiveModel.approvedObjectiveIds(channelIds, tx || this.knex);
+  }
+
+  async getLedgersWithNewRequestsIds(tx?: Transaction): Promise<string[]> {
+    return LedgerRequest.ledgersWithNewReqeustsIds(tx || this.knex);
+  }
+
   async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
     const objective = await ObjectiveModel.approve(objectiveId, tx || this.knex);
 
@@ -426,7 +434,7 @@ export class Store {
     channelId: Bytes32,
     type: 'fund' | 'defund',
     tx?: Transaction
-  ): Promise<LedgerRequestType | undefined> {
+  ): Promise<LedgerRequest | undefined> {
     return LedgerRequest.getRequest(channelId, type, tx || this.knex);
   }
 
@@ -450,6 +458,7 @@ export class Store {
     const query = await LedgerRequest.query(tx || this.knex)
       .whereIn('channelToBeFunded', channelToBeFunded)
       .where({status: 'pending'})
+      .orWhere({status: 'queued'})
       .distinct('ledgerChannelId')
       .select('ledgerChannelId');
 
@@ -468,15 +477,11 @@ export class Store {
     return _.map(query, 'channelId');
   }
 
-  async getAllPendingLedgerRequests(tx?: Transaction): Promise<LedgerRequestType[]> {
-    return LedgerRequest.getAllPendingRequests(tx || this.knex);
-  }
-
-  async getPendingLedgerRequests(
+  async getActiveLedgerRequests(
     ledgerChannelId: Bytes32,
     tx?: Transaction
-  ): Promise<LedgerRequestType[] | undefined> {
-    return LedgerRequest.getPendingRequests(ledgerChannelId, tx || this.knex);
+  ): Promise<LedgerRequest[]> {
+    return LedgerRequest.getActiveRequests(ledgerChannelId, tx || this.knex);
   }
 
   async markLedgerRequests(

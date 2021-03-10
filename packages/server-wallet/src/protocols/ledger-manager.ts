@@ -1,500 +1,552 @@
-import {Logger} from 'pino';
-import {compose, map, filter} from 'lodash/fp';
 import _ from 'lodash';
-import {
-  allocateToTarget,
-  checkThat,
-  isSimpleAllocation,
-  SimpleAllocation,
-  areAllocationItemsEqual,
-  BN,
-  AllocationItem,
-  Errors,
-  StateVariables,
-  NULL_APP_DATA,
-} from '@statechannels/wallet-core';
-import {Transaction} from 'knex';
+import {BN, Destination, unreachable} from '@statechannels/wallet-core';
 
 import {Channel} from '../models/channel';
 import {WalletResponse} from '../wallet/wallet-response';
 import {Store} from '../wallet/store';
-import {Bytes32} from '../type-aliases';
-import {LedgerRequestType} from '../models/ledger-request';
+import {State} from '../models/channel/state';
+import {SimpleAllocationOutcome} from '../models/channel/outcome';
+import {LedgerRequest} from '../models/ledger-request';
 
-import {ChannelState, ChannelStateWithSupported} from './state';
-
-interface LedgerManagerParams {
-  store: Store;
-  logger: Logger;
-  timingMetrics: boolean;
-}
-
+// Ledger Update algorithm:
+// ------------------------
+//
+// Define the "leader" of the channel to be the first participant.
+// Let the other participant be the "follower".
+//
+// If both parties follow the protocol, the ledger exists in one of three possible states:
+// 1. Agreement (the latest state is double-signed)
+// 2. Proposal (latest states are: double-signed, leader-signed)
+// 3. Counter-proposal (latest states are: double-signed, leader-signed, follower-signed)
+//
+// If we ever find ourselves not in one of these states, declare a protocol violation and
+// exit the channel.
+//
+// The leader acts as follows:
+// * In Agreement, the leader takes all of their queued updates, formulates them into a new state
+//   and sends it to the follower. The state is now Proposal
+// * In Proposal, does nothing
+// * In Counter-proposal, confirms that all the updates are in the queue, and double signs
+//   The state is now Agreement.
+//
+// The follower acts as follows:
+// * In Agreement, does nothing
+// * In Proposal:
+//    * If all updates are in the queue, double-signs. The state is now Proposal.
+//    * Otherwise, removes the states that are not in queue and formulates new state.
+//      The state is now Counter-proposal
+// * In Counter-proposal, does nothing
+//
+//
+// Managing the request queue:
+// ---------------------------
+//
+// Requests can exist in one of 6 states:
+// 1. queued - when waiting to go into a proposal
+// 2. pending - request included in current proposal/counter-proposal signed by us
+//    (☝️ these two states are considered 'active')
+// 3. success - [terminal] when included in an agreed state
+// 4. cancelled - [terminal] if a defund is sent before the fund was included in the ledger
+// 5. insufficient-funds - [terminal] if there aren't enough funds in the ledger
+// 6. inconsistent - [terminal] requested channel is in the ledger but with a different amount
+// 7. failed - [terminal] if the ledger ends due to a closure or a protocol exception
+//
+//      ┌────────────────────────┐
+//      │                        v
+//   queued <---> pending ---> success               failed [from any state]
+//      │
+//      ├──────────────────┐──────────────────────┐
+//      v                  v                      v
+//   cancelled      insufficient-funds       inconsistent
+//
+// Requests also maintain a missedOpportunityCount and a lastAgreedStateSeen.
+//
+// The missedOpportunityCount tracks how many agreed states the request has failed to be
+// included in. Objectives can use this to determine whether a request has stalled (e.g. if
+// their counterparty isn't processing the objective anymore).
+//
+// The lastAgreedStateSeen is a piece of book-keeping to so that the LedgerManager can
+// accurately update the missedOpportunityCount.
+//
 export class LedgerManager {
   private store: Store;
-  private logger: Logger;
-  private timingMetrics: boolean;
 
   static create(params: LedgerManagerParams): LedgerManager {
     return new this(params);
   }
 
-  private constructor({store, logger, timingMetrics}: LedgerManagerParams) {
+  private constructor({store}: LedgerManagerParams) {
     this.store = store;
-    this.logger = logger;
-    this.timingMetrics = timingMetrics;
   }
 
-  async crank(ledgerChannelId: string, response: WalletResponse): Promise<boolean> {
-    let requiresAnotherCrankUponCompletion = false;
+  async crank(ledgerChannelId: string, response: WalletResponse): Promise<Destination[]> {
+    return this.store.transaction(async tx => {
+      // grab the requests
+      // TODO: requests should be locked for update
+      // TODO: fetch ledger and requests in one query
+      const ledger = await this.store.getAndLockChannel(ledgerChannelId, tx);
+      const requests = await this.store.getActiveLedgerRequests(ledgerChannelId, tx);
 
-    await this.store.lockApp(ledgerChannelId, async (tx, channel) => {
-      // TODO: Move these checks inside the DB query when fetching ledgers to process
-      if (!channel.protocolState.supported || channel.protocolState.supported.turnNum < 3) {
-        return;
-      }
+      // sanity checks
+      if (!ledger) return [];
+      if (!ledger.isRunning) return [];
+      if (!ledger.isLedger) return [];
 
       // The following behavior is specific to CHALLENGING_V0 requirements
       // It will eventually be removed
       // START CHALLENGING_VO
-      if (channel.initialSupport.length === 0 && channel.isSupported) {
-        await this.store.setInitialSupport(channel.channelId, channel.support, tx);
+      if (ledger.initialSupport.length === 0 && ledger.isSupported) {
+        await this.store.setInitialSupport(ledger.channelId, ledger.support, tx);
       }
       // END CHALLENGING_VO
 
-      let protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+      // determine which state we're in
+      const ledgerState = this.determineLedgerState(ledger);
+      // what happens next depends on whether we're the leader or follower
+      const amLeader = ledger.myIndex === 0;
+      let statesToSign: State[];
 
-      if (!hasUnhandledLedgerRequests(protocolState)) {
-        if (!requiresAnotherCrankUponCompletion) {
-          // pessimistically add state and proposal to outbox
-          await this.addStateAndProposalToOutbox(protocolState, response);
-        }
-        response.queueChannelState(protocolState.fundingChannel);
-        return;
+      switch (ledgerState.type) {
+        case 'agreement':
+          // could be in agreement through (1) follower accepting proposal, (2) leader accepting
+          // counter-proposal, and having an empty queue. So both participants could be seeing
+          // the agreedState for the first time
+          statesToSign = amLeader
+            ? this.crankAsLeaderInAgreement(ledgerState, requests)
+            : this.crankAsFollowerInAgreement(ledgerState, requests);
+          break;
+        case 'proposal':
+          // if leader, we must have created proposal, so no further action to take
+          statesToSign = amLeader ? [] : this.crankAsFollowerInProposal(ledgerState, requests);
+          break;
+        case 'counter-proposal':
+          // if follower, we must have created counter-proposal, so no further action to take
+          statesToSign = amLeader ? this.crankAsLeaderInCounterProposal(ledgerState, requests) : [];
+          break;
+        case 'protocol-violation':
+          throw new Error('protocol violation');
+        default:
+          unreachable(ledgerState);
       }
 
-      const crankAgain = await this.markIncludedRequestsAsComplete(protocolState, tx);
-      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain;
-
-      // refresh the protocol state to be safe
-      // TODO: remove if possible
-      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
-
-      if (finishedExchangingProposals(protocolState)) {
-        const crankAgain2 = await this.exchangeSignedLedgerStates(protocolState, response, tx);
-        requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain2;
+      // save the ledger
+      for (const state of statesToSign) {
+        const signedState = await this.store.signState(ledger, state.signedState, tx);
+        response.queueState(signedState, ledger.myIndex, ledger.channelId);
       }
 
-      // refresh the protocol state to be safe
-      // TODO: remove if possible
-      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
+      // save all requests
+      await LedgerRequest.saveAll(requests, tx);
+      // queue response
+      response.queueChannel(ledger);
 
-      // exchange proposals
-      const crankAgain3 = await this.exchangeProposals(protocolState, tx);
-      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || crankAgain3;
-
-      // refresh the protocol state to be safe
-      // TODO: remove if possible
-      protocolState = await getProcessLedgerQueueProtocolState(this.store, ledgerChannelId, tx);
-
-      if (!requiresAnotherCrankUponCompletion) {
-        // pessimistically add state and proposal to outbox
-        await this.addStateAndProposalToOutbox(protocolState, response);
-      }
-      response.queueChannelState(protocolState.fundingChannel);
+      // we need return any channels whose requests changed to a terminal state for cranking
+      return _.uniq(requests.filter(r => !r.isActive).map(r => r.channelToBeFunded));
     });
-
-    return requiresAnotherCrankUponCompletion;
   }
 
-  private async signLedgerUpdate(
-    fundingChannel: ChannelStateWithSupported,
-    stateToSign: StateVariables,
-    response: WalletResponse,
-    tx: Transaction
-  ) {
-    const {myIndex, channelId} = fundingChannel;
-    const channel = await Channel.forId(channelId, tx);
-    const signedState = await this.store.signState(channel, stateToSign, tx);
-    response.queueState(signedState, myIndex, channelId);
-  }
+  private crankAsLeaderInAgreement(ledgerState: Agreement, requests: LedgerRequest[]): State[] {
+    const {agreed} = ledgerState;
+    const statesToSign = [];
+    this.processAgreedState(agreed, requests);
 
-  private async addStateAndProposalToOutbox(
-    protocolState: ProtocolState,
-    response: WalletResponse
-  ) {
-    const {
-      fundingChannel: {myIndex, channelId, participants, latestSignedByMe, supported},
-      myLedgerProposal: {proposal, nonce},
-    } = protocolState;
-    if (latestSignedByMe && supported) {
-      /**
-       * Always re-send a proposal if I have one withstanding, just in case.
-       */
-      if (proposal)
-        response.queueProposeLedgerUpdate(channelId, myIndex, participants, proposal, nonce);
-      /**
-       * Re-send my latest signed ledger state if it is not supported yet.
-       */
-      if (latestSignedByMe.turnNum > supported.turnNum)
-        response.queueState(latestSignedByMe, myIndex, channelId);
+    if (_.some(requests, r => r.isQueued)) {
+      const proposedOutcome = this.buildOutcome(
+        agreed,
+        requests.filter(r => r.isQueued)
+      );
+      const proposed = agreed.advanceToOutcome(proposedOutcome);
+
+      // need to check that we actually have a new outcome, as it could be that there wasn't
+      // sufficient funding for any of the requests
+      if (!proposedOutcome.isEqualTo(agreed.simpleAllocationOutcome)) {
+        this.markIncludedRequestsAsPending(requests, proposed);
+        statesToSign.push(proposed);
+      }
     }
+    return statesToSign;
   }
 
-  private async markIncludedRequestsAsComplete(
-    protocolState: ProtocolState,
-    tx: Transaction
-  ): Promise<boolean> {
-    const {fundingChannel, channelsRequestingFunds, channelsReturningFunds} = protocolState;
-    const {supported, channelId: ledgerChannelId} = fundingChannel;
-
-    const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-    const supportedChannelIds = _.map(supportedOutcome.allocationItems, 'destination');
-
-    const fundedChannels = _.chain(channelsRequestingFunds)
-      .map('channelId')
-      .intersection(supportedChannelIds)
-      .value();
-
-    const defundedChannels = _.chain(channelsReturningFunds)
-      .map('channelId')
-      .difference(supportedChannelIds)
-      .value();
-
-    if (fundedChannels.length + defundedChannels.length === 0) return false;
-
-    /**
-     * After we have completed some funding requests (i.e., a new ledger state
-     * has been signed), we can confidently clear now-stale proposals from the DB.
-     */
-    await this.store.removeLedgerProposals(ledgerChannelId, tx);
-
-    await this.store.markLedgerRequests(fundedChannels, 'fund', 'succeeded', tx);
-    await this.store.markLedgerRequests(defundedChannels, 'defund', 'succeeded', tx);
-
-    return true; // requiresAnotherCrankUponCompletion
+  private crankAsFollowerInAgreement(ledgerState: Agreement, requests: LedgerRequest[]): State[] {
+    // nothing to do here apart from update the requests according to the agreed state
+    this.processAgreedState(ledgerState.agreed, requests);
+    return [];
   }
 
-  private async exchangeSignedLedgerStates(
-    protocolState: ProtocolStateWithDefinedProposals,
-    response: WalletResponse,
-    tx: Transaction
-  ): Promise<boolean> {
-    const {
-      fundingChannel: {supported, latestSignedByMe, latest, channelId},
-      myLedgerProposal: {proposal: myProposedOutcome},
-      theirLedgerProposal: {proposal: theirProposedOutcome},
-      channelsRequestingFunds,
-      channelsReturningFunds,
-    } = protocolState;
+  private crankAsLeaderInCounterProposal(
+    ledgerState: CounterProposal,
+    requests: LedgerRequest[]
+  ): State[] {
+    const {agreed, counterProposed} = ledgerState;
 
-    const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-    const nextTurnNum = supported.turnNum + 1;
+    const result = this.compareChangesWithRequests(requests, agreed, counterProposed);
 
-    // Already signed something and waiting for reply
-    if (latestSignedByMe.turnNum === nextTurnNum) return false;
+    // if the follower is following the protocol, we should always agree with their counterProposal
+    if (result.type !== 'full-agreement') throw new Error('protocol error');
 
-    const outcome = _.isEqual(theirProposedOutcome, myProposedOutcome)
-      ? myProposedOutcome
-      : mergeProposedLedgerUpdates(
-          myProposedOutcome,
-          theirProposedOutcome,
-          supportedOutcome,
-          channelsRequestingFunds,
-          channelsReturningFunds
-        ).outcome;
+    // if so, sign their state
+    const stateToSign = counterProposed;
 
-    const receivedReveal = latest.turnNum === nextTurnNum;
-    if (receivedReveal && !_.isEqual(outcome, latest.outcome))
-      // TODO: signals a corrupt / broken counterparty wallet, what do we want to do here?
-      throw new Error('received a signed reveal that is _not_ what we agreed on :/');
-
-    if (_.isEqual(outcome, supportedOutcome)) {
-      // dismiss
-      await this.store.removeLedgerProposals(channelId, tx);
-      return true;
-    } else {
-      // sign ledger update
-      const stateToSign = {
-        turnNum: nextTurnNum,
-        outcome,
-        appData: NULL_APP_DATA,
-        isFinal: false,
-      };
-
-      await this.signLedgerUpdate(protocolState.fundingChannel, stateToSign, response, tx);
-      return false;
-    }
-  }
-
-  private async exchangeProposals(protocolState: ProtocolState, tx: Transaction): Promise<boolean> {
-    const {
-      fundingChannel: {supported, channelId, myIndex, participants},
-      myLedgerProposal: {proposal, nonce},
-      channelsRequestingFunds,
-      channelsReturningFunds,
-    } = protocolState;
-
-    const supportedOutcome = checkThat(supported.outcome, isSimpleAllocation);
-
-    // Don't propose another commit, wait for theirs
-    if (proposal) return false;
-
-    const {outcome, channelsNotFunded} = redistributeFunds(
-      supportedOutcome,
-      channelsReturningFunds,
-      channelsRequestingFunds
+    // and proceed as if we're in the AgreementState
+    const otherStatesToSign = this.crankAsLeaderInAgreement(
+      {type: 'agreement', agreed: counterProposed},
+      requests
     );
 
-    if (_.isEqual(outcome, supportedOutcome)) {
-      if (channelsNotFunded.length > 0) {
-        // mark insufficient funds
-        await this.store.markLedgerRequests(channelsNotFunded, 'fund', 'failed', tx);
-        return false;
+    return [stateToSign, ...otherStatesToSign];
+  }
+
+  private crankAsFollowerInProposal(ledgerState: Proposal, requests: LedgerRequest[]): State[] {
+    const statesToSign = [];
+    const {agreed, proposed} = ledgerState;
+
+    this.processAgreedState(agreed, requests);
+
+    const result = this.compareChangesWithRequests(requests, agreed, proposed);
+
+    switch (result.type) {
+      case 'full-agreement':
+        statesToSign.push(proposed);
+        this.processAgreedState(proposed, requests);
+        break;
+      case 'some-overlap':
+      case 'no-overlap': {
+        // in both cases we're going to make a counter-proposal either to return to the
+        // original state, or to go to a state containing the overlap
+        const counterProposed = proposed.advanceToOutcome(result.narrowedOutcome);
+        statesToSign.push(counterProposed);
+        this.markIncludedRequestsAsPending(requests, counterProposed);
+        break;
+      }
+      default:
+        unreachable(result);
+    }
+
+    return statesToSign;
+  }
+
+  private processAgreedState(agreedState: State, requests: LedgerRequest[]): void {
+    // identify potential cancellations (defunds for which the fund is still queued or pending)
+    const {cancellationDefunds, nonCancellations} = this.identifyPotentialCancellations(requests);
+
+    // we exclude potential cancellation defunds when judging the success, otherwise a defund
+    // where the fund isn't yet included would be marked a success
+    this.markSuccessesAndInconsistencies(nonCancellations, agreedState);
+
+    // in the case where we're the leader and we just approved a counterProposal, there will
+    // be some pending requests that weren't included. Reset those now.
+    this.resetPendingRequestsToQueued(requests);
+
+    // cancel any pairs of matching funds/defunds that still both queued
+    const nonApplicableCancellations = this.applyCancellations(
+      cancellationDefunds,
+      requests,
+      agreedState.turnNum
+    );
+
+    // it's possible that the matching fund was marked as inconsistent above, which means
+    // we now need to assess if the defund is consistent
+    // (this would happen if we had duplicate funds for the same channel. We have a db constraint
+    // to protect against this, but that only works if we never garbage collect or lose the db)
+    this.markSuccessesAndInconsistencies(nonApplicableCancellations, agreedState);
+
+    this.updateStateSeenAndMissedOps(requests, agreedState.turnNum);
+  }
+
+  private markSuccessesAndInconsistencies(requests: LedgerRequest[], agreedState: State): void {
+    const agreedOutcome = agreedState.simpleAllocationOutcome;
+    if (!agreedOutcome) throw Error("Ledger state doesn't have a simple allocation outcome");
+
+    const [fundings, defundings] = _.partition(requests, r => r.type === 'fund');
+
+    // for defundings, one of three things is true:
+    // 1. the channel doesn't appear => defunding successful
+    // 2. the channel appears but with a different amount => inconsistent
+    // 3. the channel appears with the same amount => no change
+    for (const defund of defundings) {
+      const matches = agreedOutcome.destinations.filter(d => d === defund.channelToBeFunded);
+      if (matches.length > 1) {
+        throw new Error(`Duplicate entries for destination`);
+      } else if (matches.length === 0) {
+        defund.status = 'succeeded';
+        defund.lastSeenAgreedState = agreedState.turnNum;
       } else {
-        return false;
+        const outcomeBal = agreedOutcome.balanceFor(defund.channelToBeFunded);
+        const amountsMatch = outcomeBal && BN.eq(outcomeBal, defund.totalAmount);
+        if (!amountsMatch) {
+          defund.status = 'inconsistent';
+          defund.lastSeenAgreedState = agreedState.turnNum;
+        }
+      }
+    }
+
+    // for fundings check which are present, and then check that the totals match
+    const includedFundings = _.intersectionWith(
+      fundings,
+      agreedOutcome.destinations,
+      (fund, dest) => fund.channelToBeFunded === dest
+    );
+    includedFundings.forEach(f => {
+      const outcomeBal = agreedOutcome.balanceFor(f.channelToBeFunded);
+      const amountsMatch = outcomeBal && BN.eq(outcomeBal, f.totalAmount);
+      f.status = amountsMatch ? 'succeeded' : 'inconsistent';
+      f.lastSeenAgreedState = agreedState.turnNum;
+    });
+  }
+
+  private updateStateSeenAndMissedOps(requests: LedgerRequest[], turnNum: number) {
+    requests
+      .filter(r => r.isQueued)
+      .forEach(r => {
+        if (r.lastSeenAgreedState !== turnNum) {
+          if (r.lastSeenAgreedState) r.missedOpportunityCount = 1 + r.missedOpportunityCount;
+          r.lastSeenAgreedState = turnNum;
+        }
+      });
+  }
+
+  private resetPendingRequestsToQueued(requests: LedgerRequest[]) {
+    requests.filter(r => r.isPending).forEach(r => (r.status = 'queued'));
+  }
+
+  private markIncludedRequestsAsPending(requests: LedgerRequest[], proposed: State): void {
+    const proposedOutcome = proposed.simpleAllocationOutcome;
+    if (!proposedOutcome) throw Error("Ledger state doesn't have a simple allocation outcome");
+
+    const [fundings, defundings] = _.partition(
+      requests.filter(r => r.isQueued),
+      r => r.isFund
+    );
+
+    // for defundings, mark any the aren't present as successful
+    const missingDefundings = _.differenceWith(
+      defundings,
+      proposedOutcome.destinations,
+      (defund, dest) => defund.channelToBeFunded === dest
+    );
+    missingDefundings.forEach(d => (d.status = 'pending'));
+
+    // for fundings check which are present, and then check that the totals match
+    const includedFundings = _.intersectionWith(
+      fundings,
+      proposedOutcome.destinations,
+      (fund, dest) => fund.channelToBeFunded === dest
+    );
+    includedFundings.forEach(f => {
+      const outcomeBal = proposedOutcome.balanceFor(f.channelToBeFunded);
+      const amountsMatch = outcomeBal && BN.eq(outcomeBal, f.totalAmount);
+      // amounts sould always match, as proposedOutcome is always called with a state we constructed
+      if (!amountsMatch) throw new Error("amounts don't match");
+
+      f.status = 'pending';
+    });
+  }
+
+  private identifyPotentialCancellations(
+    requests: LedgerRequest[]
+  ): {cancellationDefunds: LedgerRequest[]; nonCancellations: LedgerRequest[]} {
+    const [fundings, defundings] = _.partition(requests, r => r.isFund);
+
+    const cancellationDefunds = _.intersectionWith(
+      defundings,
+      fundings,
+      (x, y) => x.channelToBeFunded === y.channelToBeFunded
+    );
+    const nonCancellations = _.difference(requests, cancellationDefunds);
+
+    // sanity check: cancellationDefunds should always be queued
+    for (const d of cancellationDefunds) {
+      if (!d.isQueued) throw new Error(`cancellation defund is not in queued state: ${d.$id}`);
+    }
+
+    return {cancellationDefunds, nonCancellations};
+  }
+
+  // find the corresponding fund for each defund and cancel it if it's in the queued state
+  // returns the cancellations that can't be applied (becuase their parnter has already been confirmed)
+  private applyCancellations(
+    cancellations: LedgerRequest[],
+    requests: LedgerRequest[],
+    turnNum: number
+  ): LedgerRequest[] {
+    const nonApplicableCancellations = [];
+    for (const defund of cancellations) {
+      const fund = requests.find(r => r.isFund && r.channelToBeFunded === defund.channelToBeFunded);
+      if (fund && fund.isQueued) {
+        fund.status = 'cancelled';
+        fund.lastSeenAgreedState = turnNum;
+        defund.status = 'cancelled';
+        defund.lastSeenAgreedState = turnNum;
+      } else {
+        nonApplicableCancellations.push(defund);
+      }
+    }
+    return nonApplicableCancellations;
+  }
+
+  // compareChangesWithRequest
+  // - fullAgreement => agree on channels and outcome
+  // - someoverlap, narrowedOutcome => have removed
+  // - noOverlap
+  private compareChangesWithRequests(
+    requests: LedgerRequest[],
+    baselineState: State,
+    candidateState: State
+  ): CompareChangesWithRequestsResult {
+    const baselineOutcome = baselineState.simpleAllocationOutcome;
+    const candidateOutcome = candidateState.simpleAllocationOutcome;
+
+    if (!baselineOutcome || !candidateOutcome)
+      throw Error("Ledger state doesn't have simple allocation outcome");
+
+    const changedDestinations = _.xor(baselineOutcome.destinations, candidateOutcome.destinations);
+
+    if (changedDestinations.length === 0) return {type: 'full-agreement'};
+
+    // we don't want to mistakenly think that defund cancellations are included in the state, so
+    // we need to exclude them in what follows
+    const {nonCancellations} = this.identifyPotentialCancellations(requests);
+
+    // identify which changes from the proposal are also in our list of requests
+    const overlappingRequests = nonCancellations.filter(req =>
+      changedDestinations.includes(req.channelToBeFunded)
+    );
+
+    if (overlappingRequests.length === 0)
+      return {type: 'no-overlap', narrowedOutcome: baselineOutcome};
+
+    // build the outcome
+    const calculatedOutcome = this.buildOutcome(baselineState, overlappingRequests);
+
+    if (overlappingRequests.length === changedDestinations.length) {
+      // we've have full overlap
+      if (candidateOutcome.isEqualTo(calculatedOutcome)) {
+        // all agree. happy days.
+        return {type: 'full-agreement'};
+      } else {
+        // uh oh. We agree on the requests but not the outcome. Coding error alert
+        throw new Error('Outcomes inconsistent');
       }
     } else {
-      // propose Ledger update
-      await this.store.storeLedgerProposal(
-        channelId,
-        outcome,
-        nonce + 1,
-        participants[myIndex].signingAddress,
-        tx
-      );
-      return false;
+      return {type: 'some-overlap', narrowedOutcome: calculatedOutcome};
     }
+  }
+
+  private determineLedgerState(ledger: Channel): LedgerState {
+    const [leader, follower] = ledger.participants.map(p => p.signingAddress);
+    const latestTurnNum = ledger.latestTurnNum;
+
+    const latestState = ledger.uniqueStateAt(latestTurnNum);
+    if (!latestState) return {type: 'protocol-violation'};
+
+    if (latestState.fullySigned) {
+      return {type: 'agreement', agreed: latestState};
+    }
+
+    const penultimateState = ledger.uniqueStateAt(latestTurnNum - 1);
+    if (!penultimateState) return {type: 'protocol-violation'};
+
+    if (penultimateState.fullySigned) {
+      if (latestState.signedBy(leader)) {
+        return {type: 'proposal', proposed: latestState, agreed: penultimateState};
+      } else {
+        return {type: 'protocol-violation'};
+      }
+    }
+
+    const antepenultimateState = ledger.uniqueStateAt(latestTurnNum - 2);
+    if (!antepenultimateState) return {type: 'protocol-violation'};
+
+    if (
+      !antepenultimateState.fullySigned &&
+      penultimateState.signedBy(leader) &&
+      latestState.signedBy(follower)
+    ) {
+      return {type: 'protocol-violation'};
+    } else {
+      return {
+        type: 'counter-proposal',
+        counterProposed: latestState,
+        proposed: penultimateState,
+        agreed: antepenultimateState,
+      };
+    }
+  }
+
+  private buildOutcome(state: State, requests: LedgerRequest[]): SimpleAllocationOutcome {
+    if (!state.simpleAllocationOutcome)
+      throw Error("Ledger doesn't have simple allocation outcome");
+
+    let currentOutcome = state.simpleAllocationOutcome.dup();
+
+    // we should do any defunds first
+    for (const defundReq of requests.filter(r => r.isDefund)) {
+      const updatedOutcome = currentOutcome.remove(
+        defundReq.channelToBeFunded,
+        state.participantDestinations,
+        [defundReq.amountA, defundReq.amountB]
+      );
+
+      if (updatedOutcome) {
+        currentOutcome = updatedOutcome;
+      } else {
+        // the only way removal fails is if the refund amounts don't match the amount in the channel
+        // in that case the request is not viable and should be marked as insconsistent
+        defundReq.status = 'inconsistent';
+      }
+    }
+
+    // then we should do any fundings
+    // NOTE: new requests MUST be appended in lexographical order by channelId
+    // this isn't strictly necessary, but removes any ambiguity about the format of the state
+    for (const fundingReq of _.sortBy(
+      requests.filter(r => r.isFund),
+      'channelToBeFunded'
+    )) {
+      const updatedOutcome = currentOutcome.add(
+        fundingReq.channelToBeFunded,
+        state.participantDestinations,
+        [fundingReq.amountA, fundingReq.amountB]
+      );
+
+      if (updatedOutcome) {
+        currentOutcome = updatedOutcome;
+      } else {
+        // if funding failed, it means that there aren't enough funds left in the channel
+        // so mark the request as failed
+        // TODO: do we actually want to do this here?
+        fundingReq.status = 'insufficient-funds';
+      }
+    }
+
+    return currentOutcome;
   }
 }
 
-/**
- * Follows an algorithm to guarantee that an agreed upon ledger update will be signed by
- * 2 participants in at most 2 round trips. Either can propose a state at any time and either
- * can counterpropose a state at any time. However, if they follow the algorithm below they
- * should always be able to compute the expected outcome by the second round trip.
- *
- * Algorithm:
- *
- *  Let O be the outcome of the currently supported state S.
- *
- *   i. Create my own ledger update. If I have already proposed a new ledger update, go to (ii).
- *      Else:
- *      Let D₁ be the pending defund ledger updates. Remove D₁ from O.
- *
- *      Sort pending ledger updates by channel nonce. Call them F.
- *      Add from F when the outcome O "affords it", and mark with an error otherwise.
- *      Call F₁ those we could "afford" to add to O.
- *      For those we cannot afford, mark as ‘failed’ with insufficient funds.
- *
- *      My ledger update is (D₁, F₁). Send it to my peer.
- *
- *  ii. If there is an existing peer proposal for a ledger update D₂ and F₂, go to (iii).
- *      Else, ask for their ledger update and return.
- *
- * iii. Compute the next outcome O'.
- *      a. Compute D = D₁ ⋂ D₂. Remove all items D from O.
- *
- *      b. Compute F = F₁ ∩ F₂.
- *      Add from F when the outcome O "affords it".
- *
- *      c. If O' !== O, sign a state S' with outcome O' and turn number S.turnNum + 1.
- *         Else erase both sent and received proposals and start again at (i).
- *
- * Notes:
- *   - In the implementation below, instead of sending (D, F) to my peer, a computed
- *     outcome based on applying D and F to O is sent and the peer is expected to be
- *     able to "deconstruct" it into D and F if it is not equal to their proposal. In
- *     a future implementation we will send (D, F) instead of the computed proposal
- */
+// LedgerState
+// ===========
+type LedgerState = Agreement | Proposal | CounterProposal | ProtocolViolation;
 
-export type ProtocolState = {
-  fundingChannel: ChannelStateWithSupported;
-  theirLedgerProposal: {proposal: SimpleAllocation | null; nonce: number};
-  myLedgerProposal: {proposal: SimpleAllocation | null; nonce: number};
-  channelsRequestingFunds: ChannelState[];
-  channelsReturningFunds: ChannelState[];
+type Agreement = {type: 'agreement'; agreed: State};
+type Proposal = {type: 'proposal'; agreed: State; proposed: State};
+type CounterProposal = {
+  type: 'counter-proposal';
+  counterProposed: State;
+  proposed: State;
+  agreed: State;
 };
+type ProtocolViolation = {type: 'protocol-violation'};
 
-type ProtocolStateWithDefinedProposals = ProtocolState & {
-  theirLedgerProposal: {proposal: SimpleAllocation; nonce: number};
-  myLedgerProposal: {proposal: SimpleAllocation; nonce: number};
-};
+// CompareChangesWithRequestsResult
+// ================================
+type CompareChangesWithRequestsResult = FullAgreement | SomeOverlap | NoOverlap;
 
-function removeChannelFromAllocation(
-  allocationItems: AllocationItem[],
-  channel: ChannelState
-): AllocationItem[] {
-  if (!channel.supported) throw new Error('state is unsupported');
+type FullAgreement = {type: 'full-agreement'};
+type SomeOverlap = {type: 'some-overlap'; narrowedOutcome: SimpleAllocationOutcome};
+type NoOverlap = {type: 'no-overlap'; narrowedOutcome: SimpleAllocationOutcome};
 
-  const {allocationItems: channelAllocations} = checkThat(
-    channel.supported.outcome,
-    isSimpleAllocation
-  );
-
-  const [removed, remaining] = _.partition(allocationItems, ['destination', channel.channelId]);
-
-  if (removed.length !== 1) throw new Error('Expected to find exactly one item');
-
-  if (removed[0].amount !== channelAllocations.map(x => x.amount).reduce(BN.add, BN.from(0)))
-    throw new Error('Expected outcome allocations to add up to the allocation in ledger');
-
-  return channelAllocations.reduce((remainingItems, {destination, amount}) => {
-    const idx = remainingItems.findIndex(to => destination === to.destination);
-    return idx > -1
-      ? _.update(remainingItems, idx, to => ({
-          amount: BN.add(amount, to.amount),
-          destination,
-        }))
-      : [...remainingItems, {amount, destination}];
-  }, remaining);
+// LedgerManagerParams
+// ===================
+interface LedgerManagerParams {
+  store: Store;
 }
-
-const retrieveFundsFromClosedChannels = (
-  {assetHolderAddress, allocationItems}: SimpleAllocation,
-  channelsReturningFunds: ChannelState[]
-): SimpleAllocation => ({
-  type: 'SimpleAllocation',
-  assetHolderAddress: assetHolderAddress,
-  allocationItems: channelsReturningFunds.reduce(removeChannelFromAllocation, allocationItems),
-});
-
-const allocateFundsToChannels = (
-  original: SimpleAllocation,
-  allocationTargets: ChannelState[]
-): {
-  outcome: SimpleAllocation;
-  channelsNotFunded: Bytes32[];
-} => {
-  const channelsNotFunded: Bytes32[] = [];
-  const outcome = allocationTargets.reduce((outcome, {channelId, supported}) => {
-    try {
-      return allocateToTarget(
-        outcome,
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        (supported!.outcome as SimpleAllocation).allocationItems,
-        channelId
-      ) as SimpleAllocation;
-    } catch (e) {
-      if (
-        // A proposed channel wants more funds than are available from a participant
-        e.message.toString() === Errors.InsufficientFunds ||
-        // There is no participant balance at all (exactly 0 left)
-        e.message.toString() === Errors.DestinationMissing
-      )
-        channelsNotFunded.push(channelId);
-      return outcome;
-    }
-  }, original);
-
-  return {outcome, channelsNotFunded};
-};
-
-const intersectOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
-  if (a.assetHolderAddress !== b.assetHolderAddress)
-    throw new Error('intersectOutcome: assetHolderAddresses not equal');
-  return {
-    type: 'SimpleAllocation',
-    assetHolderAddress: b.assetHolderAddress,
-    allocationItems: _.intersectionWith(
-      a.allocationItems,
-      b.allocationItems,
-      areAllocationItemsEqual
-    ),
-  };
-};
-const redistributeFunds = (
-  outcome: SimpleAllocation,
-  defunding: ChannelState[],
-  funding: ChannelState[]
-): {
-  outcome: SimpleAllocation;
-  channelsNotFunded: Bytes32[];
-} => allocateFundsToChannels(retrieveFundsFromClosedChannels(outcome, defunding), funding);
-
-const xorOutcome = (a: SimpleAllocation, b: SimpleAllocation): SimpleAllocation => {
-  if (a.assetHolderAddress !== b.assetHolderAddress)
-    throw new Error('xorOutcome: assetHolderAddresses not equal');
-  return {
-    type: 'SimpleAllocation',
-    assetHolderAddress: b.assetHolderAddress,
-    allocationItems: _.xorWith(a.allocationItems, b.allocationItems, areAllocationItemsEqual),
-  };
-};
-
-const channelIdMatchesDestination = ({channelId}: ChannelState, {destination}: AllocationItem) =>
-  channelId === destination;
-
-const mergeProposedLedgerUpdates = (
-  mine: SimpleAllocation,
-  theirs: SimpleAllocation,
-  supportedOutcome: SimpleAllocation,
-  requesting: ChannelState[],
-  returning: ChannelState[]
-) => {
-  const {allocationItems: merged} = intersectOutcome(mine, theirs);
-  const {allocationItems: xor} = xorOutcome(mine, theirs);
-  const bothFunding = _.intersectionWith(requesting, merged, channelIdMatchesDestination);
-  const bothDefunding = _.differenceWith(returning, xor, channelIdMatchesDestination);
-  return redistributeFunds(supportedOutcome, bothDefunding, bothFunding);
-};
-
-const hasUnhandledLedgerRequests = (ps: ProtocolState): boolean =>
-  ps.channelsRequestingFunds.length + ps.channelsReturningFunds.length > 0;
-
-const finishedExchangingProposals = (ps: ProtocolState): ps is ProtocolStateWithDefinedProposals =>
-  Boolean(ps.myLedgerProposal.proposal && ps.theirLedgerProposal.proposal);
-
-/**
- * Helper method to retrieve scoped data needed for ProcessLedger protocol.
- *
- * TODO: This can be heavily optimized by writing some manually crafted SQL
- */
-export const getProcessLedgerQueueProtocolState = async (
-  store: Store,
-  ledgerChannelId: Bytes32,
-  tx: Transaction
-): Promise<ProtocolState> => {
-  const fundingChannel = await store.getChannelState(ledgerChannelId, tx);
-  const ledgerRequests = await store.getPendingLedgerRequests(ledgerChannelId, tx);
-  const proposals = await store.getLedgerProposals(ledgerChannelId, tx);
-  const [[mine], [theirs]] = _.partition(proposals, [
-    'signingAddress',
-    fundingChannel.participants[fundingChannel.myIndex].signingAddress,
-  ]);
-  return {
-    fundingChannel: runningOrError(fundingChannel),
-
-    myLedgerProposal: mine ?? {proposal: null, nonce: 0},
-    theirLedgerProposal: theirs ?? {proposal: null, nonce: 0},
-
-    channelsRequestingFunds: await Promise.all<ChannelState>(
-      compose(
-        map(({channelToBeFunded}: LedgerRequestType) =>
-          store.getChannelState(channelToBeFunded, tx)
-        ),
-        filter(['status', 'pending']),
-        filter(['type', 'fund'])
-      )(ledgerRequests)
-    ).then(sortByNonce),
-
-    channelsReturningFunds: await Promise.all<ChannelState>(
-      compose(
-        map(({channelToBeFunded}: LedgerRequestType) =>
-          store.getChannelState(channelToBeFunded, tx)
-        ),
-        filter(['status', 'pending']),
-        filter(['type', 'defund'])
-      )(ledgerRequests)
-    ).then(sortByNonce),
-  };
-};
-
-const sortByNonce = (channelStates: ChannelState[]): ChannelState[] =>
-  _.sortBy(channelStates, ({latest: {channelNonce}}) => channelNonce);
-
-const runningOrError = (cs: ChannelState): ChannelStateWithSupported => {
-  // TODO: Figure out why TypeScript is not detecting latestSignedByMe
-  if (cs.supported && cs.latestSignedByMe && cs.supported.turnNum >= 3)
-    return cs as ChannelStateWithSupported;
-  throw new Error('unreachable: ledger channel is not running');
-};
