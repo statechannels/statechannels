@@ -30,7 +30,7 @@ import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
 
-import {Bytes32} from '../type-aliases';
+import {Bytes32, Uint256} from '../type-aliases';
 import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
@@ -167,11 +167,7 @@ export class SingleThreadedWallet
       timingMetrics: this.walletConfig.metricsConfiguration.timingMetrics,
     });
 
-    this.ledgerManager = LedgerManager.create({
-      store: this.store,
-      logger: this.logger,
-      timingMetrics: this.walletConfig.metricsConfiguration.timingMetrics,
-    });
+    this.ledgerManager = LedgerManager.create({store: this.store});
   }
   /**
    * Adds an ethereum private key to the wallet's database
@@ -948,68 +944,32 @@ export class SingleThreadedWallet
    * @param channels channels touched by the caller
    * @param response WalletResponse that is modified in place while cranking objectives
    */
-  private async takeActions(channels: Bytes32[], response: WalletResponse): Promise<void> {
-    let needToCrank = true;
-    while (needToCrank) {
-      await this.crankUntilIdle(channels, response);
-      needToCrank = await this.processLedgerQueue(channels, response);
+  private async takeActions(channelIds: Bytes32[], response: WalletResponse): Promise<void> {
+    // 1. we're passed a set of channelIds that have changed
+    // 2. we crank any objectives that involve changed channels, which could create new ledger requests
+    // 3. we crank any ledgers with new requests, which could update those requests
+    // 4. if any requests changed, we treat the corresponding channels as changed and go to step 2
+
+    while (channelIds.length > 0) {
+      const objectiveIds = await this.store.getApprovedObjectiveIds(channelIds);
+      for (const objectiveId of objectiveIds) {
+        await this.objectiveManager.crank(objectiveId, response);
+      }
+
+      const ledgersFromRequests = await this.store.getLedgersWithNewRequestsIds();
+      const ledgersFromChannels = await this.store.filterChannelIdsByIsLedger(channelIds);
+      const ledgersToProcess = _.uniq(ledgersFromChannels.concat(ledgersFromRequests));
+
+      channelIds = [];
+      for (const ledgerChannelId of ledgersToProcess) {
+        //todo: how to handle errors
+        const touchedChannels = await this.ledgerManager.crank(ledgerChannelId, response);
+        channelIds = [...channelIds, ...touchedChannels];
+      }
     }
 
     response.createdObjectives.map(o => this.emit('objectiveStarted', o));
     response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
-  }
-
-  private async processLedgerQueue(
-    channels: Bytes32[],
-    response: WalletResponse
-  ): Promise<boolean> {
-    let requiresAnotherCrankUponCompletion = false;
-
-    // Fetch ledger channels related to the channels argument where related means, either:
-    // - The ledger channel is in the channels array
-    // - The ledger channel is funding one of the channels in the channels array
-    const ledgerIdsFundingChannels = await this.store.getLedgerChannelIdsFundingChannels(channels);
-    const ledgerIdsFromChannels = await this.store.filterChannelIdsByIsLedger(channels);
-
-    const ledgersToProcess = _.uniq(ledgerIdsFromChannels.concat(ledgerIdsFundingChannels));
-
-    for (const ledgerChannelId of ledgersToProcess) {
-      const result = await this.ledgerManager.crank(ledgerChannelId, response).catch(err => {
-        // We log and swallow errors thrown during cranking
-        // So that the wallet can continue processing other ledger channels.
-        // TODO review this choice
-        // https://github.com/statechannels/statechannels/pull/3169#issuecomment-763637894
-        this.logger.error({err}, `Error cranking ledger channel ${ledgerChannelId}`);
-        return false;
-      });
-      requiresAnotherCrankUponCompletion = requiresAnotherCrankUponCompletion || result;
-    }
-
-    return requiresAnotherCrankUponCompletion;
-  }
-
-  // todo(tom): change function to return a value instead of mutating input args
-  private async crankUntilIdle(channels: Bytes32[], response: WalletResponse): Promise<void> {
-    // Fetch channels related to the channels argument where related means, either:
-    // - The channel is in the channels array
-    // - The channel is being funded by one of the channels in the channels array
-    const channelsWithRelevantPendingReqs = await this.store.getChannelIdsPendingLedgerFundingFrom(
-      channels
-    );
-
-    const objectives = (
-      await this.store.getObjectives(channels.concat(channelsWithRelevantPendingReqs))
-    ).filter(objective => objective.status === 'approved');
-
-    // todo(tom): why isn't this just a for loop?
-    while (objectives.length) {
-      const objective = objectives[0];
-
-      await this.objectiveManager.crank(objective.objectiveId, response);
-
-      // remove objective from list
-      objectives.shift();
-    }
   }
 
   // ChainEventSubscriberInterface implementation
@@ -1030,7 +990,7 @@ export class SingleThreadedWallet
     const response = WalletResponse.initialize();
     const transferredOut = externalPayouts.map(ai => ({
       toAddress: makeDestination(ai.destination),
-      amount: ai.amount,
+      amount: ai.amount as Uint256,
     }));
 
     await this.store.updateTransferredOut(channelId, assetHolderAddress, transferredOut);

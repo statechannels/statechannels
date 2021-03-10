@@ -74,8 +74,8 @@ describe(`defunding phase (when the channel is closed)`, () => {
   });
   describe(`fake funding`, () => {
     it('marks the objective as complete', async () => {
-      const testChan = TestChannel.create({finalFrom: FINAL, fundingStrategy: 'Fake'});
-      const objective = await setup(testChan, {participant: 0, statesHeld: [FINAL, FINAL + 1]});
+      const testChan2 = TestChannel.create({finalFrom: FINAL, fundingStrategy: 'Fake'});
+      const objective = await setup(testChan2, {participant: 0, statesHeld: [FINAL, FINAL + 1]});
 
       await crankAndAssert(objective, {completesObj: true});
     });

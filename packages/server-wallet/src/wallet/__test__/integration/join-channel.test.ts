@@ -3,11 +3,7 @@ import {
   BN,
   serializeState,
   serializeAllocation,
-  makeDestination,
-  SignedStateWithHash,
   serializeOutcome,
-  makeAddress,
-  serializeRequest,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Objection from 'objection';
@@ -211,7 +207,6 @@ describe('directly funded app', () => {
 describe('ledger funded app scenarios', () => {
   let ledger: Channel;
   let app: Channel;
-  let expectedUpdatedLedgerState: SignedStateWithHash;
 
   beforeEach(async () => {
     const someNonConflictingChannelNonce = 23364518;
@@ -240,22 +235,6 @@ describe('ledger funded app scenarios', () => {
       fundingStrategy: 'Ledger',
       fundingLedgerChannelId: ledger.channelId,
     });
-
-    // Construct expected ledger update state
-    expectedUpdatedLedgerState = {
-      ...ledger.latest,
-      turnNum: 6,
-      outcome: {
-        type: 'SimpleAllocation' as const,
-        assetHolderAddress: makeAddress('0x0000000000000000000000000000000000000000'),
-        allocationItems: [
-          {
-            destination: makeDestination(app.channelId), // Funds allocated to channel
-            amount: BN.from(5), // As per channel outcome
-          },
-        ],
-      },
-    };
   });
 
   const putTestChannelInsideWallet = async (args: Objection.PartialModelObject<Channel>) => {
@@ -301,15 +280,6 @@ describe('ledger funded app scenarios', () => {
             sender: 'bob',
             data: {
               signedStates: [serializeState(stateWithHashSignedBy([bob()])(signedPreFS1))],
-              requests: [
-                serializeRequest({
-                  type: 'ProposeLedgerUpdate',
-                  channelId: ledger.channelId,
-                  outcome: expectedUpdatedLedgerState.outcome,
-                  nonce: 1,
-                  signingAddress: bob().address,
-                }),
-              ],
             },
           },
         },
