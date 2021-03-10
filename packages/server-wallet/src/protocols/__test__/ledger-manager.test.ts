@@ -1,54 +1,24 @@
 import _ from 'lodash';
-import {
-  AllocationItem,
-  BN,
-  makeDestination,
-  Participant,
-  serializeRequest,
-  SimpleAllocation,
-  simpleEthAllocation as coreSimpleEthAllocation,
-} from '@statechannels/wallet-core';
+import {unreachable} from '@statechannels/wallet-core';
 
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
-import {Fixture} from '../../wallet/__test__/fixtures/utils';
-import {LedgerManager} from '../ledger-manager';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {Store} from '../../wallet/store';
 import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
-import {WalletResponse} from '../../wallet/wallet-response';
 import {createLogger} from '../../logger';
-import {LedgerRequestType} from '../../models/ledger-request';
-import {getPayloadFor} from '../../__test__/test-helpers';
-import {ProposeLedgerUpdate} from '../actions';
-import {LedgerProposal} from '../../models/ledger-proposal';
+import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
-import {Channel} from '../../models/channel';
+import {State} from '../../models/channel/state';
+import {LedgerManager} from '../ledger-manager';
+import {WalletResponse} from '../../wallet/wallet-response';
+import {Destination} from '../../type-aliases';
 
 // TEST HELPERS
-// There are many test cases in this file. These helpers make the tests cases more readable.
-
 jest.setTimeout(10_000);
-
-type PreAllocationItem = [string | Fixture<Participant>, number];
-
-function allocationItem(preAllocationItem: PreAllocationItem): AllocationItem {
-  const [destinationOrFixture, amount] = preAllocationItem;
-  const destination =
-    typeof destinationOrFixture === 'string'
-      ? makeDestination(destinationOrFixture)
-      : destinationOrFixture().destination;
-  return {destination, amount: BN.from(amount)};
-}
-
-function simpleEthAllocation(...items: PreAllocationItem[]): SimpleAllocation {
-  return coreSimpleEthAllocation(items.map(allocationItem));
-}
 // END TEST HELPERS
 
 let store: Store;
-let ledgerManager: LedgerManager;
 
 beforeAll(async () => {
   await DBAdmin.migrateDatabase(defaultTestConfig());
@@ -62,11 +32,6 @@ beforeEach(async () => {
     '0',
     createLogger(defaultTestConfig())
   );
-  ledgerManager = LedgerManager.create({
-    store,
-    logger: store.logger,
-    timingMetrics: defaultTestConfig().metricsConfiguration.timingMetrics,
-  });
   await DBAdmin.truncateDatabase(defaultTestConfig());
 });
 
@@ -74,648 +39,728 @@ afterEach(async () => {
   await DBAdmin.truncateDatabase(defaultTestConfig());
 });
 
-describe('marking ledger requests as complete', () => {
-  it('detects completed funding requests from the outcome of supported state', async () => {
-    // create an application channel
-    const appChannel = TestChannel.create({aBal: 5, bBal: 5});
-    await appChannel.insertInto(store, {states: [0, 1]});
-    // create a ledger channel that funds that channel. Note distinct channel nonce ensured automatically
-    const ledgerChannel = TestLedgerChannel.create({});
-    await ledgerChannel.insertInto(store, {
-      states: [4, 5],
-      bals: [[appChannel.channelId, 10]],
-    });
-    // create a ledger request for the ledger to fund the channel
-    await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+describe('as leader', () => {
+  describe('in the accept state', () => {
+    it(
+      'will create a proposal from requests in the queue',
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'queued'],
+            ['defund', 'c', 5, 5, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          proposed: {turn: 6, bals: {a: 9, b: 9, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 5, 5, 'pending', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
 
-    // crank the ledger manager
-    await ledgerManager.crank(ledgerChannel.channelId, new WalletResponse());
-    // assert that it marks the request as complete
-    expect(
-      await store.getLedgerRequest(appChannel.channelId, 'fund')
-    ).toMatchObject<LedgerRequestType>({
-      type: 'fund',
-      ledgerChannelId: ledgerChannel.channelId,
-      channelToBeFunded: appChannel.channelId,
-      status: 'succeeded',
-    });
+    it(
+      `will marks requests that appear in the state as successful`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 6, bals: {a: 9, b: 9, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 5, 5, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+        after: {
+          agreed: {turn: 6, bals: {a: 9, b: 9, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'succeeded', {missedOps: 0, lastSeen: 6}],
+            ['defund', 'c', 5, 5, 'succeeded', {missedOps: 0, lastSeen: 6}],
+          ],
+        },
+      })
+    );
 
-    // Verify CHALLENGING_VO behavior
-    const reloadedLedger = await Channel.forId(ledgerChannel.channelId, knex);
-    expect(reloadedLedger.initialSupport[0]).toMatchObject({turnNum: 5});
-    expect(reloadedLedger.initialSupport[0].signatures).toHaveLength(2);
+    it(
+      `it increases missedOps if the requests aren't accepted`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 6, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}], // was pending, but not accepted
+            ['defund', 'c', 5, 5, 'queued'], // didn't see state 5, so won't be a missedOp
+          ],
+        },
+        after: {
+          agreed: {turn: 6, bals: {a: 5, b: 5, c: 10}},
+          proposed: {turn: 7, bals: {a: 9, b: 9, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 1, lastSeen: 6}],
+            ['defund', 'c', 5, 5, 'pending', {missedOps: 0, lastSeen: 6}],
+          ],
+        },
+      })
+    );
+
+    it(
+      `will mark bad requests as insufficent-funds / inconsistent`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 6, 6, 'queued', {missedOps: 0, lastSeen: 5}], // not enough funds
+            ['defund', 'c', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}], // c has 10, not 2
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 6, 6, 'insufficient-funds', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 1, 1, 'inconsistent', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+
+    it(
+      `will cancel two requests where the funding is still queued`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'cancelled', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'cancelled', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+
+    it(
+      `will cancel two requests where the funding was pending but not accepted`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'cancelled', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'cancelled', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+
+    it(
+      `won't cancel requests if the funding has already been accepted`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 4, b: 4, c: 10, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 4, b: 4, c: 10, d: 2}},
+          proposed: {turn: 6, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 1, 1, 'succeeded', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+
+    it(
+      `won't mark requests as insufficient-funding if there's a defund that frees enough funds`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          requests: [
+            ['fund', 'd', 6, 6, 'pending'], // not enough funds for this
+            ['defund', 'c', 1, 9, 'queued'], // .. unless this defund is applied first
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          proposed: {turn: 6, bals: {a: 0, b: 8, d: 12}},
+          requests: [
+            ['fund', 'd', 6, 6, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 1, 9, 'pending', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
   });
 
-  it('detects completed defunding requests from the outcome of supported state', async () => {
-    // create an application channel
-    const appChannel = TestChannel.create({aBal: 5, bBal: 5});
-    await appChannel.insertInto(store, {states: [0, 1]});
-    // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
-    const ledgerChannel = TestLedgerChannel.create({});
-    await ledgerChannel.insertInto(store, {
-      states: [5, 6],
-      bals: [
-        [appChannel.participantA.destination, 5],
-        [appChannel.participantB.destination, 5],
-      ],
-    });
-    // create a ledger request for the ledger to defund the channel
-    await ledgerChannel.insertDefundingRequest(store, appChannel.channelId);
+  describe('in the proposal state', () => {
+    it(
+      'takes no action',
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          proposed: {turn: 6, bals: {a: 9, b: 9, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 5, 5, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'e', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          proposed: {turn: 6, bals: {a: 9, b: 9, d: 2}},
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 5, 5, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'e', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+  });
 
-    // crank the ledger manager
-    await ledgerManager.crank(ledgerChannel.channelId, new WalletResponse());
-    // assert that it marks the request as complete
-    expect(
-      await store.getLedgerRequest(appChannel.channelId, 'defund')
-    ).toMatchObject<LedgerRequestType>({
-      type: 'defund',
-      ledgerChannelId: ledgerChannel.channelId,
-      channelToBeFunded: appChannel.channelId,
-      status: 'succeeded',
-    });
+  describe('in the counter-proposal state', () => {
+    it(
+      `will accept a counter-proposal and re-propose any missing requests`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
+          proposed: {turn: 6, bals: {a: 9, b: 9, d: 2}}, // leader proposes fund d and defund c
+          counterProposed: {turn: 7, bals: {a: 4, b: 4, c: 10, d: 2}}, // follower just accepted fund d
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 5, 5, 'pending', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+        after: {
+          agreed: {turn: 7, bals: {a: 4, b: 4, c: 10, d: 2}}, // counterProposal -> agreed
+          proposed: {turn: 8, bals: {a: 9, b: 9, d: 2}}, // re-propose to defund c
+          requests: [
+            ['fund', 'd', 1, 1, 'succeeded', {missedOps: 0, lastSeen: 7}],
+            ['defund', 'c', 5, 5, 'pending', {missedOps: 1, lastSeen: 7}],
+          ],
+        },
+      })
+    );
+
+    it(
+      `won't apply cancellations if the state was accepted`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10}},
+          proposed: {turn: 6, bals: {a: 7, b: 8, d: 2, c: 3}}, // leader proposes fund c and d
+          counterProposed: {turn: 7, bals: {a: 9, b: 9, d: 2}}, // follower just accepted fund d
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'c', 2, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'd', 1, 1, 'queued'], // but now we have a defund request for d
+          ],
+        },
+        after: {
+          agreed: {turn: 7, bals: {a: 9, b: 9, d: 2}}, // leader accepts counterproposal
+          proposed: {turn: 8, bals: {a: 8, b: 9, c: 3}}, // re-proposes fund c and defund d
+          requests: [
+            ['defund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 7}],
+            ['fund', 'd', 1, 1, 'succeeded', {missedOps: 0, lastSeen: 7}],
+            ['fund', 'c', 2, 1, 'pending', {missedOps: 1, lastSeen: 7}],
+          ],
+        },
+      })
+    );
+    it(
+      `will apply cancellations if the state wasn't accepted`,
+      testLedgerCrank({
+        as: 'leader',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10}},
+          proposed: {turn: 6, bals: {a: 7, b: 8, d: 2, c: 3}}, // leader proposes fund c and d
+          counterProposed: {turn: 7, bals: {a: 9, b: 9, d: 2}}, // follower just accepted fund d
+          requests: [
+            ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'c', 2, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 2, 1, 'queued'], // but now we have a defund request for c
+          ],
+        },
+        after: {
+          agreed: {turn: 7, bals: {a: 9, b: 9, d: 2}}, // leader accepts counterproposal
+          requests: [
+            ['fund', 'd', 1, 1, 'succeeded', {missedOps: 0, lastSeen: 7}],
+            ['fund', 'c', 2, 1, 'cancelled', {missedOps: 0, lastSeen: 7}],
+            ['defund', 'c', 2, 1, 'cancelled', {missedOps: 0, lastSeen: 7}],
+          ],
+        },
+      })
+    );
   });
 });
 
-describe('exchanging ledger proposals', () => {
-  describe('as initial proposer', () => {
-    it('takes no action if proposal is identical to existing supported outcome', async () => {
-      // NOTE: currently, there are some side effects that happen even when there is "no action"
-      // these side effects are the "pessimistic" resending of proposals and states.
-      // So here I interpret "takes no action" <> no new signed state in the outbox
+describe('as follower', () => {
+  describe('in the agreement state', () => {
+    it(
+      `marks included requests as succeeded`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 2}},
+          requests: [
+            ['defund', 'd', 1, 1, 'pending'], // d is not there, so this succeeded
+            ['fund', 'c', 2, 0, 'pending'], // this also succeeded
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 2}},
+          requests: [
+            ['defund', 'd', 1, 1, 'succeeded', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'c', 2, 0, 'succeeded', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+    it(
+      `marks inconsistent states`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 2, d: 1}},
+          requests: [
+            ['defund', 'd', 1, 1, 'queued'], // amount doesn't match with d's total
+            ['fund', 'c', 2, 1, 'queued'], // c is funded, but with a different amt
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 2, d: 1}},
+          requests: [
+            ['defund', 'd', 1, 1, 'inconsistent', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'c', 2, 1, 'inconsistent', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+    it(
+      `will cancel requests that haven't been included`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10}},
+          requests: [
+            ['fund', 'c', 2, 1, 'queued'],
+            ['defund', 'c', 2, 1, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10}},
+          requests: [
+            ['fund', 'c', 2, 1, 'cancelled', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 2, 1, 'cancelled', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+    it(
+      `won't cancel requests that have been included`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3}},
+          requests: [
+            ['fund', 'c', 2, 1, 'pending'], // has been included
+            ['defund', 'c', 2, 1, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3}},
+          requests: [
+            ['fund', 'c', 2, 1, 'succeeded', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 2, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+    // TODO: it will mark a mismatched cancellation as inconsistent
+  });
+  describe('in the proposal state', () => {
+    it(
+      `accepts the state if complete overlap`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5}},
+          requests: [
+            ['fund', 'd', 4, 1, 'queued'], // included in proposal
+            ['defund', 'c', 2, 1, 'queued'], // included in proposal
+            ['fund', 'e', 1, 1, 'queued'],
+          ],
+        },
+        after: {
+          agreed: {turn: 6, bals: {a: 8, b: 10, d: 5}},
+          requests: [
+            ['fund', 'd', 4, 1, 'succeeded', {missedOps: 0, lastSeen: 6}],
+            ['defund', 'c', 2, 1, 'succeeded', {missedOps: 0, lastSeen: 6}],
+            ['fund', 'e', 1, 1, 'queued', {missedOps: 1, lastSeen: 6}],
+          ],
+        },
+      })
+    );
+    it(
+      `makes a counterproposal if there's some overlap`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3, g: 1}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5, f: 2}},
+          requests: [
+            ['fund', 'd', 4, 1, 'queued'], // included in proposal
+            ['defund', 'c', 2, 1, 'queued'], // included in proposal
+            ['fund', 'e', 1, 1, 'queued'],
+            // don't have defund g
+            // don't have fund f
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3, g: 1}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5, f: 2}},
+          counterProposed: {turn: 7, bals: {a: 8, b: 10, d: 5, g: 1}},
+          requests: [
+            ['fund', 'd', 4, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 2, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'e', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+    it(
+      `makes a counterproposal to return to agreed if there's no overlap`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3, g: 1}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5, f: 2}},
+          requests: [
+            ['fund', 'e', 1, 1, 'queued'],
+            // don't have fund f, defund g, fund d or defund c
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3, g: 1}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5, f: 2}},
+          counterProposed: {turn: 7, bals: {a: 10, b: 10, c: 3, g: 1}},
+          requests: [['fund', 'e', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}]],
+        },
+      })
+    );
+  });
+  describe('in the counter-proposal state', () => {
+    it(
+      `takes no action`,
+      testLedgerCrank({
+        as: 'follower',
+        before: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3, g: 1}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5, f: 2}},
+          counterProposed: {turn: 7, bals: {a: 8, b: 10, d: 5, g: 1}},
+          requests: [
+            ['fund', 'd', 4, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 2, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'e', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+        after: {
+          agreed: {turn: 5, bals: {a: 10, b: 10, c: 3, g: 1}},
+          proposed: {turn: 6, bals: {a: 8, b: 10, d: 5, f: 2}},
+          counterProposed: {turn: 7, bals: {a: 8, b: 10, d: 5, g: 1}},
+          requests: [
+            ['fund', 'd', 4, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['defund', 'c', 2, 1, 'pending', {missedOps: 0, lastSeen: 5}],
+            ['fund', 'e', 1, 1, 'queued', {missedOps: 0, lastSeen: 5}],
+          ],
+        },
+      })
+    );
+  });
+});
 
-      // create a ledger channel. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [5, 6],
-      });
-      // insert a ledger proposal identical to the existing outcome
-      await ledgerChannel.insertProposal(
-        store,
-        ledgerChannel.startOutcome, // proposal
-        ledgerChannel.participantA.signingAddress,
-        1
-      );
+function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
+  return async () => {
+    // setup
+    // -----
+    const testCase = new LedgerCrankTestCase(args);
 
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
+    // - create skeleton ledgerChannelObject
+    const ledgerChannel = TestLedgerChannel.create({});
 
-      // assert that the signed state in the outbox has the same turnNum (we are just pessimistically resending)
-      expect(
-        (response.multipleChannelOutput().outbox[0]?.params.data as any).signedStates[0].turnNum
-      ).toEqual(6);
-    });
+    const channelLookup = new ChannelLookup();
+    channelLookup.set('a', ledgerChannel.participantA.destination);
+    channelLookup.set('b', ledgerChannel.participantB.destination);
 
-    it(`takes no action if proposal exists but counterparty's does not`, async () => {
-      // NOTE: currently, there are some side effects that happen even when there is "no action"
-      // these side effects are the "pessimistic" resending of proposals and states.
-      // So here I interpret "takes no action" <> no new signed state in the outbox
-
-      // create an application channel
-      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
-      await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        // Will be "fully funded" i.e. with 20 coins
-        states: [4, 5],
-        bals: [
-          [appChannel.participantA.destination, 10],
-          [appChannel.participantB.destination, 10],
-        ],
-      });
-      // create a ledger request for the ledger to fund the channel
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
-      // insert a ledger proposal identical to the existing outcome
-      await ledgerChannel.insertProposal(
-        store,
-        simpleEthAllocation(
-          [appChannel.participantA.destination, 9],
-          [appChannel.participantB.destination, 10],
-          [appChannel.channelId, 1]
-        ), // proposal
-        ledgerChannel.participantA.signingAddress,
-        1
-      );
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there are NO signed state in the outbox
-      expect(
-        (response.multipleChannelOutput().outbox[0]?.params.data as any).signedStates
-      ).toBeUndefined();
-    });
-
-    it('proposes new outcome funding 1 channel, exhausting 100% of funds', async () => {
-      // create an application channel
+    // first we need to turn strings like 'c' and 'd' into actual channels in the store
+    for (const key of testCase.referencedChannelDests) {
       const appChannel = TestChannel.create({aBal: 5, bBal: 5});
-      await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        // Will be "fully funded" i.e. with 10 coins
-        states: [4, 5],
-        bals: [
-          [appChannel.participantA.destination, 5],
-          [appChannel.participantB.destination, 5],
-        ],
+      await appChannel.insertInto(store, {
+        states: [0, 1],
+        participant: args.as === 'leader' ? 0 : 1,
       });
-      // create a ledger request for the ledger to fund the channel
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+      channelLookup.set(key, appChannel.channelId);
+    }
 
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there is a proposal in the outbox
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
-        type: 'ProposeLedgerUpdate',
-        nonce: 1,
-        channelId: ledgerChannel.channelId,
-        outcome: simpleEthAllocation([appChannel.channelId, 10]),
-        signingAddress: ledgerChannel.participantA.signingAddress,
-      };
-      expect(payload).toMatchObject({
-        requests: [serializeRequest(expectedProposeLedgerUpdate)],
-      });
+    // - construct and add the before states
+    const stateToParams = (
+      state: StateDesc,
+      type: 'agreed' | 'proposed' | 'counter-proposed'
+    ): any => ({
+      turn: state.turn,
+      bals: Object.keys(state.bals).map(
+        k => [channelLookup.get(k), state.bals[k]] as [string, number]
+      ),
+      signedBy: {agreed: 'both', proposed: 0, 'counter-proposed': 1}[type],
+    });
+    await ledgerChannel.insertInto(store, {
+      participant: args.as === 'leader' ? 0 : 1,
+      states: _.compact([
+        testCase.agreedBefore && stateToParams(testCase.agreedBefore, 'agreed'),
+        testCase.proposedBefore && stateToParams(testCase.proposedBefore, 'proposed'),
+        testCase.counterProposedBefore &&
+          stateToParams(testCase.counterProposedBefore, 'counter-proposed'),
+      ]),
     });
 
-    it('proposes new outcome funding many channels', async () => {
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [10, 10],
-      });
+    for (const req of testCase.requestsBefore) {
+      const channelToBeFunded = channelLookup.get(req.channelKey);
 
-      // create 5 application channels, each allocating 1 to Alice
-      const appChannels = [0, 1, 2, 3, 4].map(() => TestChannel.create({aBal: 1, bBal: 0}));
-      for await (const appChannel of appChannels) {
-        // for each one, insert the channel and a ledger funding request
-        await appChannel.insertInto(store, {states: [0, 1]});
-        await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+      switch (req.type) {
+        case 'fund':
+          await ledgerChannel.insertFundingRequest(store, {...req, channelToBeFunded});
+          break;
+        case 'defund':
+          await ledgerChannel.insertDefundingRequest(store, {...req, channelToBeFunded});
+          break;
+        default:
+          unreachable(req.type);
+      }
+    }
+
+    // crank
+    // -----
+    const response = WalletResponse.initialize();
+    await LedgerManager.create({store}).crank(ledgerChannel.channelId, response);
+
+    // assertions
+    // ----------
+    await store.transaction(async tx => {
+      // fetch the ledger channel and check that the states are ok
+      const ledger = await store.getChannel(ledgerChannel.channelId, tx);
+      if (!ledger) throw new Error(`Ledger not found`);
+      // get the latest agreed state and the turn number
+      const agreedState = ledger.latestFullySignedState;
+      if (!agreedState) throw new Error(`No latest agreed state`);
+
+      const ledgerStateDesc: LedgerStateDesc = {
+        agreed: toStateDesc(agreedState, channelLookup),
+        requests: [],
+      };
+
+      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+      if (proposedState) {
+        expect(proposedState.signerIndices).toEqual([0]);
+        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+      }
+      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+      if (counterProposedState) {
+        expect(counterProposedState.signerIndices).toEqual([1]);
+        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
       }
 
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
+      // then fetch the ledger requests and check them
+      const requests = await LedgerRequest.query(tx)
+        .select()
+        .where({ledgerChannelId: ledgerChannel.channelId});
 
-      // assert that there is a proposal funding all of those channels in the outbox
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
-        type: 'ProposeLedgerUpdate',
-        nonce: 1,
-        channelId: ledgerChannel.channelId,
-        outcome: simpleEthAllocation(
-          [alice, 5],
-          [bob, 10],
-          ...appChannels.map(c => [c.channelId, c.startBal] as [string, number])
-        ),
-        signingAddress: ledgerChannel.participantA.signingAddress,
-      };
-      expect(payload).toMatchObject({
-        requests: [serializeRequest(expectedProposeLedgerUpdate)],
-      });
-    });
-
-    it('proposes new outcome requiring defund before having sufficient funds', async () => {
-      // setup a ledger channel funding an 'older' channel
-      const ledgerChannel = TestLedgerChannel.create({});
-      const olderChannel = TestChannel.create({aBal: 10, bBal: 0});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [[olderChannel.channelId, 10]],
-      });
-      await olderChannel.insertInto(store, {states: [0, 1]});
-
-      // create a new channel
-      const newChannel = TestChannel.create({aBal: 10, bBal: 0});
-      await newChannel.insertInto(store, {states: [0, 1]});
-
-      // create a ledger request for the ledger to defund the older channel
-      await ledgerChannel.insertDefundingRequest(store, olderChannel.channelId);
-      // create a ledger request for the ledger to fund the new channel
-      await ledgerChannel.insertFundingRequest(store, newChannel.channelId);
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there is a proposal funding the new channel in the outbox
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
-        type: 'ProposeLedgerUpdate',
-        nonce: 1,
-        channelId: ledgerChannel.channelId,
-        outcome: simpleEthAllocation([newChannel.channelId, 10]),
-        signingAddress: ledgerChannel.participantA.signingAddress,
-      };
-      expect(payload).toMatchObject({
-        requests: [serializeRequest(expectedProposeLedgerUpdate)],
-      });
-    });
-
-    it('makes no proposal but identifies channel when ledger has insufficient funds', async () => {
-      // create an application channel that allocates 200 coins
-      const appChannel = TestChannel.create({aBal: 100, bBal: 100});
-      await appChannel.insertInto(store, {states: [0, 1]});
-      // create a ledger channel whose current state doesn't fund that channel. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        // Will be "fully funded" with 10 coins, but this is insufficient for the app channel
-        states: [4, 5],
-        bals: [
-          [appChannel.participantA.destination, 5],
-          [appChannel.participantB.destination, 5],
-        ],
-      });
-      // create a ledger request for the ledger to fund the channel
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there is NO proposal in the outbox
-      expect(response.multipleChannelOutput().outbox).toHaveLength(0);
-    });
-
-    it('proposes outcome funding some channels, identifying insufficient funds for others', async () => {
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [10, 10],
-      });
-
-      // create 5 application channels, each allocating 5 to Alice
-      // The ledger channel can only afford 2 of these
-      const appChannels = [0, 1, 2, 3, 4].map(() => TestChannel.create({aBal: 5, bBal: 0}));
-      for await (const appChannel of appChannels) {
-        // for each one, insert the channel and a ledger funding request
-        await appChannel.insertInto(store, {states: [0, 1]});
-        await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+      for (const req of requests) {
+        ledgerStateDesc.requests.push([
+          req.type,
+          channelLookup.getKey(req.channelToBeFunded),
+          Number(req.amountA),
+          Number(req.amountB),
+          req.status,
+          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+        ]);
       }
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there is a proposal to fund some of those channels in the outbox
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
-        type: 'ProposeLedgerUpdate',
-        nonce: 1,
-        channelId: ledgerChannel.channelId,
-        outcome: simpleEthAllocation(
-          [bob, 10],
-          ...appChannels.slice(0, 2).map(c => [c.channelId, c.startBal] as [string, number])
-        ),
-        signingAddress: ledgerChannel.participantA.signingAddress,
-      };
-
-      expect(payload).toMatchObject({
-        requests: [serializeRequest(expectedProposeLedgerUpdate)],
-      });
+      ledgerStateDesc.requests.sort();
+      args.after.requests.sort();
+      expect(ledgerStateDesc).toEqual(args.after);
     });
-  });
+  };
+}
 
-  describe('as responding proposer', () => {
-    it('will propose identical proposal to counterparty with same requests', async () => {
-      // create an application channel
-      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
-      await appChannel.insertInto(store, {states: [0, 1]});
+function toStateDesc(state: State, lookup: ChannelLookup): StateDesc {
+  const bals: StateDesc['bals'] = {};
+  state.simpleAllocationOutcome?.items.forEach(
+    i => (bals[lookup.getKey(i.destination)] = Number(i.amount))
+  );
+  return {
+    turn: state.turnNum,
+    bals,
+  };
+}
+class LedgerCrankTestCase {
+  constructor(private args: LedgerCrankTestCaseArgs) {}
 
-      // create and insert a funded ledger channel that doesn't fund any channels yet. Note distinct channel nonce ensured automatically
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [3, 4],
-        bals: [10, 10],
-      });
+  get statesBefore(): StateDesc[] {
+    return _.compact([
+      this.args.before.agreed,
+      this.args.before.proposed,
+      this.args.before.counterProposed,
+    ]);
+  }
 
-      const bobsProposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
-      // add a proposal from bob into Alice's store
-      await ledgerChannel.insertProposal(
-        store,
-        bobsProposal,
-        ledgerChannel.participantB.signingAddress,
-        0
-      );
+  get statesAfter(): StateDesc[] {
+    return _.compact([
+      this.args.after.agreed,
+      this.args.after.proposed,
+      this.args.after.counterProposed,
+    ]);
+  }
 
-      // add consistent funding requests to Alice's store
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+  get agreedBefore(): StateDesc {
+    return this.args.before.agreed;
+  }
+  get proposedBefore(): StateDesc | undefined {
+    return this.args.before.proposed;
+  }
+  get counterProposedBefore(): StateDesc | undefined {
+    return this.args.before.counterProposed;
+  }
 
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
+  get agreedAfter(): StateDesc {
+    return this.args.after.agreed;
+  }
+  get proposedAfter(): StateDesc | undefined {
+    return this.args.after.proposed;
+  }
+  get counterProposedAfter(): StateDesc | undefined {
+    return this.args.after.counterProposed;
+  }
 
-      // check that Alice proposes the same as bob
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-      const expectedProposeLedgerUpdate: ProposeLedgerUpdate = {
-        type: 'ProposeLedgerUpdate',
-        nonce: 1,
-        channelId: ledgerChannel.channelId,
-        outcome: bobsProposal,
-        signingAddress: ledgerChannel.participantA.signingAddress,
-      };
-      expect(payload).toMatchObject({
-        requests: [serializeRequest(expectedProposeLedgerUpdate)],
-      });
-    });
-  });
-});
+  get requestsBefore(): Request[] {
+    return this.args.before.requests.map(r => ({
+      type: r[0],
+      channelKey: r[1],
+      amtA: r[2],
+      amtB: r[3],
+      status: r[4],
+      missedOps: r[5]?.missedOps,
+      lastSeen: r[5]?.lastSeen,
+    }));
+  }
 
-describe('exchanging signed ledger state updates', () => {
-  describe('as initial signer', () => {
-    it('does not sign ledger update if one has already been signed by me', async () => {
-      // create an application channel
-      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
-      await appChannel.insertInto(store, {states: [0, 1]});
+  get requestsAfter(): Request[] {
+    return this.args.after.requests.map(r => ({
+      type: r[0],
+      channelKey: r[1],
+      amtA: r[2],
+      amtB: r[3],
+      status: r[4],
+      missedOps: r[5]?.missedOps,
+      lastSeen: r[5]?.lastSeen,
+    }));
+  }
 
-      // create and insert a funded ledger channel that already funds the appChannel
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [
-          [appChannel.participantA.destination, 9],
-          [appChannel.participantB.destination, 10],
-          [appChannel.channelId, 1],
-        ],
-      });
+  get referencedChannelDests(): string[] {
+    const referencedChannels = new Set<string>();
+    // add any channels referenced in the states
+    [...this.statesBefore, ...this.statesAfter]
+      .flatMap(s => Object.keys(s.bals))
+      .forEach(x => referencedChannels.add(x));
+    // as well as any channels referenced in the requests
+    [...this.args.before.requests, ...this.args.after.requests].forEach(r =>
+      referencedChannels.add(r[1])
+    );
+    // a and b are special and refer to the participants
+    referencedChannels.delete('a');
+    referencedChannels.delete('b');
+    return Array.from(referencedChannels);
+  }
+}
 
-      // create a ledger request for the ledger to fund the channel
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+class ChannelLookup {
+  private lookup: Record<string, Destination> = {};
 
-      // add a proposal from each of alice and bob (into Alice's store)
-      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
-      await ledgerChannel.insertProposal(
-        store,
-        proposal,
-        ledgerChannel.participantA.signingAddress,
-        0
-      );
-      await ledgerChannel.insertProposal(
-        store,
-        proposal,
-        ledgerChannel.participantB.signingAddress,
-        1
-      );
+  get(key: string): Destination {
+    const val = this.lookup[key];
+    if (!val) throw Error(`ChannelLookup missing key ${key}`);
+    return val;
+  }
 
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
+  getKey(val: string): string {
+    const key = Object.keys(this.lookup).find(key => this.lookup[key] === val);
+    if (!key) throw Error(`ChannelLookup missing key for value ${val}`);
+    return key;
+  }
 
-      // assert that there IS NOTHING in the outbox
-      // NOTE this is somewhat awkward because pessimisstic resending may cause something to be in the outbox
-      // If there is, we can instead check there are no signed states in there. Still awkward, though.
-      expect(response.multipleChannelOutput().outbox).toHaveLength(0);
-    });
+  set(k: string, v: Destination): void {
+    this.lookup[k] = v;
+  }
+}
 
-    it('generates signed ledger update when proposals were identical', async () => {
-      // create an application channel
-      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
-      await appChannel.insertInto(store, {states: [0, 1]});
+interface Request {
+  type: 'fund' | 'defund';
+  channelKey: string;
+  amtA: number;
+  amtB: number;
+  status: LedgerRequestStatus;
+  missedOps?: number;
+  lastSeen?: number;
+}
 
-      // create and insert a funded ledger channel that already funds the appChannel
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [
-          [appChannel.participantA.destination, 10],
-          [appChannel.participantB.destination, 10],
-        ],
-      });
+type RequestDesc =
+  | ['defund' | 'fund', string, number, number, LedgerRequestStatus]
+  | [
+      'defund' | 'fund',
+      string,
+      number,
+      number,
+      LedgerRequestStatus,
+      {missedOps?: number; lastSeen?: number}
+    ];
 
-      // create a ledger request for the ledger to fund the channel
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
+type StateDesc = {
+  turn: number;
+  bals: Record<string, number>;
+};
 
-      // add a proposal from each of alice and bob (into Alice's store)
-      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
-      await ledgerChannel.insertProposal(
-        store,
-        proposal,
-        ledgerChannel.participantA.signingAddress,
-        0
-      );
-      await ledgerChannel.insertProposal(
-        store,
-        proposal,
-        ledgerChannel.participantB.signingAddress,
-        1
-      );
+interface LedgerStateDesc {
+  agreed: StateDesc;
+  proposed?: StateDesc;
+  counterProposed?: StateDesc;
+  requests: RequestDesc[];
+}
 
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there is a signedState in the outbox
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-
-      expect(payload).toMatchObject({
-        signedStates: [
-          {
-            ...ledgerChannel.wireState(
-              6,
-              [
-                [alice().destination, 9],
-                [bob().destination, 10],
-                [appChannel.channelId, 1],
-              ],
-              [0]
-            ),
-          },
-        ],
-      });
-    });
-
-    it('generates signed ledger update when proposals were not identical but overlapped', async () => {
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [10, 10],
-      });
-
-      // create three application channels
-      const appChannels = [0, 1, 2].map(() => TestChannel.create({aBal: 1, bBal: 0}));
-      for await (const appChannel of appChannels) {
-        // for each one, insert the channel and a ledger funding request
-        await appChannel.insertInto(store, {states: [0, 1]});
-        await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
-      }
-
-      const proposal1 = simpleEthAllocation(
-        [alice, 8],
-        [bob, 10],
-        [appChannels[0].channelId, 1],
-        [appChannels[1].channelId, 1]
-      );
-      const proposal2 = simpleEthAllocation(
-        [alice, 8],
-        [bob, 10],
-        [appChannels[1].channelId, 1],
-        [appChannels[2].channelId, 1]
-      );
-
-      await ledgerChannel.insertProposal(
-        store,
-        proposal1,
-        ledgerChannel.participantA.signingAddress,
-        0
-      );
-
-      await ledgerChannel.insertProposal(
-        store,
-        proposal2,
-        ledgerChannel.participantB.signingAddress,
-        1
-      );
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response);
-
-      // assert that there is a signedState in the outbox
-      const payload = getPayloadFor(
-        ledgerChannel.participantB.participantId,
-        response.multipleChannelOutput().outbox
-      );
-
-      expect(payload).toMatchObject({
-        signedStates: [
-          {
-            ...ledgerChannel.wireState(
-              6,
-              [
-                [alice().destination, 9],
-                [bob().destination, 10],
-                [appChannels[1].channelId, 1], // the intersection of the proposals
-              ],
-              [0]
-            ),
-          },
-        ],
-      });
-    });
-
-    it('dismisses proposals when the intersected result is identical to supported', async () => {
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [4, 5],
-        bals: [10, 10],
-      });
-
-      // create three application channels
-      const appChannels = [0, 1].map(() => TestChannel.create({aBal: 1, bBal: 0}));
-      for await (const appChannel of appChannels) {
-        // for each one, insert the channel and a ledger funding request
-        await appChannel.insertInto(store, {states: [0, 1]});
-        await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
-      }
-
-      const proposal1 = simpleEthAllocation([alice, 9], [bob, 10], [appChannels[0].channelId, 1]);
-      const proposal2 = simpleEthAllocation([alice, 9], [bob, 10], [appChannels[1].channelId, 1]);
-
-      await ledgerChannel.insertProposal(
-        store,
-        proposal1,
-        ledgerChannel.participantA.signingAddress,
-        0
-      );
-
-      await ledgerChannel.insertProposal(
-        store,
-        proposal2,
-        ledgerChannel.participantB.signingAddress,
-        0
-      );
-
-      let ledgerProposals = await store.getLedgerProposals(ledgerChannel.channelId);
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      await ledgerManager.crank(ledgerChannel.channelId, response); // This can result in several "actions" happening, in the old language
-      // in fact, we get a DismissLedgerProposals, then a ProposeLedgerUpdate, then an undefined
-      // The later actions overwrite changes to the store that we might intend to assert on after a single action is processed
-      // (see below)
-
-      // assert that the ledger proposals were dismissed
-      ledgerProposals = await store.getLedgerProposals(ledgerChannel.channelId);
-
-      // This assertion will fail because subsequent "actions" reintroduce a non-null proposal
-      // expect(ledgerProposals).toContainObject({
-      //   nonce: 0,
-      //   proposal: null,
-      //   signgingAddress: ledgerChannel.participantA.signingAddress,
-      // });
-      expect(ledgerProposals).toContainObject<Partial<LedgerProposal>>({
-        nonce: 0,
-        proposal: null,
-        signingAddress: ledgerChannel.participantB.signingAddress,
-      });
-    });
-  });
-
-  describe('as responding signer', () => {
-    it('throws an error if counterparty signed update does not follow protocol', async () => {
-      // create an application channel
-      const appChannel = TestChannel.create({aBal: 1, bBal: 0});
-      await appChannel.insertInto(store, {states: [0, 1]});
-
-      // create and insert a funded ledger channel that already funds the appChannel
-      const ledgerChannel = TestLedgerChannel.create({});
-      await ledgerChannel.insertInto(store, {
-        states: [3],
-      });
-
-      // create a ledger request for the ledger to fund the channel
-      await ledgerChannel.insertFundingRequest(store, appChannel.channelId);
-
-      // add a proposal from each of alice and bob (into Alice's store)
-      const proposal = simpleEthAllocation([alice, 9], [bob, 10], [appChannel.channelId, 1]);
-      await ledgerChannel.insertProposal(
-        store,
-        proposal,
-        ledgerChannel.participantA.signingAddress,
-        0
-      );
-      await ledgerChannel.insertProposal(
-        store,
-        proposal,
-        ledgerChannel.participantB.signingAddress,
-        0
-      );
-
-      // protocol deviation:
-      const stateWithUnexpectedOutcome = ledgerChannel.wirePayload(4, [0, 1337], [1]); // signed by Bob only
-      await store.pushMessage(stateWithUnexpectedOutcome);
-
-      // crank the ledger manager
-      const response = new WalletResponse();
-      expect.assertions(1);
-      await expect(ledgerManager.crank(ledgerChannel.channelId, response)).rejects.toThrow(
-        'received a signed reveal that is _not_ what we agreed on :/'
-      );
-    });
-  });
-});
+interface LedgerCrankTestCaseArgs {
+  as: 'leader' | 'follower';
+  before: LedgerStateDesc;
+  after: LedgerStateDesc;
+}
