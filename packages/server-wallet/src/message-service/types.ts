@@ -8,7 +8,7 @@ export type MessageHandler = (
   // Including the to makes it easier for a messaging service to handle multiple wallets if it chooses to do so
   to: string,
   message: unknown,
-  messageService: MessagingServiceInterface
+  messageService: MessageServiceInterface
 ) => Promise<void>;
 
 /**
@@ -19,9 +19,9 @@ export type MessageHandler = (
  */
 export type MessageServiceFactory = (
   messageHandler: MessageHandler
-) => Promise<MessagingServiceInterface>;
+) => Promise<MessageServiceInterface>;
 
-export interface MessagingServiceInterface {
+export interface MessageServiceInterface {
   /**
    * Sends out the messages to the specified by participants.
    * @param messages The collection of messages to send

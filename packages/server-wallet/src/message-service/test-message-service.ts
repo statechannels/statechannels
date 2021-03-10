@@ -2,14 +2,14 @@ import {Message} from '@statechannels/client-api-schema';
 
 import {Wallet} from '../wallet';
 
-import {MessageHandler, MessagingServiceInterface} from './types';
+import {MessageHandler, MessageServiceInterface} from './types';
 
-export class TestMessageService implements MessagingServiceInterface {
+export class TestMessageService implements MessageServiceInterface {
   protected constructor(private _receive: MessageHandler) {}
 
-  static async createTestMessagingService(
+  static async createTestMessageService(
     messageHandler: MessageHandler
-  ): Promise<MessagingServiceInterface> {
+  ): Promise<MessageServiceInterface> {
     const service = new TestMessageService(messageHandler);
     return service;
   }
@@ -37,7 +37,7 @@ export class TestMessageService implements MessagingServiceInterface {
  */
 export function setupTestMessagingService(
   wallets: {participantId: string; wallet: Wallet}[]
-): Promise<MessagingServiceInterface> {
+): Promise<MessageServiceInterface> {
   const messageHandler: MessageHandler = async (to, message, me) => {
     // TODO: This assumes only 1 matching wallet.
     const matching = wallets.find(w => w.participantId === to);
@@ -49,5 +49,5 @@ export function setupTestMessagingService(
 
     await me.send(result.outbox.map(o => o.params));
   };
-  return TestMessageService.createTestMessagingService(messageHandler);
+  return TestMessageService.createTestMessageService(messageHandler);
 }
