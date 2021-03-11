@@ -20,6 +20,8 @@ import {
   aWalletConfig,
   bWalletConfig,
 } from '../../../jest/with-peers-setup-teardown';
+// TODO: this is temporary. This test file is refactored in
+// https://github.com/statechannels/statechannels/pull/3287
 async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
   const config = wallet.walletConfig;
   await wallet.destroy();
