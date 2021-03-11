@@ -7,9 +7,9 @@ export class TestMessageService implements MessageServiceInterface {
   protected constructor(private _receive: MessageHandler) {}
   protected destroyed = false;
   static async createTestMessageService(
-    messageHandler: MessageHandler
+    incomingMessageHandler: MessageHandler
   ): Promise<MessageServiceInterface> {
-    const service = new TestMessageService(messageHandler);
+    const service = new TestMessageService(incomingMessageHandler);
     return service;
   }
 

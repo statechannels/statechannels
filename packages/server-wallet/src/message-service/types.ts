@@ -18,7 +18,7 @@ export type MessageHandler = (
  * messageHandler should be triggered whenever the messaging service receives a message.
  */
 export type MessageServiceFactory = (
-  messageHandler: MessageHandler
+  incomingMessageHandler: MessageHandler
 ) => Promise<MessageServiceInterface>;
 
 export interface MessageServiceInterface {
