@@ -66,6 +66,8 @@ The following diagram describes the various components in the architecture. The 
                                                       +------------------+
 ```
 
+(This diagram was created at https://textik.com/)
+
 # The responsibilities of a state channel wallet
 
 As in the [Hippocratic oath](https://en.wikipedia.org/wiki/Hippocratic_Oath): _primum non nocere,_ (first, do no harm).
