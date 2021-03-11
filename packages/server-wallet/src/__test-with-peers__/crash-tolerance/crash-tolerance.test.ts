@@ -6,6 +6,7 @@ import {
 import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers} from 'ethers';
 
+import {Wallet} from '../..';
 import {
   getPeersSetup,
   participantA,
@@ -13,13 +14,13 @@ import {
   peersTeardown,
   peerWallets,
 } from '../../../jest/with-peers-setup-teardown';
-import {
-  crashAndRestart,
-  getChannelResultFor,
-  getPayloadFor,
-  ONE_DAY,
-} from '../../__test__/test-helpers';
+import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
 
+async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
+  const config = wallet.walletConfig;
+  await wallet.destroy();
+  return Wallet.create(config); // Wallet that will "restart"
+}
 let channelId: string;
 jest.setTimeout(10_000);
 

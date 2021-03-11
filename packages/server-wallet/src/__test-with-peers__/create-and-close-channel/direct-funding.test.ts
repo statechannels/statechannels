@@ -12,7 +12,7 @@ import {
   participantA,
   participantB,
   peersTeardown,
-  messagingService,
+  messageService,
 } from '../../../jest/with-peers-setup-teardown';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
 import {expectLatestStateToMatch} from '../utils';
@@ -52,12 +52,12 @@ it('Create a directly funded channel between two wallets ', async () => {
   //        A <> B
   // PreFund0
   const resultA0 = await peerWallets.a.createChannel(createChannelParams);
-  await messagingService.send(resultA0.outbox.map(o => o.params));
+  await messageService.send(resultA0.outbox.map(o => o.params));
   channelId = resultA0.channelResults[0].channelId;
 
   //      PreFund0B
   const resultB1 = await peerWallets.b.joinChannel({channelId});
-  await messagingService.send(resultB1.outbox.map(o => o.params));
+  await messageService.send(resultB1.outbox.map(o => o.params));
 
   const depositByA = {
     channelId,
@@ -88,8 +88,8 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   const resultA2 = await peerWallets.a.updateFundingForChannels([depositByB]);
   const resultB2 = await peerWallets.b.updateFundingForChannels([depositByB]);
-  await messagingService.send(resultA2.outbox.map(o => o.params));
-  await messagingService.send(resultB2.outbox.map(o => o.params));
+  await messageService.send(resultA2.outbox.map(o => o.params));
+  await messageService.send(resultB2.outbox.map(o => o.params));
 
   await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
@@ -113,7 +113,7 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   // A generates isFinal4
   const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
-  await messagingService.send(aCloseChannelResult.outbox.map(o => o.params));
+  await messageService.send(aCloseChannelResult.outbox.map(o => o.params));
   // it shouldn't error if close channel is called twice
   await peerWallets.a.closeChannel(closeChannelParams);
 

@@ -8,9 +8,9 @@ import {
   seedBobsSigningWallet,
 } from '../src/db/seeds/1_signing_wallet_seeds';
 import {MessageServiceInterface} from '../src/message-service/types';
-import {setupTestMessagingService} from '../src/message-service/test-message-service';
+import { setupTestMessagingService } from '../src/__test-with-peers__/utils';
 
-interface TestPeerWallets {
+ interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
@@ -29,7 +29,32 @@ export let peerWallets: TestPeerWallets;
  * If this is not used it will have no effect.
  * It can be used to automatically transport messages between the two participants.
  */
-export let messagingService: MessageServiceInterface;
+export let messageService: MessageServiceInterface;
+
+export const participantIdA = 'a';
+export const participantIdB = 'b';
+
+/**
+ * 
+ */
+export async function crashAndRestart(): Promise<void> {
+  // Get all the configs for the wallets
+
+  const {walletConfig: aWalletConfig} = peerWallets.a;
+  const {walletConfig: bWalletConfig} = peerWallets.b;
+
+  await messageService.destroy();
+ await  peerWallets.a.destroy();
+  await peerWallets.b.destroy();
+
+    peerWallets = {
+      a: await Wallet.create(aWalletConfig),
+      b: await Wallet.create(bWalletConfig),
+    };
+messageService = await setupTestMessagingService([{participantId: participantIdA, wallet: peerWallets.a},{participantId: participantIdB, wallet: peerWallets.b} ]) ;
+ 
+  }
+
 
 export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
   return async () => {
@@ -50,6 +75,7 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
       b: await Wallet.create(bWalletConfig),
     };
 
+
     if (withWalletSeeding) {
       await seedAlicesSigningWallet(peerWallets.a.knex);
       await seedBobsSigningWallet(peerWallets.b.knex);
@@ -57,24 +83,30 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 
     participantA = {
       signingAddress: await peerWallets.a.getSigningAddress(),
-      participantId: 'a',
+      participantId: participantIdA,
       destination: makeDestination(
         '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
       ),
     };
     participantB = {
       signingAddress: await peerWallets.b.getSigningAddress(),
-      participantId: 'b',
+      participantId: participantIdB,
       destination: makeDestination(
         '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
       ),
     };
 
-    messagingService = await setupTestMessagingService([
-      {participantId: participantA.participantId, wallet: peerWallets.a},
-      {participantId: participantB.participantId, wallet: peerWallets.b},
-    ]);
+    
+  const participantWallets =  [
+     {participantId: participantIdA, wallet: peerWallets.a},
+      {participantId: participantIdB, wallet: peerWallets.b}];
+
+    messageService = await setupTestMessagingService(participantWallets);
+
+  
   };
+
+
 }
 
 export const peersTeardown: jest.Lifecycle = async () => {

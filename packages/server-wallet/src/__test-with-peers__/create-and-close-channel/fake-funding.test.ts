@@ -13,7 +13,7 @@ import {
   participantA,
   participantB,
   peersTeardown,
-  messagingService,
+  messageService,
 } from '../../../jest/with-peers-setup-teardown';
 import {expectLatestStateToMatch} from '../utils';
 
@@ -43,7 +43,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
   //        A <> B
   // PreFund0
   const aCreateChannelOutput = await peerWallets.a.createChannel(channelParams);
-  await messagingService.send(aCreateChannelOutput.outbox.map(o => o.params));
+  await messageService.send(aCreateChannelOutput.outbox.map(o => o.params));
   channelId = aCreateChannelOutput.channelResults[0].channelId;
 
   expectLatestStateToMatch(channelId, peerWallets.a, {
@@ -59,7 +59,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   // after joinChannel, B signs PreFund1 and PostFund3
   const bJoinChannelOutput = await peerWallets.b.joinChannel({channelId});
-  await messagingService.send(bJoinChannelOutput.outbox.map(o => o.params));
+  await messageService.send(bJoinChannelOutput.outbox.map(o => o.params));
 
   await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
@@ -77,7 +77,7 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   // A generates isFinal4
   const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
-  await messagingService.send(aCloseChannelResult.outbox.map(o => o.params));
+  await messageService.send(aCloseChannelResult.outbox.map(o => o.params));
 
   await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'closed',

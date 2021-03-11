@@ -2,10 +2,9 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Outgoing} from '../..';
+import {Outgoing, Wallet} from '../..';
 import {Bytes32} from '../../type-aliases';
 import {
-  crashAndRestart,
   getChannelResultFor,
   getPayloadFor,
   interParticipantChannelResultsAreEqual,
@@ -21,7 +20,11 @@ import {
   aWalletConfig,
   bWalletConfig,
 } from '../../../jest/with-peers-setup-teardown';
-
+async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
+  const config = wallet.walletConfig;
+  await wallet.destroy();
+  return Wallet.create(config); // Wallet that will "restart"
+}
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
 const tablesUsingLedgerChannels = ['channels', 'ledger_requests', 'ledger_proposals'];

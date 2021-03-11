@@ -27,4 +27,9 @@ export interface MessageServiceInterface {
    * @param messages The collection of messages to send
    */
   send(message: Message[]): Promise<void>;
+
+  /**
+   * This is called when the message service is no longer needed
+   */
+  destroy(): Promise<void>;
 }
