@@ -53,9 +53,6 @@ export class LedgerFunder {
     // if we already requested funding return false
     if (await this.alreadyRequestedFunding(channel.channelId, tx)) return false;
 
-    // NOTE FOR TOMORROW:
-    // it seems like the open channel algorithm doens't notice that the channel is funded
-
     // otherwise request funding
     await this.requestLedgerFunding(channel, ledger, tx);
     return false;
