@@ -1,5 +1,6 @@
 import {Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
+import {Logger} from 'pino';
 
 import {Wallet} from '..';
 
@@ -12,19 +13,32 @@ import {MessageHandler, MessageServiceInterface} from './types';
  */
 export class TestMessageService implements MessageServiceInterface {
   private _handleMessage: (message: Message) => Promise<void>;
-  protected constructor(handleMessage: MessageHandler) {
+  protected constructor(
+    handleMessage: MessageHandler,
+    protected _dropRate: number,
+    protected _logger?: Logger
+  ) {
     // We always pass a reference to the messageService when calling handleMessage
     // This allows the MessageHandler function to easily call messageHandler.send
     // We just bind that here for convenience.
     this._handleMessage = async message => handleMessage(message, this);
   }
 
-  static async create(incomingMessageHandler: MessageHandler): Promise<MessageServiceInterface> {
-    const service = new TestMessageService(incomingMessageHandler);
+  static async create(
+    incomingMessageHandler: MessageHandler,
+    logger?: Logger,
+    dropRate = 0
+  ): Promise<MessageServiceInterface> {
+    const service = new TestMessageService(incomingMessageHandler, dropRate, logger);
     return service;
   }
 
   async send(messages: Message[]): Promise<void> {
+    if (Math.random() < this._dropRate) {
+      this._logger?.debug({messages}, 'Dropping messages');
+      return;
+    }
+
     for (const message of messages) {
       await this._handleMessage(message);
     }
