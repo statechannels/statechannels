@@ -29,7 +29,7 @@ A state channel wallet has the following _runtime dependencies_:
 
 - a message delivery service (provided by The App)
 - a blockchain provider (e.g. infura)
-- a database (could be a Postgres server or indexedDB)
+- a "store", which is a wrapper around a database (could be a Postgres server or indexedDB)
 
 The following diagram describes the various components in the architecture. The scope of this document is limited to the components left of the dividing line.
 
