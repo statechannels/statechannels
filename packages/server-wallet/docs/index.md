@@ -27,7 +27,7 @@ A state channel wallet _is not_:
 
 A state channel wallet has the following _runtime dependencies_:
 
-- a message delivery service (deferred to The App)
+- a message delivery service (provided by The App)
 - a blockchain provider (e.g. infura)
 - a database (could be a Postgres server or indexedDB)
 
