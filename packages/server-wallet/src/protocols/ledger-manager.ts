@@ -32,7 +32,7 @@ import {LedgerRequest} from '../models/ledger-request';
 // The follower acts as follows:
 // * In Agreement, does nothing
 // * In Proposal:
-//    * If all updates are in the queue, double-signs. The state is now Proposal.
+//    * If all updates are in the queue, double-signs. The state is now Agreement.
 //    * Otherwise, removes the states that are not in queue and formulates new state.
 //      The state is now Counter-proposal
 // * In Counter-proposal, does nothing
@@ -257,7 +257,7 @@ export class LedgerManager {
     const agreedOutcome = agreedState.simpleAllocationOutcome;
     if (!agreedOutcome) throw Error("Ledger state doesn't have a simple allocation outcome");
 
-    const [fundings, defundings] = _.partition(requests, r => r.type === 'fund');
+    const [fundings, defundings] = _.partition(requests, r => r.isFund);
 
     // for defundings, one of three things is true:
     // 1. the channel doesn't appear => defunding successful
@@ -491,7 +491,7 @@ export class LedgerManager {
         currentOutcome = updatedOutcome;
       } else {
         // the only way removal fails is if the refund amounts don't match the amount in the channel
-        // in that case the request is not viable and should be marked as insconsistent
+        // in that case the request is not viable and should be marked as inconsistent
         defundReq.status = 'inconsistent';
       }
     }

@@ -14,9 +14,7 @@ import {LedgerManager} from '../ledger-manager';
 import {WalletResponse} from '../../wallet/wallet-response';
 import {Destination} from '../../type-aliases';
 
-// TEST HELPERS
 jest.setTimeout(10_000);
-// END TEST HELPERS
 
 let store: Store;
 
@@ -400,7 +398,6 @@ describe('as follower', () => {
         },
       })
     );
-    // TODO: it will mark a mismatched cancellation as inconsistent
   });
   describe('in the proposal state', () => {
     it(
