@@ -109,7 +109,18 @@ Here, “explicit permission” shall be implied by an API call. “Implicit per
 
 > An objective is a proposal for a goal which The App asserts that it wants to achieve.
 
-It has a _name_ and _parameters_. The parameters include a _scope_, which is a list of channelIds.
+It has a _type_ and _parameters_. The parameters include a _scope_, which is a list of channelIds.
+
+For an example, upon an appropriate request fromt the app, the wallet may create
+
+```ts
+{
+  type: 'CloseChannel',
+  scope: ['0x123']
+}
+```
+
+which codes for the goal of closing channel `0x123`.
 
 > To approve an objective is to grant permission, enabling the wallet to use the private keys it stores as it sees fit, for the channels in its scope for the lifetime of the objective.
 
