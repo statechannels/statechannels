@@ -6,21 +6,18 @@ import {
 import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers} from 'ethers';
 
-import {Wallet} from '../..';
 import {
+  crashAndRestart,
   getPeersSetup,
+  messageService,
   participantA,
   participantB,
   peersTeardown,
   peerWallets,
 } from '../../../jest/with-peers-setup-teardown';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
+import {expectLatestStateToMatch} from '../utils';
 
-async function crashAndRestart(wallet: Wallet): Promise<Wallet> {
-  const config = wallet.walletConfig;
-  await wallet.destroy();
-  return Wallet.create(config); // Wallet that will "restart"
-}
 let channelId: string;
 jest.setTimeout(10_000);
 
@@ -51,23 +48,20 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
 
   channelId = resultA0.channelResults[0].channelId;
 
-  expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'opening',
     turnNum: 0,
   });
 
-  //    > PreFund0A
-  const resultB0 = await peerWallets.b.pushMessage(
-    getPayloadFor(participantB.participantId, resultA0.outbox)
-  );
+  await messageService.send(resultA0.outbox.map(o => o.params));
 
-  expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
+  await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'proposed',
     turnNum: 0,
   });
 
-  // Destory Wallet b and restart
-  peerWallets.b = await crashAndRestart(peerWallets.b);
+  // Destroy Wallet b and restart
+  await crashAndRestart('B');
 
   //      PreFund0B
   const resultB1 = await peerWallets.b.joinChannel({channelId});
@@ -76,22 +70,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 0,
   });
 
-  //  PreFund0B <
-  const resultA1 = await peerWallets.a.pushMessage(
-    getPayloadFor(participantA.participantId, resultB1.outbox)
-  );
-
-  /**
-   * In this case, there is no auto-advancing to the running stage. Instead we have
-   * an intermediate 'opening' stage where each party must fund their channel. A funds
-   * first, and then B funds. A and B both signs turnNum 3 on the call to updateFundingForChannels
-   * and then sends the newly signed state to each other at the same time.
-   */
-
-  expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
+  await messageService.send(resultB1.outbox.map(o => o.params));
 
   const depositByA = {
     channelId,
@@ -118,6 +97,9 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 0,
   });
 
+  await messageService.send(resultA2.outbox.map(o => o.params));
+  await messageService.send(resultB2.outbox.map(o => o.params));
+
   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
     // Still opening because turnNum 3 is not supported yet (2 is not in the wallet)
     status: 'opening',
@@ -134,10 +116,8 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   });
 
   //  PostFund3B <
-  const resultA3 = await peerWallets.a.pushMessage(
-    getPayloadFor(participantA.participantId, resultB2.outbox)
-  );
-  expect(getChannelResultFor(channelId, resultA3.channelResults)).toMatchObject({
+  await messageService.send(resultB2.outbox.map(o => o.params));
+  await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
     turnNum: 3,
   });
@@ -154,23 +134,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 4,
   });
 
-  const bPushMessageResult = await peerWallets.b.pushMessage(
-    getPayloadFor(participantB.participantId, aCloseChannelResult.outbox)
-  );
-
+  await messageService.send(aCloseChannelResult.outbox.map(o => o.params));
   // B pushed isFinal4, generated countersigned isFinal4
-  expect(getChannelResultFor(channelId, bPushMessageResult.channelResults)).toMatchObject({
-    status: 'closed',
-    turnNum: 4,
-  });
-
-  // A pushed the countersigned isFinal4
-  const aPushMessageResult = await peerWallets.a.pushMessage(
-    getPayloadFor(participantA.participantId, bPushMessageResult.outbox)
-  );
-
-  expect(getChannelResultFor(channelId, aPushMessageResult.channelResults)).toMatchObject({
-    status: 'closed',
-    turnNum: 4,
-  });
+  await expectLatestStateToMatch(channelId, peerWallets.a, {status: 'closed', turnNum: 4});
 });

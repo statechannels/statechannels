@@ -8,9 +8,9 @@ import {
   seedBobsSigningWallet,
 } from '../src/db/seeds/1_signing_wallet_seeds';
 import {MessageServiceInterface} from '../src/message-service/types';
-import { setupTestMessagingService } from '../src/__test-with-peers__/utils';
+import {setupTestMessagingService} from '../src/__test-with-peers__/utils';
 
- interface TestPeerWallets {
+interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
@@ -35,26 +35,33 @@ export const participantIdA = 'a';
 export const participantIdB = 'b';
 
 /**
- * 
+ *
  */
-export async function crashAndRestart(): Promise<void> {
+export async function crashAndRestart(
+  walletsToRestart: 'A' | 'B' | 'Both' = 'Both'
+): Promise<void> {
   // Get all the configs for the wallets
 
   const {walletConfig: aWalletConfig} = peerWallets.a;
   const {walletConfig: bWalletConfig} = peerWallets.b;
 
   await messageService.destroy();
- await  peerWallets.a.destroy();
-  await peerWallets.b.destroy();
 
-    peerWallets = {
-      a: await Wallet.create(aWalletConfig),
-      b: await Wallet.create(bWalletConfig),
-    };
-messageService = await setupTestMessagingService([{participantId: participantIdA, wallet: peerWallets.a},{participantId: participantIdB, wallet: peerWallets.b} ]) ;
- 
+  if (walletsToRestart === 'A' || walletsToRestart === 'Both') {
+    await peerWallets.a.destroy();
+    peerWallets.a = await Wallet.create(aWalletConfig);
   }
 
+  if (walletsToRestart === 'B' || walletsToRestart === 'Both') {
+    await peerWallets.b.destroy();
+    peerWallets.b = await Wallet.create(bWalletConfig);
+  }
+  
+  messageService = await setupTestMessagingService([
+    {participantId: participantIdA, wallet: peerWallets.a},
+    {participantId: participantIdB, wallet: peerWallets.b},
+  ]);
+}
 
 export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
   return async () => {
@@ -74,7 +81,6 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
       a: await Wallet.create(aWalletConfig),
       b: await Wallet.create(bWalletConfig),
     };
-
 
     if (withWalletSeeding) {
       await seedAlicesSigningWallet(peerWallets.a.knex);
@@ -96,17 +102,13 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
       ),
     };
 
-    
-  const participantWallets =  [
-     {participantId: participantIdA, wallet: peerWallets.a},
-      {participantId: participantIdB, wallet: peerWallets.b}];
+    const participantWallets = [
+      {participantId: participantIdA, wallet: peerWallets.a},
+      {participantId: participantIdB, wallet: peerWallets.b},
+    ];
 
     messageService = await setupTestMessagingService(participantWallets);
-
-  
   };
-
-
 }
 
 export const peersTeardown: jest.Lifecycle = async () => {
