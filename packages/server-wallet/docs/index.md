@@ -92,7 +92,7 @@ Next, allow for advanced funding relationships
 
 10. With implicit permission, sign “safe” updates in ledger channels (meaning no funds are lost)
 
-[More detail on responsibilities.](./responsibilities.md)
+[More detail on how a wallet can meet its responsibilities.](./responsibilities.md)
 
 # Objective-driven Wallet architecture
 
