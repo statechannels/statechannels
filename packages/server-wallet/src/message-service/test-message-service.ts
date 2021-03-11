@@ -5,7 +5,7 @@ import {MessageHandler, MessageServiceInterface} from './types';
 
 export class TestMessageService implements MessageServiceInterface {
   protected constructor(private _receive: MessageHandler) {}
-  protected destroyed = false;
+
   static async createTestMessageService(
     incomingMessageHandler: MessageHandler
   ): Promise<MessageServiceInterface> {
@@ -20,6 +20,7 @@ export class TestMessageService implements MessageServiceInterface {
   }
 
   async destroy(): Promise<void> {
+    // This prevents any more progress from being made
     this._receive = async () => _.noop();
   }
 }
