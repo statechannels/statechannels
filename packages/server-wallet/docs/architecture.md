@@ -58,9 +58,9 @@ The following diagram describes the various components in the architecture. The 
                         |          <---------------------------+     |
                         |          |                |     |    |     |
                         |          |                |     |    |     |
-                        +----------+                |     +----|-----+
-                                                    |          |
-                                                    | +--------|---------+
+                        +----------+                |     +----|--|--+
+                                                    |          |  | Messages in API response
+                                                    | +--------|--v------+
                                                     | |  COUNTERPARTY    |
                                                     | |  WALLETS         |
                                                       +------------------+
