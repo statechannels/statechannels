@@ -458,18 +458,18 @@ export class LedgerManager {
     if (!antepenultimateState) return {type: 'protocol-violation'};
 
     if (
-      !antepenultimateState.fullySigned &&
+      antepenultimateState.fullySigned &&
       penultimateState.signedBy(leader) &&
       latestState.signedBy(follower)
     ) {
-      return {type: 'protocol-violation'};
-    } else {
       return {
         type: 'counter-proposal',
         counterProposed: latestState,
         proposed: penultimateState,
         agreed: antepenultimateState,
       };
+    } else {
+      return {type: 'protocol-violation'};
     }
   }
 
