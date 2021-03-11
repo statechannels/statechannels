@@ -6,7 +6,7 @@ Store them in a database.
 Minimise time spent in memory.
 
 ### 3. Store relevant states
-Accept states from counterparties through the `pushMessage` API method.
+Accept states from counterparties through wire messages.
 In the extreme (“ideal” case), keep every state ever signed or received.
 In practice, garbage collect "old" states (should only need ~`nParticipants` states per channel), by tracking `validTransition` relationships between them. 
 
@@ -38,4 +38,3 @@ An approved  `OpenChannel` objective may trigger  a `deposit` blockchain transac
 An approved objective may trigger updates to non-application channels. The implicit permission granted only covers updates that will not lose The App money.
 
 Q: should explicit updates to ledger channels be blocked?
-

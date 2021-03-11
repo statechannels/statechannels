@@ -72,14 +72,14 @@ As in the [Hippocratic oath](https://en.wikipedia.org/wiki/Hippocratic_Oath): _p
 
 1. Do not lose secrets (private keys)
 2. Do not leak secrets (private keys)
-3. Store relevant states and signatures (Don’t lose any unless they are screened off by kept ones, allow states to be queried)
+3. Store relevant states and signatures (Don’t lose any unless they are superceded by kept ones, allow states to be queried)
 4. Do not sign states or blockchain transactions unless the App grants permission
 
 Next, do some active things to protect The App’s interests.
 
 5. With implicit permission, allow an exit on chain without losing funds
-6. Detect and store blockchain challenges (for querying)
-7. Detect and store changes in channel funding (for querying)
+6. Detect and store blockchain challenges
+7. Detect and store changes in channel funding
 
 Next, do some active things to allow The App to express itself
 
@@ -94,7 +94,7 @@ Next, allow for advanced funding relationships
 
 # Objective-driven Wallet architecture
 
-In order to fulfil its responsibilities, a state channel wallet must be carefully architected. This section describes one approach that we are pursuing. Let's consider the most important responsibility of a state channels wallet, besides secure storage of secrets and states:
+In order to fulfill its responsibilities, a state channel wallet must be carefully designed. This section describes our approach. Let's consider the most important responsibility of a state channels wallet, besides secure storage of secrets and states:
 
 > Signing a state or a blockchain transaction is only ever done with permission.
 
@@ -103,7 +103,7 @@ Here, “explicit permission” shall be implied by an API call. “Implicit per
 - greater abstraction of the details of nitro protocol
 - greater performance and robustness of a responsible wallet
 - easier coordination between counterparties
-- short-lived request/response cycle over the API
+- quick API calls, only involving "locally" asynchronous code
 
 > An objective is a proposal for a goal which The App asserts that it wants to achieve.
 
@@ -117,11 +117,11 @@ It has a _name_ and _parameters_. The parameters include a _scope_, which is a l
 
 ### Creation
 
-Objectives are spawned:
+Objectives are created:
 
-1. During request handling, i.e. during an API call. The API call resolves when the objective is committed to the wallet's store.
+1. During an API call. The API call resolves when the objective is committed to the wallet's store.
 
-Some objecties are "shared" and involve other participants. They are therefore communicated across "the wire" to other wallets. Therefore we also have objectives being spawned in a wallet:
+Some objecties are "shared" and involve other participants. They are therefore communicated across "the wire" to other wallets. Therefore, objectives can be created by the wallet itself when handling a peer message.
 
 2. When a message is received from a counterparty. An implementation detail: this is also received via a (special) API method `pushMessage`.
 
@@ -180,4 +180,4 @@ TODO
 
 # Processing the Ledger Queue
 
-Requests to update a ledger channel are _not_ handled by objectives. This is because, in contrast to objectives, we do not want to reject requests from the app that target a ledger channel that is already locked by an objective. We have a queueing system for such updates.
+[A Nitro ledger channel can be used to fund many other channels.](https://medium.com/statechannels/channels-funding-channels-funding-channels-3dc86450ec26), meaning a ledger channel might be "in scope" for many Objectives. Therefore, the Wallet keeps track of a queue of _requested ledger updates_. The `LedgerManager` batches many ledger requests together, executing them in a single state update.
