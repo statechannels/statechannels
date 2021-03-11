@@ -129,7 +129,7 @@ Some objecties are "shared" and involve other participants. They are therefore c
 
 ### Approval
 
-Approval will be _automatic_ if the objective is spawned via 1. Otherwise, if it is spawned via 2, the app will be notified of a new objective and invited to approve it.
+Approval will be _automatic_ if the objective is created via 1. Otherwise, if it is created via 2, the app will be notified of a new objective and invited to approve it.
 
 To approve an objective is to transfer ownership of those channels to the objective for the lifetime of the objective or until another more important objective is approved that takes ownership. This means that updates cannot be made to a channel in the scope of an approved objective that is still alive. This includes updates by any other objectives as well as explicit updates from the app.
 
@@ -156,7 +156,7 @@ As a final step, metadata about objective progress is written to the database. T
 
 > Q: Which rows should be locked? One answer is: the objective row and all of the channel rows in the scope of the objective.
 
-An objective will often be blocked on, or waiting for, external events. The wallet will track the length of time an objective is blocked, and expose this information to the app. This allows the app to choose to spawn a new objective to displace the stalled one. For example, a `SubmitChallenege` objective might displace a `CloseChannel` objective.
+An objective will often be blocked on, or waiting for, external events. The wallet will track the length of time an objective is blocked, and expose this information to the app. This allows the app to choose to create a new objective to displace the stalled one. For example, a `SubmitChallenege` objective might displace a `CloseChannel` objective.
 
 > Q: does the app have to first reject the stalled objective? It's scope could be different to the new objective's, so it seems like the only safe thing to do is to release the _entire_ scope of the stalled objective.
 
