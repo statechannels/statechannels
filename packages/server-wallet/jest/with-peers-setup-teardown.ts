@@ -24,6 +24,7 @@ export const bWalletConfig = overwriteConfigWithDatabaseConnection(defaultTestCo
 export let participantA: Participant;
 export let participantB: Participant;
 export let peerWallets: TestPeerWallets;
+
 /**
  * A messaging service that links the two peer wallets.
  * If this is not used it will have no effect.
@@ -35,15 +36,13 @@ export const participantIdA = 'a';
 export const participantIdB = 'b';
 
 /**
- *
+ * This destroys the peerWallet(s) and the message service and then re-instantiates them.
+ * This mimics a crash and restart
+ * @param walletsToRestart Specifies the peerWallet that will be restarted
  */
 export async function crashAndRestart(
   walletsToRestart: 'A' | 'B' | 'Both' = 'Both'
 ): Promise<void> {
-  // Get all the configs for the wallets
-
-  const {walletConfig: aWalletConfig} = peerWallets.a;
-  const {walletConfig: bWalletConfig} = peerWallets.b;
 
   await messageService.destroy();
 
