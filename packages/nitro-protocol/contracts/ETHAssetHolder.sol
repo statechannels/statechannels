@@ -31,7 +31,7 @@ contract ETHAssetHolder is AssetHolder {
         uint256 amount
     ) external payable {
         require(!_isExternalDestination(destination), 'Deposit to external destination');
-        require(msg.value == amount, 'Insufficient ETH for ETH deposit');
+        require(msg.value == amount, 'Incorrect msg.value for deposit');
         uint256 amountDeposited;
         // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
         // 1. Participant A deposits
