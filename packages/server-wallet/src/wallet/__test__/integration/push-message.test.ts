@@ -2,9 +2,6 @@ import {
   calculateChannelId,
   simpleEthAllocation,
   serializeState,
-  SimpleAllocation,
-  makeAddress,
-  serializeOutcome,
   SignedState,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
@@ -462,57 +459,6 @@ describe('when there is a request provided', () => {
         {
           method: 'MessageQueued',
           params: {data: {signedStates: expect.arrayContaining(signedStates)}},
-        },
-      ],
-    });
-  });
-
-  it('appends proposed ledger update to the outbox satisfying a GetChannel request', async () => {
-    // Set up test by adding a single state into the DB via pushMessage call
-    const channelsBefore = await Channel.query(wallet.knex).select();
-    expect(channelsBefore).toHaveLength(0);
-    const signedStates = [serializeState(stateSignedBy([bob()])({turnNum: zero}))];
-    await wallet.pushMessage({walletVersion: WALLET_VERSION, signedStates});
-
-    // Get the channelId of that which was added
-    const [{channelId}] = await Channel.query(wallet.knex).select();
-
-    // Manually set this channel as a ledger
-    await Channel.setLedger(
-      channelId,
-      makeAddress('0x0000000000000000000000000000000000001337'),
-      wallet.knex
-    );
-
-    const someArbitraryOutcome: SimpleAllocation = {
-      type: 'SimpleAllocation',
-      assetHolderAddress: makeAddress('0x0000000000000000000000000000000000001337'),
-      allocationItems: [],
-    };
-    await wallet.store.storeLedgerProposal(channelId, someArbitraryOutcome, 1, alice().address);
-
-    // Expect a GetChannel request to produce an outbound message with all states
-    await expect(
-      wallet.pushMessage({
-        walletVersion: WALLET_VERSION,
-        requests: [{type: 'GetChannel', channelId}],
-      })
-    ).resolves.toMatchObject({
-      outbox: [
-        {
-          method: 'MessageQueued',
-          params: {
-            data: {
-              signedStates,
-              requests: [
-                {
-                  type: 'ProposeLedgerUpdate',
-                  channelId,
-                  outcome: serializeOutcome(someArbitraryOutcome),
-                },
-              ],
-            },
-          },
         },
       ],
     });

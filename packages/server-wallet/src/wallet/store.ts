@@ -45,7 +45,6 @@ import {LedgerRequest} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
 import {defaultTestConfig} from '../config';
 import {createLogger} from '../logger';
-import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
@@ -493,28 +492,6 @@ export class Store {
     await pMap(channelIds, request =>
       LedgerRequest.setRequestStatus(request, type, status, tx || this.knex)
     );
-  }
-
-  async getLedgerProposals(channelId: Bytes32, tx?: Transaction): Promise<LedgerProposal[]> {
-    return await LedgerProposal.forChannel(channelId, tx || this.knex);
-  }
-
-  async storeLedgerProposal(
-    channelId: Bytes32,
-    proposal: Outcome,
-    nonce: number,
-    signingAddress: Address,
-    tx?: Transaction
-  ): Promise<void> {
-    proposal = checkThat(proposal, isSimpleAllocation);
-    await LedgerProposal.storeProposal(
-      {channelId, proposal, nonce, signingAddress},
-      tx || this.knex
-    );
-  }
-
-  async removeLedgerProposals(channelId: Bytes32, tx: Transaction): Promise<void> {
-    await LedgerProposal.setProposalsToNull(channelId, tx);
   }
 
   /**

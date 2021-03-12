@@ -1,7 +1,6 @@
 import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
-  ChannelRequest as ChannelRequestWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Guarantee as GuaranteeWire,
@@ -14,8 +13,7 @@ import {
   AllocationItem,
   SimpleAllocation,
   Payload,
-  SimpleGuarantee,
-  ChannelRequest
+  SimpleGuarantee
 } from '../../types';
 import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
@@ -29,11 +27,10 @@ export function serializeMessage(
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
   const objectives = message.objectives;
-  const requests = message.requests?.map(serializeRequest);
   return {
     recipient,
     sender,
-    data: {walletVersion, signedStates, objectives, requests}
+    data: {walletVersion, signedStates, objectives, requests: message.requests}
   };
 }
 
@@ -62,18 +59,6 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
     channelId: channelId || calculateChannelId(state),
     signatures: state.signatures.map(s => s.signature)
   };
-}
-
-export function serializeRequest(request: ChannelRequest): ChannelRequestWire {
-  if (request.type === 'ProposeLedgerUpdate') {
-    return {
-      ...request,
-      nonce: request.nonce,
-      outcome: serializeOutcome(request.outcome),
-      signingAddress: request.signingAddress
-    };
-  }
-  return request;
 }
 
 export function serializeOutcome(outcome: Outcome): OutcomeWire {

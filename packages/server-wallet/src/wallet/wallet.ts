@@ -18,7 +18,6 @@ import {
   Address as CoreAddress,
   PrivateKey,
   makeDestination,
-  deserializeRequest,
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -342,22 +341,6 @@ export class SingleThreadedWallet
 
     response.queueChannelRequest(channelId, myIndex, participants);
     response.queueChannelState(channelState);
-
-    if (await this.store.isLedger(channelId)) {
-      const proposals = await this.store.getLedgerProposals(channelId);
-      const [[mine]] = _.partition(proposals, [
-        'signingAddress',
-        participants[myIndex].signingAddress,
-      ]);
-      if (mine && mine.proposal)
-        response.queueProposeLedgerUpdate(
-          channelId,
-          myIndex,
-          participants,
-          mine.proposal,
-          mine.nonce
-        );
-    }
   }
 
   /**
@@ -817,7 +800,7 @@ export class SingleThreadedWallet
    * Push a message from a counterparty into the wallet.
    *
    * @remarks
-   * Fresh states and Ledger Proposals will be stored.
+   * Fresh states will be stored.
    * Requests will be handled.
    * Objectives with updated channels in scope will be cranked.
    *
@@ -879,7 +862,7 @@ export class SingleThreadedWallet
     response.createdObjectives = storedObjectives;
 
     const channelIdsFromRequests: Bytes32[] = [];
-    const requests = (wirePayload.requests || []).map(deserializeRequest);
+    const requests = wirePayload.requests || [];
 
     for (const request of requests) {
       const {channelId} = request;
@@ -892,35 +875,8 @@ export class SingleThreadedWallet
 
           // add signed states to response
           signedStates.forEach(s => response.queueState(s, channelState.myIndex, channelId));
-
-          if (await this.store.isLedger(channelId)) {
-            const proposals = await this.store.getLedgerProposals(channelId);
-
-            const [[mine]] = _.partition(proposals, [
-              'signingAddress',
-              channelState.participants[channelState.myIndex].signingAddress,
-            ]);
-
-            if (mine && mine.proposal)
-              response.queueProposeLedgerUpdate(
-                channelId,
-                channelState.myIndex,
-                channelState.participants,
-                mine.proposal,
-                mine.nonce
-              );
-          }
-
           continue;
         }
-        case 'ProposeLedgerUpdate':
-          await store.storeLedgerProposal(
-            channelId,
-            request.outcome,
-            request.nonce,
-            request.signingAddress
-          );
-          continue;
         default:
           continue;
       }

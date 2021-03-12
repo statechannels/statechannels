@@ -144,14 +144,7 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 
 // channel requests
 type GetChannel = {type: 'GetChannel'; channelId: string};
-type ProposeLedgerUpdate = {
-  type: 'ProposeLedgerUpdate';
-  nonce: number;
-  channelId: string;
-  outcome: Outcome;
-  signingAddress: Address;
-};
-export type ChannelRequest = GetChannel | ProposeLedgerUpdate;
+export type ChannelRequest = GetChannel;
 
 export interface Payload {
   walletVersion: string; // e.g. @statechannels/server-wallet@1.4.0

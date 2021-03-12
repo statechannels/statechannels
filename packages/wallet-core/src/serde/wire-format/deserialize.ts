@@ -2,7 +2,6 @@ import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
   Objective as ObjectiveWire,
-  ChannelRequest as ChannelRequestWire,
   AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
   Message as WireMessage,
@@ -19,7 +18,6 @@ import {
   Participant,
   makeAddress,
   Payload,
-  ChannelRequest,
   SharedObjective
 } from '../../types';
 import {BN} from '../../bignumber';
@@ -48,7 +46,7 @@ export function validatePayload(rawPayload: unknown): WirePayload {
 export function deserializeMessage(message: WireMessage): Payload {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
   const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
-  const requests = message?.data?.requests?.map(req => deserializeRequest(req));
+  const requests = message?.data?.requests;
   const walletVersion = message.data.walletVersion;
 
   return {
@@ -108,18 +106,6 @@ export function deserializeObjective(objective: ObjectiveWire): SharedObjective 
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity
 // I don't want asset holders in the json rpc layer, as the client shouldn't care
-
-export function deserializeRequest(request: ChannelRequestWire): ChannelRequest {
-  if (request.type === 'ProposeLedgerUpdate')
-    return {
-      ...request,
-      outcome: deserializeOutcome(request.outcome),
-      nonce: request.nonce,
-      signingAddress: makeAddress(request.signingAddress)
-    };
-
-  return request;
-}
 
 export function deserializeOutcome(outcome: OutcomeWire): Outcome {
   if (isAllocations(outcome)) {
