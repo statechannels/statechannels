@@ -1,4 +1,5 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
+import _ from 'lodash';
 
 import {Wallet} from '..';
 import {TestMessageService} from '../message-service/test-message-service';
@@ -31,8 +32,17 @@ export async function expectLatestStateToMatch(
 export function setupTestMessagingService(
   wallets: {participantId: string; wallet: Wallet}[]
 ): Promise<MessageServiceInterface> {
+  const hasUniqueParticipants = new Set(wallets.map(w => w.participantId)).size === wallets.length;
+  const hasUniqueWallets = new Set(wallets.map(w => w.wallet)).size === wallets.length;
+
+  if (!hasUniqueParticipants) {
+    throw new Error('Duplicate participant ids');
+  }
+
+  if (!hasUniqueWallets) {
+    throw new Error('Duplicate wallets');
+  }
   const messageHandler: MessageHandler = async (to, message, me) => {
-    // TODO: This assumes only 1 matching wallet.
     const matching = wallets.find(w => w.participantId === to);
 
     if (!matching) {
