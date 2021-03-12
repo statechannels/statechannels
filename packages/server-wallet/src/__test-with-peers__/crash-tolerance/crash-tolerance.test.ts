@@ -16,7 +16,7 @@ import {
   peerWallets,
 } from '../../../jest/with-peers-setup-teardown';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
-import {expectLatestStateToMatch} from '../utils';
+import {expectLatestStateToMatch, getMessages} from '../utils';
 
 let channelId: string;
 jest.setTimeout(10_000);
@@ -53,7 +53,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 0,
   });
 
-  await messageService.send(resultA0.outbox.map(o => o.params));
+  await messageService.send(getMessages(resultA0));
 
   await expectLatestStateToMatch(channelId, peerWallets.b, {
     status: 'proposed',
@@ -70,7 +70,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 0,
   });
 
-  await messageService.send(resultB1.outbox.map(o => o.params));
+  await messageService.send(getMessages(resultB1));
 
   const depositByA = {
     channelId,
@@ -97,8 +97,8 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 0,
   });
 
-  await messageService.send(resultA2.outbox.map(o => o.params));
-  await messageService.send(resultB2.outbox.map(o => o.params));
+  await messageService.send(getMessages(resultA2));
+  await messageService.send(getMessages(resultB2));
 
   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
     // Still opening because turnNum 3 is not supported yet (2 is not in the wallet)
@@ -116,7 +116,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   });
 
   //  PostFund3B <
-  await messageService.send(resultB2.outbox.map(o => o.params));
+  await messageService.send(getMessages(resultB2));
   await expectLatestStateToMatch(channelId, peerWallets.a, {
     status: 'running',
     turnNum: 3,
@@ -134,7 +134,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     turnNum: 4,
   });
 
-  await messageService.send(aCloseChannelResult.outbox.map(o => o.params));
+  await messageService.send(getMessages(aCloseChannelResult));
   // B pushed isFinal4, generated countersigned isFinal4
   await expectLatestStateToMatch(channelId, peerWallets.a, {status: 'closed', turnNum: 4});
 });
