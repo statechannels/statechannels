@@ -58,54 +58,21 @@
       "type": "string"
     },
     "ChannelRequest": {
-      "anyOf": [
-        {
-          "additionalProperties": false,
-          "properties": {
-            "channelId": {
-              "type": "string"
-            },
-            "type": {
-              "const": "GetChannel",
-              "type": "string"
-            }
-          },
-          "required": [
-            "type",
-            "channelId"
-          ],
-          "type": "object"
+      "additionalProperties": false,
+      "properties": {
+        "channelId": {
+          "type": "string"
         },
-        {
-          "additionalProperties": false,
-          "properties": {
-            "channelId": {
-              "type": "string"
-            },
-            "nonce": {
-              "type": "number"
-            },
-            "outcome": {
-              "$ref": "#/definitions/Outcome"
-            },
-            "signingAddress": {
-              "$ref": "#/definitions/Address"
-            },
-            "type": {
-              "const": "ProposeLedgerUpdate",
-              "type": "string"
-            }
-          },
-          "required": [
-            "type",
-            "nonce",
-            "channelId",
-            "outcome",
-            "signingAddress"
-          ],
-          "type": "object"
+        "type": {
+          "const": "GetChannel",
+          "type": "string"
         }
-      ]
+      },
+      "required": [
+        "type",
+        "channelId"
+      ],
+      "type": "object"
     },
     "CloseChannel": {
       "additionalProperties": false,

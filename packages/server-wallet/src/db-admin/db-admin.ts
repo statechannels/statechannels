@@ -13,7 +13,6 @@ import {ObjectiveModel, ObjectiveChannelModel} from '../models/objective';
 import {Funding} from '../models/funding';
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest} from '../models/ledger-request';
-import {LedgerProposal} from '../models/ledger-proposal';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {
@@ -158,7 +157,6 @@ const defaultTables = [
   Funding,
   AppBytecode,
   LedgerRequest,
-  LedgerProposal,
   Funding,
   AdjudicatorStatusModel,
   ChainServiceRequest,

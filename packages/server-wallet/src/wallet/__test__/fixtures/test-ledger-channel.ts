@@ -1,18 +1,15 @@
 import _ from 'lodash';
 import {
-  Address,
   BN,
   ChannelConstants,
   Destination,
   makeAddress,
   OpenChannel,
-  SimpleAllocation,
 } from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {Payload} from '@statechannels/wire-format';
 
 import {defaultTestConfig} from '../../../config';
-import {LedgerProposal} from '../../../models/ledger-proposal';
 import {LedgerRequest, LedgerRequestStatus} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
@@ -116,17 +113,6 @@ export class TestLedgerChannel extends TestChannel {
           },
           tx
         )
-    );
-  }
-
-  public async insertProposal(
-    store: Store,
-    proposal: SimpleAllocation,
-    signingAddress: Address,
-    nonce: number
-  ): Promise<void> {
-    return store.transaction(tx =>
-      LedgerProposal.storeProposal({channelId: this.channelId, signingAddress, proposal, nonce}, tx)
     );
   }
 }
