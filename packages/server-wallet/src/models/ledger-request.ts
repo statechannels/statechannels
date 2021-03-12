@@ -85,7 +85,7 @@ export class LedgerRequest extends Model implements LedgerRequestType {
       .orWhere({ledgerChannelId, status: 'queued'});
   }
 
-  static async ledgersWithNewReqeustsIds(tx: TransactionOrKnex): Promise<string[]> {
+  static async ledgersWithNewRequestsIds(tx: TransactionOrKnex): Promise<string[]> {
     return (
       await LedgerRequest.query(tx).column('ledgerChannelId').whereNull('lastSeenAgreedState')
     ).map(lr => lr.ledgerChannelId);
