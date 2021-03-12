@@ -27,7 +27,6 @@ const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 const tablesUsingLedgerChannels = [
   'channels',
   'ledger_requests',
-  'ledger_proposals',
   'objectives_channels',
   'objectives',
 ];
