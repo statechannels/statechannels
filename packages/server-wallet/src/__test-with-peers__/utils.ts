@@ -7,7 +7,6 @@ import {MessageHandler, MessageServiceInterface} from '../message-service/types'
 import {Notice} from '../protocols/actions';
 import {MultipleChannelOutput, SingleChannelOutput} from '../wallet';
 
-// TODO: Is there a cleaner way of writing this?
 export async function expectLatestStateToMatch(
   channelId: string,
   wallet: Wallet,
