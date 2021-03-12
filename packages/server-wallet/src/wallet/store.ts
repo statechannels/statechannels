@@ -349,7 +349,7 @@ export class Store {
   }
 
   async getLedgersWithNewRequestsIds(tx?: Transaction): Promise<string[]> {
-    return LedgerRequest.ledgersWithNewReqeustsIds(tx || this.knex);
+    return LedgerRequest.ledgersWithNewRequestsIds(tx || this.knex);
   }
 
   async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
