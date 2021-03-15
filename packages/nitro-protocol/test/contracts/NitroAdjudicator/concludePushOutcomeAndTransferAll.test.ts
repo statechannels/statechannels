@@ -174,7 +174,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         ).wait(); // if the tx is mined, we know we the transfer succeeded
       }
       if ('ETH' in heldBefore) {
-        // Transfer some funds in to the ETHAssetHolder. Use zero channel address for ease.
+        // Transfer some funds in to the ETHAssetHolder.
         await (
           await EthAssetHolder1.deposit(channelId, '0x00', heldBefore.ETH.c, {
             value: heldBefore.ETH.c,
@@ -182,7 +182,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         ).wait();
       }
       if ('ETH2' in heldBefore) {
-        // Transfer some funds in to the other ETHAssetHolder. Use zero channel address for ease.
+        // Transfer some funds in to the other ETHAssetHolder.
         await (
           await EthAssetHolder2.deposit(channelId, '0x00', heldBefore.ETH2.c, {
             value: heldBefore.ETH2.c,
