@@ -27,7 +27,7 @@ function getCreateChannelsArgs(): CreateChannelParams {
   });
 }
 
-describe('EnsureObjectives', () => {
+describe('Ensure-Objectives', () => {
   const cases = [0, 0.1, 0.2, 0.3];
 
   test.each(cases)('creates a channel with a drop rate of %f ', async dropRate => {
