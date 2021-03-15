@@ -1,8 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, BigNumber} from 'ethers';
+import {Contract, Wallet, ethers, BigNumber, utils, constants} from 'ethers';
 
-import AssetHolderArtifact1 from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
-import AssetHolderArtifact2 from '../../../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
+import EthAssetHolderArtifact1 from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
+import EthAssetHolderArtifact2 from '../../../artifacts/contracts/test/TestEthAssetHolder2.sol/TestEthAssetHolder.json';
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
@@ -32,8 +32,8 @@ import {NITRO_MAX_GAS} from '../../../src/transactions';
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
-let AssetHolder1: Contract;
-let AssetHolder2: Contract;
+let EthAssetHolder1: Contract;
+let EthAssetHolder2: Contract;
 let ERC20AssetHolder: Contract;
 let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
@@ -83,15 +83,15 @@ beforeAll(async () => {
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  AssetHolder1 = await setupContracts(
+  EthAssetHolder1 = await setupContracts(
     provider,
-    AssetHolderArtifact1,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
+    EthAssetHolderArtifact1,
+    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
   );
-  AssetHolder2 = await setupContracts(
+  EthAssetHolder2 = await setupContracts(
     provider,
-    AssetHolderArtifact2,
-    process.env.TEST_ASSET_HOLDER2_ADDRESS
+    EthAssetHolderArtifact2,
+    process.env.TEST_ETH_ASSET_HOLDER2_ADDRESS
   );
   ERC20AssetHolder = await setupContracts(
     provider,
@@ -99,8 +99,8 @@ beforeAll(async () => {
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
   Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
-  addresses.ETH = AssetHolder1.address;
-  addresses.ETH2 = AssetHolder2.address;
+  addresses.ETH = EthAssetHolder1.address;
+  addresses.ETH2 = EthAssetHolder2.address;
   addresses.ERC20 = ERC20AssetHolder.address;
   appDefinition = getPlaceHolderContractAddress();
   // Preload At and Bt with TOK
@@ -173,6 +173,22 @@ describe('concludePushOutcomeAndTransferAll', () => {
           await Token.transfer(ERC20AssetHolder.address, BigNumber.from(heldBefore.ERC20.c))
         ).wait(); // if the tx is mined, we know we the transfer succeeded
       }
+      if ('ETH' in heldBefore) {
+        // Transfer some funds in to the ETHAssetHolder. Use zero channel address for ease.
+        await (
+          await EthAssetHolder1.deposit(channelId, '0x00', heldBefore.ETH.c, {
+            value: heldBefore.ETH.c,
+          })
+        ).wait();
+      }
+      if ('ETH2' in heldBefore) {
+        // Transfer some funds in to the other ETHAssetHolder. Use zero channel address for ease.
+        await (
+          await EthAssetHolder2.deposit(channelId, '0x00', heldBefore.ETH2.c, {
+            value: heldBefore.ETH2.c,
+          })
+        ).wait();
+      }
 
       // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, outcomeShortHand, newOutcome, heldAfter, payouts] = [
@@ -184,7 +200,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
-      resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2, ERC20AssetHolder]);
+      resetMultipleHoldings(heldBefore, [EthAssetHolder1, EthAssetHolder2, ERC20AssetHolder]);
 
       // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);
@@ -246,8 +262,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
         // Compile events from logs
         const events = compileEventsFromLogs(logs, [
-          AssetHolder1,
-          AssetHolder2,
+          EthAssetHolder1,
+          EthAssetHolder2,
           ERC20AssetHolder,
           NitroAdjudicator,
         ]);
@@ -280,12 +296,12 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expect(events).toMatchObject(expectedEvents);
 
         // Check new holdings on each AssetHolder
-        checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2, ERC20AssetHolder]);
+        checkMultipleHoldings(heldAfter, [EthAssetHolder1, EthAssetHolder2, ERC20AssetHolder]);
 
         // Check new assetOutcomeHash on each AssetHolder
         checkMultipleAssetOutcomeHashes(channelId, newOutcome, [
-          AssetHolder1,
-          AssetHolder2,
+          EthAssetHolder1,
+          EthAssetHolder2,
           ERC20AssetHolder,
         ]);
       }

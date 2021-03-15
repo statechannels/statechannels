@@ -2,13 +2,12 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 import '../ETHAssetHolder.sol';
-import './TESTAssetHolder.sol';
 
 /**
  * @dev This contract is a clone of the ETHAssetHolder contract. It will be initialized to point to the TestNitroAdjudicator.
  */
 contract TestEthAssetHolder is ETHAssetHolder {
-    uint256 public dummy; // this is simply to make the contract have distinct bytecode from the ETHAssetHolder (otherwise bytecode verification can fail)
+    uint256 public dummy2; // this is simply to make the contract have distinct bytecode from the ETHAssetHolder (otherwise bytecode verification can fail)
 
     /**
      * @dev Manually set the holdings mapping to a given amount for a given channelId.  Shortcuts the deposit workflow (ONLY USE IN A TESTING ENVIRONMENT)
