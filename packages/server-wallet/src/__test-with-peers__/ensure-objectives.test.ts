@@ -27,14 +27,17 @@ function getCreateChannelsArgs(): CreateChannelParams {
   });
 }
 
-describe('Ensure-Objectives', () => {
-  const cases = [0, 0.1, 0.2, 0.3];
+describe('EnsureObjectives', () => {
+  // This is the percentages of messages that get dropped
+  const cases = [0, 10, 30];
 
-  test.each(cases)('creates a channel with a drop rate of %f ', async dropRate => {
+  test.each(cases)('creates a channel with a drop rate of %f%% ', async messageDropPercentage => {
     const participantWallets = [
       {participantId: participantIdA, wallet: peerWallets.a},
       {participantId: participantIdB, wallet: peerWallets.b},
     ];
+    const dropRate = messageDropPercentage === 0 ? 0 : messageDropPercentage / 100;
+
     const messageService = await setupTestMessagingService(participantWallets, dropRate);
     const channelManager = new ChannelManager(peerWallets.a, messageService);
 
@@ -43,7 +46,7 @@ describe('Ensure-Objectives', () => {
       await peerWallets.b.joinChannel({channelId});
     });
 
-    await channelManager.createChannels(getCreateChannelsArgs(), 5);
+    await channelManager.createChannels(getCreateChannelsArgs(), 50);
   });
 
   // This is a nice sanity check to ensure that messages do get dropped
@@ -60,7 +63,7 @@ describe('Ensure-Objectives', () => {
       await peerWallets.b.joinChannel({channelId});
     });
 
-    await expect(channelManager.createChannels(getCreateChannelsArgs(), 5)).rejects.toThrow(
+    await expect(channelManager.createChannels(getCreateChannelsArgs(), 1)).rejects.toThrow(
       'Unable to ensure objectives'
     );
   });

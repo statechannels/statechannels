@@ -13,6 +13,14 @@ import {MessageHandler, MessageServiceInterface} from './types';
  */
 export class TestMessageService implements MessageServiceInterface {
   private _handleMessage: (message: Message) => Promise<void>;
+
+  /**
+   * Creates a test message service that can be used in tets
+   * @param incomingMessageHandler The message handler to use
+   * @param logger An optional logger for logging
+   * @param dropRate A number between 0 and 1 which controls how often messages are dropped. 1 means all messages are dropped and 0 means none.
+   * @returns
+   */
   protected constructor(
     handleMessage: MessageHandler,
     protected _dropRate: number,
@@ -34,8 +42,17 @@ export class TestMessageService implements MessageServiceInterface {
   }
 
   async send(messages: Message[]): Promise<void> {
-    if (Math.random() < this._dropRate) {
-      this._logger?.debug({messages}, 'Dropping messages');
+    const randomValue = Math.random();
+    const shouldDrop = randomValue > 1 - this._dropRate;
+    if (shouldDrop) {
+      this._logger?.trace(
+        {
+          messages,
+          dropRate: this._dropRate,
+          randomValue,
+        },
+        'Dropping messages'
+      );
       return;
     }
 
