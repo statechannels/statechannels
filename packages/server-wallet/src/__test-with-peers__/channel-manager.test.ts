@@ -1,6 +1,4 @@
-import {Allocation, CreateChannelParams} from '@statechannels/client-api-schema';
-import {makeAddress} from '@statechannels/wallet-core';
-import {BigNumber, ethers, constants} from 'ethers';
+import {CreateChannelParams} from '@statechannels/client-api-schema';
 
 import {
   getPeersSetup,
@@ -13,36 +11,24 @@ import {
 } from '../../jest/with-peers-setup-teardown';
 import {ChannelManager} from '../channel-manager';
 import {WalletObjective} from '../models/objective';
-import {ONE_DAY} from '../__test__/test-helpers';
+import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
 
 import {setupTestMessagingService} from './utils';
 
-jest.setTimeout(3000_000);
+jest.setTimeout(60_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
 
 function getCreateChannelsArgs(): CreateChannelParams {
-  const allocation: Allocation = {
-    allocationItems: [
-      {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
-      {destination: participantB.destination, amount: BigNumber.from(1).toHexString()},
-    ],
-    assetHolderAddress: makeAddress(constants.AddressZero), // must be even length
-  };
-
-  return {
+  return createChannelArgs({
     participants: [participantA, participantB],
-    allocations: [allocation],
-    appDefinition: ethers.constants.AddressZero,
-    appData: makeAddress(constants.AddressZero), // must be even length
     fundingStrategy: 'Fake',
-    challengeDuration: ONE_DAY,
-  };
+  });
 }
 
 describe('EnsureObjectives', () => {
-  const cases = [0, 0.1, 0.2, 0.5];
+  const cases = [0, 0.1, 0.2, 0.3];
 
   test.each(cases)('creates a channel with a drop rate of %f ', async dropRate => {
     const participantWallets = [
