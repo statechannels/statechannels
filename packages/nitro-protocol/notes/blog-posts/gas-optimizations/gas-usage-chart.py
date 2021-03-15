@@ -32,12 +32,12 @@ legacy["challengePath"] = legacy["forceMove"] + \
 
 optimized = {
     "revision": '990a3e9ca10c311b9cbd7057383696458e38fda',  # statechannels monorepo
-    "deployNitroAdjudicator": 3155589,
+    "deployNitroAdjudicator": 2425942,
     "deployAssetHolder": 1831942,
-    "deposit": 48776,
-    "concludePushOutcomeAndTransferAll": 107812,
-    "forceMove": 134004,
-    "respond": 86357,
+    "deposit": 48996,
+    "concludePushOutcomeAndTransferAll": 113797, 
+    "forceMove": 101881,
+    "respond": 56706,
 }
 
 optimized["deployment"] = optimized["deployNitroAdjudicator"] + \
