@@ -1,5 +1,5 @@
 import {GanacheServer, configureEnvVariables} from '@statechannels/devtools';
-import {deploy} from '../deployment/deploy';
+import {deploy} from '../deployment/deploy-test-contracts';
 
 export default async function setup() {
   configureEnvVariables();

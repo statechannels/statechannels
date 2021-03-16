@@ -1,8 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, BigNumber, utils, constants} from 'ethers';
 
-import EthAssetHolderArtifact1 from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
-import EthAssetHolderArtifact2 from '../../../artifacts/contracts/test/TestEthAssetHolder2.sol/TestEthAssetHolder.json';
+import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
@@ -23,7 +22,6 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  resetMultipleHoldings,
   setupContracts,
   writeGasConsumption,
 } from '../../test-helpers';
@@ -85,13 +83,13 @@ beforeAll(async () => {
   );
   EthAssetHolder1 = await setupContracts(
     provider,
-    EthAssetHolderArtifact1,
-    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+    ETHAssetHolderArtifact,
+    process.env.ETH_ASSET_HOLDER_ADDRESS
   );
   EthAssetHolder2 = await setupContracts(
     provider,
-    EthAssetHolderArtifact2,
-    process.env.TEST_ETH_ASSET_HOLDER2_ADDRESS
+    ETHAssetHolderArtifact,
+    process.env.ETH_ASSET_HOLDER2_ADDRESS
   );
   ERC20AssetHolder = await setupContracts(
     provider,
@@ -166,15 +164,13 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const largestTurnNum = turnNumRecord + 1;
       const initialFingerprint = ethers.constants.HashZero;
 
-      // Transfer some tokens into ERC20AssetHolder
+      // Transfer some tokens into the relevant AssetHolder
       // Do this step before transforming input data (easier)
       if ('ERC20' in heldBefore) {
-        await (
-          await Token.transfer(ERC20AssetHolder.address, BigNumber.from(heldBefore.ERC20.c))
-        ).wait(); // if the tx is mined, we know we the transfer succeeded
+        await (await Token.increaseAllowance(ERC20AssetHolder.address, heldBefore.ERC20.c)).wait();
+        await (await ERC20AssetHolder.deposit(channelId, '0x00', heldBefore.ERC20.c)).wait();
       }
       if ('ETH' in heldBefore) {
-        // Transfer some funds in to the ETHAssetHolder.
         await (
           await EthAssetHolder1.deposit(channelId, '0x00', heldBefore.ETH.c, {
             value: heldBefore.ETH.c,
@@ -182,7 +178,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
         ).wait();
       }
       if ('ETH2' in heldBefore) {
-        // Transfer some funds in to the other ETHAssetHolder.
         await (
           await EthAssetHolder2.deposit(channelId, '0x00', heldBefore.ETH2.c, {
             value: heldBefore.ETH2.c,
@@ -198,9 +193,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
         heldAfter,
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
-
-      // Set holdings on multiple asset holders
-      resetMultipleHoldings(heldBefore, [EthAssetHolder1, EthAssetHolder2, ERC20AssetHolder]);
 
       // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);

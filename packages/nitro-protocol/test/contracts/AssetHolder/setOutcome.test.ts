@@ -1,7 +1,7 @@
 import {Contract, Wallet, utils} from 'ethers';
 const {id, keccak256} = utils;
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
+import AssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
 
@@ -25,7 +25,7 @@ beforeAll(async () => {
   AssetHolder = await setupContracts(
     provider,
     AssetHolderArtifact,
-    process.env.TEST_ETH_ASSET_HOLDER_ADDRESS
+    process.env.ETH_ASSET_HOLDER_ADDRESS
   );
   const channel: Channel = {chainId, participants, channelNonce};
   channelId = getChannelId(channel);

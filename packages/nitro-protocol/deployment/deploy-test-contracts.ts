@@ -1,16 +1,16 @@
+// NOTE: this script manages deploying contracts for testing purposes ONLY
+// DO NOT USE THIS SCRIPT TO DEPLOY CONTRACTS TO PRODUCTION NETWORKS
 import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
 import {writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
-import ethAssetHolderArtifact from '../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
-import ethAssetHolder2Artifact from '../artifacts/contracts/test/TestEthAssetHolder2.sol/TestEthAssetHolder.json';
+import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import singleAssetPaymentsArtifact from '../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
 import hashLockedSwapArtifact from '../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
-import testAssetHolderArtifact1 from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
-import testAssetHolderArtifact2 from '../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
+import testAssetHolderArtifact from '../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
@@ -35,12 +35,12 @@ export async function deploy(): Promise<Record<string, string>> {
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(trivialAppArtifact as any);
   const TEST_FORCE_MOVE_ADDRESS = await deployer.deploy(testForceMoveArtifact as any);
   const TEST_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    testAssetHolderArtifact1 as any,
+    testAssetHolderArtifact as any,
     {},
     TEST_NITRO_ADJUDICATOR_ADDRESS
   );
   const TEST_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
-    testAssetHolderArtifact2 as any,
+    testAssetHolderArtifact as any,
     {},
     TEST_NITRO_ADJUDICATOR_ADDRESS
   );
@@ -52,13 +52,13 @@ export async function deploy(): Promise<Record<string, string>> {
     {},
     new Wallet(ETHERLIME_ACCOUNTS[0].privateKey).address
   );
-  const TEST_ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
+  const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     ethAssetHolderArtifact as any,
     {},
     TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  const TEST_ETH_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
-    ethAssetHolder2Artifact as any,
+  const ETH_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
+    ethAssetHolderArtifact as any,
     {},
     TEST_NITRO_ADJUDICATOR_ADDRESS
   );
@@ -77,8 +77,8 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_FORCE_MOVE_ADDRESS,
     TEST_NITRO_ADJUDICATOR_ADDRESS,
     TEST_TOKEN_ADDRESS,
-    TEST_ETH_ASSET_HOLDER_ADDRESS,
-    TEST_ETH_ASSET_HOLDER2_ADDRESS,
+    ETH_ASSET_HOLDER_ADDRESS,
+    ETH_ASSET_HOLDER2_ADDRESS,
     TEST_TOKEN_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER2_ADDRESS,
