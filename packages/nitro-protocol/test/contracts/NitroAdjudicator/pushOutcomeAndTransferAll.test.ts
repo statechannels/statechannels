@@ -1,8 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import AssetHolderArtifact1 from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
-import AssetHolderArtifact2 from '../../../artifacts/contracts/test/TESTAssetHolder2.sol/TESTAssetHolder2.json';
+import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
@@ -59,12 +58,12 @@ beforeAll(async () => {
   );
   AssetHolder1 = await setupContracts(
     provider,
-    AssetHolderArtifact1,
+    AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER_ADDRESS
   );
   AssetHolder2 = await setupContracts(
     provider,
-    AssetHolderArtifact2,
+    AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER2_ADDRESS
   );
   addresses.ETH = AssetHolder1.address;

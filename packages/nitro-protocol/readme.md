@@ -114,7 +114,9 @@ WARNING: This can be expensive. Each contract will take several million gas to d
 ```
 INFURA_TOKEN=[your token here] MAINNET_DEPLOYER_PK=[private key used for mainnet deploy] yarn contract:deploy-mainnet --gasprice [your-chosen-gasPrice-here]
 ```
+### To a local blockchain (for testing)
 
+Contract deployment is handled automatically by our test setup scripts. Note that a **different** set of contracts is deployed when testing. Those contracts expose some helper functions that should not exist on production contracts. 
 ## Verifying on etherscan
  This is a somewhat manual process, but easier than using the etherscan GUI. 
  
