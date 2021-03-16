@@ -36,6 +36,7 @@ describe('EnsureObjectives', () => {
       {participantId: participantIdA, wallet: peerWallets.a},
       {participantId: participantIdB, wallet: peerWallets.b},
     ];
+
     const dropRate = messageDropPercentage === 0 ? 0 : messageDropPercentage / 100;
 
     const messageService = await setupTestMessagingService(participantWallets, dropRate);
@@ -55,6 +56,7 @@ describe('EnsureObjectives', () => {
       {participantId: participantIdA, wallet: peerWallets.a},
       {participantId: participantIdB, wallet: peerWallets.b},
     ];
+
     const messageService = await setupTestMessagingService(participantWallets, 1);
     // We use a short backoff to avoid burning times in the tests
     const channelManager = await ChannelManager.create(peerWallets.a, messageService, [1]);
