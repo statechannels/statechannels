@@ -10,10 +10,12 @@ import {
   peerWallets,
 } from '../../jest/with-peers-setup-teardown';
 import {ChannelManager} from '../channel-manager';
+import {
+  createTestMessageHandler,
+  TestMessageService,
+} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
-
-import {setupTestMessagingService} from './utils';
 
 jest.setTimeout(30_000);
 
@@ -39,7 +41,11 @@ describe('EnsureObjectives', () => {
 
     const dropRate = messageDropPercentage === 0 ? 0 : messageDropPercentage / 100;
 
-    const messageService = await setupTestMessagingService(participantWallets, dropRate);
+    const messageService = await TestMessageService.create(
+      createTestMessageHandler(participantWallets),
+      peerWallets.a.logger,
+      dropRate
+    );
     const channelManager = await ChannelManager.create(peerWallets.a, messageService);
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
@@ -57,7 +63,11 @@ describe('EnsureObjectives', () => {
       {participantId: participantIdB, wallet: peerWallets.b},
     ];
 
-    const messageService = await setupTestMessagingService(participantWallets, 1);
+    const messageService = await TestMessageService.create(
+      createTestMessageHandler(participantWallets),
+      peerWallets.a.logger,
+      1
+    );
     // We use a short backoff to avoid burning times in the tests
     const channelManager = await ChannelManager.create(peerWallets.a, messageService, [1]);
 

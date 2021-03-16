@@ -1,9 +1,9 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
 
 import {MessageServiceInterface} from './message-service/types';
+import {getMessages} from './message-service/utils';
 import {WalletObjective} from './models/objective';
 import {Wallet} from './wallet';
-import {getMessages} from './__test-with-peers__/utils';
 
 export const delay = async (ms = 10): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
