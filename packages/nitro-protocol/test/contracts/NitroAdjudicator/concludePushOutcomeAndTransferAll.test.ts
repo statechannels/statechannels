@@ -164,7 +164,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const largestTurnNum = turnNumRecord + 1;
       const initialFingerprint = ethers.constants.HashZero;
 
-      // Transfer some tokens into the relevant AssetHoldera
+      // Transfer some tokens into the relevant AssetHolder
       // Do this step before transforming input data (easier)
       if ('ERC20' in heldBefore) {
         await (await Token.increaseAllowance(ERC20AssetHolder.address, heldBefore.ERC20.c)).wait();
