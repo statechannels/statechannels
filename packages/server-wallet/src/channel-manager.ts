@@ -8,10 +8,32 @@ import {getMessages} from './__test-with-peers__/utils';
 export const delay = async (ms = 10): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-const BACKOFF_INTERVALS = [1_000, 2_000, 4_000, 8_000, 16_000];
+/**
+ * These are the default backoff intervals used.
+ * It uses a simple exponential strategy.
+ */
+export const DEFAULT_BACKOFF_INTERVALS = [1_000, 2_000, 4_000, 8_000, 16_000];
 
 export class ChannelManager {
-  constructor(private _wallet: Wallet, private _messageService: MessageServiceInterface) {}
+  /**
+   * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
+   * @param wallet The wallet to use.
+   * @param messageService  The message service to use.
+   * @param backOffIntervals At what intervals ensureObjective should retry sending messages to complete an objective.
+   * @returns A channel manager.
+   */
+  public static async create(
+    wallet: Wallet,
+    messageService: MessageServiceInterface,
+    backOffIntervals = DEFAULT_BACKOFF_INTERVALS
+  ): Promise<ChannelManager> {
+    return new ChannelManager(wallet, messageService, backOffIntervals);
+  }
+  private constructor(
+    private _wallet: Wallet,
+    private _messageService: MessageServiceInterface,
+    private _backoffIntervals: number[]
+  ) {}
 
   /**
    * TODO: This is a basic implementation of createChannels.
@@ -54,7 +76,7 @@ export class ChannelManager {
 
     wallet.on('objectiveSucceeded', onObjectiveSucceeded);
 
-    for (const retryTimeoutMs of BACKOFF_INTERVALS) {
+    for (const retryTimeoutMs of this._backoffIntervals) {
       if (remaining.size === 0) return;
 
       await delay(retryTimeoutMs);

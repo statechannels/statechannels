@@ -15,7 +15,7 @@ import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
 
 import {setupTestMessagingService} from './utils';
 
-jest.setTimeout(60_000);
+jest.setTimeout(30_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
@@ -39,7 +39,7 @@ describe('EnsureObjectives', () => {
     const dropRate = messageDropPercentage === 0 ? 0 : messageDropPercentage / 100;
 
     const messageService = await setupTestMessagingService(participantWallets, dropRate);
-    const channelManager = new ChannelManager(peerWallets.a, messageService);
+    const channelManager = await ChannelManager.create(peerWallets.a, messageService);
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
       const {targetChannelId: channelId} = o.data;
@@ -56,7 +56,8 @@ describe('EnsureObjectives', () => {
       {participantId: participantIdB, wallet: peerWallets.b},
     ];
     const messageService = await setupTestMessagingService(participantWallets, 1);
-    const channelManager = new ChannelManager(peerWallets.a, messageService);
+    // We use a short backoff to avoid burning times in the tests
+    const channelManager = await ChannelManager.create(peerWallets.a, messageService, [1]);
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
       const {targetChannelId: channelId} = o.data;
