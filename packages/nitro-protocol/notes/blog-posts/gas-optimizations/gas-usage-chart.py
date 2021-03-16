@@ -6,9 +6,9 @@ import os
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 
-usd_per_eth = 142
+usd_per_eth = 1783
 eth_per_gwei = 1e-9
-gwei_per_gas = 2
+gwei_per_gas = 138
 
 usd_per_1M_gas = usd_per_eth * eth_per_gwei * gwei_per_gas * 1e6
 print(usd_per_1M_gas)
@@ -32,12 +32,12 @@ legacy["challengePath"] = legacy["forceMove"] + \
 
 optimized = {
     "revision": '990a3e9ca10c311b9cbd7057383696458e38fda',  # statechannels monorepo
-    "deployNitroAdjudicator": 3155589,
+    "deployNitroAdjudicator": 2425942,
     "deployAssetHolder": 1831942,
-    "deposit": 48776,
-    "concludePushOutcomeAndTransferAll": 107812,
-    "forceMove": 134004,
-    "respond": 86357,
+    "deposit": 48996,
+    "concludePushOutcomeAndTransferAll": 113797, 
+    "forceMove": 101881,
+    "respond": 56706,
 }
 
 optimized["deployment"] = optimized["deployNitroAdjudicator"] + \

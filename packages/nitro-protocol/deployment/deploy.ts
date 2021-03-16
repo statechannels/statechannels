@@ -5,6 +5,7 @@ import {writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/test/TestEthAssetHolder.sol/TestEthAssetHolder.json';
+import ethAssetHolder2Artifact from '../artifacts/contracts/test/TestEthAssetHolder2.sol/TestEthAssetHolder.json';
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import singleAssetPaymentsArtifact from '../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
 import hashLockedSwapArtifact from '../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
@@ -56,6 +57,11 @@ export async function deploy(): Promise<Record<string, string>> {
     {},
     TEST_NITRO_ADJUDICATOR_ADDRESS
   );
+  const TEST_ETH_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
+    ethAssetHolder2Artifact as any,
+    {},
+    TEST_NITRO_ADJUDICATOR_ADDRESS
+  );
   const TEST_TOKEN_ASSET_HOLDER_ADDRESS = await deployer.deploy(
     erc20AssetHolderArtifact as any,
     {},
@@ -72,6 +78,7 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_NITRO_ADJUDICATOR_ADDRESS,
     TEST_TOKEN_ADDRESS,
     TEST_ETH_ASSET_HOLDER_ADDRESS,
+    TEST_ETH_ASSET_HOLDER2_ADDRESS,
     TEST_TOKEN_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER2_ADDRESS,
