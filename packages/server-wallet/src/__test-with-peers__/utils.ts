@@ -43,13 +43,13 @@ export function setupTestMessagingService(
   if (!hasUniqueWallets) {
     throw new Error('Duplicate wallets');
   }
-  const messageHandler: MessageHandler = async (to, message, me) => {
-    const matching = wallets.find(w => w.participantId === to);
+  const messageHandler: MessageHandler = async (message, me) => {
+    const matching = wallets.find(w => w.participantId === message.recipient);
 
     if (!matching) {
-      throw new Error(`Invalid to value ${to}`);
+      throw new Error(`Invalid to value ${message.recipient}`);
     }
-    const result = await matching.wallet.pushMessage(message);
+    const result = await matching.wallet.pushMessage(message.data);
 
     await me.send(result.outbox.map(o => o.params));
   };

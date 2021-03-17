@@ -5,9 +5,7 @@ import {Message} from '@statechannels/client-api-schema';
  * The handler is responsible for pushing the message into the appropriate wallet
  */
 export type MessageHandler = (
-  // Including the to makes it easier for a messaging service to handle multiple wallets if it chooses to do so
-  to: string,
-  message: unknown,
+  message: Message,
   messageService: MessageServiceInterface
 ) => Promise<void>;
 

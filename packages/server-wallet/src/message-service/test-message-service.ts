@@ -15,7 +15,7 @@ export class TestMessageService implements MessageServiceInterface {
 
   async send(messages: Message[]): Promise<void> {
     for (const message of messages) {
-      await this._receive(message.recipient, message.data, this);
+      await this._receive(message, this);
     }
   }
 
