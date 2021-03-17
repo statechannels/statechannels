@@ -11,7 +11,13 @@ import {MessageHandler, MessageServiceInterface} from './types';
  * The message service is responsible for calling pushMessage on the appropriate wallets.
  */
 export class TestMessageService implements MessageServiceInterface {
-  protected constructor(private _handleMessage: MessageHandler) {}
+  private _handleMessage: (message: Message) => Promise<void>;
+  protected constructor(handleMessage: MessageHandler) {
+    // We always pass a reference to the messageService when calling handleMessage
+    // This allows the MessageHandler function to easily call messageHandler.send
+    // We just bind that here for convenience.
+    this._handleMessage = async message => handleMessage(message, this);
+  }
 
   static async createTestMessageService(
     incomingMessageHandler: MessageHandler
@@ -22,7 +28,7 @@ export class TestMessageService implements MessageServiceInterface {
 
   async send(messages: Message[]): Promise<void> {
     for (const message of messages) {
-      await this._handleMessage(message, this);
+      await this._handleMessage(message);
     }
   }
 
