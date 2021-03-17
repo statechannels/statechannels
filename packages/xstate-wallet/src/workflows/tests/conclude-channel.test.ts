@@ -105,7 +105,7 @@ const createLedgerChannels = async () => {
   await Promise.all(
     services.map(
       service =>
-        new Promise(resolve =>
+        new Promise<void>(resolve =>
           service.onTransition(state => state.matches('success') && service.stop() && resolve())
         )
     )
@@ -113,7 +113,7 @@ const createLedgerChannels = async () => {
 };
 
 const resolveOnTransition = (service, passCond, rejectString?: string) =>
-  new Promise((resolve, reject) => {
+  new Promise<void>((resolve, reject) => {
     setTimeout(() => reject(rejectString), 5_000);
     service.onTransition(state => passCond(state) && service.stop() && resolve());
   });

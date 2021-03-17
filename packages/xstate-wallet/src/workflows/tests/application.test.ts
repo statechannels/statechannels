@@ -43,7 +43,7 @@ describe('Channel setup, CREATE_CHANNEL role', () => {
       Application.workflow(store, messagingService, context).withConfig({
         services: {
           invokeCreateChannelAndFundProtocol: () =>
-            new Promise(r => spy('Channel was funded') && r())
+            new Promise<void>(r => spy('Channel was funded') && r())
         }
       })
     );
@@ -103,9 +103,9 @@ describe('Channel setup, JOIN_CHANNEL role', () => {
         actions: {sendJoinChannelResponse: spy, sendUpdateChannelResponse: spy},
         services: {
           invokeCreateChannelAndFundProtocol: () =>
-            new Promise(resolve => spy(expectations.channelFunded) && resolve()),
+            new Promise<void>(resolve => spy(expectations.channelFunded) && resolve()),
           setapplicationDomain: () =>
-            new Promise(resolve => spy(expectations.domainSet) && resolve())
+            new Promise<void>(resolve => spy(expectations.domainSet) && resolve())
         }
       })
     );

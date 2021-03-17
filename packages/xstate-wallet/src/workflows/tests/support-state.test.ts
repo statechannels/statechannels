@@ -78,7 +78,7 @@ const runUntilSuccess = async (machine, stores: Array<TestStore>) => {
   await Promise.all(
     services.map(
       service =>
-        new Promise(resolve =>
+        new Promise<void>(resolve =>
           service.onTransition(state => state.matches('success') && service.stop() && resolve())
         )
     )

@@ -73,7 +73,7 @@ describe('getAddress', () => {
 describe('channelUpdatedFeed', () => {
   test('it fires when a state with the correct channel id is received', async () => {
     const store = await aStore();
-    return new Promise(resolve => {
+    return new Promise<void>(resolve => {
       store.channelUpdatedFeed(channelId).subscribe(x => {
         expect(x.latest).toMatchObject(state);
         resolve();
