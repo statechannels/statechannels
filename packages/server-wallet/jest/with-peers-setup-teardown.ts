@@ -8,7 +8,8 @@ import {
   seedBobsSigningWallet,
 } from '../src/db/seeds/1_signing_wallet_seeds';
 import {MessageServiceInterface} from '../src/message-service/types';
-import {setupTestMessagingService} from '../src/__test-with-peers__/utils';
+import { createTestMessageHandler, TestMessageService } from '../src/message-service/test-message-service';
+
 
 interface TestPeerWallets {
   a: Wallet;
@@ -56,10 +57,13 @@ export async function crashAndRestart(
     peerWallets.b = await Wallet.create(bWalletConfig);
   }
   
-  messageService = await setupTestMessagingService([
+  const handler = await createTestMessageHandler([
     {participantId: participantIdA, wallet: peerWallets.a},
     {participantId: participantIdB, wallet: peerWallets.b},
   ]);
+
+  messageService =await  TestMessageService.createTestMessageService(handler);
+
 }
 
 export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
@@ -106,7 +110,9 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
       {participantId: participantIdB, wallet: peerWallets.b},
     ];
 
-    messageService = await setupTestMessagingService(participantWallets);
+     
+  const handler =  createTestMessageHandler(participantWallets);
+  messageService =await  TestMessageService.createTestMessageService(handler);
   };
 }
 
