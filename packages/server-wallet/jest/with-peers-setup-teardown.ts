@@ -62,7 +62,7 @@ export async function crashAndRestart(
     {participantId: participantIdB, wallet: peerWallets.b},
   ]);
 
-  messageService =await  TestMessageService.createTestMessageService(handler);
+  messageService =await  TestMessageService.create(handler);
 
 }
 
@@ -112,7 +112,7 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 
      
   const handler =  createTestMessageHandler(participantWallets);
-  messageService =await  TestMessageService.createTestMessageService(handler);
+  messageService =await  TestMessageService.create(handler);
   };
 }
 
