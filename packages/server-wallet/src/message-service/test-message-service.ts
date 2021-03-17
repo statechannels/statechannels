@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {MessageHandler, MessageServiceInterface} from './types';
 
 export class TestMessageService implements MessageServiceInterface {
-  protected constructor(private _receive: MessageHandler) {}
+  protected constructor(private _handleMessage: MessageHandler) {}
 
   static async createTestMessageService(
     incomingMessageHandler: MessageHandler
@@ -15,12 +15,12 @@ export class TestMessageService implements MessageServiceInterface {
 
   async send(messages: Message[]): Promise<void> {
     for (const message of messages) {
-      await this._receive(message, this);
+      await this._handleMessage(message, this);
     }
   }
 
   async destroy(): Promise<void> {
     // This prevents any more progress from being made
-    this._receive = async () => _.noop();
+    this._handleMessage = async () => _.noop();
   }
 }
