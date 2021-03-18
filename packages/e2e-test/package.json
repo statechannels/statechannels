@@ -12,5 +12,6 @@
   },
   "scripts": {
     "test": "yarn jest -c ./jest/jest.config.js --runInBand"
-  }
+  },
+  "devDependencies": {}
 }

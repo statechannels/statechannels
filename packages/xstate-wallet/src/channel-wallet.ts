@@ -1,5 +1,5 @@
-import ReactDOM from 'react-dom';
-import React from 'react';
+// import ReactDOM from 'react-dom';
+//import React from 'react';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {
@@ -19,7 +19,7 @@ import {AppRequestEvent} from './event-types';
 import {Store} from './store';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
-import {Wallet as WalletUi} from './ui/wallet';
+//import {Wallet as WalletUi} from './ui/wallet';
 import {MessagingServiceInterface, supportedFundingStrategyOrThrow} from './messaging';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
@@ -180,10 +180,10 @@ export class ChannelWallet {
 
   private renderUI(machine) {
     if (document.getElementById('root')) {
-      ReactDOM.render(
-        React.createElement(WalletUi, {workflow: machine}),
-        document.getElementById('root')
-      );
+      // ReactDOM.render(
+      //   React.createElement(WalletUi, {workflow: machine}),
+      //   document.getElementById('root')
+      // );
     }
   }
 

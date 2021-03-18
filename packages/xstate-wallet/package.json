@@ -152,13 +152,14 @@
     "node": ">=12.16.0"
   },
   "license": "MIT",
-  "main": "index.js",
+  "main": "lib/src/main.js",
   "scripts": {
     "build-storybook": "build-storybook --quiet",
     "build:netlify:production": "yarn prepare && cp _redirects build/_redirects",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts --cache",
     "lint:write": "eslint . --ext .ts --fix",
+    "prepare": "yarn node scripts/build.js",
     "release:netlify:production": "netlify deploy --site $XSTATE_WALLET_NETLIFY_ID --dir=build",
     "start": "yarn node scripts/start.js",
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",

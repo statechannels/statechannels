@@ -5,6 +5,7 @@ import {
   SingleThreadedWallet
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {FakeChain, Player} from '@statechannels/xstate-wallet';
 
 const baseConfig = defaultTestConfig({
   networkConfiguration: {
@@ -29,5 +30,11 @@ beforeAll(async () => {
 
 it('e2e test', async () => {
   await SingleThreadedWallet.create(serverConfig);
+  const fakeChain = new FakeChain();
+  const playerA = await Player.createPlayer(
+    '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
+    'PlayerA',
+    fakeChain
+  );
   expect(1).toEqual(1);
 });

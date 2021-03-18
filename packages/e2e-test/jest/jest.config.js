@@ -5,7 +5,7 @@ module.exports = {
   rootDir: root,
   collectCoverageFrom: ['src/**/*.{js,ts}'],
   testMatch: ['<rootDir>/**/__test__/**/?(*.)(spec|test).ts'],
-  testEnvironment: 'node',
+  testEnvironment: 'jsdom',
   testURL: 'http://localhost',
   transform: {'^.+\\.ts$': 'ts-jest'},
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|ts)$'],
