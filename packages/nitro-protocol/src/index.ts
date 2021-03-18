@@ -35,7 +35,7 @@ export const ContractArtifacts = {
   NitroAdjudicatorArtifact: minimize(FULLNitroAdjudicatorArtifact),
   Erc20AssetHolderArtifact: minimize(FULLErc20AssetHolderArtifact),
   EthAssetHolderArtifact: minimize(FULLEthAssetHolderArtifact),
-  HashLockedSwap: minimize(FULLHashLockedSwapArtifact),
+  HashLockedSwapArtifact: minimize(FULLHashLockedSwapArtifact),
 };
 
 /*
