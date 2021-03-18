@@ -1,0 +1,24 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "lib": ["ES2019", "dom"],
+    "target": "es2019",
+    "module": "commonjs",
+    "outDir": "lib",
+    "esModuleInterop": true,
+    "noImplicitAny": true,
+    "allowJs": true, // We want to include loader.js to load worker threads
+    "removeComments": false
+  },
+  "references": [
+    {
+      "path": "../server-wallet"
+    },
+    {
+      "path": "../xstate-wallet"
+    }
+  ],
+  "include": ["src", "jest"],
+  "exclude": ["**/node_modules", "**/.*/"]
+}
