@@ -1,3 +1,5 @@
+import {TextDecoder} from 'util';
+
 import {createValidTransitionTransaction, State as NitroState} from '@statechannels/nitro-protocol';
 import * as PureEVM from '@connext/pure-evm-wasm';
 import {BigNumber, utils} from 'ethers';
