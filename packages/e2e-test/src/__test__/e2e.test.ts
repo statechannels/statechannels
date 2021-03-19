@@ -5,9 +5,15 @@ import {
   SingleThreadedWallet
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {FakeChain, Player} from '@statechannels/xstate-wallet';
+import {ClientWallet} from '@statechannels/xstate-wallet';
 import {constants} from 'ethers';
-import {BN, makeDestination} from '@statechannels/wallet-core';
+import {
+  BN,
+  deserializeObjective,
+  deserializeState,
+  makeDestination,
+  validatePayload
+} from '@statechannels/wallet-core';
 
 const baseConfig = defaultTestConfig({
   networkConfiguration: {
@@ -32,20 +38,14 @@ beforeAll(async () => {
 
 it('e2e test', async () => {
   const serverWallet = await SingleThreadedWallet.create(serverConfig);
-  const fakeChain = new FakeChain();
-  const xstateWallet = await Player.createPlayer(
-    '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',
-    'PlayerA',
-    fakeChain
-  );
+  const xstateWallet = await ClientWallet.create();
 
   const serverAddress = await serverWallet.getSigningAddress();
   const serverDestination = makeDestination(serverAddress);
-  const xstateDestination = makeDestination(xstateWallet.destination);
+  const xstateDestination = makeDestination(await xstateWallet.store.getAddress());
 
   const {
-    outbox: [{params}],
-    channelResults: [{channelId}]
+    outbox: [{params}]
   } = await serverWallet.createChannel({
     appData: '0x',
     appDefinition: constants.AddressZero,
@@ -68,23 +68,21 @@ it('e2e test', async () => {
         assetHolderAddress: constants.AddressZero,
         allocationItems: [
           {
-            amount: BN.from(0),
+            amount: BN.from(3),
             destination: serverDestination
           },
-          {amount: BN.from(0), destination: xstateDestination}
+          {amount: BN.from(5), destination: xstateDestination}
         ]
       }
     ]
   });
 
-  expect(1).toEqual(1);
-});
-
-function generatePushMessage(messageParams): PushMessageRequest {
-  return {
-    jsonrpc: '2.0',
-    id: 111111111,
-    method: 'PushMessage',
-    params: messageParams
+  const wirePayload = validatePayload(params.data);
+  const payload = {
+    objectives: wirePayload.objectives?.map(deserializeObjective) || [],
+    signedStates: wirePayload.signedStates?.map(deserializeState) || []
   };
-}
+
+  const response = await xstateWallet.incomingMessage(payload);
+  expect(response).toBeDefined();
+});
