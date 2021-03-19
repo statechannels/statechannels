@@ -95,7 +95,8 @@ export class ClientWallet {
           _.pick(latestState, 'outcome', 'turnNum', 'appData', 'isFinal'),
           pk
         );
-        response.signedStates = [newState];
+
+        response.signedStates = [{..._.omit(newState, 'stateHash')}];
       }
     }
     return response;

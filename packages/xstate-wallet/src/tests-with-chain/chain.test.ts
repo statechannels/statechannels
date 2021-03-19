@@ -6,7 +6,8 @@ import {
   createSignatureEntry,
   SignedState,
   State,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
@@ -93,7 +94,7 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
-    appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
+    appDefinition: makeAddress(TRIVIAL_APP_ADDRESS), // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
 
@@ -138,7 +139,7 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 1,
-    appDefinition: TRIVIAL_APP_ADDRESS, // TODO point at a deployed contract
+    appDefinition: makeAddress(TRIVIAL_APP_ADDRESS), // TODO point at a deployed contract
     participants: [playerA.participant, playerB.participant]
   };
   const state5signature = createSignatureEntry(state5, playerA.privateKey);
@@ -151,7 +152,7 @@ it('correctly crafts a forceMove transaction (2x single-signed states)', async (
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 1,
-    appDefinition: TRIVIAL_APP_ADDRESS,
+    appDefinition: makeAddress(TRIVIAL_APP_ADDRESS),
     participants: [playerA.participant, playerB.participant]
   };
 

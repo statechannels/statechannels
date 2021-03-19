@@ -1,17 +1,24 @@
 export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
-
 import React from 'react';
-import {DomainBudget, Participant, ethBudget, BN, Zero} from '@statechannels/wallet-core';
+import {
+  DomainBudget,
+  Participant,
+  ethBudget,
+  BN,
+  Zero,
+  makeAddress
+} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 
 import {logger} from '../../logger';
 import {Store} from '../../store';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
-import {renderComponentInFrontOfApp} from './helpers';
 import {machine as approveBudgetAndFundWorkflow} from '../../workflows/approve-budget-and-fund';
+
+import {renderComponentInFrontOfApp} from './helpers';
 
 const store = new Store();
 
@@ -25,13 +32,13 @@ const budget: DomainBudget = ethBudget('web3torrent.statechannels.org', {
 
 const alice: Participant = {
   participantId: 'a',
-  signingAddress: '0xa',
+  signingAddress: makeAddress('0xa'),
   destination: '0xad' as any
 };
 
 const hub: Participant = {
   participantId: 'b',
-  signingAddress: '0xb',
+  signingAddress: makeAddress('0xb'),
   destination: '0xbd' as any
 };
 

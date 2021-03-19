@@ -4,7 +4,8 @@ import {
   DomainBudget,
   simpleEthAllocation,
   makeDestination,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 import {ethers, BigNumberish} from 'ethers';
 
@@ -23,14 +24,14 @@ export const wallet3 = new ethers.Wallet(
 ); // 0xaaaa84838319627Fa056fC3FC29ab94d479B8502
 
 export const first: Participant = {
-  signingAddress: wallet1.address,
+  signingAddress: makeAddress(wallet1.address),
   destination: makeDestination(
     '0xaaaa000000000000000000000000000000000000000000000000000000000001'
   ),
   participantId: 'playerA'
 };
 export const second: Participant = {
-  signingAddress: wallet2.address,
+  signingAddress: makeAddress(wallet2.address),
   destination: makeDestination(
     '0xbbbb000000000000000000000000000000000000000000000000000000000002'
   ),
@@ -42,7 +43,7 @@ export const threeParticipants: [Participant, Participant, Participant] = [first
 
 export const appState = (turnNum: number, isFinal = false): State => ({
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  appDefinition: '0x0000000000000000000000000000000000000000',
+  appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
   isFinal,
   turnNum,
   outcome: simpleEthAllocation([
@@ -73,7 +74,7 @@ export const ledgerState = (
   isFinal: false,
   challengeDuration: CHALLENGE_DURATION,
   appData: '0x0000000000000000000000000000000000000000000000000000000000000000',
-  appDefinition: '0x0000000000000000000000000000000000000000'
+  appDefinition: makeAddress('0x0000000000000000000000000000000000000000')
 });
 
 export const TEST_APP_DOMAIN = 'localhost';

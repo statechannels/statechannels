@@ -7,7 +7,8 @@ import {
   ChannelConstants,
   Outcome,
   State,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 
 import {Store} from '../../store';
@@ -45,7 +46,7 @@ const targetChannel: ChannelConstants = {
   chainId,
   challengeDuration,
   participants,
-  appDefinition
+  appDefinition: makeAddress(appDefinition)
 };
 const targetChannelId = calculateChannelId(targetChannel);
 
@@ -59,7 +60,7 @@ const depositAmount = ledgerAmounts.reduce(add);
 
 const allocation: Outcome = {
   type: 'SimpleAllocation',
-  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+  assetHolderAddress: makeAddress(ETH_ASSET_HOLDER_ADDRESS),
   allocationItems: [0, 1].map(i => ({
     destination: destinations[i],
     amount: amounts[i]

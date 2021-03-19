@@ -28,11 +28,11 @@ import {
   isSimpleEthAllocation,
   makeDestination,
   serializeDomainBudget,
-  serializeChannelEntry,
   deserializeMessage,
   serializeMessage,
   deserializeAllocations,
-  deserializeBudgetRequest
+  deserializeBudgetRequest,
+  makeAddress
 } from '@statechannels/wallet-core';
 
 import {AppRequestEvent} from './event-types';
@@ -202,14 +202,17 @@ export class MessagingService implements MessagingServiceInterface {
         }
         break;
       case 'GetChannels':
-        const channelEntries = await this.store.getApplicationChannels(
-          fromDomain,
-          request.params.includeClosed
-        );
-        const serializedChannelEntries = await Promise.all(
-          channelEntries.map(serializeChannelEntry)
-        );
-        await this.sendResponse(requestId, serializedChannelEntries);
+        // TODO: comment back in
+
+        // const channelEntries = await this.store.getApplicationChannels(
+        //   fromDomain,
+        //   request.params.includeClosed
+        // );
+
+        // const serializedChannelEntries = await Promise.all(
+        //   channelEntries.map(serializeChannelEntry)
+        // );
+        // await this.sendResponse(requestId, serializedChannelEntries);
 
         break;
       case 'ChallengeChannel':
@@ -245,14 +248,19 @@ export class MessagingService implements MessagingServiceInterface {
   }
 }
 
-export function convertToInternalParticipant(participant: {
+export function convertToInternalParticipant({
+  destination,
+  signingAddress,
+  participantId
+}: {
   destination: string;
   signingAddress: string;
   participantId: string;
 }): Participant {
   return {
-    ...participant,
-    destination: makeDestination(participant.destination)
+    participantId,
+    signingAddress: makeAddress(signingAddress),
+    destination: makeDestination(destination)
   };
 }
 

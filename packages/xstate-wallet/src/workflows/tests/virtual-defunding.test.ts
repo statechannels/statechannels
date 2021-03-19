@@ -11,7 +11,8 @@ import {
   simpleEthAllocation,
   simpleEthGuarantee,
   makeDestination,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 import {constants as ethersConstants} from 'ethers';
 
@@ -36,7 +37,7 @@ const {add} = BN;
 const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = ethersConstants.AddressZero;
+const appDefinition = makeAddress(ethersConstants.AddressZero);
 const alice = participants[ParticipantIdx.A];
 const bob = participants[ParticipantIdx.B];
 const hub = participants[ParticipantIdx.Hub];

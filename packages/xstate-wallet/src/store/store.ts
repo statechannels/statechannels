@@ -20,7 +20,8 @@ import {
   SimpleAllocation,
   Funding,
   BN,
-  Uint256
+  Uint256,
+  makeAddress
 } from '@statechannels/wallet-core';
 
 import {Chain, FakeChain} from '../chain';
@@ -258,7 +259,7 @@ export class Store {
               challengeDuration,
               channelNonce,
               participants,
-              appDefinition,
+              appDefinition: makeAddress(appDefinition),
               ...stateVars
             },
             applicationDomain
@@ -383,12 +384,13 @@ export class Store {
     const objectives = this.objectives;
     if (!_.find(objectives, o => _.isEqual(o, objective))) {
       this.objectives.push(objective);
-      addToOutbox &&
-        this._eventEmitter.emit('addToOutbox', {
-          walletVersion: WALLET_VERSION,
-          objectives: [objective]
-        });
-      this._eventEmitter.emit('newObjective', objective);
+      // TODO: comment back in
+      // addToOutbox &&
+      // this._eventEmitter.emit('addToOutbox', {
+      //   walletVersion: WALLET_VERSION,
+      //   objectives: [objective]
+      // });
+      // this._eventEmitter.emit('newObjective', objective);
     }
   }
 

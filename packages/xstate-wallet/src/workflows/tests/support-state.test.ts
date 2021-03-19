@@ -7,7 +7,8 @@ import {
   Outcome,
   State,
   SignedState,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 import {constants} from 'ethers';
 
@@ -25,7 +26,7 @@ jest.setTimeout(5000);
 
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = constants.AddressZero;
+const appDefinition = makeAddress(constants.AddressZero);
 
 const targetChannel: ChannelConstants = {
   channelNonce: 0,

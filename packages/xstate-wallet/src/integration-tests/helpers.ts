@@ -4,7 +4,8 @@ import {
   SignatureEntry,
   SignedState,
   signState,
-  makeDestination
+  makeDestination,
+  makeAddress
 } from '@statechannels/wallet-core';
 import {
   isStateChannelsNotification,
@@ -102,7 +103,7 @@ export class Player {
     return {
       participantId: this.signingAddress,
       destination: this.destination,
-      signingAddress: this.signingAddress
+      signingAddress: makeAddress(this.signingAddress)
     };
   }
   get participantId(): string {
@@ -112,7 +113,7 @@ export class Player {
   signState(state: SignedState): SignedState {
     const mySignature: SignatureEntry = {
       signature: signState(state, this.privateKey),
-      signer: this.signingAddress
+      signer: makeAddress(this.signingAddress)
     };
 
     return {...state, signatures: _.unionBy(state.signatures, [mySignature], sig => sig.signature)};
@@ -183,7 +184,7 @@ export function generatePlayerUpdate(
       appData: '0x00',
       allocations: [
         {
-          token: utils.hexZeroPad('0x00', 32),
+          assetHolderAddress: utils.hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
@@ -216,7 +217,7 @@ export function generateCreateChannelRequest(
       participants: [playerA, playerB],
       allocations: [
         {
-          token: utils.hexZeroPad('0x00', 32),
+          assetHolderAddress: utils.hexZeroPad('0x00', 32),
           allocationItems: [
             {
               destination: playerA.destination,
@@ -231,7 +232,8 @@ export function generateCreateChannelRequest(
       ],
       appDefinition: '0x430869383d611bBB1ce7Ca207024E7901bC26b40',
       appData: '0x00',
-      fundingStrategy: 'Direct'
+      fundingStrategy: 'Direct',
+      challengeDuration: 1000
     }
   };
 }
@@ -245,7 +247,7 @@ export function generateApproveBudgetAndFundRequest(
     id: 88888888,
     method: 'ApproveBudgetAndFund',
     params: {
-      token: ETH_TOKEN,
+      assetHolderAddress: ETH_TOKEN,
       hub,
       playerParticipantId: player.participantId,
       requestedSendCapacity: utils.hexZeroPad('0x5', 32),
