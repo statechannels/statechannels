@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.17.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.16.0...@statechannels/nitro-protocol@0.17.0) (2021-03-19)
+
+
+### Features
+
+* add HashLockArtifact ([f7dec32](https://github.com/statechannels/monorepo/commit/f7dec322f9833b3f071a1955648ee1789eae51d2))
+
+
+
+
+
 # [0.16.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.11.1...@statechannels/nitro-protocol@0.16.0) (2021-02-11)
 
 

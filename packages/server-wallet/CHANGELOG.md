@@ -3,6 +3,25 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.24.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.23.0...@statechannels/server-wallet@1.24.0) (2021-03-19)
+
+
+### Bug Fixes
+
+* await of course ([2fb49aa](https://github.com/statechannels/statechannels/commit/2fb49aaa3d4fd9f43c45fb5bee4d45fc521f2da8))
+* correct some merge problem ([fe5e097](https://github.com/statechannels/statechannels/commit/fe5e0979a2292a6400783e031f25f75ad22d9f06))
+* fix yarn ([2891e52](https://github.com/statechannels/statechannels/commit/2891e520f64a9dc4c36b543f7986127cdeff1878))
+* make sure channel id is checked in all places ([b85d1bf](https://github.com/statechannels/statechannels/commit/b85d1bf693116f3e81163ebee075325113e00118))
+
+
+### Features
+
+* new ledger funding algorithm ([5fc8a6f](https://github.com/statechannels/statechannels/commit/5fc8a6fa6d5aa832fc5b96108052a6edfc67a1b9))
+
+
+
+
+
 # [1.23.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.21.0...@statechannels/server-wallet@1.23.0) (2021-02-23)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.5.6](https://github.com/statechannels/monorepo/compare/@statechannels/devtools@0.5.5...@statechannels/devtools@0.5.6) (2021-03-19)
+
+**Note:** Version bump only for package @statechannels/devtools
+
+
+
+
+
 ## [0.5.5](https://github.com/statechannels/monorepo/compare/@statechannels/devtools@0.5.1...@statechannels/devtools@0.5.5) (2021-02-11)
 
 **Note:** Version bump only for package @statechannels/devtools
