@@ -1,11 +1,15 @@
+import {Participant} from '@statechannels/client-api-schema';
+import {makeDestination} from '@statechannels/wallet-core';
+
 import {Wallet} from '../src/wallet';
 import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
 } from '../src/db/seeds/1_signing_wallet_seeds';
-import {Participant} from '@statechannels/client-api-schema';
-import {makeDestination} from '@statechannels/wallet-core';
+import {MessageServiceInterface} from '../src/message-service/types';
+import { createTestMessageHandler, TestMessageService } from '../src/message-service/test-message-service';
+
 
 interface TestPeerWallets {
   a: Wallet;
@@ -22,7 +26,47 @@ export let participantA: Participant;
 export let participantB: Participant;
 export let peerWallets: TestPeerWallets;
 
-export function getPeersSetup(withWalletSeeding: boolean = false): jest.Lifecycle {
+/**
+ * A messaging service that links the two peer wallets.
+ * If this is not used it will have no effect.
+ * It can be used to automatically transport messages between the two participants.
+ */
+export let messageService: MessageServiceInterface;
+
+export const participantIdA = 'a';
+export const participantIdB = 'b';
+
+/**
+ * This destroys the peerWallet(s) and the message service and then re-instantiates them.
+ * This mimics a crash and restart
+ * @param walletsToRestart Specifies the peerWallet that will be restarted
+ */
+export async function crashAndRestart(
+  walletsToRestart: 'A' | 'B' | 'Both' = 'Both'
+): Promise<void> {
+
+  await messageService.destroy();
+
+  if (walletsToRestart === 'A' || walletsToRestart === 'Both') {
+    await peerWallets.a.destroy();
+    peerWallets.a = await Wallet.create(aWalletConfig);
+  }
+
+  if (walletsToRestart === 'B' || walletsToRestart === 'Both') {
+    await peerWallets.b.destroy();
+    peerWallets.b = await Wallet.create(bWalletConfig);
+  }
+  
+  const handler = await createTestMessageHandler([
+    {participantId: participantIdA, wallet: peerWallets.a},
+    {participantId: participantIdB, wallet: peerWallets.b},
+  ]);
+
+  messageService =await  TestMessageService.create(handler);
+
+}
+
+export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
   return async () => {
     await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
 
@@ -48,18 +92,27 @@ export function getPeersSetup(withWalletSeeding: boolean = false): jest.Lifecycl
 
     participantA = {
       signingAddress: await peerWallets.a.getSigningAddress(),
-      participantId: 'a',
+      participantId: participantIdA,
       destination: makeDestination(
         '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
       ),
     };
     participantB = {
       signingAddress: await peerWallets.b.getSigningAddress(),
-      participantId: 'b',
+      participantId: participantIdB,
       destination: makeDestination(
         '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
       ),
     };
+
+    const participantWallets = [
+      {participantId: participantIdA, wallet: peerWallets.a},
+      {participantId: participantIdB, wallet: peerWallets.b},
+    ];
+
+     
+  const handler =  createTestMessageHandler(participantWallets);
+  messageService =await  TestMessageService.create(handler);
   };
 }
 
