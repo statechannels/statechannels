@@ -47,7 +47,7 @@
     "@typescript-eslint/eslint-plugin": "4.13.0",
     "@typescript-eslint/parser": "4.13.0",
     "autocannon": "6.4.0",
-    "axios": "0.20.0",
+    "axios": "0.21.1",
     "body-parser": "1.19.0",
     "cli-table3": "0.6.0",
     "clinic": "7.0.0",
