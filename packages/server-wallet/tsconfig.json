@@ -1,8 +1,9 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+
     "allowSyntheticDefaultImports": true,
-    "lib": ["ES2019", "dom"],
+    "lib": ["ES2019"],
     "target": "es2019",
     "module": "commonjs",
     "outDir": "lib",
