@@ -34,6 +34,7 @@ export const messageIsValid = ajv.compile({$ref: 'api.json#/definitions/Message'
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function validateMessage(jsonBlob: object): Message {
   if (!messageIsValid(jsonBlob)) {
+    console.log(messageIsValid.errors?.map(prettyPrintError));
     throw new WireFormatValidationError(
       'Invalid message',
       jsonBlob,
