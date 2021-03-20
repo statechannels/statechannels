@@ -1,6 +1,12 @@
 import {ethers, Wallet} from 'ethers';
 import _ from 'lodash';
-import {signState, State, simpleEthAllocation, toNitroState} from '@statechannels/wallet-core';
+import {
+  signState,
+  State,
+  simpleEthAllocation,
+  toNitroState,
+  makeAddress,
+} from '@statechannels/wallet-core';
 import {signState as wasmSignState} from '@statechannels/wasm-utils';
 
 import {participant} from '../src/wallet/__test__/fixtures/participants';
@@ -15,7 +21,7 @@ async function benchmark(): Promise<void> {
     turnNum: 1,
     isFinal: false,
     appData: '0x00',
-    appDefinition: ethers.constants.AddressZero,
+    appDefinition: makeAddress(ethers.constants.AddressZero),
     challengeDuration: 0x5,
   };
 

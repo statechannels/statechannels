@@ -12,6 +12,7 @@ import {
   deserializeObjective,
   deserializeState,
   makeDestination,
+  serializeState,
   validatePayload
 } from '@statechannels/wallet-core';
 
@@ -40,10 +41,6 @@ beforeAll(async () => {
 });
 
 it('e2e test', async () => {
-  expect(1).toEqual(1);
-});
-
-it.skip('e2e test', async () => {
   const serverWallet = await SingleThreadedWallet.create(serverConfig);
   const xstateWallet = await ClientWallet.create();
 
@@ -91,8 +88,13 @@ it.skip('e2e test', async () => {
   };
 
   const xstatePrefundResponse = await xstateWallet.incomingMessage(payload);
-  const serverPreDepositResponse = await serverWallet.pushMessage({
+
+  const wireXstatePrefundResponse = {
     ...xstatePrefundResponse,
+    signedStates: xstatePrefundResponse.signedStates?.map(s => serializeState(s))
+  };
+  const serverPreDepositResponse = await serverWallet.pushMessage({
+    ...wireXstatePrefundResponse,
     requests: [],
     walletVersion: '@statechannels/server-wallet@1.23.0'
   });
