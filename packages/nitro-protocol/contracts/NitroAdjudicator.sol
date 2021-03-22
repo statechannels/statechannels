@@ -111,6 +111,10 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
             sigs
         );
         _transferAllFromAllAssetHolders(channelId, outcomeBytes);
+        // Now put the channel back into "Open" mode. This opens up the possibility
+        // of checkpointing, challenging, or concluding again. But the channel is now completely defunded:
+        // So clients have on reason to do that, nor to care if a counterparty does that.
+        delete statusOf[channelId]; // So that this method leaves no trace on chain whatsoever (for this channel)
     }
 
     /**
