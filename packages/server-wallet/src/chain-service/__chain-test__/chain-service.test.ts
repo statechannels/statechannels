@@ -60,7 +60,7 @@ async function mineBlocks() {
   }
 }
 
-jest.setTimeout(20_000);
+jest.setTimeout(30_000);
 // The test nitro adjudicator allows us to set channel storage
 const testAdjudicator = new Contract(
   nitroAdjudicatorAddress,
