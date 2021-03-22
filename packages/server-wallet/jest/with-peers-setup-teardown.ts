@@ -31,7 +31,7 @@ export let peerWallets: TestPeerWallets;
  * If this is not used it will have no effect.
  * It can be used to automatically transport messages between the two participants.
  */
-export let messageService: MessageServiceInterface;
+export let messageService: TestMessageService;
 
 export const participantIdA = 'a';
 export const participantIdB = 'b';
@@ -62,7 +62,7 @@ export async function crashAndRestart(
     {participantId: participantIdB, wallet: peerWallets.b},
   ]);
 
-  messageService =await  TestMessageService.create(handler);
+  messageService =await  TestMessageService.create(handler) as TestMessageService;
 
 }
 
@@ -112,11 +112,12 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 
      
   const handler =  createTestMessageHandler(participantWallets);
-  messageService =await  TestMessageService.create(handler);
+  messageService =await  TestMessageService.create(handler) as TestMessageService;
   };
 }
 
 export const peersTeardown: jest.Lifecycle = async () => {
+  await messageService.destroy();
   await Promise.all([peerWallets.a.destroy(), peerWallets.b.destroy()]);
   await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
 };

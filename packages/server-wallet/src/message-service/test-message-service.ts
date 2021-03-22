@@ -6,6 +6,18 @@ import {Wallet} from '..';
 
 import {MessageHandler, MessageServiceInterface} from './types';
 
+export type LatencyOptions = {
+  /**
+   * The mean delay to delay messages with. If undefined messages are not delayed
+   * Otherwise each message is delayed by meanDelay / 2 + Math.random() * meanDelay);
+   */
+  meanDelay?: number;
+  /**
+   * How frequently a message should be dropped. Can range from 0 (never dropped) to 1(always dropped)
+   */
+  dropRate: number;
+};
+
 /**
  * A basic message service that is responsible for sending and receiving messages for a collection of wallets.
  * All the wallets will share the same message service.
@@ -13,19 +25,20 @@ import {MessageHandler, MessageServiceInterface} from './types';
  */
 export class TestMessageService implements MessageServiceInterface {
   private _handleMessage: (message: Message) => Promise<void>;
+  private _options: LatencyOptions;
 
+  private _timeouts: NodeJS.Timeout[] = [];
+
+  protected destroyed = false;
   /**
    * Creates a test message service that can be used in tets
    * @param incomingMessageHandler The message handler to use
    * @param logger An optional logger for logging
-   * @param dropRate A number between 0 and 1 which controls how often messages are dropped. 1 means all messages are dropped and 0 means none.
+
    * @returns
    */
-  protected constructor(
-    handleMessage: MessageHandler,
-    protected _dropRate: number,
-    protected _logger?: Logger
-  ) {
+  protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
+    this._options = {dropRate: 0, meanDelay: undefined};
     // We always pass a reference to the messageService when calling handleMessage
     // This allows the MessageHandler function to easily call messageHandler.send
     // We just bind that here for convenience.
@@ -34,36 +47,45 @@ export class TestMessageService implements MessageServiceInterface {
 
   static async create(
     incomingMessageHandler: MessageHandler,
-    logger?: Logger,
-    dropRate = 0
+
+    logger?: Logger
   ): Promise<MessageServiceInterface> {
-    const service = new TestMessageService(incomingMessageHandler, dropRate, logger);
+    const service = new TestMessageService(incomingMessageHandler, logger);
     return service;
   }
-
+  public setLatencyOptions(incomingOptions: Partial<LatencyOptions>): void {
+    this._options = _.merge(this._options, incomingOptions);
+  }
   async send(messages: Message[]): Promise<void> {
-    const randomValue = Math.random();
-    const shouldDrop = randomValue > 1 - this._dropRate;
+    const shouldDrop = Math.random() > 1 - this._options.dropRate;
     if (shouldDrop) {
       this._logger?.trace(
         {
           messages,
-          dropRate: this._dropRate,
-          randomValue,
+          dropRate: this._options.dropRate,
         },
         'Dropping messages'
       );
       return;
-    }
-
-    for (const message of messages) {
-      await this._handleMessage(message);
+    } else {
+      const {meanDelay} = this._options;
+      if (meanDelay) {
+        this._timeouts.push(
+          setTimeout(async () => {
+            await Promise.all(messages.map(this._handleMessage));
+          }, meanDelay / 2 + Math.random() * meanDelay)
+        );
+      } else {
+        await Promise.all(messages.map(this._handleMessage));
+      }
     }
   }
 
   async destroy(): Promise<void> {
     // This prevents any more progress from being made
     this._handleMessage = async () => _.noop();
+
+    await Promise.all(this._timeouts.map(clearTimeout));
   }
 }
 
@@ -83,7 +105,8 @@ export class TestMessageService implements MessageServiceInterface {
  * await ms.handleMessages(result.outbox);
  */
 export const createTestMessageHandler = (
-  wallets: {participantId: string; wallet: Wallet}[]
+  wallets: {participantId: string; wallet: Wallet}[],
+  logger?: Logger
 ): MessageHandler => {
   const hasUniqueParticipants = new Set(wallets.map(w => w.participantId)).size === wallets.length;
   const hasUniqueWallets = new Set(wallets.map(w => w.wallet)).size === wallets.length;
@@ -101,6 +124,8 @@ export const createTestMessageHandler = (
     if (!matching) {
       throw new Error(`Invalid recipient ${message.recipient}`);
     }
+
+    logger?.trace({message}, 'Pushing message into wallet');
     const result = await matching.wallet.pushMessage(message.data);
 
     await me.send(result.outbox.map(o => o.params));

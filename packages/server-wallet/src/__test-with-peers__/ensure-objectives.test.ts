@@ -2,22 +2,18 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 
 import {
   getPeersSetup,
+  messageService,
   participantA,
   participantB,
-  participantIdA,
-  participantIdB,
   peersTeardown,
   peerWallets,
 } from '../../jest/with-peers-setup-teardown';
 import {ChannelManager} from '../channel-manager';
-import {
-  createTestMessageHandler,
-  TestMessageService,
-} from '../message-service/test-message-service';
+import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
 
-jest.setTimeout(30_000);
+jest.setTimeout(36_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
@@ -31,42 +27,36 @@ function getCreateChannelsArgs(): CreateChannelParams {
 
 describe('EnsureObjectives', () => {
   // This is the percentages of messages that get dropped
-  const cases = [0, 10, 30];
+  const testCases: LatencyOptions[] = [
+    // No latency/message dropping
+    {
+      dropRate: 0,
+      meanDelay: undefined,
+    },
+    // Lots of messages dropping but no delay
+    {dropRate: 0.2, meanDelay: undefined},
+    // delay but no dropping
+    {dropRate: 0, meanDelay: 150},
+    // 10% message drop and 50 ms mean delay
+    {dropRate: 0.1, meanDelay: 50},
+  ];
+  test.each(testCases)(
+    'can successfully create a channel with the latency options: %o',
+    async options => {
+      messageService.setLatencyOptions(options);
+      const channelManager = await ChannelManager.create(peerWallets.a, messageService);
 
-  test.each(cases)('creates a channel with a drop rate of %f%% ', async messageDropPercentage => {
-    const participantWallets = [
-      {participantId: participantIdA, wallet: peerWallets.a},
-      {participantId: participantIdB, wallet: peerWallets.b},
-    ];
+      peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
+        await peerWallets.b.joinChannels([o.data.targetChannelId]);
+      });
 
-    const dropRate = messageDropPercentage === 0 ? 0 : messageDropPercentage / 100;
+      await channelManager.createChannels(getCreateChannelsArgs(), 50);
+    }
+  );
 
-    const messageService = await TestMessageService.create(
-      createTestMessageHandler(participantWallets),
-      peerWallets.a.logger,
-      dropRate
-    );
-    const channelManager = await ChannelManager.create(peerWallets.a, messageService);
-
-    peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
-      await peerWallets.b.joinChannels([o.data.targetChannelId]);
-    });
-
-    await channelManager.createChannels(getCreateChannelsArgs(), 50);
-  });
-
-  // This is a nice sanity check to ensure that messages do get dropped
+  //  This is a nice sanity check to ensure that messages do get dropped
   test('fails when all messages are dropped', async () => {
-    const participantWallets = [
-      {participantId: participantIdA, wallet: peerWallets.a},
-      {participantId: participantIdB, wallet: peerWallets.b},
-    ];
-
-    const messageService = await TestMessageService.create(
-      createTestMessageHandler(participantWallets),
-      peerWallets.a.logger,
-      1
-    );
+    messageService.setLatencyOptions({dropRate: 1});
     // We use a short backoff to avoid burning times in the tests
     const channelManager = await ChannelManager.create(peerWallets.a, messageService, [1]);
 

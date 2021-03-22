@@ -90,4 +90,8 @@ export class ChannelManager {
     wallet.logger.error('Unable to ensure objectives', {remaining: Array.from(remaining.keys())});
     throw new Error('Unable to ensure objectives');
   }
+
+  async destroy(): Promise<void> {
+    return this._wallet.destroy();
+  }
 }
