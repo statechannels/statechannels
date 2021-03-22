@@ -101,10 +101,10 @@ These states can be represented in the following state machine:
 <Mermaid chart='
 graph LR
 linkStyle default interpolate basis
-Open -->|forceMove| Challenge
+Open -->|challenge| Challenge
 Open -->|checkpoint| Open
 Open-->|conclude| Finalized
-Challenge-->|forceMove| Challenge
+Challenge-->|challenge| Challenge
 Challenge-->|respond| Open
 Challenge-->|checkpoint| Open
 Challenge-->|conclude| Finalized

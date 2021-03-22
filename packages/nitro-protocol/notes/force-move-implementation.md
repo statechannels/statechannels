@@ -134,7 +134,7 @@ With these considerations in mind, the ForceMove interface should be something l
 ## Unanswered Questions
 
 1. Should we use time or blocknumber? Time is generally more predictable and nicer to work with in client code but is manipulable by miners :(.
-2. Is it worth optimizing separately for the case n=2 (e.g. with methods `forceMove2` and so on)
+2. Is it worth optimizing separately for the case n=2 (e.g. with methods `challenge2` and so on)
 3. What order should we put states in? (Maybe reverse?)
 4. Should we use abi encode?
 5. We don't technically need to pass the `isFinal` flag into `conclude` - it will only work if it is true. Maybe that's a step too far?

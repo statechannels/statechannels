@@ -18,7 +18,7 @@ legacy = {
     "deployNitroAdjudicator": 6553512,  # TEST contract
     "deposit": 46750,
     "concludeAndWithdraw": 644147,
-    "forceMove": 677845,
+    "challenge": 677845,
     "respond": 336337,
 }
 
@@ -27,7 +27,7 @@ legacy["deployment"] = legacy["deployNitroAdjudicator"]
 legacy["happyPath"] = legacy["deposit"] + \
     legacy["concludeAndWithdraw"]
 
-legacy["challengePath"] = legacy["forceMove"] + \
+legacy["challengePath"] = legacy["challenge"] + \
     legacy["respond"]
 
 optimized = {
@@ -36,7 +36,7 @@ optimized = {
     "deployAssetHolder": 1831942,
     "deposit": 48996,
     "concludePushOutcomeAndTransferAll": 113797, 
-    "forceMove": 101881,
+    "challenge": 101881,
     "respond": 56706,
 }
 
@@ -46,7 +46,7 @@ optimized["deployment"] = optimized["deployNitroAdjudicator"] + \
 optimized["happyPath"] = optimized["deposit"] + \
     optimized["concludePushOutcomeAndTransferAll"]
 
-optimized["challengePath"] = optimized["forceMove"] + \
+optimized["challengePath"] = optimized["challenge"] + \
     optimized["respond"]
 
 labels = ['Happy Path', 'Challenge Path']
