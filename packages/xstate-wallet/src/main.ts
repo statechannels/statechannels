@@ -1,4 +1,11 @@
-import {BN, calculateChannelId, Objective, SignedState, Uint256} from '@statechannels/wallet-core';
+import {
+  BN,
+  calculateChannelId,
+  Objective,
+  SignedState,
+  Uint256,
+  unreachable
+} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {map} from 'rxjs/operators';
 
@@ -7,19 +14,22 @@ import {logger} from './logger';
 import {Store} from './store';
 import {ChainWatcher, ChannelChainInfo} from './chain';
 
-export {Player} from './integration-tests/helpers';
-export {FakeChain} from './chain';
-
-type Message = {
+export type Message = {
   objectives: Objective[];
   signedStates: SignedState[];
 };
 type Response = Message & {deposit?: boolean; currentHoldings?: string};
 
-type Funding = {type: 'FUNDED'} | {type: 'SAFE_TO_DEPOSIT'; currentHoldings: Uint256} | undefined;
+type Funding =
+  | {type: 'FUNDED'}
+  | {type: 'DEPOSITED'}
+  | {type: 'SAFE_TO_DEPOSIT'; currentHoldings: Uint256}
+  | undefined;
+type OnNewMessage = (message: Message) => void;
 
 export class ClientWallet {
   private constructor(
+    private onNewMessage: OnNewMessage,
     private chain = new ChainWatcher(),
     public store = new Store(chain),
     private registeredChannels = new Set<string>(),
@@ -31,8 +41,8 @@ export class ClientWallet {
     return this;
   }
 
-  static async create(): Promise<ClientWallet> {
-    return new ClientWallet().init();
+  static async create(onNewMessage: OnNewMessage): Promise<ClientWallet> {
+    return new ClientWallet(onNewMessage).init();
   }
 
   async incomingMessage(payload: Message): Promise<Message> {
@@ -72,12 +82,20 @@ export class ClientWallet {
           )
           .subscribe({
             next: async update => {
-              if (this.latestFunding?.type === 'FUNDED') return;
-              if (
-                this.latestFunding?.type === 'SAFE_TO_DEPOSIT' &&
-                update?.type === 'SAFE_TO_DEPOSIT'
-              ) {
-                return;
+              const latestType = this.latestFunding?.type;
+              switch (latestType) {
+                case 'FUNDED':
+                  return;
+                case 'DEPOSITED':
+                  if (update?.type === 'FUNDED') break;
+                  return;
+                case 'SAFE_TO_DEPOSIT':
+                  if (update?.type === 'FUNDED') break;
+                  return;
+                case undefined:
+                  break;
+                default:
+                  unreachable(latestType);
               }
               this.latestFunding = update;
               await this.onOpenChannelObjective(channelId);
@@ -107,11 +125,13 @@ export class ClientWallet {
     const pk = await this.store.getPrivateKey(await this.store.getAddress());
     const response = this.crankOpenChannelObjective(channel, this.latestFunding, pk);
     if (response.deposit && response.currentHoldings) {
+      this.latestFunding = {type: 'DEPOSITED'};
       // TODO: remove this hardcoding
       await this.chain.deposit(channel.channelId, response.currentHoldings, '0x05');
     }
     if (response.signedStates[0]) {
       await this.store.addState(response.signedStates[0]);
+      this.onNewMessage(response);
     }
     return response;
   }
@@ -138,7 +158,7 @@ export class ClientWallet {
       response.currentHoldings = funding.currentHoldings;
     }
     if (funding && funding.type === 'FUNDED') {
-      if (latestState.turnNum === 1 && !channel.isSupportedByMe) {
+      if (latestState.turnNum === 3 && channel.latestSignedByMe.turnNum === 0) {
         const newState = channel.signAndAdd(
           _.pick(latestState, 'outcome', 'turnNum', 'appData', 'isFinal'),
           pk

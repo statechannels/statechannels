@@ -6,7 +6,7 @@ import {
   SingleThreadedWallet
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ClientWallet} from '@statechannels/xstate-wallet';
+import {ClientWallet, Message} from '@statechannels/xstate-wallet';
 import {constants, Contract, providers} from 'ethers';
 import {
   BN,
@@ -21,6 +21,7 @@ import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
+import {WalletObjective} from '@statechannels/server-wallet/src/models/objective';
 
 jest.setTimeout(60_000);
 
@@ -75,7 +76,25 @@ function mineOnEvent(contract: Contract) {
 
 it('e2e test', async () => {
   const serverWallet = await SingleThreadedWallet.create(serverConfig);
-  const xstateWallet = await ClientWallet.create();
+  const objectiveSuccededPromise = new Promise<void>(r => {
+    serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
+      if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
+    });
+  });
+
+  const onNewMessage = (message: Message) => {
+    const wireMessage = {
+      ...message,
+      signedStates: message.signedStates?.map(s => serializeState(s))
+    };
+    serverWallet.pushMessage({
+      ...wireMessage,
+      requests: [],
+      walletVersion: '@statechannels/server-wallet@1.23.0'
+    });
+  };
+
+  const xstateWallet = await ClientWallet.create(onNewMessage);
 
   const serverAddress = await serverWallet.getSigningAddress();
   const serverDestination = makeDestination(serverAddress);
@@ -120,17 +139,7 @@ it('e2e test', async () => {
     signedStates: wirePayload.signedStates?.map(deserializeState) || []
   };
 
-  const xstatePrefundResponse = await xstateWallet.incomingMessage(payload);
-
-  const wireXstatePrefundResponse = {
-    ...xstatePrefundResponse,
-    signedStates: xstatePrefundResponse.signedStates?.map(s => serializeState(s))
-  };
-  const serverPreDepositResponse = await serverWallet.pushMessage({
-    ...wireXstatePrefundResponse,
-    requests: [],
-    walletVersion: '@statechannels/server-wallet@1.23.0'
-  });
+  await xstateWallet.incomingMessage(payload);
 
   const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
     .pipe(take(3))
@@ -141,7 +150,6 @@ it('e2e test', async () => {
     objectives: wirePayload2.objectives?.map(deserializeObjective) || [],
     signedStates: wirePayload2.signedStates?.map(deserializeState) || []
   };
-  const xstatePrefundResponse2 = await xstateWallet.incomingMessage(payload2);
-
-  expect(serverPreDepositResponse).toBeDefined();
+  await xstateWallet.incomingMessage(payload2);
+  await objectiveSuccededPromise;
 });
