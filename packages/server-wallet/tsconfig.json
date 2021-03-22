@@ -1,8 +1,12 @@
 {
   "extends": "../../tsconfig.json",
   "compilerOptions": {
+    // This prevents conflicting @types from the parents node_modules/@types
+        "typeRoots": [
+      "./node_modules/@types"
+    ],
     "allowSyntheticDefaultImports": true,
-    "lib": ["ES2019", "dom"],
+    "lib": ["ES2019"],
     "target": "es2019",
     "module": "commonjs",
     "outDir": "lib",
