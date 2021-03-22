@@ -1,11 +1,4 @@
-import {
-  BN,
-  calculateChannelId,
-  Objective,
-  OpenChannel,
-  SignedState,
-  Uint256
-} from '@statechannels/wallet-core';
+import {BN, calculateChannelId, Objective, SignedState, Uint256} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {map} from 'rxjs/operators';
 
@@ -29,7 +22,8 @@ export class ClientWallet {
   private constructor(
     private chain = new ChainWatcher(),
     public store = new Store(chain),
-    private registeredChannels = new Set<string>()
+    private registeredChannels = new Set<string>(),
+    private latestFunding: Funding = undefined
   ) {}
 
   private async init(): Promise<ClientWallet> {
@@ -78,9 +72,15 @@ export class ClientWallet {
           )
           .subscribe({
             next: async update => {
-              const channel = await this.store.getEntry(channelId);
-              const pk = await this.store.getPrivateKey(await this.store.getAddress());
-              this.crankOpenChannelObjective(undefined, channel, update, pk);
+              if (this.latestFunding?.type === 'FUNDED') return;
+              if (
+                this.latestFunding?.type === 'SAFE_TO_DEPOSIT' &&
+                update?.type === 'SAFE_TO_DEPOSIT'
+              ) {
+                return;
+              }
+              this.latestFunding = update;
+              await this.onOpenChannelObjective(channelId);
             }
           });
       }
@@ -92,7 +92,7 @@ export class ClientWallet {
     for (const objective of this.store.objectives) {
       switch (objective.type) {
         case 'OpenChannel': {
-          response = await this.onOpenChannelObjective(objective);
+          response = await this.onOpenChannelObjective(objective.data.targetChannelId);
           break;
         }
         default:
@@ -102,44 +102,51 @@ export class ClientWallet {
     return response;
   }
 
-  async onOpenChannelObjective(objective: OpenChannel): Promise<Message> {
-    const channel = await this.store.getEntry(objective.data.targetChannelId);
+  async onOpenChannelObjective(channelId: string): Promise<Message> {
+    const channel = await this.store.getEntry(channelId);
     const pk = await this.store.getPrivateKey(await this.store.getAddress());
-    const response = this.crankOpenChannelObjective(objective, channel, undefined, pk);
+    const response = this.crankOpenChannelObjective(channel, this.latestFunding, pk);
     if (response.deposit && response.currentHoldings) {
-      await this.chain.deposit(channel.channelId, response.currentHoldings, '0x03');
+      // TODO: remove this hardcoding
+      await this.chain.deposit(channel.channelId, response.currentHoldings, '0x05');
     }
-    await this.store.addState(response.signedStates[0]);
+    if (response.signedStates[0]) {
+      await this.store.addState(response.signedStates[0]);
+    }
     return response;
   }
 
   // Let's start with just directly funded channels
-  crankOpenChannelObjective(
-    objective: OpenChannel | undefined,
-    channel: ChannelStoreEntry,
-    funding: Funding,
-    pk: string
-  ): Response {
+  crankOpenChannelObjective(channel: ChannelStoreEntry, funding: Funding, pk: string): Response {
     const response: Response = {
       objectives: [],
       signedStates: []
     };
     const {latestState} = channel;
     // Prefund state
-    if (latestState.turnNum === 0) {
-      if (!channel.isSupportedByMe) {
+    if (latestState.turnNum === 0 && !channel.isSupportedByMe) {
+      const newState = channel.signAndAdd(
+        _.pick(latestState, 'outcome', 'turnNum', 'appData', 'isFinal'),
+        pk
+      );
+
+      response.signedStates = [{..._.omit(newState, 'stateHash')}];
+      return response;
+    }
+    if (funding && funding.type === 'SAFE_TO_DEPOSIT') {
+      response.deposit = true;
+      response.currentHoldings = funding.currentHoldings;
+    }
+    if (funding && funding.type === 'FUNDED') {
+      if (latestState.turnNum === 1 && !channel.isSupportedByMe) {
         const newState = channel.signAndAdd(
           _.pick(latestState, 'outcome', 'turnNum', 'appData', 'isFinal'),
           pk
         );
 
         response.signedStates = [{..._.omit(newState, 'stateHash')}];
+        return response;
       }
-      return response;
-    }
-    if (funding && funding.type === 'SAFE_TO_DEPOSIT') {
-      response.deposit = true;
-      response.currentHoldings = funding.currentHoldings;
     }
     return response;
   }
