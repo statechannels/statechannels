@@ -133,8 +133,15 @@ it('e2e test', async () => {
   });
 
   const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(take(2))
+    .pipe(take(3))
     .toPromise();
-  await postFundAPromise;
+  const singleChannelOutput = await postFundAPromise;
+  const wirePayload2 = validatePayload(singleChannelOutput.outbox[0].params.data);
+  const payload2 = {
+    objectives: wirePayload2.objectives?.map(deserializeObjective) || [],
+    signedStates: wirePayload2.signedStates?.map(deserializeState) || []
+  };
+  const xstatePrefundResponse2 = await xstateWallet.incomingMessage(payload2);
+
   expect(serverPreDepositResponse).toBeDefined();
 });

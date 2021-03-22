@@ -1,9 +1,18 @@
-import {Objective, OpenChannel, SignedState} from '@statechannels/wallet-core';
+import {
+  BN,
+  calculateChannelId,
+  Objective,
+  OpenChannel,
+  SignedState,
+  Uint256
+} from '@statechannels/wallet-core';
 import _ from 'lodash';
+import {map} from 'rxjs/operators';
 
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {logger} from './logger';
 import {Store} from './store';
+import {ChainWatcher, ChannelChainInfo} from './chain';
 
 export {Player} from './integration-tests/helpers';
 export {FakeChain} from './chain';
@@ -12,13 +21,16 @@ type Message = {
   objectives: Objective[];
   signedStates: SignedState[];
 };
+type Response = Message & {deposit?: boolean; currentHoldings?: string};
+
+type Funding = {type: 'FUNDED'} | {type: 'SAFE_TO_DEPOSIT'; currentHoldings: Uint256} | undefined;
 
 export class ClientWallet {
-  public store: Store;
-
-  private constructor() {
-    this.store = new Store();
-  }
+  private constructor(
+    private chain = new ChainWatcher(),
+    public store = new Store(chain),
+    private registeredChannels = new Set<string>()
+  ) {}
 
   private async init(): Promise<ClientWallet> {
     await this.store.initialize();
@@ -48,6 +60,30 @@ export class ClientWallet {
       logger.info('No incoming states');
     } else {
       await this.store.addState(payloadState);
+      const channelId = calculateChannelId(payloadState);
+      if (!this.registeredChannels.has(channelId)) {
+        this.chain
+          .chainUpdatedFeed(channelId)
+          .pipe(
+            map(
+              (chainInfo: ChannelChainInfo): Funding => {
+                // TODO: remove this hardcoding
+                if (BN.gte(chainInfo.amount, '0x08')) return {type: 'FUNDED'};
+                // TODO: remove this hardcoding
+                else if (BN.gte(chainInfo.amount, '0x03'))
+                  return {type: 'SAFE_TO_DEPOSIT', currentHoldings: chainInfo.amount};
+                else return;
+              }
+            )
+          )
+          .subscribe({
+            next: async update => {
+              const channel = await this.store.getEntry(channelId);
+              const pk = await this.store.getPrivateKey(await this.store.getAddress());
+              this.crankOpenChannelObjective(undefined, channel, update, pk);
+            }
+          });
+      }
     }
 
     // Fetch channels for the objective
@@ -68,22 +104,23 @@ export class ClientWallet {
 
   async onOpenChannelObjective(objective: OpenChannel): Promise<Message> {
     const channel = await this.store.getEntry(objective.data.targetChannelId);
-    const response = this.crankOpenChannelObjective(
-      objective,
-      channel,
-      await this.store.getPrivateKey(await this.store.getAddress())
-    );
-    this.store.addState(response.signedStates[0]);
+    const pk = await this.store.getPrivateKey(await this.store.getAddress());
+    const response = this.crankOpenChannelObjective(objective, channel, undefined, pk);
+    if (response.deposit && response.currentHoldings) {
+      await this.chain.deposit(channel.channelId, response.currentHoldings, '0x03');
+    }
+    await this.store.addState(response.signedStates[0]);
     return response;
   }
 
   // Let's start with just directly funded channels
   crankOpenChannelObjective(
-    objective: OpenChannel,
+    objective: OpenChannel | undefined,
     channel: ChannelStoreEntry,
+    funding: Funding,
     pk: string
-  ): Message {
-    const response: Message = {
+  ): Response {
+    const response: Response = {
       objectives: [],
       signedStates: []
     };
@@ -98,6 +135,11 @@ export class ClientWallet {
 
         response.signedStates = [{..._.omit(newState, 'stateHash')}];
       }
+      return response;
+    }
+    if (funding && funding.type === 'SAFE_TO_DEPOSIT') {
+      response.deposit = true;
+      response.currentHoldings = funding.currentHoldings;
     }
     return response;
   }
