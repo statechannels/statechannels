@@ -49,8 +49,7 @@ describe('EnsureObjectives', () => {
     const channelManager = await ChannelManager.create(peerWallets.a, messageService);
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
-      const {targetChannelId: channelId} = o.data;
-      await peerWallets.b.joinChannel({channelId});
+      await peerWallets.b.joinChannels([o.data.targetChannelId]);
     });
 
     await channelManager.createChannels(getCreateChannelsArgs(), 50);
@@ -73,7 +72,7 @@ describe('EnsureObjectives', () => {
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
       const {targetChannelId: channelId} = o.data;
-      await peerWallets.b.joinChannel({channelId});
+      await peerWallets.b.joinChannels([channelId]);
     });
 
     await expect(channelManager.createChannels(getCreateChannelsArgs(), 1)).rejects.toThrow(
