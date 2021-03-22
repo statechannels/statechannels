@@ -24,7 +24,7 @@ The challenger needs to sign this data:
 keccak256(abi.encode(challengeStateHash, 'forceMove'))
 ```
 
-in order to form `challengerSig`. This signals their intent to forceMove this channel with this particular state. This mechanism allows the forceMove to be authorized only by a channel participant.
+in order to form `challengerSig`. This signals their intent to challenge this channel with this particular state. This mechanism allows the challenge to be authorized only by a channel participant.
 :::
 
 We provide a handy utility function `signChallengeMessage` to form this signature.

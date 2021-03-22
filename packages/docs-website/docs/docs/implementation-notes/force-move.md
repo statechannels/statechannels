@@ -353,14 +353,14 @@ Although the `outcome` is included in the `state`, we include the `outcomeHash` 
 
 ## Methods
 
-### `forceMove`
+### `challenge`
 
-The `forceMove` function allows anyone holding the appropriate off-chain state to register a challenge on chain, and gives the framework its name. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
+The `challenge` function allows anyone holding the appropriate off-chain state to register a challenge on chain. It is designed to ensure that a state channel can progress or be finalized in the event of inactivity on behalf of a participant (e.g. the current mover).
 
 The off-chain state is submitted (in an optimized format), and once relevant checks have passed, an `outcome` is registered against the `channelId`, with a finalization time set at some delay after the transaction is processed. This delay allows the challenge to be cleared by a timely and well-formed [respond](#respond) or [checkpoint](#checkpoint) transaction. If no such transaction is forthcoming, the challenge will time out, allowing the `outcome` registered to be finalized. A finalized outcome can then be used to extract funds from the channel.
 
 ```solidity
-    function forceMove(
+    function challenge(
         FixedPart memory fixedPart,
         uint256 largestTurnNum,
         ForceMoveApp.VariablePart[] memory variableParts,
@@ -394,7 +394,7 @@ The challenger needs to sign this data:
 keccak256(abi.encode(challengeStateHash, 'forceMove'))
 ```
 
-in order to form `challengerSig`. This signals their intent to forceMove this channel with this particular state. This mechanism allows the forceMove to be authorized only by a channel participant.
+in order to form `challengerSig`. This signals their intent to challenge this channel with this particular state. This mechanism allows the challenge to be authorized only by a channel participant.
 :::
 
 ### `respond`
