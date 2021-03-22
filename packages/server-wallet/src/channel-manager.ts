@@ -1,18 +1,12 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
+import {backOff, IBackOffOptions} from 'exponential-backoff';
 
 import {MessageServiceInterface} from './message-service/types';
 import {getMessages} from './message-service/utils';
 import {WalletObjective} from './models/objective';
 import {Wallet} from './wallet';
-
 export const delay = async (ms = 10): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
-
-/**
- * These are the default backoff intervals used.
- * It uses a simple exponential strategy.
- */
-export const DEFAULT_BACKOFF_INTERVALS = [1_000, 2_000, 4_000, 8_000, 16_000];
 
 export class ChannelManager {
   /**
@@ -25,14 +19,14 @@ export class ChannelManager {
   public static async create(
     wallet: Wallet,
     messageService: MessageServiceInterface,
-    backOffIntervals = DEFAULT_BACKOFF_INTERVALS
+    backOffOptions?: Partial<Exclude<IBackOffOptions, 'retry'>>
   ): Promise<ChannelManager> {
-    return new ChannelManager(wallet, messageService, backOffIntervals);
+    return new ChannelManager(wallet, messageService, backOffOptions ?? {});
   }
   private constructor(
     private _wallet: Wallet,
     private _messageService: MessageServiceInterface,
-    private _backoffIntervals: number[]
+    private _backOffOptions: Partial<IBackOffOptions>
   ) {}
 
   /**
@@ -75,20 +69,25 @@ export class ChannelManager {
     };
 
     wallet.on('objectiveSucceeded', onObjectiveSucceeded);
+    try {
+      await backOff(
+        async () => {
+          const {outbox} = await wallet.syncObjectives(objectives.map(o => o.objectiveId));
+          await messageService.send(getMessages(outbox));
 
-    for (const retryTimeoutMs of this._backoffIntervals) {
-      if (remaining.size === 0) return;
+          if (remaining.size !== 0) {
+            // Throwing an error indicates to the backoff library that the task is not complete
+            throw new Error('Still objectives to complete');
+          }
+        },
 
-      await delay(retryTimeoutMs);
-
-      const {outbox} = await wallet.syncObjectives(objectives.map(o => o.objectiveId));
-
-      await messageService.send(getMessages(outbox));
+        {...this._backOffOptions, retry: () => remaining.size !== 0}
+      );
+    } catch (error) {
+      wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+      wallet.logger.error('Unable to ensure objectives', {remaining: Array.from(remaining.keys())});
+      throw new Error('Unable to ensure objectives');
     }
-
-    wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-    wallet.logger.error('Unable to ensure objectives', {remaining: Array.from(remaining.keys())});
-    throw new Error('Unable to ensure objectives');
   }
 
   async destroy(): Promise<void> {

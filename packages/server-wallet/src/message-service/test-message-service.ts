@@ -58,22 +58,15 @@ export class TestMessageService implements MessageServiceInterface {
   }
   async send(messages: Message[]): Promise<void> {
     const shouldDrop = Math.random() > 1 - this._options.dropRate;
-    if (shouldDrop) {
-      this._logger?.trace(
-        {
-          messages,
-          dropRate: this._options.dropRate,
-        },
-        'Dropping messages'
-      );
-      return;
-    } else {
+
+    if (!shouldDrop) {
       const {meanDelay} = this._options;
       if (meanDelay) {
+        const delay = meanDelay / 2 + Math.random() * meanDelay;
         this._timeouts.push(
           setTimeout(async () => {
             await Promise.all(messages.map(this._handleMessage));
-          }, meanDelay / 2 + Math.random() * meanDelay)
+          }, delay)
         );
       } else {
         await Promise.all(messages.map(this._handleMessage));

@@ -13,7 +13,7 @@ import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
 
-jest.setTimeout(36_000);
+jest.setTimeout(60_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
@@ -34,11 +34,11 @@ describe('EnsureObjectives', () => {
       meanDelay: undefined,
     },
     // Lots of messages dropping but no delay
-    {dropRate: 0.2, meanDelay: undefined},
+    {dropRate: 0.5, meanDelay: undefined},
     // delay but no dropping
     {dropRate: 0, meanDelay: 150},
-    // 10% message drop and 50 ms mean delay
-    {dropRate: 0.1, meanDelay: 50},
+    // Delay and drop
+    {dropRate: 0.3, meanDelay: 100},
   ];
   test.each(testCases)(
     'can successfully create a channel with the latency options: %o',
@@ -57,8 +57,10 @@ describe('EnsureObjectives', () => {
   //  This is a nice sanity check to ensure that messages do get dropped
   test('fails when all messages are dropped', async () => {
     messageService.setLatencyOptions({dropRate: 1});
-    // We use a short backoff to avoid burning times in the tests
-    const channelManager = await ChannelManager.create(peerWallets.a, messageService, [1]);
+    // We limit the attempts to avoid wasting times in the test
+    const channelManager = await ChannelManager.create(peerWallets.a, messageService, {
+      numOfAttempts: 1,
+    });
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
       const {targetChannelId: channelId} = o.data;

@@ -57,6 +57,7 @@
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.3.1",
     "eslint-plugin-unicorn": "21.0.0",
+    "exponential-backoff": "^3.1.0",
     "express": "4.17.1",
     "express-pino-logger": "5.0.0",
     "jest": "26.6.3",
