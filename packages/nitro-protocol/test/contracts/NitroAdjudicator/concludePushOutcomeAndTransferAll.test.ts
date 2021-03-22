@@ -238,16 +238,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
           receipt.gasUsed
         );
 
-        // Compute expected ChannelDataHash
-        const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedFingerprint = channelDataToStatus({
-          turnNumRecord: 0,
-          finalizesAt: blockTimestamp,
-          outcome,
-        });
-
-        // Check fingerprint against the expected value
-        expect(await NitroAdjudicator.statusOf(channelId)).toEqual(expectedFingerprint);
+        // Check fingerprint is reset (gas optimization)
+        expect(await NitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
 
         // Extract logs
         const {logs} = await (await tx).wait();
