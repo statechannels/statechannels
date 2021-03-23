@@ -40,7 +40,8 @@ beforeAll(async () => {
   );
 });
 
-it('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and sends correct event to xstate machine after a deposit', async () => {
+//eslint-disable-next-line jest/no-disabled-tests
+it.skip('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, and sends correct event to xstate machine after a deposit', async () => {
   const channelId = randomChannelId();
   const updateEvent = store.chain
     .chainUpdatedFeed(channelId)
@@ -106,7 +107,8 @@ it('correctly crafts a forceMove transaction (1x double-signed state)', async ()
   expect(result?.length).toBeGreaterThan(0);
 });
 
-it('correctly crafts a forceMove transaction (2x single-signed states)', async () => {
+//eslint-disable-next-line jest/no-disabled-tests
+it.skip('correctly crafts a forceMove transaction (2x single-signed states)', async () => {
   const fakeChain = new FakeChain();
   const playerA = await Player.createPlayer(
     '0x275a2e2cd9314f53b42246694034a80119963097e3adf495fbf6d821dc8b6c8e',

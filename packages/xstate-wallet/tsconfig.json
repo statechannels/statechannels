@@ -22,7 +22,7 @@
     "jsx": "react",
     "types": ["react", "jest", "node", "segment-analytics"]
   },
-  "include": ["./src"],
+  "include": ["./src", "deployment"],
   "references": [
     {
       "path": "../nitro-protocol"
