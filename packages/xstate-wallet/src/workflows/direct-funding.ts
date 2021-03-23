@@ -10,7 +10,8 @@ import {
   AllocationItem,
   Destination,
   BN,
-  Zero
+  Zero,
+  makeAddress
 } from '@statechannels/wallet-core';
 
 import {Store} from '../store';
@@ -186,7 +187,7 @@ export const machine: MachineFactory<Init, any> = (store: Store, context: Init) 
           turnNum: 0,
           outcome: minimalOutcome(simpleEthAllocation([]), minimalAllocation),
           appData: ethers.constants.HashZero,
-          appDefinition: ethers.constants.AddressZero
+          appDefinition: makeAddress(ethers.constants.AddressZero)
         }
       };
     }

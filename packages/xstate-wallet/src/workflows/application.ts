@@ -12,7 +12,7 @@ import {
   State
 } from 'xstate';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
-import {StateVariables, serializeChannelEntry} from '@statechannels/wallet-core';
+import {StateVariables} from '@statechannels/wallet-core';
 import {StateChannelsError} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
@@ -33,7 +33,6 @@ import {createMockGuard} from '../utils/workflow-utils';
 import {MessagingServiceInterface, SupportedFundingStrategy} from '../messaging';
 
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
-
 export interface WorkflowContext {
   applicationDomain: string;
   fundingStrategy: SupportedFundingStrategy;
@@ -253,9 +252,11 @@ export const workflow = (
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
 
-      distinctUntilChanged((entry1, entry2) =>
-        _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
-      ),
+      // TODO: comment back in
+      // distinctUntilChanged((entry1, entry2) =>
+      //   _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
+      // ),
+      distinctUntilChanged((entry1, entry2) => _.isEqual(entry1, entry2)),
 
       map(storeEntry => ({
         type: 'CHANNEL_UPDATED',
@@ -266,17 +267,24 @@ export const workflow = (
   const actions: WorkflowActions = {
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+
+      // TODO: comment back in
+      //await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, entry);
     },
 
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      // TODO: comment back in
+      //await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, entry);
     },
 
     sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      // TODO: comment back in
+      //await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, entry);
     },
 
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
@@ -290,10 +298,11 @@ export const workflow = (
       event: {storeEntry: ChannelStoreEntry}
     ) => {
       if (event.storeEntry.channelId === context.channelId) {
-        messagingService.sendChannelNotification(
-          'ChannelUpdated',
-          serializeChannelEntry(event.storeEntry)
-        );
+        // TODO: comment back in
+        // messagingService.sendChannelNotification(
+        //   'ChannelUpdated',
+        //   serializeChannelEntry(event.storeEntry)
+        // );
       }
     },
     displayUi: () => {
@@ -320,9 +329,14 @@ export const workflow = (
     updateChannel: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
         try {
+          // TODO: comment back in
+          // messagingService.sendResponse(
+          //   event.requestId,
+          //   serializeChannelEntry(await store.updateChannel(event.channelId, event))
+          // );
           messagingService.sendResponse(
             event.requestId,
-            serializeChannelEntry(await store.updateChannel(event.channelId, event))
+            await store.updateChannel(event.channelId, event)
           );
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);
@@ -344,9 +358,14 @@ export const workflow = (
     closeChannel: async (context: ChannelIdExists, event: PlayerRequestConclude) => {
       if (context.channelId === event.channelId) {
         try {
+          // TODO: comment back in
+          // messagingService.sendResponse(
+          //   event.requestId,
+          //   serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
+          // );
           messagingService.sendResponse(
             event.requestId,
-            serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
+            await store.updateChannel(event.channelId, {isFinal: true})
           );
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);

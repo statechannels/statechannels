@@ -1,7 +1,7 @@
 import {interpret} from 'xstate';
 import {ethers, utils} from 'ethers';
 import waitForExpect from 'wait-for-expect';
-import {signState, State, simpleEthAllocation, BN} from '@statechannels/wallet-core';
+import {signState, State, simpleEthAllocation, BN, makeAddress} from '@statechannels/wallet-core';
 
 import {FakeChain} from '../../chain';
 import {TestStore} from '../../test-store';
@@ -54,7 +54,7 @@ beforeEach(async () => {
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
-    appDefinition: ethers.constants.AddressZero,
+    appDefinition: makeAddress(ethers.constants.AddressZero),
     participants: [playerA.participant, playerB.participant]
   };
 
@@ -62,7 +62,7 @@ beforeEach(async () => {
     ...state,
     signatures: [playerA, playerB].map(({privateKey, signingAddress}) => ({
       signature: signState(state, privateKey),
-      signer: signingAddress
+      signer: makeAddress(signingAddress)
     }))
   };
 

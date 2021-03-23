@@ -5,7 +5,8 @@ import {
   State,
   SignedState,
   createSignatureEntry,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 import {ethers, utils} from 'ethers';
 
@@ -52,7 +53,7 @@ test('concludes on their turn', async () => {
     challengeDuration: CHALLENGE_DURATION,
     chainId: CHAIN_NETWORK_ID,
     channelNonce: 0,
-    appDefinition: ethers.constants.AddressZero,
+    appDefinition: makeAddress(ethers.constants.AddressZero),
     participants: [playerA.participant, playerB.participant]
   };
 

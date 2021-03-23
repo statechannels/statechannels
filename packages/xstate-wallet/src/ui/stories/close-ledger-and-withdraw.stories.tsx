@@ -2,13 +2,12 @@ export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import React from 'react';
-import {Participant, DomainBudget, ethBudget, BN} from '@statechannels/wallet-core';
+import {Participant, DomainBudget, ethBudget, BN, makeAddress} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
 import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
 import {Store} from '../../store';
-import {renderComponentInFrontOfApp} from './helpers';
 import {logger} from '../../logger';
 import {
   workflow as closeLedgerWithdrawWorkflow,
@@ -16,19 +15,21 @@ import {
   WorkflowContext
 } from '../../workflows/close-ledger-and-withdraw';
 
+import {renderComponentInFrontOfApp} from './helpers';
+
 const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);
 const messagingService: MessagingServiceInterface = new MessagingService(store);
 
 const alice: Participant = {
   participantId: 'a',
-  signingAddress: '0xa',
+  signingAddress: makeAddress('0xa'),
   destination: '0xad' as any
 };
 
 const bob: Participant = {
   participantId: 'b',
-  signingAddress: '0xb',
+  signingAddress: makeAddress('0xb'),
   destination: '0xbd' as any
 };
 

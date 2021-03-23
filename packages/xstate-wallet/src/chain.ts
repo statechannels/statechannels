@@ -358,7 +358,7 @@ export class ChainWatcher implements Chain {
       )
       .sort((s1, s2) => s1.state.turnNum - s2.state.turnNum);
     const transactionRequest = {
-      ...Transactions.createForceMoveTransaction(
+      ...Transactions.createChallengeTransaction(
         convertedSignedStates,
         // createForceMoveTransaction requires this to sign a "challenge message"
         privateKey

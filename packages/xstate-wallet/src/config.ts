@@ -1,5 +1,5 @@
 import {constants} from 'ethers';
-import {Destination} from '@statechannels/wallet-core';
+import {Address, Destination, makeAddress} from '@statechannels/wallet-core';
 
 // TODO: Use getEnvBool from devtools once working
 function getBool(val: string | undefined): boolean {
@@ -28,13 +28,15 @@ export const INFURA_API_KEY: string | undefined = process.env.INFURA_API_KEY;
 
 export const CLEAR_STORAGE_ON_START = getBool(process.env.CLEAR_STORAGE_ON_START);
 
-export const ETH_ASSET_HOLDER_ADDRESS: string =
-  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero;
+export const ETH_ASSET_HOLDER_ADDRESS: Address = makeAddress(
+  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
+);
 
 export const HUB_PARTICIPANT_ID = 'firebase:simple-hub';
 
-export const HUB_ADDRESS: string =
-  process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502';
+export const HUB_ADDRESS: Address = makeAddress(
+  process.env.HUB_ADDRESS || '0xaaaa84838319627Fa056fC3FC29ab94d479B8502'
+);
 
 if (!process.env.HUB_DESTINATION) {
   throw new Error('HUB_DESTINATION environment variable must be defined');
@@ -50,7 +52,9 @@ export const LOG_DESTINATION: string | undefined = process.env.LOG_DESTINATION
 export const NITRO_ADJUDICATOR_ADDRESS: string =
   process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero;
 
-export const TRIVIAL_APP_ADDRESS: string = process.env.TRIVIAL_APP_ADDRESS || constants.AddressZero;
+export const TRIVIAL_APP_ADDRESS: Address = makeAddress(
+  process.env.TRIVIAL_APP_ADDRESS || constants.AddressZero
+);
 
 export const USE_INDEXED_DB = getBool(process.env.USE_INDEXED_DB);
 

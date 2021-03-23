@@ -10,7 +10,8 @@ import {
   Outcome,
   State,
   SignedState,
-  BN
+  BN,
+  makeAddress
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {constants} from 'ethers';
@@ -29,7 +30,7 @@ const EXPECT_TIMEOUT = process.env.CI ? 9500 : 2000;
 
 const chainId = '0x01';
 const challengeDuration = 10;
-const appDefinition = constants.AddressZero;
+const appDefinition = makeAddress(constants.AddressZero);
 
 const targetChannel: ChannelConstants = {
   channelNonce: 0,
