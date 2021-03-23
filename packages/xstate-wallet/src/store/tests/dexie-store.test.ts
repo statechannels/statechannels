@@ -1,3 +1,7 @@
+test('placeholder test', () => {
+  expect(1).toEqual(1);
+});
+
 // TODO: comment back in
 
 // /* eslint-disable no-console */

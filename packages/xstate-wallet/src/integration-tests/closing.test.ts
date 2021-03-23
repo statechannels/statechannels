@@ -18,7 +18,8 @@ import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
 
 jest.setTimeout(30000);
 
-test('concludes on their turn', async () => {
+// TODO: unskip test
+test.skip('concludes on their turn', async () => {
   const fakeChain = new FakeChain();
 
   const playerA = await Player.createPlayer(

@@ -92,7 +92,8 @@ beforeEach(async () => {
   await bStore.initialize([wallet2.privateKey]);
 });
 
-test('virtual funding with smart hub', async () => {
+// TODO: unskip test
+test.skip('virtual funding with smart hub', async () => {
   const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(hubContext));
   const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));
   const bService = interpret(VirtualFundingAsLeaf.machine(bStore).withContext(context));

@@ -16,7 +16,8 @@ import {TEST_APP_DOMAIN, budget} from '../workflows/tests/data';
 import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helpers';
 jest.setTimeout(30000);
 
-it('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
+// TODO: unskip test
+it.skip('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
   const fakeChain = new FakeChain();
   await fakeChain.ethereumEnable();
   const playerA = await Player.createPlayer(
@@ -52,10 +53,7 @@ it('allows for a wallet to close the ledger channel with the hub and withdraw', 
   await hub.store.createBudget(budget(BN.from(6), BN.from(4)));
 
   await playerA.store.setLedger(ledgerChannel.channelId);
-  await hub.store
-    .channelUpdatedFeed(ledgerChannel.channelId)
-    .pipe(first())
-    .toPromise();
+  await hub.store.channelUpdatedFeed(ledgerChannel.channelId).pipe(first()).toPromise();
   await hub.store.setLedger(ledgerChannel.channelId);
   await hub.store.signAndAddState(ledgerChannel.channelId, ledgerChannel.latest);
   await playerA.store.chain.deposit(ledgerChannel.channelId, '0x00', '0x10');
