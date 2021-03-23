@@ -238,6 +238,9 @@ describe('concludePushOutcomeAndTransferAll', () => {
           receipt.gasUsed
         );
 
+        // experiment:
+        const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
+
         // Check fingerprint is reset (gas optimization)
         expect(await NitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
 
