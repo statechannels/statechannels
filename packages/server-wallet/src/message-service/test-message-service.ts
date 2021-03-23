@@ -29,7 +29,7 @@ export class TestMessageService implements MessageServiceInterface {
 
   private _timeouts: NodeJS.Timeout[] = [];
 
-  protected destroyed = false;
+  protected _destroyed = false;
   /**
    * Creates a test message service that can be used in tets
    * @param incomingMessageHandler The message handler to use
@@ -65,7 +65,9 @@ export class TestMessageService implements MessageServiceInterface {
         const delay = meanDelay / 2 + Math.random() * meanDelay;
         this._timeouts.push(
           setTimeout(async () => {
-            await Promise.all(messages.map(this._handleMessage));
+            if (!this._destroyed) {
+              await Promise.all(messages.map(this._handleMessage));
+            }
           }, delay)
         );
       } else {
@@ -75,10 +77,11 @@ export class TestMessageService implements MessageServiceInterface {
   }
 
   async destroy(): Promise<void> {
+    this._destroyed = true;
     // This prevents any more progress from being made
     this._handleMessage = async () => _.noop();
 
-    await Promise.all(this._timeouts.map(clearTimeout));
+    this._timeouts.forEach(t => t.unref());
   }
 }
 
