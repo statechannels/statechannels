@@ -34,11 +34,11 @@ describe('EnsureObjectives', () => {
       meanDelay: undefined,
     },
     // Lots of messages dropping but no delay
-    {dropRate: 0.5, meanDelay: undefined},
+    {dropRate: 0.3, meanDelay: undefined},
     // delay but no dropping
-    {dropRate: 0, meanDelay: 150},
+    {dropRate: 0, meanDelay: 200},
     // Delay and drop
-    {dropRate: 0.3, meanDelay: 100},
+    {dropRate: 0.2, meanDelay: 100},
   ];
   test.each(testCases)(
     'can successfully create a channel with the latency options: %o',
