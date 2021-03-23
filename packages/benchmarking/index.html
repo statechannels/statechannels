@@ -1,0 +1,24 @@
+<script src="./dist/main.js"></script>
+Wallet setup flow
+
+<button onClick="window.channelProvider.mountWalletComponent('http://127.0.0.1:3055')">1. MountWalletComponent</button><br></br>
+<button onClick="window.channelProvider.enable()">2. Enable channel provider</button><br></br>
+<hr></hr>
+Wallet API
+<helie></helie>
+<button onClick="window.createChannel()">createChannel</button><br></br>
+<div id="create-channel-time"></div>
+<hr></hr>
+Ethers API
+
+<button onClick="window.signMessage()">ethers.signMessage</button><br></br>
+<div id="sign-message-time"></div>
+<hr></hr>
+Nitro API
+<button onClick="window.signState()">nitro.signState</button><br></br>
+<div id="sign-state-time"></div>
+<button onClick="window.getStateSignerAddress()">nitro.getStateSignerAddress</button><br></br>
+<div id="get-state-signer-address-time"></div>
+<hr></hr>
+Benchmarking
+<button onClick="window.runBenchmark()">runBenchmark</button><br></br>

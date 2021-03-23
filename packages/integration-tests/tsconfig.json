@@ -1,0 +1,18 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "module": "commonjs",
+    "declarationDir": "lib",
+    "outDir": "lib",
+    "removeComments": false,
+    "target": "es2015",
+    "esModuleInterop": true,
+    "types": ["react", "jest", "node"]
+  },
+  "references": [
+    {"path": "../iframe-channel-provider"},
+    {"path": "../client-api-schema"},
+    {"path": "../iframe-channel-provider"}
+  ]
+}
