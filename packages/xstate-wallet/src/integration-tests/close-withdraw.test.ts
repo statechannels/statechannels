@@ -17,6 +17,7 @@ import {Player, hookUpMessaging, generateCloseAndWithdrawRequest} from './helper
 jest.setTimeout(30000);
 
 // TODO: unskip test
+// eslint-disable-next-line jest/no-disabled-tests
 it.skip('allows for a wallet to close the ledger channel with the hub and withdraw', async () => {
   const fakeChain = new FakeChain();
   await fakeChain.ethereumEnable();

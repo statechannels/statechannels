@@ -11,6 +11,7 @@ import {Player, generateApproveBudgetAndFundRequest, hookUpMessaging} from './he
 jest.setTimeout(30000);
 
 // TODO: unskip test
+// eslint-disable-next-line jest/no-disabled-tests
 it.skip('allows for a wallet to approve a budget and fund with the hub', async () => {
   const fakeChain = new FakeChain();
 

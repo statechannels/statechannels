@@ -22,7 +22,7 @@ if (NODE_ENV === 'production') {
 
 const log = logger.trace.bind(logger);
 
-(async function() {
+(async function () {
   log({version: GIT_VERSION}, 'Wallet initializing');
 
   const chain = new ChainWatcher();

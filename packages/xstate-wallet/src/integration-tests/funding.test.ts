@@ -14,6 +14,7 @@ import {
 jest.setTimeout(20000);
 
 // TODO: unskip test
+// eslint-disable-next-line jest/no-disabled-tests
 it.skip('allows for two wallets to fund an app', async () => {
   const fakeChain = new FakeChain();
 

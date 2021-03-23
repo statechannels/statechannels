@@ -21,6 +21,7 @@ jest.setTimeout(10000);
 
 describe('Channel setup, CREATE_CHANNEL role', () => {
   // TODO: unskip test
+  // eslint-disable-next-line jest/no-disabled-tests
   test.skip('with direct funding strategy', async () => {
     const context: Application.Init = {
       type: 'CREATE_CHANNEL',

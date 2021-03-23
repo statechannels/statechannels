@@ -55,6 +55,12 @@ module.exports = {
       rules: {
         'no-process-env': 'off'
       }
+    },
+    {
+      files: ['**/*.ts'],
+      rules: {
+        '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_', varsIgnorePattern: '^_'}]
+      }
     }
   ]
 };

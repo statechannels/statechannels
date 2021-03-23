@@ -379,7 +379,7 @@ export class Store {
       }
     );
 
-  async addObjective(objective: Objective, addToOutbox = true) {
+  async addObjective(objective: Objective, _addToOutbox = true) {
     const objectives = this.objectives;
     if (!_.find(objectives, o => _.isEqual(o, objective))) {
       this.objectives.push(objective);

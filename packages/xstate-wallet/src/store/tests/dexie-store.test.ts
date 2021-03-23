@@ -4,8 +4,9 @@ test('placeholder test', () => {
 
 // TODO: comment back in
 
+/* eslint-disable jest/no-commented-out-tests */
+
 // /* eslint-disable no-console */
-// /* eslint-disable jest/no-disabled-tests */
 // import {Wallet} from 'ethers';
 // import {
 //   simpleEthAllocation,

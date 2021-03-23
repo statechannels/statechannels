@@ -93,6 +93,7 @@ beforeEach(async () => {
 });
 
 // TODO: unskip test
+// eslint-disable-next-line jest/no-disabled-tests
 test.skip('virtual funding with smart hub', async () => {
   const hubService = interpret(VirtualFundingAsHub.machine(hubStore).withContext(hubContext));
   const aService = interpret(VirtualFundingAsLeaf.machine(aStore).withContext(context));

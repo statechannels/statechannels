@@ -163,6 +163,4 @@ export const mockGuards: WorkflowGuards = {
 export const mockOptions = {guards: mockGuards};
 
 export const createAndFundLedgerWorkflow = (store: Store, context: WorkflowContext) =>
-  Machine(config)
-    .withConfig(options(store))
-    .withContext(context);
+  Machine(config).withConfig(options(store)).withContext(context);

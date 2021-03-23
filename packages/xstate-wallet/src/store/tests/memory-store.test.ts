@@ -4,6 +4,8 @@ test('placeholder test', () => {
 
 // TODO: comment back in
 
+/* eslint-disable jest/no-commented-out-tests */
+
 // import {
 //   simpleEthAllocation,
 //   makeDestination,

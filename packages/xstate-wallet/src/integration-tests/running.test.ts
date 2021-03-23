@@ -45,6 +45,7 @@ test('placeholder test', () => {
 //     );
 //   });
 
+// eslint-disable-next-line jest/no-commented-out-tests
 // test('accepts states when running', async () => {
 //   const fakeChain = new FakeChain();
 

@@ -264,9 +264,7 @@ export const workflow = (
   messagingService: MessagingServiceInterface,
   context: WorkflowContext
 ): StateMachine<WorkflowContext, any, WorkflowEvent, WorkflowTypeState> =>
-  Machine(config)
-    .withConfig(options(store, messagingService))
-    .withContext(context);
+  Machine(config).withConfig(options(store, messagingService)).withContext(context);
 
 export type CloseLedgerAndWithdrawService = Interpreter<
   WorkflowContext,
