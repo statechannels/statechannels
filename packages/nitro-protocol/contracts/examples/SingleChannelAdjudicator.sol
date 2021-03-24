@@ -3,6 +3,7 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 import '../Outcome.sol';
+import './AdjudicatorFactory.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 // Have a an adjudicator per channel, which is only deployed when assets are paid out.
@@ -19,14 +20,14 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 // As version 0 but make it so the channel "address" is the adjudicator address (and uniquely derived from the channel id)
 //, by deploying via an on chain factory
 
-contract SingleChannelAdjudicator {
-    bytes32 public cId;
-    bytes32 public status;
-
-    function setup(bytes32 _cId) public {
-        require(cId == 0);
-        cId = _cId;
+library fakeFactory {
+    function getChannelAddress(bytes32) public view returns (address) {
+        return address(this);
     }
+}
+
+contract SingleChannelAdjudicator {
+    bytes32 public status;
 
     struct FixedPart {
         uint256 chainId;
@@ -218,7 +219,7 @@ contract SingleChannelAdjudicator {
     }
 
     function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
-        require(channelId == cId, 'Wrong channelId for this adjudicator');
+        require(fakeFactory.getChannelAddress(channelId) == address(this), 'Wrong channelId for this adjudicator');
     }
 
     /**

@@ -1,10 +1,12 @@
 // NOTE: this script manages deploying contracts for testing purposes ONLY
 // DO NOT USE THIS SCRIPT TO DEPLOY CONTRACTS TO PRODUCTION NETWORKS
-import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {Wallet} from 'ethers';
-import {DeployedContractWrapper} from 'etherlime-lib';
+import {fstat} from 'fs/promises';
+import {writeSync, writeFileSync} from 'fs';
 
-import {writeGasConsumption} from '../test/test-helpers';
+import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {ContractFactory, Wallet, utils} from 'ethers';
+
+import {getTestProvider, setupContracts, writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
@@ -71,14 +73,48 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_NITRO_ADJUDICATOR_ADDRESS,
     TEST_TOKEN_ADDRESS
   );
+  const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(adjudicatorFactoryArtifact as any);
+
+  // const singleChannelAdjudicatorArtifactReplaced = JSON.parse(
+  //   JSON.stringify(singleChannelAdjudicatorArtifact).replace(
+  //     '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
+  //     `${ADJUDICATOR_FACTORY_ADDRESS}`
+  //   )
+  // );
+
+  // console.log(ADJUDICATOR_FACTORY_ADDRESS);
+  // writeFileSync('./replaced.json', JSON.stringify(singleChannelAdjudicatorArtifactReplaced));
+
+  // console.log('replaced dummy address');
+
+  // function libraryHashPlaceholder(input) {
+  //   return '$' + utils.keccak256(input).slice(0, 34) + '$';
+  // }
+
+  console.log(ADJUDICATOR_FACTORY_ADDRESS);
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
-    singleChannelAdjudicatorArtifact as any
+    singleChannelAdjudicatorArtifact as any,
+    {$e3f979aae6bae748bc967818e064d55234$: ADJUDICATOR_FACTORY_ADDRESS.slice(2)}
   );
-  const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(
-    adjudicatorFactoryArtifact as any,
-    {},
-    SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS
+
+  console.log('deployed master');
+
+  const provider = getTestProvider();
+
+  console.log('rdfas');
+
+  const AdjudicatorFactory = await setupContracts(
+    provider,
+    adjudicatorFactoryArtifact,
+    ADJUDICATOR_FACTORY_ADDRESS
   );
+
+  console.log('setupcontracts factory');
+
+  await (await AdjudicatorFactory.setup(SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS)).wait();
+
+  console.log('factory.setup');
+
   return {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
@@ -93,7 +129,7 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_TOKEN_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER2_ADDRESS,
-    SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS,
+    // SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS,
     ADJUDICATOR_FACTORY_ADDRESS,
   };
 }

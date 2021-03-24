@@ -126,12 +126,12 @@ describe('concludePushOutcomeAndTransferAll', () => {
       payouts: OutcomeShortHand;
       reasonString;
     }) => {
-      const deployer = await provider.getSigner(1);
+      console.log('tx originator address: ' + (await provider.getSigner(0).getAddress()));
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
-
+      console.log('channelid: ' + channelId);
       const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
-
+      console.log('cadjudicatort address: ' + adjudicatorAddress);
       const SingleChannelAdjudicator = await setupContracts(
         provider,
         SingleChannelAdjudicatorArtifact,
@@ -202,11 +202,18 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
       // Form transaction
-      const tx = AdjudicatorFactory.createAndPayout(
-        channelId,
+
+      (await AdjudicatorFactory.createChannel(channelId)).wait();
+
+      const tx = await SingleChannelAdjudicator.concludePushOutcomeAndTransferAll(
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
         {gasLimit: 3000000}
       );
+      //   const tx = AdjudicatorFactory.createAndPayout(
+      //     channelId,
+      //     ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
+      //     {gasLimit: 3000000}
+      //   );
 
       // Switch on overall test expectation
       if (reasonString) {
