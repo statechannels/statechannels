@@ -1,9 +1,10 @@
-import {CreateChannelParams} from '@statechannels/client-api-schema';
+import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 
 import {MessageServiceInterface} from './message-service/types';
 import {getMessages} from './message-service/utils';
 import {WalletObjective} from './models/objective';
 import {Wallet} from './wallet';
+
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
@@ -55,17 +56,20 @@ export class ChannelManager {
   public async createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<void> {
     const createResult = await this._wallet.createChannels(args, numberOfChannels);
 
-    await this._messageService.send(getMessages(createResult));
-    await this.ensureObjectives(createResult.newObjectives);
+    await this.ensureObjectives(createResult.newObjectives, getMessages(createResult.outbox));
   }
 
   /**
    * Ensures that the provided objectives get completed.
    * Will resend messages as required to ensure that the objectives get completed.
    * @param objectives The list of objectives to ensure get completed.
+   * @param objectiveMessages The collection of outgoing messages related to the objective.
    * @returns A promise that resolves when all the objectives are completed
    */
-  private async ensureObjectives(objectives: WalletObjective[]): Promise<void> {
+  private async ensureObjectives(
+    objectives: WalletObjective[],
+    objectiveMessages: Message[]
+  ): Promise<void> {
     const remaining = new Map(objectives.map(o => [o.objectiveId, o]));
 
     const onObjectiveSucceeded = (o: WalletObjective) => {
@@ -80,8 +84,11 @@ export class ChannelManager {
 
     this._wallet.on('objectiveSucceeded', onObjectiveSucceeded);
 
-    const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
+    // Now that we're listening for objective success we can now send messages
+    // that might trigger progress on the objective
+    await this._messageService.send(objectiveMessages);
 
+    const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
     for (let i = 0; i < numberOfAttempts; i++) {
       if (remaining.size === 0) return;
 
@@ -89,7 +96,6 @@ export class ChannelManager {
       await delay(delayAmount);
 
       const {outbox} = await this._wallet.syncObjectives(objectives.map(o => o.objectiveId));
-
       await this._messageService.send(getMessages(outbox));
     }
 
