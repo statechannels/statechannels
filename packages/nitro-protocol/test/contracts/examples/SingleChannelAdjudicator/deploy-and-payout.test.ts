@@ -88,7 +88,7 @@ beforeAll(async () => {
 const accepts1 = '{ETH: {A: 1}}';
 const accepts2 = '{ETH: {A: 1}, ETH2: {A: 2}}';
 const accepts3 = '{ETH2: {A: 1, B: 1}}';
-const accepts4 = '{ERC20: {A: 1, B: 1}}';
+const accepts4 = '{ERC20: {A: 1}}';
 const accepts4a = '{ERC20: {A: 1}}';
 const accepts5 = '{ERC20: {At: 1, Bt: 1}} (At and Bt already have some TOK)';
 const accepts6 = '10 TOK payouts';
@@ -104,8 +104,8 @@ let channelNonce = getRandomNonce('concludePushOutcomeAndTransferAll');
 describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | outcomeShortHand         | heldBefore         | heldAfter          | newOutcome | payouts                  | reasonString
-    ${accepts4} | ${{ERC20: {A: 1, B: 1}}} | ${{ERC20: {c: 2}}} | ${{ERC20: {c: 0}}} | ${{}}      | ${{ERC20: {A: 1, B: 1}}} | ${undefined}
+    description | outcomeShortHand   | heldBefore         | heldAfter          | newOutcome | payouts            | reasonString
+    ${accepts4} | ${{ERC20: {A: 1}}} | ${{ERC20: {c: 1}}} | ${{ERC20: {c: 0}}} | ${{}}      | ${{ERC20: {A: 1}}} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -148,7 +148,10 @@ describe('concludePushOutcomeAndTransferAll', () => {
       // Transfer some tokens into the relevant AssetHolder
       // Do this step before transforming input data (easier)
       if ('ERC20' in heldBefore) {
-        await (await Token.transfer(SingleChannelAdjudicator.address, heldBefore.ERC20.c)).wait();
+        const {gasUsed} = await (
+          await Token.transfer(SingleChannelAdjudicator.address, heldBefore.ERC20.c)
+        ).wait();
+        console.log('spent gas depositing tokens: ' + gasUsed);
       }
       //   if ('ETH' in heldBefore) {
       //     await (
