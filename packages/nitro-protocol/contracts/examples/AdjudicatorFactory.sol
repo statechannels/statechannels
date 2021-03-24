@@ -11,17 +11,15 @@ contract AdjudicatorFactory {
     bytes private constant proxyCreationCodeSuffix = hex'5af43d82803e903d91602b57fd5bf3';
 
     bytes32 private creationCodeHash;
-    address private immutable mastercopy;
+    address private mastercopy;
 
     event ChannelCreation(address channel);
 
-    /// @dev Creates a new `ChannelFactory`
-    /// @param _mastercopy the address of the `ChannelMastercopy` (channel logic)
-    constructor(address _mastercopy) {
+    function setup(address _mastercopy) public {
+        require(mastercopy==address(0));
         mastercopy = _mastercopy;
         creationCodeHash = keccak256(_getProxyCreationCode(_mastercopy));
     }
-
     ////////////////////////////////////////
     // Public Methods
 
@@ -43,7 +41,6 @@ contract AdjudicatorFactory {
     /// @dev Allows us to create new channel contract and get it all set up in one transaction
     function createChannel(bytes32 channelId) public returns (address channel) {
         channel = _deployChannelProxy(channelId);
-        SingleChannelAdjudicator(channel).setup(channelId);
         emit ChannelCreation(channel);
     }
 
@@ -59,7 +56,6 @@ contract AdjudicatorFactory {
         SingleChannelAdjudicator.Signature[] memory sigs
     ) public returns (address channel) {
         channel = _deployChannelProxy(channelId);
-        SingleChannelAdjudicator(channel).setup(channelId);
         SingleChannelAdjudicator(channel).concludePushOutcomeAndTransferAll(
             largestTurnNum,
             fixedPart,
