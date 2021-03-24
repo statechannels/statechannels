@@ -1,32 +1,48 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
-import {backOff, IBackOffOptions} from 'exponential-backoff';
 
 import {MessageServiceInterface} from './message-service/types';
 import {getMessages} from './message-service/utils';
 import {WalletObjective} from './models/objective';
 import {Wallet} from './wallet';
-export const delay = async (ms = 10): Promise<void> =>
+export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
+export type RetryOptions = {
+  /**
+   * The number of attempts to make.
+   */
+  numberOfAttempts: number;
+  /**
+   * The initial delay to use in milliseconds
+   */
+  initialDelay: number;
+
+  /**
+   * The multiple that the delay is multiplied by each time
+   */
+  multiple: number;
+};
+
+const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
 export class ChannelManager {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
    * @param wallet The wallet to use.
    * @param messageService  The message service to use.
-   * @param backOffIntervals At what intervals ensureObjective should retry sending messages to complete an objective.
+   * @param retryOptions How often and for how long the channel manager should retry objectives.
    * @returns A channel manager.
    */
   public static async create(
     wallet: Wallet,
     messageService: MessageServiceInterface,
-    backOffOptions?: Partial<Exclude<IBackOffOptions, 'retry'>>
+    retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<ChannelManager> {
-    return new ChannelManager(wallet, messageService, backOffOptions ?? {});
+    return new ChannelManager(wallet, messageService, {...DEFAULTS, ...retryOptions});
   }
   private constructor(
     private _wallet: Wallet,
     private _messageService: MessageServiceInterface,
-    private _backOffOptions: Partial<IBackOffOptions>
+    private _retryOptions: RetryOptions
   ) {}
 
   /**
@@ -63,27 +79,25 @@ export class ChannelManager {
     };
 
     this._wallet.on('objectiveSucceeded', onObjectiveSucceeded);
-    try {
-      await backOff(
-        async () => {
-          const {outbox} = await this._wallet.syncObjectives(objectives.map(o => o.objectiveId));
-          await this._messageService.send(getMessages(outbox));
 
-          if (remaining.size !== 0) {
-            // Throwing an error indicates to the backoff library that the task is not complete
-            throw new Error('Still objectives to complete');
-          }
-        },
+    const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
 
-        {...this._backOffOptions, retry: () => remaining.size !== 0}
-      );
-    } catch (error) {
-      this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-      this._wallet.logger.error('Unable to ensure objectives', {
-        remaining: Array.from(remaining.keys()),
-      });
-      throw new Error('Unable to ensure objectives');
+    for (let i = 0; i < numberOfAttempts; i++) {
+      if (remaining.size === 0) return;
+
+      const delayAmount = initialDelay * Math.pow(multiple, i);
+      await delay(delayAmount);
+
+      const {outbox} = await this._wallet.syncObjectives(objectives.map(o => o.objectiveId));
+
+      await this._messageService.send(getMessages(outbox));
     }
+
+    this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+    this._wallet.logger.error('Unable to ensure objectives', {
+      remaining: Array.from(remaining.keys()),
+    });
+    throw new Error('Unable to ensure objectives');
   }
 
   async destroy(): Promise<void> {

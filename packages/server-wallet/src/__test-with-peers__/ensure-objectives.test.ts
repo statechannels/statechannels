@@ -61,7 +61,7 @@ describe('EnsureObjectives', () => {
     messageService.setLatencyOptions({dropRate: 1});
     // We limit the attempts to avoid wasting times in the test
     const channelManager = await ChannelManager.create(peerWallets.a, messageService, {
-      numOfAttempts: 1,
+      numberOfAttempts: 1,
     });
 
     peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
