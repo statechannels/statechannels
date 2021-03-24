@@ -17,23 +17,13 @@ module.exports = {
     // It's annoying having to deal with these jest rules
     'jest/no-disabled-tests': 'off',
     'jest/expect-expect': 'off',
-    'no-process-env': 'error',
-    'unicorn/filename-case': [
-      'error',
-      // Enforce kebab casing for file names except for generated seed/migration files
-      {case: 'kebabCase', ignore: [/^\d_.*_seeds\.ts$/, /^\d{14}_.*\.ts$/]}
-    ]
+    'no-process-env': 'error'
   },
   overrides: [
     {
       // process.env allowed in some files
-      files: ['scripts/*', 'e2e-test/jest/*'],
+      files: ['scripts/*'],
       rules: {'no-process-env': 'off'}
-    },
-    {
-      // process.env allowed in some files
-      files: ['src/utilities/workers/loader.js'],
-      rules: {'@typescript-eslint/no-var-requires': 'off'}
     },
     {
       files: ['**/*.ts'],
