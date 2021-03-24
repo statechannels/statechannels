@@ -104,8 +104,7 @@ export async function deploy(): Promise<Record<string, string>> {
   // https://docs.soliditylang.org/en/v0.8.0/contracts.html#libraries
 
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
-    singleChannelAdjudicatorArtifactReplaced as any,
-    {$e3f979aae6bae748bc967818e064d55234$: ADJUDICATOR_FACTORY_ADDRESS.slice(2)}
+    singleChannelAdjudicatorArtifactReplaced as any
   );
 
   console.log('deployed master');
