@@ -1,13 +1,14 @@
 import {
   BN,
   calculateChannelId,
+  checkThat,
+  isSimpleEthAllocation,
   Objective,
   SignedState,
   Uint256,
-  unreachable
+  Zero
 } from '@statechannels/wallet-core';
-import _ from 'lodash';
-import {map} from 'rxjs/operators';
+import _, {Dictionary} from 'lodash';
 
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {logger} from './logger';
@@ -18,14 +19,17 @@ export type Message = {
   objectives: Objective[];
   signedStates: SignedState[];
 };
-type Response = Message & {deposit?: boolean; currentHoldings?: string};
+type Response = Message & {deposit?: boolean};
 
-type Funding =
-  | {type: 'FUNDED'}
-  | {type: 'DEPOSITED'}
-  | {type: 'SAFE_TO_DEPOSIT'; currentHoldings: Uint256}
-  | undefined;
+type Funding = 'DEPOSITED' | undefined;
 type OnNewMessage = (message: Message) => void;
+
+type DepositInfo = {
+  depositAt: Uint256;
+  myDeposit: Uint256;
+  totalAfterDeposit: Uint256;
+  fundedAt: Uint256;
+};
 
 export class BrowserWallet {
   private constructor(
@@ -33,7 +37,8 @@ export class BrowserWallet {
     private chain = new ChainWatcher(),
     public store = new Store(chain),
     private registeredChannels = new Set<string>(),
-    private latestFunding: Funding = undefined
+    private channelFundingAmount: Dictionary<Uint256> = {},
+    private channelFundingStatus: Dictionary<Funding> = {}
   ) {}
 
   private async init(): Promise<BrowserWallet> {
@@ -66,41 +71,9 @@ export class BrowserWallet {
       await this.store.addState(payloadState);
       const channelId = calculateChannelId(payloadState);
       if (!this.registeredChannels.has(channelId)) {
-        this.chain
-          .chainUpdatedFeed(channelId)
-          .pipe(
-            map(
-              (chainInfo: ChannelChainInfo): Funding => {
-                // TODO: remove this hardcoding
-                if (BN.gte(chainInfo.amount, '0x08')) return {type: 'FUNDED'};
-                // TODO: remove this hardcoding
-                else if (BN.gte(chainInfo.amount, '0x03'))
-                  return {type: 'SAFE_TO_DEPOSIT', currentHoldings: chainInfo.amount};
-                else return;
-              }
-            )
-          )
-          .subscribe({
-            next: async update => {
-              const latestType = this.latestFunding?.type;
-              switch (latestType) {
-                case 'FUNDED':
-                  return;
-                case 'DEPOSITED':
-                  if (update?.type === 'FUNDED') break;
-                  return;
-                case 'SAFE_TO_DEPOSIT':
-                  if (update?.type === 'FUNDED') break;
-                  return;
-                case undefined:
-                  break;
-                default:
-                  unreachable(latestType);
-              }
-              this.latestFunding = update;
-              await this.onOpenChannelObjective(channelId);
-            }
-          });
+        this.chain.chainUpdatedFeed(channelId).subscribe({
+          next: chainInfo => this.onFundingUpdate(channelId, chainInfo)
+        });
       }
     }
 
@@ -120,11 +93,23 @@ export class BrowserWallet {
   async onOpenChannelObjective(channelId: string): Promise<Message> {
     const channel = await this.store.getEntry(channelId);
     const pk = await this.store.getPrivateKey(await this.store.getAddress());
-    const response = this.crankOpenChannelObjective(channel, this.latestFunding, pk);
-    if (response.deposit && response.currentHoldings) {
-      this.latestFunding = {type: 'DEPOSITED'};
+    const depositInfo = await this.getDepositInfo(channelId);
+
+    const response = this.crankOpenChannelObjective(
+      channel,
+      this.channelFundingAmount[channelId],
+      this.channelFundingStatus[channelId],
+      depositInfo,
+      pk
+    );
+    if (response.deposit) {
+      this.channelFundingStatus[channelId] = 'DEPOSITED';
       // TODO: remove this hardcoding
-      await this.chain.deposit(channel.channelId, response.currentHoldings, '0x05');
+      await this.chain.deposit(
+        channel.channelId,
+        this.channelFundingAmount[channelId],
+        depositInfo.myDeposit
+      );
     }
     if (response.signedStates[0]) {
       await this.store.addState(response.signedStates[0]);
@@ -133,8 +118,13 @@ export class BrowserWallet {
     return response;
   }
 
-  // Let's start with just directly funded channels
-  crankOpenChannelObjective(channel: ChannelStoreEntry, funding: Funding, pk: string): Response {
+  crankOpenChannelObjective(
+    channel: ChannelStoreEntry,
+    fundingAmount: Uint256,
+    fundingStatus: Funding,
+    depositInfo: DepositInfo,
+    pk: string
+  ): Response {
     const response: Response = {
       objectives: [],
       signedStates: []
@@ -142,29 +132,53 @@ export class BrowserWallet {
     const {latestState} = channel;
     // Prefund state
     if (latestState.turnNum === 0 && !channel.isSupportedByMe) {
-      const newState = channel.signAndAdd(
-        _.pick(latestState, 'outcome', 'turnNum', 'appData', 'isFinal'),
-        pk
-      );
-
-      response.signedStates = [{..._.omit(newState, 'stateHash')}];
+      const newState = channel.signAndAdd(latestState, pk);
+      response.signedStates = [newState];
       return response;
     }
-    if (funding && funding.type === 'SAFE_TO_DEPOSIT') {
-      response.deposit = true;
-      response.currentHoldings = funding.currentHoldings;
-    }
-    if (funding && funding.type === 'FUNDED') {
-      if (latestState.turnNum === 3 && channel.latestSignedByMe.turnNum === 0) {
-        const newState = channel.signAndAdd(
-          _.pick(latestState, 'outcome', 'turnNum', 'appData', 'isFinal'),
-          pk
-        );
 
-        response.signedStates = [{..._.omit(newState, 'stateHash')}];
-        return response;
+    // TODO: remove this hardcoding
+    if (
+      BN.gte(fundingAmount, depositInfo.depositAt) &&
+      BN.lt(fundingAmount, depositInfo.totalAfterDeposit) &&
+      fundingStatus !== 'DEPOSITED'
+    ) {
+      response.deposit = true;
+      return response;
+    }
+    if (
+      BN.gte(fundingAmount, depositInfo.fundedAt) &&
+      latestState.turnNum === 3 &&
+      channel.latestSignedByMe.turnNum === 0
+    ) {
+      const newState = channel.signAndAdd(latestState, pk);
+      response.signedStates = [newState];
+      return response;
+    }
+
+    return response;
+  }
+
+  async onFundingUpdate(channelId: string, channelChainInfo: ChannelChainInfo): Promise<void> {
+    this.channelFundingAmount[channelId] = channelChainInfo.amount;
+    await this.onOpenChannelObjective(channelId);
+  }
+
+  async getDepositInfo(channelId: string): Promise<DepositInfo> {
+    const {latestState, myIndex} = await this.store.getEntry(channelId);
+    const {allocationItems} = checkThat(latestState.outcome, isSimpleEthAllocation);
+
+    const fundedAt = allocationItems.map(a => a.amount).reduce(BN.add);
+    let depositAt = Zero;
+    for (let i = 0; i < allocationItems.length; i++) {
+      const {amount} = allocationItems[i];
+      if (i !== myIndex) depositAt = BN.add(depositAt, amount);
+      else {
+        const totalAfterDeposit = BN.add(depositAt, amount);
+        return {depositAt, myDeposit: amount, totalAfterDeposit, fundedAt};
       }
     }
-    return response;
+
+    throw Error(`Could not find an allocation for participant id ${myIndex}`);
   }
 }
