@@ -26,7 +26,7 @@ postgres: &postgres
 
 save_dep: &save_dep
   save_cache:
-    key: v11-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v12-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/client-api-schema/node_modules
@@ -37,6 +37,7 @@ save_dep: &save_dep
       - packages/server-wallet/node_modules
       - packages/wallet-core/node_modules
       - packages/wire-format/node_modules
+      - packages/xstate-wallet/node_modules
 
 restore_dep: &restore_dep
   restore_cache:
@@ -257,7 +258,7 @@ jobs:
             - run:
                 name: build docs-website
                 command: yarn lerna run build-docs-website --stream
-            - run: 
+            - run:
                 name: ensure api-reports checked in (yarn lerna run generate-api)
                 command: git diff --exit-code
             - run:
@@ -278,7 +279,7 @@ jobs:
             - run:
                 name: build docs-website
                 command: yarn lerna run --since $(git merge-base $CIRCLE_BRANCH origin/master) build-docs-website --stream
-            - run: 
+            - run:
                 name: ensure api-reports checked in (yarn lerna run generate-api)
                 command: git diff --exit-code
             - run:
