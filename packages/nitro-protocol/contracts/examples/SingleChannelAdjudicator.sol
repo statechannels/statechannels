@@ -220,6 +220,8 @@ contract SingleChannelAdjudicator {
     }
 
     function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
+        // this doesn't work since a library can only be accessed with a delegatecall
+        // and this will not provide the correct storage context required for the channel address to be correctly computed
         require(fakeFactory.getChannelAddress(channelId) == address(this), 'Wrong channelId for this adjudicator');
     }
 
