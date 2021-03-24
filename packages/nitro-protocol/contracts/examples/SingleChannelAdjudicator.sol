@@ -22,6 +22,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 library fakeFactory {
     function getChannelAddress(bytes32) public view returns (address) {
+        revert('should not ever happen');
         return address(this);
     }
 }
