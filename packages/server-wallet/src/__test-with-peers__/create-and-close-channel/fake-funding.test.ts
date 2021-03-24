@@ -15,7 +15,8 @@ import {
   peersTeardown,
   messageService,
 } from '../../../jest/with-peers-setup-teardown';
-import {expectLatestStateToMatch, getMessages} from '../utils';
+import {expectLatestStateToMatch} from '../utils';
+import {getMessages} from '../../message-service/utils';
 
 let channelId: string;
 

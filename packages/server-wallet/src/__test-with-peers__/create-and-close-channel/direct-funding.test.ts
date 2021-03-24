@@ -14,8 +14,9 @@ import {
   peersTeardown,
   messageService,
 } from '../../../jest/with-peers-setup-teardown';
+import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
-import {expectLatestStateToMatch, getMessages} from '../utils';
+import {expectLatestStateToMatch} from '../utils';
 
 const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
