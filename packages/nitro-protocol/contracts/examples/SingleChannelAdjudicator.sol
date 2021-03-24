@@ -16,7 +16,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 // Version 1:
 //
-// As version 0 but make it so the channel id is the adjudicator address
+// As version 0 but make it so the channel id is the adjudicator address, by deploying via an on chain factory
 
 contract SingleChannelAdjudicator {
     mapping(bytes32 => bytes32) public statusOf;
@@ -36,7 +36,7 @@ contract SingleChannelAdjudicator {
         uint48 challengeDuration;
     }
 
-        struct Signature {
+    struct Signature {
         uint8 v;
         bytes32 r;
         bytes32 s;
@@ -44,7 +44,7 @@ contract SingleChannelAdjudicator {
 
     enum ChannelMode {Open, Challenge, Finalized}
 
-        struct State {
+    struct State {
         // participants sign the hash of this
         uint48 turnNum;
         bool isFinal;
@@ -105,7 +105,7 @@ contract SingleChannelAdjudicator {
      * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
      * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
      */
-    function _transferAllAssets( bytes memory outcomeBytes) internal {
+    function _transferAllAssets(bytes memory outcomeBytes) internal {
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         // loop over tokens
@@ -404,7 +404,7 @@ contract SingleChannelAdjudicator {
      */
     event Concluded(bytes32 indexed channelId, uint48 finalizesAt);
 
-        function getChainID() public pure returns (uint256) {
+    function getChainID() public pure returns (uint256) {
         uint256 id;
         /* solhint-disable no-inline-assembly */
         assembly {
@@ -414,7 +414,7 @@ contract SingleChannelAdjudicator {
         return id;
     }
 
-        /**
+    /**
      * @notice Given a digest and ethereum digital signature, recover the signer
      * @dev Given a digest and digital signature, recover the signer
      * @param _d message digest
