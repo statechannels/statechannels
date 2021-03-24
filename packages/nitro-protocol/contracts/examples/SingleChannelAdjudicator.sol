@@ -2,6 +2,9 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
+import '../Outcome.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
+
 // Have a an adjudicator per channel, which is only deployed when assets are paid out.
 // Transfers are always external: they always pay out to an ethereum address (since channels have ethereum address now)
 // Version 0:
@@ -25,6 +28,45 @@ contract SingleChannelAdjudicator {
         cId = _cId;
     }
 
+    struct FixedPart {
+        uint256 chainId;
+        address[] participants;
+        uint48 channelNonce;
+        address appDefinition;
+        uint48 challengeDuration;
+    }
+
+        struct Signature {
+        uint8 v;
+        bytes32 r;
+        bytes32 s;
+    }
+
+    enum ChannelMode {Open, Challenge, Finalized}
+
+        struct State {
+        // participants sign the hash of this
+        uint48 turnNum;
+        bool isFinal;
+        bytes32 channelId; // keccack(chainId,participants,channelNonce)
+        bytes32 appPartHash;
+        //     keccak256(abi.encode(
+        //         fixedPart.challengeDuration,
+        //         fixedPart.appDefinition,
+        //         variablePart.appData
+        //     )
+        // )
+        bytes32 outcomeHash;
+    }
+
+    struct ChannelData {
+        uint48 turnNumRecord;
+        uint48 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
     /**
      * @notice Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
      * @dev Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
@@ -46,7 +88,7 @@ contract SingleChannelAdjudicator {
         Signature[] memory sigs
     ) public {
         bytes32 outcomeHash = keccak256(outcomeBytes);
-        bytes32 channelId = _conclude(
+        _conclude(
             largestTurnNum,
             fixedPart,
             appPartHash,
@@ -55,16 +97,15 @@ contract SingleChannelAdjudicator {
             whoSignedWhat,
             sigs
         );
-        _transferAllAssets(channelId, outcomeBytes);
+        _transferAllAssets(outcomeBytes);
     }
 
     /**
      * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
      * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
-     * @param channelId Unique identifier for a state channel
      * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
      */
-    function _transferAllAssets(bytes32 channelId, bytes memory outcomeBytes) internal {
+    function _transferAllAssets( bytes memory outcomeBytes) internal {
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         // loop over tokens
@@ -76,14 +117,14 @@ contract SingleChannelAdjudicator {
 
             if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
                 Outcome.AllocationItem[] memory allocation = abi.decode(
-                    assetOutcome.allocationItems,
+                    assetOutcome.allocationOrGuaranteeBytes,
                     (Outcome.AllocationItem[])
                 );
 
                 // loop over payouts for this token
                 for (uint256 j = 0; j < allocation.length; j++) {
-                    IERC20(assetOutome.assetHolderAddress).transfer(
-                        _bytes32ToAddress(allocation[j].desination),
+                    IERC20(outcome[i].assetHolderAddress).transfer(
+                        _bytes32ToAddress(allocation[j].destination),
                         allocation[j].amount
                     );
                 }
@@ -175,14 +216,13 @@ contract SingleChannelAdjudicator {
         return address(uint160(uint256(destination)));
     }
 
-    function _requireChannelIdMatchesContract(bytes32 channelId) {
+    function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
         require(channelId == cId, 'Wrong channelId for this adjudicator');
     }
 
     /**
      * @notice Checks that this channel is NOT in the Finalized mode.
      * @dev Checks that this channel is in the Challenge mode.
-     * @param channelId Unique identifier for a channel.
      */
     function _requireChannelNotFinalized() internal view {
         require(_mode() != ChannelMode.Finalized, 'Channel finalized.');
@@ -326,7 +366,7 @@ contract SingleChannelAdjudicator {
     function _generateStatus(ChannelData memory channelData)
         internal
         pure
-        returns (bytes32 status)
+        returns (bytes32 _status)
     {
         // The hash is constructed from left to right.
         uint256 result;
@@ -354,7 +394,7 @@ contract SingleChannelAdjudicator {
             )
         );
 
-        status = bytes32(result);
+        _status = bytes32(result);
     }
 
     /**
@@ -363,4 +403,28 @@ contract SingleChannelAdjudicator {
      * @param finalizesAt The unix timestamp when `channelId` finalized.
      */
     event Concluded(bytes32 indexed channelId, uint48 finalizesAt);
+
+        function getChainID() public pure returns (uint256) {
+        uint256 id;
+        /* solhint-disable no-inline-assembly */
+        assembly {
+            id := chainid()
+        }
+        /* solhint-disable no-inline-assembly */
+        return id;
+    }
+
+        /**
+     * @notice Given a digest and ethereum digital signature, recover the signer
+     * @dev Given a digest and digital signature, recover the signer
+     * @param _d message digest
+     * @param sig ethereum digital signature
+     * @return signer
+     */
+    function _recoverSigner(bytes32 _d, Signature memory sig) internal pure returns (address) {
+        bytes32 prefixedHash = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', _d));
+        address a = ecrecover(prefixedHash, sig.v, sig.r, sig.s);
+        require(a != address(0), 'Invalid signature');
+        return (a);
+    }
 }
