@@ -130,7 +130,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
 
-      await (await AdjudicatorFactory.createChannel(channelId)).wait();
+      const {gasUsed} = await (await AdjudicatorFactory.createChannel(channelId)).wait();
+      console.log('gas spent deploying with create2: ' + gasUsed);
 
       const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
 
@@ -212,6 +213,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
       } else {
         const receipt = await (await tx).wait();
 
+        console.log('gas used: ' + receipt.gasUsed);
         expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
 
         await writeGasConsumption(
@@ -227,9 +229,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
           finalizesAt: blockTimestamp,
           outcome,
         });
-
-        // Check fingerprint against the expected value
-        expect(await SingleChannelAdjudicator.status()).toEqual(expectedFingerprint);
 
         // Extract logs
         const {logs} = await (await tx).wait();
