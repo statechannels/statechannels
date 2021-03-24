@@ -130,9 +130,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
 
-      const {gasUsed} = await (await AdjudicatorFactory.createChannel(channelId)).wait();
-      console.log('gas spent deploying with create2: ' + gasUsed);
-
       const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
 
       const SingleChannelAdjudicator = await setupContracts(
@@ -202,7 +199,8 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const sigs = await signStates(states, wallets, whoSignedWhat);
 
       // Form transaction
-      const tx = SingleChannelAdjudicator.concludePushOutcomeAndTransferAll(
+      const tx = AdjudicatorFactory.createAndPayout(
+        channelId,
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
         {gasLimit: 3000000}
       );
