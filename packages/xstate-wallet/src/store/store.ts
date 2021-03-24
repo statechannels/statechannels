@@ -54,7 +54,8 @@ export class Store {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
-  private objectives: Objective[] = [];
+  // TODO: this should not be public
+  public objectives: Objective[] = [];
 
   constructor(chain?: Chain, backend?: DBBackend) {
     // TODO: We shouldn't default to a fake chain
