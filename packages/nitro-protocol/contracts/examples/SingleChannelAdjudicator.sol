@@ -98,7 +98,7 @@ contract SingleChannelAdjudicator {
             sigs
         );
         _transferAllAssets(outcomeBytes);
-        // selfdestruct(address(0));
+        selfdestruct(address(0));
     }
 
     /**
