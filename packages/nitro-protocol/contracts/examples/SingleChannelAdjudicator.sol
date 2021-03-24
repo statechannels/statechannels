@@ -2,8 +2,28 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
+// Have a an adjudicator per channel, which is only deployed when assets are paid out.
+// Transfers are always external: they always pay out to an ethereum address (since channels have ethereum address now)
+// Version 0:
+
+// 1. Deploy a per-channel adjudicator with a baked in channel id stored on it.
+// 2. Fund it by transferring some ERC20s to the singlechanneladjudicator address.
+// 3. Construct a conclusion proof and call concludePushOutcomeAndTransferAll
+// 4. Asset that the correct EOA token balances are correct.
+
+// Version 1:
+//
+// As version 0 but make it so the channel id is the adjudicator address
+
 contract SingleChannelAdjudicator {
     mapping(bytes32 => bytes32) public statusOf;
+
+    bytes32 public cId;
+    bytes32 public status;
+
+    constructor(bytes32 _cId) {
+        cId = _cId;
+    }
 
     /**
      * @notice Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
@@ -95,6 +115,7 @@ contract SingleChannelAdjudicator {
     ) internal returns (bytes32 channelId) {
         channelId = _getChannelId(fixedPart);
         _requireChannelNotFinalized(channelId);
+        _requireChannelIdMatchesContract(channelId);
 
         // input type validation
         requireValidInput(
@@ -106,9 +127,6 @@ contract SingleChannelAdjudicator {
 
         require(largestTurnNum + 1 >= numStates, 'largestTurnNum too low');
         // ^^ SW-C101: prevent underflow
-
-        channelId = _getChannelId(fixedPart);
-        _requireChannelNotFinalized(channelId);
 
         // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
@@ -141,7 +159,7 @@ contract SingleChannelAdjudicator {
         );
 
         // effects
-        statusOf[channelId] = _generateStatus(
+        status = _generateStatus(
             ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash) //solhint-disable-line not-rely-on-time
         );
         emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
@@ -155,5 +173,52 @@ contract SingleChannelAdjudicator {
      */
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
         return address(uint160(uint256(destination)));
+    }
+
+    function _requireChannelIdMatchesContract(bytes32 channelId) {
+        require(channelId == cId, 'Wrong channelId for this adjudicator');
+    }
+
+    /**
+     * @notice Checks that this channel is NOT in the Finalized mode.
+     * @dev Checks that this channel is in the Challenge mode.
+     * @param channelId Unique identifier for a channel.
+     */
+    function _requireChannelNotFinalized() internal view {
+        require(_mode() != ChannelMode.Finalized, 'Channel finalized.');
+    }
+
+    /**
+     * @notice Computes the ChannelMode for this channel.
+     * @dev Computes the ChannelMode for this channel.
+     */
+    function _mode() internal view returns (ChannelMode) {
+        // Note that _unpackStatus() returns (0,0,0), which is
+        // correct when nobody has written to storage yet.
+
+        (, uint48 finalizesAt, ) = _unpackStatus();
+        if (finalizesAt == 0) {
+            return ChannelMode.Open;
+            // solhint-disable-next-line not-rely-on-time
+        } else if (finalizesAt <= block.timestamp) {
+            return ChannelMode.Finalized;
+        } else {
+            return ChannelMode.Challenge;
+        }
+    }
+
+    function _unpackStatus()
+        internal
+        view
+        returns (
+            uint48 turnNumRecord,
+            uint48 finalizesAt,
+            uint160 fingerprint
+        )
+    {
+        uint16 cursor = 256;
+        turnNumRecord = uint48(uint256(status) >> (cursor -= 48));
+        finalizesAt = uint48(uint256(status) >> (cursor -= 48));
+        fingerprint = uint160(uint256(status));
     }
 }
