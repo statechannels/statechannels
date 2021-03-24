@@ -250,7 +250,7 @@ export class ChainWatcher implements Chain {
   private get signer() {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
 
-    if (window.ethereum.mockingInfuraProvider) {
+    if (window.ethereum?.mockingInfuraProvider) {
       return new Wallet(
         '0xccb052837ccafb700e34c0e0cc0f3e5fbee8f078f3fe6b4e5950c7c8acaa7bce',
         this.provider
@@ -325,8 +325,13 @@ export class ChainWatcher implements Chain {
   }
 
   public get selectedAddress(): string | null {
-    if (this.mySelectedAddress === null && window && window.ethereum) {
-      this.mySelectedAddress = window.ethereum.selectedAddress ?? null;
+    if (this.mySelectedAddress === null) {
+      if (window && window.ethereum) {
+        this.mySelectedAddress = window.ethereum.selectedAddress ?? null;
+      } else {
+        // TODO: remove this ganache case hardcoding
+        this.mySelectedAddress = '0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39';
+      }
     }
     return this.mySelectedAddress;
   }
@@ -400,10 +405,9 @@ export class ChainWatcher implements Chain {
 
     const amount: Uint256 = BN.from(await ethAssetHolder.holdings(channelId));
 
-    const [turnNumRecord, finalizesAt]: [
-      number,
-      number
-    ] = await this._adjudicator.getChannelStorage(channelId);
+    const [turnNumRecord, finalizesAt]: [number, number] = await this._adjudicator.unpackStatus(
+      channelId
+    );
 
     const blockNum = await this.provider.getBlockNumber();
     chainLogger.trace(
@@ -458,7 +462,7 @@ export class ChainWatcher implements Chain {
       }))
     );
 
-    const assetTransferEvents = fromEvent(this._assetHolders[0], 'AssetTransferred').pipe(
+    const assetTransferEvents = fromEvent(this._assetHolders[0], 'AllocationUpdated').pipe(
       // TODO: Type event correctly, use ethers-utils.js
       filter((event: Array<string | Uint256>) => BN.eq(event[0], channelId)),
       // Actually ignores the event data and just polls the chain
