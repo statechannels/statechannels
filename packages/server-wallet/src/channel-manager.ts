@@ -40,22 +40,16 @@ export class ChannelManager {
     const createResult = await this._wallet.createChannels(args, numberOfChannels);
 
     await this._messageService.send(getMessages(createResult));
-    await this.ensureObjectives(createResult.newObjectives, this._wallet, this._messageService);
+    await this.ensureObjectives(createResult.newObjectives);
   }
 
   /**
    * Ensures that the provided objectives get completed.
    * Will resend messages as required to ensure that the objectives get completed.
    * @param objectives The list of objectives to ensure get completed.
-   * @param wallet The wallet to use
-   * @param messageService The message service to use.
    * @returns A promise that resolves when all the objectives are completed
    */
-  private async ensureObjectives(
-    objectives: WalletObjective[],
-    wallet: Wallet,
-    messageService: MessageServiceInterface
-  ): Promise<void> {
+  private async ensureObjectives(objectives: WalletObjective[]): Promise<void> {
     const remaining = new Map(objectives.map(o => [o.objectiveId, o]));
 
     const onObjectiveSucceeded = (o: WalletObjective) => {
@@ -64,16 +58,16 @@ export class ChannelManager {
       }
 
       if (remaining.size === 0) {
-        wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+        this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
       }
     };
 
-    wallet.on('objectiveSucceeded', onObjectiveSucceeded);
+    this._wallet.on('objectiveSucceeded', onObjectiveSucceeded);
     try {
       await backOff(
         async () => {
-          const {outbox} = await wallet.syncObjectives(objectives.map(o => o.objectiveId));
-          await messageService.send(getMessages(outbox));
+          const {outbox} = await this._wallet.syncObjectives(objectives.map(o => o.objectiveId));
+          await this._messageService.send(getMessages(outbox));
 
           if (remaining.size !== 0) {
             // Throwing an error indicates to the backoff library that the task is not complete
@@ -84,8 +78,10 @@ export class ChannelManager {
         {...this._backOffOptions, retry: () => remaining.size !== 0}
       );
     } catch (error) {
-      wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-      wallet.logger.error('Unable to ensure objectives', {remaining: Array.from(remaining.keys())});
+      this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+      this._wallet.logger.error('Unable to ensure objectives', {
+        remaining: Array.from(remaining.keys()),
+      });
       throw new Error('Unable to ensure objectives');
     }
   }
