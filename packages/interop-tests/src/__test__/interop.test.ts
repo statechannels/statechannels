@@ -34,7 +34,7 @@ const chainId = process.env.CHAIN_ID;
 
 if (!rpcEndpoint) throw new Error('RPC_ENDPOINT must be defined');
 
-const baseConfig = defaultTestConfig({
+const serverConfig = defaultTestConfig({
   networkConfiguration: {
     chainNetworkID: chainId
       ? parseInt(chainId)
@@ -47,15 +47,10 @@ const baseConfig = defaultTestConfig({
   }
 });
 
-const serverConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
-  database: 'server_peer'
-});
-
 let provider: providers.JsonRpcProvider;
 
 beforeAll(async () => {
   await DBAdmin.truncateDatabase(serverConfig);
-  await DBAdmin.migrateDatabase(serverConfig);
 
   provider = new providers.JsonRpcProvider(rpcEndpoint);
   const assetHolder = new Contract(
