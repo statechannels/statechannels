@@ -37,6 +37,7 @@ export class BrowserWallet {
     private chain = new ChainWatcher(),
     public store = new Store(chain),
     private registeredChannels = new Set<string>(),
+    // TODO: probably should be stored in a more permanent storage
     private channelFunding: Dictionary<Funding> = {}
   ) {}
 
@@ -76,6 +77,7 @@ export class BrowserWallet {
       }
     }
 
+    // Crank objectives
     for (const objective of this.store.objectives) {
       switch (objective.type) {
         case 'OpenChannel': {
@@ -126,13 +128,14 @@ export class BrowserWallet {
       signedStates: []
     };
     const {latestState} = channel;
-    // Prefund state
+    // Should we sign the prefund state?
     if (latestState.turnNum === 0 && !channel.isSupportedByMe) {
       const newState = channel.signAndAdd(latestState, pk);
       response.signedStates = [newState];
       return response;
     }
 
+    // Should we deposit?
     if (
       BN.gte(channelFunding.amountOnChain, depositInfo.depositAt) &&
       BN.lt(channelFunding.amountOnChain, depositInfo.totalAfterDeposit) &&
@@ -141,6 +144,8 @@ export class BrowserWallet {
       response.deposit = true;
       return response;
     }
+
+    // Should we sign the postfund state?
     if (
       BN.gte(channelFunding.amountOnChain, depositInfo.fundedAt) &&
       latestState.turnNum === 3 &&
