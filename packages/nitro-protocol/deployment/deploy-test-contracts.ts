@@ -2,6 +2,7 @@
 // DO NOT USE THIS SCRIPT TO DEPLOY CONTRACTS TO PRODUCTION NETWORKS
 import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
+import {DeployedContractWrapper} from 'etherlime-lib';
 
 import {writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
@@ -15,6 +16,8 @@ import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
+import adjudicatorFactoryArtifact from '../artifacts/contracts/examples/AdjudicatorFactory.sol/AdjudicatorFactory.json';
+import singleChannelAdjudicatorArtifact from '../artifacts/contracts/examples/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 
 export async function deploy(): Promise<Record<string, string>> {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
@@ -68,6 +71,14 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_NITRO_ADJUDICATOR_ADDRESS,
     TEST_TOKEN_ADDRESS
   );
+  const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
+    singleChannelAdjudicatorArtifact as any
+  );
+  const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(
+    adjudicatorFactoryArtifact as any,
+    {},
+    SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS
+  );
   return {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
@@ -82,5 +93,7 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_TOKEN_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER2_ADDRESS,
+    SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS,
+    ADJUDICATOR_FACTORY_ADDRESS,
   };
 }

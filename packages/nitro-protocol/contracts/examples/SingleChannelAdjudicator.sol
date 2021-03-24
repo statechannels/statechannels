@@ -19,12 +19,11 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 // As version 0 but make it so the channel id is the adjudicator address, by deploying via an on chain factory
 
 contract SingleChannelAdjudicator {
-    mapping(bytes32 => bytes32) public statusOf;
-
     bytes32 public cId;
     bytes32 public status;
 
-    constructor(bytes32 _cId) {
+    function setup(bytes32 _cId) public {
+        require(cId == 0);
         cId = _cId;
     }
 

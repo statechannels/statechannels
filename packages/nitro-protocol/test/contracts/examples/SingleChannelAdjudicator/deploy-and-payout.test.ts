@@ -2,6 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, BigNumber, utils, constants, ContractFactory} from 'ethers';
 
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/examples/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
+import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/examples/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import TokenArtifact from '../../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../../src/contract/channel';
 import {channelDataToStatus} from '../../../../src/contract/channel-storage';
@@ -28,6 +29,7 @@ import {NITRO_MAX_GAS} from '../../../../src/transactions';
 
 const provider = getTestProvider();
 let SingleChannelAdjudicator: Contract;
+let AdjudicatorFactory: Contract;
 let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = ['', '', ''];
@@ -73,6 +75,11 @@ for (let i = 0; i < 3; i++) {
 beforeAll(async () => {
   appDefinition = getPlaceHolderContractAddress();
   Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  AdjudicatorFactory = await setupContracts(
+    provider,
+    AdjudicatorFactoryArtifact,
+    process.env.ADJUDICATOR_FACTORY_ADDRESS
+  );
   // Preload At and Bt with TOK
   await (await Token.transfer('0x' + addresses.At.slice(26), BigNumber.from(1))).wait();
   await (await Token.transfer('0x' + addresses.Bt.slice(26), BigNumber.from(1))).wait();
@@ -123,16 +130,15 @@ describe('concludePushOutcomeAndTransferAll', () => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
 
-      const SingleChannelAdjudicatorFactory = await ContractFactory.fromSolidity(
+      await (await AdjudicatorFactory.createChannel(channelId)).wait();
+
+      const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
+
+      const SingleChannelAdjudicator = await setupContracts(
+        provider,
         SingleChannelAdjudicatorArtifact,
-        deployer
+        adjudicatorAddress
       );
-      console.log(SingleChannelAdjudicatorFactory);
-
-      const SingleChannelAdjudicator = await SingleChannelAdjudicatorFactory.deploy(channelId);
-
-      console.log(SingleChannelAdjudicatorFactory);
-
       addresses.c = channelId;
       addresses.ERC20 = Token.address; // this matches the changes made to the contract
       const support = oneState;
