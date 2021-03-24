@@ -47,6 +47,31 @@ contract AdjudicatorFactory {
         emit ChannelCreation(channel);
     }
 
+    /// @dev Allows us to create new channel contract, payout all of the funds, and destroy the contract
+    function createAndPayout(
+        bytes32 channelId,
+        uint48 largestTurnNum,
+        SingleChannelAdjudicator.FixedPart memory fixedPart,
+        bytes32 appPartHash,
+        bytes memory outcomeBytes,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        SingleChannelAdjudicator.Signature[] memory sigs
+    ) public returns (address channel) {
+        channel = _deployChannelProxy(channelId);
+        SingleChannelAdjudicator(channel).setup(channelId);
+        SingleChannelAdjudicator(channel).concludePushOutcomeAndTransferAll(
+            largestTurnNum,
+            fixedPart,
+            appPartHash,
+            outcomeBytes,
+            numStates,
+            whoSignedWhat,
+            sigs
+        );
+        emit ChannelCreation(channel);
+    }
+
     ////////////////////////////////////////
     // Internal Methods
 
