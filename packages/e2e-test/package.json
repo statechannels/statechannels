@@ -13,6 +13,7 @@
     "ts-jest": "26.4.4"
   },
   "scripts": {
-    "test": "LOG_DESTINATION=console HUB_DESTINATION=0x123 yarn jest -c ./jest/jest.config.js --runInBand"
+    "test": "LOG_DESTINATION=console HUB_DESTINATION=0x123 yarn jest -c ./jest/jest.config.js --runInBand",
+    "test:ci": "yarn test"
   }
 }
