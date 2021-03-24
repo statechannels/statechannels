@@ -21,7 +21,7 @@ export type Message = {
 };
 type Response = Message & {deposit?: boolean};
 
-type Funding = 'DEPOSITED' | undefined;
+type Funding = {amountOnChain: Uint256; status?: 'DEPOSITED'};
 type OnNewMessage = (message: Message) => void;
 
 type DepositInfo = {
@@ -37,8 +37,7 @@ export class BrowserWallet {
     private chain = new ChainWatcher(),
     public store = new Store(chain),
     private registeredChannels = new Set<string>(),
-    private channelFundingAmount: Dictionary<Uint256> = {},
-    private channelFundingStatus: Dictionary<Funding> = {}
+    private channelFunding: Dictionary<Funding> = {}
   ) {}
 
   private async init(): Promise<BrowserWallet> {
@@ -97,17 +96,15 @@ export class BrowserWallet {
 
     const response = this.crankOpenChannelObjective(
       channel,
-      this.channelFundingAmount[channelId],
-      this.channelFundingStatus[channelId],
+      this.channelFunding[channelId],
       depositInfo,
       pk
     );
     if (response.deposit) {
-      this.channelFundingStatus[channelId] = 'DEPOSITED';
-      // TODO: remove this hardcoding
+      this.channelFunding[channelId] = {...this.channelFunding[channelId], status: 'DEPOSITED'};
       await this.chain.deposit(
         channel.channelId,
-        this.channelFundingAmount[channelId],
+        this.channelFunding[channelId].amountOnChain,
         depositInfo.myDeposit
       );
     }
@@ -120,8 +117,7 @@ export class BrowserWallet {
 
   crankOpenChannelObjective(
     channel: ChannelStoreEntry,
-    fundingAmount: Uint256,
-    fundingStatus: Funding,
+    channelFunding: Funding,
     depositInfo: DepositInfo,
     pk: string
   ): Response {
@@ -137,17 +133,16 @@ export class BrowserWallet {
       return response;
     }
 
-    // TODO: remove this hardcoding
     if (
-      BN.gte(fundingAmount, depositInfo.depositAt) &&
-      BN.lt(fundingAmount, depositInfo.totalAfterDeposit) &&
-      fundingStatus !== 'DEPOSITED'
+      BN.gte(channelFunding.amountOnChain, depositInfo.depositAt) &&
+      BN.lt(channelFunding.amountOnChain, depositInfo.totalAfterDeposit) &&
+      channelFunding.status !== 'DEPOSITED'
     ) {
       response.deposit = true;
       return response;
     }
     if (
-      BN.gte(fundingAmount, depositInfo.fundedAt) &&
+      BN.gte(channelFunding.amountOnChain, depositInfo.fundedAt) &&
       latestState.turnNum === 3 &&
       channel.latestSignedByMe.turnNum === 0
     ) {
@@ -160,7 +155,10 @@ export class BrowserWallet {
   }
 
   async onFundingUpdate(channelId: string, channelChainInfo: ChannelChainInfo): Promise<void> {
-    this.channelFundingAmount[channelId] = channelChainInfo.amount;
+    this.channelFunding[channelId] = {
+      ...this.channelFunding[channelId],
+      amountOnChain: channelChainInfo.amount
+    };
     await this.onOpenChannelObjective(channelId);
   }
 
