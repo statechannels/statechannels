@@ -100,9 +100,12 @@ export class ChannelManager {
     }
 
     this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-    this._wallet.logger.error('Unable to ensure objectives', {
-      remaining: Array.from(remaining.keys()),
-    });
+    this._wallet.logger.error(
+      {
+        remaining: Array.from(remaining.keys()),
+      },
+      'Unable to ensure objectives'
+    );
     throw new Error('Unable to ensure objectives');
   }
 
