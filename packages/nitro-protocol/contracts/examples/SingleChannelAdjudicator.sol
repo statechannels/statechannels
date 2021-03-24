@@ -16,7 +16,8 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 // Version 1:
 //
-// As version 0 but make it so the channel id is the adjudicator address, by deploying via an on chain factory
+// As version 0 but make it so the channel "address" is the adjudicator address (and uniquely derived from the channel id)
+//, by deploying via an on chain factory
 
 contract SingleChannelAdjudicator {
     bytes32 public cId;
@@ -97,6 +98,7 @@ contract SingleChannelAdjudicator {
             sigs
         );
         _transferAllAssets(outcomeBytes);
+        // selfdestruct(address(0));
     }
 
     /**
