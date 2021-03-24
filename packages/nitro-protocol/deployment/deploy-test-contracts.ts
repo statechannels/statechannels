@@ -75,25 +75,36 @@ export async function deploy(): Promise<Record<string, string>> {
   );
   const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(adjudicatorFactoryArtifact as any);
 
-  // const singleChannelAdjudicatorArtifactReplaced = JSON.parse(
-  //   JSON.stringify(singleChannelAdjudicatorArtifact).replace(
-  //     '0xFFfFfFffFFfffFFfFFfFFFFFffFFFffffFfFFFfF',
-  //     `${ADJUDICATOR_FACTORY_ADDRESS}`
-  //   )
-  // );
+  // copypasted from hardhat-deploy
+  function linkRawLibrary(bytecode: string, libraryName: string, libraryAddress: string): string {
+    const address = libraryAddress.replace('0x', '');
+    let encodedLibraryName;
+    if (libraryName.startsWith('$') && libraryName.endsWith('$')) {
+      encodedLibraryName = libraryName.slice(1, libraryName.length - 1);
+    } else {
+      encodedLibraryName = utils.solidityKeccak256(['string'], [libraryName]).slice(2, 36);
+    }
+    const pattern = new RegExp(`_+\\$${encodedLibraryName}\\$_+`, 'g');
+    if (!pattern.exec(bytecode)) {
+      throw new Error(
+        `Can't link '${libraryName}' (${encodedLibraryName}) in \n----\n ${bytecode}\n----\n`
+      );
+    }
+    return bytecode.replace(pattern, address);
+  }
 
-  // console.log(ADJUDICATOR_FACTORY_ADDRESS);
-  // writeFileSync('./replaced.json', JSON.stringify(singleChannelAdjudicatorArtifactReplaced));
+  const singleChannelAdjudicatorArtifactReplaced = {...singleChannelAdjudicatorArtifact};
+  singleChannelAdjudicatorArtifactReplaced.bytecode = linkRawLibrary(
+    singleChannelAdjudicatorArtifact.bytecode,
+    '$76eca443f7bf7cc2d9c0c268c261b98992$',
+    ADJUDICATOR_FACTORY_ADDRESS
+  );
 
-  // console.log('replaced dummy address');
+  // we used the placeholder manually
+  // https://docs.soliditylang.org/en/v0.8.0/contracts.html#libraries
 
-  // function libraryHashPlaceholder(input) {
-  //   return '$' + utils.keccak256(input).slice(0, 34) + '$';
-  // }
-
-  console.log(ADJUDICATOR_FACTORY_ADDRESS);
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
-    singleChannelAdjudicatorArtifact as any,
+    singleChannelAdjudicatorArtifactReplaced as any,
     {$e3f979aae6bae748bc967818e064d55234$: ADJUDICATOR_FACTORY_ADDRESS.slice(2)}
   );
 
