@@ -1,6 +1,7 @@
 import {
   DBAdmin,
   defaultTestConfig,
+  Output,
   overwriteConfigWithDatabaseConnection,
   SingleChannelOutput,
   SingleThreadedWallet
@@ -25,22 +26,23 @@ import {WalletObjective} from '@statechannels/server-wallet/src/models/objective
 
 jest.setTimeout(60_000);
 
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
+/* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
-if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const rpcEndpoint = process.env.RPC_ENDPOINT;
+const chainId = process.env.CHAIN_ID;
+/* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
+
+if (!rpcEndpoint) throw new Error('RPC_ENDPOINT must be defined');
 
 const baseConfig = defaultTestConfig({
   networkConfiguration: {
-    chainNetworkID: process.env.CHAIN_ID
-      ? parseInt(process.env.CHAIN_ID)
+    chainNetworkID: chainId
+      ? parseInt(chainId)
       : defaultTestConfig().networkConfiguration.chainNetworkID
   },
   chainServiceConfiguration: {
     attachChainService: true,
-    provider: process.env.RPC_ENDPOINT,
+    provider: rpcEndpoint,
     pk: ETHERLIME_ACCOUNTS[0].privateKey
   }
 });
@@ -74,15 +76,26 @@ function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocksForEvent);
 }
 
-it('e2e test', async () => {
+function serverMessageToBrowserMessage(serverOutput: Output): Message {
+  const wirePayload = validatePayload(serverOutput.outbox[0].params.data);
+  return {
+    objectives: wirePayload.objectives?.map(deserializeObjective) || [],
+    signedStates: wirePayload.signedStates?.map(deserializeState) || []
+  };
+}
+
+it('server + browser wallet interoperability test', async () => {
   const serverWallet = await SingleThreadedWallet.create(serverConfig);
+  const serverAddress = await serverWallet.getSigningAddress();
+  const serverDestination = makeDestination(serverAddress);
+
   const objectiveSuccededPromise = new Promise<void>(r => {
     serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
       if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
     });
   });
 
-  const onNewMessage = (message: Message) => {
+  const onNewMessageFromBroserWallet = (message: Message) => {
     const wireMessage = {
       ...message,
       signedStates: message.signedStates?.map(s => serializeState(s))
@@ -94,15 +107,11 @@ it('e2e test', async () => {
     });
   };
 
-  const xstateWallet = await ClientWallet.create(onNewMessage);
+  const browserWallet = await ClientWallet.create(onNewMessageFromBroserWallet);
+  const browserAddress = await browserWallet.store.getAddress();
+  const browserDestination = makeDestination(await browserWallet.store.getAddress());
 
-  const serverAddress = await serverWallet.getSigningAddress();
-  const serverDestination = makeDestination(serverAddress);
-  const xstateDestination = makeDestination(await xstateWallet.store.getAddress());
-
-  const {
-    outbox: [{params}]
-  } = await serverWallet.createChannel({
+  const output1 = await serverWallet.createChannel({
     appData: '0x',
     appDefinition: constants.AddressZero,
     fundingStrategy: 'Direct',
@@ -114,9 +123,9 @@ it('e2e test', async () => {
         destination: serverDestination
       },
       {
-        participantId: 'xstate',
-        signingAddress: await xstateWallet.store.getAddress(),
-        destination: xstateDestination
+        participantId: 'browser',
+        signingAddress: browserAddress,
+        destination: browserDestination
       }
     ],
     allocations: [
@@ -127,29 +136,27 @@ it('e2e test', async () => {
             amount: BN.from(3),
             destination: serverDestination
           },
-          {amount: BN.from(5), destination: xstateDestination}
+          {amount: BN.from(5), destination: browserDestination}
         ]
       }
     ]
   });
 
-  const wirePayload = validatePayload(params.data);
-  const payload = {
-    objectives: wirePayload.objectives?.map(deserializeObjective) || [],
-    signedStates: wirePayload.signedStates?.map(deserializeState) || []
-  };
+  await browserWallet.incomingMessage(serverMessageToBrowserMessage(output1));
 
-  await xstateWallet.incomingMessage(payload);
-
+  /** This is fragile. We are waiting for the third channelUpdated event. Note that these events consistently arrive in the following order.
+   *  But the events are not guaranteed to arrive in this order:
+   *  1. The first event is triggered by the registration of the channel with the chain service.
+   *      holdingUpdated is invoked when the initial holdings are read from the chain.
+   *  2. The second event is triggered by the server wallet deposit. The deposit results in a holdingUpdated invocation.
+   *  3. The third event is triggered by the browser wallet deposit.
+   */
+  //
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
     .pipe(take(3))
     .toPromise();
-  const singleChannelOutput = await postFundAPromise;
-  const wirePayload2 = validatePayload(singleChannelOutput.outbox[0].params.data);
-  const payload2 = {
-    objectives: wirePayload2.objectives?.map(deserializeObjective) || [],
-    signedStates: wirePayload2.signedStates?.map(deserializeState) || []
-  };
-  await xstateWallet.incomingMessage(payload2);
+
+  await browserWallet.incomingMessage(serverMessageToBrowserMessage(await postFundAPromise));
   await objectiveSuccededPromise;
 });
