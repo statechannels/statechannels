@@ -50,7 +50,9 @@ describe('EnsureObjectives', () => {
         await peerWallets.b.joinChannels([o.data.targetChannelId]);
       });
 
-      await channelManager.createChannels(getCreateChannelsArgs(), 50);
+      await expect(
+        channelManager.createChannels(getCreateChannelsArgs(), 50)
+      ).resolves.not.toThrow();
     }
   );
 
