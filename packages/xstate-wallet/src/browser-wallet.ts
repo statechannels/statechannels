@@ -27,7 +27,7 @@ type Funding =
   | undefined;
 type OnNewMessage = (message: Message) => void;
 
-export class ClientWallet {
+export class BrowserWallet {
   private constructor(
     private onNewMessage: OnNewMessage,
     private chain = new ChainWatcher(),
@@ -36,13 +36,13 @@ export class ClientWallet {
     private latestFunding: Funding = undefined
   ) {}
 
-  private async init(): Promise<ClientWallet> {
+  private async init(): Promise<BrowserWallet> {
     await this.store.initialize();
     return this;
   }
 
-  static async create(onNewMessage: OnNewMessage): Promise<ClientWallet> {
-    return new ClientWallet(onNewMessage).init();
+  static async create(onNewMessage: OnNewMessage): Promise<BrowserWallet> {
+    return new BrowserWallet(onNewMessage).init();
   }
 
   async incomingMessage(payload: Message): Promise<Message> {

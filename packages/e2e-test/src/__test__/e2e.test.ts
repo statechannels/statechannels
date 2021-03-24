@@ -7,7 +7,7 @@ import {
   SingleThreadedWallet
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ClientWallet, Message} from '@statechannels/xstate-wallet';
+import {BrowserWallet, Message} from '@statechannels/xstate-wallet';
 import {constants, Contract, providers} from 'ethers';
 import {
   BN,
@@ -107,7 +107,7 @@ it('server + browser wallet interoperability test', async () => {
     });
   };
 
-  const browserWallet = await ClientWallet.create(onNewMessageFromBroserWallet);
+  const browserWallet = await BrowserWallet.create(onNewMessageFromBroserWallet);
   const browserAddress = await browserWallet.store.getAddress();
   const browserDestination = makeDestination(await browserWallet.store.getAddress());
 
