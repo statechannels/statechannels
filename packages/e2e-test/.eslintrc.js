@@ -39,10 +39,6 @@ module.exports = {
       files: ['**/*.ts'],
       extends: ['plugin:import/typescript'],
       rules: {
-        // We use snake case for some PostgreSQL / Objection client library key names
-        '@typescript-eslint/camelcase': 'off',
-        '@typescript-eslint/no-explicit-any': 'off',
-        '@typescript-eslint/no-use-before-define': 'off',
         '@typescript-eslint/no-unused-vars': [1, {argsIgnorePattern: '^_', varsIgnorePattern: '^_'}]
       }
     }
