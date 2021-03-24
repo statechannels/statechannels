@@ -159,4 +159,6 @@ it('server + browser wallet interoperability test', async () => {
 
   await browserWallet.incomingMessage(serverMessageToBrowserMessage(await postFundAPromise));
   await objectiveSuccededPromise;
+
+  await serverWallet.destroy();
 });
