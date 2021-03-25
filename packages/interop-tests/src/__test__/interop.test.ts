@@ -6,7 +6,7 @@ import {
   SingleThreadedEngine
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {BrowserWallet, Message} from '@statechannels/xstate-wallet';
+import {ChannelWallet2, Message} from '@statechannels/xstate-wallet';
 import {constants, Contract, providers} from 'ethers';
 import {
   BN,
@@ -106,12 +106,9 @@ it('server + browser wallet interoperability test', async () => {
     });
   };
 
-  const browserWallet = await BrowserWallet.create(
-    onNewMessageFromBroserWallet,
-    makeAddress('0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39')
-  );
-  const browserAddress = await browserWallet.store.getAddress();
-  const browserDestination = makeDestination(await browserWallet.store.getAddress());
+  const browserWallet = await ChannelWallet2.create(onNewMessageFromBroserWallet);
+  const browserAddress = await browserWallet.getAddress();
+  const browserDestination = makeDestination(browserAddress);
 
   const output1 = await serverWallet.createChannel({
     appData: '0x',
