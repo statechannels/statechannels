@@ -20,15 +20,13 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 // As version 0 but make it so the channel "address" is the adjudicator address (and uniquely derived from the channel id)
 //, by deploying via an on chain factory
 
-// This will be linked
-/* solhint-disable no-empty-blocks */
-library placeholderFactory {
-
-}
-
-/* solhint-enable no-empty-blocks */
-
 contract SingleChannelAdjudicator {
+    address immutable adjudicatorFactoryAddress;
+
+    constructor(address a) {
+        adjudicatorFactoryAddress = a;
+    }
+
     bytes32 public status;
 
     struct FixedPart {
@@ -224,7 +222,7 @@ contract SingleChannelAdjudicator {
         // the placeholderFactory will be replaced with the address of the real AdjudicatorFactory
         // at deploy time (it will be linked).
         require(
-            AdjudicatorFactory(address(placeholderFactory)).getChannelAddress(channelId) ==
+            AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(channelId) ==
                 address(this),
             'Wrong channelId'
         );
