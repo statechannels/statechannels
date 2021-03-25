@@ -22,6 +22,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
 // This will be linked
 library placeholderFactory {
+
 }
 
 contract SingleChannelAdjudicator {
@@ -219,7 +220,11 @@ contract SingleChannelAdjudicator {
     function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
         // the placeholderFactory will be replaced with the address of the real AdjudicatorFactory
         // at deploy time (it will be linked).
-        require(AdjudicatorFactory(address(placeholderFactory)).getChannelAddress(channelId) == address(this), 'Wrong channelId for this adjudicator');
+        require(
+            AdjudicatorFactory(address(placeholderFactory)).getChannelAddress(channelId) ==
+                address(this),
+            'Wrong channelId for this adjudicator'
+        );
     }
 
     /**

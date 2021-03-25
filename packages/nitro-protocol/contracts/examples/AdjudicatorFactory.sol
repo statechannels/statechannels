@@ -16,7 +16,7 @@ contract AdjudicatorFactory {
     event ChannelCreation(address channel);
 
     function setup(address _mastercopy) public {
-        require(mastercopy==address(0));
+        require(mastercopy == address(0));
         mastercopy = _mastercopy;
         creationCodeHash = keccak256(_getProxyCreationCode(_mastercopy));
     }
