@@ -203,17 +203,11 @@ describe('concludePushOutcomeAndTransferAll', () => {
 
       // Form transaction
 
-      (await AdjudicatorFactory.createChannel(channelId)).wait();
-
-      const tx = await SingleChannelAdjudicator.concludePushOutcomeAndTransferAll(
+      const tx = AdjudicatorFactory.createAndPayout(
+        channelId,
         ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
         {gasLimit: 3000000}
       );
-      //   const tx = AdjudicatorFactory.createAndPayout(
-      //     channelId,
-      //     ...concludePushOutcomeAndTransferAllArgs(states, sigs, whoSignedWhat),
-      //     {gasLimit: 3000000}
-      //   );
 
       // Switch on overall test expectation
       if (reasonString) {
