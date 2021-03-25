@@ -149,9 +149,9 @@ export class MessagingService implements MessagingServiceInterface {
     const ourAddress = await this.store.getAddress();
     const sender = ourAddress;
     const objectiveRecipients =
-      message.objectives?.map(o => o.participants).reduce((a, b) => a.concat(b)) || [];
+      message.objectives?.map(o => o.participants).reduce((a, b) => a.concat(b), []) || [];
     const stateRecipients =
-      message.signedStates?.map(ss => ss.participants).reduce((a, b) => a.concat(b)) || [];
+      message.signedStates?.map(ss => ss.participants).reduce((a, b) => a.concat(b), []) || [];
 
     const filteredRecipients = [...new Set((objectiveRecipients || []).concat(stateRecipients))]
       .filter(p => p.signingAddress !== sender)

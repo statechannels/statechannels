@@ -6,22 +6,15 @@ import {
   SingleThreadedEngine
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ChannelWallet2, Message} from '@statechannels/xstate-wallet';
+import {ChannelWallet} from '@statechannels/xstate-wallet';
 import {constants, Contract, providers} from 'ethers';
-import {
-  BN,
-  deserializeObjective,
-  deserializeState,
-  makeAddress,
-  makeDestination,
-  serializeState,
-  validatePayload
-} from '@statechannels/wallet-core';
+import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {WalletObjective} from '@statechannels/server-wallet/src/models/objective';
+import {isJsonRpcNotification, Message, PushMessageRequest} from '@statechannels/client-api-schema';
 
 jest.setTimeout(60_000);
 
@@ -75,12 +68,8 @@ function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocksForEvent);
 }
 
-function serverMessageToBrowserMessage(serverOutput: Output): Message {
-  const wirePayload = validatePayload(serverOutput.outbox[0].params.data);
-  return {
-    objectives: wirePayload.objectives?.map(deserializeObjective) || [],
-    signedStates: wirePayload.signedStates?.map(deserializeState) || []
-  };
+function serverMessageToBrowserMessage(serverOutput: Output): PushMessageRequest {
+  return generatePushMessage(serverOutput.outbox[0].params);
 }
 
 it('server + browser wallet interoperability test', async () => {
@@ -94,21 +83,15 @@ it('server + browser wallet interoperability test', async () => {
     });
   });
 
-  const onNewMessageFromBroserWallet = (message: Message) => {
-    const wireMessage = {
-      ...message,
-      signedStates: message.signedStates?.map(s => serializeState(s))
-    };
-    serverWallet.pushMessage({
-      ...wireMessage,
-      requests: [],
-      walletVersion: '@statechannels/server-wallet@1.23.0'
-    });
-  };
-
-  const browserWallet = await ChannelWallet2.create(onNewMessageFromBroserWallet);
+  const browserWallet = await ChannelWallet.create();
   const browserAddress = await browserWallet.getAddress();
   const browserDestination = makeDestination(browserAddress);
+
+  browserWallet.onSendMessage(message => {
+    if (isJsonRpcNotification(message)) {
+      serverWallet.pushMessage((message.params as Message).data);
+    }
+  });
 
   const output1 = await serverWallet.createChannel({
     appData: '0x',
@@ -122,7 +105,7 @@ it('server + browser wallet interoperability test', async () => {
         destination: serverDestination
       },
       {
-        participantId: 'browser',
+        participantId: browserAddress,
         signingAddress: browserAddress,
         destination: browserDestination
       }
@@ -141,7 +124,7 @@ it('server + browser wallet interoperability test', async () => {
     ]
   });
 
-  await browserWallet.incomingMessage(serverMessageToBrowserMessage(output1));
+  await browserWallet.pushMessage(serverMessageToBrowserMessage(output1), 'dummyDomain');
 
   /** This is fragile. We are waiting for the third channelUpdated event. Note that these events consistently arrive in the following order.
    *  But the events are not guaranteed to arrive in this order:
@@ -150,14 +133,27 @@ it('server + browser wallet interoperability test', async () => {
    *  2. The second event is triggered by the server wallet deposit. The deposit results in a holdingUpdated invocation.
    *  3. The third event is triggered by the browser wallet deposit.
    */
-  //
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
     .pipe(take(3))
     .toPromise();
 
-  await browserWallet.incomingMessage(serverMessageToBrowserMessage(await postFundAPromise));
+  await browserWallet.pushMessage(
+    serverMessageToBrowserMessage(await postFundAPromise),
+    'dummyDomain'
+  );
+
   await objectiveSuccededPromise;
 
   await serverWallet.destroy();
 });
+
+function generatePushMessage(messageParams: Message): PushMessageRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 111111111,
+    method: 'PushMessage',
+    params: messageParams
+  };
+}
