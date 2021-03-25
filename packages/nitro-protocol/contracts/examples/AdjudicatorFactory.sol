@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.7.1;
+pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 import '@openzeppelin/contracts/utils/Create2.sol';
@@ -16,7 +16,7 @@ contract AdjudicatorFactory {
     event ChannelCreation(address channel);
 
     function setup(address _mastercopy) public {
-        require(mastercopy == address(0));
+        require(mastercopy == address(0), 'Can only set mstrcpy addr once');
         mastercopy = _mastercopy;
         creationCodeHash = keccak256(_getProxyCreationCode(_mastercopy));
     }
