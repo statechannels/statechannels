@@ -202,9 +202,7 @@ contract SingleChannelAdjudicator {
         );
 
         // effects
-        status = _generateStatus(
-            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash) //solhint-disable-line not-rely-on-time
-        );
+
         emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
     }
 
