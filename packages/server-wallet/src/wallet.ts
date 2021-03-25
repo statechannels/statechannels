@@ -25,7 +25,7 @@ export type RetryOptions = {
 };
 
 const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
-export class ChannelManager {
+export class Wallet {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
    * @param engine The engine to use.
@@ -37,8 +37,8 @@ export class ChannelManager {
     engine: Engine,
     messageService: MessageServiceInterface,
     retryOptions: Partial<RetryOptions> = DEFAULTS
-  ): Promise<ChannelManager> {
-    return new ChannelManager(engine, messageService, {...DEFAULTS, ...retryOptions});
+  ): Promise<Wallet> {
+    return new Wallet(engine, messageService, {...DEFAULTS, ...retryOptions});
   }
   private constructor(
     private _engine: Engine,

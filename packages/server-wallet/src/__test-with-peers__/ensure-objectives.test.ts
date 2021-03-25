@@ -8,7 +8,7 @@ import {
   peersTeardown,
   peerEngines,
 } from '../../jest/with-peers-setup-teardown';
-import {ChannelManager} from '../channel-manager';
+import {Wallet} from '../wallet';
 import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
@@ -44,15 +44,13 @@ describe('EnsureObjectives', () => {
     'can successfully create a channel with the latency options: %o',
     async options => {
       messageService.setLatencyOptions(options);
-      const channelManager = await ChannelManager.create(peerEngines.a, messageService);
+      const wallet = await Wallet.create(peerEngines.a, messageService);
 
       peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
       });
 
-      await expect(
-        channelManager.createChannels(getCreateChannelsArgs(), 50)
-      ).resolves.not.toThrow();
+      await expect(wallet.createChannels(getCreateChannelsArgs(), 50)).resolves.not.toThrow();
     }
   );
 
@@ -60,7 +58,7 @@ describe('EnsureObjectives', () => {
   test('fails when all messages are dropped', async () => {
     messageService.setLatencyOptions({dropRate: 1});
     // We limit the attempts to avoid wasting times in the test
-    const channelManager = await ChannelManager.create(peerEngines.a, messageService, {
+    const wallet = await Wallet.create(peerEngines.a, messageService, {
       numberOfAttempts: 1,
     });
 
@@ -69,7 +67,7 @@ describe('EnsureObjectives', () => {
       await peerEngines.b.joinChannels([channelId]);
     });
 
-    await expect(channelManager.createChannels(getCreateChannelsArgs(), 1)).rejects.toThrow(
+    await expect(wallet.createChannels(getCreateChannelsArgs(), 1)).rejects.toThrow(
       'Unable to ensure objectives'
     );
   });
