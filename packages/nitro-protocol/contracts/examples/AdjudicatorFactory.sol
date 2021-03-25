@@ -20,6 +20,7 @@ contract AdjudicatorFactory {
         mastercopy = _mastercopy;
         creationCodeHash = keccak256(_getProxyCreationCode(_mastercopy));
     }
+
     ////////////////////////////////////////
     // Public Methods
 

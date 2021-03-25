@@ -20,11 +20,8 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 // As version 0 but make it so the channel "address" is the adjudicator address (and uniquely derived from the channel id)
 //, by deploying via an on chain factory
 
-library fakeFactory {
-    function getChannelAddress(bytes32) public view returns (address) {
-        revert('should not ever happen');
-        return address(this);
-    }
+// This will be linked
+library placeholderFactory {
 }
 
 contract SingleChannelAdjudicator {
@@ -220,9 +217,9 @@ contract SingleChannelAdjudicator {
     }
 
     function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
-        // this doesn't work since a library can only be accessed with a delegatecall
-        // and this will not provide the correct storage context required for the channel address to be correctly computed
-        require(fakeFactory.getChannelAddress(channelId) == address(this), 'Wrong channelId for this adjudicator');
+        // the placeholderFactory will be replaced with the address of the real AdjudicatorFactory
+        // at deploy time (it will be linked).
+        require(AdjudicatorFactory(address(placeholderFactory)).getChannelAddress(channelId) == address(this), 'Wrong channelId for this adjudicator');
     }
 
     /**

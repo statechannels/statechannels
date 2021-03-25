@@ -96,7 +96,7 @@ export async function deploy(): Promise<Record<string, string>> {
   const singleChannelAdjudicatorArtifactReplaced = {...singleChannelAdjudicatorArtifact};
   singleChannelAdjudicatorArtifactReplaced.bytecode = linkRawLibrary(
     singleChannelAdjudicatorArtifact.bytecode,
-    '$76eca443f7bf7cc2d9c0c268c261b98992$',
+    '$6eb8f1fbabd8edee7028b3a94009ba20a9$',
     ADJUDICATOR_FACTORY_ADDRESS
   );
 
