@@ -297,9 +297,6 @@ contract ForceMove is IForceMove {
         require(largestTurnNum + 1 >= numStates, 'largestTurnNum too low');
         // ^^ SW-C101: prevent underflow
 
-        channelId = _getChannelId(fixedPart);
-        _requireChannelNotFinalized(channelId);
-
         // By construction, the following states form a valid transition
         bytes32[] memory stateHashes = new bytes32[](numStates);
         for (uint48 i = 0; i < numStates; i++) {
