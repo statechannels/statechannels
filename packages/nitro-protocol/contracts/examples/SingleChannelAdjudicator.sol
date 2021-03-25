@@ -21,7 +21,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 //, by deploying via an on chain factory
 
 contract SingleChannelAdjudicator {
-    address immutable adjudicatorFactoryAddress;
+    address public immutable adjudicatorFactoryAddress;
 
     constructor(address a) {
         adjudicatorFactoryAddress = a;
