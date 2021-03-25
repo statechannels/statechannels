@@ -5,7 +5,7 @@ import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState, signState} from '../protocols/actions';
 import {ChannelState, ChannelStateWithSupported} from '../protocols/state';
-import {WalletError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 
 import {hasSupportedState, isMyTurn} from './helpers';
 
@@ -18,8 +18,8 @@ export interface UpdateChannelHandlerParams {
   appData: string;
 }
 
-export class UpdateChannelError extends WalletError {
-  readonly type = WalletError.errors.UpdateChannelError;
+export class UpdateChannelError extends EngineError {
+  readonly type = EngineError.errors.UpdateChannelError;
 
   static readonly reasons = {
     channelNotFound: 'channel not found',

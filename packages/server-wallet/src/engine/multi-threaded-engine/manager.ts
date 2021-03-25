@@ -8,7 +8,7 @@ import {isLeft, isRight} from 'fp-ts/lib/These';
 import _ from 'lodash';
 import {Logger} from 'pino';
 
-import {ServerWalletConfig} from '../../config';
+import {EngineConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {MultipleChannelOutput, SingleChannelOutput} from '../types';
 
@@ -23,14 +23,14 @@ export class WorkerManager {
 
   /**
    *
-   * @param walletConfig server wallet config to be passed to the worker wallet
+   * @param engineConfig engine config to be passed to the worker engine
    * @param onNewWorker callback that is executed when a new worker is created
    */
-  constructor(walletConfig: ServerWalletConfig, onNewWorker: (worker: Worker) => void) {
-    this.logger = createLogger(walletConfig).child({module: 'Worker-Manager'});
-    this.threadAmount = walletConfig.workerThreadAmount;
+  constructor(engineConfig: EngineConfig, onNewWorker: (worker: Worker) => void) {
+    this.logger = createLogger(engineConfig).child({module: 'Worker-Manager'});
+    this.threadAmount = engineConfig.workerThreadAmount;
     if (this.threadAmount === 0) {
-      throw new Error('Invalid walletConfig: threadAmount should not be 0');
+      throw new Error('Invalid engineConfig: threadAmount should not be 0');
     }
 
     this.pool = new Pool({
@@ -38,7 +38,7 @@ export class WorkerManager {
         this.logger.trace('Starting worker');
 
         const worker = new Worker(path.resolve(__dirname, './loader.js'), {
-          workerData: walletConfig,
+          workerData: engineConfig,
         });
 
         worker.on('error', err => {

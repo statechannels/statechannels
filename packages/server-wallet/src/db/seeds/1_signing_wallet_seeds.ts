@@ -2,7 +2,7 @@ import Knex from 'knex';
 
 import {DBAdmin} from '../../db-admin/db-admin';
 import {SigningWallet} from '../../models/signing-wallet';
-import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
+import {alice, bob} from '../../engine/__test__/fixtures/signing-wallets';
 
 export async function seedAlicesSigningWallet(knex: Knex): Promise<void> {
   await DBAdmin.truncateDataBaseFromKnex(knex);

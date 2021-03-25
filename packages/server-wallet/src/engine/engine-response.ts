@@ -9,13 +9,13 @@ import {WalletObjective, isSharedObjective, toWireObjective} from '../models/obj
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
-import {WalletEvent, MultipleChannelOutput, SingleChannelOutput, Output} from './types';
+import {EngineEvent, MultipleChannelOutput, SingleChannelOutput, Output} from './types';
 
 /**
  * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
  * to be returned to the user after a call.
  */
-export class WalletResponse {
+export class EngineResponse {
   _channelResults: Record<string, ChannelResult> = {};
   private queuedMessages: WireMessage[] = [];
   objectivesToApprove: WalletObjective[] = [];
@@ -23,7 +23,7 @@ export class WalletResponse {
   succeededObjectives: WalletObjective[] = [];
   requests: string[] = [];
 
-  static initialize(): WalletResponse {
+  static initialize(): EngineResponse {
     return new this();
   }
 
@@ -192,7 +192,7 @@ export class WalletResponse {
     return this.channelResults;
   }
 
-  channelUpdatedEvents(): WalletEvent[] {
+  channelUpdatedEvents(): EngineEvent[] {
     return this.channelResults.map(channelResult => ({
       type: 'channelUpdated' as const,
       value: {

@@ -4,7 +4,7 @@ import {ethers} from 'ethers';
 import {Address} from '@statechannels/wallet-core';
 
 import {Uint48} from '../type-aliases';
-import {WalletError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 
 export class Nonce extends Model {
   readonly id!: number;
@@ -65,8 +65,8 @@ export class Nonce extends Model {
   }
 }
 
-class NonceError extends WalletError {
-  readonly type = WalletError.errors.NonceError;
+class NonceError extends EngineError {
+  readonly type = EngineError.errors.NonceError;
   static readonly reasons = {
     addressNotInArray: 'Addresses are not an array',
     notAnAddress: 'Not an address',

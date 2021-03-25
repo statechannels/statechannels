@@ -6,8 +6,8 @@ import {
   LoggingConfiguration,
   NetworkConfiguration,
   OptionalDatabaseConfiguration,
-  OptionalServerWalletConfig,
-  ServerWalletConfig,
+  OptionalEngineConfig,
+  EngineConfig,
 } from './types';
 
 export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
@@ -44,7 +44,7 @@ export const defaultChainServiceConfiguration: ChainServiceConfiguration = {
  * These are the default values that will be used by the server wallet
  * if not overidden in the provided config
  */
-export const defaultConfig: OptionalServerWalletConfig = {
+export const defaultConfig: OptionalEngineConfig = {
   databaseConfiguration: defaultDatabaseConfiguration,
   loggingConfiguration: defaultLoggingConfiguration,
   metricsConfiguration: defaultMetricsConfiguration,
@@ -64,8 +64,8 @@ export const defaultTestNetworkConfiguration: NetworkConfiguration = {
 };
 
 export const defaultTestConfig = (
-  partialConfig: DeepPartial<ServerWalletConfig & HasDatabaseConnectionConfigObject> = {}
-): ServerWalletConfig & HasDatabaseConnectionConfigObject => {
+  partialConfig: DeepPartial<EngineConfig & HasDatabaseConnectionConfigObject> = {}
+): EngineConfig & HasDatabaseConnectionConfigObject => {
   const fullDefaultConfig = {
     ...defaultConfig,
     networkConfiguration: defaultTestNetworkConfiguration,

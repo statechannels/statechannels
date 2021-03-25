@@ -1,7 +1,7 @@
 import joi, {ValidationErrorItem} from 'joi';
 import {parse} from 'pg-connection-string';
 
-import {ServerWalletConfig} from './types';
+import {EngineConfig} from './types';
 
 const validateConnectionString = (connection: string) => {
   const parsed = parse(connection);
@@ -66,7 +66,7 @@ const chainServiceConfigurationSchema = joi.object({
   allowanceMode: joi.string().valid('MaxUint', 'PerDeposit').optional(),
 });
 
-const serverWalletConfigSchema = joi.object({
+const engine = joi.object({
   databaseConfiguration: databaseConfigurationSchema,
   networkConfiguration: networkConfigurationSchema,
   chainServiceConfiguration: chainServiceConfigurationSchema,
@@ -77,13 +77,13 @@ const serverWalletConfigSchema = joi.object({
   metricsConfiguration: metricsConfigurationSchema.optional(),
 });
 
-export function validateServerWalletConfig(
+export function validateEngineConfig(
   config: Record<string, any>
-): {valid: boolean; value: ServerWalletConfig | undefined; errors: ValidationErrorItem[]} {
-  const results = serverWalletConfigSchema.validate(config);
+): {valid: boolean; value: EngineConfig | undefined; errors: ValidationErrorItem[]} {
+  const results = engine.validate(config);
   return {
     valid: !results.error,
-    value: results.value ? (results.value as ServerWalletConfig) : undefined,
+    value: results.value ? (results.value as EngineConfig) : undefined,
     errors: results.error?.details || [],
   };
 }

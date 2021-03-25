@@ -1,6 +1,6 @@
 import {WirePayload} from '../type-aliases';
-import {WalletResponse} from '../wallet/wallet-response';
-import {Store} from '../wallet/store';
+import {EngineResponse} from '../engine/engine-response';
+import {Store} from '../engine/store';
 
 /**
  * For making a single update to a running application channel
@@ -19,7 +19,7 @@ export class SingleAppUpdater {
   /**
    * For pushing a message containing a single update to a running application channel
    */
-  async update(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
+  async update(wirePayload: WirePayload, response: EngineResponse): Promise<void> {
     // check that we have exactly one signedState and nothing else
     if (wirePayload.signedStates?.length !== 1)
       throw new Error(`The payload sent to pushUpdate must contain exactly 1 signedState.`);

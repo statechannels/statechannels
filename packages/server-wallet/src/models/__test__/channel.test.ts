@@ -3,13 +3,13 @@ import {BN, Destination, makeAddress} from '@statechannels/wallet-core';
 
 import {Channel, ChannelError} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
+import {stateWithHashSignedBy} from '../../engine/__test__/fixtures/states';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {dropNonVariables} from '../../state-utils';
 import {Funding} from '../funding';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {defaultTestConfig} from '../../config';
-import {Store} from '../../wallet/store';
+import {Store} from '../../engine/store';
 import {DBAdmin} from '../../db-admin/db-admin';
 
 import {channel} from './fixtures/channel';

@@ -7,8 +7,8 @@ import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {WalletObjective} from '../models/objective';
-import {Store} from '../wallet/store';
-import {WalletResponse} from '../wallet/wallet-response';
+import {Store} from '../engine/store';
+import {EngineResponse} from '../engine/engine-response';
 
 export class LedgerFunder {
   constructor(
@@ -35,7 +35,7 @@ export class LedgerFunder {
   public async crank(
     objective: WalletObjective<OpenChannel>,
     channel: Channel,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<boolean> {
     const ledgerId = objective.data.fundingLedgerChannelId;

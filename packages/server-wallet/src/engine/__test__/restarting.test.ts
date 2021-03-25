@@ -1,7 +1,7 @@
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/src/config';
 import waitForExpect from 'wait-for-expect';
 
-import {defaultTestConfig, Wallet} from '..';
+import {defaultTestConfig, Engine} from '..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -37,7 +37,7 @@ test('the wallet checks the chain id and registers existing channels with the ch
   });
   await Channel.query(testKnex).withGraphFetched('signingWallet').insert(c);
 
-  const w = await Wallet.create(defaultTestConfig());
+  const w = await Engine.create(defaultTestConfig());
 
   await waitForExpect(() => {
     expect(registerChannelMock).toHaveBeenCalledWith(c.channelId, [ETH_ASSET_HOLDER_ADDRESS], w);

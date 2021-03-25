@@ -9,7 +9,7 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {participant} from '../../wallet/__test__/fixtures/participants';
+import {participant} from '../../engine/__test__/fixtures/participants';
 import {recoverAddress, signState as wasmSignState} from '../signatures';
 import {addHash} from '../../state-utils';
 import {createLogger} from '../../logger';

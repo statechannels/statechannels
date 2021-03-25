@@ -1,12 +1,12 @@
 import {Participant} from '@statechannels/client-api-schema';
 import {validatePayload} from '@statechannels/wallet-core';
 
-import {alice, bob} from '../src/wallet/__test__/fixtures/signing-wallets';
-import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
+import {alice, bob} from '../src/engine/__test__/fixtures/signing-wallets';
+import {alice as aliceP, bob as bobP} from '../src/engine/__test__/fixtures/participants';
 import {Channel} from '../src/models/channel';
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
+import {stateVars} from '../src/engine/__test__/fixtures/state-vars';
 import {DBAdmin} from '../src/db-admin/db-admin';
 
 import PayerClient from './payer/client';

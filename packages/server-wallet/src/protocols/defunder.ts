@@ -15,7 +15,7 @@ import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {WalletObjective} from '../models/objective';
-import {Store} from '../wallet/store';
+import {Store} from '../engine/store';
 
 /**
  * DefunderResult type is the return value of the crank method. The return value of the crank method

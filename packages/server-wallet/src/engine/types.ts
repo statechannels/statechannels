@@ -46,9 +46,9 @@ type ObjectiveSucceeded = {
   value: WalletObjective;
 };
 
-export type WalletEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
+export type EngineEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
 
-export interface WalletInterface {
+export interface EngineInterface {
   // App utilities
   registerAppDefinition(appDefinition: string): Promise<void>;
   registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
@@ -70,7 +70,7 @@ export interface WalletInterface {
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
   updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
-  // Wallet <-> Wallet communication
+  // Engine <-> Engine communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 }

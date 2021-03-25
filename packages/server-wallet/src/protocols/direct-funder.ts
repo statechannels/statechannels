@@ -7,8 +7,8 @@ import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {WalletObjective} from '../models/objective';
-import {Store} from '../wallet/store';
-import {WalletResponse} from '../wallet/wallet-response';
+import {Store} from '../engine/store';
+import {EngineResponse} from '../engine/engine-response';
 
 export class DirectFunder {
   constructor(
@@ -35,7 +35,7 @@ export class DirectFunder {
   public async crank(
     objective: WalletObjective<OpenChannel>,
     channel: Channel,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<boolean> {
     const assetHolderAddress = this.assetHolder(channel);

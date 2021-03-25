@@ -24,9 +24,9 @@ import {
   alice as aliceParticipant,
   bob,
   bob as bobParticipant,
-} from '../../wallet/__test__/fixtures/participants';
-import {alice as aWallet, bob as bWallet} from '../../wallet/__test__/fixtures/signing-wallets';
-import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
+} from '../../engine/__test__/fixtures/participants';
+import {alice as aWallet, bob as bWallet} from '../../engine/__test__/fixtures/signing-wallets';
+import {stateSignedBy} from '../../engine/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
 import {AssetOutcomeUpdatedArg, ChallengeRegisteredArg, HoldingUpdatedArg} from '../types';
 

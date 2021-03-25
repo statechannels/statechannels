@@ -1,9 +1,9 @@
 import pino from 'pino';
 
-import {getDatabaseConnectionConfig, ServerWalletConfig} from './config';
+import {getDatabaseConnectionConfig, EngineConfig} from './config';
 import {WALLET_VERSION} from './version';
 
-export function createLogger(config: ServerWalletConfig): pino.Logger {
+export function createLogger(config: EngineConfig): pino.Logger {
   const destination =
     config.loggingConfiguration.logDestination &&
     config.loggingConfiguration.logDestination.toLocaleLowerCase() !== 'console'

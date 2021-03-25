@@ -1,17 +1,17 @@
 import {defaultTestConfig} from '../defaults';
 import {DatabaseConfiguration} from '../types';
-import {validateServerWalletConfig} from '../validation';
+import {validateEngineConfig} from '../validation';
 
 describe('config validation', () => {
   describe('server wallet config', () => {
     it('validates the default test config', () => {
-      expect(validateServerWalletConfig(defaultTestConfig()).valid).toBe(true);
+      expect(validateEngineConfig(defaultTestConfig()).valid).toBe(true);
     });
   });
 
   describe('chain service config', () => {
     it('rejects an invalid private key', () => {
-      const {valid, errors} = validateServerWalletConfig(
+      const {valid, errors} = validateEngineConfig(
         defaultTestConfig({
           chainServiceConfiguration: {
             pk: 'bla',
@@ -26,7 +26,7 @@ describe('config validation', () => {
     });
     it('rejects an invalid rpc endpoint', () => {
       const chainServiceConfiguration = {provider: 'badurl'};
-      const result = validateServerWalletConfig(defaultTestConfig({chainServiceConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({chainServiceConfiguration}));
       expect(result.errors[0].message).toMatch(
         '"chainServiceConfiguration.provider" must be a valid uri'
       );
@@ -34,7 +34,7 @@ describe('config validation', () => {
     });
     it('rejects an invalid allowance mode', () => {
       const chainServiceConfiguration = {allowanceMode: 'bad'};
-      const result = validateServerWalletConfig(
+      const result = validateEngineConfig(
         // eslint-disable-next-line
         // @ts-ignore
         defaultTestConfig({chainServiceConfiguration})
@@ -46,7 +46,7 @@ describe('config validation', () => {
     });
     it('rejects an invalid polling interval', () => {
       const chainServiceConfiguration = {pollingInterval: 0};
-      const result = validateServerWalletConfig(defaultTestConfig({chainServiceConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({chainServiceConfiguration}));
       expect(result.errors[0].message).toMatch(
         '"chainServiceConfiguration.pollingInterval" must be a positive number'
       );
@@ -57,7 +57,7 @@ describe('config validation', () => {
   describe('network config', () => {
     it('rejects an invalid chain id', () => {
       const networkConfiguration = {chainNetworkID: 0.5};
-      const result = validateServerWalletConfig(defaultTestConfig({networkConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({networkConfiguration}));
       expect(result.errors[0].message).toMatch(
         '"networkConfiguration.chainNetworkID" must be an integer'
       );
@@ -69,7 +69,7 @@ describe('config validation', () => {
       const metricsConfiguration = {
         timingMetrics: true,
       };
-      const result = validateServerWalletConfig(defaultTestConfig({metricsConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({metricsConfiguration}));
       expect(result.errors[0].message).toMatch(
         '"metricsConfiguration.metricsOutputFile" is required'
       );
@@ -84,7 +84,7 @@ describe('config validation', () => {
         pool: {max: 5},
         debug: false,
       };
-      const result = validateServerWalletConfig(defaultTestConfig({databaseConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({databaseConfiguration}));
       expect(result.valid).toBe(true);
     });
 
@@ -94,7 +94,7 @@ describe('config validation', () => {
         pool: {max: 5},
         debug: false,
       };
-      const result = validateServerWalletConfig(defaultTestConfig({databaseConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({databaseConfiguration}));
       expect(result.valid).toBe(true);
     });
 
@@ -104,7 +104,7 @@ describe('config validation', () => {
         pool: {max: 5},
         debug: false,
       };
-      const result = validateServerWalletConfig(defaultTestConfig({databaseConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({databaseConfiguration}));
       expect(result.valid).toBe(false);
       expect(result.errors[0].message).toMatch('Invalid connection string');
     });
@@ -115,7 +115,7 @@ describe('config validation', () => {
         pool: {max: 5},
         debug: false,
       };
-      const result = validateServerWalletConfig(defaultTestConfig({databaseConfiguration}));
+      const result = validateEngineConfig(defaultTestConfig({databaseConfiguration}));
       expect(result.valid).toBe(false);
       expect(result.errors[0].message).toMatch(
         '"databaseConfiguration.connection.dbName" is not allowed'

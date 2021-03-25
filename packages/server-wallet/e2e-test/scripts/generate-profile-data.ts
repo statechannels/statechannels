@@ -13,7 +13,7 @@ import {
   knexPayer,
   RECEIVER_PORT,
 } from '../e2e-utils';
-import {alice, bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
+import {alice, bob} from '../../src/engine/__test__/fixtures/signing-wallets';
 import {SigningWallet} from '../../src/models/signing-wallet';
 import {DBAdmin} from '../../src';
 

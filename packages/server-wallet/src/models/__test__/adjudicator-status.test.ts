@@ -3,8 +3,8 @@ import {DBAdmin} from '../../db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../adjudicator-status';
 import {Channel} from '../channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
-import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
-import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
+import {stateSignedBy} from '../../engine/__test__/fixtures/states';
+import {alice} from '../../engine/__test__/fixtures/signing-wallets';
 
 import {channel} from './fixtures/channel';
 

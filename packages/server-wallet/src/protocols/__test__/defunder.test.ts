@@ -11,9 +11,9 @@ import {Channel} from '../../models/channel';
 import {Funding} from '../../models/funding';
 import {LedgerRequest} from '../../models/ledger-request';
 import {ObjectiveModel, WalletObjective} from '../../models/objective';
-import {Store} from '../../wallet/store';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
-import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
+import {Store} from '../../engine/store';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
+import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
 
 const testChannel = TestChannel.create({

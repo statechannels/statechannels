@@ -2,7 +2,7 @@ import express from 'express';
 import pino from 'express-pino-logger';
 
 import {logger} from '../logger';
-import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
+import {alice} from '../../src/engine/__test__/fixtures/signing-wallets';
 import {RECEIVER_PORT} from '../e2e-utils';
 
 import PayerClient from './client';

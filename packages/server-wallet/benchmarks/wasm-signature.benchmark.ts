@@ -1,3 +1,6 @@
+// TODO: Clean up or remove benchmarks
+/* eslint-disable */
+
 import {ethers, Wallet} from 'ethers';
 import _ from 'lodash';
 import {signState, State, simpleEthAllocation, toNitroState} from '@statechannels/wallet-core';

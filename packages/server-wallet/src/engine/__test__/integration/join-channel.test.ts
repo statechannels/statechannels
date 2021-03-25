@@ -9,7 +9,7 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/confi
 import Objection from 'objection';
 
 import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
+import {Engine} from '../..';
 import {seedBobsSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob, alice} from '../fixtures/signing-wallets';
@@ -20,9 +20,9 @@ import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {ObjectiveModel} from '../../../models/objective';
 
-let w: Wallet;
+let w: Engine;
 beforeEach(async () => {
-  w = await Wallet.create(defaultTestConfig());
+  w = await Engine.create(defaultTestConfig());
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
   await seedBobsSigningWallet(w.knex);
 });
@@ -237,7 +237,7 @@ describe('ledger funded app scenarios', () => {
     });
   });
 
-  const putTestChannelInsideWallet = async (args: Objection.PartialModelObject<Channel>) => {
+  const putTestChannelInsideEngine = async (args: Objection.PartialModelObject<Channel>) => {
     const channel = await Channel.query(w.knex).insert(args);
 
     await ObjectiveModel.insert(
@@ -263,7 +263,7 @@ describe('ledger funded app scenarios', () => {
     const preFS0 = {turnNum: 0, outcome};
     const preFS1 = {turnNum: 0, outcome};
 
-    const {channelId} = await putTestChannelInsideWallet({
+    const {channelId} = await putTestChannelInsideEngine({
       ...app,
       signingAddress: bob().address,
       vars: [stateWithHashSignedBy([alice()])(preFS0)],

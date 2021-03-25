@@ -3,9 +3,9 @@ import {OpenChannel, unreachable} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'objection';
 
-import {Store} from '../wallet/store';
+import {Store} from '../engine/store';
 import {WalletObjective} from '../models/objective';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../engine/engine-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {Nothing, Cranker} from '../objectives/objective-manager';
@@ -38,7 +38,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
 
   public async crank(
     objective: WalletObjective<OpenChannel>,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {
     const channelToLock = objective.data.targetChannelId;
@@ -83,7 +83,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
   private async crankChannelFunder(
     objective: WalletObjective<OpenChannel>,
     channel: Channel,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<boolean> {
     const strategy = objective.data.fundingStrategy;
@@ -113,7 +113,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
 
   private async signPrefundSetup(
     channel: Channel,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<void> {
     // TODO: should probably have more checking around the form of channel.latest
@@ -125,7 +125,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
 
   private async signPostfundSetup(
     channel: Channel,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<void> {
     // TODO: should probably have more checking around the form of channel.latest

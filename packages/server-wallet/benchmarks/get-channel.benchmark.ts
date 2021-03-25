@@ -1,3 +1,5 @@
+// TODO: Clean up or remove benchmarks
+/* eslint-disable */
 import _ from 'lodash';
 import {configureEnvVariables} from '@statechannels/devtools';
 import Knex from 'knex';

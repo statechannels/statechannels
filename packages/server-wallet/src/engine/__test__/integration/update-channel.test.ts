@@ -1,7 +1,7 @@
 import {utils} from 'ethers';
 
 import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
+import {Engine} from '../..';
 import {updateChannelArgs} from '../fixtures/update-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
@@ -13,7 +13,7 @@ import {AppBytecode} from '../../../models/app-bytecode';
 import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';
 import {DBAdmin} from '../../../db-admin/db-admin';
 
-let w: Wallet;
+let w: Engine;
 
 afterEach(async () => {
   await w.destroy();
@@ -22,7 +22,7 @@ afterEach(async () => {
 const appData1 = utils.defaultAbiCoder.encode(['uint256'], [1]);
 const appData2 = utils.defaultAbiCoder.encode(['uint256'], [2]);
 beforeEach(async () => {
-  w = await Wallet.create({...defaultTestConfig(), skipEvmValidation: false});
+  w = await Engine.create({...defaultTestConfig(), skipEvmValidation: false});
 
   await DBAdmin.truncateDataBaseFromKnex(knex);
   await seedAlicesSigningWallet(knex);

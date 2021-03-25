@@ -1,10 +1,10 @@
 import _ from 'lodash';
 import {SubmitChallenge} from '@statechannels/wallet-core';
 
-import {Store} from '../../wallet/store';
+import {Store} from '../../engine/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {WalletResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../engine/engine-response';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
@@ -13,8 +13,8 @@ import {Channel} from '../../models/channel';
 import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
-import {stateSignedBy, stateWithHashSignedBy} from '../../wallet/__test__/fixtures/states';
-import {alice, bob} from '../../wallet/__test__/fixtures/signing-wallets';
+import {stateSignedBy, stateWithHashSignedBy} from '../../engine/__test__/fixtures/states';
+import {alice, bob} from '../../engine/__test__/fixtures/signing-wallets';
 import {ChainServiceRequest} from '../../models/chain-service-request';
 import {DBAdmin} from '../../db-admin/db-admin';
 
@@ -111,7 +111,7 @@ const crankAndAssert = async (
   const callsChallenge = args.callsChallenge || false;
   const chainService = new MockChainService();
   const challengeSubmitter = ChallengeSubmitter.create(store, chainService, logger, timingMetrics);
-  const response = WalletResponse.initialize();
+  const response = EngineResponse.initialize();
   const spy = jest.spyOn(chainService, 'challenge');
   await store.transaction(async tx => {
     await challengeSubmitter.crank(objective, response, tx);

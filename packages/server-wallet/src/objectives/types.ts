@@ -1,10 +1,10 @@
 import {Logger} from 'pino';
 import {ChannelResult} from '@statechannels/client-api-schema';
 
-import {Store} from '../wallet/store';
+import {Store} from '../engine/store';
 import {ChainServiceInterface} from '../chain-service';
 import {Outgoing} from '../protocols/actions';
-import {WalletEvent} from '../wallet/types';
+import {EngineEvent} from '../engine/types';
 
 export interface ObjectiveManagerParams {
   store: Store;
@@ -17,6 +17,6 @@ export interface ObjectiveManagerParams {
 export type ExecutionResult = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
-  events?: WalletEvent[];
+  events?: EngineEvent[];
   error?: any;
 };

@@ -1,5 +1,5 @@
 export type Values<E> = E[keyof E];
-export abstract class WalletError extends Error {
+export abstract class EngineError extends Error {
   static readonly errors = {
     ChannelError: 'ChannelError',
     JoinChannelError: 'JoinChannelError',
@@ -11,10 +11,10 @@ export abstract class WalletError extends Error {
     PushMessageError: 'PushMessageError',
   } as const;
 
-  abstract readonly type: Values<typeof WalletError.errors>;
+  abstract readonly type: Values<typeof EngineError.errors>;
   static readonly reasons: {[key: string]: string};
   constructor(
-    public readonly reason: Values<typeof WalletError.reasons>,
+    public readonly reason: Values<typeof EngineError.reasons>,
     public readonly data: any = undefined
   ) {
     super(reason);
@@ -30,14 +30,14 @@ function hasOwnProperty<X extends {}, Y extends PropertyKey>(
 }
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
-export function isWalletError(error: any): error is WalletError {
+export function isEngineError(error: any): error is EngineError {
   if (!error?.type) return false;
   if (!(typeof error.type === 'string' || error.type instanceof String)) return false;
-  return hasOwnProperty(WalletError.errors, error.type);
+  return hasOwnProperty(EngineError.errors, error.type);
 }
 
-export class PushMessageError extends WalletError {
-  readonly type = WalletError.errors.PushMessageError;
+export class PushMessageError extends EngineError {
+  readonly type = EngineError.errors.PushMessageError;
 
   static readonly reasons = {
     genericPushMessageError: 'Error during pushMessage',

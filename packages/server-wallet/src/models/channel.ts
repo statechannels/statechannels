@@ -29,7 +29,7 @@ import {
   ChannelStateFunding,
   directFundingStatus,
 } from '../protocols/state';
-import {WalletError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 import {dropNonVariables} from '../state-utils';
 import {validateTransition} from '../utilities/validate-transition';
 
@@ -641,7 +641,7 @@ export class Channel extends Model implements ChannelColumns {
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function isChannelError(err: any): err is ChannelError {
-  if (err.type === WalletError.errors.ChannelError) return true;
+  if (err.type === EngineError.errors.ChannelError) return true;
   return false;
 }
 
@@ -653,8 +653,8 @@ export function isChannelMissingError(err: any): err is ChannelError {
   return false;
 }
 
-export class ChannelError extends WalletError {
-  readonly type = WalletError.errors.ChannelError;
+export class ChannelError extends EngineError {
+  readonly type = EngineError.errors.ChannelError;
 
   static readonly reasons = {
     invalidChannelId: 'Invalid channel id',

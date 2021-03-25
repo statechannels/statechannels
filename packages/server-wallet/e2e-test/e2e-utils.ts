@@ -8,27 +8,27 @@ import axios from 'axios';
 
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
+import {stateVars} from '../src/engine/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {
   overwriteConfigWithDatabaseConnection,
-  extractDBConfigFromServerWalletConfig,
-  ServerWalletConfig,
+  extractDBConfigFromEngineConfig,
+  EngineConfig,
   defaultTestConfig,
 } from '../src/config';
 
 import {PerformanceTimer} from './payer/timers';
 import {LOG_PATH} from './logger';
 
-const config: ServerWalletConfig = {
+const config: EngineConfig = {
   ...defaultTestConfig(),
   loggingConfiguration: {logLevel: 'trace', logDestination: LOG_PATH},
 };
 
-export const payerConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(config, {
+export const payerConfig: EngineConfig = overwriteConfigWithDatabaseConnection(config, {
   database: 'server_wallet_payer',
 });
-export const receiverConfig: ServerWalletConfig = overwriteConfigWithDatabaseConnection(config, {
+export const receiverConfig: EngineConfig = overwriteConfigWithDatabaseConnection(config, {
   database: 'server_wallet_receiver',
 });
 
@@ -117,8 +117,8 @@ export const waitForServerToStart = (
     }, pingInterval);
   });
 
-export const knexPayer: Knex = Knex(extractDBConfigFromServerWalletConfig(payerConfig));
-export const knexReceiver: Knex = Knex(extractDBConfigFromServerWalletConfig(receiverConfig));
+export const knexPayer: Knex = Knex(extractDBConfigFromEngineConfig(payerConfig));
+export const knexReceiver: Knex = Knex(extractDBConfigFromEngineConfig(receiverConfig));
 export const killServer = async ({server}: E2EServer): Promise<void> => {
   kill(server.pid);
 };

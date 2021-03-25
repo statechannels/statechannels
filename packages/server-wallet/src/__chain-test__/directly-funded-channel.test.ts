@@ -7,13 +7,9 @@ import _ from 'lodash';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 
-import {
-  defaultTestConfig,
-  overwriteConfigWithDatabaseConnection,
-  ServerWalletConfig,
-} from '../config';
+import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Wallet, SingleChannelOutput} from '../wallet';
+import {Engine, SingleChannelOutput} from '../engine';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
@@ -33,10 +29,10 @@ const config = {
 };
 
 let provider: providers.JsonRpcProvider;
-let a: Wallet;
-let b: Wallet;
+let a: Engine;
+let b: Engine;
 
-const bWalletConfig: ServerWalletConfig = {
+const bEngineConfig: EngineConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
   chainServiceConfiguration: {
     attachChainService: true,
@@ -46,7 +42,7 @@ const bWalletConfig: ServerWalletConfig = {
     allowanceMode: 'MaxUint',
   },
 };
-const aWalletConfig: ServerWalletConfig = {
+const aEngineConfig: EngineConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_a'}),
   chainServiceConfiguration: {
     attachChainService: true,
@@ -83,15 +79,15 @@ beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
 
   await Promise.all(
-    [aWalletConfig, bWalletConfig].map(async config => {
+    [aEngineConfig, bEngineConfig].map(async config => {
       await DBAdmin.dropDatabase(config);
       await DBAdmin.createDatabase(config);
       await DBAdmin.migrateDatabase(config);
     })
   );
 
-  a = await Wallet.create(aWalletConfig);
-  b = await Wallet.create(bWalletConfig);
+  a = await Engine.create(aEngineConfig);
+  b = await Engine.create(bEngineConfig);
 
   const assetHolder = new Contract(
     ethAssetHolderAddress,
@@ -103,12 +99,12 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
+  await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
 
   provider.polling = false;
 });
 
-it('Create a directly funded channel between two wallets ', async () => {
+it('Create a directly funded channel between two engines ', async () => {
   const participantA: Participant = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
@@ -248,7 +244,7 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   // Mine a few blocks, but not enough for the chain service to update holdings
   // Then wait 500ms so that, if the chain service incorrectly updated holdings,
-  // then the updated holdings would have been processed by the wallet.
+  // then the updated holdings would have been processed by the engine.
   await mineBlocks(3);
   await new Promise(r => setTimeout(r, 500));
   expect((await a.getState({channelId})).channelResult).toMatchObject({

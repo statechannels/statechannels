@@ -2,37 +2,35 @@ import {Worker} from 'worker_threads';
 
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
-import {IncomingServerWalletConfig} from '../../config';
-import {MultipleChannelOutput, SingleChannelOutput, WalletEvent} from '../types';
-import {SingleThreadedWallet} from '../wallet';
+import {IncomingEngineConfig} from '../../config';
+import {MultipleChannelOutput, SingleChannelOutput, EngineEvent} from '../types';
+import {SingleThreadedEngine} from '../engine';
 
 import {WorkerManager} from './manager';
 
-export type WalletEventEmitted<E extends WalletEvent = WalletEvent> = {
-  type: 'WalletEventEmitted';
+export type EngineEventEmitted<E extends EngineEvent = EngineEvent> = {
+  type: 'EngineEventEmitted';
   name: E['type'];
   value: E['value'];
 };
 
-function isEventEmitted<E extends WalletEvent>(msg: any): msg is WalletEventEmitted<E> {
-  return 'type' in msg && msg.type === 'WalletEventEmitted';
+function isEventEmitted<E extends EngineEvent>(msg: any): msg is EngineEventEmitted<E> {
+  return 'type' in msg && msg.type === 'EngineEventEmitted';
 }
 
 /**
- * A multi-threaded Nitro wallet
+ * A multi-threaded Nitro engine
  */
-export class MultiThreadedWallet extends SingleThreadedWallet {
+export class MultiThreadedEngine extends SingleThreadedEngine {
   private workerManager: WorkerManager;
 
-  public static async create(
-    walletConfig: IncomingServerWalletConfig
-  ): Promise<MultiThreadedWallet> {
-    return new this(walletConfig);
+  public static async create(engineConfig: IncomingEngineConfig): Promise<MultiThreadedEngine> {
+    return new this(engineConfig);
   }
 
-  protected constructor(walletConfig: IncomingServerWalletConfig) {
-    super(walletConfig);
-    this.workerManager = new WorkerManager(this.walletConfig, (worker: Worker) =>
+  protected constructor(engineConfig: IncomingEngineConfig) {
+    super(engineConfig);
+    this.workerManager = new WorkerManager(this.engineConfig, (worker: Worker) =>
       worker.on('message', (msg: any) => {
         if (isEventEmitted(msg)) this.emit(msg.name, msg.value);
       })

@@ -2,7 +2,7 @@ import {Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import {Logger} from 'pino';
 
-import {Wallet} from '..';
+import {Engine} from '..';
 
 import {MessageHandler, MessageServiceInterface} from './types';
 
@@ -19,9 +19,9 @@ export type LatencyOptions = {
 };
 
 /**
- * A basic message service that is responsible for sending and receiving messages for a collection of wallets.
- * All the wallets will share the same message service.
- * The message service is responsible for calling pushMessage on the appropriate wallets.
+ * A basic message service that is responsible for sending and receiving messages for a collection of engines.
+ * All the engines will share the same message service.
+ * The message service is responsible for calling pushMessage on the appropriate engines.
  */
 export class TestMessageService implements MessageServiceInterface {
   private _handleMessage: (message: Message) => Promise<void>;
@@ -86,43 +86,43 @@ export class TestMessageService implements MessageServiceInterface {
 }
 
 /**
- * This is a helper method that sets up a message service for a collection of wallets.
- * Whenever handleMessages or send are called they are pushed into the appropriate wallet.
+ * This is a helper method that sets up a message service for a collection of engines.
+ * Whenever handleMessages or send are called they are pushed into the appropriate engine.
  * Any response to the pushMessage is then sent to the other participants
- * @param wallets The collection of wallets that will be communicating. A participantId must be provided for each wallet.
- * @returns A messaging service that is responsible for calling pushMessage on the correct wallet.
+ * @param engines The collection of engines that will be communicating. A participantId must be provided for each engine.
+ * @returns A messaging service that is responsible for calling pushMessage on the correct engine.
  * @example
  * const handler = createTestMessageHandler(..bla)
  * const ms = createTestMessageHandler(handler)
- * const result = wallet.createChannel(..bla);
+ * const result = engine.createChannel(..bla);
  *
  * // This will send all the messages from the result of the create channel call
  * // and will handle any responses to those messages and so on...
  * await ms.handleMessages(result.outbox);
  */
 export const createTestMessageHandler = (
-  wallets: {participantId: string; wallet: Wallet}[],
+  engines: {participantId: string; engine: Engine}[],
   logger?: Logger
 ): MessageHandler => {
-  const hasUniqueParticipants = new Set(wallets.map(w => w.participantId)).size === wallets.length;
-  const hasUniqueWallets = new Set(wallets.map(w => w.wallet)).size === wallets.length;
+  const hasUniqueParticipants = new Set(engines.map(w => w.participantId)).size === engines.length;
+  const hasUniqueEngines = new Set(engines.map(w => w.engine)).size === engines.length;
 
   if (!hasUniqueParticipants) {
     throw new Error('Duplicate participant ids');
   }
 
-  if (!hasUniqueWallets) {
-    throw new Error('Duplicate wallets');
+  if (!hasUniqueEngines) {
+    throw new Error('Duplicate engines');
   }
   return async (message, me) => {
-    const matching = wallets.find(w => w.participantId === message.recipient);
+    const matching = engines.find(w => w.participantId === message.recipient);
 
     if (!matching) {
       throw new Error(`Invalid recipient ${message.recipient}`);
     }
 
-    logger?.trace({message}, 'Pushing message into wallet');
-    const result = await matching.wallet.pushMessage(message.data);
+    logger?.trace({message}, 'Pushing message into engine');
+    const result = await matching.engine.pushMessage(message.data);
 
     await me.send(result.outbox.map(o => o.params));
   };

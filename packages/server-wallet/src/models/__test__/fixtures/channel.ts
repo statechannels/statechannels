@@ -3,10 +3,10 @@ import _ from 'lodash';
 import {flow} from 'fp-ts/lib/function';
 
 import {Channel, RequiredColumns} from '../../../models/channel';
-import {Fixture, fixture, DeepPartial} from '../../../wallet/__test__/fixtures/utils';
+import {Fixture, fixture, DeepPartial} from '../../../engine/__test__/fixtures/utils';
 import {addHash, dropNonVariables, addChannelId, addHashes} from '../../../state-utils';
-import {alice, bob} from '../../../wallet/__test__/fixtures/signing-wallets';
-import {createState, stateSignedBy} from '../../../wallet/__test__/fixtures/states';
+import {alice, bob} from '../../../engine/__test__/fixtures/signing-wallets';
+import {createState, stateSignedBy} from '../../../engine/__test__/fixtures/states';
 import {SigningWallet} from '../../signing-wallet';
 
 export const channel: Fixture<Channel> = (props?: DeepPartial<RequiredColumns>) => {
