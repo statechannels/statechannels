@@ -8,7 +8,7 @@ import {BigNumber, ethers, constants} from 'ethers';
 
 import {ONE_DAY} from '../../__test__/test-helpers';
 import {
-  peerWallets,
+  peerEngines,
   getPeersSetup,
   participantA,
   participantB,
@@ -43,31 +43,31 @@ it('Create a fake-funded channel between two wallets ', async () => {
 
   //        A <> B
   // PreFund0
-  const aCreateChannelOutput = await peerWallets.a.createChannel(channelParams);
+  const aCreateChannelOutput = await peerEngines.a.createChannel(channelParams);
   await messageService.send(getMessages(aCreateChannelOutput));
   channelId = aCreateChannelOutput.channelResults[0].channelId;
 
-  expectLatestStateToMatch(channelId, peerWallets.a, {
+  expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'opening',
     turnNum: 0,
   });
 
   // A sends PreFund0 to B
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'proposed',
     turnNum: 0,
   });
 
   // after joinChannel, B signs PreFund1 and PostFund3
-  const bJoinChannelOutput = await peerWallets.b.joinChannel({channelId});
+  const bJoinChannelOutput = await peerEngines.b.joinChannel({channelId});
   await messageService.send(getMessages(bJoinChannelOutput));
 
-  await expectLatestStateToMatch(channelId, peerWallets.a, {
+  await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'running',
     turnNum: 3,
   });
 
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'running',
     turnNum: 3,
   });
@@ -77,15 +77,15 @@ it('Create a fake-funded channel between two wallets ', async () => {
   };
 
   // A generates isFinal4
-  const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
+  const aCloseChannelResult = await peerEngines.a.closeChannel(closeChannelParams);
   await messageService.send(getMessages(aCloseChannelResult));
 
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'closed',
     turnNum: 4,
   });
 
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'closed',
     turnNum: 4,
   });

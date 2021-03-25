@@ -12,7 +12,7 @@ import {
   ErorringMockChainService,
   MockChainService,
 } from '../../chain-service';
-import {WalletResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../wallet/wallet-response';
 import {ChannelDefunder} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
 import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
@@ -209,6 +209,6 @@ async function setAdjudicatorStatus(
 
 async function crankChannelDefunder(objective: WalletObjective<DefundChannel>) {
   return store.transaction(async tx => {
-    return channelDefunder.crank(objective, WalletResponse.initialize(), tx);
+    return channelDefunder.crank(objective, EngineResponse.initialize(), tx);
   });
 }

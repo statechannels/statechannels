@@ -5,49 +5,49 @@ const {AddressZero} = constants;
 import {makeDestination, BN, Address, Destination, makeAddress} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {MultiThreadedWallet, Wallet as ServerWallet} from '../../src';
+import {MultiThreadedEngine as MultiThreadedEngine, Engine} from '../../src';
 import {Bytes32} from '../../src/type-aliases';
 import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
-import {DeepPartial, defaultConfig, ServerWalletConfig} from '../../src/config';
+import {DeepPartial, defaultConfig, EngineConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
-import {WalletEvent} from '../../src/wallet/types';
+import {EngineEvent} from '../../src/wallet/types';
 
 type TestChannelResult = {
   channelResult: ChannelResult;
-  events: WalletEvent[];
+  events: EngineEvent[];
 };
 
 export default class PayerClient {
-  readonly config: ServerWalletConfig;
+  readonly config: EngineConfig;
   readonly provider: providers.JsonRpcProvider;
   private constructor(
     private readonly pk: Bytes32,
     private readonly receiverHttpServerURL: string,
-    public readonly wallet: ServerWallet
+    public readonly engine: Engine
   ) {
-    this.config = wallet.walletConfig;
+    this.config = engine.engineConfig;
     this.provider = new providers.JsonRpcProvider(this.config.chainServiceConfiguration.provider);
   }
   public static async create(
     pk: Bytes32,
     receiverHttpServerURL: string,
-    partialConfig?: DeepPartial<ServerWalletConfig>
+    partialConfig?: DeepPartial<EngineConfig>
   ): Promise<PayerClient> {
     const mergedConfig = _.merge(payerConfig, partialConfig);
-    const wallet = recordFunctionMetrics(
-      await ServerWallet.create(mergedConfig),
+    const engine = recordFunctionMetrics(
+      await Engine.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
-    return new PayerClient(pk, receiverHttpServerURL, wallet);
+    return new PayerClient(pk, receiverHttpServerURL, engine);
   }
 
   public async warmup(): Promise<void> {
-    this.wallet instanceof MultiThreadedWallet && (await this.wallet.warmUpThreads());
+    this.engine instanceof MultiThreadedEngine && (await this.engine.warmUpThreads());
   }
   public async destroy(): Promise<void> {
     this.provider.removeAllListeners();
-    await this.wallet.destroy();
+    await this.engine.destroy();
   }
   private time = timerFactory(defaultConfig.metricsConfiguration.timingMetrics, 'payerClient');
 
@@ -78,25 +78,25 @@ export default class PayerClient {
   }
 
   public async getChannel(channelId: string): Promise<ChannelResult> {
-    const {channelResult: channel} = await this.wallet.getState({channelId});
+    const {channelResult: channel} = await this.engine.getState({channelId});
 
     return channel;
   }
 
   public async getChannels(): Promise<ChannelResult[]> {
-    const {channelResults} = await this.wallet.getChannels();
+    const {channelResults} = await this.engine.getChannels();
     return channelResults;
   }
 
   public async createPayerChannel(receiver: Participant): Promise<TestChannelResult> {
-    const events: WalletEvent[] = [];
+    const events: EngineEvent[] = [];
     const names = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
-    names.map(event => this.wallet.on(event, e => events.push({...e, event})));
+    names.map(event => this.engine.on(event, e => events.push({...e, event})));
 
     const {
       outbox: [{params}],
       channelResults: [{channelId}],
-    } = await this.wallet.createChannels(
+    } = await this.engine.createChannels(
       {
         appData: '0x',
         appDefinition: AddressZero,
@@ -121,11 +121,11 @@ export default class PayerClient {
 
     const prefund2 = await this.messageReceiverAndExpectReply(params.data);
 
-    const postfund1 = await this.wallet.pushMessage(prefund2);
+    const postfund1 = await this.engine.pushMessage(prefund2);
     const postfund2 = await this.messageReceiverAndExpectReply(postfund1.outbox[0].params.data);
-    await this.wallet.pushMessage(postfund2);
+    await this.engine.pushMessage(postfund2);
 
-    const {channelResult} = await this.wallet.getState({channelId});
+    const {channelResult} = await this.engine.getState({channelId});
 
     return {channelResult, events};
   }
@@ -176,7 +176,7 @@ export default class PayerClient {
     await blocksMined;
   }
   public async challenge(channelId: string): Promise<ChannelResult> {
-    const {channelResult} = await this.wallet.challenge(channelId);
+    const {channelResult} = await this.engine.challenge(channelId);
     return channelResult;
   }
 
@@ -188,7 +188,7 @@ export default class PayerClient {
     // Assuming MessageQueued inside the outbox
     const {
       outbox: [msgQueued],
-    } = await this.time(`update ${channelId}`, async () => this.wallet.updateChannel(channel));
+    } = await this.time(`update ${channelId}`, async () => this.engine.updateChannel(channel));
 
     return msgQueued.params.data;
   }
@@ -200,15 +200,15 @@ export default class PayerClient {
       this.messageReceiverAndExpectReply(payload, '/payment')
     );
 
-    await this.time(`push message ${channelId}`, async () => this.wallet.pushMessage(reply));
+    await this.time(`push message ${channelId}`, async () => this.engine.pushMessage(reply));
   }
 
   public async syncChannel(channelId: string): Promise<void> {
     const {
       outbox: [{params}],
-    } = await this.wallet.syncChannel({channelId});
+    } = await this.engine.syncChannel({channelId});
     const reply = await this.messageReceiverAndExpectReply(params.data);
-    await this.wallet.pushMessage(reply);
+    await this.engine.pushMessage(reply);
   }
 
   public emptyMessage(): Promise<unknown> {

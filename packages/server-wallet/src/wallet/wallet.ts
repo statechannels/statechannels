@@ -37,11 +37,11 @@ import * as ChannelState from '../protocols/state';
 import {PushMessageError} from '../errors/wallet-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {
-  ServerWalletConfig,
-  extractDBConfigFromServerWalletConfig,
+  EngineConfig,
+  extractDBConfigFromEngineConfig,
   defaultConfig,
-  IncomingServerWalletConfig,
-  validateServerWalletConfig,
+  IncomingEngineConfig,
+  validateEngineConfig,
 } from '../config';
 import {
   ChainServiceInterface,
@@ -64,32 +64,32 @@ import {
   SingleChannelOutput,
   MultipleChannelOutput,
   Output,
-  WalletInterface,
+  EngineInterface,
   UpdateChannelFundingParams,
-  WalletEvent,
+  EngineEvent,
 } from './types';
-import {WalletResponse} from './wallet-response';
+import {EngineResponse} from './wallet-response';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
 
 type EventEmitterType = {
-  [key in WalletEvent['type']]: WalletEvent['value'];
+  [key in EngineEvent['type']]: EngineEvent['value'];
 };
 
 export class ConfigValidationError extends Error {
   constructor(public errors: ValidationErrorItem[]) {
-    super('Server wallet configuration validation failed');
+    super('Engine configuration validation failed');
   }
 }
 
 /**
- * A single-threaded Nitro wallet
+ * A single-threaded Nitro engine
  */
-export class SingleThreadedWallet
+export class SingleThreadedEngine
   extends EventEmitter<EventEmitterType>
-  implements WalletInterface, ChainEventSubscriberInterface {
+  implements EngineInterface, ChainEventSubscriberInterface {
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
@@ -97,34 +97,32 @@ export class SingleThreadedWallet
   ledgerManager: LedgerManager;
   logger: Logger;
 
-  readonly walletConfig: ServerWalletConfig;
+  readonly engineConfig: EngineConfig;
 
-  public static async create(
-    walletConfig: IncomingServerWalletConfig
-  ): Promise<SingleThreadedWallet> {
-    const wallet = new SingleThreadedWallet(walletConfig);
+  public static async create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine> {
+    const engine = new SingleThreadedEngine(engineConfig);
 
-    await wallet.chainService.checkChainId(walletConfig.networkConfiguration.chainNetworkID);
+    await engine.chainService.checkChainId(engineConfig.networkConfiguration.chainNetworkID);
 
-    await wallet.registerExistingChannelsWithChainService();
-    return wallet;
+    await engine.registerExistingChannelsWithChainService();
+    return engine;
   }
 
   /**
-   * Protected method. Initialize wallet via Wallet.create(..)
+   * Protected method. Initialize engine via Engine.create(..)
    * @readonly
    */
-  protected constructor(walletConfig: IncomingServerWalletConfig) {
+  protected constructor(engineConfig: IncomingEngineConfig) {
     super();
 
-    const populatedConfig = _.assign({}, defaultConfig, walletConfig);
+    const populatedConfig = _.assign({}, defaultConfig, engineConfig);
     // Even though the config hasn't been validated we attempt to create a logger
     // This allows us to log out any config validation errors
     this.logger = createLogger(populatedConfig);
 
-    this.logger.trace({walletConfig: populatedConfig}, 'Wallet initializing');
+    this.logger.trace({engineConfig: populatedConfig}, 'Engine initializing');
 
-    const {errors, valid} = validateServerWalletConfig(populatedConfig);
+    const {errors, valid} = validateEngineConfig(populatedConfig);
 
     if (!valid) {
       errors.forEach(error =>
@@ -132,27 +130,27 @@ export class SingleThreadedWallet
       );
       throw new ConfigValidationError(errors);
     }
-    this.walletConfig = populatedConfig;
+    this.engineConfig = populatedConfig;
 
-    this.knex = Knex(extractDBConfigFromServerWalletConfig(this.walletConfig));
+    this.knex = Knex(extractDBConfigFromEngineConfig(this.engineConfig));
 
     this.store = new Store(
       this.knex,
-      this.walletConfig.metricsConfiguration.timingMetrics,
-      this.walletConfig.skipEvmValidation,
-      utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
+      this.engineConfig.metricsConfiguration.timingMetrics,
+      this.engineConfig.skipEvmValidation,
+      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
       this.logger
     );
 
     // set up timing metrics
-    if (this.walletConfig.metricsConfiguration.timingMetrics) {
+    if (this.engineConfig.metricsConfiguration.timingMetrics) {
       // Validation ensures that the metricsOutputFile will be defined
-      setupMetrics(this.walletConfig.metricsConfiguration.metricsOutputFile as string);
+      setupMetrics(this.engineConfig.metricsConfiguration.metricsOutputFile as string);
     }
 
-    if (this.walletConfig.chainServiceConfiguration.attachChainService) {
+    if (this.engineConfig.chainServiceConfiguration.attachChainService) {
       this.chainService = new ChainService({
-        ...this.walletConfig.chainServiceConfiguration,
+        ...this.engineConfig.chainServiceConfiguration,
         logger: this.logger,
       });
     } else {
@@ -163,13 +161,13 @@ export class SingleThreadedWallet
       store: this.store,
       chainService: this.chainService,
       logger: this.logger,
-      timingMetrics: this.walletConfig.metricsConfiguration.timingMetrics,
+      timingMetrics: this.engineConfig.metricsConfiguration.timingMetrics,
     });
 
     this.ledgerManager = LedgerManager.create({store: this.store});
   }
   /**
-   * Adds an ethereum private key to the wallet's database
+   * Adds an ethereum private key to the engine's database
    *
    * @remarks
    *
@@ -188,7 +186,7 @@ export class SingleThreadedWallet
    * Registers any channels existing in the database with the chain service.
    *
    * @remarks
-   * Enables the chain service to alert the wallet of of any blockchain events for existing channels.
+   * Enables the chain service to alert the engine of of any blockchain events for existing channels.
    *
    * @returns A promise that resolves when the channels have been successfully registered.
    */
@@ -209,7 +207,7 @@ export class SingleThreadedWallet
    * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
    *
    * @remarks
-   * Storing the bytecode is necessary for the wallet to verify ForceMoveApp transitions.
+   * Storing the bytecode is necessary for the engine to verify ForceMoveApp transitions.
    *
    * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
    * @returns A promise that resolves when the bytecode has been successfully stored.
@@ -217,7 +215,7 @@ export class SingleThreadedWallet
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this.chainService.fetchBytecode(appDefinition);
     await this.store.upsertBytecode(
-      utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
+      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
       makeAddress(appDefinition),
       bytecode
     );
@@ -227,7 +225,7 @@ export class SingleThreadedWallet
    * Stores the supplied ForceMoveApp definition bytecode against the supplied blockchain address.
    *
    * @remarks
-   * Storing the bytecode is necessary for the wallet to verify ForceMoveApp transitions.
+   * Storing the bytecode is necessary for the engine to verify ForceMoveApp transitions.
    *
    * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
    * @param  bytecode - The bytecode at that address.
@@ -235,14 +233,14 @@ export class SingleThreadedWallet
    */
   public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
     return this.store.upsertBytecode(
-      utils.hexlify(this.walletConfig.networkConfiguration.chainNetworkID),
+      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
       makeAddress(appDefinition),
       bytecode
     );
   }
 
   /**
-   * Streamlines wallet output messsages.
+   * Streamlines engine output messsages.
    *
    * @remarks
    * Helps to enable more efficient messaging. Channel results are sorted and deduplicated. Messages to the same recipient are merged.
@@ -255,16 +253,16 @@ export class SingleThreadedWallet
    * @returns A streamlined output of messages.
    */
   public static mergeOutputs(output: Output[]): MultipleChannelOutput {
-    return WalletResponse.mergeOutputs(output);
+    return EngineResponse.mergeOutputs(output);
   }
 
   /**
-   * Destroy this wallet instance
+   * Destroy this engine instance
    *
    * @remarks
-   * Removes listeners from the chainService and destroys the wallet's database connection.
+   * Removes listeners from the chainService and destroys the engine's database connection.
    *
-   * @returns A promise that resolves when the wallet has been destroyed.
+   * @returns A promise that resolves when the engine has been destroyed.
    */
   public async destroy(): Promise<void> {
     await this.knex.destroy();
@@ -278,7 +276,7 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to an object containing the messages.
    */
   public async syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await Promise.all(channelIds.map(channelId => this._syncChannel(channelId, response)));
 
@@ -291,7 +289,7 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to an object containing the messages.
    */
   public async syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     const objectives = await this.store.getObjectivesByIds(objectiveIds);
 
     const fetchedObjectiveIds = objectives.map(o => o.objectiveId);
@@ -327,12 +325,12 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to an object containing the messages.
    */
   public async syncChannel({channelId}: SyncChannelParams): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     await this._syncChannel(channelId, response);
     return response.singleChannelOutput();
   }
 
-  private async _syncChannel(channelId: string, response: WalletResponse): Promise<void> {
+  private async _syncChannel(channelId: string, response: EngineResponse): Promise<void> {
     const {states, channelState} = await this.store.getStates(channelId);
 
     const {myIndex, participants} = channelState;
@@ -350,7 +348,7 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to a channel output.
    */
   public async challenge(channelId: string): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this.knex.transaction(async tx => {
       const channel = await this.store.getChannel(channelId, tx);
@@ -384,7 +382,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Update the wallet's knowledge about the funding for some channels
+   * Update the engine's knowledge about the funding for some channels
    *
    * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
@@ -392,7 +390,7 @@ export class SingleThreadedWallet
   public async updateFundingForChannels(
     args: UpdateChannelFundingParams[]
   ): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await Promise.all(args.map(a => this._updateChannelFunding(a, response)));
 
@@ -400,7 +398,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Update the wallet's knowledge about the funding for a channel.
+   * Update the engine's knowledge about the funding for a channel.
    *
    * @param args - An object specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
@@ -408,7 +406,7 @@ export class SingleThreadedWallet
   public async updateChannelFunding(
     args: UpdateChannelFundingParams
   ): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this._updateChannelFunding(args, response);
 
@@ -417,7 +415,7 @@ export class SingleThreadedWallet
 
   private async _updateChannelFunding(
     {channelId, assetHolderAddress, amount}: UpdateChannelFundingParams,
-    response: WalletResponse
+    response: EngineResponse
   ): Promise<void> {
     await this.store.updateFunding(
       channelId,
@@ -429,7 +427,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Get the signing address for this wallet, or create it if it does not exist.
+   * Get the signing address for this engine, or create it if it does not exist.
    *
    * @returns A promise that resolves to the address.
    */
@@ -441,7 +439,7 @@ export class SingleThreadedWallet
    * Creates a ledger channel.
    *
    * @remarks
-   * The channel will have a null app definition and null app data. This method is otherwise identical to {@link SingleThreadedWallet.createChannel}.
+   * The channel will have a null app definition and null app data. This method is otherwise identical to {@link SingleThreadedEngine.createChannel}.
    *
    * @returns A promise that resolves to the channel output.
    */
@@ -449,7 +447,7 @@ export class SingleThreadedWallet
     args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
   ): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this._createChannel(
       response,
@@ -471,7 +469,7 @@ export class SingleThreadedWallet
    *
    * @remarks
    * The channel's nonce will be automatically chosen.
-   * The channel will be registered with the wallet's chain service.
+   * The channel will be registered with the engine's chain service.
    * The 0th state will be created and signed.
    * An OpenChannel objective will be created and approved.
    *
@@ -479,7 +477,7 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to the channel output.
    */
   async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this._createChannel(response, args, 'app');
 
@@ -488,7 +486,7 @@ export class SingleThreadedWallet
     return response.multipleChannelOutput();
   }
   /**
-   * Creates multiple channels with the same parameters. See {@link SingleThreadedWallet.createChannel}.
+   * Creates multiple channels with the same parameters. See {@link SingleThreadedEngine.createChannel}.
    *
    * @param args - Parameters to create the channels with.
    * @param numberOfChannels - The number of desired channels.
@@ -498,7 +496,7 @@ export class SingleThreadedWallet
     args: CreateChannelParams,
     numberOfChannels: number
   ): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await Promise.all(
       _.range(numberOfChannels).map(() => this._createChannel(response, args, 'app'))
@@ -510,7 +508,7 @@ export class SingleThreadedWallet
   }
 
   private async _createChannel(
-    response: WalletResponse,
+    response: EngineResponse,
     args: CreateChannelParams,
     role: 'app' | 'ledger' = 'app'
   ): Promise<string> {
@@ -531,7 +529,7 @@ export class SingleThreadedWallet
 
     const constants = {
       appDefinition: makeAddress(appDefinition),
-      chainId: BigNumber.from(this.walletConfig.networkConfiguration.chainNetworkID).toHexString(),
+      chainId: BigNumber.from(this.engineConfig.networkConfiguration.chainNetworkID).toHexString(),
       challengeDuration,
       channelNonce,
       participants,
@@ -561,13 +559,13 @@ export class SingleThreadedWallet
    *
    * @remarks
    * Approves an OpenChannel objective for each channel, if it exists, and cranks it.
-   * Registers each channel with the wallet's chain service.
+   * Registers each channel with the engine's chain service.
    *
    * @param channelIds - The list of ids of the channels to join.
    * @returns A promise that resolves to the channel output.
    */
   async joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     const objectives = await this.store.getObjectives(channelIds);
 
     await Promise.all(
@@ -589,15 +587,15 @@ export class SingleThreadedWallet
    *
    * @remarks
    * Approves an OpenChannel objective for this channel, if it exists, and cranks it.
-   * Registers the channel with the wallet's chain service.
-   * Throws an error if the channel is not known to this wallet.
+   * Registers the channel with the engine's chain service.
+   * Throws an error if the channel is not known to this engine.
    * Throws an error if no objectives are known that have this channel in scope.
    *
    * @param channelId - The id of the channel to join.
    * @returns A promise that resolves to the channel output.
    */
   async joinChannel({channelId}: JoinChannelParams): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     const channel = await this.store.getChannelState(channelId);
 
     if (!channel)
@@ -628,7 +626,7 @@ export class SingleThreadedWallet
    *
    * @remarks
    * Signs and stores the new state, returns the result in a message for counterparties.
-   * Throws an error if the channel is not known to this wallet.
+   * Throws an error if the channel is not known to this engine.
    * Throws an error if no objectives are known that have this channel in scope.
    *
    * @param channelId - The id of the channel to update.
@@ -642,7 +640,7 @@ export class SingleThreadedWallet
     appData,
   }: UpdateChannelParams): Promise<SingleChannelOutput> {
     const timer = timerFactory(
-      this.walletConfig.metricsConfiguration.timingMetrics,
+      this.engineConfig.metricsConfiguration.timingMetrics,
       `updateChannel ${channelId}`
     );
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
@@ -652,18 +650,18 @@ export class SingleThreadedWallet
       );
     };
     const criticalCode: AppHandler<Promise<SingleChannelOutput>> = async (tx, channel) => {
-      const response = WalletResponse.initialize();
+      const response = EngineResponse.initialize();
       const {myIndex} = channel;
 
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
-        this.walletConfig.metricsConfiguration.timingMetrics
+        this.engineConfig.metricsConfiguration.timingMetrics
       );
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
           UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
-          this.walletConfig.metricsConfiguration.timingMetrics
+          this.engineConfig.metricsConfiguration.timingMetrics
         )
       );
       const signedState = await timer('signing state', async () => {
@@ -690,13 +688,13 @@ export class SingleThreadedWallet
    *
    * @remarks
    * Signs, stores, and sends an isFinal=true state for each channel in the list.
-   * Creates, approves and cranks a CloseChannel objective for each channel in the list. See {@link SingleThreadedWallet.closeChannel}.
+   * Creates, approves and cranks a CloseChannel objective for each channel in the list. See {@link SingleThreadedEngine.closeChannel}.
    *
    * @param channelId - The id of the channel to try and close.
    * @returns A promise that resolves to the channel output.
    */
   async closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     for (const channelId of channelIds) await this._closeChannel(channelId, response);
 
@@ -717,7 +715,7 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to the channel output.
    */
   async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this._closeChannel(channelId, response);
     await this.takeActions([channelId], response);
@@ -725,12 +723,12 @@ export class SingleThreadedWallet
     return response.singleChannelOutput();
   }
 
-  private async _closeChannel(channelId: Bytes32, response: WalletResponse): Promise<void> {
+  private async _closeChannel(channelId: Bytes32, response: EngineResponse): Promise<void> {
     await this.objectiveManager.commenceCloseChannel(channelId, response);
   }
 
   /**
-   * Gets the latest state for each ledger channel in the wallet's store.
+   * Gets the latest state for each ledger channel in the engine's store.
    *
    * @param assetHolderAddress - The on chain address of an asset holder contract funding the ledger channels (filters the query).
    * @param participants - The list of participants in the ledger channel (filters the query).
@@ -740,7 +738,7 @@ export class SingleThreadedWallet
     assetHolderAddress: string,
     participants: APIParticipant[]
   ): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     const channelStates = await this.store.getLedgerChannels(
       assetHolderAddress,
@@ -753,12 +751,12 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Gets the latest state for each channel in the wallet's store.
+   * Gets the latest state for each channel in the engine's store.
    *
    * @returns A promise that resolves to the channel output.
    */
   async getChannels(): Promise<MultipleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     const channelStates = await this.store.getChannels();
     channelStates.forEach(cs => response.queueChannelState(cs));
@@ -782,7 +780,7 @@ export class SingleThreadedWallet
    * @returns A promise that resolves to the channel output.
    */
   async getState({channelId}: GetStateParams): Promise<SingleChannelOutput> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     try {
       const channel = await this.store.getChannelState(channelId);
@@ -797,7 +795,7 @@ export class SingleThreadedWallet
   }
 
   /**
-   * Push a message from a counterparty into the wallet.
+   * Push a message from a counterparty into the engine.
    *
    * @remarks
    * Fresh states will be stored.
@@ -810,7 +808,7 @@ export class SingleThreadedWallet
   async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
     const wirePayload = validatePayload(rawPayload);
 
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     try {
       await this._pushMessage(wirePayload, response);
@@ -840,14 +838,14 @@ export class SingleThreadedWallet
   async pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput> {
     const wirePayload = validatePayload(rawPayload);
 
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await SingleAppUpdater.create(this.store).update(wirePayload, response);
 
     return response.singleChannelOutput();
   }
 
-  private async _pushMessage(wirePayload: WirePayload, response: WalletResponse): Promise<void> {
+  private async _pushMessage(wirePayload: WirePayload, response: EngineResponse): Promise<void> {
     const store = this.store;
 
     const {
@@ -856,9 +854,9 @@ export class SingleThreadedWallet
       storedObjectives,
     } = await this.store.pushMessage(wirePayload);
 
-    // HACK (1): This may cause the wallet to re-emit `'objectiveStarted'` multiple times
+    // HACK (1): This may cause the engine to re-emit `'objectiveStarted'` multiple times
     // For instance, a peer who sends me an objective `o`, and then triggers `syncObjectives`
-    // including `o`, will cause my wallet to emit `'objectiveStarted'` for `o` twice.
+    // including `o`, will cause my engine to emit `'objectiveStarted'` for `o` twice.
     response.createdObjectives = storedObjectives;
 
     const channelIdsFromRequests: Bytes32[] = [];
@@ -898,9 +896,9 @@ export class SingleThreadedWallet
    * Emits an 'objectiveSucceded' event for objectives that succeed.
    *
    * @param channels channels touched by the caller
-   * @param response WalletResponse that is modified in place while cranking objectives
+   * @param response EngineResponse that is modified in place while cranking objectives
    */
-  private async takeActions(channelIds: Bytes32[], response: WalletResponse): Promise<void> {
+  private async takeActions(channelIds: Bytes32[], response: EngineResponse): Promise<void> {
     // 1. we're passed a set of channelIds that have changed
     // 2. we crank any objectives that involve changed channels, which could create new ledger requests
     // 3. we crank any ledgers with new requests, which could update those requests
@@ -930,7 +928,7 @@ export class SingleThreadedWallet
 
   // ChainEventSubscriberInterface implementation
   async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
     await this.takeActions([channelId], response);
@@ -943,7 +941,7 @@ export class SingleThreadedWallet
     assetHolderAddress,
     externalPayouts,
   }: AssetOutcomeUpdatedArg): Promise<void> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     const transferredOut = externalPayouts.map(ai => ({
       toAddress: makeDestination(ai.destination),
       amount: ai.amount as Uint256,
@@ -957,7 +955,7 @@ export class SingleThreadedWallet
   }
 
   async challengeRegistered(arg: ChallengeRegisteredArg): Promise<void> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     const {channelId, finalizesAt: finalizedAt, challengeStates} = arg;
 
     await this.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
@@ -966,7 +964,7 @@ export class SingleThreadedWallet
   }
 
   async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
 
     await this.store.markAdjudicatorStatusAsFinalized(
       arg.channelId,
@@ -1003,7 +1001,7 @@ export class SingleThreadedWallet
 }
 
 // TODO: This should be removed, and not used externally.
-// It is a fill-in until the wallet API is specced out.
+// It is a fill-in until the engine API is specced out.
 export function getOrThrow<E, T>(result: Either.Either<E, T>): T {
   return Either.getOrElseW<E, T>(
     (err: E): T => {

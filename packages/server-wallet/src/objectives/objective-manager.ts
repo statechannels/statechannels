@@ -7,7 +7,7 @@ import {ChannelOpener, WaitingFor as ChannelOpenerWaitingFor} from '../protocols
 import {ChannelCloser, WaitingFor as ChannelCloserWaitingFor} from '../protocols/channel-closer';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../wallet/wallet-response';
 import {
   ChallengeSubmitter,
   WaitingFor as ChallengeSubmitterWaitingFor,
@@ -35,7 +35,7 @@ export type WaitingFor =
   | Nothing;
 
 export interface Cranker<O extends WalletObjective> {
-  crank: (objective: O, response: WalletResponse, tx: Transaction) => Promise<WaitingFor | Nothing>;
+  crank: (objective: O, response: EngineResponse, tx: Transaction) => Promise<WaitingFor | Nothing>;
 }
 export class ObjectiveManager {
   private store: Store;
@@ -62,7 +62,7 @@ export class ObjectiveManager {
    * @param objectiveId - id of objective to try to advance
    * @param response - response builder; will be modified by the method
    */
-  async crank(objectiveId: string, response: WalletResponse): Promise<void> {
+  async crank(objectiveId: string, response: EngineResponse): Promise<void> {
     return this.store.transaction(async tx => {
       const objective = await this.store.getAndLockObjective(objectiveId, tx);
       let waitingFor: WaitingFor | null;
@@ -118,7 +118,7 @@ export class ObjectiveManager {
     return ChannelCloser.create(this.store, this.chainService, this.logger, this.timingMetrics);
   }
 
-  public async commenceCloseChannel(channelId: Bytes32, response: WalletResponse): Promise<void> {
+  public async commenceCloseChannel(channelId: Bytes32, response: EngineResponse): Promise<void> {
     return CloseChannelObjective.commence(channelId, response, this.store);
   }
 }

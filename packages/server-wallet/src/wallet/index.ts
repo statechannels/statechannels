@@ -1,27 +1,27 @@
-import {IncomingServerWalletConfig} from '../config';
+import {IncomingEngineConfig} from '../config';
 
-import {MultiThreadedWallet} from './multi-threaded-wallet';
-import {WalletInterface} from './types';
-import {SingleThreadedWallet} from './wallet';
+import {MultiThreadedEngine} from './multi-threaded-wallet';
+import {EngineInterface} from './types';
+import {SingleThreadedEngine} from './wallet';
 
 /**
- * A single- or multi-threaded Nitro wallet
+ * A single- or multi-threaded Nitro Engine
  *
  * @remarks
- * The number of threads is specified in the supplied {@link @statechannels/server-wallet#RequiredServerWalletConfig | configuration}.
+ * The number of threads is specified in the supplied {@link @statechannels/server-wallet#RequiredServerEngineConfig | configuration}.
  */
-export abstract class Wallet extends SingleThreadedWallet implements WalletInterface {
+export abstract class Engine extends SingleThreadedEngine implements EngineInterface {
   static async create(
-    walletConfig: IncomingServerWalletConfig
-  ): Promise<SingleThreadedWallet | MultiThreadedWallet> {
-    if (walletConfig?.workerThreadAmount && walletConfig.workerThreadAmount > 0) {
-      return MultiThreadedWallet.create(walletConfig);
+    engineConfig: IncomingEngineConfig
+  ): Promise<SingleThreadedEngine | MultiThreadedEngine> {
+    if (engineConfig?.workerThreadAmount && engineConfig.workerThreadAmount > 0) {
+      return MultiThreadedEngine.create(engineConfig);
     } else {
-      return SingleThreadedWallet.create(walletConfig);
+      return SingleThreadedEngine.create(engineConfig);
     }
   }
 }
 
 export * from '../config';
 export * from './types';
-export {SingleThreadedWallet, MultiThreadedWallet};
+export {SingleThreadedEngine, MultiThreadedEngine};

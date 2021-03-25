@@ -1,13 +1,13 @@
 import {ChannelId} from '@statechannels/client-api-schema';
 
-import {WalletError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/wallet-error';
 
 export interface JoinChannelHandlerParams {
   channelId: ChannelId;
 }
 
-export class JoinChannelError extends WalletError {
-  readonly type = WalletError.errors.JoinChannelError;
+export class JoinChannelError extends EngineError {
+  readonly type = EngineError.errors.JoinChannelError;
 
   static readonly reasons = {
     channelNotFound: 'channel not found',

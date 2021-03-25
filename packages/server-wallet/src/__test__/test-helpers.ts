@@ -1,7 +1,7 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {ChannelRequest, Payload, SignedState} from '@statechannels/wire-format';
 
-import {Wallet} from '../wallet';
+import {Engine} from '../wallet';
 import {Outgoing} from '..';
 
 export const ONE_DAY = 86400;
@@ -35,7 +35,7 @@ export function getSignedStateFor(channelId: string, outbox: Outgoing[]): Signed
   return filteredSignedStates[0];
 }
 
-export async function interParticipantChannelResultsAreEqual(a: Wallet, b: Wallet): Promise<void> {
+export async function interParticipantChannelResultsAreEqual(a: Engine, b: Engine): Promise<void> {
   const {channelResults: aChannelResults} = await a.getChannels();
   const {channelResults: bChannelResults, outbox: bOutbox} = await b.getChannels();
 

@@ -6,8 +6,8 @@ import {Config} from 'knex';
 import {
   defaultConfig,
   defaultDatabaseConfiguration,
-  extractDBConfigFromServerWalletConfig,
-  ServerWalletConfig,
+  extractDBConfigFromEngineConfig,
+  EngineConfig,
 } from '../config';
 
 // Populate env vars as knexfile is used directly in yarn scripts
@@ -26,10 +26,10 @@ WARNING: @statechannels/devtools not detected.
 
 const BASE_PATH = path.join(__dirname, '..', 'db');
 const extensions = [path.extname(__filename)];
-export function createKnexConfig(walletConfig: ServerWalletConfig): Config<any> {
+export function createKnexConfig(engineConfig: EngineConfig): Config<any> {
   return {
-    ...extractDBConfigFromServerWalletConfig(walletConfig),
-    debug: walletConfig.databaseConfiguration.debug,
+    ...extractDBConfigFromEngineConfig(engineConfig),
+    debug: engineConfig.databaseConfiguration.debug,
     migrations: {
       directory: path.join(BASE_PATH, 'migrations'),
       loadExtensions: extensions,

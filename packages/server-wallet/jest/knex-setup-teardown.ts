@@ -6,7 +6,7 @@ import {DBAdmin} from '../src/db-admin/db-admin';
 configureEnvVariables();
 
 import {
-  extractDBConfigFromServerWalletConfig,
+  extractDBConfigFromEngineConfig,
   defaultTestConfig,
   DatabaseConfiguration,
 } from '../src/config';
@@ -21,7 +21,7 @@ const constructedKnexs: Knex[] = []
  */
 export let constructKnex = (databaseConfiguration: Partial<DatabaseConfiguration>): Knex =>
   {
-    const knex = Knex(extractDBConfigFromServerWalletConfig(defaultTestConfig({databaseConfiguration})));
+    const knex = Knex(extractDBConfigFromEngineConfig(defaultTestConfig({databaseConfiguration})));
     constructedKnexs.push(knex)
 
     return knex

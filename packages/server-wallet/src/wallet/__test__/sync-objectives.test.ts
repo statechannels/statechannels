@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import {Wallet} from '..';
+import {Engine} from '..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
@@ -12,23 +12,23 @@ import {openChannelObjective} from './fixtures/open-channel-objective';
 import {alice} from './fixtures/signing-wallets';
 import {stateWithHashSignedBy} from './fixtures/states';
 
-let wallet: Wallet;
+let engine: Engine;
 
 beforeAll(async () => {
   await seedAlicesSigningWallet(testKnex);
-  wallet = await Wallet.create(defaultTestConfig());
+  engine = await Engine.create(defaultTestConfig());
 });
 
 afterAll(async () => {
-  await wallet.destroy();
+  await engine.destroy();
 });
 describe('SyncObjective', () => {
   it('throws an error if an objectiveId does not exist', async () => {
-    await expect(wallet.syncObjectives(['FAKE'])).rejects.toThrow('Could not find all objectives');
+    await expect(engine.syncObjectives(['FAKE'])).rejects.toThrow('Could not find all objectives');
   });
 
   it('handles being called with no objective ids', async () => {
-    const syncResults = await wallet.syncObjectives([]);
+    const syncResults = await engine.syncObjectives([]);
     expect(syncResults.channelResults).toHaveLength(0);
     expect(syncResults.newObjectives).toHaveLength(0);
     expect(syncResults.outbox).toHaveLength(0);
@@ -44,7 +44,7 @@ describe('SyncObjective', () => {
 
     const {channelId} = targetChannel;
 
-    const {newObjectives, outbox, channelResults} = await wallet.syncObjectives([
+    const {newObjectives, outbox, channelResults} = await engine.syncObjectives([
       objective.objectiveId,
     ]);
 

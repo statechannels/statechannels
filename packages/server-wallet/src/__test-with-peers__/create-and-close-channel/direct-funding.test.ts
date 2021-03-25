@@ -7,7 +7,7 @@ import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers} from 'ethers';
 
 import {
-  peerWallets,
+  peerEngines,
   getPeersSetup,
   participantA,
   participantB,
@@ -52,12 +52,12 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   //        A <> B
   // PreFund0
-  const resultA0 = await peerWallets.a.createChannel(createChannelParams);
+  const resultA0 = await peerEngines.a.createChannel(createChannelParams);
   await messageService.send(getMessages(resultA0));
   channelId = resultA0.channelResults[0].channelId;
 
   //      PreFund0B
-  const resultB1 = await peerWallets.b.joinChannel({channelId});
+  const resultB1 = await peerEngines.b.joinChannel({channelId});
   await messageService.send(getMessages(resultB1));
 
   const depositByA = {
@@ -67,8 +67,8 @@ it('Create a directly funded channel between two wallets ', async () => {
   }; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
-  await peerWallets.a.updateFundingForChannels([depositByA]);
-  await peerWallets.b.updateFundingForChannels([depositByA]);
+  await peerEngines.a.updateFundingForChannels([depositByA]);
+  await peerEngines.b.updateFundingForChannels([depositByA]);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
   const depositByB = {
@@ -78,25 +78,25 @@ it('Create a directly funded channel between two wallets ', async () => {
   }; // B sends 1 ETH (2 total)
 
   // Results before funding is complete
-  await expectLatestStateToMatch(channelId, peerWallets.a, {
+  await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'opening',
     turnNum: 0,
   });
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'opening',
     turnNum: 0,
   });
 
-  const resultA2 = await peerWallets.a.updateFundingForChannels([depositByB]);
-  const resultB2 = await peerWallets.b.updateFundingForChannels([depositByB]);
+  const resultA2 = await peerEngines.a.updateFundingForChannels([depositByB]);
+  const resultB2 = await peerEngines.b.updateFundingForChannels([depositByB]);
   await messageService.send(getMessages(resultA2));
   await messageService.send(getMessages(resultB2));
 
-  await expectLatestStateToMatch(channelId, peerWallets.a, {
+  await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'running',
     turnNum: 3,
   });
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'running',
     turnNum: 3,
   });
@@ -104,7 +104,7 @@ it('Create a directly funded channel between two wallets ', async () => {
     channelId,
   };
 
-  const bCloseChannel = peerWallets.b.closeChannel(closeChannelParams);
+  const bCloseChannel = peerEngines.b.closeChannel(closeChannelParams);
 
   await bCloseChannel;
 
@@ -113,21 +113,21 @@ it('Create a directly funded channel between two wallets ', async () => {
   // -------------------------------
 
   // A generates isFinal4
-  const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
+  const aCloseChannelResult = await peerEngines.a.closeChannel(closeChannelParams);
   await messageService.send(getMessages(aCloseChannelResult));
   // it shouldn't error if close channel is called twice
-  await peerWallets.a.closeChannel(closeChannelParams);
+  await peerEngines.a.closeChannel(closeChannelParams);
 
   expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
     status: 'closing',
     turnNum: 4,
   });
-  await expectLatestStateToMatch(channelId, peerWallets.a, {
+  await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'closed',
     turnNum: 4,
   });
   // A pushed the countersigned isFinal4
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'closed',
     turnNum: 4,
   });

@@ -7,7 +7,7 @@ import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
 import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
 import {alice} from '../src/wallet/__test__/fixtures/signing-wallets';
 import {channel, withSupportedState} from '../src/models/__test__/fixtures/channel';
-import {defaultTestNetworkConfiguration, ServerWalletConfig, WalletEvent} from '../src';
+import {defaultTestNetworkConfiguration, EngineConfig, EngineEvent} from '../src';
 import {Channel} from '../src/models/channel';
 import {DBAdmin} from '../src/db-admin/db-admin';
 import {AdjudicatorStatusModel} from '../src/models/adjudicator-status';
@@ -28,7 +28,7 @@ const ChannelPayer = Channel.bindKnex(knexPayer);
 const provider = process.env.RPC_ENDPOINT;
 const pk = process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey;
 
-const config: ServerWalletConfig = {
+const config: EngineConfig = {
   ...payerConfig,
   loggingConfiguration: {logLevel: 'trace', logDestination: LOG_PATH},
   networkConfiguration: defaultTestNetworkConfiguration,
@@ -55,7 +55,7 @@ afterAll(async () => {
   await knexPayer.destroy();
 });
 
-test('the wallet handles the basic challenging v0 behavior', async () => {
+test('the engine handles the basic challenging v0 behavior', async () => {
   const channelId = await insertChannel();
 
   payerClient = await PayerClient.create(alice().privateKey, 'fake_url', config);
@@ -71,9 +71,9 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
   // We expect the channel to be in an open status
   expect(await getChannelMode(channelId)).toEqual('Open');
 
-  const events: WalletEvent[] = [];
+  const events: EngineEvent[] = [];
   const names = ['objectiveStarted', 'objectiveSucceeded'] as const;
-  names.map(event => payerClient.wallet.on(event, e => events.push({...e, event})));
+  names.map(event => payerClient.engine.on(event, e => events.push({...e, event})));
 
   // Call challenge and mine blocks
   await payerClient.challenge(channelId);
@@ -93,7 +93,7 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
 
   await payerClient.mineBlocks(5);
 
-  // We expect that the challenge should be detected by the wallet
+  // We expect that the challenge should be detected by the engine
   expect(await getChannelMode(channelId)).toEqual('Challenge');
 
   // Mine a block with a timestamp of current + CHALLENGE_DURATION
@@ -117,7 +117,7 @@ test('the wallet handles the basic challenging v0 behavior', async () => {
 // Helpers
 async function fundChannel(payerClient: PayerClient, channelId: string) {
   const amount = BN.add(payerAmount, receiverAmount);
-  const transResponse = await payerClient.wallet.chainService.fundChannel({
+  const transResponse = await payerClient.engine.chainService.fundChannel({
     amount,
     channelId,
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,

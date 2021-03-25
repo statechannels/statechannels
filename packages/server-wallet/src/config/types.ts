@@ -59,17 +59,17 @@ export type ChainServiceConfiguration = {
 } & Partial<Exclude<ChainServiceArgs, 'logger'>>;
 
 /**
- * The minimum required configuration to use the server wallet.
+ * The minimum required configuration to use the engine.
  */
-export type RequiredServerWalletConfig = {
+export type RequiredEngineConfig = {
   databaseConfiguration: RequiredDatabaseConfiguration;
   networkConfiguration: NetworkConfiguration;
 };
 
 /**
- * Additional configuration options for the server wallet that are not required.
+ * Additional configuration options for the engine that are not required.
  */
-export interface OptionalServerWalletConfig {
+export interface OptionalEngineConfig {
   databaseConfiguration: OptionalDatabaseConfiguration;
   workerThreadAmount: number;
   skipEvmValidation: boolean;
@@ -81,14 +81,13 @@ export interface OptionalServerWalletConfig {
 /**
  * This is a fully filled out config. All Required and Optional fields are defined.
  */
-export type ServerWalletConfig = RequiredServerWalletConfig & OptionalServerWalletConfig;
+export type EngineConfig = RequiredEngineConfig & OptionalEngineConfig;
 
 /**
- * This is the config accepted by the wallet create method.
+ * This is the config accepted by the engine create method.
  * It is the required config properties plus additional optional properties
  */
-export type IncomingServerWalletConfig = RequiredServerWalletConfig &
-  Partial<OptionalServerWalletConfig>;
+export type IncomingEngineConfig = RequiredEngineConfig & Partial<OptionalEngineConfig>;
 
 /**
  * Various network configuration options

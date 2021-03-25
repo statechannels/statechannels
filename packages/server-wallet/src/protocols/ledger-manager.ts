@@ -2,7 +2,7 @@ import _ from 'lodash';
 import {BN, Destination, unreachable} from '@statechannels/wallet-core';
 
 import {Channel} from '../models/channel';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../wallet/wallet-response';
 import {Store} from '../wallet/store';
 import {State} from '../models/channel/state';
 import {SimpleAllocationOutcome} from '../models/channel/outcome';
@@ -79,7 +79,7 @@ export class LedgerManager {
     this.store = store;
   }
 
-  async crank(ledgerChannelId: string, response: WalletResponse): Promise<Destination[]> {
+  async crank(ledgerChannelId: string, response: EngineResponse): Promise<Destination[]> {
     return this.store.transaction(async tx => {
       // grab the requests
       // TODO: requests should be locked for update

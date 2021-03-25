@@ -4,24 +4,24 @@ import {left, right} from 'fp-ts/lib/Either';
 
 import {createLogger} from '../../logger';
 import {timerFactory} from '../../metrics';
-import {ServerWalletConfig} from '../../config';
-import {SingleThreadedWallet} from '..';
-import {WalletEvent} from '../types';
+import {EngineConfig} from '../../config';
+import {SingleThreadedEngine} from '..';
+import {EngineEvent} from '../types';
 
 import {isStateChannelWorkerData} from './worker-data';
 
 startWorker();
 
-function relayWalletEvents<E extends WalletEvent>(name: E['type']) {
+function relayEngineEvents<E extends EngineEvent>(name: E['type']) {
   return (value: E['value']): void => {
-    parentPort?.postMessage({type: 'WalletEventEmitted', name, value});
+    parentPort?.postMessage({type: 'EngineEventEmitted', name, value});
   };
 }
 
 async function startWorker() {
   // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
-  const walletConfig: ServerWalletConfig = {
-    ...(workerData as ServerWalletConfig),
+  const engineConfig: EngineConfig = {
+    ...(workerData as EngineConfig),
     databaseConfiguration: {
       connection: workerData.databaseConfiguration.connection,
       pool: {min: 0, max: 1},
@@ -29,13 +29,13 @@ async function startWorker() {
     workerThreadAmount: 0, // don't want workers to start more workers
   };
 
-  const logger = createLogger(walletConfig).child({threadId});
+  const logger = createLogger(engineConfig).child({threadId});
 
   logger.debug(`Worker %o starting`, threadId);
-  const wallet = await SingleThreadedWallet.create(walletConfig);
+  const engine = await SingleThreadedEngine.create(engineConfig);
 
   const events = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
-  events.forEach(name => wallet.on(name, relayWalletEvents(name)));
+  events.forEach(name => engine.on(name, relayEngineEvents(name)));
 
   parentPort?.on('message', async (message: any) => {
     if (isMainThread) {
@@ -49,7 +49,7 @@ async function startWorker() {
     }
 
     const timer = timerFactory(
-      walletConfig.metricsConfiguration?.timingMetrics || false,
+      engineConfig.metricsConfiguration?.timingMetrics || false,
       `Thread ${threadId}`
     );
     try {
@@ -57,17 +57,17 @@ async function startWorker() {
         case 'UpdateChannel':
           logger.debug(`Worker-%o handling UpdateChannel`, threadId);
           return parentPort?.postMessage(
-            right(await timer('UpdateChannel', () => wallet.updateChannel(message.args)))
+            right(await timer('UpdateChannel', () => engine.updateChannel(message.args)))
           );
         case 'PushMessage':
           logger.debug(`Worker-%o handling PushMessage`, threadId);
           return parentPort?.postMessage(
-            right(await timer('PushMessage', () => wallet.pushMessage(message.args)))
+            right(await timer('PushMessage', () => engine.pushMessage(message.args)))
           );
         case 'PushUpdate':
           logger.debug(`Worker-%o handling PushUpdate`, threadId);
           return parentPort?.postMessage(
-            right(await timer('PushUpdate', () => wallet.pushUpdate(message.args)))
+            right(await timer('PushUpdate', () => engine.pushUpdate(message.args)))
           );
         default:
           return parentPort?.postMessage(left(new Error('Unknown message type')));

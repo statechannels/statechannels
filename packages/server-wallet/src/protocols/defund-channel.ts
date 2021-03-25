@@ -6,7 +6,7 @@ import {ChainServiceInterface} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../wallet/store';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../wallet/wallet-response';
 
 import {Defunder} from './defunder';
 
@@ -32,7 +32,7 @@ export class ChannelDefunder implements Cranker<WalletObjective<DefundChannel>> 
 
   public async crank(
     objective: WalletObjective<DefundChannel>,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {
     const {targetChannelId: channelId} = objective.data;

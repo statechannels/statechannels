@@ -6,7 +6,7 @@ import {
   participantA,
   participantB,
   peersTeardown,
-  peerWallets,
+  peerEngines,
 } from '../../jest/with-peers-setup-teardown';
 import {ChannelManager} from '../channel-manager';
 import {LatencyOptions} from '../message-service/test-message-service';
@@ -44,10 +44,10 @@ describe('EnsureObjectives', () => {
     'can successfully create a channel with the latency options: %o',
     async options => {
       messageService.setLatencyOptions(options);
-      const channelManager = await ChannelManager.create(peerWallets.a, messageService);
+      const channelManager = await ChannelManager.create(peerEngines.a, messageService);
 
-      peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
-        await peerWallets.b.joinChannels([o.data.targetChannelId]);
+      peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
+        await peerEngines.b.joinChannels([o.data.targetChannelId]);
       });
 
       await expect(
@@ -60,13 +60,13 @@ describe('EnsureObjectives', () => {
   test('fails when all messages are dropped', async () => {
     messageService.setLatencyOptions({dropRate: 1});
     // We limit the attempts to avoid wasting times in the test
-    const channelManager = await ChannelManager.create(peerWallets.a, messageService, {
+    const channelManager = await ChannelManager.create(peerEngines.a, messageService, {
       numberOfAttempts: 1,
     });
 
-    peerWallets.b.on('objectiveStarted', async (o: WalletObjective) => {
+    peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
       const {targetChannelId: channelId} = o.data;
-      await peerWallets.b.joinChannels([channelId]);
+      await peerEngines.b.joinChannels([channelId]);
     });
 
     await expect(channelManager.createChannels(getCreateChannelsArgs(), 1)).rejects.toThrow(

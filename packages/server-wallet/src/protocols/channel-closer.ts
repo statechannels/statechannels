@@ -11,7 +11,7 @@ import {isExternalDestination} from '@statechannels/nitro-protocol';
 import {Store} from '../wallet/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletObjective} from '../models/objective';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../wallet/wallet-response';
 import {Channel} from '../models/channel';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 
@@ -42,7 +42,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
 
   public async crank(
     objective: WalletObjective<CloseChannel>,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {
     const channelToLock = objective.data.targetChannelId;
@@ -91,7 +91,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
   private async areAllFinalStatesSigned(
     channel: Channel,
     tx: Transaction,
-    response: WalletResponse
+    response: EngineResponse
   ): Promise<boolean> {
     // I want to sign the final state if:
     // - I haven't yet signed a final state
@@ -119,7 +119,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
     channel: Channel,
     turnNum: number,
     tx: Transaction,
-    response: WalletResponse
+    response: EngineResponse
   ): Promise<void> {
     if (!channel.supported) {
       throw new Error('Must have a supported state');
@@ -135,7 +135,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
     objective: WalletObjective<CloseChannel>,
     channel: Channel,
     tx: Transaction,
-    response: WalletResponse
+    response: EngineResponse
   ): Promise<void> {
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannel(channel);

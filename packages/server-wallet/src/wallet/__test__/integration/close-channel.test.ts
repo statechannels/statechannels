@@ -1,5 +1,5 @@
 import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
+import {Engine} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
@@ -7,9 +7,9 @@ import {channel} from '../../../models/__test__/fixtures/channel';
 import {defaultTestConfig} from '../../../config';
 import {Bytes32} from '../../../type-aliases';
 
-let w: Wallet;
+let w: Engine;
 beforeAll(async () => {
-  w = await Wallet.create(defaultTestConfig());
+  w = await Engine.create(defaultTestConfig());
   await seedAlicesSigningWallet(w.knex);
 });
 

@@ -33,7 +33,7 @@ import {Channel, ChannelError, CHANNEL_COLUMNS} from '../models/channel';
 import {SigningWallet} from '../models/signing-wallet';
 import {addHash, addState, clearOldStates, fastDeserializeState} from '../state-utils';
 import {ChannelState} from '../protocols/state';
-import {WalletError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/wallet-error';
 import {Bytes32, Uint256, Bytes} from '../type-aliases';
 import {timerFactory, recordFunctionMetrics, setupDBMetrics, timerFactorySync} from '../metrics';
 import {isReverseSorted, pick} from '../utilities/helpers';
@@ -692,8 +692,8 @@ export class Store {
   }
 }
 
-class StoreError extends WalletError {
-  readonly type = WalletError.errors.StoreError;
+class StoreError extends EngineError {
+  readonly type = EngineError.errors.StoreError;
 
   static readonly reasons = {
     duplicateChannel: 'Expected the channel to NOT exist in the database',

@@ -3,7 +3,7 @@ import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import {MessageServiceInterface} from './message-service/types';
 import {getMessages} from './message-service/utils';
 import {WalletObjective} from './models/objective';
-import {Wallet} from './wallet';
+import {Engine} from './wallet';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -28,20 +28,20 @@ const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay:
 export class ChannelManager {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
-   * @param wallet The wallet to use.
+   * @param engine The engine to use.
    * @param messageService  The message service to use.
    * @param retryOptions How often and for how long the channel manager should retry objectives.
    * @returns A channel manager.
    */
   public static async create(
-    wallet: Wallet,
+    engine: Engine,
     messageService: MessageServiceInterface,
     retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<ChannelManager> {
-    return new ChannelManager(wallet, messageService, {...DEFAULTS, ...retryOptions});
+    return new ChannelManager(engine, messageService, {...DEFAULTS, ...retryOptions});
   }
   private constructor(
-    private _wallet: Wallet,
+    private _engine: Engine,
     private _messageService: MessageServiceInterface,
     private _retryOptions: RetryOptions
   ) {}
@@ -54,7 +54,7 @@ export class ChannelManager {
    * @returns
    */
   public async createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<void> {
-    const createResult = await this._wallet.createChannels(args, numberOfChannels);
+    const createResult = await this._engine.createChannels(args, numberOfChannels);
 
     await this.ensureObjectives(createResult.newObjectives, getMessages(createResult.outbox));
   }
@@ -78,11 +78,11 @@ export class ChannelManager {
       }
 
       if (remaining.size === 0) {
-        this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+        this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
       }
     };
 
-    this._wallet.on('objectiveSucceeded', onObjectiveSucceeded);
+    this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
 
     // Now that we're listening for objective success we can now send messages
     // that might trigger progress on the objective
@@ -95,12 +95,12 @@ export class ChannelManager {
       const delayAmount = initialDelay * Math.pow(multiple, i);
       await delay(delayAmount);
 
-      const {outbox} = await this._wallet.syncObjectives(objectives.map(o => o.objectiveId));
+      const {outbox} = await this._engine.syncObjectives(objectives.map(o => o.objectiveId));
       await this._messageService.send(getMessages(outbox));
     }
 
-    this._wallet.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-    this._wallet.logger.error(
+    this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+    this._engine.logger.error(
       {
         remaining: Array.from(remaining.keys()),
       },
@@ -110,6 +110,6 @@ export class ChannelManager {
   }
 
   async destroy(): Promise<void> {
-    return this._wallet.destroy();
+    return this._engine.destroy();
   }
 }

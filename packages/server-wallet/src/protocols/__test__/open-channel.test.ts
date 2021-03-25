@@ -4,7 +4,7 @@ import {ChannelOpener} from '../channel-opener';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {WalletResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../wallet/wallet-response';
 import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
@@ -173,7 +173,7 @@ const crankAndAssert = async (
 
   const chainService = new MockChainService();
   const channelOpener = ChannelOpener.create(store, chainService, logger, timingMetrics);
-  const response = WalletResponse.initialize();
+  const response = EngineResponse.initialize();
   const spy = jest.spyOn(chainService, 'fundChannel');
   await store.transaction(async tx => {
     await channelOpener.crank(objective, response, tx);

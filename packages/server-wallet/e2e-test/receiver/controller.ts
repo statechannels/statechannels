@@ -2,7 +2,7 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
 import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
-import {Wallet, Message as Payload, MultiThreadedWallet} from '../../src';
+import {Engine, Message as Payload, MultiThreadedEngine} from '../../src';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';
 import {defaultConfig} from '../../src/config';
@@ -10,17 +10,17 @@ import {WALLET_VERSION} from '../../src/version';
 
 export default class ReceiverController {
   static async create(): Promise<ReceiverController> {
-    const wallet = recordFunctionMetrics(
-      await Wallet.create(receiverConfig),
+    const engine = recordFunctionMetrics(
+      await Engine.create(receiverConfig),
       defaultConfig.metricsConfiguration.timingMetrics
     );
-    return new ReceiverController(wallet);
+    return new ReceiverController(engine);
   }
 
-  private constructor(private readonly wallet: Wallet) {}
+  private constructor(private readonly engine: Engine) {}
 
   public async warmup(): Promise<void> {
-    this.wallet instanceof MultiThreadedWallet && (await this.wallet.warmUpThreads());
+    this.engine instanceof MultiThreadedEngine && (await this.engine.warmUpThreads());
   }
 
   private readonly myParticipantID: string = 'receiver';
@@ -43,7 +43,7 @@ export default class ReceiverController {
     const {
       channelResults: [channelResult],
       outbox: [maybeSyncStateResponse],
-    } = await this.time('push message', async () => this.wallet.pushMessage(message));
+    } = await this.time('push message', async () => this.engine.pushMessage(message));
 
     if (maybeSyncStateResponse) {
       const syncResponse = maybeSyncStateResponse.params.data as Payload;
@@ -56,16 +56,16 @@ export default class ReceiverController {
         outbox: [messageToSendToPayer],
       } = await this.time('react', async () => {
         if (channelResult.status === 'proposed') {
-          return this.wallet.joinChannels([channelResult.channelId]);
+          return this.engine.joinChannels([channelResult.channelId]);
         } else {
-          return this.wallet.updateChannel(channelResult);
+          return this.engine.updateChannel(channelResult);
         }
       });
 
-      const walletResponse = messageToSendToPayer.params.data as Payload;
+      const engineResponse = messageToSendToPayer.params.data as Payload;
 
-      reply.signedStates = reply.signedStates?.concat(walletResponse.signedStates || []);
-      reply.objectives = reply.objectives?.concat(walletResponse.objectives || []);
+      reply.signedStates = reply.signedStates?.concat(engineResponse.signedStates || []);
+      reply.objectives = reply.objectives?.concat(engineResponse.objectives || []);
     }
 
     return reply;
@@ -81,7 +81,7 @@ export default class ReceiverController {
     const {
       channelResult,
       outbox: [maybeSyncStateResponse],
-    } = await this.time('push update', async () => this.wallet.pushUpdate(message));
+    } = await this.time('push update', async () => this.engine.pushUpdate(message));
 
     if (maybeSyncStateResponse) {
       const syncResponse = maybeSyncStateResponse.params.data as Payload;
@@ -94,16 +94,16 @@ export default class ReceiverController {
         outbox: [messageToSendToPayer],
       } = await this.time('react', async () => {
         if (channelResult.status === 'proposed') {
-          return this.wallet.joinChannels([channelResult.channelId]);
+          return this.engine.joinChannels([channelResult.channelId]);
         } else {
-          return this.wallet.updateChannel(channelResult);
+          return this.engine.updateChannel(channelResult);
         }
       });
 
-      const walletResponse = messageToSendToPayer.params.data as Payload;
+      const engineResponse = messageToSendToPayer.params.data as Payload;
 
-      reply.signedStates = reply.signedStates?.concat(walletResponse.signedStates || []);
-      reply.objectives = reply.objectives?.concat(walletResponse.objectives || []);
+      reply.signedStates = reply.signedStates?.concat(engineResponse.signedStates || []);
+      reply.objectives = reply.objectives?.concat(engineResponse.objectives || []);
     }
 
     return reply;

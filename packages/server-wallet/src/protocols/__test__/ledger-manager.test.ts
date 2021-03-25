@@ -11,7 +11,7 @@ import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
 import {State} from '../../models/channel/state';
 import {LedgerManager} from '../ledger-manager';
-import {WalletResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../wallet/wallet-response';
 import {Destination} from '../../type-aliases';
 
 jest.setTimeout(10_000);
@@ -562,7 +562,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
 
     // crank
     // -----
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     await LedgerManager.create({store}).crank(ledgerChannel.channelId, response);
 
     // assertions

@@ -4,7 +4,7 @@ import {ethers, constants} from 'ethers';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
+import {Engine} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {Funding} from '../../../models/funding';
@@ -15,9 +15,9 @@ import {defaultTestConfig} from '../../../config';
 
 const AddressZero = makeAddress(ethers.constants.AddressZero);
 
-let w: Wallet;
+let w: Engine;
 beforeEach(async () => {
-  w = await Wallet.create(defaultTestConfig());
+  w = await Engine.create(defaultTestConfig());
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });
 afterEach(async () => {

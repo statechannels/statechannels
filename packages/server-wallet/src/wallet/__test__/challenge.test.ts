@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import {defaultTestConfig, Wallet} from '..';
+import {defaultTestConfig, Engine} from '..';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
@@ -11,9 +11,9 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {alice, bob} from './fixtures/signing-wallets';
 import {stateWithHashSignedBy} from './fixtures/states';
 
-let w: Wallet;
+let w: Engine;
 beforeAll(async () => {
-  w = await Wallet.create(defaultTestConfig());
+  w = await Engine.create(defaultTestConfig());
 });
 
 beforeEach(async () => {

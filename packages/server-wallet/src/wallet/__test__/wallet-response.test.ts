@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {channelWithVars} from '../../models/__test__/fixtures/channel';
 import {Notice} from '../../protocols/actions';
 import {addHash} from '../../state-utils';
-import {WalletResponse} from '../wallet-response';
+import {EngineResponse} from '../wallet-response';
 
 import {stateSignedBy} from './fixtures/states';
 
@@ -14,7 +14,7 @@ describe('mergeChannelResults', () => {
       channelWithVars({vars: [addHash(stateSignedBy()({turnNum: 1}))]}).channelResult,
       channelWithVars({vars: [addHash(stateSignedBy()({turnNum: 2}))]}).channelResult,
     ];
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     for (const channelResult of duplicateChannelResult) {
       response.queueChannelResult(channelResult);
     }
@@ -28,7 +28,7 @@ describe('mergeChannelResults', () => {
       channelWithVars({channelId: '0x123'}).channelResult,
       channelWithVars({channelId: '0xabc'}).channelResult,
     ];
-    const response = WalletResponse.initialize();
+    const response = EngineResponse.initialize();
     for (const channelResult of duplicateChannelResult) {
       response.queueChannelResult(channelResult);
     }
@@ -54,7 +54,7 @@ describe('mergeOutgoing', () => {
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state2]}},
     };
 
-    const merged = WalletResponse.mergeOutgoing([message2, message1]);
+    const merged = EngineResponse.mergeOutgoing([message2, message1]);
     expect(merged).toHaveLength(1);
 
     expect((merged[0] as any).params.data.signedStates).toHaveLength(2);
@@ -72,7 +72,7 @@ describe('mergeOutgoing', () => {
       params: {recipient: USER1, sender: USER2, data: {signedStates: [state]}},
     };
     // We perform a deep clone to avoid things passing due to object references being the same
-    const merged = WalletResponse.mergeOutgoing([message, _.cloneDeep(message)]);
+    const merged = EngineResponse.mergeOutgoing([message, _.cloneDeep(message)]);
     expect(merged).toHaveLength(1);
 
     expect((merged[0] as any).params.data.signedStates).toHaveLength(1);

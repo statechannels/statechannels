@@ -1,7 +1,7 @@
 import {OpenChannel} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
-import {Wallet} from '../..';
+import {Engine} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {defaultTestConfig} from '../../../config';
@@ -9,9 +9,9 @@ import {DBAdmin} from '../../../db-admin/db-admin';
 import {WalletObjective} from '../../../models/objective';
 import {WaitingFor} from '../../../protocols/channel-opener';
 
-let w: Wallet;
+let w: Engine;
 beforeEach(async () => {
-  w = await Wallet.create(defaultTestConfig());
+  w = await Engine.create(defaultTestConfig());
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });
 

@@ -3,12 +3,10 @@ import {knexSnakeCaseMappers} from 'objection';
 import {parse} from 'pg-connection-string';
 
 import {defaultDatabaseConfiguration} from './defaults';
-import {ServerWalletConfig, DatabaseConnectionConfiguration} from './types';
+import {EngineConfig, DatabaseConnectionConfiguration} from './types';
 
-export function extractDBConfigFromServerWalletConfig(
-  serverWalletConfig: ServerWalletConfig
-): Config {
-  const connectionConfig = getDatabaseConnectionConfig(serverWalletConfig);
+export function extractDBConfigFromEngineConfig(engineConfig: EngineConfig): Config {
+  const connectionConfig = getDatabaseConnectionConfig(engineConfig);
 
   return {
     client: 'postgres',
@@ -18,7 +16,7 @@ export function extractDBConfigFromServerWalletConfig(
       user: connectionConfig.user || '',
     },
     ...knexSnakeCaseMappers(),
-    pool: serverWalletConfig.databaseConfiguration.pool || {},
+    pool: engineConfig.databaseConfiguration.pool || {},
   };
 }
 type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfiguration, string>>;
@@ -26,9 +24,9 @@ type DatabaseConnectionConfigObject = Required<Exclude<DatabaseConnectionConfigu
 type PartialConfigObject = Partial<DatabaseConnectionConfigObject> &
   Required<Pick<DatabaseConnectionConfigObject, 'database'>>;
 export function overwriteConfigWithDatabaseConnection(
-  config: ServerWalletConfig,
+  config: EngineConfig,
   databaseConnectionConfig: PartialConfigObject | string
-): ServerWalletConfig {
+): EngineConfig {
   return {
     ...config,
     databaseConfiguration: {
@@ -53,7 +51,7 @@ function isPartialDatabaseConfigObject(
 }
 
 export function getDatabaseConnectionConfig(
-  config: ServerWalletConfig
+  config: EngineConfig
 ): DatabaseConnectionConfigObject & {host: string; port: number} {
   if (typeof config.databaseConfiguration.connection === 'string') {
     const {connection: defaultConnection} = defaultDatabaseConfiguration;

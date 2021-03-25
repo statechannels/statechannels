@@ -4,7 +4,7 @@ import {SubmitChallenge} from '@statechannels/wallet-core';
 import {Store} from '../../wallet/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {WalletResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../wallet/wallet-response';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
@@ -111,7 +111,7 @@ const crankAndAssert = async (
   const callsChallenge = args.callsChallenge || false;
   const chainService = new MockChainService();
   const challengeSubmitter = ChallengeSubmitter.create(store, chainService, logger, timingMetrics);
-  const response = WalletResponse.initialize();
+  const response = EngineResponse.initialize();
   const spy = jest.spyOn(chainService, 'challenge');
   await store.transaction(async tx => {
     await challengeSubmitter.crank(objective, response, tx);

@@ -1,13 +1,13 @@
 import {Bytes32} from '../type-aliases';
 import {Store} from '../wallet/store';
-import {WalletError, Values} from '../errors/wallet-error';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineError, Values} from '../errors/wallet-error';
+import {EngineResponse} from '../wallet/wallet-response';
 import {ObjectiveModel} from '../models/objective';
 
 export class CloseChannelObjective {
   public static async commence(
     channelId: Bytes32,
-    response: WalletResponse,
+    response: EngineResponse,
     store: Store
   ): Promise<void> {
     await store.lockApp(
@@ -36,8 +36,8 @@ export class CloseChannelObjective {
   }
 }
 
-export class CloseChannelError extends WalletError {
-  readonly type = WalletError.errors.CloseChannelError;
+export class CloseChannelError extends EngineError {
+  readonly type = EngineError.errors.CloseChannelError;
 
   static readonly reasons = {
     channelMissing: 'channel not found',

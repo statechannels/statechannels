@@ -13,7 +13,7 @@ import {
   participantA,
   participantB,
   peersTeardown,
-  peerWallets,
+  peerEngines,
 } from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
@@ -25,7 +25,7 @@ jest.setTimeout(10_000);
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
 
-it('Create a directly-funded channel between two wallets, of which one crashes midway through ', async () => {
+it('Create a directly-funded channel between two engines, of which one crashes midway through ', async () => {
   const allocation: Allocation = {
     allocationItems: [
       {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},
@@ -45,27 +45,27 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
 
   //        A <> B
   // PreFund0
-  const resultA0 = await peerWallets.a.createChannel(createChannelParams);
+  const resultA0 = await peerEngines.a.createChannel(createChannelParams);
 
   channelId = resultA0.channelResults[0].channelId;
 
-  await expectLatestStateToMatch(channelId, peerWallets.a, {
+  await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'opening',
     turnNum: 0,
   });
 
   await messageService.send(getMessages(resultA0));
 
-  await expectLatestStateToMatch(channelId, peerWallets.b, {
+  await expectLatestStateToMatch(channelId, peerEngines.b, {
     status: 'proposed',
     turnNum: 0,
   });
 
-  // Destroy Wallet b and restart
+  // Destroy Engine b and restart
   await crashAndRestart('B');
 
   //      PreFund0B
-  const resultB1 = await peerWallets.b.joinChannel({channelId});
+  const resultB1 = await peerEngines.b.joinChannel({channelId});
   expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
     status: 'opening',
     turnNum: 0,
@@ -80,8 +80,8 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   }; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
-  await peerWallets.a.updateFundingForChannels([depositByA]);
-  await peerWallets.b.updateFundingForChannels([depositByA]);
+  await peerEngines.a.updateFundingForChannels([depositByA]);
+  await peerEngines.b.updateFundingForChannels([depositByA]);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
   const depositByB = {
@@ -90,8 +90,8 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
     amount: BigNumber.from(2).toHexString(),
   }; // B sends 1 ETH (2 total)
   // < PostFund3B
-  const resultA2 = await peerWallets.a.updateFundingForChannels([depositByB]);
-  const resultB2 = await peerWallets.b.updateFundingForChannels([depositByB]);
+  const resultA2 = await peerEngines.a.updateFundingForChannels([depositByB]);
+  const resultB2 = await peerEngines.b.updateFundingForChannels([depositByB]);
 
   expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
     status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
@@ -102,13 +102,13 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   await messageService.send(getMessages(resultB2));
 
   expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-    // Still opening because turnNum 3 is not supported yet (2 is not in the wallet)
+    // Still opening because turnNum 3 is not supported yet (2 is not in the engine)
     status: 'opening',
     turnNum: 0,
   });
 
   //  > PostFund3A
-  const resultB3 = await peerWallets.b.pushMessage(
+  const resultB3 = await peerEngines.b.pushMessage(
     getPayloadFor(participantB.participantId, resultA2.outbox)
   );
   expect(getChannelResultFor(channelId, resultB3.channelResults)).toMatchObject({
@@ -118,7 +118,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
 
   //  PostFund3B <
   await messageService.send(getMessages(resultB2));
-  await expectLatestStateToMatch(channelId, peerWallets.a, {
+  await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'running',
     turnNum: 3,
   });
@@ -128,7 +128,7 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
   };
 
   // A generates isFinal4
-  const aCloseChannelResult = await peerWallets.a.closeChannel(closeChannelParams);
+  const aCloseChannelResult = await peerEngines.a.closeChannel(closeChannelParams);
 
   expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
     status: 'closing',
@@ -137,5 +137,5 @@ it('Create a directly-funded channel between two wallets, of which one crashes m
 
   await messageService.send(getMessages(aCloseChannelResult));
   // B pushed isFinal4, generated countersigned isFinal4
-  await expectLatestStateToMatch(channelId, peerWallets.a, {status: 'closed', turnNum: 4});
+  await expectLatestStateToMatch(channelId, peerEngines.a, {status: 'closed', turnNum: 4});
 });

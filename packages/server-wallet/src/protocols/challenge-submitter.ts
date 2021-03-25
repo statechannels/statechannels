@@ -8,7 +8,7 @@ import {Channel} from '../models/channel';
 import {WalletObjective} from '../models/objective';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../wallet/store';
-import {WalletResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../wallet/wallet-response';
 
 export const enum WaitingFor {
   // This objective is not shared, therefore there are no other channel participants to wait on
@@ -35,7 +35,7 @@ export class ChallengeSubmitter implements Cranker<WalletObjective<SubmitChallen
   }
   public async crank(
     objective: WalletObjective<SubmitChallenge>,
-    response: WalletResponse,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<WaitingFor | Nothing> {
     const {targetChannelId: channelToLock} = objective.data;
