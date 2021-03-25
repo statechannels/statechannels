@@ -1,5 +1,3 @@
-// import ReactDOM from 'react-dom';
-//import React from 'react';
 import {interpret, Interpreter, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {
@@ -8,24 +6,62 @@ import {
   StateChannelsErrorResponse
 } from '@statechannels/client-api-schema';
 import {filter} from 'rxjs/operators';
-import {Payload, isOpenChannel, OpenChannel} from '@statechannels/wallet-core';
+import {
+  Payload,
+  isOpenChannel,
+  OpenChannel,
+  SignedState,
+  Uint256,
+  BN,
+  checkThat,
+  isSimpleEthAllocation,
+  Zero,
+  SharedObjective
+} from '@statechannels/wallet-core';
+import {Dictionary} from '@statechannels/wallet-core/node_modules/@types/lodash';
 
+import {ChannelStoreEntry} from './store/channel-store-entry';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
 import {ethereumEnableWorkflow} from './workflows/ethereum-enable';
-//import {Wallet as WalletUi} from './ui/wallet';
-import {MessagingServiceInterface, supportedFundingStrategyOrThrow} from './messaging';
+import {
+  MessagingService,
+  MessagingServiceInterface,
+  supportedFundingStrategyOrThrow
+} from './messaging';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
+import {ChainWatcher, ChannelChainInfo} from './chain';
 
 export interface Workflow {
   id: string;
   service: Interpreter<any, any, any>;
   domain: string; // TODO: Is this useful?
 }
+
+export type Message = {
+  objectives: SharedObjective[];
+  signedStates: SignedState[];
+};
+type Response = Message & {deposit?: boolean};
+type Funding = {amountOnChain: Uint256; status?: 'DEPOSITED'};
+type DepositInfo = {
+  depositAt: Uint256;
+  myDeposit: Uint256;
+  totalAfterDeposit: Uint256;
+  fundedAt: Uint256;
+};
 export class ChannelWallet {
   public workflows: Workflow[];
+  protected channelFunding: Dictionary<Funding> = {};
+  protected registeredChannels: Set<string> = new Set<string>();
+  static async create(): Promise<ChannelWallet> {
+    const chain = new ChainWatcher();
+    const store = new Store(chain);
+    await store.initialize();
+    return new ChannelWallet(store, new MessagingService(store));
+  }
 
   constructor(
     protected store: Store,
@@ -168,26 +204,22 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
-    this.renderUI(service);
+    // TODO: comment back in (maybe?)
+    //this.renderUI(service);
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
     return workflow;
   }
 
-  private renderUI(_machine) {
-    if (document.getElementById('root')) {
-      // ReactDOM.render(
-      //   React.createElement(WalletUi, {workflow: machine}),
-      //   document.getElementById('root')
-      // );
-    }
-  }
-
-  public async pushMessage(jsonRpcMessage: object, fromDomain: string) {
-    // Update any workflows waiting on an observable
-    await this.messagingService.receiveRequest(jsonRpcMessage, fromDomain);
-  }
+  // private renderUI(machine) {
+  //   if (document.getElementById('root')) {
+  //     ReactDOM.render(
+  //       React.createElement(WalletUi, {workflow: machine}),
+  //       document.getElementById('root')
+  //     );
+  //   }
+  // }
 
   public onSendMessage(
     callback: (
@@ -196,6 +228,143 @@ export class ChannelWallet {
   ) {
     this.messagingService.outboxFeed.subscribe(m => callback(m));
   }
+
+  public getAddress(): Promise<string> {
+    return this.store.getAddress();
+  }
+
+  /**
+   *  START of wallet 2.0
+   */
+
+  public async pushMessage(jsonRpcMessage: object, fromDomain: string) {
+    // Update any workflows waiting on an observable
+    await this.messagingService.receiveRequest(jsonRpcMessage, fromDomain);
+
+    let response: Message = {
+      objectives: [],
+      signedStates: []
+    };
+
+    // Crank objectives
+    for (const objective of this.store.objectives) {
+      switch (objective.type) {
+        case 'OpenChannel': {
+          response = await this.onOpenChannelObjective(objective.data.targetChannelId);
+          break;
+        }
+        default:
+          throw new Error('Objective not supported');
+      }
+    }
+    return response;
+  }
+
+  async onOpenChannelObjective(channelId: string): Promise<Message> {
+    const channel = await this.store.getEntry(channelId);
+    if (!this.registeredChannels.has(channelId)) {
+      this.store.chain.chainUpdatedFeed(channelId).subscribe({
+        next: chainInfo => this.onFundingUpdate(channelId, chainInfo)
+      });
+    }
+    const pk = await this.store.getPrivateKey(await this.store.getAddress());
+    const depositInfo = await this.getDepositInfo(channelId);
+
+    const response = this.crankOpenChannelObjective(
+      channel,
+      this.channelFunding[channelId],
+      depositInfo,
+      pk
+    );
+    if (response.deposit) {
+      this.channelFunding[channelId] = {...this.channelFunding[channelId], status: 'DEPOSITED'};
+      await this.store.chain.deposit(
+        channel.channelId,
+        this.channelFunding[channelId].amountOnChain,
+        depositInfo.myDeposit
+      );
+    }
+    if (response.signedStates[0]) {
+      await this.store.addState(response.signedStates[0]);
+      this.messagingService.sendMessageNotification({
+        ...response,
+        walletVersion: '@statechannels/server-wallet@1.23.0)'
+      });
+    }
+    return response;
+  }
+
+  crankOpenChannelObjective(
+    channel: ChannelStoreEntry,
+    channelFunding: Funding,
+    depositInfo: DepositInfo,
+    pk: string
+  ): Response {
+    const response: Response = {
+      objectives: [],
+      signedStates: []
+    };
+    const {latestState} = channel;
+    // Should we sign the prefund state?
+    if (latestState.turnNum === 0 && !channel.isSupportedByMe) {
+      const newState = channel.signAndAdd(latestState, pk);
+      response.signedStates = [newState];
+      return response;
+    }
+
+    // Should we deposit?
+    if (
+      BN.gte(channelFunding.amountOnChain, depositInfo.depositAt) &&
+      BN.lt(channelFunding.amountOnChain, depositInfo.totalAfterDeposit) &&
+      channelFunding.status !== 'DEPOSITED'
+    ) {
+      response.deposit = true;
+      return response;
+    }
+
+    // Should we sign the postfund state?
+    if (
+      BN.gte(channelFunding.amountOnChain, depositInfo.fundedAt) &&
+      latestState.turnNum === 3 &&
+      channel.latestSignedByMe.turnNum === 0
+    ) {
+      const newState = channel.signAndAdd(latestState, pk);
+      response.signedStates = [newState];
+      return response;
+    }
+
+    return response;
+  }
+
+  async onFundingUpdate(channelId: string, channelChainInfo: ChannelChainInfo): Promise<void> {
+    this.channelFunding[channelId] = {
+      ...this.channelFunding[channelId],
+      amountOnChain: channelChainInfo.amount
+    };
+    await this.onOpenChannelObjective(channelId);
+  }
+
+  async getDepositInfo(channelId: string): Promise<DepositInfo> {
+    const {latestState, myIndex} = await this.store.getEntry(channelId);
+    const {allocationItems} = checkThat(latestState.outcome, isSimpleEthAllocation);
+
+    const fundedAt = allocationItems.map(a => a.amount).reduce(BN.add);
+    let depositAt = Zero;
+    for (let i = 0; i < allocationItems.length; i++) {
+      const {amount} = allocationItems[i];
+      if (i !== myIndex) depositAt = BN.add(depositAt, amount);
+      else {
+        const totalAfterDeposit = BN.add(depositAt, amount);
+        return {depositAt, myDeposit: amount, totalAfterDeposit, fundedAt};
+      }
+    }
+
+    throw Error(`Could not find an allocation for participant id ${myIndex}`);
+  }
+
+  /**
+   *  END of wallet 2.0
+   */
 }
 
 const alreadyLogging = {};

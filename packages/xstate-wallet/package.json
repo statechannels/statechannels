@@ -152,7 +152,7 @@
     "node": ">=12.16.0"
   },
   "license": "MIT",
-  "main": "lib/src/browser-wallet.js",
+  "main": "lib/src/channel-wallet.js",
   "scripts": {
     "build-storybook": "build-storybook --quiet",
     "build:netlify:production": "yarn prepare && cp _redirects build/_redirects",
