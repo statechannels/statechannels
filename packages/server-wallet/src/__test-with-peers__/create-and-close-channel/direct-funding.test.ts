@@ -26,7 +26,7 @@ let channelId: string;
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
 
-it('Create a directly funded channel between two wallets ', async () => {
+it('Create a directly funded channel between two engines ', async () => {
   const allocation: Allocation = {
     allocationItems: [
       {

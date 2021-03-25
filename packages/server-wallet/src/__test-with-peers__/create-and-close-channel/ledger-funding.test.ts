@@ -163,7 +163,7 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
     await DBAdmin.truncateDatabase(bEngineConfig, tablesUsingLedgerChannels);
   });
 
-  it('can fund and close channel by ledger between two wallets ', async () => {
+  it('can fund and close channel by ledger between two engines ', async () => {
     ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(10, 10, ledgerChannelId);
 
@@ -239,7 +239,7 @@ describe('Funding a single channel with 50% of ledger funds', () => {
     await DBAdmin.truncateDatabase(bEngineConfig, tablesUsingLedgerChannels);
   });
 
-  it('can fund a channel by ledger between two wallets ', async () => {
+  it('can fund a channel by ledger between two engines ', async () => {
     ledgerChannelId = await createLedgerChannel(10, 10);
     const params = testCreateChannelParams(5, 5, ledgerChannelId);
 

@@ -23,7 +23,7 @@ let channelId: string;
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
 
-it('Create a fake-funded channel between two wallets ', async () => {
+it('Create a fake-funded channel between two engines ', async () => {
   const assetHolderAddress = makeAddress(constants.AddressZero);
   const aBal = BigNumber.from(1).toHexString();
 
