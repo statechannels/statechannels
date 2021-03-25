@@ -1,5 +1,5 @@
 import {UpdateChannelError} from '../../handlers/update-channel';
-import {isEngineError} from '../wallet-error';
+import {isEngineError} from '../engine-error';
 
 test('passes typeguard', () => {
   const updateChannelError = new UpdateChannelError(UpdateChannelError.reasons.channelNotFound);

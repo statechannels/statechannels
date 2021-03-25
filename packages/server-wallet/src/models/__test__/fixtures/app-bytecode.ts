@@ -1,7 +1,7 @@
 import {makeAddress} from '@statechannels/wallet-core';
 import {TestContractArtifacts} from '@statechannels/nitro-protocol';
 
-import {fixture} from '../../../wallet/__test__/fixtures/utils';
+import {fixture} from '../../../engine/__test__/fixtures/utils';
 import {AppBytecode} from '../../app-bytecode';
 
 // This is the bytecode from nitro protocol's counting app

@@ -1,7 +1,7 @@
 import {Participant} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 
-import {Engine} from '../src/wallet';
+import {Engine} from '../src/engine';
 import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../src';
 import {
   seedAlicesSigningWallet,

@@ -8,10 +8,10 @@ import {Transaction} from 'objection';
 import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
 
-import {Store} from '../wallet/store';
+import {Store} from '../engine/store';
 import {ChainServiceInterface} from '../chain-service';
 import {WalletObjective} from '../models/objective';
-import {EngineResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../engine/engine-response';
 import {Channel} from '../models/channel';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 

@@ -7,8 +7,8 @@ import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {WalletObjective} from '../models/objective';
-import {Store} from '../wallet/store';
-import {EngineResponse} from '../wallet/wallet-response';
+import {Store} from '../engine/store';
+import {EngineResponse} from '../engine/engine-response';
 
 export class DirectFunder {
   constructor(

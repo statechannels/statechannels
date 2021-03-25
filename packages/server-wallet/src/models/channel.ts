@@ -29,7 +29,7 @@ import {
   ChannelStateFunding,
   directFundingStatus,
 } from '../protocols/state';
-import {EngineError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 import {dropNonVariables} from '../state-utils';
 import {validateTransition} from '../utilities/validate-transition';
 

@@ -1,7 +1,7 @@
 import {Bytes32} from '../type-aliases';
-import {Store} from '../wallet/store';
-import {EngineError, Values} from '../errors/wallet-error';
-import {EngineResponse} from '../wallet/wallet-response';
+import {Store} from '../engine/store';
+import {EngineError, Values} from '../errors/engine-error';
+import {EngineResponse} from '../engine/engine-response';
 import {ObjectiveModel} from '../models/objective';
 
 export class CloseChannelObjective {

@@ -1,11 +1,11 @@
 import {BN, OpenChannel} from '@statechannels/wallet-core';
 
 import {ChannelOpener} from '../channel-opener';
-import {Store} from '../../wallet/store';
+import {Store} from '../../engine/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {EngineResponse} from '../../wallet/wallet-response';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {EngineResponse} from '../../engine/engine-response';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {WalletObjective} from '../../models/objective';

@@ -1,6 +1,6 @@
 import {BN, simpleEthAllocation} from '@statechannels/wallet-core';
 
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
+import {alice, bob} from '../../engine/__test__/fixtures/participants';
 import {directFundingStatus} from '../state';
 
 const zero = BN.from(0);

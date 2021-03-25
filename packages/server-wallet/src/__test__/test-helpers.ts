@@ -1,7 +1,7 @@
 import {ChannelResult} from '@statechannels/client-api-schema';
 import {ChannelRequest, Payload, SignedState} from '@statechannels/wire-format';
 
-import {Engine} from '../wallet';
+import {Engine} from '../engine';
 import {Outgoing} from '..';
 
 export const ONE_DAY = 86400;

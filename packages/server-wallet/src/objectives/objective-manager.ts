@@ -5,9 +5,9 @@ import {Transaction} from 'knex';
 import {Bytes32} from '../type-aliases';
 import {ChannelOpener, WaitingFor as ChannelOpenerWaitingFor} from '../protocols/channel-opener';
 import {ChannelCloser, WaitingFor as ChannelCloserWaitingFor} from '../protocols/channel-closer';
-import {Store} from '../wallet/store';
+import {Store} from '../engine/store';
 import {ChainServiceInterface} from '../chain-service';
-import {EngineResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../engine/engine-response';
 import {
   ChallengeSubmitter,
   WaitingFor as ChallengeSubmitterWaitingFor,

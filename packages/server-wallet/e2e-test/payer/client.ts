@@ -11,7 +11,7 @@ import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {DeepPartial, defaultConfig, EngineConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
-import {EngineEvent} from '../../src/wallet/types';
+import {EngineEvent} from '../../src/engine/types';
 
 type TestChannelResult = {
   channelResult: ChannelResult;

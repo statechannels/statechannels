@@ -1,6 +1,6 @@
 import {WirePayload} from '../type-aliases';
-import {EngineResponse} from '../wallet/wallet-response';
-import {Store} from '../wallet/store';
+import {EngineResponse} from '../engine/engine-response';
+import {Store} from '../engine/store';
 
 /**
  * For making a single update to a running application channel

@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {channelWithVars} from '../../models/__test__/fixtures/channel';
 import {Notice} from '../../protocols/actions';
 import {addHash} from '../../state-utils';
-import {EngineResponse} from '../wallet-response';
+import {EngineResponse} from '../engine-response';
 
 import {stateSignedBy} from './fixtures/states';
 

@@ -5,7 +5,7 @@ import {ChannelId} from '@statechannels/client-api-schema';
 
 import {SignState, signState} from '../protocols/actions';
 import {ChannelState, ChannelStateWithSupported} from '../protocols/state';
-import {EngineError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 
 import {hasSupportedState, isMyTurn} from './helpers';
 

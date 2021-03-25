@@ -4,7 +4,7 @@ import {ethers} from 'ethers';
 import {Address} from '@statechannels/wallet-core';
 
 import {Uint48} from '../type-aliases';
-import {EngineError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 
 export class Nonce extends Model {
   readonly id!: number;

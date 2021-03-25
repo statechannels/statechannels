@@ -2,7 +2,7 @@ import _ from 'lodash';
 import {Address} from '@statechannels/wallet-core';
 
 import {Nonce} from '../nonce';
-import {alice, bob} from '../../wallet/__test__/fixtures/participants';
+import {alice, bob} from '../../engine/__test__/fixtures/participants';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 
 import {nonce} from './fixtures/nonces';

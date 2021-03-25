@@ -1,7 +1,7 @@
 import {ChannelStateFunding, ChannelStateWithSupported} from '../../state';
-import {stateWithHashSignedBy} from '../../../wallet/__test__/fixtures/states';
-import {fixture} from '../../../wallet/__test__/fixtures/utils';
-import {alice, bob} from '../../../wallet/__test__/fixtures/participants';
+import {stateWithHashSignedBy} from '../../../engine/__test__/fixtures/states';
+import {fixture} from '../../../engine/__test__/fixtures/utils';
+import {alice, bob} from '../../../engine/__test__/fixtures/participants';
 
 const defaultChannelState: ChannelStateWithSupported = {
   channelId: '0x1234',

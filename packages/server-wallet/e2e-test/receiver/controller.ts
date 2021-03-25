@@ -1,7 +1,7 @@
 import {makeDestination} from '@statechannels/wallet-core';
 import {Participant} from '@statechannels/client-api-schema';
 
-import {bob} from '../../src/wallet/__test__/fixtures/signing-wallets';
+import {bob} from '../../src/engine/__test__/fixtures/signing-wallets';
 import {Engine, Message as Payload, MultiThreadedEngine} from '../../src';
 import {timerFactory, recordFunctionMetrics} from '../../src/metrics';
 import {receiverConfig} from '../e2e-utils';

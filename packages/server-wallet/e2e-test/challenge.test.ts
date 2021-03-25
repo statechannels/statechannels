@@ -3,9 +3,9 @@ import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {utils, providers, constants} from 'ethers';
 import {BN, makeAddress, Participant} from '@statechannels/wallet-core';
 
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
-import {alice as aliceP, bob as bobP} from '../src/wallet/__test__/fixtures/participants';
-import {alice} from '../src/wallet/__test__/fixtures/signing-wallets';
+import {stateVars} from '../src/engine/__test__/fixtures/state-vars';
+import {alice as aliceP, bob as bobP} from '../src/engine/__test__/fixtures/participants';
+import {alice} from '../src/engine/__test__/fixtures/signing-wallets';
 import {channel, withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {defaultTestNetworkConfiguration, EngineConfig, EngineEvent} from '../src';
 import {Channel} from '../src/models/channel';

@@ -4,7 +4,7 @@ import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
 import {IncomingEngineConfig} from '../../config';
 import {MultipleChannelOutput, SingleChannelOutput, EngineEvent} from '../types';
-import {SingleThreadedEngine} from '../wallet';
+import {SingleThreadedEngine} from '../engine';
 
 import {WorkerManager} from './manager';
 

@@ -9,7 +9,7 @@ import {
 } from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Values} from '../errors/wallet-error';
+import {Values} from '../errors/engine-error';
 import {signState as wasmSignState} from '../utilities/signatures';
 import {addHash} from '../state-utils';
 

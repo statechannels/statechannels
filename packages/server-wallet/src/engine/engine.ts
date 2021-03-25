@@ -34,7 +34,7 @@ import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import * as ChannelState from '../protocols/state';
-import {PushMessageError} from '../errors/wallet-error';
+import {PushMessageError} from '../errors/engine-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {
   EngineConfig,
@@ -68,7 +68,7 @@ import {
   UpdateChannelFundingParams,
   EngineEvent,
 } from './types';
-import {EngineResponse} from './wallet-response';
+import {EngineResponse} from './engine-response';
 
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.

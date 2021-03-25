@@ -3,8 +3,8 @@ import Knex from 'knex';
 
 import {peerEngines, getPeersSetup, peersTeardown} from '../../jest/with-peers-setup-teardown';
 import {WalletObjective, ObjectiveModel} from '../models/objective';
-import {createChannelArgs} from '../wallet/__test__/fixtures/create-channel';
-import {bob} from '../wallet/__test__/fixtures/participants';
+import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
+import {bob} from '../engine/__test__/fixtures/participants';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 jest.setTimeout(10_000);

@@ -4,7 +4,7 @@ import {configureEnvVariables} from '@statechannels/devtools';
 configureEnvVariables();
 
 import PayerClient from '../payer/client';
-import {alice} from '../../src/wallet/__test__/fixtures/signing-wallets';
+import {alice} from '../../src/engine/__test__/fixtures/signing-wallets';
 import {recordFunctionMetrics} from '../../src/metrics';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../../src/config';
 

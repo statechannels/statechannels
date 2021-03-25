@@ -3,10 +3,10 @@ import {BN} from '@statechannels/wallet-core';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {Store} from '../../wallet/store';
-import {EngineResponse} from '../../wallet/wallet-response';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
-import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
+import {Store} from '../../engine/store';
+import {EngineResponse} from '../../engine/engine-response';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
+import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {SingleAppUpdater} from '../single-app-updater';
 
 const FINAL = 8;

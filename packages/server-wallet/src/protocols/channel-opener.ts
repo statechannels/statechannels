@@ -3,9 +3,9 @@ import {OpenChannel, unreachable} from '@statechannels/wallet-core';
 import _ from 'lodash';
 import {Transaction} from 'objection';
 
-import {Store} from '../wallet/store';
+import {Store} from '../engine/store';
 import {WalletObjective} from '../models/objective';
-import {EngineResponse} from '../wallet/wallet-response';
+import {EngineResponse} from '../engine/engine-response';
 import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {Nothing, Cranker} from '../objectives/objective-manager';

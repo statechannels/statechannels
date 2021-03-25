@@ -3,15 +3,15 @@ import {unreachable} from '@statechannels/wallet-core';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
-import {Store} from '../../wallet/store';
-import {TestLedgerChannel} from '../../wallet/__test__/fixtures/test-ledger-channel';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
+import {Store} from '../../engine/store';
+import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {createLogger} from '../../logger';
 import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
 import {State} from '../../models/channel/state';
 import {LedgerManager} from '../ledger-manager';
-import {EngineResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../engine/engine-response';
 import {Destination} from '../../type-aliases';
 
 jest.setTimeout(10_000);

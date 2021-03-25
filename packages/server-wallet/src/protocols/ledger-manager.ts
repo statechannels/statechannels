@@ -2,8 +2,8 @@ import _ from 'lodash';
 import {BN, Destination, unreachable} from '@statechannels/wallet-core';
 
 import {Channel} from '../models/channel';
-import {EngineResponse} from '../wallet/wallet-response';
-import {Store} from '../wallet/store';
+import {EngineResponse} from '../engine/engine-response';
+import {Store} from '../engine/store';
 import {State} from '../models/channel/state';
 import {SimpleAllocationOutcome} from '../models/channel/outcome';
 import {LedgerRequest} from '../models/ledger-request';

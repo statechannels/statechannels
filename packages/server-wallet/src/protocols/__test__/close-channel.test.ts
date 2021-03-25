@@ -7,9 +7,9 @@ import {defaultTestConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
-import {Store} from '../../wallet/store';
-import {EngineResponse} from '../../wallet/wallet-response';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {Store} from '../../engine/store';
+import {EngineResponse} from '../../engine/engine-response';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {ChannelCloser} from '../channel-closer';
 
 const FINAL = 10; // this will be A's state to sign

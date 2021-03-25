@@ -3,7 +3,7 @@ import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import {MessageServiceInterface} from './message-service/types';
 import {getMessages} from './message-service/utils';
 import {WalletObjective} from './models/objective';
-import {Engine} from './wallet';
+import {Engine} from './engine';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));

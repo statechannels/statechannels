@@ -3,7 +3,7 @@ import {DefundChannel, makeAddress, State} from '@statechannels/wallet-core';
 import {defaultTestConfig} from '../..';
 import {createLogger} from '../../logger';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
-import {Store} from '../../wallet/store';
+import {Store} from '../../engine/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
@@ -12,13 +12,13 @@ import {
   ErorringMockChainService,
   MockChainService,
 } from '../../chain-service';
-import {EngineResponse} from '../../wallet/wallet-response';
+import {EngineResponse} from '../../engine/engine-response';
 import {ChannelDefunder} from '../defund-channel';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
-import {stateSignedBy} from '../../wallet/__test__/fixtures/states';
-import {alice} from '../../wallet/__test__/fixtures/signing-wallets';
+import {stateSignedBy} from '../../engine/__test__/fixtures/states';
+import {alice} from '../../engine/__test__/fixtures/signing-wallets';
 import {Funding} from '../../models/funding';
-import {TestChannel} from '../../wallet/__test__/fixtures/test-channel';
+import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 
 const logger = createLogger(defaultTestConfig());
 const timingMetrics = false;

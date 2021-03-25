@@ -1,6 +1,6 @@
 import {ChannelId} from '@statechannels/client-api-schema';
 
-import {EngineError, Values} from '../errors/wallet-error';
+import {EngineError, Values} from '../errors/engine-error';
 
 export interface JoinChannelHandlerParams {
   channelId: ChannelId;

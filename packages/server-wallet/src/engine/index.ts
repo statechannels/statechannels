@@ -1,8 +1,8 @@
 import {IncomingEngineConfig} from '../config';
 
-import {MultiThreadedEngine} from './multi-threaded-wallet';
+import {MultiThreadedEngine} from './multi-threaded-engine';
 import {EngineInterface} from './types';
-import {SingleThreadedEngine} from './wallet';
+import {SingleThreadedEngine} from './engine';
 
 /**
  * A single- or multi-threaded Nitro Engine

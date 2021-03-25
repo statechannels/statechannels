@@ -9,7 +9,7 @@ import {take} from 'rxjs/operators';
 
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Engine, SingleChannelOutput} from '../wallet';
+import {Engine, SingleChannelOutput} from '../engine';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../__test__/test-helpers';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion

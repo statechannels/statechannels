@@ -8,7 +8,7 @@ import axios from 'axios';
 
 import {withSupportedState} from '../src/models/__test__/fixtures/channel';
 import {SigningWallet} from '../src/models/signing-wallet';
-import {stateVars} from '../src/wallet/__test__/fixtures/state-vars';
+import {stateVars} from '../src/engine/__test__/fixtures/state-vars';
 import {Channel} from '../src/models/channel';
 import {
   overwriteConfigWithDatabaseConnection,

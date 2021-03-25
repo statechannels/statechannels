@@ -19,7 +19,7 @@ import {ObjectiveModel} from '../../../models/objective';
 import {defaultTestConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {WALLET_VERSION} from '../../../version';
-import {PushMessageError} from '../../../errors/wallet-error';
+import {PushMessageError} from '../../../errors/engine-error';
 import {MultiThreadedEngine, Engine} from '../..';
 
 const dropNonVariables = (s: SignedState): any =>

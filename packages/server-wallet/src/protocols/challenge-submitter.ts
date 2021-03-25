@@ -7,8 +7,8 @@ import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {WalletObjective} from '../models/objective';
 import {Cranker, Nothing} from '../objectives/objective-manager';
-import {Store} from '../wallet/store';
-import {EngineResponse} from '../wallet/wallet-response';
+import {Store} from '../engine/store';
+import {EngineResponse} from '../engine/engine-response';
 
 export const enum WaitingFor {
   // This objective is not shared, therefore there are no other channel participants to wait on
