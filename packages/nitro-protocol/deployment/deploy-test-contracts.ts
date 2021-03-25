@@ -74,37 +74,10 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_TOKEN_ADDRESS
   );
   const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(adjudicatorFactoryArtifact as any);
-
-  // copypasted from hardhat-deploy
-  function linkRawLibrary(bytecode: string, libraryName: string, libraryAddress: string): string {
-    const address = libraryAddress.replace('0x', '');
-    let encodedLibraryName;
-    if (libraryName.startsWith('$') && libraryName.endsWith('$')) {
-      encodedLibraryName = libraryName.slice(1, libraryName.length - 1);
-    } else {
-      encodedLibraryName = utils.solidityKeccak256(['string'], [libraryName]).slice(2, 36);
-    }
-    const pattern = new RegExp(`_+\\$${encodedLibraryName}\\$_+`, 'g');
-    if (!pattern.exec(bytecode)) {
-      throw new Error(
-        `Can't link '${libraryName}' (${encodedLibraryName}) in \n----\n ${bytecode}\n----\n`
-      );
-    }
-    return bytecode.replace(pattern, address);
-  }
-
-  const singleChannelAdjudicatorArtifactReplaced = {...singleChannelAdjudicatorArtifact};
-  singleChannelAdjudicatorArtifactReplaced.bytecode = linkRawLibrary(
-    singleChannelAdjudicatorArtifact.bytecode,
-    '$6eb8f1fbabd8edee7028b3a94009ba20a9$',
-    ADJUDICATOR_FACTORY_ADDRESS
-  );
-
-  // we used the placeholder manually
-  // https://docs.soliditylang.org/en/v0.8.0/contracts.html#libraries
-
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
-    singleChannelAdjudicatorArtifactReplaced as any
+    singleChannelAdjudicatorArtifact as any,
+    {},
+    ADJUDICATOR_FACTORY_ADDRESS
   );
 
   console.log('deployed master');
