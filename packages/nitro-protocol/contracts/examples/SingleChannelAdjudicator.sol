@@ -21,9 +21,12 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 //, by deploying via an on chain factory
 
 // This will be linked
+/* solhint-disable no-empty-blocks */
 library placeholderFactory {
 
 }
+
+/* solhint-enable no-empty-blocks */
 
 contract SingleChannelAdjudicator {
     bytes32 public status;
@@ -223,7 +226,7 @@ contract SingleChannelAdjudicator {
         require(
             AdjudicatorFactory(address(placeholderFactory)).getChannelAddress(channelId) ==
                 address(this),
-            'Wrong channelId for this adjudicator'
+            'Wrong channelId'
         );
     }
 
