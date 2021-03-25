@@ -302,25 +302,25 @@ workflows:
     jobs:
       - prepare
 
-      - test:
-          requires:
-            - prepare
+      # - test:
+      #     requires:
+      #       - prepare
 
       # - server-wallet-profiling:
       #     requires:
       #       - prepare
-      - server-wallet-stress-test:
-          requires:
-            - prepare
-      - server-wallet-stress-test-threaded:
-          requires:
-            - prepare
+      # - server-wallet-stress-test:
+      #     requires:
+      #       - prepare
+      # - server-wallet-stress-test-threaded:
+      #     requires:
+      #       - prepare
       - server-wallet-with-peers-test:
           requires:
             - prepare
-      - server-wallet-e2e-test:
-          requires:
-            - prepare
-      - deploy-docs-website:
-          requires:
-            - prepare
+      # - server-wallet-e2e-test:
+      #     requires:
+      #       - prepare
+      # - deploy-docs-website:
+      #     requires:
+      #       - prepare
