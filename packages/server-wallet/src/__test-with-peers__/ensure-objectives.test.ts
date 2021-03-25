@@ -44,7 +44,10 @@ describe('EnsureObjectives', () => {
     'can successfully create a channel with the latency options: %o',
     async options => {
       messageService.setLatencyOptions(options);
-      const wallet = await Wallet.create(peerEngines.a, messageService);
+      const wallet = await Wallet.create(peerEngines.a, messageService, {
+        numberOfAttempts: 20,
+        multiple: 1.2,
+      });
 
       peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
