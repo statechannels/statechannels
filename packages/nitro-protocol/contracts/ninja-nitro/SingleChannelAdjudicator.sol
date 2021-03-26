@@ -106,8 +106,9 @@ contract SingleChannelAdjudicator is
 
                 // loop over payouts for this token
                 for (uint256 j = 0; j < allocation.length; j++) {
-                    IERC20(outcome[i].assetHolderAddress).transfer(
-                        _bytes32ToAddress(allocation[j].destination),
+                    _transferAsset(
+                        outcome[i].assetHolderAddress,
+                        allocation[j].destination,
                         allocation[j].amount
                     );
                 }
@@ -285,7 +286,7 @@ contract SingleChannelAdjudicator is
             allocationBytes,
             (Outcome.AllocationItem[])
         );
-        uint256 initialHoldings = IERC20(assetHolderAddress).balanceOf(address(this));
+        uint256 initialHoldings = _holdings(assetHolderAddress);
 
         (
             Outcome.AllocationItem[] memory newAllocation,
@@ -306,7 +307,7 @@ contract SingleChannelAdjudicator is
             if (payouts[j] > 0) {
                 bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
-                IERC20(assetHolderAddress).transfer(_bytes32ToAddress(destination), payouts[j]);
+                _transferAsset(assetHolderAddress, destination, payouts[j]);
             }
         }
         // emit AllocationUpdated(fromChannelId, initialHoldings); // TODO emit an OutcomeUpdated event
@@ -416,5 +417,31 @@ contract SingleChannelAdjudicator is
         //         ),
         //     'h(allocation)!=assetOutcomeHash'
         // );
+    }
+
+    function _transferAsset(
+        address assetHolderAddress,
+        bytes32 destination,
+        uint256 amount
+    ) internal {
+        if (assetHolderAddress == address(0)) {
+            (bool success, ) = _bytes32ToAddress(destination).call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
+            require(success, 'Could not transfer ETH');
+        } else {
+            // assume ERC20 Token
+            require(
+                IERC20(assetHolderAddress).transfer(_bytes32ToAddress(destination), amount),
+                'Could not transfer ERC20 tokens'
+            );
+        }
+    }
+
+    function _holdings(address assetHolderAddress) internal view returns (uint256) {
+        if (assetHolderAddress == address(0)) {
+            return address(this).balance;
+        } else {
+            // assume ERC20 Token
+            return IERC20(assetHolderAddress).balanceOf(address(this));
+        }
     }
 }
