@@ -13,7 +13,8 @@ import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 
-jest.setTimeout(60_000);
+// These tests can take quite a long time if we're unlucky
+jest.setTimeout(120_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
@@ -38,7 +39,7 @@ describe('EnsureObjectives', () => {
     // delay but no dropping
     {dropRate: 0, meanDelay: 200},
     // Delay and drop
-    {dropRate: 0.2, meanDelay: 100},
+    {dropRate: 0.1, meanDelay: 100},
   ];
   test.each(testCases)(
     'can successfully create a channel with the latency options: %o',
@@ -47,6 +48,7 @@ describe('EnsureObjectives', () => {
       const wallet = await Wallet.create(peerEngines.a, messageService, {
         numberOfAttempts: 50,
         multiple: 1.5,
+        initialDelay: 25,
       });
 
       peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
