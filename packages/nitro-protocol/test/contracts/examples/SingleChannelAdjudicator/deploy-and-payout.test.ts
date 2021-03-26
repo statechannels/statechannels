@@ -105,6 +105,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
     description | outcomeShortHand   | heldBefore         | heldAfter          | newOutcome | payouts            | reasonString
+    ${accepts1} | ${{ETH: {A: 1}}}   | ${{ETH: {c: 1}}}   | ${{ETH: {c: 0}}}   | ${{}}      | ${{ETH: {A: 1}}}   | ${undefined}
     ${accepts4} | ${{ERC20: {A: 1}}} | ${{ERC20: {c: 1}}} | ${{ERC20: {c: 0}}} | ${{}}      | ${{ERC20: {A: 1}}} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
@@ -138,6 +139,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         adjudicatorAddress
       );
       addresses.c = channelId;
+      addresses.ETH = constants.AddressZero;
       addresses.ERC20 = Token.address; // this matches the changes made to the contract
       const support = oneState;
       const {appData, whoSignedWhat} = support;
@@ -153,20 +155,15 @@ describe('concludePushOutcomeAndTransferAll', () => {
         ).wait();
         console.log('spent gas depositing tokens: ' + gasUsed);
       }
-      //   if ('ETH' in heldBefore) {
-      //     await (
-      //       await EthAssetHolder1.deposit(channelId, '0x00', heldBefore.ETH.c, {
-      //         value: heldBefore.ETH.c,
-      //       })
-      //     ).wait();
-      //   }
-      //   if ('ETH2' in heldBefore) {
-      //     await (
-      //       await EthAssetHolder2.deposit(channelId, '0x00', heldBefore.ETH2.c, {
-      //         value: heldBefore.ETH2.c,
-      //       })
-      //     ).wait();
-      //   }
+      if ('ETH' in heldBefore) {
+        const {gasUsed} = await (
+          await provider.getSigner().sendTransaction({
+            to: SingleChannelAdjudicator.address,
+            value: heldBefore.ETH.c,
+          })
+        ).wait();
+        console.log('spent gas depositing ETH: ' + gasUsed);
+      }
 
       // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, outcomeShortHand, newOutcome, heldAfter, payouts] = [
