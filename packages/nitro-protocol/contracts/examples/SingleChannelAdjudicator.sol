@@ -2,6 +2,7 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
+import '../ForceMove.sol';
 import '../Outcome.sol';
 import './AdjudicatorFactory.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
@@ -20,52 +21,11 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 // As version 0 but make it so the channel "address" is the adjudicator address (and uniquely derived from the channel id)
 //, by deploying via an on chain factory
 
-contract SingleChannelAdjudicator {
+contract SingleChannelAdjudicator is ForceMove {
     address public immutable adjudicatorFactoryAddress;
 
     constructor(address a) {
         adjudicatorFactoryAddress = a;
-    }
-
-    bytes32 public status;
-
-    struct FixedPart {
-        uint256 chainId;
-        address[] participants;
-        uint48 channelNonce;
-        address appDefinition;
-        uint48 challengeDuration;
-    }
-
-    struct Signature {
-        uint8 v;
-        bytes32 r;
-        bytes32 s;
-    }
-
-    enum ChannelMode {Open, Challenge, Finalized}
-
-    struct State {
-        // participants sign the hash of this
-        uint48 turnNum;
-        bool isFinal;
-        bytes32 channelId; // keccack(chainId,participants,channelNonce)
-        bytes32 appPartHash;
-        //     keccak256(abi.encode(
-        //         fixedPart.challengeDuration,
-        //         fixedPart.appDefinition,
-        //         variablePart.appData
-        //     )
-        // )
-        bytes32 outcomeHash;
-    }
-
-    struct ChannelData {
-        uint48 turnNumRecord;
-        uint48 finalizesAt;
-        bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
-        bytes32 outcomeHash;
     }
 
     /**
@@ -89,7 +49,7 @@ contract SingleChannelAdjudicator {
         Signature[] memory sigs
     ) public {
         bytes32 outcomeHash = keccak256(outcomeBytes);
-        _conclude(
+        _ninjaConclude(
             largestTurnNum,
             fixedPart,
             appPartHash,
@@ -137,8 +97,8 @@ contract SingleChannelAdjudicator {
     }
 
     /**
-     * @notice Finalizes a channel by providing a finalization proof. Internal method.
-     * @dev Finalizes a channel by providing a finalization proof. Internal method.
+     * @notice Finalizes a channel by providing a finalization proof. Internal method. Does not touch storage.
+     * @dev Finalizes a channel by providing a finalization proof. Internal method. Does not touch storage.
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
@@ -147,7 +107,7 @@ contract SingleChannelAdjudicator {
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      * @param sigs An array of signatures that support the state with the `largestTurnNum`.
      */
-    function _conclude(
+    function _ninjaConclude(
         uint48 largestTurnNum,
         FixedPart memory fixedPart,
         bytes32 appPartHash,
@@ -158,7 +118,7 @@ contract SingleChannelAdjudicator {
     ) internal returns (bytes32 channelId) {
         channelId = _getChannelId(fixedPart);
         _requireChannelIdMatchesContract(channelId);
-        _requireChannelNotFinalized();
+        _requireChannelNotFinalized(channelId);
 
         // input type validation
         requireValidInput(
@@ -224,213 +184,5 @@ contract SingleChannelAdjudicator {
                 address(this),
             'Wrong channelId'
         );
-    }
-
-    /**
-     * @notice Checks that this channel is NOT in the Finalized mode.
-     * @dev Checks that this channel is in the Challenge mode.
-     */
-    function _requireChannelNotFinalized() internal view {
-        require(_mode() != ChannelMode.Finalized, 'Channel finalized.');
-    }
-
-    /**
-     * @notice Computes the ChannelMode for this channel.
-     * @dev Computes the ChannelMode for this channel.
-     */
-    function _mode() internal view returns (ChannelMode) {
-        // Note that _unpackStatus() returns (0,0,0), which is
-        // correct when nobody has written to storage yet.
-
-        (, uint48 finalizesAt, ) = _unpackStatus();
-        if (finalizesAt == 0) {
-            return ChannelMode.Open;
-            // solhint-disable-next-line not-rely-on-time
-        } else if (finalizesAt <= block.timestamp) {
-            return ChannelMode.Finalized;
-        } else {
-            return ChannelMode.Challenge;
-        }
-    }
-
-    function _unpackStatus()
-        internal
-        view
-        returns (
-            uint48 turnNumRecord,
-            uint48 finalizesAt,
-            uint160 fingerprint
-        )
-    {
-        uint16 cursor = 256;
-        turnNumRecord = uint48(uint256(status) >> (cursor -= 48));
-        finalizesAt = uint48(uint256(status) >> (cursor -= 48));
-        fingerprint = uint160(uint256(status));
-    }
-
-    /**
-     * @notice Validates input for several external methods.
-     * @dev Validates input for several external methods.
-     * @param numParticipants Length of the participants array
-     * @param numStates Number of states submitted
-     * @param numSigs Number of signatures submitted
-     * @param numWhoSignedWhats whoSignedWhat.length
-     */
-    function requireValidInput(
-        uint256 numParticipants,
-        uint256 numStates,
-        uint256 numSigs,
-        uint256 numWhoSignedWhats
-    ) public pure returns (bool) {
-        require((numParticipants >= numStates) && (numStates > 0), 'Insufficient or excess states');
-        require(
-            (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
-            'Bad |signatures|v|whoSignedWhat|'
-        );
-        require(numParticipants < type(uint8).max, 'Too many participants!');
-        return true;
-    }
-
-    /**
-     * @notice Computes the unique id of a channel.
-     * @dev Computes the unique id of a channel.
-     * @param fixedPart Part of the state that does not change
-     * @return channelId
-     */
-    function _getChannelId(FixedPart memory fixedPart) internal pure returns (bytes32 channelId) {
-        require(fixedPart.chainId == getChainID(), 'Incorrect chainId');
-        channelId = keccak256(
-            abi.encode(getChainID(), fixedPart.participants, fixedPart.channelNonce)
-        );
-    }
-
-    /**
-     * @notice Given an array of state hashes, checks the validity of the supplied signatures. Valid means there is a signature for each participant, either on the hash of the state for which they are a mover, or on the hash of a state that appears after that state in the array.
-     * @dev Given an array of state hashes, checks the validity of the supplied signatures. Valid means there is a signature for each participant, either on the hash of the state for which they are a mover, or on the hash of a state that appears after that state in the array.
-     * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
-     * @param participants A list of addresses representing the participants of a channel.
-     * @param stateHashes Array of keccak256(State) submitted in support of a state,
-     * @param sigs Array of Signatures, one for each participant
-     * @param whoSignedWhat participant[i] signed stateHashes[whoSignedWhat[i]]
-     * @return true if the signatures are valid, false otherwise
-     */
-    function _validSignatures(
-        uint48 largestTurnNum,
-        address[] memory participants,
-        bytes32[] memory stateHashes,
-        Signature[] memory sigs,
-        uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
-    ) internal pure returns (bool) {
-        uint256 nParticipants = participants.length;
-        uint256 nStates = stateHashes.length;
-
-        require(
-            _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates),
-            'Unacceptable whoSignedWhat array'
-        );
-        for (uint256 i = 0; i < nParticipants; i++) {
-            address signer = _recoverSigner(stateHashes[whoSignedWhat[i]], sigs[i]);
-            if (signer != participants[i]) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @notice Given a declaration of which state in the support proof was signed by which participant, check if this declaration is acceptable. Acceptable means there is a signature for each participant, either on the hash of the state for which they are a mover, or on the hash of a state that appears after that state in the array.
-     * @dev Given a declaration of which state in the support proof was signed by which participant, check if this declaration is acceptable. Acceptable means there is a signature for each participant, either on the hash of the state for which they are a mover, or on the hash of a state that appears after that state in the array.
-     * @param whoSignedWhat participant[i] signed stateHashes[whoSignedWhat[i]]
-     * @param largestTurnNum Largest turnNum of the support proof
-     * @param nParticipants Number of participants in the channel
-     * @param nStates Number of states in the support proof
-     * @return true if whoSignedWhat is acceptable, false otherwise
-     */
-    function _acceptableWhoSignedWhat(
-        uint8[] memory whoSignedWhat,
-        uint48 largestTurnNum,
-        uint256 nParticipants,
-        uint256 nStates
-    ) internal pure returns (bool) {
-        require(whoSignedWhat.length == nParticipants, '|whoSignedWhat|!=nParticipants');
-        for (uint256 i = 0; i < nParticipants; i++) {
-            uint256 offset = (nParticipants + largestTurnNum - i) % nParticipants;
-            // offset is the difference between the index of participant[i] and the index of the participant who owns the largesTurnNum state
-            // the additional nParticipants in the dividend ensures offset always positive
-            if (whoSignedWhat[i] + offset + 1 < nStates) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    /**
-     * @notice Formats the input data for on chain storage.
-     * @dev Formats the input data for on chain storage.
-     * @param channelData ChannelData data.
-     */
-    function _generateStatus(ChannelData memory channelData)
-        internal
-        pure
-        returns (bytes32 _status)
-    {
-        // The hash is constructed from left to right.
-        uint256 result;
-        uint16 cursor = 256;
-
-        // Shift turnNumRecord 208 bits left to fill the first 48 bits
-        result = uint256(channelData.turnNumRecord) << (cursor -= 48);
-
-        // logical or with finalizesAt padded with 160 zeros to get the next 48 bits
-        result |= (uint256(channelData.finalizesAt) << (cursor -= 48));
-
-        // logical or with the last 160 bits of the hash the remaining channelData fields
-        // (we call this the fingerprint)
-        result |= uint256(
-            uint160(
-                uint256(
-                    keccak256(
-                        abi.encode(
-                            channelData.stateHash,
-                            channelData.challengerAddress,
-                            channelData.outcomeHash
-                        )
-                    )
-                )
-            )
-        );
-
-        _status = bytes32(result);
-    }
-
-    /**
-     * @dev Indicates that a challenge has been registered against `channelId`.
-     * @param channelId Unique identifier for a state channel.
-     * @param finalizesAt The unix timestamp when `channelId` finalized.
-     */
-    event Concluded(bytes32 indexed channelId, uint48 finalizesAt);
-
-    function getChainID() public pure returns (uint256) {
-        uint256 id;
-        /* solhint-disable no-inline-assembly */
-        assembly {
-            id := chainid()
-        }
-        /* solhint-disable no-inline-assembly */
-        return id;
-    }
-
-    /**
-     * @notice Given a digest and ethereum digital signature, recover the signer
-     * @dev Given a digest and digital signature, recover the signer
-     * @param _d message digest
-     * @param sig ethereum digital signature
-     * @return signer
-     */
-    function _recoverSigner(bytes32 _d, Signature memory sig) internal pure returns (address) {
-        bytes32 prefixedHash = keccak256(abi.encodePacked('\x19Ethereum Signed Message:\n32', _d));
-        address a = ecrecover(prefixedHash, sig.v, sig.r, sig.s);
-        require(a != address(0), 'Invalid signature');
-        return (a);
     }
 }
