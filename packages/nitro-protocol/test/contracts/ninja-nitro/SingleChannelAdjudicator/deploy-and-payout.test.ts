@@ -28,7 +28,6 @@ import {signStates} from '../../../../src';
 import {NITRO_MAX_GAS} from '../../../../src/transactions';
 
 const provider = getTestProvider();
-let SingleChannelAdjudicator: Contract;
 let AdjudicatorFactory: Contract;
 let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
