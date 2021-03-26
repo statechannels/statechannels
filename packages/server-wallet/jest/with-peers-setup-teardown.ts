@@ -60,6 +60,7 @@ export async function crashAndRestart(
   enginesToRestart: 'A' | 'B' | 'Both' = 'Both'
 ): Promise<void> {
   try {
+    logger.trace({enginesToRestart},'START crash and restart')
     await messageService.destroy();
 
     if (enginesToRestart === 'A' || enginesToRestart === 'Both') {
@@ -78,6 +79,7 @@ export async function crashAndRestart(
     ]);
 
     messageService = (await TestMessageService.create(handler)) as TestMessageService;
+     logger.trace({enginesToRestart},'COMPLETE crash and restart')
   } catch (error) {
     logger.error(error, 'CrashAndRestart failed');
     throw error;
@@ -87,6 +89,7 @@ export async function crashAndRestart(
 export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
   return async () => {
     try {
+       logger.trace({withWalletSeeding},'START getPeersSetup')
       await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
 
       await Promise.all([
@@ -131,6 +134,7 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 
       const handler = createTestMessageHandler(participantEngines);
       messageService = (await TestMessageService.create(handler)) as TestMessageService;
+      logger.trace({withWalletSeeding},'COMPLETE getPeersSetup')
     } catch (error) {
       logger.error(error, 'getPeersSetup failed');
       throw error;
@@ -140,9 +144,11 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 
 export const peersTeardown: jest.Lifecycle = async () => {
 try{
+  logger.trace('START peersTeardown')
   await messageService.destroy();
   await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
   await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+  logger.trace('COMPLETE peersTeardown')
   } catch (error) {
       logger.error(error, 'peersTeardown failed');
       throw error;
