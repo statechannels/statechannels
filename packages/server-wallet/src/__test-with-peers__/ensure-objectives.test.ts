@@ -45,8 +45,8 @@ describe('EnsureObjectives', () => {
     async options => {
       messageService.setLatencyOptions(options);
       const wallet = await Wallet.create(peerEngines.a, messageService, {
-        numberOfAttempts: 20,
-        multiple: 1.2,
+        numberOfAttempts: 50,
+        multiple: 1.5,
       });
 
       peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
