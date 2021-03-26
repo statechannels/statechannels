@@ -42,7 +42,11 @@ export class TestMessageService implements MessageServiceInterface {
     // We always pass a reference to the messageService when calling handleMessage
     // This allows the MessageHandler function to easily call messageHandler.send
     // We just bind that here for convenience.
-    this._handleMessage = async message => handleMessage(message, this);
+    this._handleMessage = async message => {
+      // This prevents triggering messages after the service is destroyed
+      // This is important
+      if (!this._destroyed) return handleMessage(message, this);
+    };
   }
 
   static async create(
@@ -75,6 +79,7 @@ export class TestMessageService implements MessageServiceInterface {
           await this._handleMessage(message);
         }
       }
+      await Promise.all(messages.map(this._handleMessage));
     }
   }
 
