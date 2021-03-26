@@ -29,6 +29,38 @@ contract SingleChannelAdjudicator is ForceMove {
     }
 
     /**
+     * @notice Allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
+     * @dev Allows a finalized channel's outcome to be decoded and one or more AssetOutcomes registered in external Asset Holder contracts.
+     * @param channelId Unique identifier for a state channel
+     * @param turnNumRecord A turnNum that (the adjudicator knows and stores) is supported by a signature from each participant.
+     * @param finalizesAt The unix timestamp when this channel will finalize
+     * @param stateHash The keccak256 of the abi.encode of the State (struct) stored by the adjudicator
+     * @param challengerAddress The address of the participant whom registered the challenge, if any.
+     * @param outcomeBytes The encoded Outcome of this state channel.
+     */
+    function pushOutcomeAndTransferAll(
+        // TODO rename this. We no longer have a notion of pushing an outcome
+        bytes32 channelId,
+        uint48 turnNumRecord,
+        uint48 finalizesAt,
+        bytes32 stateHash,
+        address challengerAddress,
+        bytes memory outcomeBytes
+    ) public {
+        // requirements
+        _requireChannelFinalized(channelId);
+
+        bytes32 outcomeHash = keccak256(outcomeBytes);
+
+        _requireMatchingStorage(
+            ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash),
+            channelId
+        );
+
+        _transferAllAssets(outcomeBytes);
+    }
+
+    /**
      * @notice Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
      * @dev Finalizes a channel by providing a finalization proof, allows a finalized channel's outcome to be decoded and transferAll to be triggered in external Asset Holder contracts.
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
@@ -184,5 +216,26 @@ contract SingleChannelAdjudicator is ForceMove {
                 address(this),
             'Wrong channelId'
         );
+    }
+
+    /**
+    * @notice Check that the submitted pair of states form a valid transition (public wrapper for internal function _requireValidTransition)
+    * @dev Check that the submitted pair of states form a valid transition (public wrapper for internal function _requireValidTransition)
+    * @param nParticipants Number of participants in the channel.
+    transition
+    * @param isFinalAB Pair of booleans denoting whether the first and second state (resp.) are final.
+    * @param ab Variable parts of each of the pair of states
+    * @param turnNumB turnNum of the later state of the pair.
+    * @param appDefinition Address of deployed contract containing application-specific validTransition function.
+    * @return true if the later state is a validTransition from its predecessor, reverts otherwise.
+    */
+    function validTransition(
+        uint256 nParticipants,
+        bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
+        IForceMoveApp.VariablePart[2] memory ab, // [a,b]
+        uint48 turnNumB,
+        address appDefinition
+    ) public pure returns (bool) {
+        return _requireValidTransition(nParticipants, isFinalAB, ab, turnNumB, appDefinition);
     }
 }
