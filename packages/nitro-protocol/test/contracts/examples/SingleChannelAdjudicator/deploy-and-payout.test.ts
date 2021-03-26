@@ -1,8 +1,8 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, BigNumber, utils, constants, ContractFactory} from 'ethers';
 
-import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/examples/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
-import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/examples/AdjudicatorFactory.sol/AdjudicatorFactory.json';
+import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
+import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import TokenArtifact from '../../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../../src/contract/channel';
 import {channelDataToStatus} from '../../../../src/contract/channel-storage';

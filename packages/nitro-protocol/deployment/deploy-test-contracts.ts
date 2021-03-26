@@ -18,8 +18,8 @@ import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
-import adjudicatorFactoryArtifact from '../artifacts/contracts/examples/AdjudicatorFactory.sol/AdjudicatorFactory.json';
-import singleChannelAdjudicatorArtifact from '../artifacts/contracts/examples/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
+import adjudicatorFactoryArtifact from '../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
+import singleChannelAdjudicatorArtifact from '../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 
 export async function deploy(): Promise<Record<string, string>> {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
