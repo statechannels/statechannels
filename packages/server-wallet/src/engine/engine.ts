@@ -42,6 +42,7 @@ import {
   defaultConfig,
   IncomingEngineConfig,
   validateEngineConfig,
+  getDatabaseConnectionConfig,
 } from '../config';
 import {
   ChainServiceInterface,
@@ -265,8 +266,20 @@ export class SingleThreadedEngine
    * @returns A promise that resolves when the engine has been destroyed.
    */
   public async destroy(): Promise<void> {
-    await this.knex.destroy();
-    this.chainService.destructor();
+    try {
+      const {database} = getDatabaseConnectionConfig(this.engineConfig);
+      this.logger.trace({database}, 'Destroy called');
+      await this.knex.destroy();
+      this.chainService.destructor();
+    } catch (error) {
+      // Knex can throw errors about aborting current jobs
+      // which we swallow here.
+      if (error.message === 'aborted') {
+        this.logger.trace('Swallowing aborted error from Knex');
+      } else {
+        throw error;
+      }
+    }
   }
 
   /**
