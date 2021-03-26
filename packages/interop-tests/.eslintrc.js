@@ -6,13 +6,7 @@ module.exports = {
     es6: true
   },
   plugins: ['jest', 'import', 'unicorn'],
-  extends: [
-    '../../.eslintrc.js',
-    'plugin:jest/recommended',
-    'plugin:jest/style',
-    'plugin:import/errors',
-    'plugin:import/warnings'
-  ],
+  extends: ['../../.eslintrc.js', 'plugin:jest/recommended', 'plugin:jest/style'],
   rules: {
     // It's annoying having to deal with these jest rules
     'jest/no-disabled-tests': 'off',
