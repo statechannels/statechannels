@@ -7,20 +7,6 @@ import '../Outcome.sol';
 import './AdjudicatorFactory.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
-// Have a an adjudicator per channel, which is only deployed when assets are paid out.
-// Transfers are always external: they always pay out to an ethereum address (since channels have ethereum address now)
-// Version 0:
-
-// 1. Deploy a per-channel adjudicator with a baked in channel id stored on it.
-// 2. Fund it by transferring some ERC20s to the singlechanneladjudicator address.
-// 3. Construct a conclusion proof and call concludePushOutcomeAndTransferAll
-// 4. Asset that the correct EOA token balances are correct.
-
-// Version 1:
-//
-// As version 0 but make it so the channel "address" is the adjudicator address (and uniquely derived from the channel id)
-//, by deploying via an on chain factory
-
 contract SingleChannelAdjudicator is ForceMove {
     address public immutable adjudicatorFactoryAddress;
 
