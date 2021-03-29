@@ -24,7 +24,7 @@ const ARTIFACTS_DIR = '../../artifacts';
 try {
   fs.mkdirSync(ARTIFACTS_DIR);
 } catch (err) {
-  if (err.message !== "EEXIST: file already exists, mkdir '../../artifacts'") throw err;
+  if (err.message !== `EEXIST: file already exists, mkdir '${ARTIFACTS_DIR}'`) throw err;
 }
 const baseConfig = defaultTestConfig({
   loggingConfiguration: {logLevel: 'trace', logDestination:  path.join(ARTIFACTS_DIR, 'with-peers.log')},
