@@ -13,7 +13,7 @@ import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 
-jest.setTimeout(60_000);
+jest.setTimeout(120_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
@@ -44,7 +44,11 @@ describe('EnsureObjectives', () => {
     'can successfully create a channel with the latency options: %o',
     async options => {
       messageService.setLatencyOptions(options);
-      const wallet = await Wallet.create(peerEngines.a, messageService);
+      const wallet = await Wallet.create(peerEngines.a, messageService, {
+        numberOfAttempts: 50,
+        initialDelay: 25,
+        multiple: 1.5,
+      });
 
       peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
