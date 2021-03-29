@@ -7,7 +7,7 @@ import {
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ChannelWallet} from '@statechannels/xstate-wallet';
-import {constants, Contract, providers} from 'ethers';
+import {constants, Contract, providers, Wallet} from 'ethers';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
@@ -83,7 +83,9 @@ it('server + browser wallet interoperability test', async () => {
     });
   });
 
-  const browserWallet = await ChannelWallet.create();
+  const browserWallet = await ChannelWallet.create(
+    makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
+  );
   const browserAddress = await browserWallet.getAddress();
   const browserDestination = makeDestination(browserAddress);
 
