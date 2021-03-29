@@ -11,9 +11,9 @@ export default async function setup(): Promise<void> {
     return;
   }
 
-  process.env['CHAIN_NETWORK_ID'] = '9002';
+  process.env['CHAIN_NETWORK_ID'] = '9003';
   process.env['GANACHE_HOST'] = '0.0.0.0';
-  process.env['GANACHE_PORT'] = '8545';
+  process.env['GANACHE_PORT'] = '8546';
   process.env[
     'RPC_ENDPOINT'
   ] = `http://${process.env['GANACHE_HOST']}:${process.env['GANACHE_PORT']}`;
