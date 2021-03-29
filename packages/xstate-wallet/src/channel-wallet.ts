@@ -16,7 +16,8 @@ import {
   checkThat,
   isSimpleEthAllocation,
   Zero,
-  SharedObjective
+  SharedObjective,
+  Address
 } from '@statechannels/wallet-core';
 import {Dictionary} from '@statechannels/wallet-core/node_modules/@types/lodash';
 
@@ -56,8 +57,8 @@ export class ChannelWallet {
   public workflows: Workflow[];
   protected channelFunding: Dictionary<Funding> = {};
   protected registeredChannels: Set<string> = new Set<string>();
-  static async create(): Promise<ChannelWallet> {
-    const chain = new ChainWatcher();
+  static async create(chainAddress?: Address): Promise<ChannelWallet> {
+    const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
     await store.initialize();
     return new ChannelWallet(store, new MessagingService(store));
