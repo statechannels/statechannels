@@ -15,9 +15,10 @@ export type TestNetworkContext = {
 
 export async function deploy(): Promise<TestNetworkContext> {
   const ethereumPrivateKey = ETHERLIME_ACCOUNTS[0].privateKey;
+  const ganachePort = Number(process.env.GANACHE_PORT);
 
   // TODO: best way to configure this?
-  const deployer = new GanacheDeployer(8545, ethereumPrivateKey);
+  const deployer = new GanacheDeployer(ganachePort, ethereumPrivateKey);
   const {EthAssetHolderArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
 
   const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(

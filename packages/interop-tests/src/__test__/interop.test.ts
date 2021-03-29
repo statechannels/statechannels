@@ -34,6 +34,11 @@ const chainId = process.env.CHAIN_ID;
 if (!rpcEndpoint) throw new Error('RPC_ENDPOINT must be defined');
 
 const serverConfig = defaultTestConfig({
+  databaseConfiguration: {
+    connection: {
+      database: 'interop_test'
+    }
+  },
   networkConfiguration: {
     chainNetworkID: chainId
       ? parseInt(chainId)
