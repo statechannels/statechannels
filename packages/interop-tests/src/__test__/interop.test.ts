@@ -2,7 +2,6 @@ import {
   DBAdmin,
   defaultTestConfig,
   Output,
-  overwriteConfigWithDatabaseConnection,
   SingleChannelOutput,
   SingleThreadedWallet
 } from '@statechannels/server-wallet';
@@ -102,7 +101,10 @@ it('server + browser wallet interoperability test', async () => {
     });
   };
 
-  const browserWallet = await BrowserWallet.create(onNewMessageFromBroserWallet);
+  const browserWallet = await BrowserWallet.create(
+    onNewMessageFromBroserWallet,
+    makeAddress('0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39')
+  );
   const browserAddress = await browserWallet.store.getAddress();
   const browserDestination = makeDestination(await browserWallet.store.getAddress());
 

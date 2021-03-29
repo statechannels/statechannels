@@ -39,7 +39,7 @@ export interface ChannelChainInfo {
 export interface Chain {
   // Properties
   ethereumIsEnabled: boolean;
-  selectedAddress: string | null;
+  selectedAddress: string | undefined;
 
   // Feeds
   chainUpdatedFeed: (channelId: string) => Observable<ChannelChainInfo>;
@@ -245,8 +245,12 @@ const GAS_PRICE = utils.parseUnits('15', 'gwei');
 export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
-  private mySelectedAddress: string | null = window.ethereum?.selectedAddress ?? null;
   private provider: ReturnType<typeof getProvider>;
+
+  constructor(
+    private mySelectedAddress: string | undefined = window.ethereum?.selectedAddress ?? undefined
+  ) {}
+
   private get signer() {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
 
@@ -324,13 +328,10 @@ export class ChainWatcher implements Chain {
     }
   }
 
-  public get selectedAddress(): string | null {
+  public get selectedAddress(): string | undefined {
     if (this.mySelectedAddress === null) {
       if (window && window.ethereum) {
         this.mySelectedAddress = window.ethereum.selectedAddress ?? null;
-      } else {
-        // TODO: remove this ganache case hardcoding
-        this.mySelectedAddress = '0xd4Fa489Eacc52BA59438993f37Be9fcC20090E39';
       }
     }
     return this.mySelectedAddress;
