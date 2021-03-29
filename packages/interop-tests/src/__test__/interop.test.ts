@@ -3,7 +3,7 @@ import {
   defaultTestConfig,
   Output,
   SingleChannelOutput,
-  SingleThreadedWallet
+  SingleThreadedEngine
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {BrowserWallet, Message} from '@statechannels/xstate-wallet';
@@ -79,7 +79,7 @@ function serverMessageToBrowserMessage(serverOutput: Output): Message {
 }
 
 it('server + browser wallet interoperability test', async () => {
-  const serverWallet = await SingleThreadedWallet.create(serverConfig);
+  const serverWallet = await SingleThreadedEngine.create(serverConfig);
   const serverAddress = await serverWallet.getSigningAddress();
   const serverDestination = makeDestination(serverAddress);
 
