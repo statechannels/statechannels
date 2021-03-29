@@ -1,4 +1,5 @@
 import {
+  Address,
   BN,
   calculateChannelId,
   checkThat,
@@ -34,7 +35,8 @@ type DepositInfo = {
 export class BrowserWallet {
   private constructor(
     private onNewMessage: OnNewMessage,
-    private chain = new ChainWatcher(),
+    chainAddress?: Address,
+    private chain = new ChainWatcher(chainAddress),
     public store = new Store(chain),
     private registeredChannels = new Set<string>(),
     // TODO: probably should be stored in a more permanent storage
@@ -46,8 +48,8 @@ export class BrowserWallet {
     return this;
   }
 
-  static async create(onNewMessage: OnNewMessage): Promise<BrowserWallet> {
-    return new BrowserWallet(onNewMessage).init();
+  static async create(onNewMessage: OnNewMessage, chainAddress?: Address): Promise<BrowserWallet> {
+    return new BrowserWallet(onNewMessage, chainAddress).init();
   }
 
   async incomingMessage(payload: Message): Promise<Message> {
