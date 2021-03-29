@@ -141,9 +141,14 @@ jobs:
       - run:
           name: wallet setup
           working_directory: packages/server-wallet
+          # Create databases for the server-wallet and interop-tests package tests
           command: |
             SERVER_DB_NAME=server_wallet_test yarn db:create $PSQL_ARGS
             SERVER_DB_NAME=server_wallet_test yarn db:migrate
+
+            SERVER_DB_NAME=interop_test yarn db:create $PSQL_ARGS
+            SERVER_DB_NAME=interop_test yarn db:migrate
+
       - run:
           name: test
           command: |
