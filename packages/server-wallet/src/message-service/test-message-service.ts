@@ -65,13 +65,15 @@ export class TestMessageService implements MessageServiceInterface {
         const delay = meanDelay / 2 + Math.random() * meanDelay;
         this._timeouts.push(
           setTimeout(async () => {
-            if (!this._destroyed) {
-              await Promise.all(messages.map(this._handleMessage));
+            for (const message of messages) {
+              await this._handleMessage(message);
             }
           }, delay)
         );
       } else {
-        await Promise.all(messages.map(this._handleMessage));
+        for (const message of messages) {
+          await this._handleMessage(message);
+        }
       }
     }
   }
