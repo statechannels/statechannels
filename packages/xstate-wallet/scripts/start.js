@@ -23,22 +23,18 @@ configureEnvVariables();
 const fs = require('fs');
 const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
-const clearConsole = require('react-dev-utils/clearConsole');
-const checkRequiredFiles = require('react-dev-utils/checkRequiredFiles');
 const {
   choosePort,
   createCompiler,
   prepareProxy,
   prepareUrls
 } = require('react-dev-utils/WebpackDevServerUtils');
-const openBrowser = require('react-dev-utils/openBrowser');
 const paths = require('../config/paths');
 const configFactory = require('../config/webpack.config');
 const createDevServerConfig = require('../config/webpackDevServer.config');
 
-const config = require('../config/webpackDevServer.config');
 const {getNetworkName, setupGanache} = require('@statechannels/devtools');
-const {deploy} = require('../deployment/deploy');
+const {deploy} = require('../lib/deployment/deploy');
 
 void (async () => {
   process.on('SIGINT', () => {
@@ -56,7 +52,7 @@ void (async () => {
 
   if (process.env.TARGET_NETWORK === 'development') {
     // Add contract addresses to process.env if running ganache
-    const {deployer} = await await setupGanache(process.env.XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX);
+    const {deployer} = await setupGanache(process.env.XSTATE_WALLET_DEPLOYER_ACCOUNT_INDEX);
     const deployedArtifacts = await deploy(deployer);
     process.env = {...process.env, ...deployedArtifacts};
   }
