@@ -11,7 +11,7 @@ import {
 import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
-import {Wallet} from '../wallet';
+import {Wallet} from '../wallet/wallet';
 
 jest.setTimeout(60_000);
 

@@ -1,40 +1,15 @@
 import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
-import {MessageServiceInterface} from './message-service/types';
-import {getMessages} from './message-service/utils';
-import {WalletObjective} from './models/objective';
-import {Engine} from './engine';
+import {MessageServiceInterface} from '../message-service/types';
+import {getMessages} from '../message-service/utils';
+import {WalletObjective} from '../models/objective';
+import {Engine} from '../engine';
+
+import {RetryOptions, CreateChannelResult, EnsureResult} from './types';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
-
-export type RetryOptions = {
-  /**
-   * The number of attempts to make.
-   */
-  numberOfAttempts: number;
-  /**
-   * The initial delay to use in milliseconds
-   */
-  initialDelay: number;
-
-  /**
-   * The multiple that the delay is multiplied by each time
-   */
-  multiple: number;
-};
-type EnsureResult = 'Complete' | EnsureObjectiveFailed;
-
-export type EnsureObjectiveFailed = {
-  type: 'EnsureObjectiveFailed';
-  numberOfAttempts: number;
-};
-
-export type CreateChannelResult = {
-  done: Promise<EnsureResult>;
-  channelId: string;
-};
 
 const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
 export class Wallet {
