@@ -438,14 +438,14 @@ export class SingleThreadedEngine
    * @param args - Parameters to create the channel with.
    * @returns A promise that resolves to the channel output.
    */
-  async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
+  async createChannel(args: CreateChannelParams): Promise<SingleChannelOutput> {
     const response = EngineResponse.initialize();
 
     await this._createChannel(response, args, 'app');
 
     // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
 
-    return response.multipleChannelOutput();
+    return response.singleChannelOutput();
   }
   /**
    * Creates multiple channels with the same parameters. See {@link SingleThreadedEngine.createChannel}.

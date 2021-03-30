@@ -18,7 +18,7 @@ test('Objectives can be synced if a message is lost', async () => {
   // We mimic not receiving a message containing objectives
   const messageToLose = await peerEngines.a.createChannel(createChannelParams);
 
-  const channelId = messageToLose.channelResults[0].channelId;
+  const channelId = messageToLose.channelResult.channelId;
   const objectiveId = `OpenChannel-${channelId}`;
 
   // Only A should have the objective since we "lost" the message
@@ -43,7 +43,7 @@ test('handles the objective being synced even if no message is lost', async () =
 
   const messageResponse = await peerEngines.a.createChannel(createChannelParams);
 
-  const channelId = messageResponse.channelResults[0].channelId;
+  const channelId = messageResponse.channelResult.channelId;
   const objectiveId = `OpenChannel-${channelId}`;
 
   // The initial message is received
@@ -83,7 +83,7 @@ test('Can successfully push the sync objective message multiple times', async ()
   // We mimic not receiving a message containing objectives
   const messageToLose = await peerEngines.a.createChannel(createChannelParams);
 
-  const channelId = messageToLose.channelResults[0].channelId;
+  const channelId = messageToLose.channelResult.channelId;
   const objectiveId = `OpenChannel-${channelId}`;
 
   // Only A should have the objective since we "lost" the message

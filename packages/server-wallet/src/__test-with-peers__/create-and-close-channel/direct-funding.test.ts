@@ -48,7 +48,7 @@ it('Create a directly funded channel between two engines ', async () => {
   // PreFund0
   const resultA0 = await peerEngines.a.createChannel(createChannelParams);
   await messageService.send(getMessages(resultA0));
-  channelId = resultA0.channelResults[0].channelId;
+  channelId = resultA0.channelResult.channelId;
 
   //      PreFund0B
   const resultB1 = await peerEngines.b.joinChannel({channelId});
