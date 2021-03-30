@@ -24,7 +24,7 @@ export type LatencyOptions = {
  * The message service is responsible for calling pushMessage on the appropriate engines.
  */
 export class TestMessageService implements MessageServiceInterface {
-  private _handleMessage: (message: Message) => Promise<void>;
+  private _handleMessages: (messages: Message[]) => Promise<void>;
   private _options: LatencyOptions;
 
   private _timeouts: NodeJS.Timeout[] = [];
@@ -39,12 +39,12 @@ export class TestMessageService implements MessageServiceInterface {
    */
   protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
     this._options = {dropRate: 0, meanDelay: undefined};
-    // We always pass a reference to the messageService when calling handleMessage
-    // This allows the MessageHandler function to easily call messageHandler.send
-    // We just bind that here for convenience.
-    this._handleMessage = async message => {
-      // This prevents triggering messages after the service is destroyed
-      if (!this._destroyed) return handleMessage(message, this);
+
+    this._handleMessages = async messages => {
+      for (const message of messages) {
+        // This prevents triggering messages after the service is destroyed
+        if (!this._destroyed) return handleMessage(message, this);
+      }
     };
   }
 
@@ -66,26 +66,17 @@ export class TestMessageService implements MessageServiceInterface {
       const {meanDelay} = this._options;
       if (meanDelay) {
         const delay = meanDelay / 2 + Math.random() * meanDelay;
-        this._timeouts.push(
-          setTimeout(async () => {
-            for (const message of messages) {
-              await this._handleMessage(message);
-            }
-          }, delay)
-        );
+        this._timeouts.push(setTimeout(async () => await this._handleMessages(messages), delay));
       } else {
-        for (const message of messages) {
-          await this._handleMessage(message);
-        }
+        await this._handleMessages(messages);
       }
-      await Promise.all(messages.map(this._handleMessage));
     }
   }
 
   async destroy(): Promise<void> {
     this._destroyed = true;
     // This prevents any more progress from being made
-    this._handleMessage = async () => _.noop();
+    this._handleMessages = async () => _.noop();
 
     this._timeouts.forEach(t => t.unref());
   }
