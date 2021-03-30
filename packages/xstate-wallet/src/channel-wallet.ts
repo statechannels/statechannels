@@ -65,8 +65,8 @@ export class ChannelWallet {
   }
 
   constructor(
-    protected store: Store,
-    protected messagingService: MessagingServiceInterface,
+    private store: Store,
+    private messagingService: MessagingServiceInterface,
     public id?: string
   ) {
     this.workflows = [];
