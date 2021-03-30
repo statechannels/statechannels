@@ -68,7 +68,17 @@ describe('deposit', () => {
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance
-    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
+    const {gasUsed: increaseAllowanceGasUsed} = await (
+      await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))
+    ).wait(); // Approve enough for setup and main test
+
+    if (!reasonString) {
+      await writeGasConsumption(
+        'erc20-deposit.gas.md',
+        'Token.increaseAllowance',
+        increaseAllowanceGasUsed
+      );
+    }
 
     // Check allowance updated
     const allowance = BigNumber.from(
