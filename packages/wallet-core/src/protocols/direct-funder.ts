@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-import {checkThat, isSimpleAllocation} from '../utils';
+import {checkThat, isSimpleAllocation, unreachable} from '../utils';
 import {Message} from '../wire-protocol';
 import {BN} from '../bignumber';
 import {addHash, hashState, signState} from '../state-utils';
@@ -9,7 +9,9 @@ import {Address, SignatureEntry, State, StateWithHash, Uint256} from '../types';
 type AddressedMessage = {recipient: string; message: Message};
 
 // FIXME: For the purpose of prototyping, I am ignoring blockchain events.
-export type OpenChannelEvent = Message;
+export type OpenChannelEvent =
+  | {type: 'MessageReceived'; message: Message}
+  | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
 
 type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
@@ -61,24 +63,37 @@ export function openChannelCranker(
   const {participants} = objective.openingState;
   const me = participants[objective.myIndex];
 
-  // First, receive the message
+  // First, process the event
 
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  // FIXME: Assume there's only one signed state
-  if (event.signedStates && event.signedStates[0]) {
-    const signedState = event.signedStates[0];
-    const hash = hashState(signedState);
-    const {signatures} = signedState;
+  switch (event.type) {
+    case 'FundingUpdated':
+      objective.funding.amount = event.amount;
+      objective.funding.finalized = event.finalized;
+      break;
+    case 'MessageReceived': {
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      // FIXME: Assume there's only one signed state
+      const {signedStates} = event.message;
 
-    if (hash === objective.preFS.hash) {
-      objective.preFS.signatures = mergeSignatures(objective.preFS.signatures, signatures);
-    } else if (hash === objective.postFS.hash) {
-      objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
-    } else {
-      throw new Error(
-        `Unexpected state hash ${hash}. Expecting ${objective.preFS.hash} or ${objective.postFS.hash}`
-      );
+      if (signedStates && signedStates[0]) {
+        const signedState = signedStates[0];
+        const hash = hashState(signedState);
+        const {signatures} = signedState;
+
+        if (hash === objective.preFS.hash) {
+          objective.preFS.signatures = mergeSignatures(objective.preFS.signatures, signatures);
+        } else if (hash === objective.postFS.hash) {
+          objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
+        } else {
+          throw new Error(
+            `Unexpected state hash ${hash}. Expecting ${objective.preFS.hash} or ${objective.postFS.hash}`
+          );
+        }
+      }
+      break;
     }
+    default:
+      return unreachable(event);
   }
 
   // Then, react:
@@ -155,7 +170,7 @@ function signStateAction(
   objective: OpenChannelObjective,
   actions: Action[]
 ): Action[] {
-  const {openingState: firstState, channelId, myIndex} = objective;
+  const {openingState: firstState, myIndex} = objective;
   const me = firstState.participants[myIndex];
 
   const turnNum = key === 'preFS' ? 0 : 2 * firstState.participants.length - 1;

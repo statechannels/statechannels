@@ -21,6 +21,9 @@ jest.setTimeout(10_000);
 
 let channelId: string;
 type Peer = 'A' | 'B';
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
 
 test('pure objective cranker', () => {
   const outcome: SimpleAllocation = {
@@ -82,14 +85,14 @@ test('pure objective cranker', () => {
   This would help test that the protocol handles "race conditions"
   */
 
-  // This event contains no data. It's currently used just to kickstart Alice's cranker
-  const nullAction: Action = {type: 'deposit', amount: BN.from(0)};
+  // This is used just to kickstart Alice's cranker
+  const nullEvent = {type: 'FundingUpdated' as const, amount: BN.from(0), finalized: true};
 
   // 1. Alice signs the preFS, triggers preFS action 1
-  const output1 = crankAndExpect(
+  let output = crankAndExpect(
     'A',
     currentState,
-    nullAction,
+    nullEvent,
     {
       preFS: {
         hash: richPreFS.stateHash,
@@ -103,10 +106,10 @@ test('pure objective cranker', () => {
   );
 
   // 2. Bob receives preFS event 1, trigers preFS action 2
-  const output2 = crankAndExpect(
+  output = crankAndExpect(
     'B',
     currentState,
-    output1.actions[0],
+    output.actions[0],
     {
       preFS: {
         hash: richPreFS.stateHash,
@@ -123,10 +126,10 @@ test('pure objective cranker', () => {
   );
 
   // 3. Alice receives preFS event 2, triggers deposit action 1
-  const output3 = crankAndExpect(
+  output = crankAndExpect(
     'A',
     currentState,
-    output2.actions[0],
+    output.actions[0],
     {
       preFS: {
         hash: richPreFS.stateHash,
@@ -142,20 +145,56 @@ test('pure objective cranker', () => {
     [{type: 'deposit', amount: BN.from(1)}]
   );
 
-  expect(output3).toBeDefined();
-});
+  // 4. Alice receives deposit event 1, does nothing
+  const alicesDeposit = output.actions[0];
+  output = crankAndExpect(
+    'A',
+    currentState,
+    alicesDeposit,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(1), finalized: false},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
+    },
+    []
+  );
 
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
+  // 5. Bob receives deposit event 1, triggers deposit action 1
+  output = crankAndExpect(
+    'B',
+    currentState,
+    alicesDeposit,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(1), finalized: false},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
+    },
+    [{type: 'deposit', amount: BN.from(1)}]
+  );
+
+  expect(output).toBeDefined();
+});
 
 function generateEvent(action: Action): OpenChannelEvent {
   switch (action.type) {
     case 'deposit':
-      // FIXME We need to add a 'funding updated' event to OpenChannelEvent
-      return {signedStates: []};
+      return {type: 'FundingUpdated', amount: action.amount, finalized: false};
     case 'sendMessage':
-      return action.message.message;
+      return {type: 'MessageReceived', message: action.message.message};
     default:
       return unreachable(action);
   }
@@ -164,11 +203,14 @@ function generateEvent(action: Action): OpenChannelEvent {
 function crankAndExpect(
   peer: Peer,
   currentState: Record<Peer, OpenChannelObjective>,
-  action: Action,
+  actionOrEvent: Action | OpenChannelEvent,
   objective: DeepPartial<OpenChannelObjective>,
   actions: DeepPartial<Action>[]
 ): OpenChannelResult {
-  const event = generateEvent(action);
+  const event =
+    actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
+      ? generateEvent(actionOrEvent)
+      : actionOrEvent;
   const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
   expect(output).toMatchObject({objective, actions});
   currentState[peer] = output.objective;
