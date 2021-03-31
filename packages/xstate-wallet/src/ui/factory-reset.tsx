@@ -1,6 +1,7 @@
 import React, {useState} from 'react';
 import './wallet.scss';
 import Dexie from 'dexie';
+
 import {Store} from '../store';
 import {logger} from '../logger';
 import {DB_NAME} from '../constants';

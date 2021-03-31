@@ -1,13 +1,13 @@
 import React from 'react';
-import {WindowContext} from './window-context';
 import {Interpreter} from 'xstate';
 import {useService} from '@xstate/react';
+
+import {WindowContext} from './window-context';
 import './wallet.scss';
 import {ApplicationWorkflow} from './application-workflow';
 import {EnableEthereum} from './enable-ethereum-workflow';
 import {Layout} from './layout';
 import {ApproveBudgetAndFund} from './approve-budget-and-fund-workflow';
-
 import {CloseLedgerAndWithdraw} from './close-ledger-and-withdraw';
 
 interface Props {
