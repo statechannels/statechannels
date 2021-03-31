@@ -8,7 +8,6 @@ import {Address, SignatureEntry, State, StateWithHash, Uint256} from '../types';
 
 type AddressedMessage = {recipient: string; message: Message};
 
-// FIXME: For the purpose of prototyping, I am ignoring blockchain events.
 export type OpenChannelEvent =
   | {type: 'MessageReceived'; message: Message}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
@@ -21,19 +20,20 @@ export type OpenChannelObjective = {
   myIndex: number;
 
   preFS: SignedStateHash;
-  // FIXME: The asset class is _ignored_ here.
+  // TODO: (ChainService) The asset class is _ignored_ here.
   funding: {amount: Uint256; finalized: boolean};
+  // TODO: (ChainService) We will need to store funding requests once this gets hooked up to a chain service
   fundingRequests: {tx: string}[];
   postFS: SignedStateHash;
 };
 
 export type Action =
   | {type: 'sendMessage'; message: AddressedMessage}
-  // FIXME: What data is required here?
+  // TODO: (ChainService) We will need to include more data once this gets hooked up to a chain service
   | {type: 'deposit'; amount: Uint256};
 
 export type OpenChannelResult = {
-  // FIXME: The statuses could be named, like "waitingForDeposit", "waitingForPostFS", etc.
+  // TODO: The statuses could be named, like "waitingForDeposit", "waitingForPostFS", etc.
   status: 'inProgress' | 'success' | 'error';
   objective: OpenChannelObjective;
   actions: Action[];
@@ -71,10 +71,9 @@ export function openChannelCranker(
       objective.funding.finalized = event.finalized;
       break;
     case 'MessageReceived': {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      // FIXME: Assume there's only one signed state
       const {signedStates} = event.message;
 
+      // TODO: Assume there's only one signed state
       if (signedStates && signedStates[0]) {
         const signedState = signedStates[0];
         const hash = hashState(signedState);
@@ -128,9 +127,9 @@ export function openChannelCranker(
     return {status: 'inProgress', objective, actions};
   }
   // if there's an outstanding chain request, take no action
-  // FIXME: This assumes that each participant deposits exactly once per channel
+  // TODO: (ChainService) This assumes that each participant deposits exactly once per channel
   else if (objective.fundingRequests.length === 1) {
-    // FIXME: This should handle timed out
+    // TODO: (ChainService) This should handle timed out funding requests
     return {status: 'inProgress', objective, actions};
   } else {
     // otherwise, deposit
