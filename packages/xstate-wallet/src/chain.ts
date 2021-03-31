@@ -14,7 +14,8 @@ import {
   toNitroSignedState,
   calculateChannelId,
   Zero,
-  Uint256
+  Uint256,
+  Address
 } from '@statechannels/wallet-core';
 import {Contract, Wallet, utils, providers} from 'ethers';
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
@@ -246,10 +247,11 @@ export class ChainWatcher implements Chain {
   private _adjudicator?: Contract;
   private _assetHolders: Contract[];
   private provider: ReturnType<typeof getProvider>;
+  private mySelectedAddress: string | undefined;
 
-  constructor(
-    private mySelectedAddress: string | undefined = window.ethereum?.selectedAddress ?? undefined
-  ) {}
+  constructor(chainAddress?: Address) {
+    this.mySelectedAddress = chainAddress ?? window.ethereum?.selectedAddress ?? undefined;
+  }
 
   private get signer() {
     if (!this.ethereumIsEnabled) throw new Error('Ethereum not enabled');
