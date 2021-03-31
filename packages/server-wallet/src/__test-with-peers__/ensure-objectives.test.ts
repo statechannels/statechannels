@@ -36,21 +36,25 @@ describe('EnsureObjectives', () => {
     // Lots of messages dropping but no delay
     {dropRate: 0.3, meanDelay: undefined},
     // delay but no dropping
-    {dropRate: 0, meanDelay: 200},
+    {dropRate: 0, meanDelay: 50},
     // Delay and drop
-    {dropRate: 0.2, meanDelay: 100},
+    {dropRate: 0.2, meanDelay: 25},
   ];
   test.each(testCases)(
     'can successfully create a channel with the latency options: %o',
     async options => {
       messageService.setLatencyOptions(options);
-      const wallet = await Wallet.create(peerEngines.a, messageService);
+      const wallet = await Wallet.create(peerEngines.a, messageService, {
+        numberOfAttempts: 100,
+        initialDelay: 100,
+        multiple: 1,
+      });
 
       peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
       });
 
-      await expect(wallet.createChannels(getCreateChannelsArgs(), 50)).resolves.not.toThrow();
+      await expect(wallet.createChannels(getCreateChannelsArgs(), 10)).resolves.not.toThrow();
     }
   );
 
