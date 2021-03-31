@@ -1,21 +1,17 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber, utils, Wallet, constants} from 'ethers';
+import {Contract, BigNumber, Wallet, constants} from 'ethers';
 
-import {getFixedPart, hashAppPart, hashState, State} from '../../../../src/contract/state';
-
+import {getFixedPart, hashAppPart, State} from '../../../../src/contract/state';
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import {
-  allocationToParams,
   getRandomNonce,
   getTestProvider,
-  randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContracts,
   writeGasConsumption,
 } from '../../../test-helpers';
-
 import {
   Channel,
   channelDataToStatus,
@@ -27,7 +23,6 @@ import {
   signState,
   signStates,
 } from '../../../../src';
-import {getPlaceHolderContractAddress} from '../../../test-helpers';
 
 const provider = getTestProvider();
 
@@ -190,7 +185,7 @@ describe('transfer', () => {
       } else {
         const expectedEvents = [
           {
-            event: 'AllocationUpdated',
+            event: 'OutcomeHashUpdated',
             args: {channelId, initialHoldings: heldBefore[channelId]},
           },
         ];

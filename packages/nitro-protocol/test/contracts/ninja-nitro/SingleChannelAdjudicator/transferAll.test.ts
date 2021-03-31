@@ -3,7 +3,6 @@ import {Contract, BigNumber, utils, constants, Wallet} from 'ethers';
 import {defaultAbiCoder} from 'ethers/lib/utils';
 
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
-
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import {
   allocationToParams,
@@ -182,10 +181,10 @@ describe('transferAll (using transfer and empty indices array)', () => {
       } else {
         const {events: eventsFromLogs, gasUsed} = await (await tx).wait();
         await writeGasConsumption('SingleChannelAdjudicator.transferAll.gas.md', name, gasUsed);
-        // TODO expect an 'OutcomeUpdated' event
+        // TODO expect an 'OutcomeHashUpdated' event
         // const expectedEvents = [
         //   {
-        //     event: 'AllocationUpdated',
+        //     event: 'OutcomeHashUpdated',
         //     args: {channelId, initialHoldings: heldBefore[channelId]},
         //   },
         // ];
