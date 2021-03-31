@@ -1,9 +1,15 @@
 import {ethers} from 'ethers';
 import * as _ from 'lodash';
 
+import {unreachable} from '../utils';
 import {addHash} from '../state-utils';
 import {BN} from '../bignumber';
-import {openChannelCranker, OpenChannelObjective} from '../protocols/direct-funder';
+import {
+  Action,
+  openChannelCranker,
+  OpenChannelEvent,
+  OpenChannelObjective
+} from '../protocols/direct-funder';
 import {Address, makeAddress, SimpleAllocation, State} from '../types';
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
@@ -39,33 +45,88 @@ test('pure objective cranker', () => {
   const richPreFS = addHash(openingState);
   const richPostFS = addHash({...openingState, turnNum: 3});
 
-  const objective: OpenChannelObjective = {
+  const initial: OpenChannelObjective = {
     channelId,
     openingState,
+    myIndex: 0,
     preFS: {hash: richPreFS.stateHash, signatures: []},
     funding: {amount: BN.from(0), finalized: true},
     fundingRequests: [],
     postFS: {hash: richPostFS.stateHash, signatures: []}
   };
+  const currentState = {
+    A: _.cloneDeep(initial),
+    B: _.cloneDeep({...initial, myIndex: 1})
+  };
 
-  expect(
-    openChannelCranker(
-      objective,
-      {signedStates: [signStateHelper(richPreFS, 'A')]},
-      participantA.privateKey
-    )
-  ).toMatchObject({
-    actions: [],
-    objective: {
-      preFS: {hash: richPreFS.stateHash, signatures: [{signer: participants.A.signingAddress}]}
-    }
+  /*
+  For the purpose of this test, I am arbitrarily deciding that the actions & events occur in this order:
+  1. Alice signs the preFS, triggers preFS action 1
+  2. Bob receives preFS event 1, trigers preFS action 2
+  3. Alice receives preFS event 2, triggers deposit action 1
+  4. Alice receives deposit event 1, does nothing
+  5. Bob receives deposit event 1, triggers deposit action 1
+  6. Bob receives deposit action 2 (UNFINALIZED)
+  7. Alice receives deposit action 2 (UNFINALIZED)
+  8. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
+  9. Alice receives deposit action 2 (FINALIZED), triggers postFS action 2
+  10. Alice receives postFS event 1, is finished
+  11. Bob receives postFS event 1, is finished
+
+  You can imagine a more exhaustive test here where
+  - generated actions are put into a set
+  - when the set is non-empty, a random element is chosen and applied
+
+  This would help test that the protocol handles "race conditions"
+  */
+
+  // 1. Alice signs the preFS, triggers preFS action 1
+  const outputA1 = openChannelCranker(initial, {signedStates: []}, participantA.privateKey);
+  const expectedOutputA1: DeepPartial<OpenChannelObjective> = {
+    preFS: {
+      hash: richPreFS.stateHash,
+      signatures: [{signer: participants.A.signingAddress}]
+    },
+    funding: {amount: BN.from(0), finalized: true},
+    fundingRequests: [],
+    postFS: {hash: richPostFS.stateHash, signatures: []}
+  };
+  const expectedActionsA1: Action[] = [
+    {type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}
+  ];
+  expect(outputA1).toMatchObject({objective: expectedOutputA1, actions: expectedActionsA1});
+  currentState.A = outputA1.objective;
+
+  // 2. Bob receives preFS event 1, trigers preFS action 2
+  const expectedOutputB1: DeepPartial<OpenChannelObjective> = {
+    preFS: {
+      hash: richPreFS.stateHash,
+      signatures: [{signer: participants.A.signingAddress}, {signer: participants.B.signingAddress}]
+    },
+    funding: {amount: BN.from(0), finalized: true},
+    fundingRequests: [],
+    postFS: {hash: richPostFS.stateHash, signatures: []}
+  };
+
+  const eventB1 = generateEvent(outputA1.actions[0]);
+  const outputB1 = openChannelCranker(currentState.B, eventB1, participantB.privateKey);
+  expect(outputB1).toMatchObject({
+    objective: expectedOutputB1,
+    actions: [{type: 'sendMessage', message: {recipient: 'alice'}}]
   });
-
-  expect(() =>
-    openChannelCranker(
-      objective,
-      {signedStates: [signStateHelper(richPreFS, 'B')]},
-      participantA.privateKey
-    )
-  ).toThrow('funding milestone unimplemented');
 });
+
+type DeepPartial<T> = {
+  [P in keyof T]?: DeepPartial<T[P]>;
+};
+
+function generateEvent(action: Action): OpenChannelEvent {
+  switch (action.type) {
+    case 'deposit':
+      throw 'whoops';
+    case 'sendMessage':
+      return action.message.message;
+    default:
+      return unreachable(action);
+  }
+}

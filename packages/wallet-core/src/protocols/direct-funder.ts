@@ -1,23 +1,23 @@
-import {ethers} from 'ethers';
 import * as _ from 'lodash';
 
+import {checkThat, isSimpleAllocation} from '../utils';
 import {Message} from '../wire-protocol';
 import {BN} from '../bignumber';
 import {addHash, hashState, signState} from '../state-utils';
 import {Address, SignatureEntry, State, StateWithHash, Uint256} from '../types';
-import {serializeMessage} from '../serde/wire-format/serialize';
 
-const WALLET_VERSION = 'pure-function-protocol'; // FIXME where does this come from?
-type Outgoing = any; // FIXME
+type AddressedMessage = {recipient: string; message: Message};
 
 // FIXME: For the purpose of prototyping, I am ignoring blockchain events.
-type OpenChannelEvent = Message;
+export type OpenChannelEvent = Message;
 
 type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
 export type OpenChannelObjective = {
   channelId: string;
   openingState: State;
+  myIndex: number;
+
   preFS: SignedStateHash;
   // FIXME: The asset class is _ignored_ here.
   funding: {amount: Uint256; finalized: boolean};
@@ -25,8 +25,8 @@ export type OpenChannelObjective = {
   postFS: SignedStateHash;
 };
 
-type Action =
-  | {type: 'sendMessage'; message: Outgoing['params']}
+export type Action =
+  | {type: 'sendMessage'; message: AddressedMessage}
   // FIXME: What data is required here?
   | {type: 'deposit'; amount: Uint256};
 
@@ -58,30 +58,33 @@ export function openChannelCranker(
   event: OpenChannelEvent,
   myPrivateKey: string
 ): Result {
-  const {address} = new ethers.Wallet(myPrivateKey);
-  const me: Address = address as Address;
+  const {participants} = objective.openingState;
+  const me = participants[objective.myIndex];
 
   // First, receive the message
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const signedState = event.signedStates![0];
-  const hash = hashState(signedState);
-  const {signatures} = signedState;
+  // FIXME: Assume there's only one signed state
+  if (event.signedStates && event.signedStates[0]) {
+    const signedState = event.signedStates[0];
+    const hash = hashState(signedState);
+    const {signatures} = signedState;
 
-  if (hash === objective.preFS.hash) {
-    objective.preFS.signatures = mergeSignatures(objective.preFS.signatures, signatures);
-  } else if (hash === objective.postFS.hash) {
-    objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
-  } else {
-    throw new Error(
-      `Unexpected state hash ${hash}. Expecting ${objective.preFS.hash} or ${objective.postFS.hash}`
-    );
+    if (hash === objective.preFS.hash) {
+      objective.preFS.signatures = mergeSignatures(objective.preFS.signatures, signatures);
+    } else if (hash === objective.postFS.hash) {
+      objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
+    } else {
+      throw new Error(
+        `Unexpected state hash ${hash}. Expecting ${objective.preFS.hash} or ${objective.postFS.hash}`
+      );
+    }
   }
 
   // Then, react:
   const actions: Action[] = [];
 
-  if (!signedbyMe(objective, 'preFS', me)) {
+  if (!signedbyMe(objective, 'preFS', me.signingAddress)) {
     signStateAction('preFS', myPrivateKey, objective, actions);
   }
 
@@ -91,7 +94,10 @@ export function openChannelCranker(
 
   // Mostly copied from server-wallet/src/protocols/direct-funder
   const {funding} = objective;
-  const {targetBefore, targetAfter, targetTotal} = utils.fundingMilestone(objective.openingState);
+  const {targetBefore, targetAfter, targetTotal} = utils.fundingMilestone(
+    objective.openingState,
+    me.destination
+  );
   // if we're fully funded, we're done
   if (BN.gte(funding.amount, targetTotal) && funding.finalized) {
     // This is the only path where the channel is directly funded,
@@ -119,7 +125,7 @@ export function openChannelCranker(
   }
 
   // Now that
-  if (!signedbyMe(objective, 'postFS', me)) {
+  if (!signedbyMe(objective, 'postFS', me.signingAddress)) {
     signStateAction('postFS', myPrivateKey, objective, actions);
   }
 
@@ -149,31 +155,31 @@ function signStateAction(
   objective: OpenChannelObjective,
   actions: Action[]
 ): Action[] {
-  const {openingState: firstState, channelId} = objective;
-  const {address} = new ethers.Wallet(myPrivateKey);
-  const me: Address = address as Address;
+  const {openingState: firstState, channelId, myIndex} = objective;
+  const me = firstState.participants[myIndex];
 
   const turnNum = key === 'preFS' ? 0 : 2 * firstState.participants.length - 1;
   const state: StateWithHash = addHash({...firstState, turnNum});
   const signature = signState(state, myPrivateKey);
-  const entry = {signature, signer: me};
+  const entry = {signature, signer: me.signingAddress};
   objective[key].signatures.push(entry);
 
-  const message = serializeMessage(
-    WALLET_VERSION,
-    {walletVersion: WALLET_VERSION, signedStates: [{...state, signatures: [entry]}]},
-    'you',
-    'me',
-    channelId
-  );
-
-  actions.push({type: 'sendMessage', message});
+  recipients(objective).map(recipient => {
+    const message: Message = {signedStates: [{...state, signatures: [entry]}]};
+    actions.push({type: 'sendMessage', message: {recipient, message}});
+  });
 
   return actions;
 }
 
+function recipients({openingState: {participants}, myIndex}: OpenChannelObjective): string[] {
+  return participants.filter((_p, idx) => idx !== myIndex).map(p => p.participantId);
+}
+
 function mergeSignatures(left: SignatureEntry[], right: SignatureEntry[]): SignatureEntry[] {
-  return _.uniqBy(_.concat(left, right), entry => entry.signer);
+  const unsorted = _.uniqBy(_.concat(left, right), entry => entry.signer);
+
+  return _.sortBy(unsorted, entry => entry.signer);
 }
 
 type FundingMilestone = {
@@ -183,7 +189,24 @@ type FundingMilestone = {
 };
 
 const utils = {
-  fundingMilestone(_state: State): FundingMilestone {
-    throw 'funding milestone unimplemented';
+  fundingMilestone(state: State, destination: string): FundingMilestone {
+    const {allocationItems} = checkThat(state.outcome, isSimpleAllocation);
+
+    const myAllocationItem = _.find(allocationItems, ai => ai.destination === destination);
+    if (!myAllocationItem) {
+      // throw new ChannelError(ChannelError.reasons.destinationNotInAllocations, {
+      //   destination: this.participants[this.myIndex].destination
+      // });
+      throw 'missing';
+    }
+
+    const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== destination);
+    const targetBefore = allocationsBefore.map(a => a.amount).reduce(BN.add, BN.from(0));
+
+    const targetAfter = BN.add(targetBefore, myAllocationItem.amount);
+
+    const targetTotal = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+
+    return {targetBefore, targetAfter, targetTotal};
   }
 };
