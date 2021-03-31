@@ -1,10 +1,7 @@
 // NOTE: this script manages deploying contracts for testing purposes ONLY
 // DO NOT USE THIS SCRIPT TO DEPLOY CONTRACTS TO PRODUCTION NETWORKS
-import {fstat} from 'fs/promises';
-import {writeSync, writeFileSync} from 'fs';
-
 import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ContractFactory, Wallet, utils} from 'ethers';
+import {Wallet} from 'ethers';
 
 import {getTestProvider, setupContracts, writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
@@ -80,11 +77,7 @@ export async function deploy(): Promise<Record<string, string>> {
     ADJUDICATOR_FACTORY_ADDRESS
   );
 
-  console.log('deployed master');
-
   const provider = getTestProvider();
-
-  console.log('rdfas');
 
   const AdjudicatorFactory = await setupContracts(
     provider,
@@ -92,11 +85,7 @@ export async function deploy(): Promise<Record<string, string>> {
     ADJUDICATOR_FACTORY_ADDRESS
   );
 
-  console.log('setupcontracts factory');
-
   await (await AdjudicatorFactory.setup(SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS)).wait();
-
-  console.log('factory.setup');
 
   return {
     NITRO_ADJUDICATOR_ADDRESS,

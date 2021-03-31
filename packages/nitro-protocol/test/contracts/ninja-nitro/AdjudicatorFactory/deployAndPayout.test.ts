@@ -126,12 +126,9 @@ describe('deployAndPayout', () => {
       payouts: OutcomeShortHand;
       reasonString;
     }) => {
-      console.log('tx originator address: ' + (await provider.getSigner(0).getAddress()));
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
-      console.log('channelid: ' + channelId);
       const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
-      console.log('cadjudicatort address: ' + adjudicatorAddress);
       const SingleChannelAdjudicator = await setupContracts(
         provider,
         SingleChannelAdjudicatorArtifact,
