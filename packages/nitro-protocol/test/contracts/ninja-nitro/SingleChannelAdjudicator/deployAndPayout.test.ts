@@ -99,8 +99,8 @@ const oneState = {
   appData: [ethers.constants.HashZero],
 };
 const turnNumRecord = 5;
-let channelNonce = getRandomNonce('concludePushOutcomeAndTransferAll');
-describe('concludePushOutcomeAndTransferAll', () => {
+let channelNonce = getRandomNonce('deployAndPayout');
+describe('deployAndPayout', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
     description | outcomeShortHand   | heldBefore         | heldAfter          | newOutcome | payouts            | reasonString
@@ -215,7 +215,7 @@ describe('concludePushOutcomeAndTransferAll', () => {
         expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
 
         await writeGasConsumption(
-          './concludePushOutcomeAndTransferAll.gas.md',
+          'ChannelFactory.deployAndPayout.gas.md',
           description,
           receipt.gasUsed
         );
