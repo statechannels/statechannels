@@ -1,6 +1,8 @@
 import {Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import {Logger} from 'pino';
+import delay from 'delay';
+import {AbortController} from 'abort-controller';
 
 import {Engine} from '..';
 
@@ -24,12 +26,13 @@ export type LatencyOptions = {
  * The message service is responsible for calling pushMessage on the appropriate engines.
  */
 export class TestMessageService implements MessageServiceInterface {
-  private _handleMessage: (message: Message) => Promise<void>;
+  private _handleMessages: (messages: Message[]) => Promise<void>;
   private _options: LatencyOptions;
 
-  private _timeouts: NodeJS.Timeout[] = [];
-
   protected _destroyed = false;
+
+  /* This is used to signal the delay function to abort */
+  protected _abortController: AbortController;
   /**
    * Creates a test message service that can be used in tets
    * @param incomingMessageHandler The message handler to use
@@ -39,10 +42,13 @@ export class TestMessageService implements MessageServiceInterface {
    */
   protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
     this._options = {dropRate: 0, meanDelay: undefined};
-    // We always pass a reference to the messageService when calling handleMessage
-    // This allows the MessageHandler function to easily call messageHandler.send
-    // We just bind that here for convenience.
-    this._handleMessage = async message => handleMessage(message, this);
+    this._abortController = new AbortController();
+    this._handleMessages = async messages => {
+      for (const message of messages) {
+        // This prevents triggering messages after the service is destroyed
+        if (!this._destroyed) return handleMessage(message, this);
+      }
+    };
   }
 
   static async create(
@@ -62,26 +68,17 @@ export class TestMessageService implements MessageServiceInterface {
     if (!shouldDrop) {
       const {meanDelay} = this._options;
       if (meanDelay) {
-        const delay = meanDelay / 2 + Math.random() * meanDelay;
-        this._timeouts.push(
-          setTimeout(async () => {
-            if (!this._destroyed) {
-              await Promise.all(messages.map(this._handleMessage));
-            }
-          }, delay)
-        );
-      } else {
-        await Promise.all(messages.map(this._handleMessage));
+        const delayAmount = meanDelay / 2 + Math.random() * meanDelay;
+
+        await delay(delayAmount, {signal: this._abortController.signal});
       }
+      await this._handleMessages(messages);
     }
   }
 
   async destroy(): Promise<void> {
+    this._abortController.abort();
     this._destroyed = true;
-    // This prevents any more progress from being made
-    this._handleMessage = async () => _.noop();
-
-    this._timeouts.forEach(t => t.unref());
   }
 }
 
