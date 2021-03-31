@@ -8,17 +8,19 @@ import {
   Action,
   openChannelCranker,
   OpenChannelEvent,
-  OpenChannelObjective
+  OpenChannelObjective,
+  OpenChannelResult
 } from '../protocols/direct-funder';
 import {Address, makeAddress, SimpleAllocation, State} from '../types';
 
-import {ONE_DAY, participants, signStateHelper} from './test-helpers';
+import {ONE_DAY, participants} from './test-helpers';
 const {A: participantA, B: participantB} = participants;
 
 const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
 
 let channelId: string;
+type Peer = 'A' | 'B';
 
 test('pure objective cranker', () => {
   const outcome: SimpleAllocation = {
@@ -58,10 +60,6 @@ test('pure objective cranker', () => {
     A: _.cloneDeep(initial),
     B: _.cloneDeep({...initial, myIndex: 1})
   };
-  type Peer = keyof typeof currentState;
-  function setState(peer: Peer, {objective}: {objective: OpenChannelObjective}): void {
-    currentState[peer] = _.cloneDeep(objective);
-  }
 
   /*
   For the purpose of this test, I am arbitrarily deciding that the actions & events occur in this order:
@@ -84,59 +82,67 @@ test('pure objective cranker', () => {
   This would help test that the protocol handles "race conditions"
   */
 
+  // This event contains no data. It's currently used just to kickstart Alice's cranker
+  const nullAction: Action = {type: 'deposit', amount: BN.from(0)};
+
   // 1. Alice signs the preFS, triggers preFS action 1
-  const output1 = openChannelCranker(initial, {signedStates: []}, participantA.privateKey);
-  const expectedOutputA1: DeepPartial<OpenChannelObjective> = {
-    preFS: {
-      hash: richPreFS.stateHash,
-      signatures: [{signer: participants.A.signingAddress}]
+  const output1 = crankAndExpect(
+    'A',
+    currentState,
+    nullAction,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [{signer: participants.A.signingAddress}]
+      },
+      funding: {amount: BN.from(0), finalized: true},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
     },
-    funding: {amount: BN.from(0), finalized: true},
-    fundingRequests: [],
-    postFS: {hash: richPostFS.stateHash, signatures: []}
-  };
-  const expectedActionsA1: Action[] = [
-    {type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}
-  ];
-  expect(output1).toMatchObject({objective: expectedOutputA1, actions: expectedActionsA1});
-  setState('A', output1);
+    [{type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}]
+  );
 
   // 2. Bob receives preFS event 1, trigers preFS action 2
-  const expectedOutput2: DeepPartial<OpenChannelObjective> = {
-    preFS: {
-      hash: richPreFS.stateHash,
-      signatures: [{signer: participants.A.signingAddress}, {signer: participants.B.signingAddress}]
+  const output2 = crankAndExpect(
+    'B',
+    currentState,
+    output1.actions[0],
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(0), finalized: true},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
     },
-    funding: {amount: BN.from(0), finalized: true},
-    fundingRequests: [],
-    postFS: {hash: richPostFS.stateHash, signatures: []}
-  };
-
-  const event2 = generateEvent(output1.actions[0]);
-  const output2 = openChannelCranker(currentState.B, event2, participantB.privateKey);
-  expect(output2).toMatchObject({
-    objective: expectedOutput2,
-    actions: [{type: 'sendMessage', message: {recipient: 'alice'}}]
-  });
-  setState('B', output2);
+    [{type: 'sendMessage', message: {recipient: 'alice'}}]
+  );
 
   // 3. Alice receives preFS event 2, triggers deposit action 1
-  const expectedOutput3: DeepPartial<OpenChannelObjective> = {
-    preFS: {
-      hash: richPreFS.stateHash,
-      signatures: [{signer: participants.A.signingAddress}, {signer: participants.B.signingAddress}]
+  const output3 = crankAndExpect(
+    'A',
+    currentState,
+    output2.actions[0],
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(0), finalized: true},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
     },
-    funding: {amount: BN.from(0), finalized: true},
-    fundingRequests: [],
-    postFS: {hash: richPostFS.stateHash, signatures: []}
-  };
-  const event3 = generateEvent(output2.actions[0]);
-  const output3 = openChannelCranker(currentState.A, event3, participantA.privateKey);
-  expect(output3).toMatchObject({
-    objective: expectedOutput3,
-    actions: [{type: 'deposit', amount: BN.from(1)}]
-  });
-  setState('A', output3);
+    [{type: 'deposit', amount: BN.from(1)}]
+  );
+
+  expect(output3).toBeDefined();
 });
 
 type DeepPartial<T> = {
@@ -146,10 +152,26 @@ type DeepPartial<T> = {
 function generateEvent(action: Action): OpenChannelEvent {
   switch (action.type) {
     case 'deposit':
-      throw 'whoops';
+      // FIXME We need to add a 'funding updated' event to OpenChannelEvent
+      return {signedStates: []};
     case 'sendMessage':
       return action.message.message;
     default:
       return unreachable(action);
   }
+}
+
+function crankAndExpect(
+  peer: Peer,
+  currentState: Record<Peer, OpenChannelObjective>,
+  action: Action,
+  objective: DeepPartial<OpenChannelObjective>,
+  actions: DeepPartial<Action>[]
+): OpenChannelResult {
+  const event = generateEvent(action);
+  const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
+  expect(output).toMatchObject({objective, actions});
+  currentState[peer] = output.objective;
+
+  return output;
 }

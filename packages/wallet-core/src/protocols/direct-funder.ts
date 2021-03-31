@@ -30,7 +30,7 @@ export type Action =
   // FIXME: What data is required here?
   | {type: 'deposit'; amount: Uint256};
 
-type Result = {
+export type OpenChannelResult = {
   // FIXME: The statuses could be named, like "waitingForDeposit", "waitingForPostFS", etc.
   status: 'inProgress' | 'success' | 'error';
   objective: OpenChannelObjective;
@@ -57,7 +57,7 @@ export function openChannelCranker(
   objective: OpenChannelObjective,
   event: OpenChannelEvent,
   myPrivateKey: string
-): Result {
+): OpenChannelResult {
   const {participants} = objective.openingState;
   const me = participants[objective.myIndex];
 
