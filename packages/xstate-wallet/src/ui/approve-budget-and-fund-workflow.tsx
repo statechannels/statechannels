@@ -1,15 +1,25 @@
 import React, {useEffect, useState} from 'react';
 import './wallet.scss';
 import {useService} from '@xstate/react';
-import {Button, Heading, Flex, Text, Box, Link, Loader, Tooltip, Icon} from 'rimble-ui';
+import {
+  Button,
+  Heading,
+  Flex,
+  Text as RimbleText,
+  Box,
+  Link,
+  Loader,
+  Tooltip,
+  Icon
+} from 'rimble-ui';
 import {BN} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 
 import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
-
 import {track} from '../segment-analytics';
-import {getAmountsFromBudget} from './selectors';
 import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
+
+import {getAmountsFromBudget} from './selectors';
 interface Props {
   service: ApproveBudgetAndFundService;
 }
@@ -46,7 +56,9 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>App Budget</Heading>
 
-      <Text textAlign="center">Checking if your Metamask account has sufficient ETH</Text>
+      <RimbleText textAlign="center">
+        Checking if your Metamask account has sufficient ETH
+      </RimbleText>
     </Flex>
   );
 
@@ -55,16 +67,16 @@ export const ApproveBudgetAndFund = (props: Props) => {
       <Heading textAlign="center" mb={2}>
         App Budget
       </Heading>
-      <Text pb={3} fontSize={1}>
+      <RimbleText pb={3} fontSize={1}>
         You don&#39;t have enough ETH in your wallet!
-      </Text>
-      <Text pb={3} fontSize={1}>
+      </RimbleText>
+      <RimbleText pb={3} fontSize={1}>
         You&#39;ll need at least {utils.formatEther(BN.from(playerAmount))} ETH in your Metamask
         wallet to fund the channel. You can get more ETH{' '}
         <Link target="_blank" href={FAUCET_LINK}>
           here.
         </Link>
-      </Text>
+      </RimbleText>
     </Flex>
   );
   const waitForUserApproval = ({waiting}: {waiting: boolean} = {waiting: false}) => (
@@ -73,26 +85,26 @@ export const ApproveBudgetAndFund = (props: Props) => {
         App Budget
       </Heading>
 
-      <Text fontSize={1} pb={2}>
+      <RimbleText fontSize={1} pb={2}>
         Approve budget?
-      </Text>
+      </RimbleText>
 
       <Flex justifyContent="center" pb={2}>
         <Box>
-          <Text>Send: {utils.formatEther(BN.from(playerAmount))} ETH</Text>
-          <Text>Receive: {utils.formatEther(BN.from(hubAmount))} ETH</Text>
+          <RimbleText>Send: {utils.formatEther(BN.from(playerAmount))} ETH</RimbleText>
+          <RimbleText>Receive: {utils.formatEther(BN.from(hubAmount))} ETH</RimbleText>
         </Box>
       </Flex>
-      <Text fontSize={1} pb={2}>
+      <RimbleText fontSize={1} pb={2}>
         <strong>{budget.domain}</strong> will manage these funds.
-      </Text>
-      <Text pb={3} fontSize={1}>
+      </RimbleText>
+      <RimbleText pb={3} fontSize={1}>
         You will deposit {utils.formatEther(BN.from(playerAmount))} ETH into a channel. Our hub will
         also make a deposit.
         <Tooltip message="This allows you to transact with anyone else connected to the same hub.">
           <Icon name="Info" size="20" />
         </Tooltip>
-      </Text>
+      </RimbleText>
       <Button
         disabled={waiting}
         onClick={send('USER_APPROVES_BUDGET')}
@@ -108,11 +120,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center">Waiting for the hub to respond.</Text>
-      <Text>
+      <RimbleText textAlign="center">Waiting for the hub to respond.</RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
 
@@ -120,11 +132,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center">Querying blockchain</Text>
-      <Text>
+      <RimbleText textAlign="center">Querying blockchain</RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
 
@@ -132,9 +144,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text pb="2">The hub is now depositing funds on-chain. This may take a moment.</Text>
+      <RimbleText pb="2">
+        The hub is now depositing funds on-chain. This may take a moment.
+      </RimbleText>
 
-      <Text id="wait-for-transaction">
+      <RimbleText id="wait-for-transaction">
         Click{' '}
         <Link
           target="_blank"
@@ -143,11 +157,11 @@ export const ApproveBudgetAndFund = (props: Props) => {
           here
         </Link>{' '}
         to follow the progress on etherscan.
-      </Text>
-      <Text>
+      </RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
 
@@ -155,9 +169,9 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center" id="please-approve-transaction">
+      <RimbleText textAlign="center" id="please-approve-transaction">
         Please approve the transaction in metamask
-      </Text>
+      </RimbleText>
     </Flex>
   );
 
@@ -165,19 +179,19 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text pb={2}>Waiting for your transaction to be mined.</Text>
+      <RimbleText pb={2}>Waiting for your transaction to be mined.</RimbleText>
 
-      <Text id="wait-for-transaction">
+      <RimbleText id="wait-for-transaction">
         Click{' '}
         <Link target="_blank" href={`https://${TARGET_NETWORK}.etherscan.io/tx/${transactionId}`}>
           here
         </Link>{' '}
         to follow the progress on etherscan.
-      </Text>
-      <Text>
+      </RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
 
@@ -185,7 +199,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="left" justifyContent="space-between" flexDirection="column">
       <Heading textAlign="center">Deposit Funds</Heading>
 
-      <Text pb={4}>Your deposit transaction failed. Do you want to retry?</Text>
+      <RimbleText pb={4}>Your deposit transaction failed. Do you want to retry?</RimbleText>
 
       <Button onClick={send('USER_APPROVES_RETRY')}>Resubmit transaction</Button>
       <Button.Text onClick={send('USER_REJECTS_RETRY')}>Cancel</Button.Text>
@@ -197,21 +211,21 @@ export const ApproveBudgetAndFund = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit funds</Heading>
 
-      <Text textAlign="center">Waiting for hub to deposit</Text>
-      <Text>
+      <RimbleText textAlign="center">Waiting for hub to deposit</RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
 
   const hubTimeout = (
     <Flex alignItems="center" flexDirection="column">
       <Heading>Deposit Funds</Heading>
-      <Text pb={4} textAlign="center">
+      <RimbleText pb={4} textAlign="center">
         We haven&apos;t heard back from the hub in a bit so something might have gone wrong.
-      </Text>
-      <Text pb={4} textAlign="center">
+      </RimbleText>
+      <RimbleText pb={4} textAlign="center">
         You can click{' '}
         <Link
           target="_blank"
@@ -224,7 +238,7 @@ export const ApproveBudgetAndFund = (props: Props) => {
           {' '}
           github.
         </Link>
-      </Text>
+      </RimbleText>
       <Button
         onClick={() => {
           window.parent.postMessage('SAVE_WEB3_TORRENT_LOGS', '*');

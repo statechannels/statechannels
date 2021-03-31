@@ -3,11 +3,12 @@ import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import React from 'react';
 
-import {renderComponentInFrontOfApp} from './helpers';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {ApplicationWorkflow} from '../application-workflow';
 import {Store} from '../../store';
 import {Application} from '../../workflows';
+
+import {renderComponentInFrontOfApp} from './helpers';
 
 const store = new Store();
 store.initialize(['0x8624ebe7364bb776f891ca339f0aaa820cc64cc9fca6a28eec71e6d8fc950f29']);

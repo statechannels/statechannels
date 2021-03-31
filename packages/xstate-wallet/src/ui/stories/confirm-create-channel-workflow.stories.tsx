@@ -9,6 +9,7 @@ import {workflow, config, WorkflowContext} from '../../workflows/confirm';
 import {logger} from '../../logger';
 import {Store} from '../../store';
 import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
+
 import {renderComponentInFrontOfApp} from './helpers';
 
 const store = new Store();
