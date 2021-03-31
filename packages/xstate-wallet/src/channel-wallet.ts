@@ -208,7 +208,6 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
     // TODO: Figure out how to resolve rendering priorities
-    // TODO: comment back in (maybe?)
     this.renderUI(service);
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
