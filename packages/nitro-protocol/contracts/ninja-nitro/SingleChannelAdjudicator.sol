@@ -314,9 +314,9 @@ contract SingleChannelAdjudicator is
 
         (
             Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete, // TODO return this to allow parent to snip out assetOutcome
+            ,
             uint256[] memory payouts,
-            uint256 totalPayouts // TODO this is probably no longer needed
+
         ) = _computeNewAllocation(initialHoldings, allocation, indices);
 
         // *******
