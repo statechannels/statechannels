@@ -20,6 +20,8 @@ import {
   Address
 } from '@statechannels/wallet-core';
 import {Dictionary} from '@statechannels/wallet-core/node_modules/@types/lodash';
+import ReactDOM from 'react-dom';
+import React from 'react';
 
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {AppRequestEvent} from './event-types';
@@ -34,6 +36,7 @@ import {
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
 import {ChainWatcher, ChannelChainInfo} from './chain';
+import {Wallet as WalletUi} from './ui/wallet';
 
 export interface Workflow {
   id: string;
@@ -206,21 +209,21 @@ export class ChannelWallet {
       .start();
     // TODO: Figure out how to resolve rendering priorities
     // TODO: comment back in (maybe?)
-    //this.renderUI(service);
+    this.renderUI(service);
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
     return workflow;
   }
 
-  // private renderUI(machine) {
-  //   if (document.getElementById('root')) {
-  //     ReactDOM.render(
-  //       React.createElement(WalletUi, {workflow: machine}),
-  //       document.getElementById('root')
-  //     );
-  //   }
-  // }
+  private renderUI(machine) {
+    if (document.getElementById('root')) {
+      ReactDOM.render(
+        React.createElement(WalletUi, {workflow: machine}),
+        document.getElementById('root')
+      );
+    }
+  }
 
   public onSendMessage(
     callback: (
