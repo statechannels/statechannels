@@ -275,10 +275,24 @@ contract SingleChannelAdjudicator is
                         indices
                     )
                 );
+                outcome[i] = Outcome.OutcomeItem(
+                    outcome[i].assetHolderAddress,
+                    abi.encode(assetOutcome)
+                );
             } else {
                 revert('AssetOutcome not an allocation');
             }
         }
+
+        statusOf[fromChannelId] = _generateStatus(
+            ChannelData(
+                turnNumRecord,
+                finalizesAt,
+                stateHash,
+                challengerAddress,
+                keccak256(abi.encode(outcome))
+            )
+        );
     }
 
     /**
