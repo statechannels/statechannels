@@ -55,9 +55,9 @@ contract AdjudicatorFactory {
         uint8 numStates,
         uint8[] memory whoSignedWhat,
         SingleChannelAdjudicator.Signature[] memory sigs
-    ) public returns (address channel) {
-        channel = _deployChannelProxy(channelId);
-        SingleChannelAdjudicator(channel).concludePushOutcomeAndTransferAll(
+    ) public {
+        address channel = _deployChannelProxy(channelId);
+        SingleChannelAdjudicator(channel).concludeAndTransferAll(
             largestTurnNum,
             fixedPart,
             appPartHash,
