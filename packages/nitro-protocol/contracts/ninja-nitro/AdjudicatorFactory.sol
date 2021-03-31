@@ -66,7 +66,6 @@ contract AdjudicatorFactory {
             whoSignedWhat,
             sigs
         );
-        emit ChannelCreation(channel);
     }
 
     ////////////////////////////////////////
