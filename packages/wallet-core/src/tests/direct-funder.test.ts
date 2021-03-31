@@ -226,7 +226,107 @@ test('pure objective cranker', () => {
     },
     []
   );
+  const finalFundingEvent: OpenChannelEvent = {
+    type: 'FundingUpdated',
+    amount: currentState.B.funding.amount,
+    finalized: true
+  };
 
+  // 8. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
+  output = crankAndExpect(
+    'B',
+    currentState,
+    finalFundingEvent,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(3), finalized: true},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: [{signer: participants.B.signingAddress}]}
+    },
+    [{type: 'sendMessage', message: {recipient: 'alice'}}]
+  );
+  const bobsPostFS = output.actions[0];
+
+  // 9. Alice receives deposit action 2 (FINALIZED), triggers postFS action 2
+  output = crankAndExpect(
+    'A',
+    currentState,
+    finalFundingEvent,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(3), finalized: true},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: [{signer: participants.A.signingAddress}]}
+    },
+    [{type: 'sendMessage', message: {recipient: 'bob'}}]
+  );
+  const alicesPostFS = output.actions[0];
+
+  // 10. Alice receives postFS event 1, is finished
+  output = crankAndExpect(
+    'A',
+    currentState,
+    bobsPostFS,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(3), finalized: true},
+      fundingRequests: [],
+      postFS: {
+        hash: richPostFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      }
+    },
+    []
+  );
+
+  // 11. Bob receives postFS event 1, is finished
+  output = crankAndExpect(
+    'B',
+    currentState,
+    alicesPostFS,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(3), finalized: true},
+      fundingRequests: [],
+      postFS: {
+        hash: richPostFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      }
+    },
+    []
+  );
+
+  // To satisfy a jest ts-lint rule, we need to put a token expectation within the test block
   expect(output).toBeDefined();
 });
 
