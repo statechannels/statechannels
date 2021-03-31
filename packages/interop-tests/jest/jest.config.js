@@ -8,6 +8,9 @@ module.exports = {
   transform: {'^.+\\.ts$': 'ts-jest'},
   transformIgnorePatterns: ['[/\\\\]node_modules[/\\\\].+\\.(js|ts)$'],
   moduleFileExtensions: ['ts', 'js', 'json', 'node'],
+  moduleNameMapper: {
+    '.(scss|svg)$': 'identity-obj-proxy'
+  },
   globals: {'ts-jest': {tsconfig: './tsconfig.json'}},
   globalSetup: '<rootDir>/jest/chain-setup.ts',
   globalTeardown: '<rootDir>/jest/test-teardown.ts'
