@@ -1,6 +1,8 @@
 import React from 'react';
 import {Route, Switch, BrowserRouter} from 'react-router-dom';
+
 import {ChannelWallet} from '../channel-wallet';
+
 import {FactoryReset} from './factory-reset';
 
 enum RoutePath {

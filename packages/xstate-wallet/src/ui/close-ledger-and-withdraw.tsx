@@ -2,13 +2,14 @@ import React from 'react';
 import './wallet.scss';
 import {useService} from '@xstate/react';
 import {utils} from 'ethers';
-
-import {Button, Heading, Flex, Text, Link, Loader} from 'rimble-ui';
+import {Button, Heading, Flex, Text as RimbleText, Link, Loader} from 'rimble-ui';
 import {DomainBudget, BN} from '@statechannels/wallet-core';
+
 import {track} from '../segment-analytics';
-import {getAmountsFromBudget} from './selectors';
 import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
 import {TARGET_NETWORK} from '../config';
+
+import {getAmountsFromBudget} from './selectors';
 
 interface Props {
   service: CloseLedgerAndWithdrawService;
@@ -32,14 +33,14 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
         <Heading textAlign="center" as="h4" mt={0} mb={2}>
           {budget.domain}
         </Heading>
-        <Text fontSize={1} pb={2}>
+        <RimbleText fontSize={1} pb={2}>
           Close your hub connection with <strong>{budget.domain}</strong> and withdraw your funds?
-        </Text>
+        </RimbleText>
 
-        <Text pb={3} fontSize={1}>
+        <RimbleText pb={3} fontSize={1}>
           You will receive {utils.formatEther(BN.from(playerAmount))} ETH and the budget will be
           closed with the channel hub.
-        </Text>
+        </RimbleText>
         <Button disabled={waiting} onClick={send('USER_APPROVES_CLOSE')} id="approve-withdraw">
           Close and Withdraw
         </Button>
@@ -52,18 +53,18 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Withdraw funds</Heading>
 
-      <Text textAlign="center">Communicating with the hub</Text>
-      <Text>
+      <RimbleText textAlign="center">Communicating with the hub</RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
   const working = (
     <Flex alignItems="center" flexDirection="column">
       <Heading>Withdraw funds</Heading>
 
-      <Text textAlign="center">Working...</Text>
+      <RimbleText textAlign="center">Working...</RimbleText>
     </Flex>
   );
 
@@ -71,7 +72,7 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Withdraw funds</Heading>
 
-      <Text textAlign="center">Please approve the transaction in metamask</Text>
+      <RimbleText textAlign="center">Please approve the transaction in metamask</RimbleText>
     </Flex>
   );
 
@@ -79,19 +80,19 @@ export const CloseLedgerAndWithdraw = (props: Props) => {
     <Flex alignItems="center" flexDirection="column">
       <Heading>Withdraw funds</Heading>
 
-      <Text pb={2}>Waiting for your transaction to be mined.</Text>
+      <RimbleText pb={2}>Waiting for your transaction to be mined.</RimbleText>
 
-      <Text id="wait-for-transaction">
+      <RimbleText id="wait-for-transaction">
         Click{' '}
         <Link target="_blank" href={`https://${TARGET_NETWORK}.etherscan.io/tx/${transactionId}`}>
           here
         </Link>{' '}
         to follow the progress on etherscan.
-      </Text>
-      <Text>
+      </RimbleText>
+      <RimbleText>
         <br></br>
         <Loader color="#2728e2" size="60px" />
-      </Text>
+      </RimbleText>
     </Flex>
   );
 

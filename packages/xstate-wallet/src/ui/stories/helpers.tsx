@@ -1,14 +1,14 @@
 import React from 'react';
+import {Image as RimbleImage} from 'rimble-ui';
 
 import fakeApp from '../../images/fake-app.png';
-import {Image} from 'rimble-ui';
 import {Layout} from '../layout';
 
 export function renderComponentInFrontOfApp(component) {
   function renderFunction() {
     return (
       <div>
-        <Image src={fakeApp} />
+        <RimbleImage src={fakeApp} />
         <Layout>{component}</Layout>
       </div>
     );
