@@ -1,6 +1,8 @@
 import {Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import {Logger} from 'pino';
+import delay from 'delay';
+import {AbortController} from 'abort-controller';
 
 import {Engine} from '..';
 
@@ -27,9 +29,10 @@ export class TestMessageService implements MessageServiceInterface {
   private _handleMessages: (messages: Message[]) => Promise<void>;
   private _options: LatencyOptions;
 
-  private _timeouts: NodeJS.Timeout[] = [];
-
   protected _destroyed = false;
+
+  /* This is used to signal the delay function to abort */
+  protected _abortController: AbortController;
   /**
    * Creates a test message service that can be used in tets
    * @param incomingMessageHandler The message handler to use
@@ -39,7 +42,7 @@ export class TestMessageService implements MessageServiceInterface {
    */
   protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
     this._options = {dropRate: 0, meanDelay: undefined};
-
+    this._abortController = new AbortController();
     this._handleMessages = async messages => {
       for (const message of messages) {
         // This prevents triggering messages after the service is destroyed
@@ -65,20 +68,17 @@ export class TestMessageService implements MessageServiceInterface {
     if (!shouldDrop) {
       const {meanDelay} = this._options;
       if (meanDelay) {
-        const delay = meanDelay / 2 + Math.random() * meanDelay;
-        this._timeouts.push(setTimeout(async () => await this._handleMessages(messages), delay));
-      } else {
-        await this._handleMessages(messages);
+        const delayAmount = meanDelay / 2 + Math.random() * meanDelay;
+
+        await delay(delayAmount, {signal: this._abortController.signal});
       }
+      await this._handleMessages(messages);
     }
   }
 
   async destroy(): Promise<void> {
+    this._abortController.abort();
     this._destroyed = true;
-    // This prevents any more progress from being made
-    this._handleMessages = async () => _.noop();
-
-    this._timeouts.forEach(t => t.unref());
   }
 }
 
