@@ -30,7 +30,7 @@ test('pure objective cranker', () => {
     type: 'SimpleAllocation',
     allocationItems: [
       {destination: participantA.destination, amount: BN.from(1)},
-      {destination: participantB.destination, amount: BN.from(1)}
+      {destination: participantB.destination, amount: BN.from(2)}
     ],
     assetHolderAddress: makeAddress(AddressZero) // must be even length
   };
@@ -183,16 +183,62 @@ test('pure objective cranker', () => {
       fundingRequests: [],
       postFS: {hash: richPostFS.stateHash, signatures: []}
     },
-    [{type: 'deposit', amount: BN.from(1)}]
+    [{type: 'deposit', amount: BN.from(2)}]
+  );
+  const bobsDeposit = output.actions[0];
+
+  // 6. Bob receives deposit action 2 (UNFINALIZED)
+  output = crankAndExpect(
+    'B',
+    currentState,
+    bobsDeposit,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(3), finalized: false},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
+    },
+    []
+  );
+
+  // 7. Alice receives deposit action 2 (UNFINALIZED)
+  output = crankAndExpect(
+    'A',
+    currentState,
+    bobsDeposit,
+    {
+      preFS: {
+        hash: richPreFS.stateHash,
+        signatures: [
+          {signer: participants.A.signingAddress},
+          {signer: participants.B.signingAddress}
+        ]
+      },
+      funding: {amount: BN.from(3), finalized: false},
+      fundingRequests: [],
+      postFS: {hash: richPostFS.stateHash, signatures: []}
+    },
+    []
   );
 
   expect(output).toBeDefined();
 });
 
-function generateEvent(action: Action): OpenChannelEvent {
+function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
   switch (action.type) {
     case 'deposit':
-      return {type: 'FundingUpdated', amount: action.amount, finalized: false};
+      // Assume no chain re-orgs
+      return {
+        type: 'FundingUpdated',
+        amount: BN.add(action.amount, objective.funding.amount),
+        finalized: false
+      };
     case 'sendMessage':
       return {type: 'MessageReceived', message: action.message.message};
     default:
@@ -209,7 +255,7 @@ function crankAndExpect(
 ): OpenChannelResult {
   const event =
     actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
-      ? generateEvent(actionOrEvent)
+      ? generateEvent(actionOrEvent, currentState[peer])
       : actionOrEvent;
   const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
   expect(output).toMatchObject({objective, actions});
