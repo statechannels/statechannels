@@ -240,12 +240,22 @@ contract SingleChannelAdjudicator is
      */
     function transfer(
         bytes32 fromChannelId,
+        uint48 turnNumRecord,
+        uint48 finalizesAt,
+        bytes32 stateHash,
+        address challengerAddress,
         bytes calldata outcomeBytes,
         uint256[] memory indices
     ) external {
         // checks
         _requireIncreasingIndices(indices);
-        _requireCorrectOutcomeHash(fromChannelId, outcomeBytes);
+
+        bytes32 outcomeHash = keccak256(outcomeBytes);
+        _requireMatchingStorage(
+            ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash),
+            fromChannelId
+        );
+
         // effects and interactions
 
         // loop over tokens
@@ -397,27 +407,6 @@ contract SingleChannelAdjudicator is
     // **************
     // Requirers
     // **************
-
-    function _requireCorrectOutcomeHash(bytes32 channelId, bytes memory outcomeBytes)
-        internal
-        view
-    {
-        // TODO
-        // Getting this to work will require passing in the challengerAddress and stateHash
-        // a la NitroAdjudicator.pushOutcome
-        // require(
-        //     assetOutcomeHashes[channelId] ==
-        //         keccak256(
-        //             abi.encode(
-        //                 Outcome.AssetOutcome(
-        //                     uint8(Outcome.AssetOutcomeType.Allocation),
-        //                     allocationBytes
-        //                 )
-        //             )
-        //         ),
-        //     'h(allocation)!=assetOutcomeHash'
-        // );
-    }
 
     function _transferAsset(
         address assetHolderAddress,

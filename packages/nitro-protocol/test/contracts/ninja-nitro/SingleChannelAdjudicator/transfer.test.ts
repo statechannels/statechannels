@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber, utils, Wallet, constants} from 'ethers';
 
-import {getFixedPart, hashAppPart, State} from '../../../../src/contract/state';
+import {getFixedPart, hashAppPart, hashState, State} from '../../../../src/contract/state';
 
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
@@ -58,7 +58,7 @@ beforeAll(async () => {
   );
 });
 
-const reason0 = 'h(outcome)!=outcomeHash';
+const reason0 = 'status(ChannelData)!=storage';
 const reason1 = 'Indices must be sorted';
 
 // c is the channel we are transferring from.
@@ -131,7 +131,8 @@ describe('transfer', () => {
 
       await (await AdjudicatorFactory.createChannel(channelId)).wait();
 
-      console.log('created channel ');
+      const turnNumRecord = 5;
+
       // CONCLUDE CHANNEL
       const states: State[] = [
         {
@@ -141,27 +142,31 @@ describe('transfer', () => {
           appDefinition: constants.AddressZero,
           appData: '0x',
           challengeDuration: 0x1000,
-          turnNum: 5,
+          turnNum: turnNumRecord,
         },
       ];
+
       const sigs = [
         signState(states[0], wallets[0].privateKey).signature,
         signState(states[0], wallets[1].privateKey).signature,
       ];
-      console.log('signed states');
-      await (
-        await SingleChannelAdjudicator.conclude(
-          5,
-          getFixedPart(states[0]),
-          hashAppPart(states[0]),
-          hashOutcome(outcome),
-          1,
-          [0, 0],
-          sigs
-        )
-      ).wait();
 
-      console.log('concluded');
+      let blockNumber = 0;
+      if (Object.keys(setOutcome).length > 0) {
+        ({blockNumber} = await (
+          await SingleChannelAdjudicator.conclude(
+            turnNumRecord,
+            getFixedPart(states[0]),
+            hashAppPart(states[0]),
+            hashOutcome(outcome),
+            1,
+            [0, 0],
+            sigs
+          )
+        ).wait());
+      }
+
+      const finalizesAt = (await provider.getBlock(blockNumber)).timestamp;
 
       const balancesBefore: Record<string, BigNumber> = {};
       Object.keys(payouts).forEach(async key => {
@@ -170,7 +175,15 @@ describe('transfer', () => {
 
       // TRANSFER FROM CHANNEl
 
-      const tx = SingleChannelAdjudicator.transfer(channelId, encodeOutcome(outcome), indices);
+      const tx = SingleChannelAdjudicator.transfer(
+        channelId,
+        0, // when collaboratively concluding, turnNumRecord is set to zero
+        finalizesAt,
+        constants.HashZero, // when collaboratively concluding, stateHash is set to zero
+        constants.AddressZero, // when collaboratively concluding, challengerAddress is set to zero
+        encodeOutcome(outcome),
+        indices
+      );
       // Call method in a slightly different way if expecting a revert
       if (reason) {
         await expectRevert(() => tx, reason);
