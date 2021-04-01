@@ -16,13 +16,8 @@ module.exports = {
   overrides: [
     {
       // process.env allowed in tests
-      files: ['*.test.ts'],
+      files: ['*.test.ts', 'src/config.ts'],
       rules: {'no-process-env': 'off'}
     },
-    {
-      // process.env allowed in src/config.js
-      files: ['src/config.ts'],
-      rules: {'no-process-env': 'off'}
-    }
   ]
 };
