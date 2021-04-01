@@ -353,6 +353,70 @@ contract SingleChannelAdjudicator is
         }
     }
 
+    function _computeNewAllocationWithGuarantee(
+        uint256 initialHoldings,
+        Outcome.AllocationItem[] memory allocation,
+        uint256[] memory indices,
+        Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
+    )
+        public
+        pure
+        returns (
+            Outcome.AllocationItem[] memory newAllocation,
+            bool safeToDelete,
+            uint256[] memory payouts,
+            uint256 totalPayouts
+        )
+    {
+        // `indices == []` means "pay out to all"
+        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
+        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
+        totalPayouts = 0;
+        newAllocation = new Outcome.AllocationItem[](allocation.length);
+        safeToDelete = true; // switched to false if there is an item remaining with amount > 0
+        uint256 surplus = initialHoldings; // tracks funds available during calculation
+        uint256 k = 0; // indexes the `indices` array
+
+        // copy allocation
+        for (uint256 i = 0; i < allocation.length; i++) {
+            newAllocation[i].destination = allocation[i].destination;
+            newAllocation[i].amount = allocation[i].amount;
+        }
+
+        // for each guarantee destination
+        for (uint256 j = 0; j < guarantee.destinations.length; j++) {
+            if (surplus == 0) break;
+            for (uint256 i = 0; i < newAllocation.length; i++) {
+                if (surplus == 0) break;
+                // search for it in the allocation
+                if (guarantee.destinations[j] == newAllocation[i].destination) {
+                    // if we find it, compute new amount
+                    uint256 affordsForDestination = min(allocation[i].amount, surplus);
+                    // decrease surplus by the current amount regardless of hitting a specified index
+                    surplus -= affordsForDestination;
+                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
+                        // only if specified in supplied indices, or we if we are doing "all"
+                        // reduce the new allocationItem.amount
+                        newAllocation[i].amount -= affordsForDestination;
+                        // increase the relevant payout
+                        payouts[k] += affordsForDestination;
+                        totalPayouts += affordsForDestination;
+                        // move on to the next supplied index
+                        ++k;
+                    }
+                    break; // start again with the next guarantee destination
+                }
+            }
+        }
+
+        for (uint256 i = 0; i < allocation.length; i++) {
+            if (newAllocation[i].amount != 0) {
+                safeToDelete = false;
+                break;
+            }
+        }
+    }
+
     // /**
     //  * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
     //  * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
