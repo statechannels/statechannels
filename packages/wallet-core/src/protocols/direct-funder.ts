@@ -75,10 +75,12 @@ export type OpenChannelResult = {
  * re-trigger.
  */
 export function openChannelCranker(
-  objective: OpenChannelObjective,
+  currentObjectiveState: OpenChannelObjective,
   event: OpenChannelEvent,
   myPrivateKey: string
 ): OpenChannelResult {
+  const objective = _.cloneDeep(currentObjectiveState);
+
   const {participants} = objective.openingState;
   const me = participants[objective.myIndex];
 
