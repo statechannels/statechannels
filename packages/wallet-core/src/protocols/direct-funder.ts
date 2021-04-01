@@ -14,7 +14,15 @@ export type OpenChannelEvent =
 
 type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
+export enum WaitingFor {
+  theirPreFundSetup = 'DirectFunder.theirPreFundSetup',
+  safeToDeposit = 'DirectFunder.safeToDeposit',
+  channelFunded = 'DirectFunder.channelFunded',
+  theirPostFundState = 'DirectFunder.theirPostFundSetup'
+}
+
 export type OpenChannelObjective = {
+  status: WaitingFor | 'success' | 'error';
   channelId: string;
   openingState: State;
   myIndex: number;
@@ -33,8 +41,6 @@ export type Action =
   | {type: 'deposit'; amount: Uint256};
 
 export type OpenChannelResult = {
-  // TODO: The statuses could be named, like "waitingForDeposit", "waitingForPostFS", etc.
-  status: 'inProgress' | 'success' | 'error';
   objective: OpenChannelObjective;
   actions: Action[];
 };
@@ -117,7 +123,8 @@ export function openChannelCranker(
   }
 
   if (!completed(objective, 'preFS')) {
-    return {status: 'inProgress', objective, actions};
+    objective.status = WaitingFor.theirPreFundSetup;
+    return {objective, actions};
   }
 
   // Mostly copied from server-wallet/src/protocols/direct-funder
@@ -134,22 +141,26 @@ export function openChannelCranker(
   }
   // if it isn't my turn yet, take no action
   else if (BN.lt(funding.amount, targetBefore)) {
-    return {status: 'inProgress', objective, actions};
+    objective.status = WaitingFor.safeToDeposit;
+    return {objective, actions};
   }
   // if my deposit is already on chain, take no action
   else if (BN.gte(funding.amount, targetAfter)) {
-    return {status: 'inProgress', objective, actions};
+    objective.status = WaitingFor.channelFunded;
+    return {objective, actions};
   }
   // if there's an outstanding chain request, take no action
   // TODO: (ChainService) This assumes that each participant deposits exactly once per channel
   else if (objective.fundingRequests.length === 1) {
     // TODO: (ChainService) This should handle timed out funding requests
-    return {status: 'inProgress', objective, actions};
+    objective.status = WaitingFor.channelFunded;
+    return {objective, actions};
   } else {
     // otherwise, deposit
     const amount = BN.sub(targetAfter, funding.amount); // previous checks imply this is >0
     actions.push({type: 'deposit', amount});
-    return {status: 'inProgress', objective, actions};
+    objective.status = WaitingFor.channelFunded;
+    return {objective, actions};
   }
 
   // Now that
@@ -158,9 +169,11 @@ export function openChannelCranker(
   }
 
   if (!completed(objective, 'postFS')) {
-    return {status: 'inProgress', objective, actions};
+    objective.status = WaitingFor.theirPostFundState;
+    return {objective, actions};
   } else {
-    return {status: 'success', objective, actions};
+    objective.status = 'success';
+    return {objective, actions};
   }
 }
 

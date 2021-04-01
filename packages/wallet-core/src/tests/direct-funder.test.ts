@@ -9,7 +9,8 @@ import {
   openChannelCranker,
   OpenChannelEvent,
   OpenChannelObjective,
-  OpenChannelResult
+  OpenChannelResult,
+  WaitingFor
 } from '../protocols/direct-funder';
 import {Address, makeAddress, SimpleAllocation, State} from '../types';
 
@@ -53,6 +54,7 @@ test('pure objective cranker', () => {
   const initial: OpenChannelObjective = {
     channelId,
     openingState,
+    status: WaitingFor.theirPreFundSetup,
     myIndex: 0,
     preFS: {hash: richPreFS.stateHash, signatures: []},
     funding: {amount: BN.from(0), finalized: true},
@@ -94,6 +96,7 @@ test('pure objective cranker', () => {
     currentState,
     nullEvent,
     {
+      status: WaitingFor.theirPreFundSetup,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [{signer: participants.A.signingAddress}]
@@ -111,6 +114,7 @@ test('pure objective cranker', () => {
     currentState,
     output.actions[0],
     {
+      status: WaitingFor.safeToDeposit,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -131,6 +135,7 @@ test('pure objective cranker', () => {
     currentState,
     output.actions[0],
     {
+      status: WaitingFor.channelFunded,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -152,6 +157,7 @@ test('pure objective cranker', () => {
     currentState,
     alicesDeposit,
     {
+      status: WaitingFor.channelFunded,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -172,6 +178,7 @@ test('pure objective cranker', () => {
     currentState,
     alicesDeposit,
     {
+      status: WaitingFor.channelFunded,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -193,6 +200,7 @@ test('pure objective cranker', () => {
     currentState,
     bobsDeposit,
     {
+      status: WaitingFor.channelFunded,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -213,6 +221,7 @@ test('pure objective cranker', () => {
     currentState,
     bobsDeposit,
     {
+      status: WaitingFor.channelFunded,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -238,6 +247,7 @@ test('pure objective cranker', () => {
     currentState,
     finalFundingEvent,
     {
+      status: WaitingFor.theirPostFundState,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -259,6 +269,7 @@ test('pure objective cranker', () => {
     currentState,
     finalFundingEvent,
     {
+      status: WaitingFor.theirPostFundState,
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -280,6 +291,7 @@ test('pure objective cranker', () => {
     currentState,
     bobsPostFS,
     {
+      status: 'success',
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
@@ -306,6 +318,7 @@ test('pure objective cranker', () => {
     currentState,
     alicesPostFS,
     {
+      status: 'success',
       preFS: {
         hash: richPreFS.stateHash,
         signatures: [
