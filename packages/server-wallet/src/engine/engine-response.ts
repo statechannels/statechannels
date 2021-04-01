@@ -76,6 +76,27 @@ export class EngineResponse {
   }
 
   /**
+   * Queues direct funder message for sending to opponent
+   */
+  queueDirectFunderMessage(state: SignedState, myIndex: number, channelId?: string): void {
+    //  TODO (DirectFunder) This function should be removed
+    const myParticipantId = state.participants[myIndex].participantId;
+    state.participants.forEach((p, i) => {
+      if (i !== myIndex) {
+        this.queuedMessages.push(
+          serializeMessage(
+            WALLET_VERSION,
+            {walletVersion: WALLET_VERSION, directFunderMessage: [state]},
+            p.participantId,
+            myParticipantId,
+            channelId
+          )
+        );
+      }
+    });
+  }
+
+  /**
    * Queues an objective to be sent to the opponent
    */
   queueSendObjective(
