@@ -144,6 +144,13 @@ try{
   await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
   await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
   } catch (error) {
+    if (error.message==='aborted'){
+      // When we destroy the engines there still may open knex connections due to our use of delay in the TestMessageService
+      // These throw an abort error that can make the test output messy
+      // We just swallow the error here to avoid it
+      logger.trace({error},'Ignoring knex aborted error');
+      return;
+    }
       logger.error(error, 'peersTeardown failed');
       throw error;
     }
