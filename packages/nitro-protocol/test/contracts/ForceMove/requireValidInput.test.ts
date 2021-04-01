@@ -1,4 +1,4 @@
-import {Contract} from 'ethers';
+import {Contract, Wallet} from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import {getTestProvider, setupContracts} from '../../test-helpers';

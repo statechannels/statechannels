@@ -158,7 +158,7 @@
     "build:netlify:production": "yarn prepare && cp _redirects build/_redirects",
     "generateConfigs": "yarn run ts-node bin/generateConfigs.ts",
     "lint:check": "eslint . --ext .ts,.tsx --cache",
-    "lint:write": "eslint . --ext .ts,.tsx --fix",
+    "lint:write": "eslint . --ext .ts --fix",
     "prepare:web": "yarn node scripts/build.js && yarn build-storybook",
     "prepare": "yarn tsc",
     "release:netlify:production": "netlify deploy --site $XSTATE_WALLET_NETLIFY_ID --dir=build",

@@ -22,7 +22,7 @@ import {computeNewAllocation} from '../../../src/contract/asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
-    ? [...Array(numAllocationItems)].map(() => ({
+    ? [...Array(numAllocationItems)].map(e => ({
         destination: randomExternalDestination(),
         amount: BigNumber.from(Math.ceil(Math.random() * 10)).toHexString(),
       }))

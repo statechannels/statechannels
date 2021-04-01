@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber} from 'ethers';
+import {Contract, BigNumber, utils} from 'ethers';
+import {defaultAbiCoder} from 'ethers/lib/utils';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {
@@ -57,7 +58,7 @@ describe('transferAll (using transfer and empty indices array)', () => {
     ${'12. -> 2 chan   full/partial'} | ${{c: 3}}  | ${{C: 2, X: 2}} | ${{C: 0, X: 1}} | ${{c: 0, C: 2, X: 1}} | ${{}}           | ${undefined}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts, events: $events`,
-    async ({name, heldBefore, setOutcome, newOutcome, heldAfter, reason}) => {
+    async ({name, heldBefore, setOutcome, newOutcome, heldAfter, payouts, reason}) => {
       // Compute channelId
       const nonce = getRandomNonce(name);
       const channelId = randomChannelId(nonce);
@@ -68,6 +69,7 @@ describe('transferAll (using transfer and empty indices array)', () => {
       setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
       newOutcome = replaceAddressesAndBigNumberify(newOutcome, addresses);
       heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
+      payouts = replaceAddressesAndBigNumberify(payouts, addresses);
 
       // Reset the holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {

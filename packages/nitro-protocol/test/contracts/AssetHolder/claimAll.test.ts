@@ -1,11 +1,12 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber} from 'ethers';
+import {Contract, BigNumber, utils} from 'ethers';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
   AssetOutcomeShortHand,
+  compileEventsFromLogs,
   getRandomNonce,
   getTestProvider,
   guaranteeToParams,
