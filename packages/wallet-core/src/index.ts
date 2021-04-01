@@ -8,3 +8,5 @@ export * from './serde/app-messages/deserialize';
 export * from './serde/app-messages/serialize';
 export * from './serde/wire-format/deserialize';
 export * from './serde/wire-format/serialize';
+
+export {DirectFunder} from './protocols';
