@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import * as _ from 'lodash';
 
 import {unreachable} from '../utils';
-import {addHash} from '../state-utils';
+import {addHash, calculateChannelId, createSignatureEntry, signState} from '../state-utils';
 import {BN} from '../bignumber';
 import {
   Action,
@@ -20,47 +20,49 @@ const {A: participantA, B: participantB} = participants;
 const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
 
-let channelId: string;
 type Peer = 'A' | 'B';
 type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
 
+const outcome: SimpleAllocation = {
+  type: 'SimpleAllocation',
+  allocationItems: [
+    {destination: participantA.destination, amount: BN.from(1)},
+    {destination: participantB.destination, amount: BN.from(2)}
+  ],
+  assetHolderAddress: makeAddress(AddressZero) // must be even length
+};
+
+const openingState: State = {
+  participants: [participantA, participantB],
+  chainId: '0x01',
+  challengeDuration: ONE_DAY,
+  channelNonce: 0,
+  appDefinition: ethers.constants.AddressZero as Address,
+  appData: makeAddress(AddressZero), // must be even length
+  turnNum: 0,
+  outcome,
+  isFinal: false
+};
+
+const channelId = calculateChannelId(openingState);
+
+const richPreFS = addHash(openingState);
+const richPostFS = addHash({...openingState, turnNum: 3});
+
+const initial: OpenChannelObjective = {
+  channelId,
+  openingState,
+  status: WaitingFor.theirPreFundSetup,
+  myIndex: 0,
+  preFS: {hash: richPreFS.stateHash, signatures: []},
+  funding: {amount: BN.from(0), finalized: true},
+  fundingRequests: [],
+  postFS: {hash: richPostFS.stateHash, signatures: []}
+};
+
 test('pure objective cranker', () => {
-  const outcome: SimpleAllocation = {
-    type: 'SimpleAllocation',
-    allocationItems: [
-      {destination: participantA.destination, amount: BN.from(1)},
-      {destination: participantB.destination, amount: BN.from(2)}
-    ],
-    assetHolderAddress: makeAddress(AddressZero) // must be even length
-  };
-
-  const openingState: State = {
-    participants: [participantA, participantB],
-    chainId: '0x01',
-    challengeDuration: ONE_DAY,
-    channelNonce: 0,
-    appDefinition: ethers.constants.AddressZero as Address,
-    appData: makeAddress(AddressZero), // must be even length
-    turnNum: 0,
-    outcome,
-    isFinal: false
-  };
-
-  const richPreFS = addHash(openingState);
-  const richPostFS = addHash({...openingState, turnNum: 3});
-
-  const initial: OpenChannelObjective = {
-    channelId,
-    openingState,
-    status: WaitingFor.theirPreFundSetup,
-    myIndex: 0,
-    preFS: {hash: richPreFS.stateHash, signatures: []},
-    funding: {amount: BN.from(0), finalized: true},
-    fundingRequests: [],
-    postFS: {hash: richPostFS.stateHash, signatures: []}
-  };
   const currentState = {
     A: _.cloneDeep(initial),
     B: _.cloneDeep({...initial, myIndex: 1})
@@ -341,6 +343,31 @@ test('pure objective cranker', () => {
 
   // To satisfy a jest ts-lint rule, we need to put a token expectation within the test block
   expect(output).toBeDefined();
+});
+
+describe('error modes', () => {
+  test('receiving a signature from a non-participant', () => {
+    const signatures = [{signature: 'a signature', signer: participants.H.signingAddress}];
+    const signedStates = [{...openingState, signatures}];
+    expect(() =>
+      openChannelCranker(
+        initial,
+        {type: 'MessageReceived', message: {signedStates}},
+        participants.A.privateKey
+      )
+    ).toThrow('received a signature from a non-participant');
+  });
+
+  test('receiving an unexpected state', () => {
+    const signedStates = [{...openingState, signatures: [], turnNum: 4}];
+    expect(() =>
+      openChannelCranker(
+        initial,
+        {type: 'MessageReceived', message: {signedStates}},
+        participants.A.privateKey
+      )
+    ).toThrow('Unexpected state hash');
+  });
 });
 
 function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
