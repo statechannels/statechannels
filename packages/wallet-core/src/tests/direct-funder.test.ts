@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import * as _ from 'lodash';
 
 import {unreachable} from '../utils';
-import {addHash, calculateChannelId, createSignatureEntry, signState} from '../state-utils';
+import {addHash, calculateChannelId} from '../state-utils';
 import {BN} from '../bignumber';
 import {
   Action,
