@@ -172,7 +172,7 @@ export function openChannelCranker(
     return {objective, actions};
   }
 
-  // Now that
+  // Now that the channel is funded, it's safe to sign the postFS
   if (!signedbyMe(objective, 'postFS', me.signingAddress)) {
     signStateAction('postFS', myPrivateKey, objective, actions);
   }
