@@ -22,7 +22,8 @@ import {
   SimpleAllocation,
   SignatureEntry,
   makeAddress,
-  Address
+  Address,
+  Hashed
 } from './types';
 import {BN} from './bignumber';
 
@@ -242,3 +243,8 @@ export function nextState(state: State, outcome: Outcome): State {
 
   return {...state, turnNum: state.turnNum + 1, outcome};
 }
+
+export const addHash = <T extends State = State>(s: T): T & Hashed => ({
+  ...s,
+  stateHash: hashState(s)
+});
