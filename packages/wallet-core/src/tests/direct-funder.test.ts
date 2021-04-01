@@ -6,6 +6,7 @@ import {addHash, calculateChannelId, createSignatureEntry} from '../state-utils'
 import {BN} from '../bignumber';
 import {
   Action,
+  initialize,
   openChannelCranker,
   OpenChannelEvent,
   OpenChannelObjective,
@@ -94,6 +95,23 @@ const initial: OpenChannelObjective = {
   fundingRequests: [],
   postFundSetup: richPostFS.signedBy()
 };
+
+describe('initialization', () => {
+  test('when the opening state makes sense', () => {
+    expect(initialize(openingState, 0)).toMatchObject(initial);
+    expect(initialize(openingState, 1)).toMatchObject({...initial, myIndex: 1});
+  });
+
+  test('when the index is out of range', () => {
+    expect(() => initialize(openingState, -1)).toThrow('unexpected index');
+    expect(() => initialize(openingState, 0.5)).toThrow('unexpected index');
+    expect(() => initialize(openingState, 2)).toThrow('unexpected index');
+  });
+
+  test('when the opening state has the wrong turn number', () => {
+    expect(() => initialize({...openingState, turnNum: 1}, 0)).toThrow('unexpected state');
+  });
+});
 
 function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
   switch (action.type) {

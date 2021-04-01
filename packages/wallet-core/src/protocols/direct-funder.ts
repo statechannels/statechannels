@@ -40,6 +40,28 @@ export type OpenChannelObjective = {
   postFundSetup: SignedStateHash;
 };
 
+export function initialize(openingState: State, myIndex: number): OpenChannelObjective {
+  if (openingState.turnNum !== 0) {
+    throw 'unexpected state';
+  }
+
+  const allowedIndices = _.range(0, openingState.participants.length);
+  if (!allowedIndices.includes(myIndex)) {
+    throw 'unexpected index';
+  }
+
+  return {
+    channelId: calculateChannelId(openingState),
+    myIndex,
+    openingState,
+    status: WaitingFor.theirPreFundSetup,
+    preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures: []},
+    funding: {amount: BN.from(0), finalized: true},
+    fundingRequests: [],
+    postFundSetup: {hash: hashState(setupState(openingState, Hashes.postFundSetup)), signatures: []}
+  };
+}
+
 export type Action =
   | {type: 'sendMessage'; message: AddressedMessage}
   // TODO: (ChainService) We will need to include more data once this gets hooked up to a chain service
