@@ -121,7 +121,7 @@ export function openChannelCranker(
       objective.funding.finalized = event.finalized;
       break;
     case 'MessageReceived': {
-      const {signedStates} = event.message;
+      const {directFunderMessage: signedStates} = event.message;
 
       // TODO: Assume there's only one signed state
       if (signedStates && signedStates[0]) {
@@ -253,7 +253,7 @@ function signStateAction(
   recipients(objective).map(recipient => {
     const message: Payload = {
       walletVersion: WALLET_VERSION,
-      signedStates: [{...state, signatures: [entry]}]
+      directFunderMessage: [{...state, signatures: [entry]}]
     };
     actions.push({type: 'sendMessage', message: {recipient, message}});
   });

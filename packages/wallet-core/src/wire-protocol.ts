@@ -26,12 +26,3 @@ const guard = <T extends Objective>(name: Objective['type']) => (o: Objective): 
 export const isOpenChannel = guard<OpenChannel>('OpenChannel');
 export const isVirtuallyFund = guard<VirtuallyFund>('VirtuallyFund');
 export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
-
-export interface Message {
-  signedStates?: SignedState[];
-  objectives?: Objective[];
-
-  // TODO (DirectFunder) Remove this later
-  // This is a temporary slot for messages that are exchanged for the pure direct funder.
-  directFunderMessage?: SignedState[];
-}
