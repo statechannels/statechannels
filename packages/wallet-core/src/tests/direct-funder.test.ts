@@ -95,6 +95,40 @@ const initial: OpenChannelObjective = {
   postFundSetup: richPostFS.signedBy()
 };
 
+function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
+  switch (action.type) {
+    case 'deposit':
+      // Assume no chain re-orgs
+      return {
+        type: 'FundingUpdated',
+        amount: BN.add(action.amount, objective.funding.amount),
+        finalized: false
+      };
+    case 'sendMessage':
+      return {type: 'MessageReceived', message: action.message.message};
+    default:
+      return unreachable(action);
+  }
+}
+
+function crankAndExpect(
+  peer: Peer,
+  currentState: Record<Peer, OpenChannelObjective>,
+  actionOrEvent: Action | OpenChannelEvent,
+  objective: DeepPartial<OpenChannelObjective>,
+  actions: DeepPartial<Action>[]
+): OpenChannelResult {
+  const event =
+    actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
+      ? generateEvent(actionOrEvent, currentState[peer])
+      : actionOrEvent;
+  const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
+  expect(output).toMatchObject({objective, actions});
+  currentState[peer] = output.objective;
+
+  return output;
+}
+
 test('pure objective cranker', () => {
   const currentState = {
     A: _.cloneDeep(initial),
@@ -327,37 +361,3 @@ describe('error modes', () => {
     ).toThrow('Unexpected state hash');
   });
 });
-
-function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
-  switch (action.type) {
-    case 'deposit':
-      // Assume no chain re-orgs
-      return {
-        type: 'FundingUpdated',
-        amount: BN.add(action.amount, objective.funding.amount),
-        finalized: false
-      };
-    case 'sendMessage':
-      return {type: 'MessageReceived', message: action.message.message};
-    default:
-      return unreachable(action);
-  }
-}
-
-function crankAndExpect(
-  peer: Peer,
-  currentState: Record<Peer, OpenChannelObjective>,
-  actionOrEvent: Action | OpenChannelEvent,
-  objective: DeepPartial<OpenChannelObjective>,
-  actions: DeepPartial<Action>[]
-): OpenChannelResult {
-  const event =
-    actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
-      ? generateEvent(actionOrEvent, currentState[peer])
-      : actionOrEvent;
-  const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
-  expect(output).toMatchObject({objective, actions});
-  currentState[peer] = output.objective;
-
-  return output;
-}
