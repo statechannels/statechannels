@@ -20,6 +20,14 @@ export const participants = {
     destination: makeDestination(
       '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
     )
+  },
+  H: {
+    privateKey: '0xc9a5f30ceaf2a0ccbb30d50aa9de3f273aa6e76f89e26090c42775e9647f5b6a',
+    signingAddress: makeAddress('0x33335846dd121B14B4C313Cb6b766F09e75890dF'),
+    participantId: 'hub',
+    destination: makeDestination(
+      '0x00000000000000000000000000000000000000000000000000000000000ffff3'
+    )
   }
 };
 
