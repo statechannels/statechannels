@@ -98,12 +98,19 @@ export function openChannelCranker(
         const hash = hashState(signedState);
         const {signatures} = signedState;
 
+        for (const signature of signatures) {
+          if (!participants.find(p => p.signingAddress === signature.signer)) {
+            // TODO: (Errors) Enter an error state here
+            throw new Error('received a signature from a non-participant');
+          }
+        }
+
         if (hash === objective.preFS.hash) {
           objective.preFS.signatures = mergeSignatures(objective.preFS.signatures, signatures);
         } else if (hash === objective.postFS.hash) {
           objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
         } else {
-          // TODO: Enter an error state here
+          // TODO: (Errors) Enter an error state here
           throw new Error(
             `Unexpected state hash ${hash}. Expecting ${objective.preFS.hash} or ${objective.postFS.hash}`
           );
