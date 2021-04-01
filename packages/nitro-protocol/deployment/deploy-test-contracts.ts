@@ -70,22 +70,27 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_NITRO_ADJUDICATOR_ADDRESS,
     TEST_TOKEN_ADDRESS
   );
+
+  // BEGIN Ninja-Nitro section
   const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(adjudicatorFactoryArtifact as any);
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
     singleChannelAdjudicatorArtifact as any,
     {},
-    ADJUDICATOR_FACTORY_ADDRESS
+    ADJUDICATOR_FACTORY_ADDRESS // The mastercopy requires the adjudicator factory address as a constructor arg
+    // It will be "baked into" the bytecode of the Mastercopy
   );
 
+  // The following lines are not strictly part of deployment, but they constiture a crucial one-time setup
+  // for the contracts. The factory needs to know the address of the mastercopy, and this is provided by calling
+  // the setup method on the factory:
   const provider = getTestProvider();
-
   const AdjudicatorFactory = await setupContracts(
     provider,
     adjudicatorFactoryArtifact,
     ADJUDICATOR_FACTORY_ADDRESS
   );
-
   await (await AdjudicatorFactory.setup(SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS)).wait();
+  // END Ninja-Nitro section
 
   return {
     NITRO_ADJUDICATOR_ADDRESS,
