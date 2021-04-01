@@ -1,3 +1,7 @@
+import _ from 'lodash';
+
+import {ObjectiveStatus} from '../models/objective';
+
 export type RetryOptions = {
   /**
    * The number of attempts to make.
@@ -13,14 +17,50 @@ export type RetryOptions = {
    */
   multiple: number;
 };
-export type EnsureResult = 'Complete' | EnsureObjectiveFailed;
+
+export type ObjectiveError = EnsureObjectiveFailed | InternalError;
 
 export type EnsureObjectiveFailed = {
   type: 'EnsureObjectiveFailed';
   numberOfAttempts: number;
 };
 
-export type CreateChannelResult = {
-  done: Promise<EnsureResult>;
+/**
+ * This is the catch-all error that will be returned if some error is thrown and not handled.
+ */
+export type InternalError = {
+  type: 'InternalError';
+  error: Error;
+};
+
+export type ObjectiveSuccess = {type: 'Success'};
+
+export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
+
+/**
+ * TODO: Can the channelId just be on the objective?
+ * Or do we anticipate objectives that cover multiple channels?
+ */
+
+/**
+ * This is what is returned for any objective related API call
+ *
+ */
+export type ObjectiveResult = {
+  /**
+   * A promise that resolves when the objective is fully completed.
+   * This promise will never reject, if an error occurs the promise will return an ObjectiveError
+   */
+  done: Promise<ObjectiveDoneResult>;
+  /**
+   * The current status of the objective.
+   */
+  currentStatus: ObjectiveStatus;
+  /**
+   * The id of the objective.
+   */
+  objectiveId: string;
+
+  // The channelId for the objective
   channelId: string;
 };

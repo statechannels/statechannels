@@ -6,7 +6,7 @@ import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {Engine} from '../engine';
 
-import {RetryOptions, CreateChannelResult, EnsureResult} from './types';
+import {RetryOptions, ObjectiveResult, ObjectiveError, ObjectiveSuccess} from './types';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -40,17 +40,22 @@ export class Wallet {
    */
   public async createChannels(
     channelParameters: CreateChannelParams[]
-  ): Promise<CreateChannelResult[]> {
+  ): Promise<ObjectiveResult[]> {
     return Promise.all(
       channelParameters.map(async p => {
         const createResult = await this._engine.createChannel(p);
+
+        // TODO: Modify engine createChannel API result so objective is already returned
         if (!createResult.newObjective) {
           throw new Error('Missing objective');
         }
-        return {
-          channelId: createResult.channelResult.channelId,
+        const {newObjective, channelResult} = createResult;
 
-          done: this.ensureObjective(createResult.newObjective, getMessages(createResult)),
+        return {
+          channelId: channelResult.channelId,
+          currentStatus: newObjective.status,
+          objectiveId: newObjective.objectiveId,
+          done: this.ensureObjective(newObjective, getMessages(createResult)),
         };
       })
     );
@@ -66,7 +71,7 @@ export class Wallet {
   private async ensureObjective(
     objective: WalletObjective,
     objectiveMessages: Message[]
-  ): Promise<EnsureResult> {
+  ): Promise<ObjectiveSuccess | ObjectiveError> {
     let isComplete = false;
 
     const onObjectiveSucceeded = (o: WalletObjective) => {
@@ -84,7 +89,7 @@ export class Wallet {
 
     const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
     for (let i = 0; i < numberOfAttempts; i++) {
-      if (isComplete) return 'Complete';
+      if (isComplete) return {type: 'Success'};
       const delayAmount = initialDelay * Math.pow(multiple, i);
       await delay(delayAmount);
 

@@ -31,7 +31,7 @@ function extractReferencedChannels(objective: Objective): string[] {
   }
 }
 
-type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
+export type ObjectiveStatus = 'pending' | 'approved' | 'rejected' | 'failed' | 'succeeded';
 
 /**
  * A WalletObjective is a wire objective with a status, waitingFor state-string, timestamps and an objectiveId
