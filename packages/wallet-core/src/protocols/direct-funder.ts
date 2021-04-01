@@ -12,7 +12,7 @@ export type OpenChannelEvent =
   | {type: 'MessageReceived'; message: Message}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
 
-type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
+export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
 export enum WaitingFor {
   theirPreFundSetup = 'DirectFunder.theirPreFundSetup',

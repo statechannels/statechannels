@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import * as _ from 'lodash';
 
 import {unreachable} from '../utils';
-import {addHash, calculateChannelId} from '../state-utils';
+import {addHash, calculateChannelId, createSignatureEntry} from '../state-utils';
 import {BN} from '../bignumber';
 import {
   Action,
@@ -10,9 +10,17 @@ import {
   OpenChannelEvent,
   OpenChannelObjective,
   OpenChannelResult,
+  SignedStateHash,
   WaitingFor
 } from '../protocols/direct-funder';
-import {Address, makeAddress, SimpleAllocation, State} from '../types';
+import {
+  Address,
+  makeAddress,
+  SignatureEntry,
+  SimpleAllocation,
+  State,
+  StateWithHash
+} from '../types';
 
 import {ONE_DAY, participants} from './test-helpers';
 const {A: participantA, B: participantB} = participants;
@@ -48,18 +56,43 @@ const openingState: State = {
 
 const channelId = calculateChannelId(openingState);
 
-const richPreFS = addHash(openingState);
-const richPostFS = addHash({...openingState, turnNum: 3});
+function richify(state: State): StateWithHash & {signedBy(...peers: Peer[]): SignedStateHash} {
+  const withHash = addHash(state);
+
+  const signaturesCache: Record<Peer, SignatureEntry | undefined> = {
+    A: undefined,
+    B: undefined
+  };
+
+  return {
+    ...withHash,
+    signedBy(...peers: Peer[]) {
+      peers = _.sortedUniq(_.sortBy(peers));
+      const signatures = peers.map(peer => {
+        if (!signaturesCache[peer]) {
+          signaturesCache[peer] = createSignatureEntry(state, participants[peer].privateKey);
+        }
+
+        return signaturesCache[peer] as SignatureEntry;
+      });
+
+      return {hash: withHash.stateHash, signatures};
+    }
+  };
+}
+
+const richPreFS = richify(openingState);
+const richPostFS = richify({...openingState, turnNum: 3});
 
 const initial: OpenChannelObjective = {
   channelId,
   openingState,
   status: WaitingFor.theirPreFundSetup,
   myIndex: 0,
-  preFundSetup: {hash: richPreFS.stateHash, signatures: []},
+  preFundSetup: richPreFS.signedBy(),
   funding: {amount: BN.from(0), finalized: true},
   fundingRequests: [],
-  postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+  postFundSetup: richPostFS.signedBy()
 };
 
 test('pure objective cranker', () => {
@@ -99,13 +132,10 @@ test('pure objective cranker', () => {
     nullEvent,
     {
       status: WaitingFor.theirPreFundSetup,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [{signer: participants.A.signingAddress}]
-      },
+      preFundSetup: richPreFS.signedBy('A'),
       funding: {amount: BN.from(0), finalized: true},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     [{type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}]
   );
@@ -117,16 +147,10 @@ test('pure objective cranker', () => {
     output.actions[0],
     {
       status: WaitingFor.safeToDeposit,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(0), finalized: true},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     [{type: 'sendMessage', message: {recipient: 'alice'}}]
   );
@@ -138,16 +162,10 @@ test('pure objective cranker', () => {
     output.actions[0],
     {
       status: WaitingFor.channelFunded,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(0), finalized: true},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     [{type: 'deposit', amount: BN.from(1)}]
   );
@@ -160,16 +178,10 @@ test('pure objective cranker', () => {
     alicesDeposit,
     {
       status: WaitingFor.channelFunded,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(1), finalized: false},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     []
   );
@@ -181,16 +193,10 @@ test('pure objective cranker', () => {
     alicesDeposit,
     {
       status: WaitingFor.channelFunded,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(1), finalized: false},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     [{type: 'deposit', amount: BN.from(2)}]
   );
@@ -203,16 +209,10 @@ test('pure objective cranker', () => {
     bobsDeposit,
     {
       status: WaitingFor.channelFunded,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: false},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     []
   );
@@ -224,16 +224,10 @@ test('pure objective cranker', () => {
     bobsDeposit,
     {
       status: WaitingFor.channelFunded,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: false},
       fundingRequests: [],
-      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: richPostFS.signedBy()
     },
     []
   );
@@ -250,19 +244,10 @@ test('pure objective cranker', () => {
     finalFundingEvent,
     {
       status: WaitingFor.theirPostFundState,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFundSetup: {
-        hash: richPostFS.stateHash,
-        signatures: [{signer: participants.B.signingAddress}]
-      }
+      postFundSetup: richPostFS.signedBy('B')
     },
     [{type: 'sendMessage', message: {recipient: 'alice'}}]
   );
@@ -275,19 +260,10 @@ test('pure objective cranker', () => {
     finalFundingEvent,
     {
       status: WaitingFor.theirPostFundState,
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFundSetup: {
-        hash: richPostFS.stateHash,
-        signatures: [{signer: participants.A.signingAddress}]
-      }
+      postFundSetup: richPostFS.signedBy('A')
     },
     [{type: 'sendMessage', message: {recipient: 'bob'}}]
   );
@@ -300,22 +276,10 @@ test('pure objective cranker', () => {
     bobsPostFS,
     {
       status: 'success',
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFundSetup: {
-        hash: richPostFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      }
+      postFundSetup: richPostFS.signedBy('A', 'B')
     },
     []
   );
@@ -327,22 +291,10 @@ test('pure objective cranker', () => {
     alicesPostFS,
     {
       status: 'success',
-      preFundSetup: {
-        hash: richPreFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      },
+      preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFundSetup: {
-        hash: richPostFS.stateHash,
-        signatures: [
-          {signer: participants.A.signingAddress},
-          {signer: participants.B.signingAddress}
-        ]
-      }
+      postFundSetup: richPostFS.signedBy('A', 'B')
     },
     []
   );
