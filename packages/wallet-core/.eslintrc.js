@@ -11,18 +11,17 @@ module.exports = {
     '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-use-before-define': 'off',
     'no-restricted-imports': ['error', {patterns: ['**/lib', '**/src']}],
-    'arrow-body-style': 'error'
+    'arrow-body-style': 'error',
+    '@typescript-eslint/no-unused-vars': [
+      'error',
+      {argsIgnorePattern: '^_', varsIgnorePattern: '^_'}
+    ]
   },
   overrides: [
     {
       // process.env allowed in tests
-      files: ['*.test.ts'],
+      files: ['*.test.ts', 'src/config.ts'],
       rules: {'no-process-env': 'off'}
     },
-    {
-      // process.env allowed in src/config.js
-      files: ['src/config.ts'],
-      rules: {'no-process-env': 'off'}
-    }
   ]
 };
