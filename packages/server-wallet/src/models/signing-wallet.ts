@@ -47,17 +47,9 @@ export class SigningWallet extends Model {
   }
 
   signState(state: State | StateWithHash): SignatureEntry {
-    let signature: string;
-    if ('stateHash' in state) {
-      signature = wasmSignState(state, this.privateKey).signature;
-    } else {
-      const stateWithHash: StateWithHash = addHash(state);
-      signature = wasmSignState(stateWithHash, this.privateKey).signature;
-    }
-    return {
-      signer: this.address,
-      signature,
-    };
+    if (!('stateHash' in state)) state = addHash(state);
+
+    return {signer: this.address, signature: wasmSignState(state, this.privateKey).signature};
   }
 }
 
