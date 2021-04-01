@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, BigNumber, utils, constants} from 'ethers';
+import {Contract, Wallet, ethers, BigNumber} from 'ethers';
 
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';

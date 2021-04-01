@@ -42,7 +42,6 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
     fixedPart,
     variableParts: variablePartsUnstructured,
     sigs,
-    whoSignedWhat,
   }: ChallengeRegisteredStruct = eventResult.slice(-1)[0].args;
 
   // Fixed part

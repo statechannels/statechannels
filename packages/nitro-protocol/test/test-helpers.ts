@@ -101,7 +101,7 @@ export const newChallengeRegisteredEvent = (
   channelId: string
 ): Promise<ChallengeRegisteredStruct[keyof ChallengeRegisteredStruct]> => {
   const filter = contract.filters.ChallengeRegistered(channelId);
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     contract.on(
       filter,
       (
@@ -111,8 +111,7 @@ export const newChallengeRegisteredEvent = (
         eventChallengerArg,
         eventIsFinalArg,
         eventFixedPartArg,
-        eventChallengeVariablePartArg,
-        event
+        eventChallengeVariablePartArg
       ) => {
         contract.removeAllListeners(filter);
         resolve([
@@ -134,8 +133,8 @@ export const newChallengeClearedEvent = (
   channelId: string
 ): Promise<ChallengeClearedEvent[keyof ChallengeClearedEvent]> => {
   const filter = contract.filters.ChallengeCleared(channelId);
-  return new Promise((resolve, reject) => {
-    contract.on(filter, (eventChannelId, eventTurnNumRecord, event) => {
+  return new Promise(resolve => {
+    contract.on(filter, (eventChannelId, eventTurnNumRecord) => {
       // Match event for this channel only
       contract.removeAllListeners(filter);
       resolve([eventChannelId, eventTurnNumRecord]);
@@ -148,8 +147,8 @@ export const newConcludedEvent = (
   channelId: string
 ): Promise<[Bytes32]> => {
   const filter = contract.filters.Concluded(channelId);
-  return new Promise((resolve, reject) => {
-    contract.on(filter, (eventChannelId, event) => {
+  return new Promise(resolve => {
+    contract.on(filter, () => {
       // Match event for this channel only
       contract.removeAllListeners(filter);
       resolve([channelId]);
@@ -162,10 +161,10 @@ export const newDepositedEvent = (
   destination: string
 ): Promise<[string, BigNumber, BigNumber]> => {
   const filter = contract.filters.Deposited(destination);
-  return new Promise((resolve, reject) => {
+  return new Promise(resolve => {
     contract.on(
       filter,
-      (eventDestination: string, amountDeposited: BigNumber, amountHeld: BigNumber, event) => {
+      (eventDestination: string, amountDeposited: BigNumber, amountHeld: BigNumber) => {
         // Match event for this destination only
         contract.removeAllListeners(filter);
         resolve([eventDestination, amountDeposited, amountHeld]);
