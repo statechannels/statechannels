@@ -272,7 +272,7 @@ describe('challenge with transaction generator', () => {
     ${'challenge(0,1) accepted'}                    | ${[0, 0]} | ${[]}                              | ${[0, 1]} | ${1}
     ${'challenge(1,2) accepted'}                    | ${[0, 0]} | ${[]}                              | ${[1, 2]} | ${0}
     ${'challenge(1,2) accepted, MAX_OUTCOME_ITEMS'} | ${[0, 0]} | ${largeOutcome(MAX_OUTCOME_ITEMS)} | ${[1, 2]} | ${0}
-  `('$description', async ({description, appData, turnNums, challenger}) => {
+  `('$description', async ({appData, turnNums, challenger}) => {
     const transactionRequest: ethers.providers.TransactionRequest = createChallengeTransaction(
       [
         await createSignedCountingAppState(twoPartyChannel, appData[0], turnNums[0]),
