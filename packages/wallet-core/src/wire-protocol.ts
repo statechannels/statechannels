@@ -30,4 +30,8 @@ export const isFundGuarantor = guard<FundGuarantor>('FundGuarantor');
 export interface Message {
   signedStates?: SignedState[];
   objectives?: Objective[];
+
+  // TODO (DirectFunder) Remove this later
+  // This is a temporary slot for messages that are exchanged for the pure direct funder.
+  directFunderMessage?: SignedState[];
 }
