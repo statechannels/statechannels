@@ -23,7 +23,7 @@ export enum WaitingFor {
 
 const enum Hashes {
   preFundSetup = 'preFundSetup',
-  postFundSetup = 'postFS'
+  postFundSetup = 'postFundSetup'
 }
 
 export type OpenChannelObjective = {
@@ -37,7 +37,7 @@ export type OpenChannelObjective = {
   funding: {amount: Uint256; finalized: boolean};
   // TODO: (ChainService) We will need to store funding requests once this gets hooked up to a chain service
   fundingRequests: {tx: string}[];
-  postFS: SignedStateHash;
+  postFundSetup: SignedStateHash;
 };
 
 export type Action =
@@ -117,12 +117,15 @@ export function openChannelCranker(
             objective.preFundSetup.signatures,
             signatures
           );
-        } else if (hash === objective.postFS.hash) {
-          objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
+        } else if (hash === objective.postFundSetup.hash) {
+          objective.postFundSetup.signatures = mergeSignatures(
+            objective.postFundSetup.signatures,
+            signatures
+          );
         } else {
           // TODO: (Errors) Enter an error state here
           throw new Error(
-            `Unexpected state hash ${hash}. Expecting ${objective.preFundSetup.hash} or ${objective.postFS.hash}`
+            `Unexpected state hash ${hash}. Expecting ${objective.preFundSetup.hash} or ${objective.postFundSetup.hash}`
           );
         }
       }

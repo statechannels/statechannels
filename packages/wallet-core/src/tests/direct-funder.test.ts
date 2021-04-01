@@ -59,7 +59,7 @@ const initial: OpenChannelObjective = {
   preFundSetup: {hash: richPreFS.stateHash, signatures: []},
   funding: {amount: BN.from(0), finalized: true},
   fundingRequests: [],
-  postFS: {hash: richPostFS.stateHash, signatures: []}
+  postFundSetup: {hash: richPostFS.stateHash, signatures: []}
 };
 
 test('pure objective cranker', () => {
@@ -105,7 +105,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(0), finalized: true},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     [{type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}]
   );
@@ -126,7 +126,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(0), finalized: true},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     [{type: 'sendMessage', message: {recipient: 'alice'}}]
   );
@@ -147,7 +147,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(0), finalized: true},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     [{type: 'deposit', amount: BN.from(1)}]
   );
@@ -169,7 +169,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(1), finalized: false},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     []
   );
@@ -190,7 +190,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(1), finalized: false},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     [{type: 'deposit', amount: BN.from(2)}]
   );
@@ -212,7 +212,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(3), finalized: false},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     []
   );
@@ -233,7 +233,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(3), finalized: false},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: []}
+      postFundSetup: {hash: richPostFS.stateHash, signatures: []}
     },
     []
   );
@@ -259,7 +259,10 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: [{signer: participants.B.signingAddress}]}
+      postFundSetup: {
+        hash: richPostFS.stateHash,
+        signatures: [{signer: participants.B.signingAddress}]
+      }
     },
     [{type: 'sendMessage', message: {recipient: 'alice'}}]
   );
@@ -281,7 +284,10 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFS: {hash: richPostFS.stateHash, signatures: [{signer: participants.A.signingAddress}]}
+      postFundSetup: {
+        hash: richPostFS.stateHash,
+        signatures: [{signer: participants.A.signingAddress}]
+      }
     },
     [{type: 'sendMessage', message: {recipient: 'bob'}}]
   );
@@ -303,7 +309,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFS: {
+      postFundSetup: {
         hash: richPostFS.stateHash,
         signatures: [
           {signer: participants.A.signingAddress},
@@ -330,7 +336,7 @@ test('pure objective cranker', () => {
       },
       funding: {amount: BN.from(3), finalized: true},
       fundingRequests: [],
-      postFS: {
+      postFundSetup: {
         hash: richPostFS.stateHash,
         signatures: [
           {signer: participants.A.signingAddress},
