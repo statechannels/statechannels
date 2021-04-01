@@ -41,10 +41,23 @@ export type OpenChannelResult = {
 
 /**
  *
- * @param objective
- * @param event
+ * @param objective: A rich OpenChannelObjective data structure storing relevant data to the objective
+ * @param event an OpenChannelEvent that can trigger a state transition + actions
  * @param myPrivateKey
- * @returns Result
+ * @returns OpenChannelResult, a data structure containing
+ *            - the current state of the objective
+ *            - actionst to be triggered by an imperative shell
+ *
+ * This is a state machine implementation of a protocol for opening a directly funded channel.
+ * It operates on a "rich" OpenChannelObjective state, which stores:
+ * 1. the channel's initial state
+ * 2. the hash of the expected preFS and its hash
+ * 3. the on-chain funding of the channel
+ * 4. funding requests
+ * 5. the hash of the expected preFS and its hash
+ *
+ * The machine receives either messages or chain events.
+ * It _whitelists_ states, rejecting any state other than the expected state.
  *
  * A wallet implementation can then use the result with this sequence of asynchronous operations
  * 1. record the new objective state as well as the resulting actions
@@ -84,6 +97,7 @@ export function openChannelCranker(
         } else if (hash === objective.postFS.hash) {
           objective.postFS.signatures = mergeSignatures(objective.postFS.signatures, signatures);
         } else {
+          // TODO: Enter an error state here
           throw new Error(
             `Unexpected state hash ${hash}. Expecting ${objective.preFS.hash} or ${objective.postFS.hash}`
           );
@@ -95,7 +109,7 @@ export function openChannelCranker(
       return unreachable(event);
   }
 
-  // Then, react:
+  // Then, transition & collect actions:
   const actions: Action[] = [];
 
   if (!signedbyMe(objective, 'preFS', me.signingAddress)) {
