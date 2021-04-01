@@ -12,7 +12,8 @@ import {
   OpenChannelObjective,
   OpenChannelResult,
   SignedStateHash,
-  WaitingFor
+  WaitingFor,
+  WALLET_VERSION
 } from '../protocols/direct-funder';
 import {
   Address,
@@ -358,22 +359,22 @@ test('pure objective cranker', () => {
 describe('error modes', () => {
   test('receiving a signature from a non-participant', () => {
     const signatures = [{signature: 'a signature', signer: participants.H.signingAddress}];
-    const signedStates = [{...openingState, signatures}];
+    const directFunderMessage = [{...openingState, signatures}];
     expect(() =>
       openChannelCranker(
         initial,
-        {type: 'MessageReceived', message: {signedStates}},
+        {type: 'MessageReceived', message: {directFunderMessage, walletVersion: WALLET_VERSION}},
         participants.A.privateKey
       )
     ).toThrow('received a signature from a non-participant');
   });
 
   test('receiving an unexpected state', () => {
-    const signedStates = [{...openingState, signatures: [], turnNum: 4}];
+    const directFunderMessage = [{...openingState, signatures: [], turnNum: 4}];
     expect(() =>
       openChannelCranker(
         initial,
-        {type: 'MessageReceived', message: {signedStates}},
+        {type: 'MessageReceived', message: {directFunderMessage, walletVersion: WALLET_VERSION}},
         participants.A.privateKey
       )
     ).toThrow('Unexpected state hash');

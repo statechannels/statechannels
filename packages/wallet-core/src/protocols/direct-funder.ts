@@ -1,15 +1,17 @@
 import * as _ from 'lodash';
 
 import {checkThat, isSimpleAllocation, unreachable} from '../utils';
-import {Message} from '../wire-protocol';
 import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
-import {Address, SignatureEntry, State, Uint256} from '../types';
+import {Address, Payload, SignatureEntry, State, Uint256} from '../types';
 
-type AddressedMessage = {recipient: string; message: Message};
+// TODO (WALLET_VERSION): This should be determined and exported by wallet-core
+export const WALLET_VERSION = 'SomeVersion';
+
+type AddressedMessage = {recipient: string; message: Payload};
 
 export type OpenChannelEvent =
-  | {type: 'MessageReceived'; message: Message}
+  | {type: 'MessageReceived'; message: Payload}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
@@ -249,7 +251,10 @@ function signStateAction(
   objective[key].signatures.push(entry);
 
   recipients(objective).map(recipient => {
-    const message: Message = {signedStates: [{...state, signatures: [entry]}]};
+    const message: Payload = {
+      walletVersion: WALLET_VERSION,
+      signedStates: [{...state, signatures: [entry]}]
+    };
     actions.push({type: 'sendMessage', message: {recipient, message}});
   });
 
