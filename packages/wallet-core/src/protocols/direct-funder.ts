@@ -3,8 +3,8 @@ import * as _ from 'lodash';
 import {checkThat, isSimpleAllocation, unreachable} from '../utils';
 import {Message} from '../wire-protocol';
 import {BN} from '../bignumber';
-import {addHash, hashState, signState} from '../state-utils';
-import {Address, SignatureEntry, State, StateWithHash, Uint256} from '../types';
+import {calculateChannelId, hashState, signState} from '../state-utils';
+import {Address, SignatureEntry, State, Uint256} from '../types';
 
 type AddressedMessage = {recipient: string; message: Message};
 
@@ -206,17 +206,22 @@ function completed(objective: OpenChannelObjective, step: Hashes): boolean {
   return objective[step].signatures.length === firstState.participants.length;
 }
 
+function setupState(openingState: State, key: Hashes): State {
+  const turnNum = key === Hashes.preFundSetup ? 0 : 2 * openingState.participants.length - 1;
+
+  return {...openingState, turnNum};
+}
+
 function signStateAction(
   key: Hashes,
   myPrivateKey: string,
   objective: OpenChannelObjective,
   actions: Action[]
 ): Action[] {
-  const {openingState: firstState, myIndex} = objective;
-  const me = firstState.participants[myIndex];
+  const {openingState, myIndex} = objective;
+  const me = openingState.participants[myIndex];
 
-  const turnNum = key === Hashes.preFundSetup ? 0 : 2 * firstState.participants.length - 1;
-  const state: StateWithHash = addHash({...firstState, turnNum});
+  const state = setupState(openingState, key);
   const signature = signState(state, myPrivateKey);
   const entry = {signature, signer: me.signingAddress};
   objective[key].signatures.push(entry);
