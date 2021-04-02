@@ -3,6 +3,9 @@ import {
   simpleEthAllocation,
   serializeState,
   SignedState,
+  OpenChannel,
+  DirectFunder,
+  hashState,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import _ from 'lodash';
@@ -460,6 +463,48 @@ describe('when there is a request provided', () => {
           method: 'MessageQueued',
           params: {data: {signedStates: expect.arrayContaining(signedStates)}},
         },
+      ],
+    });
+  });
+});
+
+describe('direct-funder', () => {
+  it('stores new objectives when they come in', async () => {
+    const signedState = stateSignedBy([bob()])({turnNum: zero, channelNonce: 9001});
+    const channelId = calculateChannelId(signedState);
+    const objective: OpenChannel = {
+      type: 'OpenChannel',
+      data: {targetChannelId: channelId, fundingStrategy: 'Direct'},
+      participants: signedState.participants,
+    };
+
+    const result = await engine.pushMessage({
+      walletVersion: WALLET_VERSION,
+      objectives: [objective],
+      signedStates: [serializeState(signedState)],
+      directFunderMessage: [serializeState(signedState)],
+    });
+
+    // await expect(() => result).rejects.toThrow('Error during pushMessage');
+
+    const currentState = (engine as any).richObjectives[channelId];
+    expect(currentState).toMatchObject({
+      status: DirectFunder.WaitingFor.channelFunded,
+      preFundSetup: {
+        hash: hashState(signedState),
+        signatures: [
+          {signer: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'},
+          {signer: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'},
+        ],
+      },
+    });
+
+    expect(result).toBeDefined();
+
+    const message = result.outbox[0].params.data;
+    expect(message).toMatchObject({
+      directFunderMessage: [
+        {channelId, signatures: [currentState.preFundSetup.signatures[0].signature], turnNum: 0},
       ],
     });
   });
