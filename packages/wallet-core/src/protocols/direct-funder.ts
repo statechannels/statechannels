@@ -248,7 +248,7 @@ function signStateAction(
   const state = setupState(openingState, key);
   const signature = signState(state, myPrivateKey);
   const entry = {signature, signer: me.signingAddress};
-  objective[key].signatures.push(entry);
+  objective[key].signatures = mergeSignatures(objective[key].signatures, [entry]);
 
   recipients(objective).map(recipient => {
     const message: Payload = {
