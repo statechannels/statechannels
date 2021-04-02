@@ -289,6 +289,9 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
     _.groupBy(messages, o => o.recipient),
     (rcptMsgs, recipient) => {
       const states = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.signedStates || []));
+      const directFunderMessage = uniqueAndSorted(
+        rcptMsgs.flatMap(n => n.data.directFunderMessage || [])
+      );
       const requests = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.requests || []));
       const objectives = uniqueAndSorted(rcptMsgs.flatMap(n => n.data.objectives || []));
 
@@ -302,6 +305,7 @@ export function mergeOutgoing(outgoing: Notice[]): Notice[] {
             signedStates: states.length > 0 ? states : undefined,
             requests: requests.length > 0 ? requests : undefined,
             objectives: objectives.length > 0 ? objectives : undefined,
+            directFunderMessage: directFunderMessage.length > 0 ? directFunderMessage : undefined,
           },
         },
       };
