@@ -24,6 +24,7 @@ import {
   deserializeState,
   unreachable,
   Payload,
+  State,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -445,7 +446,8 @@ export class SingleThreadedEngine
    * Creates a ledger channel.
    *
    * @remarks
-   * The channel will have a null app definition and null app data. This method is otherwise identical to {@link SingleThreadedEngine.createChannel}.
+   * The channel will have a null app definition and null app data.
+   * This method is otherwise identical to {@link SingleThreadedEngine.createChannel}.
    *
    * @returns A promise that resolves to the channel output.
    */
@@ -549,6 +551,10 @@ export class SingleThreadedEngine
       role,
       fundingLedgerChannelId
     );
+    if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
+      const signingAddress = await this.store.getOrCreateSigningAddress();
+      this.storeRichObjective(objective, signedState, signingAddress);
+    }
 
     this.emit('objectiveStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId);
@@ -855,7 +861,7 @@ export class SingleThreadedEngine
   // TODO (DirectFunder) BEGIN DIRECT FUNDER PROTOTYPING
   // This code is not intended to be "good".
   // Instead, I wished to make the smallest amount of changes possible to
-  // try incorporating the pure direct funder
+  // show how the pure direct funder can be used
   private richObjectives: Record<string, DirectFunder.OpenChannelObjective | undefined> = {};
   private async _pushDirectFunderMessage(
     wirePayload: WirePayload,
@@ -864,24 +870,14 @@ export class SingleThreadedEngine
     const direct = wirePayload.objectives?.filter(
       o => o.type === 'OpenChannel' && o.data.fundingStrategy === 'Direct'
     );
+
     const signingAddress = await this.store.getOrCreateSigningAddress();
 
     ((direct ?? []) as OpenChannel[]).map(o => {
-      const channelId = o.data.targetChannelId;
-      // Fetch the corresponding state
-
       const openingState = wirePayload.signedStates
         ?.map(deserializeState)
         .find(s => calculateChannelId(s) === o.data.targetChannelId);
-
-      if (!openingState) {
-        throw new Error('Expecting opening state within wire payload');
-      }
-
-      const myIndex = openingState.participants.findIndex(p => p.signingAddress === signingAddress);
-      const richObjective = DirectFunder.initialize(openingState, myIndex);
-
-      this.richObjectives[channelId] = richObjective;
+      this.storeRichObjective(o, openingState as State, signingAddress);
     });
 
     const {signedStates} = wirePayload;
@@ -919,6 +915,20 @@ export class SingleThreadedEngine
         }
       }
     }
+  }
+
+  private storeRichObjective(o: OpenChannel, openingState: State, signingAddress: string) {
+    const channelId = o.data.targetChannelId;
+    // Fetch the corresponding state
+
+    if (!openingState) {
+      throw new Error('Expecting opening state within wire payload');
+    }
+
+    const myIndex = openingState.participants.findIndex(p => p.signingAddress === signingAddress);
+    const richObjective = DirectFunder.initialize(openingState, myIndex);
+
+    this.richObjectives[channelId] = richObjective;
   }
 
   private async _pushMessage(wirePayload: WirePayload, response: EngineResponse): Promise<void> {
