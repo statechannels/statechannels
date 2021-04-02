@@ -23,7 +23,6 @@ import {
   calculateChannelId,
   deserializeState,
   unreachable,
-  Payload,
   State,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -886,31 +885,33 @@ export class SingleThreadedEngine
       // would have already reached the 'success' state when we receive turn number 4.
       if (signedStates[0].turnNum >= 4) return;
 
-      const myPrivateKey = (await SigningWallet.query(this.knex).first()).privateKey;
       const channelId = signedStates[0].channelId;
-      const message: Payload = {
-        walletVersion: WALLET_VERSION,
-        signedStates: signedStates.map(deserializeState),
+
+      const current = this.richObjectives[channelId];
+      // For tests that might push in states without creating objectives first, we return early
+      // Note that this helps prevent DDoS attacks!
+      if (!current) return;
+
+      const myPrivateKey = (await SigningWallet.query(this.knex).first()).privateKey;
+      const event = {
+        type: 'MessageReceived' as const,
+        message: {walletVersion: WALLET_VERSION, signedStates: signedStates.map(deserializeState)},
       };
 
-      const {objective: nextState, actions} = DirectFunder.openChannelCranker(
-        this.richObjectives[channelId] as DirectFunder.OpenChannelObjective,
-        {type: 'MessageReceived', message},
-        myPrivateKey
-      );
+      const result = DirectFunder.openChannelCranker(current, event, myPrivateKey);
 
       // Store new state
-      this.richObjectives[channelId] = nextState;
+      this.richObjectives[channelId] = result.objective;
 
       // Take actions
-      for (const action of actions) {
+      for (const action of result.actions) {
         switch (action.type) {
           case 'deposit':
             // throw new Error('Should be depositing');
             break;
           case 'sendMessage': {
             action.message.message.signedStates?.map(state =>
-              response.queueState(state, nextState.myIndex)
+              response.queueState(state, result.objective.myIndex)
             );
             break;
           }
