@@ -1,6 +1,6 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
 
-import {SignedState, Participant} from './types';
+import {Participant} from './types';
 
 type _Objective<Name, Data> = {
   participants: Participant[];
