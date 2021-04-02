@@ -24,6 +24,7 @@ import {
   deserializeState,
   unreachable,
   State,
+  Address,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
@@ -172,6 +173,7 @@ export class SingleThreadedEngine
 
     this.ledgerManager = LedgerManager.create({store: this.store});
   }
+
   /**
    * Adds an ethereum private key to the engine's database
    *
@@ -505,9 +507,9 @@ export class SingleThreadedEngine
   ): Promise<MultipleChannelOutput> {
     const response = EngineResponse.initialize();
 
-    await Promise.all(
-      _.range(numberOfChannels).map(() => this._createChannel(response, args, 'app'))
-    );
+    for (const _i of _.range(numberOfChannels)) {
+      await this._createChannel(response, args, 'app');
+    }
 
     // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
 
@@ -551,7 +553,7 @@ export class SingleThreadedEngine
       fundingLedgerChannelId
     );
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
-      const signingAddress = await this.store.getOrCreateSigningAddress();
+      const signingAddress = await this.getCachedSigningAddress();
       this.storeRichObjective(objective, signedState, signingAddress);
     }
 
@@ -857,6 +859,15 @@ export class SingleThreadedEngine
     return response.singleChannelOutput();
   }
 
+  private _cachedSigningAddress: Address = '' as Address;
+  private async getCachedSigningAddress(): Promise<Address> {
+    if (this._cachedSigningAddress === '') {
+      this._cachedSigningAddress = await this.getSigningAddress();
+    }
+
+    return this._cachedSigningAddress;
+  }
+
   // TODO (DirectFunder) BEGIN DIRECT FUNDER PROTOTYPING
   // This code is not intended to be "good".
   // Instead, I wished to make the smallest amount of changes possible to
@@ -870,8 +881,7 @@ export class SingleThreadedEngine
       o => o.type === 'OpenChannel' && o.data.fundingStrategy === 'Direct'
     );
 
-    const signingAddress = await this.store.getOrCreateSigningAddress();
-
+    const signingAddress = await this.getCachedSigningAddress();
     ((direct ?? []) as OpenChannel[]).map(o => {
       const openingState = wirePayload.signedStates
         ?.map(deserializeState)
