@@ -26,11 +26,14 @@ export function serializeMessage(
   channelId?: string
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
-  const objectives = message.objectives;
+  const directFunderMessage = (message.directFunderMessage || []).map(s =>
+    serializeState(s, channelId)
+  );
+  const {objectives, requests} = message;
   return {
     recipient,
     sender,
-    data: {walletVersion, signedStates, objectives, requests: message.requests}
+    data: {walletVersion, signedStates, objectives, requests, directFunderMessage}
   };
 }
 
