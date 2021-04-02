@@ -882,6 +882,10 @@ export class SingleThreadedEngine
 
     const {signedStates} = wirePayload;
     if (signedStates) {
+      // When funding is connected, we won't need this "backdoor exit". Instead, the objective
+      // would have already reached the 'success' state when we receive turn number 4.
+      if (signedStates[0].turnNum >= 4) return;
+
       const myPrivateKey = (await SigningWallet.query(this.knex).first()).privateKey;
       const channelId = signedStates[0].channelId;
       const message: Payload = {
