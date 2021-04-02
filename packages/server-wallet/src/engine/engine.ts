@@ -890,7 +890,7 @@ export class SingleThreadedEngine
     });
 
     const {signedStates} = wirePayload;
-    if (signedStates) {
+    if (signedStates && signedStates[0]) {
       // When funding is connected, we won't need this "backdoor exit". Instead, the objective
       // would have already reached the 'success' state when we receive turn number 4.
       if (signedStates[0].turnNum >= 4) return;
