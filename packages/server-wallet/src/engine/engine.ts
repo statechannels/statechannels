@@ -884,13 +884,13 @@ export class SingleThreadedEngine
       this.richObjectives[channelId] = richObjective;
     });
 
-    const {directFunderMessage} = wirePayload;
-    if (directFunderMessage) {
+    const {signedStates} = wirePayload;
+    if (signedStates) {
       const myPrivateKey = (await SigningWallet.query(this.knex).first()).privateKey;
-      const channelId = directFunderMessage[0].channelId;
+      const channelId = signedStates[0].channelId;
       const message: Payload = {
         walletVersion: WALLET_VERSION,
-        directFunderMessage: directFunderMessage.map(deserializeState),
+        signedStates: signedStates.map(deserializeState),
       };
 
       const {objective: nextState, actions} = DirectFunder.openChannelCranker(
@@ -909,8 +909,8 @@ export class SingleThreadedEngine
             // throw new Error('Should be depositing');
             break;
           case 'sendMessage': {
-            action.message.message.directFunderMessage?.map(state =>
-              response.queueDirectFunderMessage(state, nextState.myIndex)
+            action.message.message.signedStates?.map(state =>
+              response.queueState(state, nextState.myIndex)
             );
             break;
           }

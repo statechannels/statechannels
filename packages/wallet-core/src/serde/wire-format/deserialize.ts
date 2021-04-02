@@ -45,7 +45,6 @@ export function validatePayload(rawPayload: unknown): WirePayload {
 
 export function deserializeMessage(message: WireMessage): Payload {
   const signedStates = message?.data?.signedStates?.map(ss => deserializeState(ss));
-  const directFunderMessage = message?.data?.directFunderMessage?.map(ss => deserializeState(ss));
   const objectives = message?.data?.objectives?.map(objective => deserializeObjective(objective));
   const requests = message?.data?.requests;
   const walletVersion = message.data.walletVersion;
@@ -54,8 +53,7 @@ export function deserializeMessage(message: WireMessage): Payload {
     walletVersion,
     signedStates,
     objectives,
-    requests,
-    directFunderMessage
+    requests
   };
 }
 

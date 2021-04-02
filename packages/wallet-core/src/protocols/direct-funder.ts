@@ -121,7 +121,7 @@ export function openChannelCranker(
       objective.funding.finalized = event.finalized;
       break;
     case 'MessageReceived': {
-      const {directFunderMessage: signedStates} = event.message;
+      const {signedStates} = event.message;
 
       // TODO: Assume there's only one signed state
       if (signedStates && signedStates[0]) {
@@ -253,7 +253,7 @@ function signStateAction(
   recipients(objective).map(recipient => {
     const message: Payload = {
       walletVersion: WALLET_VERSION,
-      directFunderMessage: [{...state, signatures: [entry]}]
+      signedStates: [{...state, signatures: [entry]}]
     };
     actions.push({type: 'sendMessage', message: {recipient, message}});
   });
@@ -266,6 +266,7 @@ function recipients({openingState: {participants}, myIndex}: OpenChannelObjectiv
 }
 
 function mergeSignatures(left: SignatureEntry[], right: SignatureEntry[]): SignatureEntry[] {
+  // TODO: Perhaps this should place signatures according to the participant's index?
   const unsorted = _.uniqBy(_.concat(left, right), entry => entry.signer);
 
   return _.sortBy(unsorted, entry => entry.signer);

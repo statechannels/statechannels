@@ -389,12 +389,6 @@
     "Payload": {
       "additionalProperties": false,
       "properties": {
-        "directFunderMessage": {
-          "items": {
-            "$ref": "#/definitions/SignedState"
-          },
-          "type": "array"
-        },
         "objectives": {
           "items": {
             "$ref": "#/definitions/Objective"

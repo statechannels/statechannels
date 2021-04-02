@@ -482,7 +482,6 @@ describe('direct-funder', () => {
       walletVersion: WALLET_VERSION,
       objectives: [objective],
       signedStates: [serializeState(signedState)],
-      directFunderMessage: [serializeState(signedState)],
     });
 
     // await expect(() => result).rejects.toThrow('Error during pushMessage');
@@ -503,7 +502,7 @@ describe('direct-funder', () => {
 
     const message = result.outbox[0].params.data;
     expect(message).toMatchObject({
-      directFunderMessage: [
+      signedStates: [
         {channelId, signatures: [currentState.preFundSetup.signatures[0].signature], turnNum: 0},
       ],
     });

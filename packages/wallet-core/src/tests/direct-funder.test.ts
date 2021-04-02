@@ -359,22 +359,22 @@ test('pure objective cranker', () => {
 describe('error modes', () => {
   test('receiving a signature from a non-participant', () => {
     const signatures = [{signature: 'a signature', signer: participants.H.signingAddress}];
-    const directFunderMessage = [{...openingState, signatures}];
+    const signedStates = [{...openingState, signatures}];
     expect(() =>
       openChannelCranker(
         initial,
-        {type: 'MessageReceived', message: {directFunderMessage, walletVersion: WALLET_VERSION}},
+        {type: 'MessageReceived', message: {signedStates, walletVersion: WALLET_VERSION}},
         participants.A.privateKey
       )
     ).toThrow('received a signature from a non-participant');
   });
 
   test('receiving an unexpected state', () => {
-    const directFunderMessage = [{...openingState, signatures: [], turnNum: 4}];
+    const signedStates = [{...openingState, signatures: [], turnNum: 4}];
     expect(() =>
       openChannelCranker(
         initial,
-        {type: 'MessageReceived', message: {directFunderMessage, walletVersion: WALLET_VERSION}},
+        {type: 'MessageReceived', message: {signedStates, walletVersion: WALLET_VERSION}},
         participants.A.privateKey
       )
     ).toThrow('Unexpected state hash');

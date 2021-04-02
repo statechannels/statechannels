@@ -155,8 +155,7 @@ export const wireMessageFormat: WireMessage = {
         type: 'GetChannel',
         channelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
       }
-    ],
-    directFunderMessage: []
+    ]
   }
 };
 
@@ -190,6 +189,5 @@ export const internalMessageFormat: Payload = {
       type: 'GetChannel',
       channelId: '0x59fb8a0bff0f4553b0169d4b6cad93f3baa9edd94bd28c954ae0ad1622252967'
     }
-  ],
-  directFunderMessage: []
+  ]
 };

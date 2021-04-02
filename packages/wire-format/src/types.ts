@@ -151,10 +151,6 @@ export interface Payload {
   signedStates?: SignedState[];
   objectives?: Objective[];
   requests?: ChannelRequest[];
-
-  // TODO (DirectFunder) Remove this later
-  // This is a temporary slot for messages that are exchanged for the pure direct funder.
-  directFunderMessage?: SignedState[];
 }
 
 export interface Message {
