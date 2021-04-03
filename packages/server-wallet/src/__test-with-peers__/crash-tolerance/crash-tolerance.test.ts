@@ -66,10 +66,7 @@ it('Create a directly-funded channel between two engines, of which one crashes m
 
   //      PreFund0B
   const resultB1 = await peerEngines.b.joinChannel({channelId});
-  expect(getChannelResultFor(channelId, [resultB1.channelResult])).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
+  expect(resultB1.channelResult).toMatchObject({status: 'opening', turnNum: 0});
 
   await messageService.send(getMessages(resultB1));
 
@@ -117,11 +114,7 @@ it('Create a directly-funded channel between two engines, of which one crashes m
 
   // A generates isFinal4
   const aCloseChannelResult = await peerEngines.a.closeChannel(closeChannelParams);
-
-  expect(getChannelResultFor(channelId, [aCloseChannelResult.channelResult])).toMatchObject({
-    status: 'closing',
-    turnNum: 4,
-  });
+  expect(aCloseChannelResult.channelResult).toMatchObject({status: 'closing', turnNum: 4});
 
   await messageService.send(getMessages(aCloseChannelResult));
   // B pushed isFinal4, generated countersigned isFinal4
