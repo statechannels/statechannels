@@ -79,8 +79,8 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     amount: aDepositAmtETH,
   };
-  await peerEngines.a.updateFundingForChannels([fundingPostADeposit]);
-  await peerEngines.b.updateFundingForChannels([fundingPostADeposit]);
+  await peerEngines.a.holdingUpdated(fundingPostADeposit);
+  await peerEngines.b.holdingUpdated(fundingPostADeposit);
   const fundingPostBDeposit = {
     channelId,
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,

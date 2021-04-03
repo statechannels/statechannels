@@ -3,8 +3,8 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress} from '@statechannels/wallet-core';
-import {BigNumber, ethers} from 'ethers';
+import {BN, makeAddress} from '@statechannels/wallet-core';
+import {ethers} from 'ethers';
 
 import {
   peerEngines,
@@ -29,14 +29,8 @@ afterAll(peersTeardown);
 it('Create a directly funded channel between two engines ', async () => {
   const allocation: Allocation = {
     allocationItems: [
-      {
-        destination: participantA.destination,
-        amount: BigNumber.from(1).toHexString(),
-      },
-      {
-        destination: participantB.destination,
-        amount: BigNumber.from(1).toHexString(),
-      },
+      {destination: participantA.destination, amount: BN.from(1)},
+      {destination: participantB.destination, amount: BN.from(1)},
     ],
     assetHolderAddress: makeAddress(AddressZero), // must be even length
   };
@@ -60,22 +54,15 @@ it('Create a directly funded channel between two engines ', async () => {
   const resultB1 = await peerEngines.b.joinChannel({channelId});
   await messageService.send(getMessages(resultB1));
 
-  const depositByA = {
-    channelId,
-    assetHolderAddress: makeAddress(AddressZero),
-    amount: BigNumber.from(1).toHexString(),
-  }; // A sends 1 ETH (1 total)
+  const assetHolderAddress = makeAddress(AddressZero);
+  const depositByA = {channelId, assetHolderAddress, amount: BN.from(1)}; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
-  await peerEngines.a.updateFundingForChannels([depositByA]);
-  await peerEngines.b.updateFundingForChannels([depositByA]);
+  await peerEngines.a.holdingUpdated(depositByA);
+  await peerEngines.b.holdingUpdated(depositByA);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
-  const depositByB = {
-    channelId,
-    assetHolderAddress: makeAddress(AddressZero),
-    amount: BigNumber.from(2).toHexString(),
-  }; // B sends 1 ETH (2 total)
+  const depositByB = {channelId, assetHolderAddress, amount: BN.from(2)}; // B sends 1 ETH (2 total)
 
   // Results before funding is complete
   await expectLatestStateToMatch(channelId, peerEngines.a, {

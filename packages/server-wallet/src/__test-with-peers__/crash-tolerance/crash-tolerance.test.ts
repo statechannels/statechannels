@@ -3,7 +3,7 @@ import {
   CloseChannelParams,
   CreateChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress} from '@statechannels/wallet-core';
+import {BN, makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers} from 'ethers';
 
 import {
@@ -73,22 +73,15 @@ it('Create a directly-funded channel between two engines, of which one crashes m
 
   await messageService.send(getMessages(resultB1));
 
-  const depositByA = {
-    channelId,
-    assetHolderAddress: makeAddress(constants.AddressZero),
-    amount: BigNumber.from(1).toHexString(),
-  }; // A sends 1 ETH (1 total)
+  const assetHolderAddress = makeAddress(constants.AddressZero);
+  const depositByA = {channelId, assetHolderAddress, amount: BN.from(1)}; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
-  await peerEngines.a.updateFundingForChannels([depositByA]);
-  await peerEngines.b.updateFundingForChannels([depositByA]);
+  await peerEngines.a.holdingUpdated(depositByA);
+  await peerEngines.b.holdingUpdated(depositByA);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
-  const depositByB = {
-    channelId,
-    assetHolderAddress: makeAddress(constants.AddressZero),
-    amount: BigNumber.from(2).toHexString(),
-  }; // B sends 1 ETH (2 total)
+  const depositByB = {channelId, assetHolderAddress, amount: BN.from(2)}; // B sends 1 ETH (2 total)
   // < PostFund3B
   const resultA2 = await peerEngines.a.updateFundingForChannels([depositByB]);
   const resultB2 = await peerEngines.b.updateFundingForChannels([depositByB]);
