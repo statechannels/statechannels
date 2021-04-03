@@ -34,8 +34,8 @@ export const participants = {
 };
 
 type Peer = keyof typeof participants;
-export function signStateHelper(state: State, by: Peer): SignedState {
-  const entry = createSignatureEntry(state, participants[by].privateKey);
+export function signStateHelper(state: State, ...by: Peer[]): SignedState {
+  const signatures = by.map(peer => createSignatureEntry(state, participants[peer].privateKey));
 
-  return {..._.cloneDeep(state), signatures: [entry]};
+  return {..._.cloneDeep(state), signatures};
 }
