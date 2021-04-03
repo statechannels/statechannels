@@ -39,7 +39,7 @@ export type OpenChannelObjective = {
   // TODO: (ChainService) The asset class is _ignored_ here.
   funding: {amount: Uint256; finalized: boolean};
   // TODO: (ChainService) We will need to store funding requests once this gets hooked up to a chain service
-  fundingRequests: {tx: string}[];
+  fundingRequest: {tx: string; attempts: number; triggeredAt: Date} | undefined;
   postFundSetup: SignedStateHash;
 };
 
@@ -66,7 +66,7 @@ export function initialize(
     status: WaitingFor.theirPreFundSetup,
     preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures},
     funding: {amount: BN.from(0), finalized: true},
-    fundingRequests: [],
+    fundingRequest: undefined,
     postFundSetup: {hash: hashState(setupState(openingState, Hashes.postFundSetup)), signatures: []}
   };
 }
@@ -204,7 +204,7 @@ export function openChannelCranker(
   }
   // if there's an outstanding chain request, take no action
   // TODO: (ChainService) This assumes that each participant deposits exactly once per channel
-  else if (objective.fundingRequests.length === 1) {
+  else if (objective.fundingRequest) {
     // TODO: (ChainService) This should handle timed out funding requests
     objective.status = WaitingFor.channelFunded;
     return {objective, actions};

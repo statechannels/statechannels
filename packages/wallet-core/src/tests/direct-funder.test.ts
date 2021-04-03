@@ -93,7 +93,7 @@ const initial: OpenChannelObjective = {
   myIndex: 0,
   preFundSetup: richPreFS.signedBy(),
   funding: {amount: BN.from(0), finalized: true},
-  fundingRequests: [],
+  fundingRequest: undefined,
   postFundSetup: richPostFS.signedBy()
 };
 
@@ -192,7 +192,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.theirPreFundSetup,
       preFundSetup: richPreFS.signedBy('A'),
       funding: {amount: BN.from(0), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     [{type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}]
@@ -208,7 +208,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.safeToDeposit,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(0), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     [{type: 'sendMessage', message: {recipient: 'alice'}}]
@@ -223,7 +223,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(0), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     [{type: 'deposit', amount: BN.from(1)}]
@@ -239,7 +239,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(1), finalized: false},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     []
@@ -254,7 +254,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(1), finalized: false},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     [{type: 'deposit', amount: BN.from(2)}]
@@ -270,7 +270,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: false},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     []
@@ -285,7 +285,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: false},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
     []
@@ -305,7 +305,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('B')
     },
     [{type: 'sendMessage', message: {recipient: 'alice'}}]
@@ -321,7 +321,7 @@ test('pure objective cranker', () => {
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('A')
     },
     [{type: 'sendMessage', message: {recipient: 'bob'}}]
@@ -337,7 +337,7 @@ test('pure objective cranker', () => {
       status: 'success',
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('A', 'B')
     },
     []
@@ -352,7 +352,7 @@ test('pure objective cranker', () => {
       status: 'success',
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: BN.from(3), finalized: true},
-      fundingRequests: [],
+      fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('A', 'B')
     },
     []
