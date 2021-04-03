@@ -1018,6 +1018,9 @@ export class SingleThreadedEngine
     await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
+    const event: DirectFunder.OpenChannelEvent = {type: 'FundingUpdated', amount, finalized: true};
+    await this.crankRichObjective(channelId, event, response);
+
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
 
     // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
