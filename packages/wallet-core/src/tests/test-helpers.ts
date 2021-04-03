@@ -1,3 +1,5 @@
+import * as _ from 'lodash';
+
 import {createSignatureEntry} from '../state-utils';
 import {makeAddress, SignedState, State} from '../types';
 import {makeDestination} from '../utils';
@@ -35,5 +37,5 @@ type Peer = keyof typeof participants;
 export function signStateHelper(state: State, by: Peer): SignedState {
   const entry = createSignatureEntry(state, participants[by].privateKey);
 
-  return {...state, signatures: [entry]};
+  return {..._.cloneDeep(state), signatures: [entry]};
 }
