@@ -519,8 +519,8 @@ export class SingleThreadedEngine
       fundingLedgerChannelId
     );
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
-      const signingAddress = await this.getCachedSigningAddress();
-      this.storeRichObjective(objective, signedState, signingAddress);
+      const {address} = await this.getCachedSigningWallet();
+      this.storeRichObjective(objective, signedState, address);
     }
 
     this.emit('objectiveStarted', objective);
@@ -825,10 +825,14 @@ export class SingleThreadedEngine
     return response.singleChannelOutput();
   }
 
-  private _cachedSigningAddress: Address = '' as Address;
-  private async getCachedSigningAddress(): Promise<Address> {
-    if (this._cachedSigningAddress === '') {
-      this._cachedSigningAddress = await this.getSigningAddress();
+  private _cachedSigningAddress: {address: Address; privateKey: Bytes32} = {
+    address: '' as Address,
+    privateKey: '' as Bytes32,
+  };
+  private async getCachedSigningWallet(): Promise<{address: Address; privateKey: Bytes32}> {
+    if (this._cachedSigningAddress.address === '') {
+      const {privateKey, address} = await SigningWallet.query(this.knex).first();
+      this._cachedSigningAddress = {privateKey, address};
     }
 
     return this._cachedSigningAddress;
@@ -847,12 +851,12 @@ export class SingleThreadedEngine
       o => o.type === 'OpenChannel' && o.data.fundingStrategy === 'Direct'
     );
 
-    const signingAddress = await this.getCachedSigningAddress();
+    const {address} = await this.getCachedSigningWallet();
     ((direct ?? []) as OpenChannel[]).map(o => {
       const openingState = wirePayload.signedStates
         ?.map(deserializeState)
         .find(s => calculateChannelId(s) === o.data.targetChannelId);
-      this.storeRichObjective(o, openingState as State, signingAddress);
+      this.storeRichObjective(o, openingState as State, address);
     });
 
     const {signedStates} = wirePayload;
@@ -868,13 +872,13 @@ export class SingleThreadedEngine
       // Note that this helps prevent DDoS attacks!
       if (!current) return;
 
-      const myPrivateKey = (await SigningWallet.query(this.knex).first()).privateKey;
+      const {privateKey} = await this.getCachedSigningWallet();
       const event = {
         type: 'MessageReceived' as const,
         message: {walletVersion: WALLET_VERSION, signedStates: signedStates.map(deserializeState)},
       };
 
-      const result = DirectFunder.openChannelCranker(current, event, myPrivateKey);
+      const result = DirectFunder.openChannelCranker(current, event, privateKey);
 
       // Store new state
       this.richObjectives[channelId] = result.objective;
