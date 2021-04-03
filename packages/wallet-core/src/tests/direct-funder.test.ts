@@ -24,7 +24,7 @@ import {
   StateWithHash
 } from '../types';
 
-import {ONE_DAY, participants} from './test-helpers';
+import {ONE_DAY, participants, signStateHelper} from './test-helpers';
 const {A: participantA, B: participantB} = participants;
 
 const {AddressZero} = ethers.constants;
@@ -101,6 +101,11 @@ describe('initialization', () => {
   test('when the opening state makes sense', () => {
     expect(initialize(openingState, 0)).toMatchObject(initial);
     expect(initialize(openingState, 1)).toMatchObject({...initial, myIndex: 1});
+    expect(initialize(signStateHelper(openingState, 'A'), 1)).toMatchObject({
+      ...initial,
+      myIndex: 1,
+      preFundSetup: richPreFS.signedBy('A')
+    });
   });
 
   test('when the index is out of range', () => {

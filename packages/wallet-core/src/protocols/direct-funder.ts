@@ -3,7 +3,7 @@ import * as _ from 'lodash';
 import {checkThat, isSimpleAllocation, unreachable} from '../utils';
 import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
-import {Address, Payload, SignatureEntry, State, Uint256} from '../types';
+import {Address, Payload, SignatureEntry, SignedState, State, Uint256} from '../types';
 
 // TODO (WALLET_VERSION): This should be determined and exported by wallet-core
 export const WALLET_VERSION = 'SomeVersion';
@@ -42,7 +42,10 @@ export type OpenChannelObjective = {
   postFundSetup: SignedStateHash;
 };
 
-export function initialize(openingState: State, myIndex: number): OpenChannelObjective {
+export function initialize(
+  openingState: State | SignedState,
+  myIndex: number
+): OpenChannelObjective {
   if (openingState.turnNum !== 0) {
     throw 'unexpected state';
   }
@@ -52,12 +55,15 @@ export function initialize(openingState: State, myIndex: number): OpenChannelObj
     throw 'unexpected index';
   }
 
+  const signatures =
+    'signatures' in openingState ? mergeSignatures([], openingState.signatures) : [];
+
   return {
     channelId: calculateChannelId(openingState),
     myIndex,
-    openingState,
+    openingState: _.omit(openingState, 'signatures'),
     status: WaitingFor.theirPreFundSetup,
-    preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures: []},
+    preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures},
     funding: {amount: BN.from(0), finalized: true},
     fundingRequests: [],
     postFundSetup: {hash: hashState(setupState(openingState, Hashes.postFundSetup)), signatures: []}
