@@ -520,12 +520,8 @@ export class SingleThreadedEngine
     );
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
       const {address} = await this.getCachedSigningWallet();
-      const richObjective = this.storeRichObjective(objective, signedState, address);
-      const event: DirectFunder.OpenChannelEvent = {
-        type: 'MessageReceived',
-        message: {walletVersion: WALLET_VERSION, signedStates: [richObjective.openingState as any]},
-      };
-      this.crankRichObjective(channel.channelId, event, response);
+      this.storeRichObjective(objective, signedState, address);
+      this.crankRichObjective(channel.channelId, {type: 'Nudge'}, response);
     }
 
     this.emit('objectiveStarted', objective);
@@ -606,15 +602,7 @@ export class SingleThreadedEngine
     await this.takeActions([channelId], response);
 
     if (this.richObjectives[channelId]) {
-      const event: DirectFunder.OpenChannelEvent = {
-        type: 'MessageReceived',
-        message: {
-          walletVersion: WALLET_VERSION,
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          signedStates: [this.richObjectives[channelId]!.openingState as any],
-        },
-      };
-      await this.crankRichObjective(channelId, event, response);
+      await this.crankRichObjective(channelId, {type: 'Nudge'}, response);
     }
 
     this.registerChannelWithChainService(channelId);
