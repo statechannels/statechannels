@@ -13,7 +13,6 @@ import {
   validatePayload,
   Outcome,
   convertToParticipant,
-  BN,
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
@@ -1005,7 +1004,7 @@ export class SingleThreadedEngine
     {channelId, amount, assetHolderAddress}: HoldingUpdatedArg,
     response = EngineResponse.initialize()
   ): Promise<void> {
-    await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
+    await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
