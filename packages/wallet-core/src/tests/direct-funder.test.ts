@@ -6,12 +6,14 @@ import {addHash, calculateChannelId, createSignatureEntry} from '../state-utils'
 import {BN} from '../bignumber';
 import {
   Action,
+  initialize,
   openChannelCranker,
   OpenChannelEvent,
   OpenChannelObjective,
   OpenChannelResult,
   SignedStateHash,
-  WaitingFor
+  WaitingFor,
+  WALLET_VERSION
 } from '../protocols/direct-funder';
 import {
   Address,
@@ -94,6 +96,57 @@ const initial: OpenChannelObjective = {
   fundingRequests: [],
   postFundSetup: richPostFS.signedBy()
 };
+
+describe('initialization', () => {
+  test('when the opening state makes sense', () => {
+    expect(initialize(openingState, 0)).toMatchObject(initial);
+    expect(initialize(openingState, 1)).toMatchObject({...initial, myIndex: 1});
+  });
+
+  test('when the index is out of range', () => {
+    expect(() => initialize(openingState, -1)).toThrow('unexpected index');
+    expect(() => initialize(openingState, 0.5)).toThrow('unexpected index');
+    expect(() => initialize(openingState, 2)).toThrow('unexpected index');
+  });
+
+  test('when the opening state has the wrong turn number', () => {
+    expect(() => initialize({...openingState, turnNum: 1}, 0)).toThrow('unexpected state');
+  });
+});
+
+function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
+  switch (action.type) {
+    case 'deposit':
+      // Assume no chain re-orgs
+      return {
+        type: 'FundingUpdated',
+        amount: BN.add(action.amount, objective.funding.amount),
+        finalized: false
+      };
+    case 'sendMessage':
+      return {type: 'MessageReceived', message: action.message.message};
+    default:
+      return unreachable(action);
+  }
+}
+
+function crankAndExpect(
+  peer: Peer,
+  currentState: Record<Peer, OpenChannelObjective>,
+  actionOrEvent: Action | OpenChannelEvent,
+  objective: DeepPartial<OpenChannelObjective>,
+  actions: DeepPartial<Action>[]
+): OpenChannelResult {
+  const event =
+    actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
+      ? generateEvent(actionOrEvent, currentState[peer])
+      : actionOrEvent;
+  const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
+  expect(output).toMatchObject({objective, actions});
+  currentState[peer] = output.objective;
+
+  return output;
+}
 
 test('pure objective cranker', () => {
   const currentState = {
@@ -310,7 +363,7 @@ describe('error modes', () => {
     expect(() =>
       openChannelCranker(
         initial,
-        {type: 'MessageReceived', message: {signedStates}},
+        {type: 'MessageReceived', message: {signedStates, walletVersion: WALLET_VERSION}},
         participants.A.privateKey
       )
     ).toThrow('received a signature from a non-participant');
@@ -321,43 +374,9 @@ describe('error modes', () => {
     expect(() =>
       openChannelCranker(
         initial,
-        {type: 'MessageReceived', message: {signedStates}},
+        {type: 'MessageReceived', message: {signedStates, walletVersion: WALLET_VERSION}},
         participants.A.privateKey
       )
     ).toThrow('Unexpected state hash');
   });
 });
-
-function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
-  switch (action.type) {
-    case 'deposit':
-      // Assume no chain re-orgs
-      return {
-        type: 'FundingUpdated',
-        amount: BN.add(action.amount, objective.funding.amount),
-        finalized: false
-      };
-    case 'sendMessage':
-      return {type: 'MessageReceived', message: action.message.message};
-    default:
-      return unreachable(action);
-  }
-}
-
-function crankAndExpect(
-  peer: Peer,
-  currentState: Record<Peer, OpenChannelObjective>,
-  actionOrEvent: Action | OpenChannelEvent,
-  objective: DeepPartial<OpenChannelObjective>,
-  actions: DeepPartial<Action>[]
-): OpenChannelResult {
-  const event =
-    actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
-      ? generateEvent(actionOrEvent, currentState[peer])
-      : actionOrEvent;
-  const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
-  expect(output).toMatchObject({objective, actions});
-  currentState[peer] = output.objective;
-
-  return output;
-}

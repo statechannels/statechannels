@@ -1,15 +1,17 @@
 import * as _ from 'lodash';
 
 import {checkThat, isSimpleAllocation, unreachable} from '../utils';
-import {Message} from '../wire-protocol';
 import {BN} from '../bignumber';
-import {addHash, hashState, signState} from '../state-utils';
-import {Address, SignatureEntry, State, StateWithHash, Uint256} from '../types';
+import {calculateChannelId, hashState, signState} from '../state-utils';
+import {Address, Payload, SignatureEntry, State, Uint256} from '../types';
 
-type AddressedMessage = {recipient: string; message: Message};
+// TODO (WALLET_VERSION): This should be determined and exported by wallet-core
+export const WALLET_VERSION = 'SomeVersion';
+
+type AddressedMessage = {recipient: string; message: Payload};
 
 export type OpenChannelEvent =
-  | {type: 'MessageReceived'; message: Message}
+  | {type: 'MessageReceived'; message: Payload}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
@@ -39,6 +41,28 @@ export type OpenChannelObjective = {
   fundingRequests: {tx: string}[];
   postFundSetup: SignedStateHash;
 };
+
+export function initialize(openingState: State, myIndex: number): OpenChannelObjective {
+  if (openingState.turnNum !== 0) {
+    throw 'unexpected state';
+  }
+
+  const allowedIndices = _.range(0, openingState.participants.length);
+  if (!allowedIndices.includes(myIndex)) {
+    throw 'unexpected index';
+  }
+
+  return {
+    channelId: calculateChannelId(openingState),
+    myIndex,
+    openingState,
+    status: WaitingFor.theirPreFundSetup,
+    preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures: []},
+    funding: {amount: BN.from(0), finalized: true},
+    fundingRequests: [],
+    postFundSetup: {hash: hashState(setupState(openingState, Hashes.postFundSetup)), signatures: []}
+  };
+}
 
 export type Action =
   | {type: 'sendMessage'; message: AddressedMessage}
@@ -206,23 +230,31 @@ function completed(objective: OpenChannelObjective, step: Hashes): boolean {
   return objective[step].signatures.length === firstState.participants.length;
 }
 
+function setupState(openingState: State, key: Hashes): State {
+  const turnNum = key === Hashes.preFundSetup ? 0 : 2 * openingState.participants.length - 1;
+
+  return {...openingState, turnNum};
+}
+
 function signStateAction(
   key: Hashes,
   myPrivateKey: string,
   objective: OpenChannelObjective,
   actions: Action[]
 ): Action[] {
-  const {openingState: firstState, myIndex} = objective;
-  const me = firstState.participants[myIndex];
+  const {openingState, myIndex} = objective;
+  const me = openingState.participants[myIndex];
 
-  const turnNum = key === Hashes.preFundSetup ? 0 : 2 * firstState.participants.length - 1;
-  const state: StateWithHash = addHash({...firstState, turnNum});
+  const state = setupState(openingState, key);
   const signature = signState(state, myPrivateKey);
   const entry = {signature, signer: me.signingAddress};
-  objective[key].signatures.push(entry);
+  objective[key].signatures = mergeSignatures(objective[key].signatures, [entry]);
 
   recipients(objective).map(recipient => {
-    const message: Message = {signedStates: [{...state, signatures: [entry]}]};
+    const message: Payload = {
+      walletVersion: WALLET_VERSION,
+      signedStates: [{...state, signatures: [entry]}]
+    };
     actions.push({type: 'sendMessage', message: {recipient, message}});
   });
 
@@ -234,6 +266,7 @@ function recipients({openingState: {participants}, myIndex}: OpenChannelObjectiv
 }
 
 function mergeSignatures(left: SignatureEntry[], right: SignatureEntry[]): SignatureEntry[] {
+  // TODO: Perhaps this should place signatures according to the participant's index?
   const unsorted = _.uniqBy(_.concat(left, right), entry => entry.signer);
 
   return _.sortBy(unsorted, entry => entry.signer);
