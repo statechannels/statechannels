@@ -63,7 +63,7 @@ export interface EngineInterface {
 
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
-  // TODO: This should live on a TestEngine interface
+  // TODO: Should this live on a TestEngineInterface?
   updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput>;
   // Engine <-> Engine communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
