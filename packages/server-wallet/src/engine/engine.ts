@@ -584,11 +584,19 @@ export class SingleThreadedEngine
 
     const objectives = await this.store.getObjectives([channelId]);
 
-    if (objectives.length === 0)
-      throw new Error(`Could not find objective for channel ${channelId}`);
+    if (objectives.length !== 1) {
+      const msg = 'Expecting exactly one objective';
+      this.logger.error({channelId, objectives}, msg);
+      throw new Error(msg);
+    }
 
-    if (objectives[0].type === 'OpenChannel')
-      await this.store.approveObjective(objectives[0].objectiveId);
+    const objective = objectives[0];
+
+    if (objective.type === 'OpenChannel') {
+      await this.store.approveObjective(objective.objectiveId);
+    } else {
+      // TODO: Shouldn't we do something about this??
+    }
 
     await this.takeActions([channelId], response);
 
