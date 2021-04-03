@@ -106,6 +106,14 @@ describe('initialization', () => {
       myIndex: 1,
       preFundSetup: richPreFS.signedBy('A')
     });
+    expect(initialize(signStateHelper(openingState, 'A', 'B'), 0)).toMatchObject({
+      ...initial,
+      preFundSetup: richPreFS.signedBy('A', 'B')
+  });
+    expect(initialize(signStateHelper(openingState, 'B', 'A'), 0)).toMatchObject({
+      ...initial,
+      preFundSetup: richPreFS.signedBy('A', 'B')
+    });
   });
 
   test('when the index is out of range', () => {
