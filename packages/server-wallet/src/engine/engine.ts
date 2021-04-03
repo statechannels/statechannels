@@ -866,38 +866,45 @@ export class SingleThreadedEngine
       if (signedStates[0].turnNum >= 4) return;
 
       const channelId = signedStates[0].channelId;
-
-      const current = this.richObjectives[channelId];
-      // For tests that might push in states without creating objectives first, we return early
-      // Note that this helps prevent DDoS attacks!
-      if (!current) return;
-
-      const {privateKey} = await this.getCachedSigningWallet();
       const event = {
         type: 'MessageReceived' as const,
         message: {walletVersion: WALLET_VERSION, signedStates: signedStates.map(deserializeState)},
       };
+      await this.crankRichObjective(channelId, event, response);
+    }
+  }
 
-      const result = DirectFunder.openChannelCranker(current, event, privateKey);
+  // TODO (DirectFunder) This should probably belong in the objective manager.
+  private async crankRichObjective(
+    channelId: Bytes32,
+    event: DirectFunder.OpenChannelEvent,
+    response: EngineResponse
+  ): Promise<void> {
+    const current = this.richObjectives[channelId];
+    // For tests that might push in states without creating objectives first, we return early
+    // Note that this helps prevent DDoS attacks!
+    if (!current) return;
 
-      // Store new state
-      this.richObjectives[channelId] = result.objective;
+    const {privateKey} = await this.getCachedSigningWallet();
+    const result = DirectFunder.openChannelCranker(current, event, privateKey);
 
-      // Take actions
-      for (const action of result.actions) {
-        switch (action.type) {
-          case 'deposit':
-            // throw new Error('Should be depositing');
-            break;
-          case 'sendMessage': {
-            action.message.message.signedStates?.map(state =>
-              response.queueState(state, result.objective.myIndex)
-            );
-            break;
-          }
-          default:
-            return unreachable(action);
+    // Store new state
+    this.richObjectives[channelId] = result.objective;
+
+    // Take actions
+    for (const action of result.actions) {
+      switch (action.type) {
+        case 'deposit':
+          // throw new Error('Should be depositing');
+          break;
+        case 'sendMessage': {
+          action.message.message.signedStates?.map(state =>
+            response.queueState(state, result.objective.myIndex)
+          );
+          break;
         }
+        default:
+          return unreachable(action);
       }
     }
   }
