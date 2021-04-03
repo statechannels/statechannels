@@ -111,10 +111,7 @@ it('throws for channels with different chain id', async () => {
   signedState = {...signedState, chainId: engine.store.chainNetworkID + 'deadbeef'};
 
   await expect(
-    engine.pushMessage({
-      walletVersion: WALLET_VERSION,
-      signedStates: [signedState],
-    })
+    engine.pushMessage({walletVersion: WALLET_VERSION, signedStates: [signedState]})
   ).rejects.toThrow();
 });
 
@@ -469,42 +466,21 @@ describe('when there is a request provided', () => {
 });
 
 describe('direct-funder', () => {
-  it('stores new objectives when they come in', async () => {
+  it('stores but does not crank new objectives when they come in', async () => {
     const signedState = stateSignedBy([bob()])({turnNum: zero, channelNonce: 9001});
-    const channelId = calculateChannelId(signedState);
-    const objective: OpenChannel = {
-      type: 'OpenChannel',
-      data: {targetChannelId: channelId, fundingStrategy: 'Direct'},
-      participants: signedState.participants,
-    };
+    const targetChannelId = calculateChannelId(signedState);
+    const {participants} = signedState;
+    const objectives: OpenChannel[] = [
+      {type: 'OpenChannel', data: {targetChannelId, fundingStrategy: 'Direct'}, participants},
+    ];
+    const signedStates = [serializeState(signedState)];
 
-    const result = await engine.pushMessage({
-      walletVersion: WALLET_VERSION,
-      objectives: [objective],
-      signedStates: [serializeState(signedState)],
-    });
+    await engine.pushMessage({walletVersion: WALLET_VERSION, objectives, signedStates});
 
-    // await expect(() => result).rejects.toThrow('Error during pushMessage');
-
-    const currentState = (engine as any).richObjectives[channelId];
+    const currentState = (engine as any).richObjectives[targetChannelId];
     expect(currentState).toMatchObject({
-      status: DirectFunder.WaitingFor.channelFunded,
-      preFundSetup: {
-        hash: hashState(signedState),
-        signatures: [
-          {signer: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'},
-          {signer: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'},
-        ],
-      },
-    });
-
-    expect(result).toBeDefined();
-
-    const message = result.outbox[0].params.data;
-    expect(message).toMatchObject({
-      signedStates: [
-        {channelId, signatures: [currentState.preFundSetup.signatures[0].signature], turnNum: 0},
-      ],
+      status: DirectFunder.WaitingFor.theirPreFundSetup,
+      preFundSetup: {hash: hashState(signedState), signatures: []},
     });
   });
 });

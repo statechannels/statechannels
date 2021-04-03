@@ -520,7 +520,12 @@ export class SingleThreadedEngine
     );
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
       const {address} = await this.getCachedSigningWallet();
-      this.storeRichObjective(objective, signedState, address);
+      const richObjective = this.storeRichObjective(objective, signedState, address);
+      const event: DirectFunder.OpenChannelEvent = {
+        type: 'MessageReceived',
+        message: {walletVersion: WALLET_VERSION, signedStates: [richObjective.openingState as any]},
+      };
+      this.crankRichObjective(channel.channelId, event, response);
     }
 
     this.emit('objectiveStarted', objective);
@@ -599,6 +604,18 @@ export class SingleThreadedEngine
     }
 
     await this.takeActions([channelId], response);
+
+    if (this.richObjectives[channelId]) {
+      const event: DirectFunder.OpenChannelEvent = {
+        type: 'MessageReceived',
+        message: {
+          walletVersion: WALLET_VERSION,
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          signedStates: [this.richObjectives[channelId]!.openingState as any],
+        },
+      };
+      await this.crankRichObjective(channelId, event, response);
+    }
 
     this.registerChannelWithChainService(channelId);
 
@@ -868,9 +885,15 @@ export class SingleThreadedEngine
 
     const {signedStates} = wirePayload;
     if (signedStates?.[0]) {
-      // When funding is connected, we won't need this "backdoor exit". Instead, the objective
-      // would have already reached the 'success' state when we receive turn number 4.
-      if (signedStates[0].turnNum >= 4) return;
+      if (
+        // When funding is connected, we won't need this "backdoor exit". Instead, the objective
+        // would have already reached the 'success' state when we receive turn number 4.
+        signedStates[0].turnNum >= 4 ||
+        // If someone just send us the OpenChannel objective, delay pushing the event in
+        // until the objective is approved via joinChannel
+        direct?.length
+      )
+        return;
 
       const channelId = signedStates[0].channelId;
       const event = {
@@ -887,27 +910,34 @@ export class SingleThreadedEngine
     event: DirectFunder.OpenChannelEvent,
     response: EngineResponse
   ): Promise<void> {
-    const current = this.richObjectives[channelId];
+    const before = _.cloneDeep(this.richObjectives[channelId]);
     // For tests that might push in states without creating objectives first, we return early
     // Note that this helps prevent DDoS attacks!
-    if (!current) return;
+    if (!before) return;
 
     const {privateKey} = await this.getCachedSigningWallet();
-    const result = DirectFunder.openChannelCranker(current, event, privateKey);
+    const result = DirectFunder.openChannelCranker(before, event, privateKey);
 
     // Store new state
     this.richObjectives[channelId] = result.objective;
 
-    // Take actions
+    // Check actions at runtime
     for (const action of result.actions) {
       switch (action.type) {
         case 'deposit':
           // throw new Error('Should be depositing');
           break;
         case 'sendMessage': {
-          action.message.message.signedStates?.map(state =>
-            response.queueState(state, result.objective.myIndex)
-          );
+          const stateSummary = (s: any) => ({turn: s.turnNum, signatures: s.signatures.length});
+          const received = action.message.message.signedStates?.map(stateSummary);
+          const expected = response._signedStates.map(stateSummary);
+
+          if (!_.isEqual(received, expected)) {
+            const msg = 'Protocol regression';
+            this.logger.error({before, event, after: result.objective, expected, received}, msg);
+            throw new Error(msg);
+          }
+
           break;
         }
         default:
@@ -916,9 +946,14 @@ export class SingleThreadedEngine
     }
   }
 
-  private storeRichObjective(o: OpenChannel, openingState: State, signingAddress: string) {
+  private storeRichObjective(
+    o: OpenChannel,
+    openingState: State,
+    signingAddress: string
+  ): DirectFunder.OpenChannelObjective {
     const channelId = o.data.targetChannelId;
-    // Fetch the corresponding state
+    if (this.richObjectives[channelId])
+      return this.richObjectives[channelId] as DirectFunder.OpenChannelObjective;
 
     if (!openingState) {
       throw new Error('Expecting opening state within wire payload');
@@ -927,7 +962,7 @@ export class SingleThreadedEngine
     const myIndex = openingState.participants.findIndex(p => p.signingAddress === signingAddress);
     const richObjective = DirectFunder.initialize(openingState, myIndex);
 
-    this.richObjectives[channelId] = richObjective;
+    return (this.richObjectives[channelId] = richObjective);
   }
 
   private async _pushMessage(wirePayload: WirePayload, response: EngineResponse): Promise<void> {
