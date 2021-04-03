@@ -155,8 +155,8 @@ function crankAndExpect(
 
 test('pure objective cranker', () => {
   const currentState = {
-    A: _.cloneDeep(initial),
-    B: _.cloneDeep({...initial, myIndex: 1})
+    A: _.cloneDeep(initialize(openingState, 0)),
+    B: _.cloneDeep(initialize(signStateHelper(openingState, 'A'), 1))
   };
 
   /*
@@ -198,11 +198,12 @@ test('pure objective cranker', () => {
     [{type: 'sendMessage', message: {recipient: 'bob', message: expect.any(Object)}}]
   );
 
-  // 2. Bob receives preFS event 1, trigers preFS action 2
+  // 2. Bob nudges (representing a joinChannel call), triggers preFS action 2
+  expect(currentState.B.preFundSetup.signatures).toHaveLength(1);
   output = crankAndExpect(
     'B',
     currentState,
-    output.actions[0],
+    {type: 'Nudge'},
     {
       status: WaitingFor.safeToDeposit,
       preFundSetup: richPreFS.signedBy('A', 'B'),

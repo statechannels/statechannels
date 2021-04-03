@@ -11,6 +11,7 @@ export const WALLET_VERSION = 'SomeVersion';
 type AddressedMessage = {recipient: string; message: Payload};
 
 export type OpenChannelEvent =
+  | {type: 'Nudge'}
   | {type: 'MessageReceived'; message: Payload}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
 
@@ -122,6 +123,8 @@ export function openChannelCranker(
   // First, process the event
 
   switch (event.type) {
+    case 'Nudge':
+      break;
     case 'FundingUpdated':
       objective.funding.amount = event.amount;
       objective.funding.finalized = event.finalized;
