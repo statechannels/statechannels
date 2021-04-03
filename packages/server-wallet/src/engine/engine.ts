@@ -548,10 +548,9 @@ export class SingleThreadedEngine
     const objectives = await this.store.getObjectives(channelIds);
 
     await Promise.all(
-      objectives.map(
-        async ({type, objectiveId}) =>
-          type === 'OpenChannel' && (await this.store.approveObjective(objectiveId))
-      )
+      objectives
+        .filter(o => o.type === 'OpenChannel')
+        .map(async ({objectiveId}) => await this.store.approveObjective(objectiveId))
     );
 
     await this.takeActions(channelIds, response);
