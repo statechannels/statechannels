@@ -480,7 +480,8 @@ describe('direct-funder', () => {
     const currentState = (engine as any).richObjectives[targetChannelId];
     expect(currentState).toMatchObject({
       status: DirectFunder.WaitingFor.theirPreFundSetup,
-      preFundSetup: {hash: hashState(signedState), signatures: []},
+      myIndex: 0,
+      preFundSetup: {hash: hashState(signedState), signatures: signedState.signatures},
     });
   });
 });
