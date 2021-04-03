@@ -83,22 +83,17 @@ it('Create a directly-funded channel between two engines, of which one crashes m
   // Then, this would be triggered by B's Chain Service after observing A's deposit
   const depositByB = {channelId, assetHolderAddress, amount: BN.from(2)}; // B sends 1 ETH (2 total)
   // < PostFund3B
-  const resultA2 = await peerEngines.a.updateFundingForChannels([depositByB]);
-  const resultB2 = await peerEngines.b.updateFundingForChannels([depositByB]);
+  const resultA2 = await peerEngines.a.holdingUpdated(depositByB);
+  const resultB2 = await peerEngines.b.holdingUpdated(depositByB);
 
-  expect(getChannelResultFor(channelId, resultA2.channelResults)).toMatchObject({
-    status: 'opening', // Still opening because turnNum 3 is not supported yet, but is signed by A
-    turnNum: 0,
-  });
+  // Still opening because turnNum 3 is not supported yet, but is signed by A
+  expect(resultA2.channelResult).toMatchObject({status: 'opening', turnNum: 0});
 
   await messageService.send(getMessages(resultA2));
   await messageService.send(getMessages(resultB2));
 
-  expect(getChannelResultFor(channelId, resultB2.channelResults)).toMatchObject({
-    // Still opening because turnNum 3 is not supported yet (2 is not in the engine)
-    status: 'opening',
-    turnNum: 0,
-  });
+  // Still opening because turnNum 3 is not supported yet (2 is not in the engine)
+  expect(resultB2.channelResult).toMatchObject({status: 'opening', turnNum: 0});
 
   //  > PostFund3A
   const resultB3 = await peerEngines.b.pushMessage(

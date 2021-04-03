@@ -40,11 +40,11 @@ export type ChallengeRegisteredArg = {
   challengeStates: SignedState[];
 };
 
-export interface ChainEventSubscriberInterface {
-  holdingUpdated(arg: HoldingUpdatedArg): void;
-  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg): void;
-  channelFinalized(arg: ChannelFinalizedArg): void;
-  challengeRegistered(arg: ChallengeRegisteredArg): void;
+export interface ChainEventSubscriberInterface<T extends void = void> {
+  holdingUpdated(arg: HoldingUpdatedArg): T;
+  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg): T;
+  channelFinalized(arg: ChannelFinalizedArg): T;
+  challengeRegistered(arg: ChallengeRegisteredArg): T;
 }
 
 interface ChainEventEmitterInterface {

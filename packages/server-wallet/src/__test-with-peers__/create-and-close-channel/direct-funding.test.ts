@@ -74,8 +74,8 @@ it('Create a directly funded channel between two engines ', async () => {
     turnNum: 0,
   });
 
-  const resultA2 = await peerEngines.a.updateFundingForChannels([depositByB]);
-  const resultB2 = await peerEngines.b.updateFundingForChannels([depositByB]);
+  const resultA2 = await peerEngines.a.holdingUpdated(depositByB);
+  const resultB2 = await peerEngines.b.holdingUpdated(depositByB);
   await messageService.send(getMessages(resultA2));
   await messageService.send(getMessages(resultB2));
 

@@ -1003,11 +1003,15 @@ export class SingleThreadedEngine
   async holdingUpdated(
     {channelId, amount, assetHolderAddress}: HoldingUpdatedArg,
     response = EngineResponse.initialize()
-  ): Promise<void> {
+  ): Promise<SingleChannelOutput> {
     await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+
+    // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
+    // multiple channel output. So, we set strict to false
+    return response.singleChannelOutput(false);
   }
 
   async assetOutcomeUpdated({
