@@ -587,7 +587,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     // crank
     // -----
     const response = EngineResponse.initialize();
-    await LedgerManager.create({store}).crank(ledgerChannel.channelId, response);
+    manager.crank(ledgerChannel.channelId, response);
 
     // assertions
     // ----------
