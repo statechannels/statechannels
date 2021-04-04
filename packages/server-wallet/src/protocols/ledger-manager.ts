@@ -119,7 +119,7 @@ export class LedgerManager {
    * @param requests LedgerRequest model **to be mutated during cranking*
    * @returns states to sign for ledger channel
    */
-  private synchronousCrankLogic(ledger: Channel, requests: RichLedgerRequest[]): State[] {
+  synchronousCrankLogic(ledger: Channel, requests: RichLedgerRequest[]): State[] {
     // determine which state we're in
     const ledgerState = this.determineLedgerState(ledger);
     // what happens next depends on whether we're the leader or follower

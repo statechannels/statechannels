@@ -1,5 +1,10 @@
 import _ from 'lodash';
-import {unreachable} from '@statechannels/wallet-core';
+import {
+  addHash,
+  createSignatureEntry,
+  SignedStateVarsWithHash,
+  unreachable,
+} from '@statechannels/wallet-core';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
@@ -9,10 +14,12 @@ import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-chan
 import {createLogger} from '../../logger';
 import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
-import {State} from '../../models/channel/state';
 import {LedgerManager} from '../ledger-manager';
 import {EngineResponse} from '../../engine/engine-response';
 import {Destination} from '../../type-aliases';
+import {State} from '../../models/channel/state';
+import {addState, clearOldStates} from '../../state-utils';
+import {channel} from '../../models/__test__/fixtures/channel';
 
 jest.setTimeout(10_000);
 
@@ -37,7 +44,7 @@ afterEach(async () => {
 
 it(
   'SYNC: will create a proposal from requests in the queue',
-  testSynchronousLogic({
+  testLedgerCrank({
     as: 'leader',
     before: {
       agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
@@ -521,7 +528,7 @@ describe('as follower', () => {
   });
 });
 
-function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
+function _testLedgerCrankOld(args: LedgerCrankTestCaseArgs): () => Promise<void> {
   return async () => {
     // setup
     // -----
@@ -633,7 +640,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
   };
 }
 
-function testSynchronousLogic(args: LedgerCrankTestCaseArgs): () => Promise<void> {
+function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
   return async () => {
     // setup
     // -----
@@ -694,8 +701,51 @@ function testSynchronousLogic(args: LedgerCrankTestCaseArgs): () => Promise<void
 
     // crank
     // -----
+    const ledgerChannelId = ledgerChannel.channelId;
+
+    // Collect the correct input to the synchronous logic
+    const tx = store.knex as any;
+    const ledgerBefore = await store.getAndLockChannel(ledgerChannelId, tx);
+    const requestsBefore = await store.getActiveLedgerRequests(ledgerChannelId, tx);
+    const states = manager.synchronousCrankLogic(ledgerBefore, requestsBefore);
+
     const response = EngineResponse.initialize();
-    manager.crank(ledgerChannel.channelId, response);
+    await manager.crank(ledgerChannelId, response);
+
+    // BEGIN CODE FOR CREATING CONSISTENCY
+    function _summary(s: SignedStateVarsWithHash) {
+      return [s.turnNum, s.signatures.map(sig => (sig.signer[2] === '1' ? 'A' : 'B'))];
+    }
+    const privateKey =
+      args.as === 'leader'
+        ? '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
+        : '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727';
+
+    // console.log('as', args.as);
+    const signedStatesBefore = states.map(s => s.signedState).map(addHash);
+    signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
+    // console.log('states signed', signedStatesBefore.map(summary));
+
+    let statesAfter = ledgerBefore.vars;
+    // console.log('ledger before', ledgerBefore.vars.map(summary));
+
+    if (signedStatesBefore.length > 0) {
+      signedStatesBefore.map(state => {
+        // console.log('adding', summary(state));
+        // console.log('to', statesAfter.map(summary));
+        statesAfter = addState(statesAfter, state);
+        // console.log('gives', statesAfter.map(summary));
+      });
+    } else {
+      statesAfter = ledgerBefore.vars;
+    }
+
+    const ledgerAfter = channel({...ledgerBefore.channelConstants, vars: statesAfter});
+    // console.log(signedStatesBefore.map(summary));
+    // console.log('ledger after', ledgerAfter.vars.map(summary));
+    ledgerAfter.vars = clearOldStates(ledgerAfter.vars, ledgerAfter.support);
+    // console.log('after clearing', ledgerAfter.vars.map(summary));
+    // END CODE FOR CREATING CONSISTENCY
 
     // assertions
     // ----------
@@ -703,6 +753,13 @@ function testSynchronousLogic(args: LedgerCrankTestCaseArgs): () => Promise<void
       // fetch the ledger channel and check that the states are ok
       const ledger = await store.getChannel(ledgerChannel.channelId, tx);
       if (!ledger) throw new Error(`Ledger not found`);
+
+      // BEGIN REGRESSION CHECK
+      // console.log('right', ledger.sortedStates.map(summary));
+      // console.log('wrong', ledgerAfter.sortedStates.map(summary));
+      expect(ledger.sortedStates).toMatchObject(ledgerAfter.sortedStates);
+      // END REGRESSION CHECK
+
       // get the latest agreed state and the turn number
       const agreedState = ledger.latestFullySignedState;
       if (!agreedState) throw new Error(`No latest agreed state`);
