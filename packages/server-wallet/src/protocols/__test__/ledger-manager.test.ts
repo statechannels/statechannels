@@ -684,18 +684,18 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       ]),
     });
 
-    const richRequests: RichLedgerRequest[] = [];
+    const requests: RichLedgerRequest[] = [];
     for (const req of testCase.requestsBefore) {
       const channelToBeFunded = channelLookup.get(req.channelKey);
 
       switch (req.type) {
         case 'fund':
-          richRequests.push(
+          requests.push(
             await ledgerChannel.insertFundingRequest(store, {...req, channelToBeFunded})
           );
           break;
         case 'defund':
-          richRequests.push(
+          requests.push(
             await ledgerChannel.insertDefundingRequest(store, {...req, channelToBeFunded})
           );
           break;
@@ -711,13 +711,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     // Collect the correct input to the synchronous logic
     const tx = store.knex as any;
     const ledgerBefore = await store.getAndLockChannel(ledgerChannelId, tx);
-    const requests = await store.getActiveLedgerRequests(ledgerChannelId, tx);
-
-    // REGRESSION TEST
-    expect(requests.map(describeRequest).sort()).toMatchObject(
-      richRequests.map(describeRequest).sort()
-    );
-    // REGRESSION TEST
 
     const states = manager.synchronousCrankLogic(ledgerBefore, requests);
 
