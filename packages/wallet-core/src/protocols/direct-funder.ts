@@ -8,6 +8,8 @@ import {Address, Payload, SignatureEntry, SignedState, State, Uint256} from '../
 // TODO (WALLET_VERSION): This should be determined and exported by wallet-core
 export const WALLET_VERSION = 'SomeVersion';
 
+export const MAX_WAITING_TIME = 5_000;
+
 type AddressedMessage = {recipient: string; message: Payload};
 
 export type OpenChannelEvent = {now: number} & (
@@ -221,9 +223,18 @@ export function openChannelCranker(
   // if there's an outstanding chain request, take no action
   // TODO: (ChainService) This assumes that each participant deposits exactly once per channel
   else if (objective.fundingRequest) {
-    // TODO: (ChainService) This should handle timed out funding requests
-    objective.status = WaitingFor.channelFunded;
-    return {objective, actions};
+    if (event.now >= objective.fundingRequest.submittedAt + MAX_WAITING_TIME) {
+      objective.status = 'error';
+      const error = new Error('Timed out while funding');
+      _.set(error, 'code', 2);
+      _.set(error, 'now', event.now);
+      _.set(error, 'submittedAt', objective.fundingRequest.submittedAt);
+      actions.push({type: 'handleError', error});
+      return {objective, actions};
+    } else {
+      objective.status = WaitingFor.channelFunded;
+      return {objective, actions};
+    }
   } else {
     // otherwise, deposit
     const amount = BN.sub(targetAfter, funding.amount); // previous checks imply this is >0

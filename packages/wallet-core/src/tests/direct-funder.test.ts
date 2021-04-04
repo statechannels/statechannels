@@ -7,6 +7,7 @@ import {BN} from '../bignumber';
 import {
   Action,
   initialize,
+  MAX_WAITING_TIME,
   openChannelCranker,
   OpenChannelEvent,
   OpenChannelObjective,
@@ -160,6 +161,11 @@ describe('cranking', () => {
       attempts: 0,
       submittedAt: 0
     };
+    const depositPending = objectiveFixture({
+      status: WaitingFor.theirPostFundState,
+      preFundSetup: richPreFS.signedBy('A', 'B'),
+      fundingRequest
+    });
     const deposited = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
@@ -244,7 +250,7 @@ describe('cranking', () => {
       [ almostFunded, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
       // Receiving a deposit submitted event
-      [ readyToFund, submitted(0), {funding: funding(0, true), fundingRequest: {tx: 'tx'}, postFundSetup: richPostFS.signedBy()}, [] ],
+      [ depositPending, submitted(0), {funding: funding(0, true), fundingRequest: {tx: 'tx'}, postFundSetup: richPostFS.signedBy()}, [] ],
 
       // Receiving a preFundSetup state
       [ funded,          nudge, {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
@@ -265,16 +271,18 @@ describe('cranking', () => {
     });
     const receiveUnexpectedState = sendState(signStateHelper({...openingState, turnNum: 1}));
 
-    const handleError = (error: any) => ({
+    const handleError = (code: number, error: any) => ({
       type: 'handleError' as const,
-      error: expect.objectContaining(error)
+      error: expect.objectContaining({...error, code})
     });
 
+    const error = {status: 'error'} as const;
+    const theFuture = MAX_WAITING_TIME + 500;
     //prettier-ignore
     const errorCases: TestCase[] = [
-      [empty, receiveNonParticipantState, empty, [handleError(({ signer: 'eve'}))]],
-      [empty, receiveUnexpectedState,     empty, [handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]})]]
-
+      [ empty, receiveNonParticipantState, error, [handleError(0, {signer: 'eve'})]],
+      [ empty, receiveUnexpectedState, error,     [handleError(1, {received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ] ],
+      [ depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ]
     ];
     test.each(errorCases)('errors: %#', (before, event, after, actions) => {
       expect(openChannelCranker(before, event, participants.A.privateKey)).toMatchObject({
