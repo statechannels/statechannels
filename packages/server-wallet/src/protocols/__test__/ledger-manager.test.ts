@@ -12,7 +12,7 @@ import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {Store} from '../../engine/store';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {createLogger} from '../../logger';
-import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
+import {LedgerRequest, LedgerRequestStatus, RichLedgerRequest} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
 import {LedgerManager} from '../ledger-manager';
 import {EngineResponse} from '../../engine/engine-response';
@@ -760,44 +760,49 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       expect(ledger.sortedStates).toMatchObject(ledgerAfter.sortedStates);
       // END REGRESSION CHECK
 
-      // get the latest agreed state and the turn number
-      const agreedState = ledger.latestFullySignedState;
-      if (!agreedState) throw new Error(`No latest agreed state`);
-
-      const ledgerStateDesc: LedgerStateDescription = {
-        agreed: toStateDesc(agreedState, channelLookup),
-        requests: [],
-      };
-
-      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
-      if (proposedState) {
-        expect(proposedState.signerIndices).toEqual([0]);
-        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
-      }
-      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
-      if (counterProposedState) {
-        expect(counterProposedState.signerIndices).toEqual([1]);
-        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
-      }
-
       // then fetch the ledger requests and check them
       const requests = await LedgerRequest.query(tx)
         .select()
         .where({ledgerChannelId: ledgerChannel.channelId});
 
-      for (const req of requests) {
-        ledgerStateDesc.requests.push([
-          req.type,
-          channelLookup.getKey(req.channelToBeFunded),
-          Number(req.amountA),
-          Number(req.amountB),
-          req.status,
-          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-        ]);
+      function checkRequests(richRequests: RichLedgerRequest[]) {
+        if (!ledger) throw new Error(`Ledger not found`);
+
+        // get the latest agreed state and the turn number
+        const agreedState = ledger.latestFullySignedState;
+        if (!agreedState) throw new Error(`No latest agreed state`);
+        const ledgerStateDesc: LedgerStateDescription = {
+          agreed: toStateDesc(agreedState, channelLookup),
+          requests: [],
+        };
+
+        const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+        if (proposedState) {
+          expect(proposedState.signerIndices).toEqual([0]);
+          ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+        }
+        const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+        if (counterProposedState) {
+          expect(counterProposedState.signerIndices).toEqual([1]);
+          ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
+        }
+
+        for (const req of richRequests) {
+          ledgerStateDesc.requests.push([
+            req.type,
+            channelLookup.getKey(req.channelToBeFunded),
+            Number(req.amountA),
+            Number(req.amountB),
+            req.status,
+            {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+          ]);
+        }
+        ledgerStateDesc.requests.sort();
+        args.after.requests.sort();
+        expect(ledgerStateDesc).toEqual(args.after);
       }
-      ledgerStateDesc.requests.sort();
-      args.after.requests.sort();
-      expect(ledgerStateDesc).toEqual(args.after);
+
+      checkRequests(requests);
     });
   };
 }
