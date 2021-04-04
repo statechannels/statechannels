@@ -12,7 +12,7 @@ import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {Store} from '../../engine/store';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {createLogger} from '../../logger';
-import {LedgerRequest, LedgerRequestStatus, RichLedgerRequest} from '../../models/ledger-request';
+import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
 import {LedgerManager} from '../ledger-manager';
 import {EngineResponse} from '../../engine/engine-response';
@@ -706,8 +706,8 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     // Collect the correct input to the synchronous logic
     const tx = store.knex as any;
     const ledgerBefore = await store.getAndLockChannel(ledgerChannelId, tx);
-    const requestsBefore = await store.getActiveLedgerRequests(ledgerChannelId, tx);
-    const states = manager.synchronousCrankLogic(ledgerBefore, requestsBefore);
+    const requests = await store.getActiveLedgerRequests(ledgerChannelId, tx);
+    const states = manager.synchronousCrankLogic(ledgerBefore, requests);
 
     const response = EngineResponse.initialize();
     await manager.crank(ledgerChannelId, response);
@@ -760,54 +760,38 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       expect(ledger.sortedStates).toMatchObject(ledgerAfter.sortedStates);
       // END REGRESSION CHECK
 
-      // then fetch the ledger requests and check them
-      const requests = await LedgerRequest.query(tx)
-        .select()
-        .where({ledgerChannelId: ledgerChannel.channelId});
+      // get the latest agreed state and the turn number
+      const agreedState = ledger.latestFullySignedState;
+      if (!agreedState) throw new Error(`No latest agreed state`);
+      const ledgerStateDesc: LedgerStateDescription = {
+        agreed: toStateDesc(agreedState, channelLookup),
+        requests: [],
+      };
 
-      function checkRequests(richRequests: RichLedgerRequest[]) {
-        if (!ledger) throw new Error(`Ledger not found`);
-
-        // get the latest agreed state and the turn number
-        const agreedState = ledger.latestFullySignedState;
-        if (!agreedState) throw new Error(`No latest agreed state`);
-        const ledgerStateDesc: LedgerStateDescription = {
-          agreed: toStateDesc(agreedState, channelLookup),
-          requests: [],
-        };
-
-        const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
-        if (proposedState) {
-          expect(proposedState.signerIndices).toEqual([0]);
-          ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
-        }
-        const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
-        if (counterProposedState) {
-          expect(counterProposedState.signerIndices).toEqual([1]);
-          ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
-        }
-
-        for (const req of richRequests) {
-          ledgerStateDesc.requests.push([
-            req.type,
-            channelLookup.getKey(req.channelToBeFunded),
-            Number(req.amountA),
-            Number(req.amountB),
-            req.status,
-            {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-          ]);
-        }
-        ledgerStateDesc.requests.sort();
-        args.after.requests.sort();
-        expect(ledgerStateDesc).toEqual(args.after);
+      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+      if (proposedState) {
+        expect(proposedState.signerIndices).toEqual([0]);
+        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+      }
+      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+      if (counterProposedState) {
+        expect(counterProposedState.signerIndices).toEqual([1]);
+        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
       }
 
-      checkRequests(requests);
-
-      // BEGIN REGRESSION CHECK
-      // Note that requestsBefore are _modified
-      checkRequests(requestsBefore);
-      // END REGRESSION CHECK
+      for (const req of requests) {
+        ledgerStateDesc.requests.push([
+          req.type,
+          channelLookup.getKey(req.channelToBeFunded),
+          Number(req.amountA),
+          Number(req.amountB),
+          req.status,
+          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+        ]);
+      }
+      ledgerStateDesc.requests.sort();
+      args.after.requests.sort();
+      expect(ledgerStateDesc).toEqual(args.after);
     });
   };
 }
