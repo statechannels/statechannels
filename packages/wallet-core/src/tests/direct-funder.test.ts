@@ -61,22 +61,11 @@ const channelId = calculateChannelId(openingState);
 function richify(state: State): StateWithHash & {signedBy(...peers: Peer[]): SignedStateHash} {
   const withHash = addHash(state);
 
-  const signaturesCache: Record<Peer, SignatureEntry | undefined> = {
-    A: undefined,
-    B: undefined
-  };
-
   return {
     ...withHash,
     signedBy(...peers: Peer[]) {
-      peers = _.sortedUniq(_.sortBy(peers));
-      const signatures = peers.map(peer => {
-        if (!signaturesCache[peer]) {
-          signaturesCache[peer] = createSignatureEntry(state, participants[peer].privateKey);
-        }
-
-        return signaturesCache[peer] as SignatureEntry;
-      });
+      const signedState = signStateHelper(withHash, ...peers);
+      const signatures = _.sortBy(signedState.signatures, sig => sig.signer);
 
       return {hash: withHash.stateHash, signatures};
     }
@@ -127,6 +116,13 @@ describe('initialization', () => {
   });
 });
 
+describe('funding', () => {
+  const readyToFund = initialize(signStateHelper(openingState, 'B', 'A'), 0);
+  test("when it's safe to fund", () => {
+    expect(readyToFund).toMatchObject({preFundSetup: richPreFS.signedBy('A', 'B')});
+  });
+});
+
 function generateEvent(action: Action, objective: OpenChannelObjective): OpenChannelEvent {
   switch (action.type) {
     case 'deposit':
@@ -161,13 +157,19 @@ function crankAndExpect(
   return output;
 }
 
-test('pure objective cranker', () => {
+test('pure objective cranker start to finish', () => {
   const currentState = {
     A: _.cloneDeep(initialize(openingState, 0)),
     B: _.cloneDeep(initialize(signStateHelper(openingState, 'A'), 1))
   };
 
   /*
+  This test is meant to match eg. the with-peers direct-funding test from server-wallet
+  It does not intend to test all behaviours of the protocol.
+  In particular, similar to the matching server-wallet test, it  does not actually trigger funding, but manually
+  tells the protocol that the channel's funding was updated
+  See https://github.com/statechannels/statechannels/blob/2b188f919cc0d1b3d4a12aca8918ddc0fb1bbaca/packages/server-wallet/src/__test-with-peers__/create-and-close-channel/direct-funding.test.ts#L73
+
   For the purpose of this test, I am arbitrarily deciding that the actions & events occur in this order:
   1. Alice signs the preFS, triggers preFS action 1
   2. Bob receives preFS event 1, trigers preFS action 2

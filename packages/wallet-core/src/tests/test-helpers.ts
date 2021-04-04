@@ -1,7 +1,7 @@
 import * as _ from 'lodash';
 
-import {createSignatureEntry} from '../state-utils';
-import {makeAddress, SignedState, State} from '../types';
+import {addHash, createSignatureEntry} from '../state-utils';
+import {makeAddress, SignatureEntry, SignedState, State} from '../types';
 import {makeDestination} from '../utils';
 
 export const ONE_DAY = 86400;
@@ -34,8 +34,18 @@ export const participants = {
 };
 
 type Peer = keyof typeof participants;
+const _signatureCache: Record<string, SignatureEntry> = {};
 export function signStateHelper(state: State, ...by: Peer[]): SignedState {
-  const signatures = by.map(peer => createSignatureEntry(state, participants[peer].privateKey));
+  const {stateHash} = addHash(state);
+  const signatures = by.map(peer => {
+    const key = `${stateHash}-${peer}`;
+
+    if (!_signatureCache[key]) {
+      _signatureCache[key] = createSignatureEntry(state, participants[peer].privateKey);
+    }
+
+    return _signatureCache[key];
+  });
 
   return {..._.cloneDeep(state), signatures};
 }
