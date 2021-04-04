@@ -95,34 +95,7 @@ export class LedgerManager {
       }
       // END CHALLENGING_VO
 
-      // determine which state we're in
-      const ledgerState = this.determineLedgerState(ledger);
-      // what happens next depends on whether we're the leader or follower
-      const amLeader = ledger.myIndex === 0;
-      let statesToSign: State[];
-
-      switch (ledgerState.type) {
-        case 'agreement':
-          // could be in agreement through (1) follower accepting proposal, (2) leader accepting
-          // counter-proposal, and having an empty queue. So both participants could be seeing
-          // the agreedState for the first time
-          statesToSign = amLeader
-            ? this.crankAsLeaderInAgreement(ledgerState, requests)
-            : this.crankAsFollowerInAgreement(ledgerState, requests);
-          break;
-        case 'proposal':
-          // if leader, we must have created proposal, so no further action to take
-          statesToSign = amLeader ? [] : this.crankAsFollowerInProposal(ledgerState, requests);
-          break;
-        case 'counter-proposal':
-          // if follower, we must have created counter-proposal, so no further action to take
-          statesToSign = amLeader ? this.crankAsLeaderInCounterProposal(ledgerState, requests) : [];
-          break;
-        case 'protocol-violation':
-          throw new Error('protocol violation');
-        default:
-          unreachable(ledgerState);
-      }
+      const statesToSign = this.synchronousCrankLogic(ledger, requests);
 
       // save the ledger
       for (const state of statesToSign) {
@@ -138,6 +111,45 @@ export class LedgerManager {
       // we need return any channels whose requests changed to a terminal state for cranking
       return _.uniq(requests.filter(r => !r.isActive).map(r => r.channelToBeFunded));
     });
+  }
+
+  /**
+   *
+   * @param ledger Channel model **not mutated during cranking*
+   * @param requests LedgerRequest model **to be mutated during cranking*
+   * @returns states to sign for ledger channel
+   */
+  private synchronousCrankLogic(ledger: Channel, requests: LedgerRequest[]): State[] {
+    // determine which state we're in
+    const ledgerState = this.determineLedgerState(ledger);
+    // what happens next depends on whether we're the leader or follower
+    const amLeader = ledger.myIndex === 0;
+    let statesToSign: State[];
+
+    switch (ledgerState.type) {
+      case 'agreement':
+        // could be in agreement through (1) follower accepting proposal, (2) leader accepting
+        // counter-proposal, and having an empty queue. So both participants could be seeing
+        // the agreedState for the first time
+        statesToSign = amLeader
+          ? this.crankAsLeaderInAgreement(ledgerState, requests)
+          : this.crankAsFollowerInAgreement(ledgerState, requests);
+        break;
+      case 'proposal':
+        // if leader, we must have created proposal, so no further action to take
+        statesToSign = amLeader ? [] : this.crankAsFollowerInProposal(ledgerState, requests);
+        break;
+      case 'counter-proposal':
+        // if follower, we must have created counter-proposal, so no further action to take
+        statesToSign = amLeader ? this.crankAsLeaderInCounterProposal(ledgerState, requests) : [];
+        break;
+      case 'protocol-violation':
+        throw new Error('protocol violation');
+      default:
+        unreachable(ledgerState);
+    }
+
+    return statesToSign;
   }
 
   private crankAsLeaderInAgreement(ledgerState: Agreement, requests: LedgerRequest[]): State[] {
