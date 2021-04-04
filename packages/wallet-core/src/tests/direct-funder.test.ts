@@ -131,6 +131,19 @@ describe('initialization', () => {
   test('when the opening state has the wrong turn number', () => {
     expect(() => initialize({...openingState, turnNum: 1}, 0)).toThrow('unexpected state');
   });
+
+  test('when the outcome does not match the expectations', () => {
+    expect(() => initialize({...openingState, outcome: 'any' as any}, 0)).toThrow(
+      /not valid, isSimpleAllocation failed/
+    );
+
+    const outcome = {
+      type: 'SimpleAllocation' as const,
+      assetHolderAddress: ethers.constants.AddressZero as any,
+      allocationItems: []
+    };
+    expect(() => initialize({...openingState, outcome}, 0)).toThrow('unexpected outcome');
+  });
 });
 
 describe('cranking', () => {
@@ -193,9 +206,9 @@ describe('cranking', () => {
       postFundSetup: richPostFS.signedBy('A')
     });
 
-    const sendState: (signedState: SignedState) => OpenChannelEvent = s => ({
+    const sendState: (signedState?: SignedState) => OpenChannelEvent = s => ({
       type: 'MessageReceived',
-      message: {walletVersion: 'foo', signedStates: [s]},
+      message: {walletVersion: 'foo', signedStates: s ? [s] : []},
       now: NOW
     });
 
@@ -234,7 +247,8 @@ describe('cranking', () => {
              empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
       [ msg, aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
-      // 
+      ['Receiving no state', empty, sendState(), {preFundSetup: richPreFS.signedBy('A')}, [{type: 'sendMessage'} ] ],
+
       [ msg = 'Receiving a deposit event',
              readyToFund, deposit(deposits.A),     {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
       [ msg, readyToFund, deposit(deposits.part),  {funding: funding(deposits.part),  postFundSetup: richPostFS.signedBy()}, [{type: 'deposit', amount: BN.sub(deposits.A, deposits.part)}] ],
@@ -295,7 +309,8 @@ describe('cranking', () => {
     const errorCases: ErrorCase[] = [
       [ 'code 0', empty, receiveNonParticipantState, error, [handleError(0, {signature: {signer: 'eve'}})]],
       [ 'code 1', empty, receiveUnexpectedState, error,     [handleError(1, {received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ] ],
-      [ 'code 2', depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ]
+      [ 'code 2', depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ],
+      [ 'code 3', depositPending, {type: 'Unknown'} as any, error, [handleError(3, {event: {type: 'Unknown'}})] ]
     ];
     test.each(errorCases)('error %s', (_msg, before, event, after, actions) => {
       const result = openChannelCranker(before, event, participants.A.privateKey);

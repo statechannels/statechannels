@@ -1,6 +1,6 @@
 import * as _ from 'lodash';
 
-import {checkThat, isSimpleAllocation, unreachable} from '../utils';
+import {checkThat, isSimpleAllocation} from '../utils';
 import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
 import {Address, Payload, SignatureEntry, SignedState, State, Uint256} from '../types';
@@ -59,6 +59,9 @@ export function initialize(
     throw 'unexpected index';
   }
 
+  // (Implicitly) check that the outcome is as expected
+  utils.fundingMilestone(openingState, openingState.participants[myIndex].destination);
+
   const signatures =
     'signatures' in openingState ? mergeSignatures([], openingState.signatures) : [];
 
@@ -113,6 +116,10 @@ export type OpenChannelResult = {
  * If the wallet crashes after 1 & before 3, the wallet can decide to re-trigger
  * the actions on a case-by-case basis, based on whether the action is safe to
  * re-trigger.
+ *
+ * ## ASSUMPTIONS ##
+ * - the opening state has a SimpleAllocation outcome
+ * - the outcome has exactly one destination per participant
  */
 export function openChannelCranker(
   currentObjectiveState: OpenChannelObjective,
@@ -188,7 +195,7 @@ export function openChannelCranker(
       break;
     }
     default:
-      return unreachable(event);
+      return unreachable(event, objective);
   }
 
   // Then, transition & collect actions:
@@ -329,7 +336,7 @@ const utils = {
       // throw new ChannelError(ChannelError.reasons.destinationNotInAllocations, {
       //   destination: this.participants[this.myIndex].destination
       // });
-      throw 'missing';
+      throw new Error('unexpected outcome');
     }
 
     const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== destination);
@@ -346,10 +353,17 @@ const utils = {
 type ErrorModes =
   | {code: 0; message: 'NonParticipantSignature'; signature: SignatureEntry}
   | {code: 1; message: 'ReceivedUnexpectedState'; received: string; expected: [string, string]}
-  | {code: 2; message: 'TimedOutWhileFunding'; now: number; submittedAt: number};
+  | {code: 2; message: 'TimedOutWhileFunding'; now: number; submittedAt: number}
+  | {code: 3; message: 'UnexpectedEvent'; event: any};
 
 class DirectFunderError extends Error {
   constructor(public data: ErrorModes) {
     super(data.message);
   }
+}
+
+function unreachable(event: never, objective: OpenChannelObjective): OpenChannelResult {
+  const error = new DirectFunderError({code: 3, event, message: 'UnexpectedEvent'});
+  objective.status = 'error';
+  return {objective, actions: [{type: 'handleError', error}]};
 }
