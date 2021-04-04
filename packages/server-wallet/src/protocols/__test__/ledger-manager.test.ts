@@ -18,6 +18,7 @@ jest.setTimeout(10_000);
 
 let store: Store;
 
+let manager: LedgerManager;
 beforeAll(async () => {
   await DBAdmin.migrateDatabase(defaultTestConfig());
 });
@@ -30,6 +31,7 @@ beforeEach(async () => {
     '0',
     createLogger(defaultTestConfig())
   );
+  manager = await LedgerManager.create({store});
   await DBAdmin.truncateDatabase(defaultTestConfig());
 });
 
@@ -697,7 +699,7 @@ function testSynchronousLogic(args: LedgerCrankTestCaseArgs): () => Promise<void
     // crank
     // -----
     const response = EngineResponse.initialize();
-    await LedgerManager.create({store}).crank(ledgerChannel.channelId, response);
+    manager.crank(ledgerChannel.channelId, response);
 
     // assertions
     // ----------
