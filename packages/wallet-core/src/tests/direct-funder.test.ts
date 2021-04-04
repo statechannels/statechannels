@@ -15,7 +15,15 @@ import {
   WaitingFor,
   WALLET_VERSION
 } from '../protocols/direct-funder';
-import {Address, makeAddress, SignedState, SimpleAllocation, State, StateWithHash} from '../types';
+import {
+  Address,
+  makeAddress,
+  SignedState,
+  SimpleAllocation,
+  State,
+  StateWithHash,
+  Uint256
+} from '../types';
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
 import {fixture} from './fixture';
@@ -29,11 +37,17 @@ type DeepPartial<T> = {
   [P in keyof T]?: DeepPartial<T[P]>;
 };
 
+const deposits = {
+  part: BN.from(2),
+  A: BN.from(3),
+  B: BN.from(5),
+  total: BN.from(8)
+};
 const outcome: SimpleAllocation = {
   type: 'SimpleAllocation',
   allocationItems: [
-    {destination: participantA.destination, amount: BN.from(1)},
-    {destination: participantB.destination, amount: BN.from(2)}
+    {destination: participantA.destination, amount: deposits.A},
+    {destination: participantB.destination, amount: deposits.B}
   ],
   assetHolderAddress: makeAddress(AddressZero) // must be even length
 };
@@ -144,22 +158,22 @@ describe('cranking', () => {
     const deposited = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(1), finalized: false}
+      funding: {amount: deposits.A, finalized: false}
     });
     const almostFunded = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: false}
+      funding: {amount: deposits.total, finalized: false}
     });
     const funded = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: true}
+      funding: {amount: deposits.total, finalized: true}
     });
     const aliceSignedPost = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: true},
+      funding: {amount: deposits.total, finalized: true},
       postFundSetup: richPostFS.signedBy('A')
     });
 
@@ -168,13 +182,13 @@ describe('cranking', () => {
       message: {walletVersion: 'foo', signedStates: [s]}
     });
 
-    const deposit = (amount: number, finalized = false): OpenChannelEvent => ({
+    const deposit = (amount: number | Uint256, finalized = false): OpenChannelEvent => ({
       type: 'FundingUpdated',
       amount: BN.from(amount),
       finalized
     });
 
-    const funding = (amount: number, finalized = false) => ({
+    const funding = (amount: number | Uint256, finalized = false) => ({
       amount: BN.from(amount),
       finalized
     });
@@ -185,32 +199,33 @@ describe('cranking', () => {
       [ empty,          {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
       [ aliceSignedPre, {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A')},      [] ],
       [ bobSigned,      {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
-      [ readyToFund,    {type: 'Nudge'}, {funding: funding(0, true)},                  [{type: 'deposit', amount: BN.from(1)}] ],
+      [ readyToFund,    {type: 'Nudge'}, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
 
       // Receiving a preFundSetup state
       [ empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
       [ aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
       // Receiving a deposit event
-      [ readyToFund,     deposit(1),       {funding: funding(1),  postFundSetup: richPostFS.signedBy()}, [] ],
-      [ readyToFund,     deposit(3),       {funding: funding(3), postFundSetup: richPostFS.signedBy()},  [] ],
-      [ readyToFund,     deposit(3, true), {funding: funding(3, true) ,postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ readyToFund, deposit(deposits.A),     {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
+      [ readyToFund, deposit(deposits.part),  {funding: funding(deposits.part),  postFundSetup: richPostFS.signedBy()}, [{type: 'deposit', amount: BN.sub(deposits.A, deposits.part)}] ],
+      [ readyToFund, deposit(deposits.total), {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ readyToFund, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ deposited, deposit(1),       {funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(1, true), {funding: funding(1, true), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(3),       {funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(9),       {funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(3, true), {funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ deposited, deposit(deposits.A),       {funding: funding(deposits.A),       postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(deposits.A, true), {funding: funding(deposits.A, true), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(deposits.total),   {funding: funding(deposits.total),   postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(9),                {funding: funding(9),                postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ almostFunded,    deposit(1),       {funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(3),       {funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(9),       {funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(3, true), {funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ almostFunded,    deposit(deposits.A),       {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(deposits.total),   {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(9),                {funding: funding(9),              postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
       // Receiving a preFundSetup state
       [ funded,          {type: 'Nudge'},                          {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
-      [ funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')},                 [{type: 'sendMessage'}] ],
-      [ aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')},                 [] ],
+      [ funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [{type: 'sendMessage'}] ],
+      [ aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [] ],
     ];
 
     test.each(cases)('works: %#', (before, event, after, actions) => {
@@ -335,7 +350,7 @@ test('pure objective cranker start to finish', () => {
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
-    [{type: 'deposit', amount: BN.from(1)}]
+    [{type: 'deposit', amount: deposits.A}]
   );
 
   // 4. Alice receives deposit event 1, does nothing
@@ -347,7 +362,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(1), finalized: false},
+      funding: {amount: BN.from(deposits.A), finalized: false},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
@@ -362,11 +377,11 @@ test('pure objective cranker start to finish', () => {
     {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(1), finalized: false},
+      funding: {amount: BN.from(deposits.A), finalized: false},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
-    [{type: 'deposit', amount: BN.from(2)}]
+    [{type: 'deposit', amount: deposits.B}]
   );
   const bobsDeposit = output.actions[0];
 
@@ -378,7 +393,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: false},
+      funding: {amount: deposits.total, finalized: false},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
@@ -393,7 +408,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: WaitingFor.channelFunded,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: false},
+      funding: {amount: deposits.total, finalized: false},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy()
     },
@@ -413,7 +428,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: true},
+      funding: {amount: deposits.total, finalized: true},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('B')
     },
@@ -429,7 +444,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: true},
+      funding: {amount: deposits.total, finalized: true},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('A')
     },
@@ -445,7 +460,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: 'success',
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: true},
+      funding: {amount: deposits.total, finalized: true},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('A', 'B')
     },
@@ -460,7 +475,7 @@ test('pure objective cranker start to finish', () => {
     {
       status: 'success',
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: BN.from(3), finalized: true},
+      funding: {amount: deposits.total, finalized: true},
       fundingRequest: undefined,
       postFundSetup: richPostFS.signedBy('A', 'B')
     },
