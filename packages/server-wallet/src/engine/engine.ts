@@ -521,7 +521,7 @@ export class SingleThreadedEngine
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
       const {address} = await this.getCachedSigningWallet();
       this.storeRichObjective(objective, signedState, address);
-      this.crankRichObjective(channel.channelId, {type: 'Nudge'}, response);
+      this.crankRichObjective(channel.channelId, {type: 'Nudge', now: 0}, response);
     }
 
     this.emit('objectiveStarted', objective);
@@ -602,7 +602,7 @@ export class SingleThreadedEngine
     await this.takeActions([channelId], response);
 
     if (this.richObjectives[channelId]) {
-      await this.crankRichObjective(channelId, {type: 'Nudge'}, response);
+      await this.crankRichObjective(channelId, {type: 'Nudge', now: 0}, response);
     }
 
     this.registerChannelWithChainService(channelId);
@@ -887,6 +887,7 @@ export class SingleThreadedEngine
       const event = {
         type: 'MessageReceived' as const,
         message: {walletVersion: WALLET_VERSION, signedStates: signedStates.map(deserializeState)},
+        now: 0,
       };
       await this.crankRichObjective(channelId, event, response);
     }
@@ -928,6 +929,8 @@ export class SingleThreadedEngine
 
           break;
         }
+        case 'handleError':
+          throw action.error;
         default:
           return unreachable(action);
       }
@@ -1048,7 +1051,12 @@ export class SingleThreadedEngine
     await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
-    const event: DirectFunder.OpenChannelEvent = {type: 'FundingUpdated', amount, finalized: true};
+    const event: DirectFunder.OpenChannelEvent = {
+      type: 'FundingUpdated',
+      amount,
+      finalized: true,
+      now: 0,
+    };
     await this.crankRichObjective(channelId, event, response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
