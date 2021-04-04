@@ -153,9 +153,11 @@ export function openChannelCranker(
         for (const signature of signatures) {
           if (!participants.find(p => p.signingAddress === signature.signer)) {
             objective.status = 'error';
-            const error = new Error('received a signature from a non-participant');
-            _.set(error, 'code', 0);
-            _.set(error, 'signer', signature.signer);
+            const error = new DirectFunderError({
+              code: 0,
+              message: 'NonParticipantSignature',
+              signature
+            });
             actions.push({type: 'handleError', error});
             return {objective, actions};
           }
@@ -173,10 +175,12 @@ export function openChannelCranker(
           );
         } else {
           objective.status = 'error';
-          const error = new Error('Unexpected state hash');
-          _.set(error, 'code', 1);
-          _.set(error, 'received', hash);
-          _.set(error, 'expected', [objective.preFundSetup.hash, objective.postFundSetup.hash]);
+          const error = new DirectFunderError({
+            message: 'ReceivedUnexpectedState',
+            code: 1,
+            received: hash,
+            expected: [objective.preFundSetup.hash, objective.postFundSetup.hash]
+          });
           actions.push({type: 'handleError', error});
           return {objective, actions};
         }
@@ -225,10 +229,12 @@ export function openChannelCranker(
   else if (objective.fundingRequest) {
     if (event.now >= objective.fundingRequest.submittedAt + MAX_WAITING_TIME) {
       objective.status = 'error';
-      const error = new Error('Timed out while funding');
-      _.set(error, 'code', 2);
-      _.set(error, 'now', event.now);
-      _.set(error, 'submittedAt', objective.fundingRequest.submittedAt);
+      const error = new DirectFunderError({
+        code: 2,
+        message: 'TimedOutWhileFunding',
+        now: event.now,
+        submittedAt: objective.fundingRequest.submittedAt
+      });
       actions.push({type: 'handleError', error});
       return {objective, actions};
     } else {
@@ -336,3 +342,14 @@ const utils = {
     return {targetBefore, targetAfter, targetTotal};
   }
 };
+
+type ErrorModes =
+  | {code: 0; message: 'NonParticipantSignature'; signature: SignatureEntry}
+  | {code: 1; message: 'ReceivedUnexpectedState'; received: string; expected: [string, string]}
+  | {code: 2; message: 'TimedOutWhileFunding'; now: number; submittedAt: number};
+
+class DirectFunderError extends Error {
+  constructor(public data: ErrorModes) {
+    super(data.message);
+  }
+}

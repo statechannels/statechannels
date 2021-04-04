@@ -274,24 +274,39 @@ describe('cranking', () => {
     });
     const receiveUnexpectedState = sendState(signStateHelper({...openingState, turnNum: 1}));
 
-    const handleError = (code: number, error: any) => ({
-      type: 'handleError' as const,
-      error: expect.objectContaining({...error, code})
-    });
+    const handleError = (code: number, data: any) => {
+      const error = new Error();
+      _.set(error, 'data', {...data, code});
+
+      return {type: 'handleError' as const, error};
+    };
+
+    type ErrorCase = [
+      string,
+      OpenChannelObjective, // current
+      OpenChannelEvent,
+      DeepPartial<OpenChannelObjective>, // expected
+      DeepPartial<Action>[]
+    ];
 
     const error = {status: 'error'} as const;
     const theFuture = MAX_WAITING_TIME + 500;
     //prettier-ignore
-    const errorCases: TestCase[] = [
-      [ 'code 0', empty, receiveNonParticipantState, error, [handleError(0, {signer: 'eve'})]],
+    const errorCases: ErrorCase[] = [
+      [ 'code 0', empty, receiveNonParticipantState, error, [handleError(0, {signature: {signer: 'eve'}})]],
       [ 'code 1', empty, receiveUnexpectedState, error,     [handleError(1, {received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ] ],
       [ 'code 2', depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ]
     ];
     test.each(errorCases)('error %s', (_msg, before, event, after, actions) => {
-      expect(openChannelCranker(before, event, participants.A.privateKey)).toMatchObject({
+      const result = openChannelCranker(before, event, participants.A.privateKey);
+      expect(result).toMatchObject({
         objective: {...after, status: 'error'},
-        actions
+        actions: [{type: 'handleError', error: expect.any(Error)}]
       });
+      const [{error}] = result.actions as any;
+      const [{error: expectedError}] = actions as any;
+
+      expect(error.data).toMatchObject(expectedError.data);
     });
   });
 });
