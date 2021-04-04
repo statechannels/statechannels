@@ -521,7 +521,7 @@ export class SingleThreadedEngine
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
       const {address} = await this.getCachedSigningWallet();
       this.storeRichObjective(objective, signedState, address);
-      this.crankRichObjective(channel.channelId, {type: 'Nudge', now: 0}, response);
+      await this.crankRichObjective(channel.channelId, {type: 'Nudge', now: 0}, response);
     }
 
     this.emit('objectiveStarted', objective);
@@ -555,6 +555,12 @@ export class SingleThreadedEngine
     );
 
     await this.takeActions(channelIds, response);
+
+    for (const channelId of channelIds) {
+      if (this.richObjectives[channelId]) {
+        await this.crankRichObjective(channelId, {type: 'Nudge', now: 0}, response);
+      }
+    }
 
     await Promise.all(channelIds.map(id => this.registerChannelWithChainService(id)));
 
