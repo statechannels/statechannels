@@ -16,7 +16,6 @@ import {
   RichLedgerRequest,
 } from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
-import {Store} from '../../store';
 
 import {TestChannel, Bals, SignedBy} from './test-channel';
 
@@ -76,26 +75,6 @@ export class TestLedgerChannel extends TestChannel {
     };
   }
 
-  public async insertFundingRequest(
-    store: Store,
-    {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
-  ): Promise<RichLedgerRequest> {
-    return LedgerRequest.setRequest(
-      {
-        ledgerChannelId: this.channelId,
-        type: 'fund',
-        channelToBeFunded,
-        amountA: BN.from(amtA),
-        amountB: BN.from(amtB),
-        status,
-        missedOpportunityCount: missedOps || 0,
-        lastSeenAgreedState: lastSeen || null,
-      },
-      store.knex
-    );
-  }
-
-  // Copy-paste from previous method
   public fundingRequest({
     channelToBeFunded,
     amtA,
@@ -114,25 +93,6 @@ export class TestLedgerChannel extends TestChannel {
       missedOpportunityCount: missedOps || 0,
       lastSeenAgreedState: lastSeen || null,
     });
-  }
-
-  public async insertDefundingRequest(
-    store: Store,
-    {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
-  ): Promise<RichLedgerRequest> {
-    return LedgerRequest.setRequest(
-      {
-        ledgerChannelId: this.channelId,
-        type: 'defund',
-        channelToBeFunded,
-        amountA: BN.from(amtA),
-        amountB: BN.from(amtB),
-        status,
-        missedOpportunityCount: missedOps || 0,
-        lastSeenAgreedState: lastSeen || null,
-      },
-      store.knex
-    );
   }
 
   // Copy-paste from previous method
