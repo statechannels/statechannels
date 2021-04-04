@@ -76,21 +76,18 @@ export class TestLedgerChannel extends TestChannel {
     store: Store,
     {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
   ): Promise<void> {
-    return store.transaction(
-      async tx =>
-        await LedgerRequest.setRequest(
-          {
-            ledgerChannelId: this.channelId,
-            type: 'fund',
-            channelToBeFunded,
-            amountA: BN.from(amtA),
-            amountB: BN.from(amtB),
-            status,
-            missedOpportunityCount: missedOps || 0,
-            lastSeenAgreedState: lastSeen || null,
-          },
-          tx
-        )
+    await LedgerRequest.setRequest(
+      {
+        ledgerChannelId: this.channelId,
+        type: 'fund',
+        channelToBeFunded,
+        amountA: BN.from(amtA),
+        amountB: BN.from(amtB),
+        status,
+        missedOpportunityCount: missedOps || 0,
+        lastSeenAgreedState: lastSeen || null,
+      },
+      store.knex
     );
   }
 
@@ -98,21 +95,18 @@ export class TestLedgerChannel extends TestChannel {
     store: Store,
     {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
   ): Promise<void> {
-    return store.transaction(
-      async tx =>
-        await LedgerRequest.setRequest(
-          {
-            ledgerChannelId: this.channelId,
-            type: 'defund',
-            channelToBeFunded,
-            amountA: BN.from(amtA),
-            amountB: BN.from(amtB),
-            status,
-            missedOpportunityCount: missedOps || 0,
-            lastSeenAgreedState: lastSeen || null,
-          },
-          tx
-        )
+    await LedgerRequest.setRequest(
+      {
+        ledgerChannelId: this.channelId,
+        type: 'defund',
+        channelToBeFunded,
+        amountA: BN.from(amtA),
+        amountB: BN.from(amtB),
+        status,
+        missedOpportunityCount: missedOps || 0,
+        lastSeenAgreedState: lastSeen || null,
+      },
+      store.knex
     );
   }
 }
