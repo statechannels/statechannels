@@ -5,6 +5,7 @@ import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
 import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 
+// TODO: This ought to be configurable
 export const MAX_WAITING_TIME = 5_000;
 
 export type OpenChannelEvent = {now: number} & (
@@ -54,7 +55,7 @@ export function initialize(
     throw 'unexpected index';
   }
 
-  // (Implicitly) check that the outcome is as expected
+  // HACK (Implicitly) check that the outcome is as expected
   utils.fundingMilestone(openingState, openingState.participants[myIndex].destination);
 
   const signatures =
