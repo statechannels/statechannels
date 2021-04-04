@@ -884,9 +884,9 @@ export class SingleThreadedEngine
         return;
 
       const channelId = signedStates[0].channelId;
-      const event = {
-        type: 'MessageReceived' as const,
-        message: {walletVersion: WALLET_VERSION, signedStates: signedStates.map(deserializeState)},
+      const event: DirectFunder.OpenChannelEvent = {
+        type: 'StatesReceived' as const,
+        states: signedStates.map(deserializeState),
         now: 0,
       };
       await this.crankRichObjective(channelId, event, response);
@@ -916,9 +916,9 @@ export class SingleThreadedEngine
         case 'deposit':
           // throw new Error('Should be depositing');
           break;
-        case 'sendMessage': {
+        case 'sendStates': {
           const stateSummary = (s: any) => ({turn: s.turnNum, signatures: s.signatures.length});
-          const received = action.message.message.signedStates?.map(stateSummary);
+          const received = action.states.map(stateSummary);
           const expected = response._signedStates.map(stateSummary);
 
           if (!_.isEqual(received, expected)) {

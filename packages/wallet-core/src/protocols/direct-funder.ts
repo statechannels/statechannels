@@ -3,18 +3,16 @@ import * as _ from 'lodash';
 import {checkThat, isSimpleAllocation} from '../utils';
 import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
-import {Address, Payload, SignatureEntry, SignedState, State, Uint256} from '../types';
+import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 
 // TODO (WALLET_VERSION): This should be determined and exported by wallet-core
 export const WALLET_VERSION = 'SomeVersion';
 
 export const MAX_WAITING_TIME = 5_000;
 
-type AddressedMessage = {recipient: string; message: Payload};
-
 export type OpenChannelEvent = {now: number} & (
   | {type: 'Nudge'}
-  | {type: 'MessageReceived'; message: Payload}
+  | {type: 'StatesReceived'; states: SignedState[]}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
   | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number; now: number}
 );
@@ -78,7 +76,7 @@ export function initialize(
 }
 
 export type Action =
-  | {type: 'sendMessage'; message: AddressedMessage}
+  | {type: 'sendStates'; states: SignedState[]}
   // TODO: (ChainService) We will need to include more data once this gets hooked up to a chain service
   | {type: 'deposit'; amount: Uint256}
   | {type: 'handleError'; error: Error};
@@ -148,8 +146,8 @@ export function openChannelCranker(
       objective.funding.amount = event.amount;
       objective.funding.finalized = event.finalized;
       break;
-    case 'MessageReceived': {
-      const {signedStates} = event.message;
+    case 'StatesReceived': {
+      const {states: signedStates} = event;
 
       // TODO: Assume there's only one signed state
       if (signedStates && signedStates[0]) {
@@ -298,20 +296,15 @@ function signStateAction(
   const signature = signState(state, myPrivateKey);
   const entry = {signature, signer: me.signingAddress};
   objective[key].signatures = mergeSignatures(objective[key].signatures, [entry]);
+  const signedState = {...state, signatures: [entry]};
 
-  recipients(objective).map(recipient => {
-    const message: Payload = {
-      walletVersion: WALLET_VERSION,
-      signedStates: [{...state, signatures: [entry]}]
-    };
-    actions.push({type: 'sendMessage', message: {recipient, message}});
-  });
+  const action = actions.find(a => a.type === 'sendStates');
+  actions.push({type: 'sendStates', states: [{...state, signatures: [entry]}]});
 
   return actions;
 }
 
-function recipients({openingState: {participants}, myIndex}: OpenChannelObjective): string[] {
-  return participants.filter((_p, idx) => idx !== myIndex).map(p => p.participantId);
+  return actions;
 }
 
 function mergeSignatures(left: SignatureEntry[], right: SignatureEntry[]): SignatureEntry[] {
