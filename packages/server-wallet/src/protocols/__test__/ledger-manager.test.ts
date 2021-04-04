@@ -709,9 +709,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     const requests = await store.getActiveLedgerRequests(ledgerChannelId, tx);
     const states = manager.synchronousCrankLogic(ledgerBefore, requests);
 
-    const response = EngineResponse.initialize();
-    await manager.crank(ledgerChannelId, response);
-
     // BEGIN CODE FOR CREATING CONSISTENCY
     function _summary(s: SignedStateVarsWithHash) {
       return [s.turnNum, s.signatures.map(sig => (sig.signer[2] === '1' ? 'A' : 'B'))];
@@ -740,59 +737,47 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       statesAfter = ledgerBefore.vars;
     }
 
-    const ledgerAfter = channel({...ledgerBefore.channelConstants, vars: statesAfter});
+    const ledger = channel({...ledgerBefore.channelConstants, vars: statesAfter});
     // console.log(signedStatesBefore.map(summary));
     // console.log('ledger after', ledgerAfter.vars.map(summary));
-    ledgerAfter.vars = clearOldStates(ledgerAfter.vars, ledgerAfter.support);
+    ledger.vars = clearOldStates(ledger.vars, ledger.support);
     // console.log('after clearing', ledgerAfter.vars.map(summary));
     // END CODE FOR CREATING CONSISTENCY
 
     // assertions
     // ----------
-    await store.transaction(async tx => {
-      // fetch the ledger channel and check that the states are ok
-      const ledger = await store.getChannel(ledgerChannel.channelId, tx);
-      if (!ledger) throw new Error(`Ledger not found`);
+    // get the latest agreed state and the turn number
+    const agreedState = ledger.latestFullySignedState;
+    if (!agreedState) throw new Error(`No latest agreed state`);
+    const ledgerStateDesc: LedgerStateDescription = {
+      agreed: toStateDesc(agreedState, channelLookup),
+      requests: [],
+    };
 
-      // BEGIN REGRESSION CHECK
-      // console.log('right', ledger.sortedStates.map(summary));
-      // console.log('wrong', ledgerAfter.sortedStates.map(summary));
-      expect(ledger.sortedStates).toMatchObject(ledgerAfter.sortedStates);
-      // END REGRESSION CHECK
+    const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+    if (proposedState) {
+      expect(proposedState.signerIndices).toEqual([0]);
+      ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+    }
+    const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+    if (counterProposedState) {
+      expect(counterProposedState.signerIndices).toEqual([1]);
+      ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
+    }
 
-      // get the latest agreed state and the turn number
-      const agreedState = ledger.latestFullySignedState;
-      if (!agreedState) throw new Error(`No latest agreed state`);
-      const ledgerStateDesc: LedgerStateDescription = {
-        agreed: toStateDesc(agreedState, channelLookup),
-        requests: [],
-      };
-
-      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
-      if (proposedState) {
-        expect(proposedState.signerIndices).toEqual([0]);
-        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
-      }
-      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
-      if (counterProposedState) {
-        expect(counterProposedState.signerIndices).toEqual([1]);
-        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
-      }
-
-      for (const req of requests) {
-        ledgerStateDesc.requests.push([
-          req.type,
-          channelLookup.getKey(req.channelToBeFunded),
-          Number(req.amountA),
-          Number(req.amountB),
-          req.status,
-          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-        ]);
-      }
-      ledgerStateDesc.requests.sort();
-      args.after.requests.sort();
-      expect(ledgerStateDesc).toEqual(args.after);
-    });
+    for (const req of requests) {
+      ledgerStateDesc.requests.push([
+        req.type,
+        channelLookup.getKey(req.channelToBeFunded),
+        Number(req.amountA),
+        Number(req.amountB),
+        req.status,
+        {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+      ]);
+    }
+    ledgerStateDesc.requests.sort();
+    args.after.requests.sort();
+    expect(ledgerStateDesc).toEqual(args.after);
   };
 }
 
