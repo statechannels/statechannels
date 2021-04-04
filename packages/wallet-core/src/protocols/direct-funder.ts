@@ -10,7 +10,7 @@ export const WALLET_VERSION = 'SomeVersion';
 
 type AddressedMessage = {recipient: string; message: Payload};
 
-export type OpenChannelEvent =
+export type OpenChannelEvent = {now: number} & (
   | {type: 'Nudge'}
   | {type: 'MessageReceived'; message: Payload}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
@@ -38,8 +38,7 @@ export type OpenChannelObjective = {
   preFundSetup: SignedStateHash;
   // TODO: (ChainService) The asset class is _ignored_ here.
   funding: {amount: Uint256; finalized: boolean};
-  // TODO: (ChainService) We will need to store funding requests once this gets hooked up to a chain service
-  fundingRequest: {tx: string; attempts: number; triggeredAt: Date} | undefined;
+  fundingRequest: {tx: string; attempts: number; submittedAt: number} | undefined;
   postFundSetup: SignedStateHash;
 };
 

@@ -12,8 +12,7 @@ import {
   OpenChannelObjective,
   OpenChannelResult,
   SignedStateHash,
-  WaitingFor,
-  WALLET_VERSION
+  WaitingFor
 } from '../protocols/direct-funder';
 import {
   Address,
@@ -27,6 +26,7 @@ import {
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
 import {fixture} from './fixture';
+const NOW = 10;
 const {A: participantA, B: participantB} = participants;
 
 const {AddressZero} = ethers.constants;
@@ -179,14 +179,18 @@ describe('cranking', () => {
 
     const sendState: (signedState: SignedState) => OpenChannelEvent = s => ({
       type: 'MessageReceived',
-      message: {walletVersion: 'foo', signedStates: [s]}
+      message: {walletVersion: 'foo', signedStates: [s]},
+      now: NOW
     });
 
     const deposit = (amount: number | Uint256, finalized = false): OpenChannelEvent => ({
       type: 'FundingUpdated',
       amount: BN.from(amount),
-      finalized
+      finalized,
+      now: NOW
     });
+
+    const nudge = {type: 'Nudge', now: NOW} as const;
 
     const funding = (amount: number | Uint256, finalized = false) => ({
       amount: BN.from(amount),
@@ -196,10 +200,10 @@ describe('cranking', () => {
     // prettier-ignore
     const cases: TestCase[] = [
       // Nudging
-      [ empty,          {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
-      [ aliceSignedPre, {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A')},      [] ],
-      [ bobSigned,      {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
-      [ readyToFund,    {type: 'Nudge'}, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
+      [ empty,          nudge, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
+      [ aliceSignedPre, nudge, {preFundSetup: richPreFS.signedBy('A')},      [] ],
+      [ bobSigned,      nudge, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ readyToFund,    nudge, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
 
       // Receiving a preFundSetup state
       [ empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
@@ -223,7 +227,7 @@ describe('cranking', () => {
       [ almostFunded, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
       // Receiving a preFundSetup state
-      [ funded,          {type: 'Nudge'},                          {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
+      [ funded,          nudge, {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
       [ funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [{type: 'sendMessage'}] ],
       [ aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [] ],
     ];
@@ -244,7 +248,8 @@ function generateEvent(action: Action, objective: OpenChannelObjective): OpenCha
       return {
         type: 'FundingUpdated',
         amount: BN.add(action.amount, objective.funding.amount),
-        finalized: false
+        finalized: false,
+        now: NOW
       };
     case 'sendMessage':
       return {type: 'MessageReceived', message: action.message.message};
@@ -305,13 +310,13 @@ test('pure objective cranker start to finish', () => {
   */
 
   // This is used just to kickstart Alice's cranker
-  const nullEvent = {type: 'FundingUpdated' as const, amount: BN.from(0), finalized: true};
+  const nudge = {type: 'Nudge' as const, now: NOW};
 
   // 1. Alice signs the preFS, triggers preFS action 1
   let output = crankAndExpect(
     'A',
     currentState,
-    nullEvent,
+    nudge,
     {
       status: WaitingFor.theirPreFundSetup,
       preFundSetup: richPreFS.signedBy('A'),
@@ -327,7 +332,7 @@ test('pure objective cranker start to finish', () => {
   output = crankAndExpect(
     'B',
     currentState,
-    {type: 'Nudge'},
+    nudge,
     {
       status: WaitingFor.safeToDeposit,
       preFundSetup: richPreFS.signedBy('A', 'B'),
@@ -417,7 +422,8 @@ test('pure objective cranker start to finish', () => {
   const finalFundingEvent: OpenChannelEvent = {
     type: 'FundingUpdated',
     amount: currentState.B.funding.amount,
-    finalized: true
+    finalized: true,
+    now: NOW
   };
 
   // 8. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
