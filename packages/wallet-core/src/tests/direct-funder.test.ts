@@ -182,33 +182,33 @@ describe('cranking', () => {
     // prettier-ignore
     const cases: TestCase[] = [
       // Nudging
-      [ empty,          {type: 'Nudge'}, {status: WaitingFor.theirPreFundSetup, preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
-      [ aliceSignedPre, {type: 'Nudge'}, {status: WaitingFor.theirPreFundSetup, preFundSetup: richPreFS.signedBy('A')},      [] ],
-      [ bobSigned,      {type: 'Nudge'}, {status: WaitingFor.channelFunded,     preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
-      [ readyToFund,    {type: 'Nudge'}, {status: WaitingFor.channelFunded},                                                 [{type: 'deposit', amount: BN.from(1)}] ],
+      [ empty,          {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
+      [ aliceSignedPre, {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A')},      [] ],
+      [ bobSigned,      {type: 'Nudge'}, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ readyToFund,    {type: 'Nudge'}, {funding: funding(0, true)},                  [{type: 'deposit', amount: BN.from(1)}] ],
 
       // Receiving a preFundSetup state
-      [ empty,          sendState(richPreFS.stateSignedBy('B')), {status: WaitingFor.channelFunded, preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
-      [ aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {status: WaitingFor.channelFunded, preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
+      [ empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
       // Receiving a deposit event
-      [ readyToFund,     deposit(1),       {status: WaitingFor.channelFunded, funding: funding(1),  postFundSetup: richPostFS.signedBy()}, [] ],
-      [ readyToFund,     deposit(3),       {status: WaitingFor.channelFunded, funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ readyToFund,     deposit(3, true), {status: WaitingFor.theirPostFundState, funding: funding(3, true) ,postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ readyToFund,     deposit(1),       {funding: funding(1),  postFundSetup: richPostFS.signedBy()}, [] ],
+      [ readyToFund,     deposit(3),       {funding: funding(3), postFundSetup: richPostFS.signedBy()},  [] ],
+      [ readyToFund,     deposit(3, true), {funding: funding(3, true) ,postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ deposited, deposit(1),       {status: WaitingFor.channelFunded, funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(1, true), {status: WaitingFor.channelFunded, funding: funding(1, true), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(3),       {status: WaitingFor.channelFunded, funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(9),       {status: WaitingFor.channelFunded, funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(3, true), {status: WaitingFor.theirPostFundState, funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ deposited, deposit(1),       {funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(1, true), {funding: funding(1, true), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(3),       {funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(9),       {funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(3, true), {funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ almostFunded,    deposit(1),       {status: WaitingFor.channelFunded, funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(3),       {status: WaitingFor.channelFunded, funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(9),       {status: WaitingFor.channelFunded, funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(3, true), {status: WaitingFor.theirPostFundState, funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ almostFunded,    deposit(1),       {funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(3),       {funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(9),       {funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(3, true), {funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
       // Receiving a preFundSetup state
-      [ funded,          {type: 'Nudge'},                          {status: WaitingFor.theirPostFundState, postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
+      [ funded,          {type: 'Nudge'},                          {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
       [ funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')},                 [{type: 'sendMessage'}] ],
       [ aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')},                 [] ],
     ];
