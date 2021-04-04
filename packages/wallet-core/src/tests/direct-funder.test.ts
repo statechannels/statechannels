@@ -44,13 +44,14 @@ const deposits = {
   B: BN.from(5),
   total: BN.from(8)
 };
+const assetHolderAddress = makeAddress(AddressZero); // must be even length
 const outcome: SimpleAllocation = {
   type: 'SimpleAllocation',
   allocationItems: [
     {destination: participantA.destination, amount: deposits.A},
     {destination: participantB.destination, amount: deposits.B}
   ],
-  assetHolderAddress: makeAddress(AddressZero) // must be even length
+  assetHolderAddress
 };
 
 const openingState: State = {
@@ -158,6 +159,19 @@ describe('cranking', () => {
   describe('as alice', () => {
     const objectiveFixture = fixture(initial);
     const empty = objectiveFixture();
+    const zeroOutcomeState = addHash({
+      ...openingState,
+      outcome: {
+        type: 'SimpleAllocation',
+        assetHolderAddress,
+        allocationItems: [
+          {destination: participants.A.destination, amount: BN.from(0)},
+          {destination: participants.B.destination, amount: BN.from(0)}
+        ]
+      }
+    });
+    const zeroOutcome = initialize(signStateHelper(zeroOutcomeState, 'A'), 1);
+
     const aliceSignedPre = objectiveFixture({
       status: WaitingFor.theirPreFundSetup,
       preFundSetup: richPreFS.signedBy('A')
@@ -242,12 +256,13 @@ describe('cranking', () => {
       [ msg, aliceSignedPre, nudge, {preFundSetup: richPreFS.signedBy('A')},      [] ],
       [ msg, bobSigned,      nudge, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
       [ msg, readyToFund,    nudge, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
+      [ msg, zeroOutcome,    nudge, {}, [{type: 'sendStates', states: [expect.objectContaining({turnNum: 0}), expect.objectContaining({turnNum: 3})]} ] ],
+      
 
       [ msg = 'Receiving a preFundSetup state',
              empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
       [ msg, aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
-      ['Receiving no state', empty, sendState(), {preFundSetup: richPreFS.signedBy('A')}, [{type: 'sendMessage'} ] ],
 
       [ msg = 'Receiving a deposit event',
              readyToFund, deposit(deposits.A),     {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],

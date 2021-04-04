@@ -298,11 +298,12 @@ function signStateAction(
   objective[key].signatures = mergeSignatures(objective[key].signatures, [entry]);
   const signedState = {...state, signatures: [entry]};
 
-  const action = actions.find(a => a.type === 'sendStates');
-  actions.push({type: 'sendStates', states: [{...state, signatures: [entry]}]});
-
-  return actions;
-}
+  const existingAction = actions.find(a => a.type === 'sendStates');
+  if (existingAction) {
+    (existingAction as any).states.push(signedState);
+  } else {
+    actions.push({type: 'sendStates', states: [{...state, signatures: [entry]}]});
+  }
 
   return actions;
 }
