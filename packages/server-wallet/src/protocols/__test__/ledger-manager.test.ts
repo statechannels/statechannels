@@ -21,9 +21,6 @@ let store: Store;
 let manager: LedgerManager;
 beforeAll(async () => {
   await DBAdmin.migrateDatabase(defaultTestConfig());
-});
-
-beforeEach(async () => {
   store = new Store(
     knex,
     defaultTestConfig().metricsConfiguration.timingMetrics,
@@ -32,6 +29,9 @@ beforeEach(async () => {
     createLogger(defaultTestConfig())
   );
   manager = await LedgerManager.create({store});
+});
+
+beforeEach(async () => {
   await DBAdmin.truncateDatabase(defaultTestConfig());
 });
 
