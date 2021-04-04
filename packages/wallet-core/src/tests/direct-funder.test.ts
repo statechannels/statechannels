@@ -135,6 +135,7 @@ describe('initialization', () => {
 
 describe('cranking', () => {
   type TestCase = [
+    string,
     OpenChannelObjective, // current
     OpenChannelEvent,
     DeepPartial<OpenChannelObjective>, // expected
@@ -220,45 +221,47 @@ describe('cranking', () => {
       finalized
     });
 
+    let msg: string;
     // prettier-ignore
     const cases: TestCase[] = [
-      // Nudging
-      [ empty,          nudge, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
-      [ aliceSignedPre, nudge, {preFundSetup: richPreFS.signedBy('A')},      [] ],
-      [ bobSigned,      nudge, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
-      [ readyToFund,    nudge, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
+      [msg = 'Nudging',
+             empty,          nudge, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
+      [ msg, aliceSignedPre, nudge, {preFundSetup: richPreFS.signedBy('A')},      [] ],
+      [ msg, bobSigned,      nudge, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ msg, readyToFund,    nudge, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
 
-      // Receiving a preFundSetup state
-      [ empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
-      [ aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
+      [ msg = 'Receiving a preFundSetup state',
+             empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ msg, aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
-      // Receiving a deposit event
-      [ readyToFund, deposit(deposits.A),     {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
-      [ readyToFund, deposit(deposits.part),  {funding: funding(deposits.part),  postFundSetup: richPostFS.signedBy()}, [{type: 'deposit', amount: BN.sub(deposits.A, deposits.part)}] ],
-      [ readyToFund, deposit(deposits.total), {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ readyToFund, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      // 
+      [ msg = 'Receiving a deposit event',
+             readyToFund, deposit(deposits.A),     {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, readyToFund, deposit(deposits.part),  {funding: funding(deposits.part),  postFundSetup: richPostFS.signedBy()}, [{type: 'deposit', amount: BN.sub(deposits.A, deposits.part)}] ],
+      [ msg, readyToFund, deposit(deposits.total), {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, readyToFund, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ deposited, deposit(deposits.A),       {funding: funding(deposits.A),       postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(deposits.A, true), {funding: funding(deposits.A, true), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(deposits.total),   {funding: funding(deposits.total),   postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(9),                {funding: funding(9),                postFundSetup: richPostFS.signedBy()}, [] ],
-      [ deposited, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ msg, deposited, deposit(deposits.A),       {funding: funding(deposits.A),       postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, deposited, deposit(deposits.A, true), {funding: funding(deposits.A, true), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, deposited, deposit(deposits.total),   {funding: funding(deposits.total),   postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, deposited, deposit(9),                {funding: funding(9),                postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, deposited, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ almostFunded, deposit(deposits.A),       {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded, deposit(deposits.total),   {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded, deposit(9),                {funding: funding(9),              postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ msg, almostFunded, deposit(deposits.A),       {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, almostFunded, deposit(deposits.total),   {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, almostFunded, deposit(9),                {funding: funding(9),              postFundSetup: richPostFS.signedBy()}, [] ],
+      [ msg, almostFunded, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      // Receiving a deposit submitted event
-      [ depositPending, submitted(0), {funding: funding(0, true), fundingRequest: {tx: 'tx'}, postFundSetup: richPostFS.signedBy()}, [] ],
+      [ 'Receiving a deposit submitted event',
+        depositPending, submitted(0), {funding: funding(0, true), fundingRequest: {tx: 'tx'}, postFundSetup: richPostFS.signedBy()}, [] ],
 
-      // Receiving a preFundSetup state
-      [ funded,          nudge, {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
-      [ funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [{type: 'sendMessage'}] ],
-      [ aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [] ],
+      [ msg = 'Receiving a preFundSetup state',
+             funded,          nudge, {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
+      [ msg, funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [{type: 'sendMessage'}] ],
+      [ msg, aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')}, [] ],
     ];
 
-    test.each(cases)('works: %#', (before, event, after, actions) => {
+    test.each(cases)('%s works: %#', (_msg, before, event, after, actions) => {
       expect(openChannelCranker(before, event, participants.A.privateKey)).toMatchObject({
         objective: after,
         actions
@@ -280,11 +283,11 @@ describe('cranking', () => {
     const theFuture = MAX_WAITING_TIME + 500;
     //prettier-ignore
     const errorCases: TestCase[] = [
-      [ empty, receiveNonParticipantState, error, [handleError(0, {signer: 'eve'})]],
-      [ empty, receiveUnexpectedState, error,     [handleError(1, {received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ] ],
-      [ depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ]
+      [ 'code 0', empty, receiveNonParticipantState, error, [handleError(0, {signer: 'eve'})]],
+      [ 'code 1', empty, receiveUnexpectedState, error,     [handleError(1, {received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ] ],
+      [ 'code 2', depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ]
     ];
-    test.each(errorCases)('errors: %#', (before, event, after, actions) => {
+    test.each(errorCases)('error %s', (_msg, before, event, after, actions) => {
       expect(openChannelCranker(before, event, participants.A.privateKey)).toMatchObject({
         objective: {...after, status: 'error'},
         actions
