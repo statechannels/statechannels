@@ -602,7 +602,7 @@ function _testLedgerCrankOld(args: LedgerCrankTestCaseArgs): () => Promise<void>
       const agreedState = ledger.latestFullySignedState;
       if (!agreedState) throw new Error(`No latest agreed state`);
 
-      const ledgerStateDesc: LedgerStateDesc = {
+      const ledgerStateDesc: LedgerStateDescription = {
         agreed: toStateDesc(agreedState, channelLookup),
         requests: [],
       };
@@ -764,7 +764,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       const agreedState = ledger.latestFullySignedState;
       if (!agreedState) throw new Error(`No latest agreed state`);
 
-      const ledgerStateDesc: LedgerStateDesc = {
+      const ledgerStateDesc: LedgerStateDescription = {
         agreed: toStateDesc(agreedState, channelLookup),
         requests: [],
       };
@@ -938,7 +938,7 @@ type StateDesc = {
   bals: Record<string, number>;
 };
 
-interface LedgerStateDesc {
+interface LedgerStateDescription {
   agreed: StateDesc;
   proposed?: StateDesc;
   counterProposed?: StateDesc;
@@ -947,6 +947,6 @@ interface LedgerStateDesc {
 
 interface LedgerCrankTestCaseArgs {
   as: 'leader' | 'follower';
-  before: LedgerStateDesc;
-  after: LedgerStateDesc;
+  before: LedgerStateDescription;
+  after: LedgerStateDescription;
 }
