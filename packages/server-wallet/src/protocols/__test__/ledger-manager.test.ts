@@ -31,10 +31,6 @@ beforeAll(async () => {
   manager = await LedgerManager.create({store});
 });
 
-beforeEach(async () => {
-  await DBAdmin.truncateDatabase(defaultTestConfig());
-});
-
 afterEach(async () => {
   await DBAdmin.truncateDatabase(defaultTestConfig());
 });
