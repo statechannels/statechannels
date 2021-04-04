@@ -2,7 +2,7 @@ import {ethers} from 'ethers';
 import * as _ from 'lodash';
 
 import {unreachable} from '../utils';
-import {addHash, calculateChannelId, createSignatureEntry} from '../state-utils';
+import {addHash, calculateChannelId} from '../state-utils';
 import {BN} from '../bignumber';
 import {
   Action,
@@ -15,16 +15,10 @@ import {
   WaitingFor,
   WALLET_VERSION
 } from '../protocols/direct-funder';
-import {
-  Address,
-  makeAddress,
-  SignatureEntry,
-  SimpleAllocation,
-  State,
-  StateWithHash
-} from '../types';
+import {Address, makeAddress, SignedState, SimpleAllocation, State, StateWithHash} from '../types';
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
+import {fixture} from './fixture';
 const {A: participantA, B: participantB} = participants;
 
 const {AddressZero} = ethers.constants;
@@ -58,7 +52,12 @@ const openingState: State = {
 
 const channelId = calculateChannelId(openingState);
 
-function richify(state: State): StateWithHash & {signedBy(...peers: Peer[]): SignedStateHash} {
+function richify(
+  state: State
+): StateWithHash & {
+  signedBy(...peers: Peer[]): SignedStateHash;
+  stateSignedBy(...peers: Peer[]): SignedState;
+} {
   const withHash = addHash(state);
 
   return {
@@ -68,6 +67,9 @@ function richify(state: State): StateWithHash & {signedBy(...peers: Peer[]): Sig
       const signatures = _.sortBy(signedState.signatures, sig => sig.signer);
 
       return {hash: withHash.stateHash, signatures};
+    },
+    stateSignedBy(...peers: Peer[]) {
+      return signStateHelper(withHash, ...peers);
     }
   };
 }
@@ -98,7 +100,7 @@ describe('initialization', () => {
     expect(initialize(signStateHelper(openingState, 'A', 'B'), 0)).toMatchObject({
       ...initial,
       preFundSetup: richPreFS.signedBy('A', 'B')
-  });
+    });
     expect(initialize(signStateHelper(openingState, 'B', 'A'), 0)).toMatchObject({
       ...initial,
       preFundSetup: richPreFS.signedBy('A', 'B')
@@ -116,10 +118,107 @@ describe('initialization', () => {
   });
 });
 
-describe('funding', () => {
-  const readyToFund = initialize(signStateHelper(openingState, 'B', 'A'), 0);
-  test("when it's safe to fund", () => {
-    expect(readyToFund).toMatchObject({preFundSetup: richPreFS.signedBy('A', 'B')});
+describe('cranking', () => {
+  type TestCase = [
+    OpenChannelObjective, // current
+    OpenChannelEvent,
+    DeepPartial<OpenChannelObjective>, // expected
+    DeepPartial<Action>[]
+  ];
+
+  describe('as alice', () => {
+    const objectiveFixture = fixture(initial);
+    const empty = objectiveFixture();
+    const aliceSignedPre = objectiveFixture({
+      status: WaitingFor.theirPreFundSetup,
+      preFundSetup: richPreFS.signedBy('A')
+    });
+    const bobSigned = objectiveFixture({
+      status: WaitingFor.theirPreFundSetup,
+      preFundSetup: richPreFS.signedBy('B')
+    });
+    const readyToFund = objectiveFixture({
+      status: WaitingFor.safeToDeposit,
+      preFundSetup: richPreFS.signedBy('A', 'B')
+    });
+    const deposited = objectiveFixture({
+      status: WaitingFor.theirPostFundState,
+      preFundSetup: richPreFS.signedBy('A', 'B'),
+      funding: {amount: BN.from(1), finalized: false}
+    });
+    const almostFunded = objectiveFixture({
+      status: WaitingFor.theirPostFundState,
+      preFundSetup: richPreFS.signedBy('A', 'B'),
+      funding: {amount: BN.from(3), finalized: false}
+    });
+    const funded = objectiveFixture({
+      status: WaitingFor.theirPostFundState,
+      preFundSetup: richPreFS.signedBy('A', 'B'),
+      funding: {amount: BN.from(3), finalized: true}
+    });
+    const aliceSignedPost = objectiveFixture({
+      status: WaitingFor.theirPostFundState,
+      preFundSetup: richPreFS.signedBy('A', 'B'),
+      funding: {amount: BN.from(3), finalized: true},
+      postFundSetup: richPostFS.signedBy('A')
+    });
+
+    const sendState: (signedState: SignedState) => OpenChannelEvent = s => ({
+      type: 'MessageReceived',
+      message: {walletVersion: 'foo', signedStates: [s]}
+    });
+
+    const deposit = (amount: number, finalized = false): OpenChannelEvent => ({
+      type: 'FundingUpdated',
+      amount: BN.from(amount),
+      finalized
+    });
+
+    const funding = (amount: number, finalized = false) => ({
+      amount: BN.from(amount),
+      finalized
+    });
+
+    // prettier-ignore
+    const cases: TestCase[] = [
+      // Nudging
+      [ empty,          {type: 'Nudge'}, {status: WaitingFor.theirPreFundSetup, preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendMessage'}] ],
+      [ aliceSignedPre, {type: 'Nudge'}, {status: WaitingFor.theirPreFundSetup, preFundSetup: richPreFS.signedBy('A')},      [] ],
+      [ bobSigned,      {type: 'Nudge'}, {status: WaitingFor.channelFunded,     preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ readyToFund,    {type: 'Nudge'}, {status: WaitingFor.channelFunded},                                                 [{type: 'deposit', amount: BN.from(1)}] ],
+
+      // Receiving a preFundSetup state
+      [ empty,          sendState(richPreFS.stateSignedBy('B')), {status: WaitingFor.channelFunded, preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendMessage'}, {type: 'deposit'}] ],
+      [ aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {status: WaitingFor.channelFunded, preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
+
+      // Receiving a deposit event
+      [ readyToFund,     deposit(1),       {status: WaitingFor.channelFunded, funding: funding(1),  postFundSetup: richPostFS.signedBy()}, [] ],
+      [ readyToFund,     deposit(3),       {status: WaitingFor.channelFunded, funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ readyToFund,     deposit(3, true), {status: WaitingFor.theirPostFundState, funding: funding(3, true) ,postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+
+      [ deposited, deposit(1),       {status: WaitingFor.channelFunded, funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(1, true), {status: WaitingFor.channelFunded, funding: funding(1, true), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(3),       {status: WaitingFor.channelFunded, funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(9),       {status: WaitingFor.channelFunded, funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ deposited, deposit(3, true), {status: WaitingFor.theirPostFundState, funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+
+      [ almostFunded,    deposit(1),       {status: WaitingFor.channelFunded, funding: funding(1), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(3),       {status: WaitingFor.channelFunded, funding: funding(3), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(9),       {status: WaitingFor.channelFunded, funding: funding(9), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded,    deposit(3, true), {status: WaitingFor.theirPostFundState, funding: funding(3, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+
+      // Receiving a preFundSetup state
+      [ funded,          {type: 'Nudge'},                          {status: WaitingFor.theirPostFundState, postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
+      [ funded,          sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')},                 [{type: 'sendMessage'}] ],
+      [ aliceSignedPost, sendState(richPostFS.stateSignedBy('B')), {status: 'success', postFundSetup: richPostFS.signedBy('A', 'B')},                 [] ],
+    ];
+
+    test.each(cases)('works: %#', (before, event, after, actions) => {
+      expect(openChannelCranker(before, event, participants.A.privateKey)).toMatchObject({
+        objective: after,
+        actions
+      });
+    });
   });
 });
 
