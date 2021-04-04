@@ -685,6 +685,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     });
 
     const requests: RichLedgerRequest[] = [];
+    const uninsertedRequests: RichLedgerRequest[] = [];
     for (const req of testCase.requestsBefore) {
       const channelToBeFunded = channelLookup.get(req.channelKey);
 
@@ -693,16 +694,23 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
           requests.push(
             await ledgerChannel.insertFundingRequest(store, {...req, channelToBeFunded})
           );
+          uninsertedRequests.push(ledgerChannel.fundingRequest({...req, channelToBeFunded}));
           break;
         case 'defund':
           requests.push(
             await ledgerChannel.insertDefundingRequest(store, {...req, channelToBeFunded})
           );
+          uninsertedRequests.push(ledgerChannel.defundingRequest({...req, channelToBeFunded}));
           break;
         default:
           unreachable(req.type);
       }
     }
+    // REGRESSION TEST
+    expect(requests.map(describeRequest).sort()).toMatchObject(
+      uninsertedRequests.map(describeRequest).sort()
+    );
+    // REGRESSION TEST
 
     // crank
     // -----

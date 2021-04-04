@@ -95,6 +95,27 @@ export class TestLedgerChannel extends TestChannel {
     );
   }
 
+  // Copy-paste from previous method
+  public fundingRequest({
+    channelToBeFunded,
+    amtA,
+    amtB,
+    status,
+    missedOps,
+    lastSeen,
+  }: RequestParams): RichLedgerRequest {
+    return LedgerRequest.fromJson({
+      ledgerChannelId: this.channelId,
+      type: 'fund',
+      channelToBeFunded,
+      amountA: BN.from(amtA),
+      amountB: BN.from(amtB),
+      status,
+      missedOpportunityCount: missedOps || 0,
+      lastSeenAgreedState: lastSeen || null,
+    });
+  }
+
   public async insertDefundingRequest(
     store: Store,
     {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
@@ -112,6 +133,27 @@ export class TestLedgerChannel extends TestChannel {
       },
       store.knex
     );
+  }
+
+  // Copy-paste from previous method
+  public defundingRequest({
+    channelToBeFunded,
+    amtA,
+    amtB,
+    status,
+    missedOps,
+    lastSeen,
+  }: RequestParams): RichLedgerRequest {
+    return LedgerRequest.fromJson({
+      ledgerChannelId: this.channelId,
+      type: 'defund',
+      channelToBeFunded,
+      amountA: BN.from(amtA),
+      amountB: BN.from(amtB),
+      status,
+      missedOpportunityCount: missedOps || 0,
+      lastSeenAgreedState: lastSeen || null,
+    });
   }
 }
 
