@@ -803,6 +803,11 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       }
 
       checkRequests(requests);
+
+      // BEGIN REGRESSION CHECK
+      // Note that requestsBefore are _modified
+      checkRequests(requestsBefore);
+      // END REGRESSION CHECK
     });
   };
 }
