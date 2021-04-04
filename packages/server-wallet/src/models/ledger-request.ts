@@ -23,6 +23,19 @@ export interface LedgerRequestType {
   type: 'fund' | 'defund';
 }
 
+export interface RichLedgerRequest extends LedgerRequestType {
+  isPending: boolean;
+  isQueued: boolean;
+  isFund: boolean;
+  isDefund: boolean;
+  totalAmount: Uint256;
+
+  // TODO: This should be removed.
+  // This is included for compatibility. It is only used in one place,
+  // when throwing an error.
+  $id: any;
+}
+
 export class LedgerRequest extends Model implements LedgerRequestType {
   channelToBeFunded!: LedgerRequestType['channelToBeFunded'];
   ledgerChannelId!: LedgerRequestType['ledgerChannelId'];

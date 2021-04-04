@@ -6,7 +6,7 @@ import {EngineResponse} from '../engine/engine-response';
 import {Store} from '../engine/store';
 import {State} from '../models/channel/state';
 import {SimpleAllocationOutcome} from '../models/channel/outcome';
-import {LedgerRequest} from '../models/ledger-request';
+import {RichLedgerRequest, LedgerRequest} from '../models/ledger-request';
 
 // Ledger Update algorithm:
 // ------------------------
@@ -119,7 +119,7 @@ export class LedgerManager {
    * @param requests LedgerRequest model **to be mutated during cranking*
    * @returns states to sign for ledger channel
    */
-  private synchronousCrankLogic(ledger: Channel, requests: LedgerRequest[]): State[] {
+  private synchronousCrankLogic(ledger: Channel, requests: RichLedgerRequest[]): State[] {
     // determine which state we're in
     const ledgerState = this.determineLedgerState(ledger);
     // what happens next depends on whether we're the leader or follower
@@ -152,7 +152,7 @@ export class LedgerManager {
     return statesToSign;
   }
 
-  private crankAsLeaderInAgreement(ledgerState: Agreement, requests: LedgerRequest[]): State[] {
+  private crankAsLeaderInAgreement(ledgerState: Agreement, requests: RichLedgerRequest[]): State[] {
     const {agreed} = ledgerState;
     const statesToSign = [];
     this.processAgreedState(agreed, requests);
@@ -174,7 +174,10 @@ export class LedgerManager {
     return statesToSign;
   }
 
-  private crankAsFollowerInAgreement(ledgerState: Agreement, requests: LedgerRequest[]): State[] {
+  private crankAsFollowerInAgreement(
+    ledgerState: Agreement,
+    requests: RichLedgerRequest[]
+  ): State[] {
     // nothing to do here apart from update the requests according to the agreed state
     this.processAgreedState(ledgerState.agreed, requests);
     return [];
@@ -182,7 +185,7 @@ export class LedgerManager {
 
   private crankAsLeaderInCounterProposal(
     ledgerState: CounterProposal,
-    requests: LedgerRequest[]
+    requests: RichLedgerRequest[]
   ): State[] {
     const {agreed, counterProposed} = ledgerState;
 
@@ -203,7 +206,7 @@ export class LedgerManager {
     return [stateToSign, ...otherStatesToSign];
   }
 
-  private crankAsFollowerInProposal(ledgerState: Proposal, requests: LedgerRequest[]): State[] {
+  private crankAsFollowerInProposal(ledgerState: Proposal, requests: RichLedgerRequest[]): State[] {
     const statesToSign = [];
     const {agreed, proposed} = ledgerState;
 
@@ -232,7 +235,7 @@ export class LedgerManager {
     return statesToSign;
   }
 
-  private processAgreedState(agreedState: State, requests: LedgerRequest[]): void {
+  private processAgreedState(agreedState: State, requests: RichLedgerRequest[]): void {
     // identify potential cancellations (defunds for which the fund is still queued or pending)
     const {cancellationDefunds, nonCancellations} = this.identifyPotentialCancellations(requests);
 
@@ -260,7 +263,7 @@ export class LedgerManager {
     this.updateStateSeenAndMissedOps(requests, agreedState.turnNum);
   }
 
-  private markSuccessesAndInconsistencies(requests: LedgerRequest[], agreedState: State): void {
+  private markSuccessesAndInconsistencies(requests: RichLedgerRequest[], agreedState: State): void {
     const agreedOutcome = agreedState.simpleAllocationOutcome;
     if (!agreedOutcome) throw Error("Ledger state doesn't have a simple allocation outcome");
 
@@ -301,7 +304,7 @@ export class LedgerManager {
     });
   }
 
-  private updateStateSeenAndMissedOps(requests: LedgerRequest[], turnNum: number) {
+  private updateStateSeenAndMissedOps(requests: RichLedgerRequest[], turnNum: number) {
     requests
       .filter(r => r.isQueued)
       .forEach(r => {
@@ -312,11 +315,11 @@ export class LedgerManager {
       });
   }
 
-  private resetPendingRequestsToQueued(requests: LedgerRequest[]) {
+  private resetPendingRequestsToQueued(requests: RichLedgerRequest[]) {
     requests.filter(r => r.isPending).forEach(r => (r.status = 'queued'));
   }
 
-  private markIncludedRequestsAsPending(requests: LedgerRequest[], proposed: State): void {
+  private markIncludedRequestsAsPending(requests: RichLedgerRequest[], proposed: State): void {
     const proposedOutcome = proposed.simpleAllocationOutcome;
     if (!proposedOutcome) throw Error("Ledger state doesn't have a simple allocation outcome");
 
@@ -350,8 +353,8 @@ export class LedgerManager {
   }
 
   private identifyPotentialCancellations(
-    requests: LedgerRequest[]
-  ): {cancellationDefunds: LedgerRequest[]; nonCancellations: LedgerRequest[]} {
+    requests: RichLedgerRequest[]
+  ): {cancellationDefunds: RichLedgerRequest[]; nonCancellations: RichLedgerRequest[]} {
     const [fundings, defundings] = _.partition(requests, r => r.isFund);
 
     const cancellationDefunds = _.intersectionWith(
@@ -372,10 +375,10 @@ export class LedgerManager {
   // find the corresponding fund for each defund and cancel it if it's in the queued state
   // returns the cancellations that can't be applied (becuase their parnter has already been confirmed)
   private applyCancellations(
-    cancellations: LedgerRequest[],
-    requests: LedgerRequest[],
+    cancellations: RichLedgerRequest[],
+    requests: RichLedgerRequest[],
     turnNum: number
-  ): LedgerRequest[] {
+  ): RichLedgerRequest[] {
     const nonApplicableCancellations = [];
     for (const defund of cancellations) {
       const fund = requests.find(r => r.isFund && r.channelToBeFunded === defund.channelToBeFunded);
@@ -396,7 +399,7 @@ export class LedgerManager {
   // - someoverlap, narrowedOutcome => have removed
   // - noOverlap
   private compareChangesWithRequests(
-    requests: LedgerRequest[],
+    requests: RichLedgerRequest[],
     baselineState: State,
     candidateState: State
   ): CompareChangesWithRequestsResult {
@@ -480,7 +483,7 @@ export class LedgerManager {
     }
   }
 
-  private buildOutcome(state: State, requests: LedgerRequest[]): SimpleAllocationOutcome {
+  private buildOutcome(state: State, requests: RichLedgerRequest[]): SimpleAllocationOutcome {
     if (!state.simpleAllocationOutcome)
       throw Error("Ledger doesn't have simple allocation outcome");
 
