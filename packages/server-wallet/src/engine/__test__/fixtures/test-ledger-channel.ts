@@ -10,7 +10,11 @@ import {utils} from 'ethers';
 import {Payload} from '@statechannels/wire-format';
 
 import {defaultTestConfig} from '../../../config';
-import {LedgerRequest, LedgerRequestStatus} from '../../../models/ledger-request';
+import {
+  LedgerRequest,
+  LedgerRequestStatus,
+  RichLedgerRequest,
+} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
 import {Store} from '../../store';
 
@@ -75,8 +79,8 @@ export class TestLedgerChannel extends TestChannel {
   public async insertFundingRequest(
     store: Store,
     {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
-  ): Promise<void> {
-    await LedgerRequest.setRequest(
+  ): Promise<RichLedgerRequest> {
+    return LedgerRequest.setRequest(
       {
         ledgerChannelId: this.channelId,
         type: 'fund',
@@ -94,8 +98,8 @@ export class TestLedgerChannel extends TestChannel {
   public async insertDefundingRequest(
     store: Store,
     {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
-  ): Promise<void> {
-    await LedgerRequest.setRequest(
+  ): Promise<RichLedgerRequest> {
+    return LedgerRequest.setRequest(
       {
         ledgerChannelId: this.channelId,
         type: 'defund',

@@ -65,8 +65,8 @@ export class LedgerRequest extends Model implements LedgerRequestType {
       lastSeenAgreedState?: null | number;
     },
     tx: TransactionOrKnex
-  ): Promise<void> {
-    await LedgerRequest.query(tx).insert({
+  ): Promise<LedgerRequest> {
+    return LedgerRequest.query(tx).insert({
       ...request,
       missedOpportunityCount: request.missedOpportunityCount || 0,
       lastSeenAgreedState: request.lastSeenAgreedState || null,
