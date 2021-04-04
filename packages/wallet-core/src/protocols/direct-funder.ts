@@ -5,9 +5,6 @@ import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
 import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 
-// TODO (WALLET_VERSION): This should be determined and exported by wallet-core
-export const WALLET_VERSION = 'SomeVersion';
-
 export const MAX_WAITING_TIME = 5_000;
 
 export type OpenChannelEvent = {now: number} & (
