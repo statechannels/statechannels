@@ -69,15 +69,11 @@ import {LedgerRequest} from '../models/ledger-request';
 // accurately update the missedOpportunityCount.
 //
 export class LedgerManager {
-  private store: Store;
-
   static create(params: LedgerManagerParams): LedgerManager {
-    return new this(params);
+    return new this(params.store);
   }
 
-  private constructor({store}: LedgerManagerParams) {
-    this.store = store;
-  }
+  private constructor(private store: Store) {}
 
   async crank(ledgerChannelId: string, response: EngineResponse): Promise<Destination[]> {
     return this.store.transaction(async tx => {
