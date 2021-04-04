@@ -217,10 +217,10 @@ describe('cranking', () => {
       [ deposited, deposit(9),                {funding: funding(9),                postFundSetup: richPostFS.signedBy()}, [] ],
       [ deposited, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
-      [ almostFunded,    deposit(deposits.A),       {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(deposits.total),   {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(9),                {funding: funding(9),              postFundSetup: richPostFS.signedBy()}, [] ],
-      [ almostFunded,    deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+      [ almostFunded, deposit(deposits.A),       {funding: funding(deposits.A),     postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded, deposit(deposits.total),   {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded, deposit(9),                {funding: funding(9),              postFundSetup: richPostFS.signedBy()}, [] ],
+      [ almostFunded, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
 
       // Receiving a preFundSetup state
       [ funded,          {type: 'Nudge'},                          {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
