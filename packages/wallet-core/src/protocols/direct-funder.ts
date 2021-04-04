@@ -13,7 +13,9 @@ type AddressedMessage = {recipient: string; message: Payload};
 export type OpenChannelEvent = {now: number} & (
   | {type: 'Nudge'}
   | {type: 'MessageReceived'; message: Payload}
-  | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
+  | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
+  | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number; now: number}
+);
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
@@ -123,6 +125,13 @@ export function openChannelCranker(
 
   switch (event.type) {
     case 'Nudge':
+      break;
+    case 'DepositSubmitted':
+      objective.fundingRequest = {
+        tx: event.tx,
+        submittedAt: event.submittedAt,
+        attempts: event.attempt
+      };
       break;
     case 'FundingUpdated':
       objective.funding.amount = event.amount;

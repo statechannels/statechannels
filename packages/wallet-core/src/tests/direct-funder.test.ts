@@ -155,31 +155,48 @@ describe('cranking', () => {
       status: WaitingFor.safeToDeposit,
       preFundSetup: richPreFS.signedBy('A', 'B')
     });
+    const fundingRequest = {
+      tx: 'tx',
+      attempts: 0,
+      submittedAt: 0
+    };
     const deposited = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: deposits.A, finalized: false}
+      funding: {amount: deposits.A, finalized: false},
+      fundingRequest
     });
     const almostFunded = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: deposits.total, finalized: false}
+      funding: {amount: deposits.total, finalized: false},
+      fundingRequest
     });
     const funded = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
-      funding: {amount: deposits.total, finalized: true}
+      funding: {amount: deposits.total, finalized: true},
+      fundingRequest
     });
     const aliceSignedPost = objectiveFixture({
       status: WaitingFor.theirPostFundState,
       preFundSetup: richPreFS.signedBy('A', 'B'),
       funding: {amount: deposits.total, finalized: true},
+      fundingRequest,
       postFundSetup: richPostFS.signedBy('A')
     });
 
     const sendState: (signedState: SignedState) => OpenChannelEvent = s => ({
       type: 'MessageReceived',
       message: {walletVersion: 'foo', signedStates: [s]},
+      now: NOW
+    });
+
+    const submitted = (attempt: number, submittedAt = 0): OpenChannelEvent => ({
+      type: 'DepositSubmitted',
+      tx: 'tx',
+      attempt,
+      submittedAt,
       now: NOW
     });
 
@@ -225,6 +242,9 @@ describe('cranking', () => {
       [ almostFunded, deposit(deposits.total),   {funding: funding(deposits.total), postFundSetup: richPostFS.signedBy()}, [] ],
       [ almostFunded, deposit(9),                {funding: funding(9),              postFundSetup: richPostFS.signedBy()}, [] ],
       [ almostFunded, deposit(deposits.total, true), {funding: funding(deposits.total, true), postFundSetup: richPostFS.signedBy('A')}, [{type: 'sendMessage'}] ],
+
+      // Receiving a deposit submitted event
+      [ readyToFund, submitted(0), {funding: funding(0, true), fundingRequest: {tx: 'tx'}, postFundSetup: richPostFS.signedBy()}, [] ],
 
       // Receiving a preFundSetup state
       [ funded,          nudge, {postFundSetup: richPostFS.signedBy('A' )}, [{type: 'sendMessage'}] ],
