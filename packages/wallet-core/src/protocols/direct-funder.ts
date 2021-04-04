@@ -23,7 +23,7 @@ export enum WaitingFor {
   theirPostFundState = 'DirectFunder.theirPostFundSetup'
 }
 
-const enum Hashes {
+const enum Steps {
   preFundSetup = 'preFundSetup',
   postFundSetup = 'postFundSetup'
 }
@@ -65,10 +65,10 @@ export function initialize(
     myIndex,
     openingState: _.omit(openingState, 'signatures'),
     status: WaitingFor.theirPreFundSetup,
-    preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures},
+    preFundSetup: {hash: hashState(setupState(openingState, Steps.preFundSetup)), signatures},
     funding: {amount: BN.from(0), finalized: true},
     fundingRequest: undefined,
-    postFundSetup: {hash: hashState(setupState(openingState, Hashes.postFundSetup)), signatures: []}
+    postFundSetup: {hash: hashState(setupState(openingState, Steps.postFundSetup)), signatures: []}
   };
 }
 
@@ -195,11 +195,11 @@ export function openChannelCranker(
 
   // Then, transition & collect actions:
 
-  if (!signedbyMe(objective, Hashes.preFundSetup, me.signingAddress)) {
-    signStateAction(Hashes.preFundSetup, myPrivateKey, objective, actions);
+  if (!signedbyMe(objective, Steps.preFundSetup, me.signingAddress)) {
+    signStateAction(Steps.preFundSetup, myPrivateKey, objective, actions);
   }
 
-  if (!completed(objective, Hashes.preFundSetup)) {
+  if (!completed(objective, Steps.preFundSetup)) {
     objective.status = WaitingFor.theirPreFundSetup;
     return {objective, actions};
   }
@@ -252,11 +252,11 @@ export function openChannelCranker(
   }
 
   // Now that the channel is funded, it's safe to sign the postFS
-  if (!signedbyMe(objective, Hashes.postFundSetup, me.signingAddress)) {
-    signStateAction(Hashes.postFundSetup, myPrivateKey, objective, actions);
+  if (!signedbyMe(objective, Steps.postFundSetup, me.signingAddress)) {
+    signStateAction(Steps.postFundSetup, myPrivateKey, objective, actions);
   }
 
-  if (!completed(objective, Hashes.postFundSetup)) {
+  if (!completed(objective, Steps.postFundSetup)) {
     objective.status = WaitingFor.theirPostFundState;
     return {objective, actions};
   } else {
@@ -265,23 +265,23 @@ export function openChannelCranker(
   }
 }
 
-function signedbyMe(objective: OpenChannelObjective, step: Hashes, me: Address): boolean {
+function signedbyMe(objective: OpenChannelObjective, step: Steps, me: Address): boolean {
   return objective[step].signatures.map(e => e.signer).includes(me);
 }
 
-function completed(objective: OpenChannelObjective, step: Hashes): boolean {
+function completed(objective: OpenChannelObjective, step: Steps): boolean {
   const {openingState: firstState} = objective;
   return objective[step].signatures.length === firstState.participants.length;
 }
 
-function setupState(openingState: State, key: Hashes): State {
-  const turnNum = key === Hashes.preFundSetup ? 0 : 2 * openingState.participants.length - 1;
+function setupState(openingState: State, step: Steps): State {
+  const turnNum = step === Steps.preFundSetup ? 0 : 2 * openingState.participants.length - 1;
 
   return {...openingState, turnNum};
 }
 
 function signStateAction(
-  key: Hashes,
+  step: Steps,
   myPrivateKey: string,
   objective: OpenChannelObjective,
   actions: Action[]
@@ -289,10 +289,10 @@ function signStateAction(
   const {openingState, myIndex} = objective;
   const me = openingState.participants[myIndex];
 
-  const state = setupState(openingState, key);
+  const state = setupState(openingState, step);
   const signature = signState(state, myPrivateKey);
   const entry = {signature, signer: me.signingAddress};
-  objective[key].signatures = mergeSignatures(objective[key].signatures, [entry]);
+  objective[step].signatures = mergeSignatures(objective[step].signatures, [entry]);
   const signedState = {...state, signatures: [entry]};
 
   const existingAction = actions.find(a => a.type === 'sendStates');
