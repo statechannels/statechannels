@@ -12,7 +12,7 @@ import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {Store} from '../../engine/store';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {createLogger} from '../../logger';
-import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
+import {LedgerRequest, LedgerRequestStatus, RichLedgerRequest} from '../../models/ledger-request';
 import {DBAdmin} from '../..';
 import {LedgerManager} from '../ledger-manager';
 import {EngineResponse} from '../../engine/engine-response';
@@ -684,15 +684,20 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       ]),
     });
 
+    const richRequests: RichLedgerRequest[] = [];
     for (const req of testCase.requestsBefore) {
       const channelToBeFunded = channelLookup.get(req.channelKey);
 
       switch (req.type) {
         case 'fund':
-          await ledgerChannel.insertFundingRequest(store, {...req, channelToBeFunded});
+          richRequests.push(
+            await ledgerChannel.insertFundingRequest(store, {...req, channelToBeFunded})
+          );
           break;
         case 'defund':
-          await ledgerChannel.insertDefundingRequest(store, {...req, channelToBeFunded});
+          richRequests.push(
+            await ledgerChannel.insertDefundingRequest(store, {...req, channelToBeFunded})
+          );
           break;
         default:
           unreachable(req.type);
@@ -707,6 +712,13 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     const tx = store.knex as any;
     const ledgerBefore = await store.getAndLockChannel(ledgerChannelId, tx);
     const requests = await store.getActiveLedgerRequests(ledgerChannelId, tx);
+
+    // REGRESSION TEST
+    expect(requests.map(describeRequest).sort()).toMatchObject(
+      richRequests.map(describeRequest).sort()
+    );
+    // REGRESSION TEST
+
     const states = manager.synchronousCrankLogic(ledgerBefore, requests);
 
     // BEGIN CODE FOR CREATING CONSISTENCY
@@ -765,16 +777,17 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
     }
 
-    for (const req of requests) {
-      ledgerStateDesc.requests.push([
+    function describeRequest(req: RichLedgerRequest): RequestDesc {
+      return [
         req.type,
         channelLookup.getKey(req.channelToBeFunded),
         Number(req.amountA),
         Number(req.amountB),
         req.status,
         {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-      ]);
+      ];
     }
+    ledgerStateDesc.requests = requests.map(describeRequest);
     ledgerStateDesc.requests.sort();
     args.after.requests.sort();
     expect(ledgerStateDesc).toEqual(args.after);
