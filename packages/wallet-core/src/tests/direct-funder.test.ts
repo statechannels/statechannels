@@ -258,6 +258,30 @@ describe('cranking', () => {
         actions
       });
     });
+
+    const receiveNonParticipantState = sendState({
+      ...openingState,
+      signatures: [{signature: 'a sig', signer: 'eve' as any}]
+    });
+    const receiveUnexpectedState = sendState(signStateHelper({...openingState, turnNum: 1}));
+
+    const handleError = (error: any) => ({
+      type: 'handleError' as const,
+      error: expect.objectContaining(error)
+    });
+
+    //prettier-ignore
+    const errorCases: TestCase[] = [
+      [empty, receiveNonParticipantState, empty, [handleError(({ signer: 'eve'}))]],
+      [empty, receiveUnexpectedState,     empty, [handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]})]]
+
+    ];
+    test.each(errorCases)('errors: %#', (before, event, after, actions) => {
+      expect(openChannelCranker(before, event, participants.A.privateKey)).toMatchObject({
+        objective: {...after, status: 'error'},
+        actions
+      });
+    });
   });
 });
 
@@ -272,7 +296,9 @@ function generateEvent(action: Action, objective: OpenChannelObjective): OpenCha
         now: NOW
       };
     case 'sendMessage':
-      return {type: 'MessageReceived', message: action.message.message};
+      return {type: 'MessageReceived', message: action.message.message, now: NOW};
+    case 'handleError':
+      throw action.error;
     default:
       return unreachable(action);
   }
@@ -286,7 +312,9 @@ function crankAndExpect(
   actions: DeepPartial<Action>[]
 ): OpenChannelResult {
   const event =
-    actionOrEvent.type === 'deposit' || actionOrEvent.type === 'sendMessage'
+    actionOrEvent.type === 'deposit' ||
+    actionOrEvent.type === 'sendMessage' ||
+    actionOrEvent.type === 'handleError'
       ? generateEvent(actionOrEvent, currentState[peer])
       : actionOrEvent;
   const output = openChannelCranker(currentState[peer], event, participants[peer].privateKey);
@@ -510,29 +538,4 @@ test('pure objective cranker start to finish', () => {
 
   // To satisfy a jest ts-lint rule, we need to put a token expectation within the test block
   expect(output).toBeDefined();
-});
-
-describe('error modes', () => {
-  test('receiving a signature from a non-participant', () => {
-    const signatures = [{signature: 'a signature', signer: participants.H.signingAddress}];
-    const signedStates = [{...openingState, signatures}];
-    expect(() =>
-      openChannelCranker(
-        initial,
-        {type: 'MessageReceived', message: {signedStates, walletVersion: WALLET_VERSION}},
-        participants.A.privateKey
-      )
-    ).toThrow('received a signature from a non-participant');
-  });
-
-  test('receiving an unexpected state', () => {
-    const signedStates = [{...openingState, signatures: [], turnNum: 4}];
-    expect(() =>
-      openChannelCranker(
-        initial,
-        {type: 'MessageReceived', message: {signedStates, walletVersion: WALLET_VERSION}},
-        participants.A.privateKey
-      )
-    ).toThrow('Unexpected state hash');
-  });
 });

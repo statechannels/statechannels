@@ -75,7 +75,8 @@ export function initialize(
 export type Action =
   | {type: 'sendMessage'; message: AddressedMessage}
   // TODO: (ChainService) We will need to include more data once this gets hooked up to a chain service
-  | {type: 'deposit'; amount: Uint256};
+  | {type: 'deposit'; amount: Uint256}
+  | {type: 'handleError'; error: Error};
 
 export type OpenChannelResult = {
   objective: OpenChannelObjective;
@@ -117,6 +118,7 @@ export function openChannelCranker(
   myPrivateKey: string
 ): OpenChannelResult {
   const objective = _.cloneDeep(currentObjectiveState);
+  const actions: Action[] = [];
 
   const {participants} = objective.openingState;
   const me = participants[objective.myIndex];
@@ -148,8 +150,12 @@ export function openChannelCranker(
 
         for (const signature of signatures) {
           if (!participants.find(p => p.signingAddress === signature.signer)) {
-            // TODO: (Errors) Enter an error state here
-            throw new Error('received a signature from a non-participant');
+            objective.status = 'error';
+            const error = new Error('received a signature from a non-participant');
+            _.set(error, 'code', 0);
+            _.set(error, 'signer', signature.signer);
+            actions.push({type: 'handleError', error});
+            return {objective, actions};
           }
         }
 
@@ -164,10 +170,13 @@ export function openChannelCranker(
             signatures
           );
         } else {
-          // TODO: (Errors) Enter an error state here
-          throw new Error(
-            `Unexpected state hash ${hash}. Expecting ${objective.preFundSetup.hash} or ${objective.postFundSetup.hash}`
-          );
+          objective.status = 'error';
+          const error = new Error('Unexpected state hash');
+          _.set(error, 'code', 1);
+          _.set(error, 'received', hash);
+          _.set(error, 'expected', [objective.preFundSetup.hash, objective.postFundSetup.hash]);
+          actions.push({type: 'handleError', error});
+          return {objective, actions};
         }
       }
       break;
@@ -177,7 +186,6 @@ export function openChannelCranker(
   }
 
   // Then, transition & collect actions:
-  const actions: Action[] = [];
 
   if (!signedbyMe(objective, Hashes.preFundSetup, me.signingAddress)) {
     signStateAction(Hashes.preFundSetup, myPrivateKey, objective, actions);
