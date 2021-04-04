@@ -45,9 +45,6 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
-    if (!channel) {
-      throw new Error(`ChannelOpener can't find channel with id ${channelToLock}`);
-    }
     // always queue the channel if we've potentially touched it
     response.queueChannel(channel);
 

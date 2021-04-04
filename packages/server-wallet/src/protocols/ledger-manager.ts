@@ -84,7 +84,6 @@ export class LedgerManager {
       const requests = await this.store.getActiveLedgerRequests(ledgerChannelId, tx);
 
       // sanity checks
-      if (!ledger) return [];
       if (!ledger.isRunning) return [];
       if (!ledger.isLedger) return [];
 
