@@ -943,6 +943,16 @@ export class SingleThreadedEngine
     }
   }
 
+  /**
+   * TODO (DirectFunder): Remove this function
+   *
+   * @param o wallet-core Objective
+   * @param openingState opening state of channe
+   * @param signingAddress My signing address
+   * @returns DirectFunder.OpenChannelObjective
+   *
+   * Stores the return value **in memory**.
+   */
   private storeRichObjective(
     o: OpenChannel,
     openingState: State,
