@@ -53,7 +53,7 @@ import { SubmitChallenge } from '@statechannels/wallet-core';
 import { SyncChannelParams } from '@statechannels/client-api-schema';
 import { Transaction } from 'objection';
 import { TransactionOrKnex } from 'objection';
-import { Uint256 as Uint256_2 } from '@statechannels/wallet-core';
+import { Uint256 } from '@statechannels/wallet-core';
 import { UpdateChannelParams } from '@statechannels/client-api-schema';
 import { ValidationErrorItem } from 'joi';
 
@@ -176,8 +176,10 @@ export interface EngineInterface {
     syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
+    // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
+    //
     // (undocumented)
-    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
+    updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput>;
 }
 
 // @public (undocumented)
@@ -343,10 +345,8 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     getObjective(objectiveId: string): Promise<WalletObjective>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    holdingUpdated({ channelId, amount, assetHolderAddress }: HoldingUpdatedArg): Promise<void>;
+    // Warning: (ae-forgotten-export) The symbol "EngineResponse" needs to be exported by the entry point index.d.ts
+    holdingUpdated({ channelId, amount, assetHolderAddress }: HoldingUpdatedArg, response?: EngineResponse): Promise<SingleChannelOutput>;
     joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput>;
     joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
     // (undocumented)
@@ -374,20 +374,7 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput>;
     updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
-    updateChannelFunding(args: UpdateChannelFundingParams): Promise<SingleChannelOutput>;
-    updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
-}
-
-// @public (undocumented)
-export interface UpdateChannelFundingParams {
-    // Warning: (ae-forgotten-export) The symbol "Uint256" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    amount: Uint256;
-    // (undocumented)
-    assetHolderAddress?: Address;
-    // (undocumented)
-    channelId: ChannelId;
+    updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput>;
 }
 
 // @public (undocumented)
@@ -400,7 +387,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:30:3 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:24:3 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

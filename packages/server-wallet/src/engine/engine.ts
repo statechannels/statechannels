@@ -13,7 +13,6 @@ import {
   validatePayload,
   Outcome,
   convertToParticipant,
-  BN,
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
@@ -30,7 +29,7 @@ import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {ethers, constants, BigNumber, utils} from 'ethers';
+import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {OpenChannel, Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
@@ -72,7 +71,6 @@ import {
   MultipleChannelOutput,
   Output,
   EngineInterface,
-  UpdateChannelFundingParams,
   EngineEvent,
 } from './types';
 import {EngineResponse} from './engine-response';
@@ -395,45 +393,13 @@ export class SingleThreadedEngine
    * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
    */
-  public async updateFundingForChannels(
-    args: UpdateChannelFundingParams[]
-  ): Promise<MultipleChannelOutput> {
+  public async updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput> {
     const response = EngineResponse.initialize();
 
-    await Promise.all(args.map(a => this._updateChannelFunding(a, response)));
+    await Promise.all(args.map(a => this.holdingUpdated(a, response)));
 
     return response.multipleChannelOutput();
   }
-
-  /**
-   * Update the engine's knowledge about the funding for a channel.
-   *
-   * @param args - An object specifying the channelId, asset holder address and amount.
-   * @returns A promise that resolves to a channel output.
-   */
-  public async updateChannelFunding(
-    args: UpdateChannelFundingParams
-  ): Promise<SingleChannelOutput> {
-    const response = EngineResponse.initialize();
-
-    await this._updateChannelFunding(args, response);
-
-    return response.singleChannelOutput();
-  }
-
-  private async _updateChannelFunding(
-    {channelId, assetHolderAddress, amount}: UpdateChannelFundingParams,
-    response: EngineResponse
-  ): Promise<void> {
-    await this.store.updateFunding(
-      channelId,
-      BN.from(amount),
-      assetHolderAddress || makeAddress(constants.AddressZero)
-    );
-
-    await this.takeActions([channelId], response);
-  }
-
   /**
    * Get the signing address for this engine, or create it if it does not exist.
    *
@@ -1027,14 +993,25 @@ export class SingleThreadedEngine
     response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
   }
 
+  /**
+   * Update the engine's knowledge about the on-chain funding for a channel.
+   *
+   * @param args - An object specifying the channelId, asset holder address and amount.
+   * @returns A promise that resolves to a channel output.
+   */
   // ChainEventSubscriberInterface implementation
-  async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
-    const response = EngineResponse.initialize();
-
-    await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
+  async holdingUpdated(
+    {channelId, amount, assetHolderAddress}: HoldingUpdatedArg,
+    response = EngineResponse.initialize()
+  ): Promise<SingleChannelOutput> {
+    await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+
+    // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
+    // multiple channel output. So, we set strict to false
+    return response.singleChannelOutput(false);
   }
 
   async assetOutcomeUpdated({

@@ -7,17 +7,11 @@ import {
   ChannelId,
   ChannelResult,
 } from '@statechannels/client-api-schema';
-import {Address as CoreAddress} from '@statechannels/wallet-core';
 
+import {HoldingUpdatedArg} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
-import {Bytes32, Uint256} from '../type-aliases';
-
-export interface UpdateChannelFundingParams {
-  channelId: ChannelId;
-  assetHolderAddress?: CoreAddress;
-  amount: Uint256;
-}
+import {Bytes32} from '../type-aliases';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
@@ -69,7 +63,8 @@ export interface EngineInterface {
 
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
-  updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
+  // TODO: Should this live on a TestEngineInterface?
+  updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput>;
   // Engine <-> Engine communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;

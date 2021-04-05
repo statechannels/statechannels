@@ -123,13 +123,8 @@ it('sends the post fund setup when the funding event is provided', async () => {
     w.knex
   );
 
-  const result = await w.updateFundingForChannels([
-    {
-      channelId: c.channelId,
-      assetHolderAddress: makeAddress(constants.AddressZero),
-      amount: BN.from(4),
-    },
-  ]);
+  const assetHolderAddress = makeAddress(constants.AddressZero);
+  const result = await w.holdingUpdated({channelId, assetHolderAddress, amount: BN.from(4)});
 
   await expect(Funding.getFundingAmount(w.knex, channelId, AddressZero)).resolves.toEqual('0x04');
 
@@ -143,7 +138,7 @@ it('sends the post fund setup when the funding event is provided', async () => {
         },
       },
     ],
-    channelResults: [{channelId: c.channelId, turnNum: 0}],
+    channelResult: {channelId: c.channelId, turnNum: 0},
   });
 });
 
