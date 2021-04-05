@@ -95,7 +95,7 @@ export class LedgerManager {
       }
       // END CHALLENGING_VO
 
-      const statesToSign = this.synchronousCrankLogic(ledger, requests);
+      const statesToSign = new LedgerProtocol().crank(ledger, requests);
 
       // save the ledger
       for (const state of statesToSign) {
@@ -112,14 +112,16 @@ export class LedgerManager {
       return _.uniq(requests.filter(r => !r.isActive).map(r => r.channelToBeFunded));
     });
   }
+}
 
+export class LedgerProtocol {
   /**
    *
    * @param ledger Channel model **not mutated during cranking**
    * @param requests LedgerRequest model **to be mutated during cranking**
    * @returns states to sign for ledger channel
    */
-  synchronousCrankLogic(ledger: Channel, requests: RichLedgerRequest[]): State[] {
+  crank(ledger: Channel, requests: RichLedgerRequest[]): State[] {
     // determine which state we're in
     const ledgerState = this.determineLedgerState(ledger);
     // what happens next depends on whether we're the leader or follower
