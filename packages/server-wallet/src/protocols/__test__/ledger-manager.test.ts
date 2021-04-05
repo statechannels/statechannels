@@ -520,28 +520,23 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
 
     const myIndex = args.as === 'leader' ? 0 : 1;
 
-    const originalRequests: RichLedgerRequest[] = [];
+    const requests: RichLedgerRequest[] = [];
     for (const req of testCase.requestsBefore) {
       const channelToBeFunded = channelLookup.get(req.channelKey);
 
       switch (req.type) {
         case 'fund':
-          originalRequests.push(ledgerChannel.fundingRequest({...req, channelToBeFunded}));
+          requests.push(ledgerChannel.fundingRequest({...req, channelToBeFunded}));
           break;
         case 'defund':
-          originalRequests.push(ledgerChannel.defundingRequest({...req, channelToBeFunded}));
+          requests.push(ledgerChannel.defundingRequest({...req, channelToBeFunded}));
           break;
         default:
           unreachable(req.type);
       }
     }
 
-    // crank
-    // -----
     const channelId = ledgerChannel.channelId;
-
-    // Collect the correct input to the synchronous logic
-
     const vars = initialStates
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
@@ -553,20 +548,17 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       signingAddress: ledgerChannel.signingWallets[myIndex].address,
       // TODO: There is a bug here, where the behaviour of the ledger funding protocol differs
       // depending on how the states are stored
-      vars: _.cloneDeep(_.sortBy(vars, s => -s.turnNum)),
+      vars: _.sortBy(vars, s => -s.turnNum),
     });
 
-    const requests = _.cloneDeep(originalRequests);
-    const statesToBeSigned = manager.synchronousCrankLogic(ledger, requests);
-
-    // BEGIN CODE FOR CREATING CONSISTENCY
-    statesToBeSigned.map(s => {
+    // crank (and update ledger vars)
+    // -----
+    manager.synchronousCrankLogic(ledger, requests).map(s => {
       const actualState = addHash(s.signedState);
-      const signatures = [ledgerChannel.signingWallets[myIndex].signState(s.signedState)];
+      const signatures = [ledgerChannel.signingWallets[myIndex].signState(actualState)];
       ledger.vars = addState(ledger.vars, {...actualState, signatures});
     });
     ledger.vars = clearOldStates(ledger.vars, ledger.support);
-    // END CODE FOR CREATING CONSISTENCY
 
     // assertions
     // ----------
@@ -589,18 +581,15 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
     }
 
-    function describeRequest(req: RichLedgerRequest): RequestDesc {
-      return [
-        req.type,
-        channelLookup.getKey(req.channelToBeFunded),
-        Number(req.amountA),
-        Number(req.amountB),
-        req.status,
-        {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-      ];
-    }
+    ledgerStateDesc.requests = requests.map(req => [
+      req.type,
+      channelLookup.getKey(req.channelToBeFunded),
+      Number(req.amountA),
+      Number(req.amountB),
+      req.status,
+      {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+    ]);
 
-    ledgerStateDesc.requests = requests.map(describeRequest);
     ledgerStateDesc.requests.sort();
     args.after.requests.sort();
     expect(ledgerStateDesc).toEqual(args.after);
