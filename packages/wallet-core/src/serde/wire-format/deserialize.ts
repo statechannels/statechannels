@@ -101,7 +101,9 @@ export function deserializeObjective(objective: ObjectiveWire): SharedObjective 
     destination: makeDestination(p.destination)
   }));
 
-  return {...objective, participants};
+  // Without asserting on the type here, the compiler complains about the `fundingStrategy`
+  // properties not matching.
+  return {...objective, participants} as SharedObjective;
 }
 // where do I move between token and asset holder?
 // I have to have asset holder between the wallets, otherwise there is ambiguity
