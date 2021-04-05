@@ -115,8 +115,8 @@ export class LedgerManager {
 
   /**
    *
-   * @param ledger Channel model **not mutated during cranking*
-   * @param requests LedgerRequest model **to be mutated during cranking*
+   * @param ledger Channel model **not mutated during cranking**
+   * @param requests LedgerRequest model **to be mutated during cranking**
    * @returns states to sign for ledger channel
    */
   synchronousCrankLogic(ledger: Channel, requests: RichLedgerRequest[]): State[] {

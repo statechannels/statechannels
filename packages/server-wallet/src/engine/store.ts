@@ -248,7 +248,7 @@ export class Store {
   }
 
   async getAndLockChannel(channelId: Bytes32, tx: Transaction): Promise<Channel> {
-    const channel = Channel.query(tx)
+    const channel = await Channel.query(tx)
       .where({channelId})
       .withGraphJoined('adjudicatorStatus')
       .withGraphFetched('signingWallet')
@@ -256,7 +256,7 @@ export class Store {
       .first();
 
     if (!channel) {
-      throw new ChannelError('No channel found with id');
+      throw new ChannelError(`No channel found with id ${channelId}`);
     }
 
     return channel;
