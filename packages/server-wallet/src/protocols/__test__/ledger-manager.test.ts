@@ -4,7 +4,7 @@ import {addHash, unreachable} from '@statechannels/wallet-core';
 import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {LedgerRequestStatus} from '../../models/ledger-request';
-import {LedgerProtocol} from '../ledger-manager';
+import {LedgerProtocol} from '../ledger-protocol';
 import {Destination} from '../../type-aliases';
 import {State} from '../../models/channel/state';
 import {addState, clearOldStates, dropNonVariables} from '../../state-utils';
