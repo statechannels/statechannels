@@ -1,5 +1,5 @@
 import _ from 'lodash';
-import {addHash, createSignatureEntry, unreachable} from '@statechannels/wallet-core';
+import {addHash, unreachable} from '@statechannels/wallet-core';
 
 import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
@@ -546,20 +546,11 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
 
-    const privateKey = [
-      '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318',
-      '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727',
-    ][myIndex];
-    const signingAddress = [
-      '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
-      '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
-    ][myIndex];
-
     const ledger = channel({
       ...ledgerChannel.channelConstants,
       channelId,
       myIndex,
-      signingAddress,
+      signingAddress: ledgerChannel.signingWallets[myIndex].address,
       // TODO: There is a bug here, where the behaviour of the ledger funding protocol differs
       // depending on how the states are stored
       vars: _.cloneDeep(_.sortBy(vars, s => -s.turnNum)),
@@ -570,9 +561,9 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
 
     // BEGIN CODE FOR CREATING CONSISTENCY
     statesToBeSigned.map(s => {
-      const signed = addHash(s.signedState);
-      signed.signatures = [createSignatureEntry(signed, privateKey)];
-      ledger.vars = addState(ledger.vars, signed);
+      const actualState = addHash(s.signedState);
+      const signatures = [ledgerChannel.signingWallets[myIndex].signState(s.signedState)];
+      ledger.vars = addState(ledger.vars, {...actualState, signatures});
     });
     ledger.vars = clearOldStates(ledger.vars, ledger.support);
     // END CODE FOR CREATING CONSISTENCY
