@@ -899,7 +899,23 @@ export class SingleThreadedEngine
     }
   }
 
-  // TODO (DirectFunder) This should probably belong in the objective manager.
+  /**
+   * @param channelId used to look up the rich objective
+   * @param event event to send to cranker
+   * @param response: used to perform runtime regression tests
+   * @returns {objective, actions}
+   *    - objective: the new value of the rich objective
+   *    - actions: things the engine needs to trigger
+   *
+   * - Fetches current value of the rich objective in memory
+   * - sends the event to the DirectFunder cranker
+   * - asserts that the generated actions are correct (ie. in line with the current protocol)
+   * - updates the rich objective
+   *
+   * This is a temporary function. (It probably belongs in the ObjectiveManager)
+   *
+   * // TODO (DirectFunder) Remove this function.
+   */
   private async crankRichObjective(
     channelId: Bytes32,
     event: DirectFunder.OpenChannelEvent,
