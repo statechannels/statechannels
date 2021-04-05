@@ -10,3 +10,6 @@ export * from './serde/wire-format/deserialize';
 export * from './serde/wire-format/serialize';
 
 export {DirectFunder} from './protocols';
+
+// Test utilities
+export * from './tests/fixture';
