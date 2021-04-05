@@ -1,5 +1,6 @@
 import {ethers} from 'ethers';
 import * as _ from 'lodash';
+import {DirectFunder} from 'protocols';
 
 import {unreachable} from '../utils';
 import {addHash, calculateChannelId} from '../state-utils';
@@ -303,39 +304,40 @@ describe('cranking', () => {
     });
     const receiveUnexpectedState = sendState(signStateHelper({...openingState, turnNum: 1}));
 
-    const handleError = (code: number, data: any) => {
-      const error = new Error();
-      _.set(error, 'data', {...data, code});
+    const handleError = (data: any) => (message: string) => {
+      const error = new Error(message) as any;
+      _.set(error, 'data', {...data, message});
 
       return {type: 'handleError' as const, error};
     };
 
     type ErrorCase = [
-      string,
+      DirectFunder.ErrorModes['message'],
       OpenChannelObjective, // current
       OpenChannelEvent,
       DeepPartial<OpenChannelObjective>, // expected
-      DeepPartial<Action>[]
+      // Generates an action, given a message
+      (message: string) => {type: 'handleError'; error: Error & {data: any}}
     ];
 
     const error = {status: 'error'} as const;
     const theFuture = MAX_WAITING_TIME + 500;
     //prettier-ignore
     const errorCases: ErrorCase[] = [
-      [ 'code 0', empty, receiveNonParticipantState, error, [handleError(0, {signature: {signer: 'eve'}})]],
-      [ 'code 1', empty, receiveUnexpectedState, error,     [handleError(1, {received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ] ],
-      [ 'code 2', depositPending, {type: 'Nudge', now: theFuture}, error, [handleError(2, {now: theFuture})] ],
-      [ 'code 3', depositPending, {type: 'Unknown'} as any, error, [handleError(3, {event: {type: 'Unknown'}})] ]
+      [ 'NonParticipantSignature', empty, receiveNonParticipantState, error, handleError({signature: {signer: 'eve'}})],
+      [ 'ReceivedUnexpectedState', empty, receiveUnexpectedState, error,     handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ],
+      [ 'TimedOutWhileFunding', depositPending, {type: 'Nudge', now: theFuture}, error, handleError({now: theFuture}) ],
+      [ 'UnexpectedEvent',      depositPending, {type: 'Unknown'} as any, error, handleError({event: {type: 'Unknown'}}) ]
     ];
-    test.each(errorCases)('error %s', (_msg, before, event, after, actions) => {
+    test.each(errorCases)('error %s', (msg, before, event, after, actionGenerator) => {
       const result = openChannelCranker(before, event, participants.A.privateKey);
       expect(result).toMatchObject({
         objective: {...after, status: 'error'},
         actions: [{type: 'handleError', error: expect.any(Error)}]
       });
-      const [{error}] = result.actions as any;
-      const [{error: expectedError}] = actions as any;
 
+      const [{error}] = result.actions as any;
+      const {error: expectedError} = actionGenerator(msg);
       expect(error.data).toMatchObject(expectedError.data);
     });
   });

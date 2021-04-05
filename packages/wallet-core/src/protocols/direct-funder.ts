@@ -157,7 +157,6 @@ export function openChannelCranker(
           if (!participants.find(p => p.signingAddress === signature.signer)) {
             objective.status = 'error';
             const error = new DirectFunderError({
-              code: 0,
               message: 'NonParticipantSignature',
               signature
             });
@@ -180,7 +179,6 @@ export function openChannelCranker(
           objective.status = 'error';
           const error = new DirectFunderError({
             message: 'ReceivedUnexpectedState',
-            code: 1,
             received: hash,
             expected: [objective.preFundSetup.hash, objective.postFundSetup.hash]
           });
@@ -233,7 +231,6 @@ export function openChannelCranker(
     if (event.now >= objective.fundingRequest.submittedAt + MAX_WAITING_TIME) {
       objective.status = 'error';
       const error = new DirectFunderError({
-        code: 2,
         message: 'TimedOutWhileFunding',
         now: event.now,
         submittedAt: objective.fundingRequest.submittedAt
@@ -342,11 +339,11 @@ const utils = {
   }
 };
 
-type ErrorModes =
-  | {code: 0; message: 'NonParticipantSignature'; signature: SignatureEntry}
-  | {code: 1; message: 'ReceivedUnexpectedState'; received: string; expected: [string, string]}
-  | {code: 2; message: 'TimedOutWhileFunding'; now: number; submittedAt: number}
-  | {code: 3; message: 'UnexpectedEvent'; event: any};
+export type ErrorModes =
+  | {message: 'NonParticipantSignature'; signature: SignatureEntry}
+  | {message: 'ReceivedUnexpectedState'; received: string; expected: [string, string]}
+  | {message: 'TimedOutWhileFunding'; now: number; submittedAt: number}
+  | {message: 'UnexpectedEvent'; event: any};
 
 class DirectFunderError extends Error {
   constructor(public data: ErrorModes) {
@@ -369,7 +366,7 @@ class DirectFunderError extends Error {
  *
  */
 function handleUnexpectedEvent(event: never, objective: OpenChannelObjective): OpenChannelResult {
-  const error = new DirectFunderError({code: 3, event, message: 'UnexpectedEvent'});
+  const error = new DirectFunderError({event, message: 'UnexpectedEvent'});
   objective.status = 'error';
   return {objective, actions: [{type: 'handleError', error}]};
 }
