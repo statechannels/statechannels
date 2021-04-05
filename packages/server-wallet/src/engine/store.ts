@@ -256,7 +256,7 @@ export class Store {
       .first();
 
     if (!channel) {
-      throw new ChannelError(`No channel found with id ${channelId}`);
+      throw new ChannelError('No channel found with id', {channelId});
     }
 
     return channel;
