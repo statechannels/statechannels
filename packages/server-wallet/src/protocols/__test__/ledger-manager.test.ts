@@ -607,27 +607,27 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     // console.log('as', args.as);
     const signedStatesBefore = states.map(s => s.signedState).map(addHash);
     signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
-    // console.log('states signed', signedStatesBefore.map(summary));
+    // console.log('states signed', signedStatesBefore.map(_summary));
 
     let statesAfter = ledgerBefore.vars;
-    // console.log('ledger before', ledgerBefore.vars.map(summary));
+    // console.log('ledger before', ledgerBefore.vars.map(_summary));
 
     if (signedStatesBefore.length > 0) {
       signedStatesBefore.map(state => {
-        // console.log('adding', summary(state));
-        // console.log('to', statesAfter.map(summary));
+        // console.log('adding', _summary(state));
+        // console.log('to', statesAfter.map(_summary));
         statesAfter = addState(statesAfter, state);
-        // console.log('gives', statesAfter.map(summary));
+        // console.log('gives', statesAfter.map(_summary));
       });
     } else {
       statesAfter = ledgerBefore.vars;
     }
 
     const ledger = channel({...ledgerBefore.channelConstants, vars: statesAfter});
-    // console.log(signedStatesBefore.map(summary));
-    // console.log('ledger after', ledgerAfter.vars.map(summary));
+    // console.log(signedStatesBefore.map(_summary));
+    // console.log('ledger after', ledgerAfter.vars.map(_summary));
     ledger.vars = clearOldStates(ledger.vars, ledger.support);
-    // console.log('after clearing', ledgerAfter.vars.map(summary));
+    // console.log('after clearing', ledgerAfter.vars.map(_summary));
     // END CODE FOR CREATING CONSISTENCY
 
     // assertions
