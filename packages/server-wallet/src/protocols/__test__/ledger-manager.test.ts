@@ -591,9 +591,9 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
 
     // Collect the correct input to the synchronous logic
     const tx = store.knex as any;
-    const ledgerBefore = await store.getAndLockChannel(ledgerChannelId, tx);
+    const storedLedger = await store.getAndLockChannel(ledgerChannelId, tx);
 
-    const states = manager.synchronousCrankLogic(ledgerBefore, requests);
+    const states = manager.synchronousCrankLogic(storedLedger, requests);
 
     // BEGIN CODE FOR CREATING CONSISTENCY
     function _summary(s: SignedStateVarsWithHash) {
@@ -609,7 +609,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
     // console.log('states signed', signedStatesBefore.map(_summary));
 
-    let statesAfter = ledgerBefore.vars;
+    let statesAfter = storedLedger.vars;
     // console.log('ledger before', ledgerBefore.vars.map(_summary));
 
     if (signedStatesBefore.length > 0) {
@@ -620,10 +620,10 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
         // console.log('gives', statesAfter.map(_summary));
       });
     } else {
-      statesAfter = ledgerBefore.vars;
+      statesAfter = storedLedger.vars;
     }
 
-    const ledger = channel({...ledgerBefore.channelConstants, vars: statesAfter});
+    const ledger = channel({...storedLedger.channelConstants, vars: statesAfter});
     // console.log(signedStatesBefore.map(_summary));
     // console.log('ledger after', ledgerAfter.vars.map(_summary));
     ledger.vars = clearOldStates(ledger.vars, ledger.support);
