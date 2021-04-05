@@ -17,28 +17,6 @@ beforeAll(async () => {
   manager = await LedgerManager.create({} as any);
 });
 
-it(
-  'SYNC: will create a proposal from requests in the queue',
-  testLedgerCrank({
-    as: 'leader',
-    before: {
-      agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
-      requests: [
-        ['fund', 'd', 1, 1, 'queued'],
-        ['defund', 'c', 5, 5, 'queued'],
-      ],
-    },
-    after: {
-      agreed: {turn: 5, bals: {a: 5, b: 5, c: 10}},
-      proposed: {turn: 6, bals: {a: 9, b: 9, d: 2}},
-      requests: [
-        ['fund', 'd', 1, 1, 'pending', {missedOps: 0, lastSeen: 5}],
-        ['defund', 'c', 5, 5, 'pending', {missedOps: 0, lastSeen: 5}],
-      ],
-    },
-  })
-);
-
 describe('as leader', () => {
   describe('in the accept state', () => {
     it(
