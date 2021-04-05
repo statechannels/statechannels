@@ -1,11 +1,15 @@
 import _ from 'lodash';
-import {BN, unreachable} from '@statechannels/wallet-core';
+import {BN, ChannelConstants, unreachable} from '@statechannels/wallet-core';
 
-import {Channel} from '../models/channel';
 import {State} from '../models/channel/state';
 import {SimpleAllocationOutcome} from '../models/channel/outcome';
 import {RichLedgerRequest} from '../models/ledger-request';
 
+interface ReadonlyChannel extends ChannelConstants {
+  myIndex: number;
+  latestTurnNum: number;
+  uniqueStateAt(turn: number): State | undefined;
+}
 export class LedgerProtocol {
   /**
    *
@@ -13,7 +17,7 @@ export class LedgerProtocol {
    * @param requests LedgerRequest model **to be mutated during cranking*
    * @returns states to sign for ledger channel
    */
-  crank(ledger: Channel, requests: RichLedgerRequest[]): State[] {
+  crank(ledger: ReadonlyChannel, requests: RichLedgerRequest[]): State[] {
     // determine which state we're in
     const ledgerState = this.determineLedgerState(ledger);
     // what happens next depends on whether we're the leader or follower
@@ -336,7 +340,7 @@ export class LedgerProtocol {
     }
   }
 
-  private determineLedgerState(ledger: Channel): LedgerState {
+  private determineLedgerState(ledger: ReadonlyChannel): LedgerState {
     const [leader, follower] = ledger.participants.map(p => p.signingAddress);
     const latestTurnNum = ledger.latestTurnNum;
 
