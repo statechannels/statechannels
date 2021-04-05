@@ -564,21 +564,22 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
         stateToParams(testCase.counterProposedBefore, 'counter-proposed'),
     ]);
 
+    const myIndex = args.as === 'leader' ? 0 : 1;
     await ledgerChannel.insertInto(store, {
-      participant: args.as === 'leader' ? 0 : 1,
+      participant: myIndex,
       states: statesToInsert,
     });
 
-    const requests: RichLedgerRequest[] = [];
+    const originalRequests: RichLedgerRequest[] = [];
     for (const req of testCase.requestsBefore) {
       const channelToBeFunded = channelLookup.get(req.channelKey);
 
       switch (req.type) {
         case 'fund':
-          requests.push(ledgerChannel.fundingRequest({...req, channelToBeFunded}));
+          originalRequests.push(ledgerChannel.fundingRequest({...req, channelToBeFunded}));
           break;
         case 'defund':
-          requests.push(ledgerChannel.defundingRequest({...req, channelToBeFunded}));
+          originalRequests.push(ledgerChannel.defundingRequest({...req, channelToBeFunded}));
           break;
         default:
           unreachable(req.type);
@@ -592,79 +593,110 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     // Collect the correct input to the synchronous logic
     const tx = store.knex as any;
     const storedLedger = await store.getAndLockChannel(ledgerChannelId, tx);
+    const ledger = channel({
+      ...storedLedger.channelConstants,
+      channelId: storedLedger.channelId,
+      myIndex,
+      signingAddress: storedLedger.signingAddress,
+      vars: _.cloneDeep(storedLedger.vars),
+    });
 
-    const states = manager.synchronousCrankLogic(storedLedger, requests);
+    const requests = _.cloneDeep(originalRequests);
+    const statesToBeSigned = manager.synchronousCrankLogic(storedLedger, requests);
 
     // BEGIN CODE FOR CREATING CONSISTENCY
-    function _summary(s: SignedStateVarsWithHash) {
-      return [s.turnNum, s.signatures.map(sig => (sig.signer[2] === '1' ? 'A' : 'B'))];
+    function _summary(s: State | SignedStateVarsWithHash) {
+      const signatures = 'signatures' in s ? s.signatures : s.signedState.signatures;
+      return [s.turnNum, signatures.map(sig => sig.signer[2])];
     }
+
+    // REGRESSION
+    const requests2 = _.cloneDeep(originalRequests);
+    const statesToBeSigned2 = manager.synchronousCrankLogic(ledger, requests2);
+    try {
+      expect(statesToBeSigned.map(_summary).sort()).toMatchObject(
+        statesToBeSigned2.map(_summary).sort()
+      );
+    } catch (error) {
+      // eslint-disable-next-line no-debugger
+      debugger;
+      manager.synchronousCrankLogic(ledger, _.cloneDeep(requests));
+    }
+    // REGRESSION
+
     const privateKey =
       args.as === 'leader'
         ? '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
         : '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727';
 
     // console.log('as', args.as);
-    const signedStatesBefore = states.map(s => s.signedState).map(addHash);
+    const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
     signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
     // console.log('states signed', signedStatesBefore.map(_summary));
 
-    let statesAfter = storedLedger.vars;
-    // console.log('ledger before', ledgerBefore.vars.map(_summary));
+    // console.log('ledger before', ledger.vars.map(_summary));
 
     if (signedStatesBefore.length > 0) {
       signedStatesBefore.map(state => {
         // console.log('adding', _summary(state));
-        // console.log('to', statesAfter.map(_summary));
-        statesAfter = addState(statesAfter, state);
-        // console.log('gives', statesAfter.map(_summary));
+        // console.log('to', ledger.vars.map(_summary));
+        ledger.vars = addState(ledger.vars, state);
+        // console.log('gives', ledger.vars.map(_summary));
       });
     } else {
-      statesAfter = storedLedger.vars;
+      ledger.vars = storedLedger.vars;
     }
 
-    const ledger = channel({...storedLedger.channelConstants, vars: statesAfter});
     // console.log(signedStatesBefore.map(_summary));
-    // console.log('ledger after', ledgerAfter.vars.map(_summary));
+    // console.log('ledger after', ledger.vars.map(_summary));
     ledger.vars = clearOldStates(ledger.vars, ledger.support);
-    // console.log('after clearing', ledgerAfter.vars.map(_summary));
+    // console.log('after clearing', ledger.vars.map(_summary));
+
     // END CODE FOR CREATING CONSISTENCY
 
     // assertions
     // ----------
     // get the latest agreed state and the turn number
-    const agreedState = ledger.latestFullySignedState;
-    if (!agreedState) throw new Error(`No latest agreed state`);
-    const ledgerStateDesc: LedgerStateDescription = {
-      agreed: toStateDesc(agreedState, channelLookup),
-      requests: [],
-    };
+    function checkRequests(requests: RichLedgerRequest[]): void {
+      const agreedState = ledger.latestFullySignedState;
+      if (!agreedState) throw new Error(`No latest agreed state`);
+      const ledgerStateDesc: LedgerStateDescription = {
+        agreed: toStateDesc(agreedState, channelLookup),
+        requests: [],
+      };
 
-    const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
-    if (proposedState) {
-      expect(proposedState.signerIndices).toEqual([0]);
-      ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
-    }
-    const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
-    if (counterProposedState) {
-      expect(counterProposedState.signerIndices).toEqual([1]);
-      ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
+      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+      if (proposedState) {
+        expect(proposedState.signerIndices).toEqual([0]);
+        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+      }
+      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+      if (counterProposedState) {
+        expect(counterProposedState.signerIndices).toEqual([1]);
+        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
+      }
+
+      function describeRequest(req: RichLedgerRequest): RequestDesc {
+        return [
+          req.type,
+          channelLookup.getKey(req.channelToBeFunded),
+          Number(req.amountA),
+          Number(req.amountB),
+          req.status,
+          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+        ];
+      }
+
+      ledgerStateDesc.requests = requests.map(describeRequest);
+      ledgerStateDesc.requests.sort();
+      args.after.requests.sort();
+      expect(ledgerStateDesc).toEqual(args.after);
     }
 
-    function describeRequest(req: RichLedgerRequest): RequestDesc {
-      return [
-        req.type,
-        channelLookup.getKey(req.channelToBeFunded),
-        Number(req.amountA),
-        Number(req.amountB),
-        req.status,
-        {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-      ];
-    }
-    ledgerStateDesc.requests = requests.map(describeRequest);
-    ledgerStateDesc.requests.sort();
-    args.after.requests.sort();
-    expect(ledgerStateDesc).toEqual(args.after);
+    // REGRESSION
+    checkRequests(requests);
+    checkRequests(requests2);
+    // REGRESSION
   };
 }
 
