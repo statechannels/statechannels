@@ -27,7 +27,7 @@ import {
 } from '../types';
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
-import {fixture} from './fixture';
+import {DeepPartial, fixture} from './fixture';
 const NOW = 10;
 const {A: participantA, B: participantB} = participants;
 
@@ -35,9 +35,6 @@ const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
 
 type Peer = 'A' | 'B';
-type DeepPartial<T> = {
-  [P in keyof T]?: DeepPartial<T[P]>;
-};
 
 const deposits = {
   part: BN.from(2),
