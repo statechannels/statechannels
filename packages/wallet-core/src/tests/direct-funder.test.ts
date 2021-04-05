@@ -28,7 +28,6 @@ import {
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
 import {DeepPartial, fixture} from './fixture';
-const NOW = 10;
 const {A: participantA, B: participantB} = participants;
 
 const {AddressZero} = ethers.constants;
@@ -220,26 +219,23 @@ describe('cranking', () => {
 
     const sendState: (signedState?: SignedState) => OpenChannelEvent = s => ({
       type: 'StatesReceived',
-      states: s ? [s] : [],
-      now: NOW
+      states: s ? [s] : []
     });
 
     const submitted = (attempt: number, submittedAt = 0): OpenChannelEvent => ({
       type: 'DepositSubmitted',
       tx: 'tx',
       attempt,
-      submittedAt,
-      now: NOW
+      submittedAt
     });
 
     const deposit = (amount: number | Uint256, finalized = false): OpenChannelEvent => ({
       type: 'FundingUpdated',
       amount: BN.from(amount),
-      finalized,
-      now: NOW
+      finalized
     });
 
-    const nudge = {type: 'Nudge', now: NOW} as const;
+    const nudge = {type: 'Nudge'} as const;
 
     const funding = (amount: number | Uint256, finalized = false) => ({
       amount: BN.from(amount),
@@ -347,11 +343,10 @@ function generateEvent(action: Action, objective: OpenChannelObjective): OpenCha
       return {
         type: 'FundingUpdated',
         amount: BN.add(action.amount, objective.funding.amount),
-        finalized: false,
-        now: NOW
+        finalized: false
       };
     case 'sendStates':
-      return {type: 'StatesReceived', states: action.states, now: NOW};
+      return {type: 'StatesReceived', states: action.states};
     case 'handleError':
       throw action.error;
     default:
@@ -413,7 +408,7 @@ test('pure objective cranker start to finish', () => {
   */
 
   // This is used just to kickstart Alice's cranker
-  const nudge = {type: 'Nudge' as const, now: NOW};
+  const nudge = {type: 'Nudge' as const};
 
   // 1. Alice signs the preFS, triggers preFS action 1
   let output = crankAndExpect(
@@ -525,8 +520,7 @@ test('pure objective cranker start to finish', () => {
   const finalFundingEvent: OpenChannelEvent = {
     type: 'FundingUpdated',
     amount: currentState.B.funding.amount,
-    finalized: true,
-    now: NOW
+    finalized: true
   };
 
   // 8. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1

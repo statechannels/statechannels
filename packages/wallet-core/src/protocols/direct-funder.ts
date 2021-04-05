@@ -8,11 +8,11 @@ import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 // TODO: This ought to be configurable
 export const MAX_WAITING_TIME = 5_000;
 
-export type OpenChannelEvent = {now: number} & (
+export type OpenChannelEvent = {now?: number} & (
   | {type: 'Nudge'}
   | {type: 'StatesReceived'; states: SignedState[]}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
-  | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number; now: number}
+  | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number}
 );
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
@@ -228,7 +228,7 @@ export function openChannelCranker(
   // if there's an outstanding chain request, take no action
   // TODO: (ChainService) This assumes that each participant deposits exactly once per channel
   else if (objective.fundingRequest) {
-    if (event.now >= objective.fundingRequest.submittedAt + MAX_WAITING_TIME) {
+    if (event.now && event.now >= objective.fundingRequest.submittedAt + MAX_WAITING_TIME) {
       objective.status = 'error';
       const error = new DirectFunderError({
         message: 'TimedOutWhileFunding',

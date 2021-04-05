@@ -521,7 +521,7 @@ export class SingleThreadedEngine
     if (objective.type === 'OpenChannel' && objective.data.fundingStrategy === 'Direct') {
       const {address} = await this.getCachedSigningWallet();
       this.storeRichObjective(objective, signedState, address);
-      await this.crankRichObjective(channel.channelId, {type: 'Nudge', now: 0}, response);
+      await this.crankRichObjective(channel.channelId, {type: 'Nudge'}, response);
     }
 
     this.emit('objectiveStarted', objective);
@@ -558,7 +558,7 @@ export class SingleThreadedEngine
 
     for (const channelId of channelIds) {
       if (this.richObjectives[channelId]) {
-        await this.crankRichObjective(channelId, {type: 'Nudge', now: 0}, response);
+        await this.crankRichObjective(channelId, {type: 'Nudge'}, response);
       }
     }
 
@@ -608,7 +608,7 @@ export class SingleThreadedEngine
     await this.takeActions([channelId], response);
 
     if (this.richObjectives[channelId]) {
-      await this.crankRichObjective(channelId, {type: 'Nudge', now: 0}, response);
+      await this.crankRichObjective(channelId, {type: 'Nudge'}, response);
     }
 
     this.registerChannelWithChainService(channelId);
@@ -890,11 +890,8 @@ export class SingleThreadedEngine
         return;
 
       const channelId = signedStates[0].channelId;
-      const event: DirectFunder.OpenChannelEvent = {
-        type: 'StatesReceived' as const,
-        states: signedStates.map(deserializeState),
-        now: 0,
-      };
+      const states = signedStates.map(deserializeState);
+      const event: DirectFunder.OpenChannelEvent = {type: 'StatesReceived', states};
       await this.crankRichObjective(channelId, event, response);
     }
   }
