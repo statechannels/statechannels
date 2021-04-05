@@ -199,15 +199,25 @@ export class TestChannel {
   }
 
   public get openChannelObjective(): OpenChannel {
-    return {
-      participants: this.participants,
-      type: 'OpenChannel',
-      data: {
-        targetChannelId: this.channelId,
-        fundingStrategy: this.fundingStrategy,
-        fundingLedgerChannelId: this.fundingLedgerChannelId,
-      },
-    };
+    const {participants, fundingStrategy, channelId: targetChannelId} = this;
+    const type = 'OpenChannel' as const;
+    let data: OpenChannel['data'];
+    switch (fundingStrategy) {
+      case 'Ledger': {
+        const fundingLedgerChannelId = this.fundingLedgerChannelId as string;
+        data = {targetChannelId, fundingStrategy, fundingLedgerChannelId};
+        break;
+      }
+      case 'Direct':
+      case 'Unknown':
+      case 'Fake':
+        data = {targetChannelId, fundingStrategy};
+        break;
+      default:
+        throw new Error('unsupported funding strategy');
+    }
+
+    return {participants, type, data};
   }
 
   public closeChannelObjective(txSubmitterOrder = [0, 1]): CloseChannel {
@@ -313,10 +323,15 @@ export class TestChannel {
       await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
     }
 
-    const {fundingStrategy, fundingLedgerChannelId} = objective.data;
-    await Channel.query(store.knex)
-      .where({channelId: this.channelId})
-      .patch({fundingStrategy, fundingLedgerChannelId});
+    if (objective.data.fundingStrategy === 'Ledger') {
+      const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+      await Channel.query(store.knex)
+        .where({channelId: this.channelId})
+        .patch({fundingStrategy, fundingLedgerChannelId});
+    } else {
+      const {fundingStrategy} = objective.data;
+      await Channel.query(store.knex).where({channelId: this.channelId}).patch({fundingStrategy});
+    }
 
     // load in the other states
     for (const state of rest) {

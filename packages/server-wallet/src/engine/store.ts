@@ -366,7 +366,7 @@ export class Store {
       // we need to patch the DB to mark that channel as a ledger channel
       // This code should probably live elsewhere
       const channelId = objective.data.targetChannelId;
-      if (objective.data.role === 'ledger') {
+      if (objective.data.fundingStrategy === 'Direct' && objective.data.role === 'ledger') {
         const channel = await this.getChannelState(channelId, tx);
         await Channel.setLedger(
           channelId,
@@ -374,7 +374,12 @@ export class Store {
           tx || this.knex
         );
       }
-      const {fundingStrategy, fundingLedgerChannelId} = objective.data;
+
+      const {fundingStrategy} = objective.data;
+      const fundingLedgerChannelId =
+        objective.data.fundingStrategy === 'Ledger'
+          ? objective.data.fundingLedgerChannelId
+          : undefined;
       await Channel.query(tx || this.knex)
         .where({channelId})
         .patch({fundingStrategy, fundingLedgerChannelId});
@@ -607,16 +612,22 @@ export class Store {
           tx
         );
 
-      const o: OpenChannel = {
-        type: 'OpenChannel' as const,
-        participants,
-        data: {
-          targetChannelId: channelId,
-          fundingStrategy,
-          fundingLedgerChannelId,
-          role,
-        },
-      };
+      let data: OpenChannel['data'];
+      const targetChannelId = channelId;
+      switch (fundingStrategy) {
+        case 'Direct':
+          data = {targetChannelId, fundingStrategy, role};
+          break;
+        case 'Ledger':
+          if (!fundingLedgerChannelId) {
+            throw new Error('Funding ledger channel id not provided');
+          }
+          data = {targetChannelId, fundingStrategy, fundingLedgerChannelId};
+          break;
+        default:
+          throw new Error('Unsupported funding strategy');
+      }
+      const o: OpenChannel = {type: 'OpenChannel', participants, data};
 
       const objective = await ObjectiveModel.insert(
         o,
