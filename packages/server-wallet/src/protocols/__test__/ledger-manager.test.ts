@@ -2,9 +2,11 @@ import _ from 'lodash';
 import {
   addHash,
   createSignatureEntry,
+  hashState,
   SignedStateVarsWithHash,
   unreachable,
 } from '@statechannels/wallet-core';
+import {ethers} from 'ethers';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
@@ -17,7 +19,7 @@ import {DBAdmin} from '../..';
 import {LedgerManager} from '../ledger-manager';
 import {Destination} from '../../type-aliases';
 import {State} from '../../models/channel/state';
-import {addState, clearOldStates} from '../../state-utils';
+import {addState, clearOldStates, dropNonVariables} from '../../state-utils';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 jest.setTimeout(10_000);
@@ -588,46 +590,72 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
 
     // crank
     // -----
-    const ledgerChannelId = ledgerChannel.channelId;
+    const channelId = ledgerChannel.channelId;
 
     // Collect the correct input to the synchronous logic
     const tx = store.knex as any;
-    const storedLedger = await store.getAndLockChannel(ledgerChannelId, tx);
-    const ledger = channel({
-      ...storedLedger.channelConstants,
-      channelId: storedLedger.channelId,
-      myIndex,
-      signingAddress: storedLedger.signingAddress,
-      vars: _.cloneDeep(storedLedger.vars),
-    });
+    const DELETE_ME_storedLedger = await store.getAndLockChannel(channelId, tx);
 
-    const requests = _.cloneDeep(originalRequests);
-    const statesToBeSigned = manager.synchronousCrankLogic(storedLedger, requests);
+    const vars = statesToInsert
+      .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
+      .map(dropNonVariables);
 
-    // BEGIN CODE FOR CREATING CONSISTENCY
-    function _summary(s: State | SignedStateVarsWithHash) {
-      const signatures = 'signatures' in s ? s.signatures : s.signedState.signatures;
-      return [s.turnNum, signatures.map(sig => sig.signer[2])];
-    }
-
-    // REGRESSION
-    const requests2 = _.cloneDeep(originalRequests);
-    const statesToBeSigned2 = manager.synchronousCrankLogic(ledger, requests2);
-    try {
-      expect(statesToBeSigned.map(_summary).sort()).toMatchObject(
-        statesToBeSigned2.map(_summary).sort()
-      );
-    } catch (error) {
-      // eslint-disable-next-line no-debugger
-      debugger;
-      manager.synchronousCrankLogic(ledger, _.cloneDeep(requests));
-    }
-    // REGRESSION
+    expect(vars.map(_summary).sort()[0]).toMatchObject(
+      DELETE_ME_storedLedger.vars.map(_summary).sort()[0]
+    );
+    // console.log(vars.map(_summary).sort()[0]);
+    // console.log(DELETE_ME_storedLedger.vars.map(_summary).sort()[0]);
+    expect(_.sortBy(vars, s => s.stateHash)).toEqual(
+      _.sortBy(DELETE_ME_storedLedger.vars, s => s.stateHash)
+    );
 
     const privateKey =
       args.as === 'leader'
         ? '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
         : '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727';
+    const {address: signingAddress} = new ethers.Wallet(privateKey);
+
+    const ledger = channel({
+      ...ledgerChannel.channelConstants,
+      channelId,
+      myIndex,
+      signingAddress,
+      // TODO: There is a bug here, where the behaviour of the ledger funding protocol differs
+      // depending on how the states are stored
+      vars: _.cloneDeep(_.sortBy(vars, s => -s.turnNum)),
+    });
+
+    const requests = _.cloneDeep(originalRequests);
+    const requests2 = _.cloneDeep(originalRequests);
+    expect(requests.map(describeRequest)).toEqual(requests2.map(describeRequest));
+
+    const statesToBeSigned = manager.synchronousCrankLogic(DELETE_ME_storedLedger, requests);
+
+    // BEGIN CODE FOR CREATING CONSISTENCY
+    function _summary(s: State | SignedStateVarsWithHash) {
+      const signatures = 'signatures' in s ? s.signatures : s.signedState.signatures;
+      const hash = 'stateHash' in s ? s.stateHash : hashState(s.signedState);
+      return [s.turnNum, hash, signatures.map(sig => (sig.signer[2] === '1' ? 'A' : 'B'))];
+    }
+
+    // REGRESSION
+    function describeRequest(req: RichLedgerRequest): RequestDesc {
+      return [
+        req.type,
+        channelLookup.getKey(req.channelToBeFunded),
+        Number(req.amountA),
+        Number(req.amountB),
+        req.status,
+        {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+      ];
+    }
+
+    const statesToBeSigned2 = manager.synchronousCrankLogic(ledger, requests2);
+    expect(requests.map(describeRequest)).toEqual(requests2.map(describeRequest));
+    expect(statesToBeSigned.map(_summary).sort()).toMatchObject(
+      statesToBeSigned2.map(_summary).sort()
+    );
+    // REGRESSION
 
     // console.log('as', args.as);
     const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
@@ -643,8 +671,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
         ledger.vars = addState(ledger.vars, state);
         // console.log('gives', ledger.vars.map(_summary));
       });
-    } else {
-      ledger.vars = storedLedger.vars;
     }
 
     // console.log(signedStatesBefore.map(_summary));
@@ -674,17 +700,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       if (counterProposedState) {
         expect(counterProposedState.signerIndices).toEqual([1]);
         ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
-      }
-
-      function describeRequest(req: RichLedgerRequest): RequestDesc {
-        return [
-          req.type,
-          channelLookup.getKey(req.channelToBeFunded),
-          Number(req.amountA),
-          Number(req.amountB),
-          req.status,
-          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-        ];
       }
 
       ledgerStateDesc.requests = requests.map(describeRequest);
