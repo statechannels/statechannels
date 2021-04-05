@@ -125,13 +125,13 @@ describe('initialization', () => {
   });
 
   test('when the index is out of range', () => {
-    expect(() => initialize(openingState, -1)).toThrow('unexpected index');
-    expect(() => initialize(openingState, 0.5)).toThrow('unexpected index');
-    expect(() => initialize(openingState, 2)).toThrow('unexpected index');
+    expect(() => initialize(openingState, -1)).toThrow('Unexpected index');
+    expect(() => initialize(openingState, 0.5)).toThrow('Unexpected index');
+    expect(() => initialize(openingState, 2)).toThrow('Unexpected index');
   });
 
   test('when the opening state has the wrong turn number', () => {
-    expect(() => initialize({...openingState, turnNum: 1}, 0)).toThrow('unexpected state');
+    expect(() => initialize({...openingState, turnNum: 1}, 0)).toThrow('Unexpected state');
   });
 
   test('when the outcome does not match the expectations', () => {
