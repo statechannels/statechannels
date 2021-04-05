@@ -6,7 +6,6 @@ import {
   SignedStateVarsWithHash,
   unreachable,
 } from '@statechannels/wallet-core';
-import {ethers} from 'ethers';
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
@@ -598,13 +597,14 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
 
-    // console.log(vars.map(_summary).sort()[0]);
-
-    const privateKey =
-      args.as === 'leader'
-        ? '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318'
-        : '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727';
-    const {address: signingAddress} = new ethers.Wallet(privateKey);
+    const privateKey = [
+      '0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318',
+      '0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727',
+    ][myIndex];
+    const signingAddress = [
+      '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf',
+      '0x2222E21c8019b14dA16235319D34b5Dd83E644A9',
+    ][myIndex];
 
     const ledger = channel({
       ...ledgerChannel.channelConstants,
@@ -616,9 +616,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       vars: _.cloneDeep(_.sortBy(vars, s => -s.turnNum)),
     });
 
-    const requests2 = _.cloneDeep(originalRequests);
-
-    // BEGIN CODE FOR CREATING CONSISTENCY
     function _summary(s: State | SignedStateVarsWithHash) {
       const signatures = 'signatures' in s ? s.signatures : s.signedState.signatures;
       const hash = 'stateHash' in s ? s.stateHash : hashState(s.signedState);
@@ -636,10 +633,12 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       ];
     }
 
-    const statesToBeSigned2 = manager.synchronousCrankLogic(ledger, requests2);
+    const requests = _.cloneDeep(originalRequests);
+    const statesToBeSigned = manager.synchronousCrankLogic(ledger, requests);
 
+    // BEGIN CODE FOR CREATING CONSISTENCY
     // console.log('as', args.as);
-    const signedStatesBefore = statesToBeSigned2.map(s => s.signedState).map(addHash);
+    const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
     signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
     // console.log('states signed', signedStatesBefore.map(_summary));
 
@@ -689,7 +688,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       expect(ledgerStateDesc).toEqual(args.after);
     }
 
-    checkRequests(requests2);
+    checkRequests(requests);
   };
 }
 
