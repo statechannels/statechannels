@@ -191,7 +191,7 @@ export function openChannelCranker(
       break;
     }
     default:
-      return unreachable(event, objective);
+      return handleUnexpectedEvent(event, objective);
   }
 
   // Then, transition & collect actions:
@@ -354,7 +354,21 @@ class DirectFunderError extends Error {
   }
 }
 
-function unreachable(event: never, objective: OpenChannelObjective): OpenChannelResult {
+/**
+ * In principle, one can send any event to the cranker.
+ * We handle this by moving to an error state with an "UnexpectedEvent" error,
+ * to avoid throwing a generic error.
+ *
+ * By extracting this in a function where event has type `never`, this forces the
+ * developer to handle all _known_ event types before returning the output of
+ * handleUnexpectedEvent
+ *
+ * @param event unsafe event sent to the cranker
+ * @param objective current objective state
+ * @returns objective moved to error state
+ *
+ */
+function handleUnexpectedEvent(event: never, objective: OpenChannelObjective): OpenChannelResult {
   const error = new DirectFunderError({code: 3, event, message: 'UnexpectedEvent'});
   objective.status = 'error';
   return {objective, actions: [{type: 'handleError', error}]};
