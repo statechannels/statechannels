@@ -351,7 +351,7 @@ export interface InsertionParams {
 
 export type SignedBy = 0 | 1 | 'both';
 
-interface StateWithBals {
+export interface StateWithBals {
   turn: number;
   bals: Bals;
   signedBy: SignedBy;

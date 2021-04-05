@@ -1,40 +1,20 @@
 import _ from 'lodash';
-import {unreachable} from '@statechannels/wallet-core';
+import {addHash, unreachable} from '@statechannels/wallet-core';
 
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
-import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
-import {Store} from '../../engine/store';
+import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
-import {createLogger} from '../../logger';
-import {LedgerRequest, LedgerRequestStatus} from '../../models/ledger-request';
-import {DBAdmin} from '../..';
-import {State} from '../../models/channel/state';
+import {LedgerRequestStatus} from '../../models/ledger-request';
 import {LedgerManager} from '../ledger-manager';
-import {EngineResponse} from '../../engine/engine-response';
 import {Destination} from '../../type-aliases';
+import {State} from '../../models/channel/state';
+import {addState, clearOldStates, dropNonVariables} from '../../state-utils';
+import {channel} from '../../models/__test__/fixtures/channel';
 
 jest.setTimeout(10_000);
 
-let store: Store;
-
+let manager: LedgerManager;
 beforeAll(async () => {
-  await DBAdmin.migrateDatabase(defaultTestConfig());
-});
-
-beforeEach(async () => {
-  store = new Store(
-    knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
-    '0',
-    createLogger(defaultTestConfig())
-  );
-  await DBAdmin.truncateDatabase(defaultTestConfig());
-});
-
-afterEach(async () => {
-  await DBAdmin.truncateDatabase(defaultTestConfig());
+  manager = await LedgerManager.create({} as any);
 });
 
 describe('as leader', () => {
@@ -501,8 +481,8 @@ describe('as follower', () => {
   });
 });
 
-function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
-  return async () => {
+function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
+  return () => {
     // setup
     // -----
     const testCase = new LedgerCrankTestCase(args);
@@ -516,100 +496,99 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
 
     // first we need to turn strings like 'c' and 'd' into actual channels in the store
     for (const key of testCase.referencedChannelDests) {
-      const appChannel = TestChannel.create({aBal: 5, bBal: 5});
-      await appChannel.insertInto(store, {
-        states: [0, 1],
-        participant: args.as === 'leader' ? 0 : 1,
-      });
-      channelLookup.set(key, appChannel.channelId);
+      channelLookup.set(key, TestChannel.create({aBal: 5, bBal: 5}).channelId);
     }
 
     // - construct and add the before states
     const stateToParams = (
       state: StateDesc,
       type: 'agreed' | 'proposed' | 'counter-proposed'
-    ): any => ({
+    ): StateWithBals => ({
       turn: state.turn,
       bals: Object.keys(state.bals).map(
         k => [channelLookup.get(k), state.bals[k]] as [string, number]
       ),
-      signedBy: {agreed: 'both', proposed: 0, 'counter-proposed': 1}[type],
-    });
-    await ledgerChannel.insertInto(store, {
-      participant: args.as === 'leader' ? 0 : 1,
-      states: _.compact([
-        testCase.agreedBefore && stateToParams(testCase.agreedBefore, 'agreed'),
-        testCase.proposedBefore && stateToParams(testCase.proposedBefore, 'proposed'),
-        testCase.counterProposedBefore &&
-          stateToParams(testCase.counterProposedBefore, 'counter-proposed'),
-      ]),
+      signedBy: {agreed: 'both', proposed: 0, 'counter-proposed': 1}[type] as SignedBy,
     });
 
-    for (const req of testCase.requestsBefore) {
+    const initialStates: StateWithBals[] = _.compact([
+      testCase.agreedBefore && stateToParams(testCase.agreedBefore, 'agreed'),
+      testCase.proposedBefore && stateToParams(testCase.proposedBefore, 'proposed'),
+      testCase.counterProposedBefore &&
+        stateToParams(testCase.counterProposedBefore, 'counter-proposed'),
+    ]);
+
+    const myIndex = args.as === 'leader' ? 0 : 1;
+
+    const requests = testCase.requestsBefore.map(req => {
       const channelToBeFunded = channelLookup.get(req.channelKey);
-
       switch (req.type) {
         case 'fund':
-          await ledgerChannel.insertFundingRequest(store, {...req, channelToBeFunded});
-          break;
+          return ledgerChannel.fundingRequest({...req, channelToBeFunded});
         case 'defund':
-          await ledgerChannel.insertDefundingRequest(store, {...req, channelToBeFunded});
-          break;
+          return ledgerChannel.defundingRequest({...req, channelToBeFunded});
         default:
           unreachable(req.type);
       }
-    }
+    });
 
-    // crank
+    const channelId = ledgerChannel.channelId;
+    const vars = initialStates
+      .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
+      .map(dropNonVariables);
+
+    const ledger = channel({
+      ...ledgerChannel.channelConstants,
+      channelId,
+      myIndex,
+      signingAddress: ledgerChannel.signingWallets[myIndex].address,
+      // TODO: There is a bug here, where the behaviour of the ledger funding protocol differs
+      // depending on how the states are stored
+      vars: _.sortBy(vars, s => -s.turnNum),
+    });
+
+    // crank (and update ledger vars)
     // -----
-    const response = EngineResponse.initialize();
-    await LedgerManager.create({store}).crank(ledgerChannel.channelId, response);
+    manager.synchronousCrankLogic(ledger, requests).map(s => {
+      const actualState = addHash(s.signedState);
+      const signatures = [ledgerChannel.signingWallets[myIndex].signState(actualState)];
+      ledger.vars = addState(ledger.vars, {...actualState, signatures});
+    });
+    ledger.vars = clearOldStates(ledger.vars, ledger.support);
 
     // assertions
     // ----------
-    await store.transaction(async tx => {
-      // fetch the ledger channel and check that the states are ok
-      const ledger = await store.getChannel(ledgerChannel.channelId, tx);
-      if (!ledger) throw new Error(`Ledger not found`);
-      // get the latest agreed state and the turn number
-      const agreedState = ledger.latestFullySignedState;
-      if (!agreedState) throw new Error(`No latest agreed state`);
+    // get the latest agreed state and the turn number
+    const agreedState = ledger.latestFullySignedState;
+    if (!agreedState) throw new Error(`No latest agreed state`);
+    const ledgerStateDesc: LedgerStateDescription = {
+      agreed: toStateDesc(agreedState, channelLookup),
+      requests: [],
+    };
 
-      const ledgerStateDesc: LedgerStateDesc = {
-        agreed: toStateDesc(agreedState, channelLookup),
-        requests: [],
-      };
+    const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+    if (proposedState) {
+      expect(proposedState.signerIndices).toEqual([0]);
+      ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+    }
+    const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+    if (counterProposedState) {
+      expect(counterProposedState.signerIndices).toEqual([1]);
+      ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
+    }
 
-      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
-      if (proposedState) {
-        expect(proposedState.signerIndices).toEqual([0]);
-        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
-      }
-      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
-      if (counterProposedState) {
-        expect(counterProposedState.signerIndices).toEqual([1]);
-        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
-      }
+    ledgerStateDesc.requests = requests.map(req => [
+      req.type,
+      channelLookup.getKey(req.channelToBeFunded),
+      Number(req.amountA),
+      Number(req.amountB),
+      req.status,
+      {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
+    ]);
 
-      // then fetch the ledger requests and check them
-      const requests = await LedgerRequest.query(tx)
-        .select()
-        .where({ledgerChannelId: ledgerChannel.channelId});
-
-      for (const req of requests) {
-        ledgerStateDesc.requests.push([
-          req.type,
-          channelLookup.getKey(req.channelToBeFunded),
-          Number(req.amountA),
-          Number(req.amountB),
-          req.status,
-          {missedOps: req.missedOpportunityCount, lastSeen: req.lastSeenAgreedState || undefined},
-        ]);
-      }
-      ledgerStateDesc.requests.sort();
-      args.after.requests.sort();
-      expect(ledgerStateDesc).toEqual(args.after);
-    });
+    ledgerStateDesc.requests.sort();
+    args.after.requests.sort();
+    expect(ledgerStateDesc).toEqual(args.after);
   };
 }
 
@@ -749,7 +728,7 @@ type StateDesc = {
   bals: Record<string, number>;
 };
 
-interface LedgerStateDesc {
+interface LedgerStateDescription {
   agreed: StateDesc;
   proposed?: StateDesc;
   counterProposed?: StateDesc;
@@ -758,6 +737,6 @@ interface LedgerStateDesc {
 
 interface LedgerCrankTestCaseArgs {
   as: 'leader' | 'follower';
-  before: LedgerStateDesc;
-  after: LedgerStateDesc;
+  before: LedgerStateDescription;
+  after: LedgerStateDescription;
 }

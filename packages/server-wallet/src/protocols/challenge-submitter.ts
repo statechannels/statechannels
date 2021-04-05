@@ -41,9 +41,6 @@ export class ChallengeSubmitter implements Cranker<WalletObjective<SubmitChallen
     const {targetChannelId: channelToLock} = objective.data;
 
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
-    if (!channel) {
-      throw new Error('Channel must exist');
-    }
 
     const status = channel.adjudicatorStatus
       ? channel.adjudicatorStatus.toResult().channelMode

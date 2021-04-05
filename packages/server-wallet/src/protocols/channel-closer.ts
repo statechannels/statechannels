@@ -48,10 +48,6 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
     const channelToLock = objective.data.targetChannelId;
     const channel = await this.store.getAndLockChannel(channelToLock, tx);
 
-    if (!channel) {
-      throw new Error('Channel must exist');
-    }
-
     response.queueChannel(channel);
 
     await channel.$fetchGraph('funding', {transaction: tx});
