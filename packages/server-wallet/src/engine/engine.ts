@@ -31,7 +31,7 @@ import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
-import {OpenChannel, Payload as WirePayload} from '@statechannels/wire-format';
+import {isOpenChannel, OpenChannel, Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
 
 import {Bytes32, Uint256} from '../type-aliases';
@@ -865,26 +865,29 @@ export class SingleThreadedEngine
     wirePayload: WirePayload,
     response: EngineResponse
   ): Promise<void> {
-    const direct = wirePayload.objectives?.filter(
-      o => o.type === 'OpenChannel' && o.data.fundingStrategy === 'Direct'
-    );
+    // First, pull off any appropriate objectives to initialize & store
+    const openDirectChannelObjectives = wirePayload.objectives
+      ?.filter(isOpenChannel)
+      .filter(o => o.data.fundingStrategy === 'Direct');
 
     const {address} = await this.getCachedSigningWallet();
-    ((direct ?? []) as OpenChannel[]).map(o => {
-      const openingState = wirePayload.signedStates
+
+    const {signedStates} = wirePayload;
+
+    (openDirectChannelObjectives ?? []).map(o => {
+      // Find the opening state
+      // HACK: This assumes that the opening state is included with the objective.
+      const openingState = signedStates
         ?.map(deserializeState)
         .find(s => calculateChannelId(s) === o.data.targetChannelId);
       this.storeRichObjective(o, openingState as State, address);
     });
 
-    const {signedStates} = wirePayload;
     if (signedStates?.[0]) {
-      if (
-        // If someone just send us the OpenChannel objective, delay pushing the event in
-        // until the objective is approved via joinChannel
-        direct?.length
-      )
-        return;
+      // If someone just send us the OpenChannel objective, delay pushing the event in
+      // until the objective is approved via joinChannel
+      const objectivesJustCreated = openDirectChannelObjectives?.length;
+      if (objectivesJustCreated) return;
 
       const channelId = signedStates[0].channelId;
       const states = signedStates.map(deserializeState);
