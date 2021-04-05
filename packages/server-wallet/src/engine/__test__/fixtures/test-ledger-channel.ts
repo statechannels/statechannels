@@ -95,7 +95,6 @@ export class TestLedgerChannel extends TestChannel {
     });
   }
 
-  // Copy-paste from previous method
   public defundingRequest({
     channelToBeFunded,
     amtA,
