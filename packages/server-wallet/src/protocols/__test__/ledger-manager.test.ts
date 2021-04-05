@@ -3,7 +3,7 @@ import {addHash, unreachable} from '@statechannels/wallet-core';
 
 import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
-import {LedgerRequestStatus, RichLedgerRequest} from '../../models/ledger-request';
+import {LedgerRequestStatus} from '../../models/ledger-request';
 import {LedgerManager} from '../ledger-manager';
 import {Destination} from '../../type-aliases';
 import {State} from '../../models/channel/state';
@@ -520,21 +520,17 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
 
     const myIndex = args.as === 'leader' ? 0 : 1;
 
-    const requests: RichLedgerRequest[] = [];
-    for (const req of testCase.requestsBefore) {
+    const requests = testCase.requestsBefore.map(req => {
       const channelToBeFunded = channelLookup.get(req.channelKey);
-
       switch (req.type) {
         case 'fund':
-          requests.push(ledgerChannel.fundingRequest({...req, channelToBeFunded}));
-          break;
+          return ledgerChannel.fundingRequest({...req, channelToBeFunded});
         case 'defund':
-          requests.push(ledgerChannel.defundingRequest({...req, channelToBeFunded}));
-          break;
+          return ledgerChannel.defundingRequest({...req, channelToBeFunded});
         default:
           unreachable(req.type);
       }
-    }
+    });
 
     const channelId = ledgerChannel.channelId;
     const vars = initialStates
