@@ -527,20 +527,12 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       }
     });
 
-    const channelId = ledgerChannel.channelId;
     const vars = initialStates
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
 
-    const ledger = channel({
-      ...ledgerChannel.channelConstants,
-      channelId,
-      myIndex,
-      signingAddress: ledgerChannel.signingWallets[myIndex].address,
-      // TODO: There is a bug here, where the behaviour of the ledger funding protocol differs
-      // depending on how the states are stored
-      vars: _.sortBy(vars, s => -s.turnNum),
-    });
+    const {address: signingAddress} = ledgerChannel.signingWallets[myIndex];
+    const ledger = channel({...ledgerChannel.channelConstants, signingAddress, vars});
 
     // crank (and update ledger vars)
     // -----
