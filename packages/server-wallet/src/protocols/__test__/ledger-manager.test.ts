@@ -8,7 +8,7 @@ import {
 
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
-import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
+import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {Store} from '../../engine/store';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {createLogger} from '../../logger';
@@ -550,21 +550,24 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     const stateToParams = (
       state: StateDesc,
       type: 'agreed' | 'proposed' | 'counter-proposed'
-    ): any => ({
+    ): StateWithBals => ({
       turn: state.turn,
       bals: Object.keys(state.bals).map(
         k => [channelLookup.get(k), state.bals[k]] as [string, number]
       ),
-      signedBy: {agreed: 'both', proposed: 0, 'counter-proposed': 1}[type],
+      signedBy: {agreed: 'both', proposed: 0, 'counter-proposed': 1}[type] as SignedBy,
     });
+
+    const statesToInsert: StateWithBals[] = _.compact([
+      testCase.agreedBefore && stateToParams(testCase.agreedBefore, 'agreed'),
+      testCase.proposedBefore && stateToParams(testCase.proposedBefore, 'proposed'),
+      testCase.counterProposedBefore &&
+        stateToParams(testCase.counterProposedBefore, 'counter-proposed'),
+    ]);
+
     await ledgerChannel.insertInto(store, {
       participant: args.as === 'leader' ? 0 : 1,
-      states: _.compact([
-        testCase.agreedBefore && stateToParams(testCase.agreedBefore, 'agreed'),
-        testCase.proposedBefore && stateToParams(testCase.proposedBefore, 'proposed'),
-        testCase.counterProposedBefore &&
-          stateToParams(testCase.counterProposedBefore, 'counter-proposed'),
-      ]),
+      states: statesToInsert,
     });
 
     const requests: RichLedgerRequest[] = [];
