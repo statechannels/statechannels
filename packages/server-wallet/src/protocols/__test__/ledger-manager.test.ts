@@ -543,10 +543,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     // first we need to turn strings like 'c' and 'd' into actual channels in the store
     for (const key of testCase.referencedChannelDests) {
       const appChannel = TestChannel.create({aBal: 5, bBal: 5});
-      await appChannel.insertInto(store, {
-        states: [0, 1],
-        participant: args.as === 'leader' ? 0 : 1,
-      });
       channelLookup.set(key, appChannel.channelId);
     }
 
