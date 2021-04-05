@@ -235,7 +235,7 @@ describe('cranking', () => {
       finalized
     });
 
-    const nudge = {type: 'Nudge'} as const;
+    const nudge = {type: 'Crank'} as const;
 
     const funding = (amount: number | Uint256, finalized = false) => ({
       amount: BN.from(amount),
@@ -319,7 +319,7 @@ describe('cranking', () => {
     const errorCases: ErrorCase[] = [
       [ 'NonParticipantSignature', empty, receiveNonParticipantState, error, handleError({signature: {signer: 'eve'}})],
       [ 'ReceivedUnexpectedState', empty, receiveUnexpectedState, error,     handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ],
-      [ 'TimedOutWhileFunding', depositPending, {type: 'Nudge', now: theFuture}, error, handleError({now: theFuture}) ],
+      [ 'TimedOutWhileFunding', depositPending, {type: 'Crank', now: theFuture}, error, handleError({now: theFuture}) ],
       [ 'UnexpectedEvent',      depositPending, {type: 'Unknown'} as any, error, handleError({event: {type: 'Unknown'}}) ]
     ];
     test.each(errorCases)('error %s', (msg, before, event, after, actionGenerator) => {
@@ -408,7 +408,7 @@ test('pure objective cranker start to finish', () => {
   */
 
   // This is used just to kickstart Alice's cranker
-  const nudge = {type: 'Nudge' as const};
+  const nudge = {type: 'Crank' as const};
 
   // 1. Alice signs the preFS, triggers preFS action 1
   let output = crankAndExpect(

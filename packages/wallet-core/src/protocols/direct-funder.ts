@@ -9,7 +9,7 @@ import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 export const MAX_WAITING_TIME = 5_000;
 
 export type OpenChannelEvent = {now?: number} & (
-  | {type: 'Nudge'}
+  | {type: 'Crank'} // Allows you to crank it every now and then to see if it's timed out.
   | {type: 'StatesReceived'; states: SignedState[]}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
   | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number}
@@ -131,7 +131,7 @@ export function openChannelCranker(
   // First, process the event
 
   switch (event.type) {
-    case 'Nudge':
+    case 'Crank':
       break;
     case 'DepositSubmitted':
       objective.fundingRequest = {
