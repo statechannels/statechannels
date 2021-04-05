@@ -843,10 +843,16 @@ export class SingleThreadedEngine
     return response.singleChannelOutput();
   }
 
+  // TODO (DirectFunder) BEGIN DIRECT FUNDER PROTOTYPING
+  // This code is not intended to be "good".
+  // Instead, I wished to make the smallest amount of changes possible to
+  // show how the pure direct funder can be used
+  // Therefore,
   private _cachedSigningAddress: {address: Address; privateKey: Bytes32} = {
     address: '' as Address,
     privateKey: '' as Bytes32,
   };
+
   private async getCachedSigningWallet(): Promise<{address: Address; privateKey: Bytes32}> {
     if (this._cachedSigningAddress.address === '') {
       const {privateKey, address} = await SigningWallet.query(this.knex).first();
@@ -855,11 +861,6 @@ export class SingleThreadedEngine
 
     return this._cachedSigningAddress;
   }
-
-  // TODO (DirectFunder) BEGIN DIRECT FUNDER PROTOTYPING
-  // This code is not intended to be "good".
-  // Instead, I wished to make the smallest amount of changes possible to
-  // show how the pure direct funder can be used
   private richObjectives: Record<string, DirectFunder.OpenChannelObjective | undefined> = {};
   private async _pushDirectFunderMessage(
     wirePayload: WirePayload,
@@ -986,6 +987,7 @@ export class SingleThreadedEngine
 
     return (this.richObjectives[channelId] = richObjective);
   }
+  // TODO (DirectFunder) END DIRECT FUNDER PROTOTYPING
 
   private async _pushMessage(wirePayload: WirePayload, response: EngineResponse): Promise<void> {
     const store = this.store;
