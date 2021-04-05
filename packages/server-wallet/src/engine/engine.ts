@@ -994,7 +994,7 @@ export class SingleThreadedEngine
   }
 
   /**
-   * Update the engine's knowledge about the funding for a channel.
+   * Update the engine's knowledge about the on-chain funding for a channel.
    *
    * @param args - An object specifying the channelId, asset holder address and amount.
    * @returns A promise that resolves to a channel output.
