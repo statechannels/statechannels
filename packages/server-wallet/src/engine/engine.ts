@@ -880,9 +880,6 @@ export class SingleThreadedEngine
     const {signedStates} = wirePayload;
     if (signedStates?.[0]) {
       if (
-        // When funding is connected, we won't need this "backdoor exit". Instead, the objective
-        // would have already reached the 'success' state when we receive turn number 4.
-        signedStates[0].turnNum >= 4 ||
         // If someone just send us the OpenChannel objective, delay pushing the event in
         // until the objective is approved via joinChannel
         direct?.length
@@ -922,6 +919,8 @@ export class SingleThreadedEngine
     // For tests that might push in states without creating objectives first, we return early
     // Note that this helps prevent DDoS attacks!
     if (!before) return;
+    if (before.status === 'success') return;
+    if (before.status === 'error') throw new Error('Unable to crank');
 
     const {privateKey} = await this.getCachedSigningWallet();
     const result = DirectFunder.openChannelCranker(before, event, privateKey);
