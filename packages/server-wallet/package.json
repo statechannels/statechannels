@@ -102,7 +102,7 @@
     "start:shared-ganache": "NODE_ENV=development npx start-shared-ganache",
     "test": "yarn jest -c ./jest/jest.config.js --runInBand",
     "test:chain": "jest -c ./jest/jest.chain.config.js --runInBand",
-    "test:ci": "yarn test --bail && yarn test:chain --bail",
+    "test:ci": "yarn run-p 'test --bail' 'test:chain --bail'",
     "test:e2e": "./src/test_db.sh server_wallet_payer server_wallet_receiver; yarn tsc; yarn jest -c ./jest/jest.e2e.config.js --runInBand",
     "test:stress": "./src/test_db.sh server_wallet_payer server_wallet_receiver; yarn tsc; NODE_ENV=test npx ts-node ./e2e-test/scripts/stress-test.ts",
     "test:with-peers": "yarn jest -c ./jest/jest.with-peers.config.js --runInBand"
