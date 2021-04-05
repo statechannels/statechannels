@@ -593,21 +593,12 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     const channelId = ledgerChannel.channelId;
 
     // Collect the correct input to the synchronous logic
-    const tx = store.knex as any;
-    const DELETE_ME_storedLedger = await store.getAndLockChannel(channelId, tx);
 
     const vars = statesToInsert
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
 
-    expect(vars.map(_summary).sort()[0]).toMatchObject(
-      DELETE_ME_storedLedger.vars.map(_summary).sort()[0]
-    );
     // console.log(vars.map(_summary).sort()[0]);
-    // console.log(DELETE_ME_storedLedger.vars.map(_summary).sort()[0]);
-    expect(_.sortBy(vars, s => s.stateHash)).toEqual(
-      _.sortBy(DELETE_ME_storedLedger.vars, s => s.stateHash)
-    );
 
     const privateKey =
       args.as === 'leader'
@@ -625,11 +616,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       vars: _.cloneDeep(_.sortBy(vars, s => -s.turnNum)),
     });
 
-    const requests = _.cloneDeep(originalRequests);
     const requests2 = _.cloneDeep(originalRequests);
-    expect(requests.map(describeRequest)).toEqual(requests2.map(describeRequest));
-
-    const statesToBeSigned = manager.synchronousCrankLogic(DELETE_ME_storedLedger, requests);
 
     // BEGIN CODE FOR CREATING CONSISTENCY
     function _summary(s: State | SignedStateVarsWithHash) {
@@ -638,7 +625,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       return [s.turnNum, hash, signatures.map(sig => (sig.signer[2] === '1' ? 'A' : 'B'))];
     }
 
-    // REGRESSION
     function describeRequest(req: RichLedgerRequest): RequestDesc {
       return [
         req.type,
@@ -651,14 +637,9 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     }
 
     const statesToBeSigned2 = manager.synchronousCrankLogic(ledger, requests2);
-    expect(requests.map(describeRequest)).toEqual(requests2.map(describeRequest));
-    expect(statesToBeSigned.map(_summary).sort()).toMatchObject(
-      statesToBeSigned2.map(_summary).sort()
-    );
-    // REGRESSION
 
     // console.log('as', args.as);
-    const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
+    const signedStatesBefore = statesToBeSigned2.map(s => s.signedState).map(addHash);
     signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
     // console.log('states signed', signedStatesBefore.map(_summary));
 
@@ -708,10 +689,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
       expect(ledgerStateDesc).toEqual(args.after);
     }
 
-    // REGRESSION
-    checkRequests(requests);
     checkRequests(requests2);
-    // REGRESSION
   };
 }
 
