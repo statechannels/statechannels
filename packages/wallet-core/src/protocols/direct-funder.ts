@@ -47,12 +47,12 @@ export function initialize(
   myIndex: number
 ): OpenChannelObjective {
   if (openingState.turnNum !== 0) {
-    throw 'unexpected state';
+    throw new Error(`Unexpected state due to turnNum ${openingState.turnNum}`);
   }
 
   const allowedIndices = _.range(0, openingState.participants.length);
   if (!allowedIndices.includes(myIndex)) {
-    throw 'unexpected index';
+    throw new Error(`Unexpected index due to index ${myIndex}`);
   }
 
   // HACK (Implicitly) check that the outcome is as expected
