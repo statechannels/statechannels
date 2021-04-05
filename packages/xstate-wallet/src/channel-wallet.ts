@@ -269,13 +269,14 @@ export class ChannelWallet {
       this.store.chain.chainUpdatedFeed(channelId).subscribe({
         next: chainInfo => this.onFundingUpdate(channelId, chainInfo)
       });
+      this.registeredChannels.add(channelId);
     }
     const pk = await this.store.getPrivateKey(await this.store.getAddress());
     const depositInfo = await this.getDepositInfo(channelId);
 
     const response = this.crankOpenChannelObjective(
       channel,
-      this.channelFunding[channelId],
+      this.channelFunding[channelId] ?? {amountOnChain: '0x0'},
       depositInfo,
       pk
     );
