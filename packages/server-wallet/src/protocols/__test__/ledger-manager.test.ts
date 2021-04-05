@@ -1,11 +1,5 @@
 import _ from 'lodash';
-import {
-  addHash,
-  createSignatureEntry,
-  hashState,
-  SignedStateVarsWithHash,
-  unreachable,
-} from '@statechannels/wallet-core';
+import {addHash, createSignatureEntry, unreachable} from '@statechannels/wallet-core';
 
 import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
@@ -593,10 +587,41 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       vars: _.cloneDeep(_.sortBy(vars, s => -s.turnNum)),
     });
 
-    function _summary(s: State | SignedStateVarsWithHash) {
-      const signatures = 'signatures' in s ? s.signatures : s.signedState.signatures;
-      const hash = 'stateHash' in s ? s.stateHash : hashState(s.signedState);
-      return [s.turnNum, hash, signatures.map(sig => (sig.signer[2] === '1' ? 'A' : 'B'))];
+    const requests = _.cloneDeep(originalRequests);
+    const statesToBeSigned = manager.synchronousCrankLogic(ledger, requests);
+
+    // BEGIN CODE FOR CREATING CONSISTENCY
+    const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
+    signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
+
+    if (signedStatesBefore.length > 0) {
+      signedStatesBefore.map(state => {
+        ledger.vars = addState(ledger.vars, state);
+      });
+    }
+
+    ledger.vars = clearOldStates(ledger.vars, ledger.support);
+    // END CODE FOR CREATING CONSISTENCY
+
+    // assertions
+    // ----------
+    // get the latest agreed state and the turn number
+    const agreedState = ledger.latestFullySignedState;
+    if (!agreedState) throw new Error(`No latest agreed state`);
+    const ledgerStateDesc: LedgerStateDescription = {
+      agreed: toStateDesc(agreedState, channelLookup),
+      requests: [],
+    };
+
+    const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
+    if (proposedState) {
+      expect(proposedState.signerIndices).toEqual([0]);
+      ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
+    }
+    const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
+    if (counterProposedState) {
+      expect(counterProposedState.signerIndices).toEqual([1]);
+      ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
     }
 
     function describeRequest(req: RichLedgerRequest): RequestDesc {
@@ -610,62 +635,10 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       ];
     }
 
-    const requests = _.cloneDeep(originalRequests);
-    const statesToBeSigned = manager.synchronousCrankLogic(ledger, requests);
-
-    // BEGIN CODE FOR CREATING CONSISTENCY
-    // console.log('as', args.as);
-    const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
-    signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
-    // console.log('states signed', signedStatesBefore.map(_summary));
-
-    // console.log('ledger before', ledger.vars.map(_summary));
-
-    if (signedStatesBefore.length > 0) {
-      signedStatesBefore.map(state => {
-        // console.log('adding', _summary(state));
-        // console.log('to', ledger.vars.map(_summary));
-        ledger.vars = addState(ledger.vars, state);
-        // console.log('gives', ledger.vars.map(_summary));
-      });
-    }
-
-    // console.log(signedStatesBefore.map(_summary));
-    // console.log('ledger after', ledger.vars.map(_summary));
-    ledger.vars = clearOldStates(ledger.vars, ledger.support);
-    // console.log('after clearing', ledger.vars.map(_summary));
-
-    // END CODE FOR CREATING CONSISTENCY
-
-    // assertions
-    // ----------
-    // get the latest agreed state and the turn number
-    function checkRequests(requests: RichLedgerRequest[]): void {
-      const agreedState = ledger.latestFullySignedState;
-      if (!agreedState) throw new Error(`No latest agreed state`);
-      const ledgerStateDesc: LedgerStateDescription = {
-        agreed: toStateDesc(agreedState, channelLookup),
-        requests: [],
-      };
-
-      const proposedState = ledger.uniqueStateAt(agreedState.turnNum + 1);
-      if (proposedState) {
-        expect(proposedState.signerIndices).toEqual([0]);
-        ledgerStateDesc['proposed'] = toStateDesc(proposedState, channelLookup);
-      }
-      const counterProposedState = ledger.uniqueStateAt(agreedState.turnNum + 2);
-      if (counterProposedState) {
-        expect(counterProposedState.signerIndices).toEqual([1]);
-        ledgerStateDesc['counterProposed'] = toStateDesc(counterProposedState, channelLookup);
-      }
-
-      ledgerStateDesc.requests = requests.map(describeRequest);
-      ledgerStateDesc.requests.sort();
-      args.after.requests.sort();
-      expect(ledgerStateDesc).toEqual(args.after);
-    }
-
-    checkRequests(requests);
+    ledgerStateDesc.requests = requests.map(describeRequest);
+    ledgerStateDesc.requests.sort();
+    args.after.requests.sort();
+    expect(ledgerStateDesc).toEqual(args.after);
   };
 }
 
