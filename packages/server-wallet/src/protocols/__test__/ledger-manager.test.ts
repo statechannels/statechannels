@@ -7,14 +7,9 @@ import {
   unreachable,
 } from '@statechannels/wallet-core';
 
-import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
 import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
-import {Store} from '../../engine/store';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
-import {createLogger} from '../../logger';
 import {LedgerRequestStatus, RichLedgerRequest} from '../../models/ledger-request';
-import {DBAdmin} from '../..';
 import {LedgerManager} from '../ledger-manager';
 import {Destination} from '../../type-aliases';
 import {State} from '../../models/channel/state';
@@ -23,23 +18,9 @@ import {channel} from '../../models/__test__/fixtures/channel';
 
 jest.setTimeout(10_000);
 
-let store: Store;
-
 let manager: LedgerManager;
 beforeAll(async () => {
-  await DBAdmin.migrateDatabase(defaultTestConfig());
-  store = new Store(
-    knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
-    '0',
-    createLogger(defaultTestConfig())
-  );
-  manager = await LedgerManager.create({store});
-});
-
-afterEach(async () => {
-  await DBAdmin.truncateDatabase(defaultTestConfig());
+  manager = await LedgerManager.create({} as any);
 });
 
 it(
@@ -528,8 +509,8 @@ describe('as follower', () => {
   });
 });
 
-function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
-  return async () => {
+function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
+  return () => {
     // setup
     // -----
     const testCase = new LedgerCrankTestCase(args);
@@ -566,10 +547,6 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => Promise<void> {
     ]);
 
     const myIndex = args.as === 'leader' ? 0 : 1;
-    await ledgerChannel.insertInto(store, {
-      participant: myIndex,
-      states: statesToInsert,
-    });
 
     const originalRequests: RichLedgerRequest[] = [];
     for (const req of testCase.requestsBefore) {
