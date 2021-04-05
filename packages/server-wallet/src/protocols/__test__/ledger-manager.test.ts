@@ -511,7 +511,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       signedBy: {agreed: 'both', proposed: 0, 'counter-proposed': 1}[type] as SignedBy,
     });
 
-    const statesToInsert: StateWithBals[] = _.compact([
+    const initialStates: StateWithBals[] = _.compact([
       testCase.agreedBefore && stateToParams(testCase.agreedBefore, 'agreed'),
       testCase.proposedBefore && stateToParams(testCase.proposedBefore, 'proposed'),
       testCase.counterProposedBefore &&
@@ -542,7 +542,7 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
 
     // Collect the correct input to the synchronous logic
 
-    const vars = statesToInsert
+    const vars = initialStates
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
 
@@ -569,15 +569,11 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
     const statesToBeSigned = manager.synchronousCrankLogic(ledger, requests);
 
     // BEGIN CODE FOR CREATING CONSISTENCY
-    const signedStatesBefore = statesToBeSigned.map(s => s.signedState).map(addHash);
-    signedStatesBefore.forEach(s => (s.signatures = [createSignatureEntry(s, privateKey)]));
-
-    if (signedStatesBefore.length > 0) {
-      signedStatesBefore.map(state => {
-        ledger.vars = addState(ledger.vars, state);
-      });
-    }
-
+    statesToBeSigned.map(s => {
+      const signed = addHash(s.signedState);
+      signed.signatures = [createSignatureEntry(signed, privateKey)];
+      ledger.vars = addState(ledger.vars, signed);
+    });
     ledger.vars = clearOldStates(ledger.vars, ledger.support);
     // END CODE FOR CREATING CONSISTENCY
 
