@@ -35,8 +35,8 @@ export class Wallet {
 
   /**
    Creates channels using the given parameters.
-   * @param channelParameters
-   * @returns
+   * @param channelParameters The parameters to use for channel creation. A channel will be created for each entry in the array.
+   * @returns A promise that resolves to a collection of ObjectiveResult.
    */
   public async createChannels(
     channelParameters: CreateChannelParams[]
