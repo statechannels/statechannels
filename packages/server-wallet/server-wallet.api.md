@@ -176,10 +176,6 @@ export interface EngineInterface {
     syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput>;
 }
 
 // @public (undocumented)
@@ -345,6 +341,7 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     getObjective(objectiveId: string): Promise<WalletObjective>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
+    // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "EngineResponse" needs to be exported by the entry point index.d.ts
     holdingUpdated({ channelId, amount, assetHolderAddress }: HoldingUpdatedArg, response?: EngineResponse): Promise<SingleChannelOutput>;
     joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput>;
@@ -374,7 +371,6 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput>;
     updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
-    updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput>;
 }
 
 // @public (undocumented)
@@ -387,7 +383,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:24:3 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:23:3 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
