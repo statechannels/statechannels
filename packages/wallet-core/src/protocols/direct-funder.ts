@@ -1,18 +1,19 @@
 import * as _ from 'lodash';
 
-import {checkThat, isSimpleAllocation, unreachable} from '../utils';
+import {checkThat, isSimpleAllocation} from '../utils';
 import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
-import {Address, Payload, SignatureEntry, State, Uint256} from '../types';
+import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 
-// TODO (WALLET_VERSION): This should be determined and exported by wallet-core
-export const WALLET_VERSION = 'SomeVersion';
+// TODO: This ought to be configurable
+export const MAX_WAITING_TIME = 5_000;
 
-type AddressedMessage = {recipient: string; message: Payload};
-
-export type OpenChannelEvent =
-  | {type: 'MessageReceived'; message: Payload}
-  | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean};
+export type OpenChannelEvent = {now?: number} & (
+  | {type: 'Crank'} // Allows you to crank it every now and then to see if it's timed out.
+  | {type: 'StatesReceived'; states: SignedState[]}
+  | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
+  | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number}
+);
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
@@ -23,7 +24,7 @@ export enum WaitingFor {
   theirPostFundState = 'DirectFunder.theirPostFundSetup'
 }
 
-const enum Hashes {
+const enum Steps {
   preFundSetup = 'preFundSetup',
   postFundSetup = 'postFundSetup'
 }
@@ -37,37 +38,46 @@ export type OpenChannelObjective = {
   preFundSetup: SignedStateHash;
   // TODO: (ChainService) The asset class is _ignored_ here.
   funding: {amount: Uint256; finalized: boolean};
-  // TODO: (ChainService) We will need to store funding requests once this gets hooked up to a chain service
-  fundingRequests: {tx: string}[];
+  fundingRequest: {tx: string; attempts: number; submittedAt: number} | undefined;
   postFundSetup: SignedStateHash;
 };
 
-export function initialize(openingState: State, myIndex: number): OpenChannelObjective {
+export function initialize(
+  openingState: State | SignedState,
+  myIndex: number
+): OpenChannelObjective {
   if (openingState.turnNum !== 0) {
-    throw 'unexpected state';
+    throw new Error(`Unexpected state due to turnNum ${openingState.turnNum}`);
   }
 
   const allowedIndices = _.range(0, openingState.participants.length);
   if (!allowedIndices.includes(myIndex)) {
-    throw 'unexpected index';
+    throw new Error(`Unexpected index due to index ${myIndex}`);
   }
+
+  // HACK (Implicitly) check that the outcome is as expected
+  utils.fundingMilestone(openingState, openingState.participants[myIndex].destination);
+
+  const signatures =
+    'signatures' in openingState ? mergeSignatures([], openingState.signatures) : [];
 
   return {
     channelId: calculateChannelId(openingState),
     myIndex,
-    openingState,
+    openingState: _.omit(openingState, 'signatures'),
     status: WaitingFor.theirPreFundSetup,
-    preFundSetup: {hash: hashState(setupState(openingState, Hashes.preFundSetup)), signatures: []},
+    preFundSetup: {hash: hashState(setupState(openingState, Steps.preFundSetup)), signatures},
     funding: {amount: BN.from(0), finalized: true},
-    fundingRequests: [],
-    postFundSetup: {hash: hashState(setupState(openingState, Hashes.postFundSetup)), signatures: []}
+    fundingRequest: undefined,
+    postFundSetup: {hash: hashState(setupState(openingState, Steps.postFundSetup)), signatures: []}
   };
 }
 
 export type Action =
-  | {type: 'sendMessage'; message: AddressedMessage}
+  | {type: 'sendStates'; states: SignedState[]}
   // TODO: (ChainService) We will need to include more data once this gets hooked up to a chain service
-  | {type: 'deposit'; amount: Uint256};
+  | {type: 'deposit'; amount: Uint256}
+  | {type: 'handleError'; error: Error};
 
 export type OpenChannelResult = {
   objective: OpenChannelObjective;
@@ -102,6 +112,10 @@ export type OpenChannelResult = {
  * If the wallet crashes after 1 & before 3, the wallet can decide to re-trigger
  * the actions on a case-by-case basis, based on whether the action is safe to
  * re-trigger.
+ *
+ * ## ASSUMPTIONS ##
+ * - the opening state has a SimpleAllocation outcome
+ * - the outcome has exactly one destination per participant
  */
 export function openChannelCranker(
   currentObjectiveState: OpenChannelObjective,
@@ -109,6 +123,7 @@ export function openChannelCranker(
   myPrivateKey: string
 ): OpenChannelResult {
   const objective = _.cloneDeep(currentObjectiveState);
+  const actions: Action[] = [];
 
   const {participants} = objective.openingState;
   const me = participants[objective.myIndex];
@@ -116,12 +131,21 @@ export function openChannelCranker(
   // First, process the event
 
   switch (event.type) {
+    case 'Crank':
+      break;
+    case 'DepositSubmitted':
+      objective.fundingRequest = {
+        tx: event.tx,
+        submittedAt: event.submittedAt,
+        attempts: event.attempt
+      };
+      break;
     case 'FundingUpdated':
       objective.funding.amount = event.amount;
       objective.funding.finalized = event.finalized;
       break;
-    case 'MessageReceived': {
-      const {signedStates} = event.message;
+    case 'StatesReceived': {
+      const {states: signedStates} = event;
 
       // TODO: Assume there's only one signed state
       if (signedStates && signedStates[0]) {
@@ -131,8 +155,13 @@ export function openChannelCranker(
 
         for (const signature of signatures) {
           if (!participants.find(p => p.signingAddress === signature.signer)) {
-            // TODO: (Errors) Enter an error state here
-            throw new Error('received a signature from a non-participant');
+            objective.status = 'error';
+            const error = new DirectFunderError({
+              message: 'NonParticipantSignature',
+              signature
+            });
+            actions.push({type: 'handleError', error});
+            return {objective, actions};
           }
         }
 
@@ -147,26 +176,29 @@ export function openChannelCranker(
             signatures
           );
         } else {
-          // TODO: (Errors) Enter an error state here
-          throw new Error(
-            `Unexpected state hash ${hash}. Expecting ${objective.preFundSetup.hash} or ${objective.postFundSetup.hash}`
-          );
+          objective.status = 'error';
+          const error = new DirectFunderError({
+            message: 'ReceivedUnexpectedState',
+            received: hash,
+            expected: [objective.preFundSetup.hash, objective.postFundSetup.hash]
+          });
+          actions.push({type: 'handleError', error});
+          return {objective, actions};
         }
       }
       break;
     }
     default:
-      return unreachable(event);
+      return handleUnexpectedEvent(event, objective);
   }
 
   // Then, transition & collect actions:
-  const actions: Action[] = [];
 
-  if (!signedbyMe(objective, Hashes.preFundSetup, me.signingAddress)) {
-    signStateAction(Hashes.preFundSetup, myPrivateKey, objective, actions);
+  if (!signedbyMe(objective, Steps.preFundSetup, me.signingAddress)) {
+    signStateAction(Steps.preFundSetup, myPrivateKey, objective, actions);
   }
 
-  if (!completed(objective, Hashes.preFundSetup)) {
+  if (!completed(objective, Steps.preFundSetup)) {
     objective.status = WaitingFor.theirPreFundSetup;
     return {objective, actions};
   }
@@ -195,10 +227,20 @@ export function openChannelCranker(
   }
   // if there's an outstanding chain request, take no action
   // TODO: (ChainService) This assumes that each participant deposits exactly once per channel
-  else if (objective.fundingRequests.length === 1) {
-    // TODO: (ChainService) This should handle timed out funding requests
-    objective.status = WaitingFor.channelFunded;
-    return {objective, actions};
+  else if (objective.fundingRequest) {
+    if (event.now && event.now >= objective.fundingRequest.submittedAt + MAX_WAITING_TIME) {
+      objective.status = 'error';
+      const error = new DirectFunderError({
+        message: 'TimedOutWhileFunding',
+        now: event.now,
+        submittedAt: objective.fundingRequest.submittedAt
+      });
+      actions.push({type: 'handleError', error});
+      return {objective, actions};
+    } else {
+      objective.status = WaitingFor.channelFunded;
+      return {objective, actions};
+    }
   } else {
     // otherwise, deposit
     const amount = BN.sub(targetAfter, funding.amount); // previous checks imply this is >0
@@ -208,11 +250,11 @@ export function openChannelCranker(
   }
 
   // Now that the channel is funded, it's safe to sign the postFS
-  if (!signedbyMe(objective, Hashes.postFundSetup, me.signingAddress)) {
-    signStateAction(Hashes.postFundSetup, myPrivateKey, objective, actions);
+  if (!signedbyMe(objective, Steps.postFundSetup, me.signingAddress)) {
+    signStateAction(Steps.postFundSetup, myPrivateKey, objective, actions);
   }
 
-  if (!completed(objective, Hashes.postFundSetup)) {
+  if (!completed(objective, Steps.postFundSetup)) {
     objective.status = WaitingFor.theirPostFundState;
     return {objective, actions};
   } else {
@@ -221,23 +263,23 @@ export function openChannelCranker(
   }
 }
 
-function signedbyMe(objective: OpenChannelObjective, step: Hashes, me: Address): boolean {
+function signedbyMe(objective: OpenChannelObjective, step: Steps, me: Address): boolean {
   return objective[step].signatures.map(e => e.signer).includes(me);
 }
 
-function completed(objective: OpenChannelObjective, step: Hashes): boolean {
+function completed(objective: OpenChannelObjective, step: Steps): boolean {
   const {openingState: firstState} = objective;
   return objective[step].signatures.length === firstState.participants.length;
 }
 
-function setupState(openingState: State, key: Hashes): State {
-  const turnNum = key === Hashes.preFundSetup ? 0 : 2 * openingState.participants.length - 1;
+function setupState(openingState: State, step: Steps): State {
+  const turnNum = step === Steps.preFundSetup ? 0 : 2 * openingState.participants.length - 1;
 
   return {...openingState, turnNum};
 }
 
 function signStateAction(
-  key: Hashes,
+  step: Steps,
   myPrivateKey: string,
   objective: OpenChannelObjective,
   actions: Action[]
@@ -245,24 +287,20 @@ function signStateAction(
   const {openingState, myIndex} = objective;
   const me = openingState.participants[myIndex];
 
-  const state = setupState(openingState, key);
+  const state = setupState(openingState, step);
   const signature = signState(state, myPrivateKey);
   const entry = {signature, signer: me.signingAddress};
-  objective[key].signatures = mergeSignatures(objective[key].signatures, [entry]);
+  objective[step].signatures = mergeSignatures(objective[step].signatures, [entry]);
+  const signedState = {...state, signatures: [entry]};
 
-  recipients(objective).map(recipient => {
-    const message: Payload = {
-      walletVersion: WALLET_VERSION,
-      signedStates: [{...state, signatures: [entry]}]
-    };
-    actions.push({type: 'sendMessage', message: {recipient, message}});
-  });
+  const existingAction = actions.find(a => a.type === 'sendStates');
+  if (existingAction) {
+    (existingAction as any).states.push(signedState);
+  } else {
+    actions.push({type: 'sendStates', states: [{...state, signatures: [entry]}]});
+  }
 
   return actions;
-}
-
-function recipients({openingState: {participants}, myIndex}: OpenChannelObjective): string[] {
-  return participants.filter((_p, idx) => idx !== myIndex).map(p => p.participantId);
 }
 
 function mergeSignatures(left: SignatureEntry[], right: SignatureEntry[]): SignatureEntry[] {
@@ -287,7 +325,7 @@ const utils = {
       // throw new ChannelError(ChannelError.reasons.destinationNotInAllocations, {
       //   destination: this.participants[this.myIndex].destination
       // });
-      throw 'missing';
+      throw new Error('unexpected outcome');
     }
 
     const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== destination);
@@ -300,3 +338,35 @@ const utils = {
     return {targetBefore, targetAfter, targetTotal};
   }
 };
+
+export type ErrorModes =
+  | {message: 'NonParticipantSignature'; signature: SignatureEntry}
+  | {message: 'ReceivedUnexpectedState'; received: string; expected: [string, string]}
+  | {message: 'TimedOutWhileFunding'; now: number; submittedAt: number}
+  | {message: 'UnexpectedEvent'; event: any};
+
+class DirectFunderError extends Error {
+  constructor(public data: ErrorModes) {
+    super(data.message);
+  }
+}
+
+/**
+ * In principle, one can send any event to the cranker.
+ * We handle this by moving to an error state with an "UnexpectedEvent" error,
+ * to avoid throwing a generic error.
+ *
+ * By extracting this in a function where event has type `never`, this forces the
+ * developer to handle all _known_ event types before returning the output of
+ * handleUnexpectedEvent
+ *
+ * @param event unsafe event sent to the cranker
+ * @param objective current objective state
+ * @returns objective moved to error state
+ *
+ */
+function handleUnexpectedEvent(event: never, objective: OpenChannelObjective): OpenChannelResult {
+  const error = new DirectFunderError({event, message: 'UnexpectedEvent'});
+  objective.status = 'error';
+  return {objective, actions: [{type: 'handleError', error}]};
+}

@@ -1,6 +1,7 @@
 const {resolve} = require('path');
 const root = resolve(__dirname, '../../');
 module.exports = {
+  collectCoverage: true,
   globalSetup: '<rootDir>/jest/test-setup.ts',
   rootDir: root,
   testMatch: ['<rootDir>/src/**/*.test.ts'],

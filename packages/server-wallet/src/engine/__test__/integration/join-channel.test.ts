@@ -4,6 +4,8 @@ import {
   serializeState,
   serializeAllocation,
   serializeOutcome,
+  DirectFunder,
+  hashState,
 } from '@statechannels/wallet-core';
 import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Objection from 'objection';
@@ -297,6 +299,52 @@ describe('ledger funded app scenarios', () => {
     expect(protocolState).toMatchObject({
       latest: signedPreFS1,
       supported: signedPreFS1,
+    });
+  });
+});
+
+describe('direct-funder', () => {
+  it('signs the prefund setup ', async () => {
+    const appData = '0x0f00';
+    const c = channel({
+      signingAddress: bob().address,
+      vars: [stateWithHashSignedBy([alice()])({appData})],
+    });
+    await Channel.query(w.knex).insert(c);
+    const {channelId} = c;
+
+    await ObjectiveModel.insert(
+      {
+        type: 'OpenChannel',
+        participants: c.participants,
+        data: {
+          targetChannelId: c.channelId,
+          fundingStrategy: 'Direct',
+          role: 'app',
+        },
+      },
+      false,
+      w.knex
+    );
+
+    (w as any).richObjectives[channelId] = DirectFunder.initialize(c.latest, 1);
+
+    await w.joinChannel({channelId});
+
+    const currentState = (w as any).richObjectives[channelId];
+
+    expect(currentState).toBeDefined();
+    expect(currentState).toMatchObject({
+      status: DirectFunder.WaitingFor.safeToDeposit,
+      preFundSetup: {
+        hash: hashState(c.latest),
+        signatures: [
+          {signer: '0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf'},
+          {signer: '0x2222E21c8019b14dA16235319D34b5Dd83E644A9'},
+        ],
+      },
+      funding: {amount: BN.from(0)},
+      postFundSetup: {hash: expect.any(String), signatures: []},
     });
   });
 });

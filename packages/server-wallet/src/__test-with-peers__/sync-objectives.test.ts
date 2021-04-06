@@ -67,13 +67,7 @@ test('handles the objective being synced even if no message is lost', async () =
     params: {
       recipient: 'alice',
       sender: 'bob',
-      data: {
-        signedStates: [
-          expect.objectContaining({turnNum: 0}),
-          // TODO (DirectFunder): Cranking the pure direct funder puts a second message in the outbox...
-          expect.objectContaining({turnNum: 0}),
-        ],
-      },
+      data: {signedStates: [expect.objectContaining({turnNum: 0})]},
     },
   });
 
@@ -114,13 +108,7 @@ test('Can successfully push the sync objective message multiple times', async ()
     params: {
       recipient: 'alice',
       sender: 'bob',
-      data: {
-        signedStates: [
-          expect.objectContaining({turnNum: 0}),
-          // TODO (DirectFunder): Cranking the pure direct funder puts a second message in the outbox...
-          expect.objectContaining({turnNum: 0}),
-        ],
-      },
+      data: {signedStates: [expect.objectContaining({turnNum: 0})]},
     },
   });
 
