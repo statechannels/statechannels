@@ -45,10 +45,6 @@ export class Wallet {
       channelParameters.map(async p => {
         const createResult = await this._engine.createChannel(p);
 
-        // TODO: Modify engine createChannel API result so objective is already returned
-        if (!createResult.newObjective) {
-          throw new Error('Missing objective');
-        }
         const {newObjective, channelResult} = createResult;
 
         return {

@@ -66,3 +66,9 @@ export interface EngineInterface {
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 }
+
+export function hasNewObjective(
+  response: SingleChannelOutput
+): response is SingleChannelOutput & {newObjective: WalletObjective} {
+  return !!response.newObjective;
+}
