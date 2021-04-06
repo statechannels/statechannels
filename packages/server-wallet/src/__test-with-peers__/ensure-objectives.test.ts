@@ -73,8 +73,7 @@ describe('EnsureObjectives', () => {
       await peerEngines.b.joinChannels([channelId]);
     });
 
-    await expect(wallet.createChannels([getCreateChannelsArgs()])).rejects.toThrow(
-      'Unable to ensure objectives'
-    );
+    const {done} = (await wallet.createChannels([getCreateChannelsArgs()]))[0];
+    await expect(done).resolves.toMatchObject({type: 'EnsureObjectiveFailed'});
   });
 });
