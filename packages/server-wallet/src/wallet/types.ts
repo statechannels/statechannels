@@ -38,11 +38,6 @@ export type ObjectiveSuccess = {type: 'Success'};
 export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
 
 /**
- * TODO: Can the channelId just be on the objective?
- * Or do we anticipate objectives that cover multiple channels?
- */
-
-/**
  * This is what is returned for any objective related API call
  *
  */
