@@ -155,9 +155,14 @@ These should adhere to the [TSDoc standard](https://github.com/Microsoft/tsdoc).
 Doc comments will appear in our documentation at https://docs.statechannels.org.
 
 ## API reports
-We use [api-extractor](https://api-extractor.com/) to help us track changes to the API of some of the packages in this repo. The tool is run via `yarn lerna run generate-api` during our continuous integration suite, and generates an [api report](https://api-extractor.com/pages/setup/configure_api_report/). If you make changes to the external API of a package, you should run this command locally and check in the reports to source control, else you will get a test failure. 
+We use [api-extractor](https://api-extractor.com/) to help us track changes to the API of some of the packages in this repo. The tool is run via `yarn lerna run generate-api` during our continuous integration suite, and generates an [api report](https://api-extractor.com/pages/setup/configure_api_report/).
 
-The checked-in report helps faciliate PR review.
+If you make changes to the external API of a package, you must switch to the `server-wallet` directory, run
+```
+yarn tsc
+yarn generate-api
+```
+and check the reports into source control. The checked-in report helps faciliate PR review.
 
 
 ## Community
