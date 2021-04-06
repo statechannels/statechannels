@@ -33,7 +33,7 @@ export type InternalError = {
   error: Error;
 };
 
-export type ObjectiveSuccess = {type: 'Success'};
+export type ObjectiveSuccess = {channelId: string; type: 'Success'};
 
 export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
 

@@ -85,7 +85,7 @@ export class Wallet {
 
     const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
     for (let i = 0; i < numberOfAttempts; i++) {
-      if (isComplete) return {type: 'Success'};
+      if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       const delayAmount = initialDelay * Math.pow(multiple, i);
       await delay(delayAmount);
 
