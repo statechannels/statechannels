@@ -23,13 +23,13 @@ const messagingService: MessagingServiceInterface = new MessagingService(store);
 
 const alice: Participant = {
   participantId: 'a',
-  signingAddress: makeAddress('0xa'),
+  signingAddress: makeAddress('0x1000000000000000000000000000000000000001'),
   destination: '0xad' as any
 };
 
 const bob: Participant = {
   participantId: 'b',
-  signingAddress: makeAddress('0xb'),
+  signingAddress: makeAddress('0x1000000000000000000000000000000000000002'),
   destination: '0xbd' as any
 };
 

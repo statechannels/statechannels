@@ -32,13 +32,13 @@ const budget: DomainBudget = ethBudget('web3torrent.statechannels.org', {
 
 const alice: Participant = {
   participantId: 'a',
-  signingAddress: makeAddress('0xa'),
+  signingAddress: makeAddress('0x1000000000000000000000000000000000000001'),
   destination: '0xad' as any
 };
 
 const hub: Participant = {
   participantId: 'b',
-  signingAddress: makeAddress('0xb'),
+  signingAddress: makeAddress('0x1000000000000000000000000000000000000002'),
   destination: '0xbd' as any
 };
 
