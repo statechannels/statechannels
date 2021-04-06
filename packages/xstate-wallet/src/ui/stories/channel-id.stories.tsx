@@ -1,5 +1,4 @@
 import React from 'react';
-export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 
 import {ChannelId} from '../channel-id';

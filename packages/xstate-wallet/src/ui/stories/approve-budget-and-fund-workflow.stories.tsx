@@ -1,4 +1,3 @@
-export default {title: 'X-state wallet'};
 import {storiesOf} from '@storybook/react';
 import {interpret} from 'xstate';
 import React from 'react';
