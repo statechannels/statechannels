@@ -388,19 +388,6 @@ export class SingleThreadedEngine
   }
 
   /**
-   * Update the engine's knowledge about the funding for some channels
-   *
-   * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
-   * @returns A promise that resolves to a channel output.
-   */
-  public async updateFundingForChannels(args: HoldingUpdatedArg[]): Promise<MultipleChannelOutput> {
-    const response = EngineResponse.initialize();
-
-    await Promise.all(args.map(a => this.holdingUpdated(a, response)));
-
-    return response.multipleChannelOutput();
-  }
-  /**
    * Get the signing address for this engine, or create it if it does not exist.
    *
    * @returns A promise that resolves to the address.
