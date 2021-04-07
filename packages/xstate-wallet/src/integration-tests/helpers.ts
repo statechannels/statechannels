@@ -184,7 +184,7 @@ export function generatePlayerUpdate(
       appData: '0x00',
       allocations: [
         {
-          assetHolderAddress: utils.hexZeroPad('0x00', 32),
+          assetHolderAddress: '0x0000000000000000000000000000000000000000',
           allocationItems: [
             {
               destination: playerA.destination,
