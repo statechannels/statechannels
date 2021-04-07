@@ -417,28 +417,122 @@ contract SingleChannelAdjudicator is
         }
     }
 
-    // /**
-    //  * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-    //  * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-    //  * @param guarantorChannelId Unique identifier for a guarantor state channel.
-    //  * @param guaranteeBytes The abi.encode of Outcome.Guarantee
-    //  * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-    //  * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
-    //  */
-    // function claim(
-    //     bytes32 guarantorChannelId,
-    //     bytes calldata guaranteeBytes,
-    //     bytes calldata allocationBytes,
-    //     uint256[] memory indices
-    // ) external override {
-    //     // checks
-    //     _requireIncreasingIndices(indices);
-    //     _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
-    //     Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
-    //     _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
-    //     // effects and interactions
-    //     _claim(guarantorChannelId, guarantee, allocationBytes, indices);
-    // }
+    function payOutTarget(
+        bytes32 guarantorChannelId,
+        ChannelDataLite calldata cDL,
+        bytes calldata guaranteeBytes,
+        address assetHolderAddress,
+        uint256[] memory payouts
+    ) external {
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+            .getChannelAddress(guarantee.targetChannelId);
+        require(msg.sender == targetChannelAddress, 'only the target channel is auth');
+        bytes32 outcomeHash = keccak256(guaranteeBytes);
+        _requireMatchingStorage(
+            ChannelData(
+                cDL.turnNumRecord,
+                cDL.finalizesAt,
+                cDL.stateHash,
+                cDL.challengerAddress,
+                outcomeHash
+            ),
+            guarantorChannelId
+        );
+        for (uint256 j = 0; j < payouts.length; j++) {
+            if (payouts[j] > 0) {
+                bytes32 destination = guarantee.destinations[j];
+                _transferAsset(assetHolderAddress, destination, payouts[j]);
+            }
+        }
+    }
+
+    /**
+     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     */
+    function claim(
+        bytes32 guarantorChannelId,
+        bytes calldata guaranteeBytes,
+        ChannelDataLite calldata guaranteeCDL,
+        bytes calldata outcomeBytes,
+        ChannelDataLite calldata targetCDL,
+        uint256[] memory indices
+    ) external {
+        // checks
+        _requireIncreasingIndices(indices);
+        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+        address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
+            guarantorChannelId
+        );
+        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+            .getChannelAddress(guarantee.targetChannelId);
+        require(address(this) == targetChannelAddress);
+        _requireMatchingStorage(
+            ChannelData(
+                targetCDL.turnNumRecord,
+                targetCDL.finalizesAt,
+                targetCDL.stateHash,
+                targetCDL.challengerAddress,
+                keccak256(outcomeBytes)
+            ),
+            guarantee.targetChannelId
+        );
+
+        // effects and interactions
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+
+        // loop over tokens
+        for (uint256 i = 0; i < outcome.length; i++) {
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                outcome[i].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
+
+            if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
+                Outcome.AllocationItem[] memory allocation = abi.decode(
+                    assetOutcome.allocationOrGuaranteeBytes,
+                    (Outcome.AllocationItem[])
+                );
+                (
+                    Outcome.AllocationItem[] memory newAllocation,
+                    ,
+                    uint256[] memory payouts,
+
+                ) = _computeNewAllocationWithGuarantee(
+                    _holdings(guarantor, outcome[i].assetHolderAddress),
+                    allocation,
+                    indices,
+                    guarantee
+                );
+                assetOutcome.allocationOrGuaranteeBytes = abi.encode(newAllocation);
+                outcome[i] = Outcome.OutcomeItem(
+                    outcome[i].assetHolderAddress,
+                    abi.encode(assetOutcome)
+                );
+                // TODO this violates CHECKS,EFFECTS,INTERACTIONS
+                // is it safe against reentrancy?
+                SingleChannelAdjudicator(guarantor).payOutTarget(
+                    guarantorChannelId,
+                    guaranteeCDL,
+                    guaranteeBytes,
+                    outcome[i].assetHolderAddress,
+                    payouts
+                );
+            } else {
+                revert('AssetOutcome not an allocation');
+            }
+
+            statusOf[guarantee.targetChannelId] = _generateStatus(
+                ChannelData(
+                    targetCDL.turnNumRecord,
+                    targetCDL.finalizesAt,
+                    targetCDL.stateHash,
+                    targetCDL.challengerAddress,
+                    keccak256(abi.encode(outcome))
+                )
+            );
+        }
+    }
 
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
         for (uint256 i = 0; i + 1 < indices.length; i++) {
@@ -477,6 +571,19 @@ contract SingleChannelAdjudicator is
         } else {
             // assume ERC20 Token
             return IERC20(assetHolderAddress).balanceOf(address(this));
+        }
+    }
+
+    function _holdings(address channelAddress, address assetHolderAddress)
+        internal
+        view
+        returns (uint256)
+    {
+        if (assetHolderAddress == address(0)) {
+            return channelAddress.balance;
+        } else {
+            // assume ERC20 Token
+            return IERC20(assetHolderAddress).balanceOf(channelAddress);
         }
     }
 }
