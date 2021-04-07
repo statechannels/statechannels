@@ -18,9 +18,7 @@ import {Player, hookUpMessaging, generateCloseRequest} from './helpers';
 
 jest.setTimeout(30000);
 
-// TODO: unskip test
-// eslint-disable-next-line jest/no-disabled-tests
-test.skip('concludes on their turn', async () => {
+test('concludes on their turn', async () => {
   const fakeChain = new FakeChain();
 
   const playerA = await Player.createPlayer(
