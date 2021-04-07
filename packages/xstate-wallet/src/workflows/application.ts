@@ -136,15 +136,15 @@ const generateConfig = (
         failure: {},
         joining: {
           on: {
-            '': [
-              {target: 'failure', cond: guards.isLedgerFunding}, // TODO: Should we even support ledger funding?
-              {target: 'done', cond: guards.amCreator}
-            ],
             JOIN_CHANNEL: {
               target: 'settingDomain',
               actions: [actions.assignRequestId, actions.sendJoinChannelResponse]
             }
-          }
+          },
+          always: [
+            {target: 'failure', cond: guards.isLedgerFunding}, // TODO: Should we even support ledger funding?
+            {target: 'done', cond: guards.amCreator}
+          ]
         },
         settingDomain: {invoke: {src: 'setapplicationDomain', onDone: 'done'}},
         done: {type: 'final'}
