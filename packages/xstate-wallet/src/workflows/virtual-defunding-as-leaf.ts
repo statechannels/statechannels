@@ -108,8 +108,9 @@ const defundTarget: StateNodeConfig<any, any, any> = _.merge(
     {src: finalJointChannelUpdate.name},
     {src: Services.supportState},
     'defundGuarantor'
-  ),
-  {exit: ['deleteTargetChannel']}
+  )
+  // TODO: implement deleteTargetChannel
+  // {exit: ['deleteTargetChannel']}
 );
 
 const defundGuarantorInLedger = (store: Store) => async ({
@@ -163,7 +164,9 @@ const defundGuarantor: StateNodeConfig<any, any, any> = {
     ),
     done: {type: 'final'}
   },
-  exit: ['deleteJointChannel', 'deleteGuarantorChannel', releaseLock.name],
+  // TODO: implement deleteJointChannel and deleteJointChannel
+  // exit: ['deleteJointChannel', 'deleteJointChannel', releaseLock.name],
+  exit: [releaseLock.name],
   onDone: 'releaseFundsFromBudget'
 };
 

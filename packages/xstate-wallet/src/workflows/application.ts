@@ -157,7 +157,10 @@ const generateConfig = (
     confirmingWithUser: {
       // FIXME We should keep track of whether the UI was turned on in the context.
       // That way, at the end, we know whether we have to send hideUI
-      entry: [actions.displayUi, 'assignUIState'],
+
+      // TODO: implement assignUIState
+      // entry: [actions.displayUi, 'assignUIState'],
+      entry: [actions.displayUi],
       invoke: {src: 'invokeCreateChannelConfirmation', onDone: 'creatingChannel'}
     },
     creatingChannel: {
