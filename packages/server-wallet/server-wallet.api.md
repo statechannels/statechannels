@@ -189,6 +189,11 @@ export function getDatabaseConnectionConfig(config: EngineConfig): DatabaseConne
     port: number;
 };
 
+// @public (undocumented)
+export function hasNewObjective(response: SingleChannelOutput): response is SingleChannelOutput & {
+    newObjective: WalletObjective;
+};
+
 // @public
 export type IncomingEngineConfig = RequiredEngineConfig & Partial<OptionalEngineConfig>;
 
@@ -330,7 +335,9 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     static create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine>;
-    createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput>;
+    createChannel(args: CreateChannelParams): Promise<SingleChannelOutput & {
+        newObjective: WalletObjective;
+    }>;
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
     createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
     destroy(): Promise<void>;
@@ -383,7 +390,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:23:3 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:72:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
