@@ -52,10 +52,7 @@ export class Wallet {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,
             objectiveId: newObjective.objectiveId,
-            done: this.ensureObjective(newObjective, getMessages(createResult)).catch(error => ({
-              type: 'InternalError' as const,
-              error,
-            })),
+            done: this.ensureObjective(newObjective, getMessages(createResult)),
           };
         } catch (error) {
           return {
@@ -73,16 +70,14 @@ export class Wallet {
       objectiveId: o.objectiveId,
       currentStatus: o.status,
       channelId: o.data.targetChannelId,
-      done: this.ensureObjective(o, []).catch(error => ({
-        type: 'InternalError' as const,
-        error,
-      })),
+      done: this.ensureObjective(o, []),
     }));
   }
 
   /**
    * Ensures that the provided objectives get completed.
    * Will resend messages as required to ensure that the objectives get completed.
+   * This should never throw an exception. Instead it should return an ObjectiveError
    * @param objectives The list of objectives to ensure get completed.
    * @param objectiveMessages The collection of outgoing messages related to the objective.
    * @returns A promise that resolves when all the objectives are completed
@@ -91,32 +86,39 @@ export class Wallet {
     objective: WalletObjective,
     objectiveMessages: Message[]
   ): Promise<ObjectiveSuccess | ObjectiveError> {
-    let isComplete = false;
+    try {
+      let isComplete = false;
 
-    const onObjectiveSucceeded = (o: WalletObjective) => {
-      if (o.objectiveId === o.objectiveId) {
-        isComplete = true;
-        this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+      const onObjectiveSucceeded = (o: WalletObjective) => {
+        if (o.objectiveId === o.objectiveId) {
+          isComplete = true;
+          this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+        }
+      };
+
+      this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
+
+      // Now that we're listening for objective success we can now send messages
+      // that might trigger progress on the objective
+      await this._messageService.send(objectiveMessages);
+
+      const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
+      for (let i = 0; i < numberOfAttempts; i++) {
+        if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
+        const delayAmount = initialDelay * Math.pow(multiple, i);
+        await delay(delayAmount);
+
+        const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
+        await this._messageService.send(getMessages(outbox));
       }
-    };
 
-    this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
-
-    // Now that we're listening for objective success we can now send messages
-    // that might trigger progress on the objective
-    await this._messageService.send(objectiveMessages);
-
-    const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
-    for (let i = 0; i < numberOfAttempts; i++) {
-      if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
-      const delayAmount = initialDelay * Math.pow(multiple, i);
-      await delay(delayAmount);
-
-      const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
-      await this._messageService.send(getMessages(outbox));
+      return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
+    } catch (error) {
+      return {
+        type: 'InternalError' as const,
+        error,
+      };
     }
-
-    return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
   }
 
   async destroy(): Promise<void> {
