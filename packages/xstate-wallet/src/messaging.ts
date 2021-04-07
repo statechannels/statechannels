@@ -35,6 +35,7 @@ import {
   makeAddress
 } from '@statechannels/wallet-core';
 
+import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
 import {AppRequestEvent} from './event-types';
 import {
   CHALLENGE_DURATION,
@@ -202,17 +203,15 @@ export class MessagingService implements MessagingServiceInterface {
         }
         break;
       case 'GetChannels':
-        // TODO: comment back in
+        const channelEntries = await this.store.getApplicationChannels(
+          fromDomain,
+          request.params.includeClosed
+        );
 
-        // const channelEntries = await this.store.getApplicationChannels(
-        //   fromDomain,
-        //   request.params.includeClosed
-        // );
-
-        // const serializedChannelEntries = await Promise.all(
-        //   channelEntries.map(serializeChannelEntry)
-        // );
-        // await this.sendResponse(requestId, serializedChannelEntries);
+        const serializedChannelEntries = await Promise.all(
+          channelEntries.map(serializeChannelEntry)
+        );
+        await this.sendResponse(requestId, serializedChannelEntries);
 
         break;
       case 'ChallengeChannel':

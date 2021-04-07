@@ -31,6 +31,7 @@ import {logger} from '../logger';
 import {CONCLUDE_TIMEOUT} from '../constants';
 import {createMockGuard} from '../utils/workflow-utils';
 import {MessagingServiceInterface, SupportedFundingStrategy} from '../messaging';
+import {serializeChannelEntry} from '../utils/wallet-core-v0.8.0';
 
 import {ConcludeChannel, CreateAndFund, ChallengeChannel, Confirm as CCC} from './';
 export interface WorkflowContext {
@@ -252,10 +253,9 @@ export const workflow = (
     store.channelUpdatedFeed(channelId).pipe(
       filter(storeEntry => storeEntry.isSupported),
 
-      // TODO: comment back in
-      // distinctUntilChanged((entry1, entry2) =>
-      //   _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
-      // ),
+      distinctUntilChanged((entry1, entry2) =>
+        _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
+      ),
       distinctUntilChanged((entry1, entry2) => _.isEqual(entry1, entry2)),
 
       map(storeEntry => ({
@@ -268,22 +268,19 @@ export const workflow = (
     sendCreateChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
 
-      // TODO: comment back in
-      //await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
       await messagingService.sendResponse(context.requestId, entry);
     },
 
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      // TODO: comment back in
-      //await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
       await messagingService.sendResponse(context.requestId, entry);
     },
 
     sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
-      // TODO: comment back in
-      //await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
+      await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
       await messagingService.sendResponse(context.requestId, entry);
     },
 
@@ -298,11 +295,10 @@ export const workflow = (
       event: {storeEntry: ChannelStoreEntry}
     ) => {
       if (event.storeEntry.channelId === context.channelId) {
-        // TODO: comment back in
-        // messagingService.sendChannelNotification(
-        //   'ChannelUpdated',
-        //   serializeChannelEntry(event.storeEntry)
-        // );
+        messagingService.sendChannelNotification(
+          'ChannelUpdated',
+          serializeChannelEntry(event.storeEntry)
+        );
       }
     },
     displayUi: () => {
@@ -329,11 +325,10 @@ export const workflow = (
     updateChannel: async (context: ChannelIdExists, event: PlayerStateUpdate) => {
       if (context.channelId === event.channelId) {
         try {
-          // TODO: comment back in
-          // messagingService.sendResponse(
-          //   event.requestId,
-          //   serializeChannelEntry(await store.updateChannel(event.channelId, event))
-          // );
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, event))
+          );
           messagingService.sendResponse(
             event.requestId,
             await store.updateChannel(event.channelId, event)
@@ -358,11 +353,10 @@ export const workflow = (
     closeChannel: async (context: ChannelIdExists, event: PlayerRequestConclude) => {
       if (context.channelId === event.channelId) {
         try {
-          // TODO: comment back in
-          // messagingService.sendResponse(
-          //   event.requestId,
-          //   serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
-          // );
+          messagingService.sendResponse(
+            event.requestId,
+            serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
+          );
           messagingService.sendResponse(
             event.requestId,
             await store.updateChannel(event.channelId, {isFinal: true})
