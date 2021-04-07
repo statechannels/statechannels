@@ -5,7 +5,7 @@ import {
   StateChannelsResponse,
   StateChannelsErrorResponse
 } from '@statechannels/client-api-schema';
-import {filter} from 'rxjs/operators';
+import {filter, take} from 'rxjs/operators';
 import {
   Payload,
   isOpenChannel,
@@ -23,6 +23,7 @@ import {Dictionary} from '@statechannels/wallet-core/node_modules/@types/lodash'
 import ReactDOM from 'react-dom';
 import React from 'react';
 
+import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
 import {ChannelStoreEntry} from './store/channel-store-entry';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
@@ -82,11 +83,10 @@ export class ChannelWallet {
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
     this.store.objectiveFeed.pipe(filter(isOpenChannel)).subscribe(async objective => {
-      // TODO: comment back in
-      // const channelEntry = await this.store
-      //   .channelUpdatedFeed(objective.data.targetChannelId)
-      //   .pipe(take(1))
-      //   .toPromise();
+      const channelEntry = await this.store
+        .channelUpdatedFeed(objective.data.targetChannelId)
+        .pipe(take(1))
+        .toPromise();
 
       // TODO: Currently receiving a duplicate JOIN_CHANNEL event
       if (this.isWorkflowIdInUse(this.calculateWorkflowId(objective))) {
@@ -109,10 +109,9 @@ export class ChannelWallet {
           this.calculateWorkflowId(objective)
         );
 
-        // TODO: comment back in
-        // this.messagingService.sendChannelNotification('ChannelProposed', {
-        //   ...serializeChannelEntry(channelEntry)
-        // });
+        this.messagingService.sendChannelNotification('ChannelProposed', {
+          ...serializeChannelEntry(channelEntry)
+        });
       }
     });
 
