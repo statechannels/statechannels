@@ -744,6 +744,15 @@ export class SingleThreadedEngine
   }
 
   /**
+   * Gets the objectives for the given ids.
+   *
+   * @returns A promise that resolves to a collection of WalletObjectives
+   */
+  async getObjectives(objectiveIds: string[]): Promise<WalletObjective[]> {
+    return this.store.getObjectivesByIds(objectiveIds);
+  }
+
+  /**
    * Gets the latest state for a channel.
    *
    * @privateRemarks TODO: Consider renaming this to getChannel() to match getChannels()
