@@ -47,7 +47,8 @@ const level = window.localStorage.LOG_LEVEL ?? LOG_LEVEL;
 const opts = {name, prettyPrint, browser, level};
 const logger = destination ? pino(opts, destination) : pino(opts);
 logger.on('level-change', (lvl, val, prevLvl, prevVal) => {
-  console.log('wallet: %s (%d) was changed to %s (%d)', lvl, val, prevLvl, prevVal);
+  if (lvl !== prevLvl)
+    console.log('wallet: %s (%d) was changed to %s (%d)', lvl, val, prevLvl, prevVal);
 });
 
 window.addEventListener('message', event => {
