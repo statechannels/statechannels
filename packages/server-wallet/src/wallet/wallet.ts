@@ -67,6 +67,19 @@ export class Wallet {
     );
   }
 
+  public async jumpStartObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
+    const objectives = await this._engine.getObjectives(objectiveIds);
+    return objectives.map(o => ({
+      objectiveId: o.objectiveId,
+      currentStatus: o.status,
+      channelId: o.data.targetChannelId,
+      done: this.ensureObjective(o, []).catch(error => ({
+        type: 'InternalError' as const,
+        error,
+      })),
+    }));
+  }
+
   /**
    * Ensures that the provided objectives get completed.
    * Will resend messages as required to ensure that the objectives get completed.
