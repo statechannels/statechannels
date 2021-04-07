@@ -2,7 +2,6 @@ import {DomainBudget, unreachable, Uint256} from '@statechannels/wallet-core';
 import {Interpreter} from 'xstate';
 
 import {ETH_ASSET_HOLDER_ADDRESS} from '../config';
-import {WorkflowState as CCCWorkflowState} from '../workflows/confirm';
 import {
   WorkflowState as AppWorkflowState,
   StateValue as AppStateValue
@@ -18,12 +17,6 @@ export function getApplicationStateValue(
   }
 }
 
-export function getConfirmCreateChannelState(
-  applicationWorkflowState: AppWorkflowState
-): CCCWorkflowState {
-  return applicationWorkflowState.children[Object.keys(applicationWorkflowState.children)[0]]
-    .state as CCCWorkflowState;
-}
 export function getConfirmCreateChannelService(
   applicationWorkflowState: AppWorkflowState
 ): Interpreter<any> {
