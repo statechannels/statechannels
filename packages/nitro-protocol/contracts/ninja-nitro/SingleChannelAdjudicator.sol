@@ -306,6 +306,71 @@ contract SingleChannelAdjudicator is
         return newAllocation;
     }
 
+    function _computeNewOutcomeWithGuarantee(
+        uint256[] memory initialHoldings,
+        Outcome.OutcomeItem[] memory outcome,
+        uint256[][] memory indices,
+        Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
+    )
+        public
+        pure
+        returns (
+            Outcome.OutcomeItem[] memory newOutcome,
+            bool safeToDelete,
+            Outcome.OutcomeItem[] memory payOuts
+        )
+    {
+        require(initialHoldings.length == indices.length && outcome.length == indices.length);
+        newOutcome = new Outcome.OutcomeItem[](outcome.length);
+        payOuts = new Outcome.OutcomeItem[](outcome.length);
+        // loop over tokens
+        for (uint256 i = 0; i < outcome.length; i++) {
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                outcome[i].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
+
+            if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
+                Outcome.AllocationItem[] memory allocation = abi.decode(
+                    assetOutcome.allocationOrGuaranteeBytes,
+                    (Outcome.AllocationItem[])
+                );
+                (
+                    Outcome.AllocationItem[] memory newAllocation,
+                    ,
+                    Outcome.AllocationItem[] memory payouts
+                ) = _computeNewAllocationWithGuarantee(
+                    initialHoldings[i],
+                    allocation,
+                    indices[i],
+                    guarantee
+                );
+
+                newOutcome[i] = Outcome.OutcomeItem(
+                    outcome[i].assetHolderAddress,
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            abi.encode(newAllocation)
+                        )
+                    )
+                );
+
+                payOuts[i] = Outcome.OutcomeItem(
+                    outcome[i].assetHolderAddress,
+                    abi.encode(
+                        Outcome.AssetOutcome(
+                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            abi.encode(payouts)
+                        )
+                    )
+                );
+            } else {
+                revert('AssetOutcome not an allocation');
+            }
+        }
+    }
+
     function _computeNewAllocation(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
@@ -364,15 +429,15 @@ contract SingleChannelAdjudicator is
         returns (
             Outcome.AllocationItem[] memory newAllocation,
             bool safeToDelete,
-            uint256[] memory payouts,
-            uint256 totalPayouts
+            Outcome.AllocationItem[] memory payOuts
         )
     {
         // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
-        totalPayouts = 0;
+        // Note: by initializing payOuts to be an array of fixed length, its entries are initialized to be `0`
         newAllocation = new Outcome.AllocationItem[](allocation.length);
+        payOuts = new Outcome.AllocationItem[](
+            indices.length > 0 ? indices.length : allocation.length
+        );
         safeToDelete = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
@@ -399,8 +464,8 @@ contract SingleChannelAdjudicator is
                         // reduce the new allocationItem.amount
                         newAllocation[i].amount -= affordsForDestination;
                         // increase the relevant payout
-                        payouts[k] += affordsForDestination;
-                        totalPayouts += affordsForDestination;
+                        payOuts[k].destination = allocation[i].destination;
+                        payOuts[k].amount += affordsForDestination;
                         // move on to the next supplied index
                         ++k;
                     }
