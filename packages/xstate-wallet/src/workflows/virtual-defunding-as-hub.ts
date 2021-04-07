@@ -119,7 +119,8 @@ const defundGuarantors: StateNodeConfig<any, any, any> = {
     defundLeft: getDataAndInvoke({src: defundLeftGuarantor.name}, {src: supportState.name}),
     defundRight: getDataAndInvoke({src: defundRightGuarantor.name}, {src: supportState.name})
   },
-  exit: 'deleteChannels',
+  // TODO: implement deleteChannels
+  // exit: 'deleteChannels',
   onDone: 'success'
 };
 
