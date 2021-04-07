@@ -164,7 +164,6 @@ const generateConfig = (
       invoke: {src: 'invokeCreateChannelConfirmation', onDone: 'creatingChannel'}
     },
     creatingChannel: {
-      on: {'': {target: 'fundingChannel', cond: guards.amJoiner}},
       invoke: {
         data: (_, event) => event.data,
         src: 'createChannel',
@@ -172,7 +171,8 @@ const generateConfig = (
           target: 'fundingChannel',
           actions: [actions.assignChannelId, actions.sendCreateChannelResponse]
         }
-      }
+      },
+      always: {target: 'fundingChannel', cond: guards.amJoiner}
     },
     fundingChannel: {
       invoke: {
