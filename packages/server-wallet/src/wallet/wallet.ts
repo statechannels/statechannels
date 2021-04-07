@@ -43,16 +43,26 @@ export class Wallet {
   ): Promise<ObjectiveResult[]> {
     return Promise.all(
       channelParameters.map(async p => {
-        const createResult = await this._engine.createChannel(p);
+        try {
+          const createResult = await this._engine.createChannel(p);
 
-        const {newObjective, channelResult} = createResult;
+          const {newObjective, channelResult} = createResult;
 
-        return {
-          channelId: channelResult.channelId,
-          currentStatus: newObjective.status,
-          objectiveId: newObjective.objectiveId,
-          done: this.ensureObjective(newObjective, getMessages(createResult)),
-        };
+          return {
+            channelId: channelResult.channelId,
+            currentStatus: newObjective.status,
+            objectiveId: newObjective.objectiveId,
+            done: this.ensureObjective(newObjective, getMessages(createResult)).catch(error => ({
+              type: 'InternalError' as const,
+              error,
+            })),
+          };
+        } catch (error) {
+          return {
+            channelParameters: p,
+            done: Promise.resolve({type: 'InternalError' as const, error}),
+          };
+        }
       })
     );
   }
