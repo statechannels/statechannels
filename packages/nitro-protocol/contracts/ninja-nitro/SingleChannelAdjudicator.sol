@@ -421,8 +421,7 @@ contract SingleChannelAdjudicator is
         bytes32 guarantorChannelId,
         ChannelDataLite calldata cDL,
         bytes calldata guaranteeBytes,
-        address assetHolderAddress,
-        uint256[] memory payouts
+        bytes calldata payoutsBytes // this is an encoded Outcome
     ) external {
         Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
@@ -439,12 +438,7 @@ contract SingleChannelAdjudicator is
             ),
             guarantorChannelId
         );
-        for (uint256 j = 0; j < payouts.length; j++) {
-            if (payouts[j] > 0) {
-                bytes32 destination = guarantee.destinations[j];
-                _transferAsset(assetHolderAddress, destination, payouts[j]);
-            }
-        }
+        _transferAllAssets(payoutsBytes);
     }
 
     /**
@@ -464,9 +458,11 @@ contract SingleChannelAdjudicator is
         address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
-        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
-            .getChannelAddress(guarantee.targetChannelId);
-        require(address(this) == targetChannelAddress);
+        {
+            address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+                .getChannelAddress(guarantee.targetChannelId);
+            require(address(this) == targetChannelAddress);
+        }
         _requireMatchingStorage(
             ChannelData(
                 targetCDL.turnNumRecord,
@@ -479,7 +475,8 @@ contract SingleChannelAdjudicator is
         );
 
         // effects and interactions
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[])); // this will be mutated and re-stored
+        // Outcome.OutcomeItem[] memory payouts = abi.decode(outcomeBytes, (Outcome.OutcomeItem[])); // this will be mutated and passed to the guarantor
 
         // loop over tokens
         for (uint256 i = 0; i < outcome.length; i++) {
@@ -496,7 +493,7 @@ contract SingleChannelAdjudicator is
                 (
                     Outcome.AllocationItem[] memory newAllocation,
                     ,
-                    uint256[] memory payouts,
+                    ,
 
                 ) = _computeNewAllocationWithGuarantee(
                     _holdings(guarantor, outcome[i].assetHolderAddress),
@@ -508,15 +505,6 @@ contract SingleChannelAdjudicator is
                 outcome[i] = Outcome.OutcomeItem(
                     outcome[i].assetHolderAddress,
                     abi.encode(assetOutcome)
-                );
-                // TODO this violates CHECKS,EFFECTS,INTERACTIONS
-                // is it safe against reentrancy?
-                SingleChannelAdjudicator(guarantor).payOutTarget(
-                    guarantorChannelId,
-                    guaranteeCDL,
-                    guaranteeBytes,
-                    outcome[i].assetHolderAddress,
-                    payouts
                 );
             } else {
                 revert('AssetOutcome not an allocation');
@@ -530,6 +518,15 @@ contract SingleChannelAdjudicator is
                     targetCDL.challengerAddress,
                     keccak256(abi.encode(outcome))
                 )
+            );
+
+            // TODO this violates CHECKS,EFFECTS,INTERACTIONS
+            // is it safe against reentrancy?
+            SingleChannelAdjudicator(guarantor).payOutTarget(
+                guarantorChannelId,
+                guaranteeCDL,
+                guaranteeBytes,
+                abi.encode(outcome) // TODO this should be payouts (same data type, though) returned from computeNewAllocation
             );
         }
     }
