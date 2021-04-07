@@ -86,7 +86,7 @@
     "webpack-manifest-plugin": "2.2.0",
     "webpack-merge": "4.2.2",
     "workbox-webpack-plugin": "5.0.0",
-    "xstate": "4.13.0"
+    "xstate": "4.17.1"
   },
   "devDependencies": {
     "@babel/core": "7.11.4",

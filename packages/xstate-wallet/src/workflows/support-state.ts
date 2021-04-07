@@ -1,11 +1,19 @@
-import {AnyEventObject, AssignAction, MachineConfig, assign, spawn, Machine, Actor} from 'xstate';
+import {
+  AnyEventObject,
+  AssignAction,
+  MachineConfig,
+  assign,
+  spawn,
+  Machine,
+  ActorRef
+} from 'xstate';
 import {filter, map} from 'rxjs/operators';
 import {statesEqual, calculateChannelId, State} from '@statechannels/wallet-core';
 
 import {Store} from '../store';
 const WORKFLOW = 'support-state';
 
-export type Init = {state: State; observer?: Actor<any, any>};
+export type Init = {state: State; observer?: ActorRef<any, any>};
 type HasChannelId = Init & {channelId: string};
 
 /*

@@ -396,12 +396,13 @@ export function logTransition(state: State<any, any, any, any>, event, id?: stri
     log({id, from, to, context, event}, 'WORKFLOW TRANSITION id %s event %o', id, event.type);
   }
 
-  Object.keys(state.children).forEach(k => {
-    const child = state.children[k];
+  // TODO: this is commented out with the upgrade to xstate@4.17.1 since child.state property does not exist
+  // Object.keys(state.children).forEach(k => {
+  //   const child = state.children[k];
 
-    if (child.state && 'onTransition' in child) {
-      const subId = (child as any).state.configuration[0].id;
-      (child as any).onTransition((state, event) => logTransition(state, event, `${id}/${subId}`));
-    }
-  });
+  //   if (child.state && 'onTransition' in child) {
+  //     const subId = (child as any).state.configuration[0].id;
+  //     (child as any).onTransition((state, event) => logTransition(state, event, `${id}/${subId}`));
+  //   }
+  // });
 }
