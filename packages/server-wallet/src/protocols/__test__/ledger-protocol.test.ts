@@ -4,18 +4,13 @@ import {addHash, unreachable} from '@statechannels/wallet-core';
 import {SignedBy, StateWithBals, TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {LedgerRequestStatus} from '../../models/ledger-request';
-import {LedgerManager} from '../ledger-manager';
+import {LedgerProtocol} from '../ledger-protocol';
 import {Destination} from '../../type-aliases';
 import {State} from '../../models/channel/state';
 import {addState, clearOldStates, dropNonVariables} from '../../state-utils';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 jest.setTimeout(10_000);
-
-let manager: LedgerManager;
-beforeAll(async () => {
-  manager = await LedgerManager.create({} as any);
-});
 
 describe('as leader', () => {
   describe('in the accept state', () => {
@@ -532,24 +527,16 @@ function testLedgerCrank(args: LedgerCrankTestCaseArgs): () => void {
       }
     });
 
-    const channelId = ledgerChannel.channelId;
     const vars = initialStates
       .map(s => ledgerChannel.signedStateWithHash(s.turn, s.bals, s.signedBy))
       .map(dropNonVariables);
 
-    const ledger = channel({
-      ...ledgerChannel.channelConstants,
-      channelId,
-      myIndex,
-      signingAddress: ledgerChannel.signingWallets[myIndex].address,
-      // TODO: There is a bug here, where the behaviour of the ledger funding protocol differs
-      // depending on how the states are stored
-      vars: _.sortBy(vars, s => -s.turnNum),
-    });
+    const {address: signingAddress} = ledgerChannel.signingWallets[myIndex];
+    const ledger = channel({...ledgerChannel.channelConstants, signingAddress, vars});
 
     // crank (and update ledger vars)
     // -----
-    manager.synchronousCrankLogic(ledger, requests).map(s => {
+    new LedgerProtocol().crank(ledger, requests).map(s => {
       const actualState = addHash(s.signedState);
       const signatures = [ledgerChannel.signingWallets[myIndex].signState(actualState)];
       ledger.vars = addState(ledger.vars, {...actualState, signatures});
