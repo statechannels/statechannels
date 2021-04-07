@@ -1,0 +1,15 @@
+diff --git a/node_modules/xstate/lib/interpreter.js b/node_modules/xstate/lib/interpreter.js
+index 030bc44..c8c7eba 100644
+--- a/node_modules/xstate/lib/interpreter.js
++++ b/node_modules/xstate/lib/interpreter.js
+@@ -1074,8 +1074,8 @@ function spawn(entity, nameOrOptions) {
+     var resolvedOptions = resolveSpawnOptions(nameOrOptions);
+     return serviceScope.consume(function (service) {
+         if (!environment_1.IS_PRODUCTION) {
+-            var isLazyEntity = utils_1.isMachine(entity) || utils_1.isFunction(entity);
+-            utils_1.warn(!!service || isLazyEntity, "Attempted to spawn an Actor (ID: \"" + (utils_1.isMachine(entity) ? entity.id : 'undefined') + "\") outside of a service. This will have no effect.");
++            // var isLazyEntity = utils_1.isMachine(entity) || utils_1.isFunction(entity);
++            // utils_1.warn(!!service || isLazyEntity, "Attempted to spawn an Actor (ID: \"" + (utils_1.isMachine(entity) ? entity.id : 'undefined') + "\") outside of a service. This will have no effect.");
+         }
+         if (service) {
+             return service.spawn(entity, resolvedOptions.name, resolvedOptions);
