@@ -45,7 +45,7 @@ it('Create a fake-funded channel between two engines ', async () => {
   // PreFund0
   const aCreateChannelOutput = await peerEngines.a.createChannel(channelParams);
   await messageService.send(getMessages(aCreateChannelOutput));
-  channelId = aCreateChannelOutput.channelResults[0].channelId;
+  channelId = aCreateChannelOutput.channelResult.channelId;
 
   expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'opening',

@@ -1,28 +1,15 @@
 import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
+import _ from 'lodash';
 
-import {MessageServiceInterface} from './message-service/types';
-import {getMessages} from './message-service/utils';
-import {WalletObjective} from './models/objective';
-import {Engine} from './engine';
+import {MessageServiceInterface} from '../message-service/types';
+import {getMessages} from '../message-service/utils';
+import {WalletObjective} from '../models/objective';
+import {Engine} from '../engine';
+
+import {RetryOptions, ObjectiveResult, ObjectiveError, ObjectiveSuccess} from './types';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
-
-export type RetryOptions = {
-  /**
-   * The number of attempts to make.
-   */
-  numberOfAttempts: number;
-  /**
-   * The initial delay to use in milliseconds
-   */
-  initialDelay: number;
-
-  /**
-   * The multiple that the delay is multiplied by each time
-   */
-  multiple: number;
-};
 
 const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
 export class Wallet {
@@ -47,16 +34,37 @@ export class Wallet {
   ) {}
 
   /**
-   * TODO: This is a basic implementation of createChannels.
-   * This will be cleaned up in https://github.com/statechannels/statechannels/issues/3365
-   * @param args
-   * @param numberOfChannels
-   * @returns
+   Creates channels using the given parameters.
+   * @param channelParameters The parameters to use for channel creation. A channel will be created for each entry in the array.
+   * @returns A promise that resolves to a collection of ObjectiveResult.
    */
-  public async createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<void> {
-    const createResult = await this._engine.createChannels(args, numberOfChannels);
+  public async createChannels(
+    channelParameters: CreateChannelParams[]
+  ): Promise<ObjectiveResult[]> {
+    return Promise.all(
+      channelParameters.map(async p => {
+        try {
+          const createResult = await this._engine.createChannel(p);
 
-    await this.ensureObjectives(createResult.newObjectives, getMessages(createResult.outbox));
+          const {newObjective, channelResult} = createResult;
+
+          return {
+            channelId: channelResult.channelId,
+            currentStatus: newObjective.status,
+            objectiveId: newObjective.objectiveId,
+            done: this.ensureObjective(newObjective, getMessages(createResult)).catch(error => ({
+              type: 'InternalError' as const,
+              error,
+            })),
+          };
+        } catch (error) {
+          return {
+            channelParameters: p,
+            done: Promise.resolve({type: 'InternalError' as const, error}),
+          };
+        }
+      })
+    );
   }
 
   /**
@@ -66,18 +74,15 @@ export class Wallet {
    * @param objectiveMessages The collection of outgoing messages related to the objective.
    * @returns A promise that resolves when all the objectives are completed
    */
-  private async ensureObjectives(
-    objectives: WalletObjective[],
+  private async ensureObjective(
+    objective: WalletObjective,
     objectiveMessages: Message[]
-  ): Promise<void> {
-    const remaining = new Map(objectives.map(o => [o.objectiveId, o]));
+  ): Promise<ObjectiveSuccess | ObjectiveError> {
+    let isComplete = false;
 
     const onObjectiveSucceeded = (o: WalletObjective) => {
       if (o.objectiveId === o.objectiveId) {
-        remaining.delete(o.objectiveId);
-      }
-
-      if (remaining.size === 0) {
+        isComplete = true;
         this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
       }
     };
@@ -90,23 +95,15 @@ export class Wallet {
 
     const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
     for (let i = 0; i < numberOfAttempts; i++) {
-      if (remaining.size === 0) return;
-
+      if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       const delayAmount = initialDelay * Math.pow(multiple, i);
       await delay(delayAmount);
 
-      const {outbox} = await this._engine.syncObjectives(objectives.map(o => o.objectiveId));
+      const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
       await this._messageService.send(getMessages(outbox));
     }
 
-    this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-    this._engine.logger.error(
-      {
-        remaining: Array.from(remaining.keys()),
-      },
-      'Unable to ensure objectives'
-    );
-    throw new Error('Unable to ensure objectives');
+    return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
   }
 
   async destroy(): Promise<void> {

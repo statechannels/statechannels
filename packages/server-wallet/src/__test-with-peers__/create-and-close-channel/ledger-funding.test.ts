@@ -168,7 +168,7 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
     const params = testCreateChannelParams(10, 10, ledgerChannelId);
 
     const {
-      channelResults: [{channelId}],
+      channelResult: {channelId},
       outbox,
     } = await peerEngines.a.createChannel(params);
 
@@ -244,7 +244,7 @@ describe('Funding a single channel with 50% of ledger funds', () => {
     const params = testCreateChannelParams(5, 5, ledgerChannelId);
 
     const {
-      channelResults: [{channelId}],
+      channelResult: {channelId},
       outbox,
     } = await peerEngines.a.createChannel(params);
 
@@ -595,7 +595,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
     const params = testCreateChannelParams(APP_WANTS, APP_WANTS, ledgerChannelId);
 
     const resultA = await peerEngines.a.createChannel(params);
-    const channelId = resultA.channelResults[0].channelId;
+    const {channelId} = resultA.channelResult;
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
     const resultB = await peerEngines.b.joinChannel({channelId});
 
@@ -636,8 +636,8 @@ describe('Funding multiple channels concurrently (one sided)', () => {
     const create2 = await peerEngines.a.createChannel(params);
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, create2.outbox));
 
-    const channelId1 = create1.channelResults[0].channelId;
-    const channelId2 = create2.channelResults[0].channelId;
+    const channelId1 = create1.channelResult.channelId;
+    const channelId2 = create2.channelResult.channelId;
 
     const {outbox: join1} = await peerEngines.b.joinChannel({channelId: channelId1});
     const {outbox: join2} = await peerEngines.b.joinChannel({channelId: channelId2});
@@ -675,8 +675,8 @@ async function proposeMultipleChannelsToEachother(
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, createA.outbox));
     const createB = await peerEngines.b.createChannel(params);
     await peerEngines.a.pushMessage(getPayloadFor(participantA.participantId, createB.outbox));
-    aToJoin.push(createB.channelResults[0].channelId);
-    bToJoin.push(createA.channelResults[0].channelId);
+    aToJoin.push(createB.channelResult.channelId);
+    bToJoin.push(createA.channelResult.channelId);
   }
   return {aToJoin, bToJoin};
 }
@@ -725,12 +725,12 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const params = testCreateChannelParams(1, 1, ledgerChannelId);
 
     const {
-      channelResults: [{channelId: channelId1}],
+      channelResult: {channelId: channelId1},
       outbox: outboxA1,
     } = await peerEngines.a.createChannel(params);
 
     const {
-      channelResults: [{channelId: channelId2}],
+      channelResult: {channelId: channelId2},
       outbox: outboxA2,
     } = await peerEngines.a.createChannel(params);
 
@@ -738,12 +738,12 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, outboxA2));
 
     const {
-      channelResults: [{channelId: channelId3}],
+      channelResult: {channelId: channelId3},
       outbox: outboxB3,
     } = await peerEngines.b.createChannel(params);
 
     const {
-      channelResults: [{channelId: channelId4}],
+      channelResult: {channelId: channelId4},
       outbox: outboxB4,
     } = await peerEngines.b.createChannel(params);
 

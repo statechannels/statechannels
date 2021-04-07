@@ -157,12 +157,12 @@ it('Create a directly funded channel between two engines ', async () => {
   // PreFund0
   const preFundA = await a.createChannel(channelParams);
 
-  const channelId = preFundA.channelResults[0].channelId;
+  const channelId = preFundA.channelResult.channelId;
 
   const aBalanceInit = await getBalance(aAddress);
   const bBalanceInit = await getBalance(bAddress);
 
-  expect(getChannelResultFor(channelId, preFundA.channelResults)).toMatchObject({
+  expect(preFundA.channelResult).toMatchObject({
     status: 'opening',
     turnNum: 0,
   });

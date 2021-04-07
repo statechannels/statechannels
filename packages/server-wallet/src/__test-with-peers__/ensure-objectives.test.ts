@@ -8,10 +8,10 @@ import {
   peersTeardown,
   peerEngines,
 } from '../../jest/with-peers-setup-teardown';
-import {Wallet} from '../wallet';
 import {LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
+import {Wallet} from '../wallet/wallet';
 
 jest.setTimeout(60_000);
 
@@ -54,7 +54,9 @@ describe('EnsureObjectives', () => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
       });
 
-      await expect(wallet.createChannels(getCreateChannelsArgs(), 10)).resolves.not.toThrow();
+      await expect(
+        wallet.createChannels(Array(10).fill(getCreateChannelsArgs()))
+      ).resolves.not.toThrow();
     }
   );
 
@@ -71,8 +73,7 @@ describe('EnsureObjectives', () => {
       await peerEngines.b.joinChannels([channelId]);
     });
 
-    await expect(wallet.createChannels(getCreateChannelsArgs(), 1)).rejects.toThrow(
-      'Unable to ensure objectives'
-    );
+    const {done} = (await wallet.createChannels([getCreateChannelsArgs()]))[0];
+    await expect(done).resolves.toMatchObject({type: 'EnsureObjectiveFailed'});
   });
 });

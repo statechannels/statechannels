@@ -47,7 +47,7 @@ it('Create a directly-funded channel between two engines, of which one crashes m
   // PreFund0
   const resultA0 = await peerEngines.a.createChannel(createChannelParams);
 
-  channelId = resultA0.channelResults[0].channelId;
+  channelId = resultA0.channelResult.channelId;
 
   await expectLatestStateToMatch(channelId, peerEngines.a, {
     status: 'opening',
