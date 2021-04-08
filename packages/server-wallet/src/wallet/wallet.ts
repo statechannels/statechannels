@@ -64,6 +64,11 @@ export class Wallet {
     );
   }
 
+  /**
+   * Finds any approved objectives and attempts to make progress on them.
+   * This is useful for restarting progress after a restart or crash.
+   * @returns A collection of ObjectiveResults. There will be an ObjectiveResult for each approved objective found.
+   */
   public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
     const objectives = await this._engine.getApprovedObjectives();
     const objectiveIds = objectives.map(o => o.objectiveId);
