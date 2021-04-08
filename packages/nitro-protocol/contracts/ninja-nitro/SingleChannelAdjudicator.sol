@@ -47,18 +47,16 @@ contract SingleChannelAdjudicator is
             whoSignedWhat,
             sigs
         );
-        _transferAllAssets(outcomeBytes);
+        _transferAllAssets(abi.decode(outcomeBytes, (Outcome.OutcomeItem[])));
         selfdestruct(address(0));
     }
 
     /**
      * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
      * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
-     * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
+     * @param outcome An array of Outcome.OutcomeItem structs.
      */
-    function _transferAllAssets(bytes memory outcomeBytes) internal {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
-
+    function _transferAllAssets(Outcome.OutcomeItem[] memory outcome) internal {
         // loop over tokens
         for (uint256 i = 0; i < outcome.length; i++) {
             Outcome.AssetOutcome memory assetOutcome = abi.decode(
@@ -496,7 +494,7 @@ contract SingleChannelAdjudicator is
     function payOutTarget(
         bytes32 guarantorChannelId,
         ChannelDataLite calldata cDL,
-        bytes calldata payoutsBytes // this is an encoded Outcome
+        Outcome.OutcomeItem[] memory payouts
     ) external {
         Outcome.Guarantee memory guarantee = abi.decode(cDL.outcomeBytes, (Outcome.Guarantee));
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
@@ -513,7 +511,7 @@ contract SingleChannelAdjudicator is
             ),
             guarantorChannelId
         );
-        _transferAllAssets(payoutsBytes);
+        _transferAllAssets(payouts);
     }
 
     /**
@@ -580,11 +578,7 @@ contract SingleChannelAdjudicator is
             )
         );
         // INTERACTIONS
-        SingleChannelAdjudicator(guarantor).payOutTarget(
-            guarantorChannelId,
-            guaranteeCDL,
-            abi.encode(payOuts)
-        );
+        SingleChannelAdjudicator(guarantor).payOutTarget(guarantorChannelId, guaranteeCDL, payOuts);
     }
 
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
