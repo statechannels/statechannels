@@ -496,7 +496,18 @@ contract SingleChannelAdjudicator is
         ChannelDataLite calldata cDL,
         Outcome.OutcomeItem[] memory payouts
     ) external {
-        Outcome.Guarantee memory guarantee = abi.decode(cDL.outcomeBytes, (Outcome.Guarantee));
+        Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
+            cDL.outcomeBytes,
+            (Outcome.OutcomeItem[])
+        );
+        Outcome.AssetOutcome memory gAssetOutcome = abi.decode(
+            guarantorOutcome[0].assetOutcomeBytes, // The target channel contract has already checked that all entires have the same target
+            (Outcome.AssetOutcome)
+        );
+        Outcome.Guarantee memory guarantee = abi.decode(
+            gAssetOutcome.allocationOrGuaranteeBytes,
+            (Outcome.Guarantee)
+        );
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
             .getChannelAddress(guarantee.targetChannelId);
         require(msg.sender == targetChannelAddress, 'only the target channel is auth');
