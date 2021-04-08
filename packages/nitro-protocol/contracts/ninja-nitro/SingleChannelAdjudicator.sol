@@ -511,7 +511,9 @@ contract SingleChannelAdjudicator is
         uint256[][] memory indices
     ) external {
         // checks
-        // _requireIncreasingIndices(indices); // TODO check for each asset
+        for (uint256 i = 0; i + 1 < indices.length; i++) {
+            _requireIncreasingIndices(indices[i]);
+        }
         Outcome.Guarantee memory guarantee = abi.decode(
             guaranteeCDL.outcomeBytes,
             (Outcome.Guarantee)
