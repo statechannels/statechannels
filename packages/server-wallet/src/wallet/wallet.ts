@@ -66,15 +66,17 @@ export class Wallet {
 
   public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
     const objectives = await this._engine.getApprovedObjectives();
-
+    const objectiveIds = objectives.map(o => o.objectiveId);
+    // Instead of getting messages per objective we just get them all at once
+    // This will prevent us from querying the database for each objective
+    const syncMessages = getMessages(await this._engine.syncObjectives(objectiveIds));
     return Promise.all(
       objectives.map(async o => {
-        const messages = getMessages(await this._engine.syncObjectives([o.objectiveId]));
         return {
           objectiveId: o.objectiveId,
           currentStatus: o.status,
           channelId: o.data.targetChannelId,
-          done: this.ensureObjective(o, messages),
+          done: this.ensureObjective(o, syncMessages),
         };
       })
     );
