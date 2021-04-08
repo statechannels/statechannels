@@ -1,4 +1,3 @@
-import {CreateChannelParams} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {ObjectiveStatus} from '../models/objective';
@@ -42,28 +41,21 @@ export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
  * This is what is returned for any objective related API call
  *
  */
-export type ObjectiveResult =
-  | {
-      /**
-       * A promise that resolves when the objective is fully completed.
-       * This promise will never reject, if an error occurs the promise will return an ObjectiveError
-       */
-      done: Promise<ObjectiveDoneResult>;
-      /**
-       * The current status of the objective.
-       */
-      currentStatus: ObjectiveStatus;
-      /**
-       * The id of the objective.
-       */
-      objectiveId: string;
-
-      // The channelId for the objective
-      channelId: string;
-    }
-
+export type ObjectiveResult = {
   /**
-   * It's possible that we encounter an error before we have an objectiveId or even a channelId
-   * In that case we return a failed promise and the parameters that caused it
+   * A promise that resolves when the objective is fully completed.
+   * This promise will never reject, if an error occurs the promise will return an ObjectiveError
    */
-  | {done: Promise<ObjectiveError>; channelParameters: CreateChannelParams};
+  done: Promise<ObjectiveDoneResult>;
+  /**
+   * The current status of the objective.
+   */
+  currentStatus: ObjectiveStatus;
+  /**
+   * The id of the objective.
+   */
+  objectiveId: string;
+
+  // The channelId for the objective
+  channelId: string;
+};
