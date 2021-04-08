@@ -343,9 +343,11 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     destroy(): Promise<void>;
     // (undocumented)
     readonly engineConfig: EngineConfig;
+    getApprovedObjectives(): Promise<WalletObjective[]>;
     getChannels(): Promise<MultipleChannelOutput>;
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
     getObjective(objectiveId: string): Promise<WalletObjective>;
+    getObjectives(objectiveIds: string[]): Promise<WalletObjective[]>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
