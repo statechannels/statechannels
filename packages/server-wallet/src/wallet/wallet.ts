@@ -55,8 +55,12 @@ export class Wallet {
             done: this.ensureObjective(newObjective, getMessages(createResult)),
           };
         } catch (error) {
+          // TODO: This is slightly hacky but it's less painful then having to narrow the type down every time
+          // you get a result back from the createChannels method
           return {
-            channelParameters: p,
+            channelId: 'ERROR',
+            currentStatus: 'failed' as const,
+            objectiveId: 'ERROR',
             done: Promise.resolve({type: 'InternalError' as const, error}),
           };
         }
