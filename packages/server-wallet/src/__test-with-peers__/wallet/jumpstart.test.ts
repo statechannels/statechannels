@@ -5,7 +5,7 @@ import {
   peerEngines,
   peersTeardown,
 } from '../../../jest/with-peers-setup-teardown';
-import {WalletObjective} from '../../models/objective';
+import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {getWithPeersCreateChannelsArgs} from '../utils';
 
 beforeAll(getPeersSetup());
@@ -13,6 +13,27 @@ afterAll(peersTeardown);
 
 jest.setTimeout(60_000);
 describe('jumpstartObjectives', () => {
+  it('returns an empty array when there are no objectives', async () => {
+    const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
+
+    const jumpstartResponse = await wallet.jumpStartObjectives();
+    const jumpstartResults = await Promise.all(jumpstartResponse.map(r => r.done));
+
+    expect(jumpstartResults).toHaveLength(0);
+  });
+
+  it('ignores completed objectives', async () => {
+    const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
+
+    const createResponse = await wallet.createChannels([getWithPeersCreateChannelsArgs()]);
+
+    await ObjectiveModel.succeed(createResponse[0].objectiveId, peerEngines.a.knex);
+    const jumpstartResponse = await wallet.jumpStartObjectives();
+    const jumpstartResults = await Promise.all(jumpstartResponse.map(r => r.done));
+
+    expect(jumpstartResults).toHaveLength(0);
+  });
+
   it('can jumpstart objectives successfully', async () => {
     const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
