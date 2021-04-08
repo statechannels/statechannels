@@ -1,16 +1,12 @@
-import {CreateChannelParams} from '@statechannels/client-api-schema';
-
-import {Wallet} from '../wallet';
+import {Wallet} from '../../wallet';
 import {
   getPeersSetup,
   messageService,
-  participantA,
-  participantB,
   peerEngines,
   peersTeardown,
-} from '../../jest/with-peers-setup-teardown';
-import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
-import {WalletObjective} from '../models/objective';
+} from '../../../jest/with-peers-setup-teardown';
+import {WalletObjective} from '../../models/objective';
+import {getWithPeersCreateChannelsArgs} from '../utils';
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
@@ -28,7 +24,7 @@ describe('jumpstartObjectives', () => {
     const numberOfChannels = 5;
     messageService.setLatencyOptions({dropRate: 1});
     const createResponse = await wallet.createChannels(
-      Array(numberOfChannels).fill(getCreateChannelsArgs())
+      Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs())
     );
     const createResults = await Promise.all(createResponse.map(r => r.done));
 
@@ -47,10 +43,3 @@ describe('jumpstartObjectives', () => {
     expect(jumpstartResults.every(d => d.type === 'Success')).toBe(true);
   });
 });
-
-function getCreateChannelsArgs(): CreateChannelParams {
-  return createChannelArgs({
-    participants: [participantA, participantB],
-    fundingStrategy: 'Fake',
-  });
-}
