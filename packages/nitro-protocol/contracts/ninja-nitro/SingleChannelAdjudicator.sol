@@ -481,14 +481,13 @@ contract SingleChannelAdjudicator is
     function payOutTarget(
         bytes32 guarantorChannelId,
         ChannelDataLite calldata cDL,
-        bytes calldata guaranteeBytes,
         bytes calldata payoutsBytes // this is an encoded Outcome
     ) external {
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+        Outcome.Guarantee memory guarantee = abi.decode(cDL.outcomeBytes, (Outcome.Guarantee));
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
             .getChannelAddress(guarantee.targetChannelId);
         require(msg.sender == targetChannelAddress, 'only the target channel is auth');
-        bytes32 outcomeHash = keccak256(guaranteeBytes);
+        bytes32 outcomeHash = keccak256(cDL.outcomeBytes);
         _requireMatchingStorage(
             ChannelData(
                 cDL.turnNumRecord,
@@ -507,15 +506,16 @@ contract SingleChannelAdjudicator is
      */
     function claim(
         bytes32 guarantorChannelId,
-        bytes calldata guaranteeBytes,
         ChannelDataLite calldata guaranteeCDL,
-        bytes calldata outcomeBytes,
         ChannelDataLite calldata targetCDL,
         uint256[][] memory indices
     ) external {
         // checks
         // _requireIncreasingIndices(indices); // TODO check for each asset
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
+        Outcome.Guarantee memory guarantee = abi.decode(
+            guaranteeCDL.outcomeBytes,
+            (Outcome.Guarantee)
+        );
         address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
@@ -530,13 +530,16 @@ contract SingleChannelAdjudicator is
                 targetCDL.finalizesAt,
                 targetCDL.stateHash,
                 targetCDL.challengerAddress,
-                keccak256(outcomeBytes)
+                keccak256(targetCDL.outcomeBytes)
             ),
             guarantee.targetChannelId
         );
 
         // effects and interactions
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[])); // this will be mutated and re-stored
+        Outcome.OutcomeItem[] memory outcome = abi.decode(
+            targetCDL.outcomeBytes,
+            (Outcome.OutcomeItem[])
+        ); // this will be mutated and re-stored
 
         uint256[] memory initialHoldings = new uint256[](indices.length);
         initialHoldings[0] = _holdings(address(0), guarantor); // TODO build this up properly
@@ -560,7 +563,6 @@ contract SingleChannelAdjudicator is
         SingleChannelAdjudicator(guarantor).payOutTarget(
             guarantorChannelId,
             guaranteeCDL,
-            guaranteeBytes,
             abi.encode(payOuts)
         );
     }
