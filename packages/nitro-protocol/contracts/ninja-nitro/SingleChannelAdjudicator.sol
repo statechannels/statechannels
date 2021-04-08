@@ -306,27 +306,42 @@ contract SingleChannelAdjudicator is
         return newAllocation;
     }
 
-    function _computeNewOutcomeWithGuarantee(
+    function _computeNewOutcomeAfterClaim(
         uint256[] memory initialHoldings,
         Outcome.OutcomeItem[] memory outcome,
+        bytes32 targetChannelId,
         uint256[][] memory indices,
-        Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
+        Outcome.OutcomeItem[] memory guarantorOutcome
     )
         public
         pure
         returns (Outcome.OutcomeItem[] memory newOutcome, Outcome.OutcomeItem[] memory payOuts)
     {
         require(initialHoldings.length == indices.length && outcome.length == indices.length);
+        require(outcome.length == guarantorOutcome.length);
         newOutcome = new Outcome.OutcomeItem[](outcome.length);
         payOuts = new Outcome.OutcomeItem[](outcome.length);
         // loop over tokens
         for (uint256 i = 0; i < outcome.length; i++) {
+            require(outcome[i].assetHolderAddress == guarantorOutcome[i].assetHolderAddress);
             Outcome.AssetOutcome memory assetOutcome = abi.decode(
                 outcome[i].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
+            Outcome.AssetOutcome memory gAssetOutcome = abi.decode(
+                guarantorOutcome[i].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
 
             if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
+                require(
+                    gAssetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee)
+                );
+                Outcome.Guarantee memory guarantee = abi.decode(
+                    gAssetOutcome.allocationOrGuaranteeBytes,
+                    (Outcome.Guarantee)
+                );
+                require(guarantee.targetChannelId == targetChannelId);
                 Outcome.AllocationItem[] memory allocation = abi.decode(
                     assetOutcome.allocationOrGuaranteeBytes,
                     (Outcome.AllocationItem[])
@@ -506,6 +521,7 @@ contract SingleChannelAdjudicator is
      */
     function claim(
         bytes32 guarantorChannelId,
+        bytes32 targetChannelId,
         ChannelDataLite calldata guaranteeCDL,
         ChannelDataLite calldata targetCDL,
         uint256[][] memory indices
@@ -514,16 +530,16 @@ contract SingleChannelAdjudicator is
         for (uint256 i = 0; i + 1 < indices.length; i++) {
             _requireIncreasingIndices(indices[i]);
         }
-        Outcome.Guarantee memory guarantee = abi.decode(
+        Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
             guaranteeCDL.outcomeBytes,
-            (Outcome.Guarantee)
+            (Outcome.OutcomeItem[])
         );
         address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
-            .getChannelAddress(guarantee.targetChannelId);
-        require(address(this) == targetChannelAddress);
+            .getChannelAddress(targetChannelId);
+        require(address(this) == targetChannelAddress, 'incorrect target channel address');
         _requireMatchingStorage(
             ChannelData(
                 targetCDL.turnNumRecord,
@@ -532,15 +548,13 @@ contract SingleChannelAdjudicator is
                 targetCDL.challengerAddress,
                 keccak256(targetCDL.outcomeBytes)
             ),
-            guarantee.targetChannelId
+            targetChannelId
         );
-
         // COMPUTATIONS
         Outcome.OutcomeItem[] memory outcome = abi.decode(
             targetCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         ); // this will be mutated and re-stored
-
         uint256[] memory initialHoldings = new uint256[](indices.length);
         for (uint256 i = 0; i + 1 < indices.length; i++) {
             initialHoldings[i] = _holdings(outcome[i].assetHolderAddress, guarantor);
@@ -548,10 +562,15 @@ contract SingleChannelAdjudicator is
         (
             Outcome.OutcomeItem[] memory newOutcome,
             Outcome.OutcomeItem[] memory payOuts
-        ) = _computeNewOutcomeWithGuarantee(initialHoldings, outcome, indices, guarantee);
-
+        ) = _computeNewOutcomeAfterClaim(
+            initialHoldings,
+            outcome,
+            targetChannelId,
+            indices,
+            guarantorOutcome
+        );
         // EFFECTS
-        statusOf[guarantee.targetChannelId] = _generateStatus(
+        statusOf[targetChannelId] = _generateStatus(
             ChannelData(
                 targetCDL.turnNumRecord,
                 targetCDL.finalizesAt,
