@@ -66,12 +66,18 @@ export class Wallet {
 
   public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
     const objectives = await this._engine.getApprovedObjectives();
-    return objectives.map(o => ({
-      objectiveId: o.objectiveId,
-      currentStatus: o.status,
-      channelId: o.data.targetChannelId,
-      done: this.ensureObjective(o, []),
-    }));
+
+    return Promise.all(
+      objectives.map(async o => {
+        const messages = getMessages(await this._engine.syncObjectives([o.objectiveId]));
+        return {
+          objectiveId: o.objectiveId,
+          currentStatus: o.status,
+          channelId: o.data.targetChannelId,
+          done: this.ensureObjective(o, messages),
+        };
+      })
+    );
   }
 
   /**
@@ -111,7 +117,7 @@ export class Wallet {
         const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
         await this._messageService.send(getMessages(outbox));
       }
-
+      if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
     } catch (error) {
       return {
