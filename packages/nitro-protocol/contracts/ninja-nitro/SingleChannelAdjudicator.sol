@@ -510,7 +510,7 @@ contract SingleChannelAdjudicator is
         ChannelDataLite calldata targetCDL,
         uint256[][] memory indices
     ) external {
-        // checks
+        // CHECKS
         for (uint256 i = 0; i + 1 < indices.length; i++) {
             _requireIncreasingIndices(indices[i]);
         }
@@ -521,11 +521,9 @@ contract SingleChannelAdjudicator is
         address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
-        {
-            address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
-                .getChannelAddress(guarantee.targetChannelId);
-            require(address(this) == targetChannelAddress);
-        }
+        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+            .getChannelAddress(guarantee.targetChannelId);
+        require(address(this) == targetChannelAddress);
         _requireMatchingStorage(
             ChannelData(
                 targetCDL.turnNumRecord,
@@ -537,19 +535,22 @@ contract SingleChannelAdjudicator is
             guarantee.targetChannelId
         );
 
-        // effects and interactions
+        // COMPUTATIONS
         Outcome.OutcomeItem[] memory outcome = abi.decode(
             targetCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         ); // this will be mutated and re-stored
 
         uint256[] memory initialHoldings = new uint256[](indices.length);
-        initialHoldings[0] = _holdings(address(0), guarantor); // TODO build this up properly
+        for (uint256 i = 0; i + 1 < indices.length; i++) {
+            initialHoldings[i] = _holdings(outcome[i].assetHolderAddress, guarantor);
+        }
         (
             Outcome.OutcomeItem[] memory newOutcome,
             Outcome.OutcomeItem[] memory payOuts
         ) = _computeNewOutcomeWithGuarantee(initialHoldings, outcome, indices, guarantee);
 
+        // EFFECTS
         statusOf[guarantee.targetChannelId] = _generateStatus(
             ChannelData(
                 targetCDL.turnNumRecord,
@@ -559,9 +560,7 @@ contract SingleChannelAdjudicator is
                 keccak256(abi.encode(newOutcome))
             )
         );
-
-        // TODO this violates CHECKS,EFFECTS,INTERACTIONS
-        // is it safe against reentrancy?
+        // INTERACTIONS
         SingleChannelAdjudicator(guarantor).payOutTarget(
             guarantorChannelId,
             guaranteeCDL,
@@ -578,10 +577,6 @@ contract SingleChannelAdjudicator is
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a > b ? b : a;
     }
-
-    // **************
-    // Requirers
-    // **************
 
     function _transferAsset(
         address assetHolderAddress,
