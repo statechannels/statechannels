@@ -775,6 +775,14 @@ export class SingleThreadedEngine
   }
 
   /**
+   * Gets any objectives with an approved status
+   * @returns A promise that resolves to a collection of WalletObjectives
+   */
+  async getApprovedObjectives(): Promise<WalletObjective[]> {
+    return this.store.getApprovedObjectives();
+  }
+
+  /**
    * Gets the latest state for a channel.
    *
    * @privateRemarks TODO: Consider renaming this to getChannel() to match getChannels()
