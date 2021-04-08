@@ -64,8 +64,8 @@ export class Wallet {
     );
   }
 
-  public async jumpStartObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
-    const objectives = await this._engine.getObjectives(objectiveIds);
+  public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
+    const objectives = await this._engine.getApprovedObjectives();
     return objectives.map(o => ({
       objectiveId: o.objectiveId,
       currentStatus: o.status,

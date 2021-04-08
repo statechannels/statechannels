@@ -744,12 +744,11 @@ export class SingleThreadedEngine
   }
 
   /**
-   * Gets the objectives for the given ids.
-   *
+   * Gets any objectives with an approved status
    * @returns A promise that resolves to a collection of WalletObjectives
    */
-  async getObjectives(objectiveIds: string[]): Promise<WalletObjective[]> {
-    return this.store.getObjectivesByIds(objectiveIds);
+  async getApprovedObjectives(): Promise<WalletObjective[]> {
+    return this.store.getApprovedObjectives();
   }
 
   /**

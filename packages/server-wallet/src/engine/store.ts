@@ -353,6 +353,11 @@ export class Store {
     return await ObjectiveModel.approvedObjectiveIds(channelIds, tx || this.knex);
   }
 
+  public async getApprovedObjectives(): Promise<Array<WalletObjective & {status: 'approved'}>> {
+    const results = await ObjectiveModel.query(this.knex).where({status: 'approved'});
+    return results.map(o => o.toObjective());
+  }
+
   async getLedgersWithNewRequestsIds(tx?: Transaction): Promise<string[]> {
     return LedgerRequest.ledgersWithNewRequestsIds(tx || this.knex);
   }
