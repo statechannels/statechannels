@@ -575,10 +575,7 @@ contract SingleChannelAdjudicator is
             guarantorOutcome
         );
         // EFFECTS
-        require(
-            keccak256(abi.encode(newOutcome)) != keccak256(targetCDL.outcomeBytes),
-            'outcome did not change'
-        ); // TODO this is mostly for debugging
+
         statusOf[targetChannelId] = _generateStatus(
             ChannelData(
                 targetCDL.turnNumRecord,
