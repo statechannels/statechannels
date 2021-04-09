@@ -54,8 +54,8 @@ contract SingleChannelAdjudicator is
     }
 
     /**
-     * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
-     * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
+     * @notice Pays out all allocations for all assets in the supplied outcome
+     * @dev Pays out all allocations for all assets in the supplied outcome
      * @param outcome An array of Outcome.OutcomeItem structs.
      */
     function _transferAllAssets(Outcome.OutcomeItem[] memory outcome) internal {
