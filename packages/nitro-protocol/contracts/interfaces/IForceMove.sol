@@ -45,6 +45,14 @@ interface IForceMove {
         bytes32 outcomeHash;
     }
 
+    struct ChannelDataLite {
+        uint48 turnNumRecord;
+        uint48 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes outcomeBytes;
+    }
+
     enum ChannelMode {Open, Challenge, Finalized}
 
     /**
