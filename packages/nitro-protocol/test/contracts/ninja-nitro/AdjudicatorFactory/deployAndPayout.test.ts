@@ -31,11 +31,11 @@ const provider = getTestProvider();
 let AdjudicatorFactory: Contract;
 let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
-const participants = ['', '', ''];
-const wallets = new Array(3);
+const participants: string[] = [];
+const wallets: Wallet[] = [];
 const challengeDuration = 0x1000;
 
-let appDefinition;
+let appDefinition: string;
 
 const addresses = {
   // Channels
@@ -68,8 +68,9 @@ for (let i = 0; i < 100; i++) {
 
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = Wallet.createRandom();
-  participants[i] = wallets[i].address;
+  const rWallet = Wallet.createRandom();
+  wallets.push(rWallet);
+  participants.push(rWallet.address);
 }
 beforeAll(async () => {
   appDefinition = getPlaceHolderContractAddress();
