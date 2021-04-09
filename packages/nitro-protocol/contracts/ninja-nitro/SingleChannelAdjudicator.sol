@@ -17,6 +17,8 @@ contract SingleChannelAdjudicator is
         adjudicatorFactoryAddress = a;
     }
 
+    receive() external payable {}
+
     /**
      * @notice Verifies a conclusion proof, pays out all assets and selfdestructs
      * @dev Verifies a conclusion proof, pays out all assets and selfdestructs
