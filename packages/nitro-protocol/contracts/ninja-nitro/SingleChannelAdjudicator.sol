@@ -162,7 +162,7 @@ contract SingleChannelAdjudicator is
      * @param destination The destination to be converted.
      * @return The rightmost 160 bits of the input string.
      */
-    function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
+    function _bytes32ToAddress(bytes32 destination) internal pure returns (address) {
         return address(uint160(uint256(destination)));
     }
 
@@ -551,10 +551,10 @@ contract SingleChannelAdjudicator is
             guaranteeCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         );
-        address payable guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
+        address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
-        address payable targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
             .getChannelAddress(targetChannelId);
         require(address(this) == targetChannelAddress, 'incorrect target channel address');
         _requireMatchingStorage(
