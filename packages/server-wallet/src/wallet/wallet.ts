@@ -57,6 +57,7 @@ export class Wallet {
         } catch (error) {
           // TODO: This is slightly hacky but it's less painful then having to narrow the type down every time
           // you get a result back from the createChannels method
+          // This should be looked at in https://github.com/statechannels/statechannels/issues/3461
           return {
             channelId: 'ERROR',
             currentStatus: 'failed' as const,
