@@ -13,7 +13,7 @@ contract SingleChannelAdjudicator is
 {
     address public immutable adjudicatorFactoryAddress;
 
-    constructor(address a) {
+    constructor(address a) payable {
         adjudicatorFactoryAddress = a;
     }
 
