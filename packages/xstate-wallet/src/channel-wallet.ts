@@ -11,12 +11,10 @@ import {
   isOpenChannel,
   OpenChannel,
   SignedState,
-  Uint256,
   SharedObjective,
   Address,
   DirectFunder
 } from '@statechannels/wallet-core';
-import {Dictionary} from '@statechannels/wallet-core/node_modules/@types/lodash';
 import ReactDOM from 'react-dom';
 import React from 'react';
 import _ from 'lodash';

@@ -64,7 +64,12 @@ export class Store {
   /**
    *  START of wallet 2.0
    */
-  // TODO: this should not be public
+
+  /** TODO:
+   *    These dictionaries should be changed:
+   *      - Store this information in permanent storage instead of memory.
+   *      - Create getters and setters.
+   */
   public richObjectives: Dictionary<DirectFunder.OpenChannelObjective> = {};
   public depositsSubmitted: Dictionary<Deposit> = {};
 
