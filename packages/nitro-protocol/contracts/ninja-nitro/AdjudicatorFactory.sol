@@ -35,13 +35,13 @@ contract AdjudicatorFactory {
     }
 
     /// @dev Allows us to get the address for a new channel contract created via `createChannel`
-    function getChannelAddress(bytes32 channelId) external view returns (address) {
-        return Create2.computeAddress(channelId, creationCodeHash);
+    function getChannelAddress(bytes32 channelId) external view returns (address payable) {
+        return payable(Create2.computeAddress(channelId, creationCodeHash));
     }
 
     /// @dev Allows us to create new channel contract and get it all set up in one transaction
-    function createChannel(bytes32 channelId) public returns (address channel) {
-        channel = _deployChannelProxy(channelId);
+    function createChannel(bytes32 channelId) public returns (address payable channel) {
+        channel = payable(_deployChannelProxy(channelId));
         emit ChannelCreation(channel);
     }
 
@@ -56,7 +56,7 @@ contract AdjudicatorFactory {
         uint8[] memory whoSignedWhat,
         SingleChannelAdjudicator.Signature[] memory sigs
     ) public {
-        address channel = _deployChannelProxy(channelId);
+        address payable channel = payable(_deployChannelProxy(channelId));
         SingleChannelAdjudicator(channel).concludeAndTransferAll(
             largestTurnNum,
             fixedPart,
