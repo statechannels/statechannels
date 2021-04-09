@@ -326,57 +326,51 @@ contract SingleChannelAdjudicator is
                 outcome[i].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
+            require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
             Outcome.AssetOutcome memory gAssetOutcome = abi.decode(
                 guarantorOutcome[i].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
+            require(gAssetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee));
+            Outcome.Guarantee memory guarantee = abi.decode(
+                gAssetOutcome.allocationOrGuaranteeBytes,
+                (Outcome.Guarantee)
+            );
+            require(guarantee.targetChannelId == targetChannelId);
+            Outcome.AllocationItem[] memory allocation = abi.decode(
+                assetOutcome.allocationOrGuaranteeBytes,
+                (Outcome.AllocationItem[])
+            );
+            (
+                Outcome.AllocationItem[] memory newAllocation, // TODO make use of safeToDelete
+                ,
+                Outcome.AllocationItem[] memory payouts
+            ) = _computeNewAllocationWithGuarantee(
+                initialHoldings[i],
+                allocation,
+                indices[i],
+                guarantee
+            );
 
-            if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
-                require(
-                    gAssetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee)
-                );
-                Outcome.Guarantee memory guarantee = abi.decode(
-                    gAssetOutcome.allocationOrGuaranteeBytes,
-                    (Outcome.Guarantee)
-                );
-                require(guarantee.targetChannelId == targetChannelId);
-                Outcome.AllocationItem[] memory allocation = abi.decode(
-                    assetOutcome.allocationOrGuaranteeBytes,
-                    (Outcome.AllocationItem[])
-                );
-                (
-                    Outcome.AllocationItem[] memory newAllocation, // TODO make use of safeToDelete
-                    ,
-                    Outcome.AllocationItem[] memory payouts
-                ) = _computeNewAllocationWithGuarantee(
-                    initialHoldings[i],
-                    allocation,
-                    indices[i],
-                    guarantee
-                );
-
-                newOutcome[i] = Outcome.OutcomeItem(
-                    outcome[i].assetHolderAddress,
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            abi.encode(newAllocation)
-                        )
+            newOutcome[i] = Outcome.OutcomeItem(
+                outcome[i].assetHolderAddress,
+                abi.encode(
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        abi.encode(newAllocation)
                     )
-                );
+                )
+            );
 
-                payOuts[i] = Outcome.OutcomeItem(
-                    outcome[i].assetHolderAddress,
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            abi.encode(payouts)
-                        )
+            payOuts[i] = Outcome.OutcomeItem(
+                outcome[i].assetHolderAddress,
+                abi.encode(
+                    Outcome.AssetOutcome(
+                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        abi.encode(payouts)
                     )
-                );
-            } else {
-                revert('AssetOutcome not an allocation');
-            }
+                )
+            );
         }
     }
 
@@ -563,10 +557,10 @@ contract SingleChannelAdjudicator is
         Outcome.OutcomeItem[] memory outcome = abi.decode(
             targetCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
-        ); // this will be mutated and re-stored
+        );
         uint256[] memory initialHoldings = new uint256[](indices.length);
         for (uint256 i = 0; i + 1 < indices.length; i++) {
-            initialHoldings[i] = _holdings(outcome[i].assetHolderAddress, guarantor);
+            initialHoldings[i] = _holdings(guarantor, outcome[i].assetHolderAddress);
         }
         (
             Outcome.OutcomeItem[] memory newOutcome,
@@ -579,6 +573,10 @@ contract SingleChannelAdjudicator is
             guarantorOutcome
         );
         // EFFECTS
+        require(
+            keccak256(abi.encode(newOutcome)) != keccak256(targetCDL.outcomeBytes),
+            'outcome did not change'
+        ); // TODO this is mostly for debugging
         statusOf[targetChannelId] = _generateStatus(
             ChannelData(
                 targetCDL.turnNumRecord,
