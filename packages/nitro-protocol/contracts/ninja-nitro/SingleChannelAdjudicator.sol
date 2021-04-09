@@ -308,6 +308,9 @@ contract SingleChannelAdjudicator is
         return newAllocation;
     }
 
+    /**
+     * @notice Pays out assets according to the supplied payouts, only if this channel has been finalized as a guarantor channel, and only if supplied by the __target__ of this channel
+     */
     function payOutTarget(
         bytes32 guarantorChannelId,
         ChannelDataLite calldata cDL,
