@@ -10,8 +10,6 @@ import {AllocationAssetOutcome} from '../../../../src/contract/outcome';
 import {State} from '../../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
-  checkMultipleAssetOutcomeHashes,
-  checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
   getPlaceHolderContractAddress,
@@ -24,18 +22,18 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../../test-helpers';
-import {signStates} from '../../../../src';
+import {convertBytes32ToAddress, signStates} from '../../../../src';
 import {NITRO_MAX_GAS} from '../../../../src/transactions';
 
 const provider = getTestProvider();
 let AdjudicatorFactory: Contract;
 let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
-const participants = ['', '', ''];
-const wallets = new Array(3);
+const participants: string[] = [];
+const wallets: Wallet[] = [];
 const challengeDuration = 0x1000;
 
-let appDefinition;
+let appDefinition: string;
 
 const addresses = {
   // Channels
@@ -54,22 +52,23 @@ const addresses = {
   ERC20: undefined,
 };
 
-const tenPayouts = {ERC20: {}};
+/*const tenPayouts = {ERC20: {}};
 const fiftyPayouts = {ERC20: {}};
 const oneHundredPayouts = {ERC20: {}};
 
-// for (let i = 0; i < 100; i++) {
-//   const destination = randomExternalDestination();
-//   addresses[i.toString()] = destination;
-//   if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
-//   if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
-//   if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
-// }
+for (let i = 0; i < 100; i++) {
+  const destination = randomExternalDestination();
+  addresses[i.toString()] = destination;
+  if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
+  if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
+  if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
+}*/
 
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
-  wallets[i] = Wallet.createRandom();
-  participants[i] = wallets[i].address;
+  const rWallet = Wallet.createRandom();
+  wallets.push(rWallet);
+  participants.push(rWallet.address);
 }
 beforeAll(async () => {
   appDefinition = getPlaceHolderContractAddress();
@@ -170,6 +169,24 @@ describe('deployAndPayout', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
+      const balancesBefore: OutcomeShortHand = {};
+      for (const asset in payouts) {
+        balancesBefore[asset] = {};
+        if (BigNumber.from(0).eq(asset)) {
+          // Asset is ETH
+          for (const payee in payouts[asset]) {
+            balancesBefore[asset][payee] = await provider.getBalance(
+              convertBytes32ToAddress(payee)
+            );
+          }
+        } else {
+          // Asset is ERC20
+          for (const payee in payouts[asset]) {
+            balancesBefore[asset][payee] = await Token.balanceOf(convertBytes32ToAddress(payee));
+          }
+        }
+      }
+
       // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);
 
@@ -216,6 +233,25 @@ describe('deployAndPayout', () => {
           description,
           receipt.gasUsed
         );
+
+        // Check that the EOAs have the right balance
+        for (const asset in payouts) {
+          for (const payee in payouts[asset]) {
+            const assetBeforeBalance: BigNumber = BigNumber.from(balancesBefore[asset][payee]);
+            const expectedAssetBalance = assetBeforeBalance.add(payouts[asset][payee]);
+            let finalBalance: BigNumber;
+
+            if (BigNumber.from(0).eq(asset)) {
+              // Asset is ETH
+              finalBalance = await provider.getBalance(convertBytes32ToAddress(payee));
+            } else {
+              // Asset is an ERC20 Token
+              finalBalance = await Token.balanceOf(convertBytes32ToAddress(payee));
+            }
+
+            expect(finalBalance.eq(expectedAssetBalance)).toBe(true);
+          }
+        }
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
