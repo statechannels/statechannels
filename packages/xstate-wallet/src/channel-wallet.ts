@@ -12,10 +12,6 @@ import {
   OpenChannel,
   SignedState,
   Uint256,
-  BN,
-  checkThat,
-  isSimpleEthAllocation,
-  Zero,
   SharedObjective,
   Address,
   DirectFunder
