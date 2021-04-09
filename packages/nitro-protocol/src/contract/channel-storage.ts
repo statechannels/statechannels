@@ -11,6 +11,14 @@ export interface ChannelData {
   challengerAddress?: Address;
   outcome?: Outcome;
 }
+
+export interface ChannelDataLite {
+  turnNumRecord: Uint48;
+  finalizesAt: Uint48;
+  stateHash: Bytes32;
+  challengerAddress: Address;
+  outcomeBytes: Bytes;
+}
 interface FingerprintPreimage {
   stateHash: Bytes32;
   challengerAddress: Address;

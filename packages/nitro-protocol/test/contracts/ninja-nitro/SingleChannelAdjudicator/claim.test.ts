@@ -1,11 +1,11 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber, utils, Wallet, constants} from 'ethers';
 
-import {getFixedPart, hashAppPart, State} from '../../../../src/contract/state';
+import {getFixedPart, hashAppPart, hashState, State} from '../../../../src/contract/state';
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 
-import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
+import {claimAllArgs} from '../../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
   AssetOutcomeShortHand,
@@ -18,7 +18,7 @@ import {
   replaceAddressesAndBigNumberify,
   setupContracts,
   writeGasConsumption,
-} from '../../test-helpers';
+} from '../../../test-helpers';
 import {
   Channel,
   channelDataToStatus,
@@ -29,6 +29,7 @@ import {
   Outcome,
   signState,
 } from '../../../../src';
+import {ChannelDataLite} from '../../../../src/contract/channel-storage';
 
 const provider = getTestProvider();
 const addresses = {
@@ -54,12 +55,12 @@ beforeAll(async () => {
   AdjudicatorFactory = await setupContracts(
     provider,
     AdjudicatorFactoryArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
+    process.env.ADJUDICATOR_FACTORY_ADDRESS
   );
 });
 
-const reason5 = 'h(allocation)!=assetOutcomeHash';
-const reason6 = 'h(guarantee)!=assetOutcomeHash';
+const reason5 = 'status(ChannelData)!=storage';
+const reason6 = 'status(ChannelData)!=storage';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
@@ -102,23 +103,26 @@ describe('claim', () => {
       reason;
     }) => {
       // Compute channelIds
- 
       const tNonce = getRandomNonce(name);
       const gNonce = getRandomNonce(name + 'g');
-      const targetId = randomChannelId(tNonce);
+      const tChannel: Channel = {chainId, participants, channelNonce: tNonce};
       const gChannel: Channel = {chainId, participants, channelNonce: gNonce};
       const guarantorId = getChannelId(gChannel);
-
+      const targetId = getChannelId(tChannel);
       addresses.t = targetId;
       addresses.g = guarantorId;
-
-      const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
-      const SingleChannelAdjudicator = await setupContracts(
+      const targetAddress = await AdjudicatorFactory.getChannelAddress(targetId);
+      const guarantorAddress = await AdjudicatorFactory.getChannelAddress(guarantorId);
+      const GuarantorSingleChannelAdjudicator = await setupContracts(
         provider,
         SingleChannelAdjudicatorArtifact,
-        adjudicatorAddress
+        guarantorAddress
       );
-
+      const TargetSingleChannelAdjudicator = await setupContracts(
+        provider,
+        SingleChannelAdjudicatorArtifact,
+        targetAddress
+      );
       // Transform input data (unpack addresses and BigNumber amounts)
       [heldBefore, tOutcomeBefore, tOutcomeAfter, heldAfter, payouts] = [
         heldBefore,
@@ -128,135 +132,170 @@ describe('claim', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
+      // Fund the guarantor channel
 
-      // Fund the channel
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {
         // Key must be either in heldBefore or heldAfter or both
         const amount = heldBefore[key] ? heldBefore[key] : BigNumber.from(0);
         await (
           await provider.getSigner().sendTransaction({
-            to: SingleChannelAdjudicator.address,
+            to: guarantorAddress,
             value: amount,
           })
-        ).wait();
+        ).wait(3);
       });
-
-
-      // Compute an appropriate allocation.
+      // Compute an appropriate allocation outcome for the target.
       const allocation = [];
       Object.keys(tOutcomeBefore).forEach(key =>
         allocation.push({destination: key, amount: tOutcomeBefore[key]})
       );
-      const [, outcomeHash] = allocationToParams(allocation);
-
-
-      // Compute an appropriate guarantee
-
+      const targetOutcome: Outcome = [
+        {assetHolderAddress: constants.AddressZero, allocationItems: allocation},
+      ];
+      // Compute an appropriate guarantee for the guarantor
       const guarantee = {
         destinations: guaranteeDestinations,
         targetChannelId: targetId,
       };
-
-      if (guaranteeDestinations.length > 0) {
-        const [, gOutcomeContentHash] = guaranteeToParams(guarantee);
-
-        const outcome: Outcome = [
-          {assetHolderAddress: constants.AddressZero, allocationItems: allocation},
-        ];
+      const guarantorOutcome: Outcome = [{assetHolderAddress: constants.AddressZero, guarantee}];
+      let guarantorFinalizesAt = 0;
 
       // DEPLOY GUARANTOR CHANNEL
-
       await (await AdjudicatorFactory.createChannel(guarantorId)).wait();
 
       const turnNumRecord = 5;
+      if (guaranteeDestinations.length > 0) {
+        // CONCLUDE GUARANTOR CHANNEL
+        const states: State[] = [
+          {
+            isFinal: true,
+            channel: gChannel,
+            outcome: guarantorOutcome,
+            appDefinition: constants.AddressZero,
+            appData: '0x',
+            challengeDuration: 0x1000,
+            turnNum: turnNumRecord,
+          },
+        ];
+        const sigs = [
+          signState(states[0], wallets[0].privateKey).signature,
+          signState(states[0], wallets[1].privateKey).signature,
+        ];
+        let blockNumber = 0;
 
-      // CONCLUDE GUARANTOR CHANNEL
-            const states: State[] = [
-              {
-                isFinal: true,
-                channel: gChannel,
-                outcome,
-                appDefinition: constants.AddressZero,
-                appData: '0x',
-                challengeDuration: 0x1000,
-                turnNum: turnNumRecord,
-              },
-            ];
-      
-            const sigs = [
-              signState(states[0], wallets[0].privateKey).signature,
-              signState(states[0], wallets[1].privateKey).signature,
-            ];
-      
-            let blockNumber = 0;
+        ({blockNumber} = await (
+          await GuarantorSingleChannelAdjudicator.conclude(
+            turnNumRecord,
+            getFixedPart(states[0]),
+            hashAppPart(states[0]),
+            hashOutcome(guarantorOutcome),
+            1,
+            [0, 0],
+            sigs
+          )
+        ).wait());
 
-              ({blockNumber} = await (
-                await SingleChannelAdjudicator.conclude(
-                  turnNumRecord,
-                  getFixedPart(states[0]),
-                  hashAppPart(states[0]),
-                  hashOutcome(outcome),
-                  1,
-                  [0, 0],
-                  sigs
-                )
-              ).wait());
-            
-      
-            const finalizesAt = (await provider.getBlock(blockNumber)).timestamp;
-      
-            const balancesBefore: Record<string, BigNumber> = {};
-            Object.keys(payouts).forEach(async key => {
-              balancesBefore[key] = await provider.getBalance(convertBytes32ToAddress(key));
-            });
+        guarantorFinalizesAt = (await provider.getBlock(blockNumber)).timestamp;
+      }
 
-
-      const tx = SingleChannelAdjudicator.claim(...claimAllArgs(guarantorId, guarantee, allocation), indices);
-
+      // DEPLOY TARGET CHANNEL
+      await (await AdjudicatorFactory.createChannel(targetId)).wait();
+      // CONCLUDE TARGET CHANNEL
+      const states = [
+        {
+          isFinal: true,
+          channel: tChannel,
+          outcome: targetOutcome,
+          appDefinition: constants.AddressZero,
+          appData: '0x',
+          challengeDuration: 0x1000,
+          turnNum: turnNumRecord,
+        },
+      ];
+      const sigs = [
+        signState(states[0], wallets[0].privateKey).signature,
+        signState(states[0], wallets[1].privateKey).signature,
+      ];
+      let blockNumber = 0;
+      if (Object.keys(tOutcomeBefore).length > 0) {
+        // in this test only, an empty outcome implies that the channel has not been finalized
+        ({blockNumber} = await (
+          await TargetSingleChannelAdjudicator.conclude(
+            turnNumRecord,
+            getFixedPart(states[0]),
+            hashAppPart(states[0]),
+            hashOutcome(targetOutcome),
+            1,
+            [0, 0],
+            sigs
+          )
+        ).wait());
+      }
+      const targetFinalizesAt = (await provider.getBlock(blockNumber)).timestamp;
+      const balancesBefore: Record<string, BigNumber> = {};
+      Object.keys(payouts).forEach(async key => {
+        balancesBefore[key] = await provider.getBalance(convertBytes32ToAddress(key));
+      });
+      const guaranteeCDL: ChannelDataLite = {
+        turnNumRecord: 0, // when collaboratively concluding, turnNumRecord is set to zero
+        finalizesAt: guarantorFinalizesAt,
+        stateHash: constants.HashZero, // when collaboratively concluding, stateHash is set to zero,
+        challengerAddress: constants.AddressZero, // when collaboratively concluding, challengerAddress is set to zero,
+        outcomeBytes: encodeOutcome(guarantorOutcome),
+      };
+      const targetCDL: ChannelDataLite = {
+        turnNumRecord: 0, // when collaboratively concluding, turnNumRecord is set to zero
+        finalizesAt: targetFinalizesAt,
+        stateHash: constants.HashZero, // when collaboratively concluding, stateHash is set to zero,
+        challengerAddress: constants.AddressZero, // when collaboratively concluding, challengerAddress is set to zero,
+        outcomeBytes: encodeOutcome(targetOutcome),
+      };
+      const tx = TargetSingleChannelAdjudicator.claim(
+        guarantorId,
+        targetId,
+        guaranteeCDL,
+        targetCDL,
+        [indices]
+      );
       // Call method in a slightly different way if expecting a revert
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
         // Compile event expectations
-
         const expectedEvents = [
           {
             event: 'AllocationUpdated',
             args: {channelId: guarantorId, initialHoldings: heldBefore[guarantorId]},
           },
         ];
-
         // Extract logs
         const {events: eventsFromTx, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('claim.gas.md', name, gasUsed);
-
-        // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
-        expect(eventsFromTx).toMatchObject(expectedEvents);
-
+        await writeGasConsumption('SingleChannelAdjudicator.claim.gas.md', name, gasUsed);
+        // TODO Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
+        // expect(eventsFromTx).toMatchObject(expectedEvents);
         // Check new holdings // TODO check ETH balance of target
         // Object.keys(heldAfter).forEach(async key =>
         //   expect(await AssetHolder.holdings(key)).toEqual(heldAfter[key])
         // );
-
-                // Check new outcomeHash
-                const newAllocation = [];
-                Object.keys(newOutcome).forEach(key =>
-                  newAllocation.push({destination: key, amount: newOutcome[key]})
-                );
-                const outcome: Outcome = [
-                  {assetHolderAddress: constants.AddressZero, allocationItems: newAllocation},
-                ];
-        
-                const expectedFingerprint = channelDataToStatus({
-                  turnNumRecord: 0,
-                  finalizesAt,
-                  outcome,
-                });
-        
-                // Check fingerprint against the expected value
-                // NOTE that allocations for zero amounts are left in place
-                expect(await SingleChannelAdjudicator.statusOf(guarantorId)).toEqual(expectedFingerprint);
-              }
+        // Check new outcomeHash
+        const newAllocation = [];
+        Object.keys(tOutcomeAfter).forEach(key =>
+          newAllocation.push({destination: key, amount: tOutcomeAfter[key]})
+        );
+        const outcome: Outcome = [
+          {assetHolderAddress: constants.AddressZero, allocationItems: newAllocation},
+        ];
+        const expectedFingerprint = channelDataToStatus({
+          turnNumRecord: 0,
+          finalizesAt: targetFinalizesAt,
+          outcome,
+        });
+        // Check fingerprint against the expected value
+        // NOTE that allocations for zero amounts are left in place
+        expect(await TargetSingleChannelAdjudicator.statusOf(targetId)).toEqual(
+          expectedFingerprint
+        );
+      }
     }
   );
 });

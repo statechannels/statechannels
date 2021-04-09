@@ -111,7 +111,6 @@ describe('transfer', () => {
           })
         ).wait();
       });
-
       // Compute an appropriate allocation.
       const allocation = [];
       Object.keys(setOutcome).forEach(key =>
@@ -191,10 +190,8 @@ describe('transfer', () => {
         ];
 
         const {events: eventsFromTx, gasUsed} = await (await tx).wait();
-        // NOTE: _transferAsset is a NOOP in TESTAssetHolder, so gas costs will be much lower than for a real Asset Holder
         await writeGasConsumption('SingleChannelAdjudicator.transfer.gas.md', name, gasUsed);
         // expect(eventsFromTx).toMatchObject(expectedEvents);
-        // TODO check EOAs have the right balance
         Object.keys(payouts).forEach(async key => {
           expect(
             (await provider.getBalance(convertBytes32ToAddress(key))).eq(
