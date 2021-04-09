@@ -33,6 +33,20 @@ export class Wallet {
     private _retryOptions: RetryOptions
   ) {}
 
+  public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
+    const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
+    return Promise.all(
+      objectives.map(async o => {
+        return {
+          objectiveId: o.objectiveId,
+          currentStatus: o.status,
+          channelId: o.data.targetChannelId,
+          done: this.ensureObjective(o, messages),
+        };
+      })
+    );
+  }
+
   /**
    Creates channels using the given parameters.
    * @param channelParameters The parameters to use for channel creation. A channel will be created for each entry in the array.
