@@ -532,7 +532,7 @@ contract SingleChannelAdjudicator is
         uint256[][] memory indices
     ) external {
         // CHECKS
-        for (uint256 i = 0; i + 1 < indices.length; i++) {
+        for (uint256 i = 0; i < indices.length; i++) {
             _requireIncreasingIndices(indices[i]);
         }
         Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
@@ -560,8 +560,8 @@ contract SingleChannelAdjudicator is
             targetCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         );
-        uint256[] memory initialHoldings = new uint256[](indices.length);
-        for (uint256 i = 0; i + 1 < indices.length; i++) {
+        uint256[] memory initialHoldings = new uint256[](outcome.length);
+        for (uint256 i = 0; i < outcome.length; i++) {
             initialHoldings[i] = _holdings(guarantor, outcome[i].assetHolderAddress);
         }
         (
