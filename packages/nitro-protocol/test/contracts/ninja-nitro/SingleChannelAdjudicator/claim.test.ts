@@ -121,7 +121,7 @@ describe('claim (ETH only)', () => {
       if (guaranteeDestinations.length > 0) {
         // CONCLUDE GUARANTOR CHANNEL
         await guarantor.conclude(guarantorOutcome);
-      }
+      } else guarantor.outcome = guarantorOutcome; // Set this so that the claim tx should revert in the way we expect
       // Compute an appropriate allocation outcome for the target (using only ETH)
       const allocation = [];
       Object.keys(tOutcomeBefore).forEach(key =>
