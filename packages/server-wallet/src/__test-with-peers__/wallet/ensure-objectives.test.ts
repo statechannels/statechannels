@@ -36,19 +36,27 @@ describe('EnsureObjectives', () => {
       messageService.setLatencyOptions(options);
       const wallet = await Wallet.create(peerEngines.a, messageService, {
         numberOfAttempts: 100,
-        initialDelay: 100,
+        initialDelay: 50,
+        multiple: 1,
+      });
+      const walletB = await Wallet.create(peerEngines.b, messageService, {
+        numberOfAttempts: 100,
+        initialDelay: 50,
         multiple: 1,
       });
 
-      peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
-        await peerEngines.b.joinChannels([o.data.targetChannelId]);
-      });
+      const listener = async (o: WalletObjective) => {
+        await walletB.approveObjectives([o.objectiveId]);
+      };
+      peerEngines.b.on('objectiveStarted', listener);
 
       const response = await wallet.createChannels(
         Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
 
       await expect(response).toBeObjectiveDoneType('Success');
+
+      peerEngines.b.removeListener('objectiveSucceeded', listener);
     }
   );
 
@@ -60,13 +68,19 @@ describe('EnsureObjectives', () => {
     const wallet = await Wallet.create(peerEngines.a, messageService, {
       numberOfAttempts: 1,
     });
-
-    peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
-      const {targetChannelId: channelId} = o.data;
-      await peerEngines.b.joinChannels([channelId]);
+    const walletB = await Wallet.create(peerEngines.b, messageService, {
+      numberOfAttempts: 100,
+      initialDelay: 100,
+      multiple: 1,
     });
+    const listener = async (o: WalletObjective) => {
+      await walletB.approveObjectives([o.objectiveId]);
+    };
+    peerEngines.b.on('objectiveStarted', listener);
 
-    const {done} = (await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]))[0];
-    await expect(done).resolves.toMatchObject({type: 'EnsureObjectiveFailed'});
+    const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
+
+    expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
+    peerEngines.b.removeListener('objectiveStarted', listener);
   });
 });
