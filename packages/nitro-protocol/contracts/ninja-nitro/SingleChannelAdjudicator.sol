@@ -17,6 +17,8 @@ contract SingleChannelAdjudicator is
         adjudicatorFactoryAddress = a;
     }
 
+    receive() external payable {}
+
     /**
      * @notice Verifies a conclusion proof, pays out all assets and selfdestructs
      * @dev Verifies a conclusion proof, pays out all assets and selfdestructs
@@ -537,10 +539,10 @@ contract SingleChannelAdjudicator is
             guaranteeCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         );
-        address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
+        address payable guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
-        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+        address payable targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
             .getChannelAddress(targetChannelId);
         require(address(this) == targetChannelAddress, 'incorrect target channel address');
         _requireMatchingStorage(
