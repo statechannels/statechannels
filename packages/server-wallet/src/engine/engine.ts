@@ -565,7 +565,7 @@ export class SingleThreadedEngine
 
       await this.takeActions([channelId], response);
     }
-    return {objectives, messages: getMessages(response.multipleChannelOutput().outbox)};
+    return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
 
   /**
