@@ -66,7 +66,7 @@ export class ChannelWallet {
       this.messagingService.sendMessageNotification(m);
     });
 
-    store.crankRichObjectiveFeed.subscribe(_.bind(this.crankRichObjective, this));
+    store.crankRichObjectiveFeed.subscribe(_.bind(this.crankRichObjectives, this));
 
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
@@ -233,7 +233,7 @@ export class ChannelWallet {
    *  START of wallet 2.0
    */
 
-  private async crankRichObjective(event: DirectFunder.OpenChannelEvent): Promise<void> {
+  private async crankRichObjectives(event: DirectFunder.OpenChannelEvent): Promise<void> {
     const richObjectives = this.store.richObjectives;
     for (const channelId of Object.keys(richObjectives)) {
       const richObjective = richObjectives[channelId];
