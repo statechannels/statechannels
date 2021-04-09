@@ -50,18 +50,11 @@ export type Message = {
   objectives: SharedObjective[];
   signedStates: SignedState[];
 };
-// type Response = Message & {deposit?: boolean};
-type Funding = {amountOnChain: Uint256; status?: 'DEPOSITED'};
-type DepositInfo = {
-  depositAt: Uint256;
-  myDeposit: Uint256;
-  totalAfterDeposit: Uint256;
-  fundedAt: Uint256;
-};
+
+type Deposit = {amountOnChain: Uint256; amountDeposited: Uint256};
 export class ChannelWallet {
   public workflows: Workflow[];
-  protected channelFunding: Dictionary<Funding> = {};
-  protected registeredChannels: Set<string> = new Set<string>();
+  protected depositsSubmitted: Dictionary<Deposit> = {};
   static async create(chainAddress?: Address): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
@@ -247,35 +240,18 @@ export class ChannelWallet {
   /**
    *  START of wallet 2.0
    */
-  async getDepositInfo(channelId: string): Promise<DepositInfo> {
-    const {latestState, myIndex} = await this.store.getEntry(channelId);
-    const {allocationItems} = checkThat(latestState.outcome, isSimpleEthAllocation);
-
-    const fundedAt = allocationItems.map(a => a.amount).reduce(BN.add);
-    let depositAt = Zero;
-    for (let i = 0; i < allocationItems.length; i++) {
-      const {amount} = allocationItems[i];
-      if (i !== myIndex) depositAt = BN.add(depositAt, amount);
-      else {
-        const totalAfterDeposit = BN.add(depositAt, amount);
-        return {depositAt, myDeposit: amount, totalAfterDeposit, fundedAt};
-      }
-    }
-
-    throw Error(`Could not find an allocation for participant id ${myIndex}`);
-  }
 
   private async crankRichObjective(event: DirectFunder.OpenChannelEvent): Promise<void> {
     const richObjectives = this.store.richObjectives;
-    for (const richObjectiveKey of Object.keys(richObjectives)) {
-      const richObjective = richObjectives[richObjectiveKey];
+    for (const channelId of Object.keys(richObjectives)) {
+      const richObjective = richObjectives[channelId];
       const result = DirectFunder.openChannelCranker(
         richObjective,
         event,
         await this.store.getPrivateKey(await this.store.getAddress())
       );
 
-      richObjectives[richObjectiveKey] = result.objective;
+      richObjectives[channelId] = result.objective;
 
       for (const action of result.actions) {
         switch (action.type) {
@@ -283,15 +259,27 @@ export class ChannelWallet {
             await Promise.all(action.states.map(state => this.store.addState(state, true)));
             break;
           case 'deposit':
+            if (this.depositsSubmitted[channelId]) {
+              throw new Error(
+                `Attempting to submit a deposit for a channel with already submitted deposit ${this.depositsSubmitted[channelId]}`
+              );
+            }
             const fundingMilestones = DirectFunder.utils.fundingMilestone(
               richObjective.openingState,
               richObjective.openingState.participants[richObjective.myIndex].destination
             );
+
+            // Record that a deposit will be made
+            this.depositsSubmitted[channelId] = {
+              amountOnChain: fundingMilestones.targetBefore,
+              amountDeposited: action.amount
+            };
             await this.store.chain.deposit(
-              richObjective.channelId,
+              channelId,
               fundingMilestones.targetBefore,
               action.amount
             );
+
             break;
           default:
             throw new Error('Not expected to reach here');
