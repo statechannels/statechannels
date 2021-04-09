@@ -10,8 +10,6 @@ import {AllocationAssetOutcome} from '../../../../src/contract/outcome';
 import {State} from '../../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../../src/contract/transaction-creators/nitro-adjudicator';
 import {
-  checkMultipleAssetOutcomeHashes,
-  checkMultipleHoldings,
   compileEventsFromLogs,
   computeOutcome,
   getPlaceHolderContractAddress,
@@ -24,7 +22,7 @@ import {
   setupContracts,
   writeGasConsumption,
 } from '../../../test-helpers';
-import {signStates} from '../../../../src';
+import {convertBytes32ToAddress, signStates} from '../../../../src';
 import {NITRO_MAX_GAS} from '../../../../src/transactions';
 
 const provider = getTestProvider();
