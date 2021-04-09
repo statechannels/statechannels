@@ -171,6 +171,24 @@ describe('deployAndPayout', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
+      const balancesBefore: OutcomeShortHand = {};
+      for (const asset in payouts) {
+        balancesBefore[asset] = {};
+        if (BigNumber.from(0).eq(asset)) {
+          // Asset is ETH
+          for (const payee in payouts[asset]) {
+            balancesBefore[asset][payee] = await provider.getBalance(
+              convertBytes32ToAddress(payee)
+            );
+          }
+        } else {
+          // Asset is ERC20
+          for (const payee in payouts[asset]) {
+            balancesBefore[asset][payee] = await Token.balanceOf(convertBytes32ToAddress(payee));
+          }
+        }
+      }
+
       // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);
 
@@ -217,6 +235,25 @@ describe('deployAndPayout', () => {
           description,
           receipt.gasUsed
         );
+
+        // Check that the EOAs have the right balance
+        for (const asset in payouts) {
+          for (const payee in payouts[asset]) {
+            const assetBeforeBalance: BigNumber = BigNumber.from(balancesBefore[asset][payee]);
+            const expectedAssetBalance = assetBeforeBalance.add(payouts[asset][payee]);
+            let finalBalance: BigNumber;
+
+            if (BigNumber.from(0).eq(asset)) {
+              // Asset is ETH
+              finalBalance = await provider.getBalance(convertBytes32ToAddress(payee));
+            } else {
+              // Asset is an ERC20 Token
+              finalBalance = await Token.balanceOf(convertBytes32ToAddress(payee));
+            }
+
+            expect(finalBalance.eq(expectedAssetBalance)).toBe(true);
+          }
+        }
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
