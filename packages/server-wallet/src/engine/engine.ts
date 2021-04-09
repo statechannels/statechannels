@@ -7,6 +7,7 @@ import {
   GetStateParams,
   Participant as APIParticipant,
   ChannelId,
+  Message,
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
@@ -57,6 +58,7 @@ import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
 import {WalletObjective, ObjectiveModel} from '../models/objective';
+import {getMessages} from '../message-service/utils';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
@@ -547,6 +549,23 @@ export class SingleThreadedEngine
     await Promise.all(channelIds.map(id => this.registerChannelWithChainService(id)));
 
     return response.multipleChannelOutput();
+  }
+
+  async approveObjectives(
+    objectiveIds: string[]
+  ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
+    const objectives = await this.store.getObjectivesByIds(objectiveIds);
+
+    const response = EngineResponse.initialize();
+    for (const objective of objectives) {
+      const {targetChannelId: channelId} = objective.data;
+      await this.registerChannelWithChainService(channelId);
+
+      await this.store.approveObjective(objective.objectiveId);
+
+      await this.takeActions([channelId], response);
+    }
+    return {objectives, messages: getMessages(response.multipleChannelOutput().outbox)};
   }
 
   /**
