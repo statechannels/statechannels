@@ -21,8 +21,10 @@ import {
   Funding,
   BN,
   Uint256,
-  makeAddress
+  makeAddress,
+  DirectFunder
 } from '@statechannels/wallet-core';
+import {Dictionary} from 'lodash';
 
 import {Chain, FakeChain} from '../chain';
 import {CHAIN_NETWORK_ID, HUB, WALLET_VERSION} from '../config';
@@ -40,6 +42,7 @@ interface InternalEvents {
   newObjective: [Objective];
   addToOutbox: [Payload];
   lockUpdated: [ChannelLock];
+  crankObjective: DirectFunder.OpenChannelEvent;
 }
 export type ChannelLock = {
   channelId: string;
@@ -54,9 +57,9 @@ export class Store {
   protected backend: DBBackend = new MemoryBackend();
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
+  private objectives: Objective[] = [];
   // TODO: this should not be public
-  public objectives: Objective[] = [];
-
+  public richObjectives: Dictionary<DirectFunder.OpenChannelObjective> = {};
   constructor(chain?: Chain, backend?: DBBackend) {
     // TODO: We shouldn't default to a fake chain
     // but I didn't feel like updating all the constructor calls
@@ -132,6 +135,10 @@ export class Store {
 
   get outboxFeed(): Observable<Payload> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
+  }
+
+  get crankObjectiveFeed(): Observable<DirectFunder.OpenChannelEvent> {
+    return fromEvent(this._eventEmitter, 'crankObjective');
   }
 
   private initializeChannel = (
@@ -394,8 +401,15 @@ export class Store {
     }
   }
 
-  public addState = (state: SignedState) =>
-    this.backend
+  /**
+   *
+   * @param state State to add to the store
+   * @param notifyOutbox Should this state get sent to other participants?
+   */
+  public async addState(state: SignedState, notifyOutbox = false) {
+    const stateToSend = notifyOutbox ? state : undefined;
+
+    return this.backend
       .transaction(
         'readwrite',
         [ObjectStores.channels, ObjectStores.nonces, ObjectStores.privateKeys],
@@ -409,7 +423,8 @@ export class Store {
           return memoryChannelStorage;
         }
       )
-      .then(entry => this.emitChannelUpdatedEventAfterTX(entry));
+      .then(entry => this.emitChannelUpdatedEventAfterTX(entry, stateToSend));
+  }
 
   public async getAddress(): Promise<string> {
     const privateKeys = await this.backend.privateKeys();
@@ -419,6 +434,8 @@ export class Store {
   async pushMessage(message: Payload) {
     await Promise.all(message.signedStates?.map(signedState => this.addState(signedState)) || []);
     message.objectives?.map(o => this.addObjective(o, false));
+
+    this.pushMessage2(message.signedStates, message.objectives);
   }
 
   public async getEntry(channelId: string): Promise<ChannelStoreEntry> {
@@ -528,6 +545,51 @@ export class Store {
         return currentBudget;
       }
     );
+
+  /**
+   *  START of wallet 2.0
+   */
+
+  async pushMessage2(signedStates: SignedState[] | undefined, objectives: Objective[] | undefined) {
+    if (objectives) await Promise.all(objectives.map(_.bind(this.addRichObjective, this)));
+
+    if (signedStates) {
+      this._eventEmitter.emit('crankObjective', {type: 'StatesReceived', states: signedStates});
+    }
+  }
+
+  private async addRichObjective(objective: Objective) {
+    switch (objective.type) {
+      case 'OpenChannel':
+        if (this.richObjectives[objective.data.targetChannelId]) {
+          throw new Error(
+            `Rich objective already exists for channel ${objective.data.targetChannelId}`
+          );
+        }
+
+        const channel = await this.getEntry(objective.data.targetChannelId);
+        const richObjective: DirectFunder.OpenChannelObjective = DirectFunder.initialize(
+          channel.latestState,
+          channel.myIndex
+        );
+        this.richObjectives[richObjective.channelId] = richObjective;
+
+        this.chain.chainUpdatedFeed(richObjective.channelId).subscribe(chainInfo =>
+          this._eventEmitter.emit('crankObjective', {
+            type: 'FundingUpdated',
+            amount: chainInfo.amount,
+            finalized: true
+          })
+        );
+        break;
+      default:
+        throw new Error(`addRichObjective not implemented for an objective type ${objective.type}`);
+    }
+  }
+
+  /**
+   *  END of wallet 2.0
+   */
 }
 
 export function supportedStateFeed(store: Store, channelId: string) {

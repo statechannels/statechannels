@@ -17,14 +17,15 @@ import {
   isSimpleEthAllocation,
   Zero,
   SharedObjective,
-  Address
+  Address,
+  DirectFunder
 } from '@statechannels/wallet-core';
 import {Dictionary} from '@statechannels/wallet-core/node_modules/@types/lodash';
 import ReactDOM from 'react-dom';
 import React from 'react';
+import _ from 'lodash';
 
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
-import {ChannelStoreEntry} from './store/channel-store-entry';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
 import {ApproveBudgetAndFund, CloseLedgerAndWithdraw, Application} from './workflows';
@@ -36,7 +37,7 @@ import {
 } from './messaging';
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
-import {ChainWatcher, ChannelChainInfo} from './chain';
+import {ChainWatcher} from './chain';
 import {Wallet as WalletUi} from './ui/wallet';
 
 export interface Workflow {
@@ -49,7 +50,7 @@ export type Message = {
   objectives: SharedObjective[];
   signedStates: SignedState[];
 };
-type Response = Message & {deposit?: boolean};
+// type Response = Message & {deposit?: boolean};
 type Funding = {amountOnChain: Uint256; status?: 'DEPOSITED'};
 type DepositInfo = {
   depositAt: Uint256;
@@ -79,6 +80,9 @@ export class ChannelWallet {
     store.outboxFeed.subscribe(async (m: Payload) => {
       this.messagingService.sendMessageNotification(m);
     });
+
+    store.crankObjectiveFeed.subscribe(_.bind(this.crankRichObjective, this));
+
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
     // It is up to the app to call JoinChannel
@@ -235,118 +239,14 @@ export class ChannelWallet {
     return this.store.getAddress();
   }
 
-  /**
-   *  START of wallet 2.0
-   */
-
   public async pushMessage(jsonRpcMessage: object, fromDomain: string) {
     // Update any workflows waiting on an observable
     await this.messagingService.receiveRequest(jsonRpcMessage, fromDomain);
-
-    let response: Message = {
-      objectives: [],
-      signedStates: []
-    };
-
-    // Crank objectives
-    for (const objective of this.store.objectives) {
-      switch (objective.type) {
-        case 'OpenChannel': {
-          response = await this.onOpenChannelObjective(objective.data.targetChannelId);
-          break;
-        }
-        default:
-          throw new Error('Objective not supported');
-      }
-    }
-    return response;
   }
 
-  async onOpenChannelObjective(channelId: string): Promise<Message> {
-    const channel = await this.store.getEntry(channelId);
-    if (!this.registeredChannels.has(channelId)) {
-      this.store.chain.chainUpdatedFeed(channelId).subscribe({
-        next: chainInfo => this.onFundingUpdate(channelId, chainInfo)
-      });
-      this.registeredChannels.add(channelId);
-    }
-    const pk = await this.store.getPrivateKey(await this.store.getAddress());
-    const depositInfo = await this.getDepositInfo(channelId);
-
-    const response = this.crankOpenChannelObjective(
-      channel,
-      this.channelFunding[channelId] ?? {amountOnChain: '0x0'},
-      depositInfo,
-      pk
-    );
-    if (response.deposit) {
-      this.channelFunding[channelId] = {...this.channelFunding[channelId], status: 'DEPOSITED'};
-      await this.store.chain.deposit(
-        channel.channelId,
-        this.channelFunding[channelId].amountOnChain,
-        depositInfo.myDeposit
-      );
-    }
-    if (response.signedStates[0]) {
-      await this.store.addState(response.signedStates[0]);
-      this.messagingService.sendMessageNotification({
-        ...response,
-        walletVersion: '@statechannels/server-wallet@1.23.0)'
-      });
-    }
-    return response;
-  }
-
-  crankOpenChannelObjective(
-    channel: ChannelStoreEntry,
-    channelFunding: Funding,
-    depositInfo: DepositInfo,
-    pk: string
-  ): Response {
-    const response: Response = {
-      objectives: [],
-      signedStates: []
-    };
-    const {latestState} = channel;
-    // Should we sign the prefund state?
-    if (latestState.turnNum === 0 && !channel.isSupportedByMe) {
-      const newState = channel.signAndAdd(latestState, pk);
-      response.signedStates = [newState];
-      return response;
-    }
-
-    // Should we deposit?
-    if (
-      BN.gte(channelFunding.amountOnChain, depositInfo.depositAt) &&
-      BN.lt(channelFunding.amountOnChain, depositInfo.totalAfterDeposit) &&
-      channelFunding.status !== 'DEPOSITED'
-    ) {
-      response.deposit = true;
-      return response;
-    }
-
-    // Should we sign the postfund state?
-    if (
-      BN.gte(channelFunding.amountOnChain, depositInfo.fundedAt) &&
-      latestState.turnNum === 3 &&
-      channel.latestSignedByMe.turnNum === 0
-    ) {
-      const newState = channel.signAndAdd(latestState, pk);
-      response.signedStates = [newState];
-      return response;
-    }
-
-    return response;
-  }
-
-  async onFundingUpdate(channelId: string, channelChainInfo: ChannelChainInfo): Promise<void> {
-    this.channelFunding[channelId] = {
-      ...this.channelFunding[channelId],
-      amountOnChain: channelChainInfo.amount
-    };
-    await this.onOpenChannelObjective(channelId);
-  }
-
+  /**
+   *  START of wallet 2.0
+   */
   async getDepositInfo(channelId: string): Promise<DepositInfo> {
     const {latestState, myIndex} = await this.store.getEntry(channelId);
     const {allocationItems} = checkThat(latestState.outcome, isSimpleEthAllocation);
@@ -363,6 +263,41 @@ export class ChannelWallet {
     }
 
     throw Error(`Could not find an allocation for participant id ${myIndex}`);
+  }
+
+  private async crankRichObjective(event: DirectFunder.OpenChannelEvent): Promise<void> {
+    const richObjectives = this.store.richObjectives;
+    for (const richObjectiveKey of Object.keys(richObjectives)) {
+      const richObjective = richObjectives[richObjectiveKey];
+      const result = DirectFunder.openChannelCranker(
+        richObjective,
+        event,
+        await this.store.getPrivateKey(await this.store.getAddress())
+      );
+
+      richObjectives[richObjectiveKey] = result.objective;
+
+      for (const action of result.actions) {
+        switch (action.type) {
+          case 'sendStates':
+            await Promise.all(action.states.map(state => this.store.addState(state, true)));
+            break;
+          case 'deposit':
+            const fundingMilestones = DirectFunder.utils.fundingMilestone(
+              richObjective.openingState,
+              richObjective.openingState.participants[richObjective.myIndex].destination
+            );
+            await this.store.chain.deposit(
+              richObjective.channelId,
+              fundingMilestones.targetBefore,
+              action.amount
+            );
+            break;
+          default:
+            throw new Error('Not expected to reach here');
+        }
+      }
+    }
   }
 
   /**

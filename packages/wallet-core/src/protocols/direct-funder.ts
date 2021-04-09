@@ -316,7 +316,7 @@ type FundingMilestone = {
   targetTotal: Uint256;
 };
 
-const utils = {
+export const utils = {
   fundingMilestone(state: State, destination: string): FundingMilestone {
     const {allocationItems} = checkThat(state.outcome, isSimpleAllocation);
 
