@@ -1,8 +1,9 @@
 import {Contract, BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
+import {computeNewAllocationWithGuarantee} from '../../../../src/ninja-nitro/helpers';
+import {AllocationItem, Guarantee, randomChannelId} from '../../../../src';
 import {getTestProvider, setupContracts, randomExternalDestination} from '../../../test-helpers';
-// eslint-disable-next-line import/order
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 
 const provider = getTestProvider();
@@ -16,12 +17,6 @@ beforeAll(async () => {
     process.env.SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS
   );
 });
-
-import {AllocationItem, Guarantee, randomChannelId} from '../../../../src';
-import {
-  computeNewAllocation,
-  computeNewAllocationWithGuarantee,
-} from '../../../../src/contract/asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
@@ -63,7 +58,7 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
       allocation,
       indices,
       guarantee
-    )) as ReturnType<typeof computeNewAllocation>;
+    )) as ReturnType<typeof computeNewAllocationWithGuarantee>;
 
     expect(result).toBeDefined();
     expect(result.newAllocation).toMatchObject(
@@ -72,10 +67,13 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
         amount: BigNumber.from(a.amount),
       }))
     );
+
     expect((result as any).safeToDelete).toEqual(locallyComputedNewAllocation.deleted);
-    expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
-    expect(result.payouts).toMatchObject(
-      locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))
+    expect(result.payOuts).toMatchObject(
+      locallyComputedNewAllocation.payOuts.map(a => ({
+        ...a,
+        amount: BigNumber.from(a.amount),
+      }))
     );
   });
 });
