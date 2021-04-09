@@ -154,7 +154,7 @@ export class Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  get crankObjectiveFeed(): Observable<DirectFunder.OpenChannelEvent> {
+  get crankRichObjectiveFeed(): Observable<DirectFunder.OpenChannelEvent> {
     return fromEvent(this._eventEmitter, 'crankObjective');
   }
 
