@@ -49,6 +49,8 @@ export type ChannelLock = {
   release: () => void;
 };
 
+type Deposit = {amountOnChain: Uint256; amountDeposited: Uint256};
+
 //FIXME
 const track = _.noop;
 const identify = _.noop;
@@ -58,8 +60,18 @@ export class Store {
   readonly chain: Chain;
   private _eventEmitter = new EventEmitter<InternalEvents>();
   private objectives: Objective[] = [];
+
+  /**
+   *  START of wallet 2.0
+   */
   // TODO: this should not be public
   public richObjectives: Dictionary<DirectFunder.OpenChannelObjective> = {};
+  public depositsSubmitted: Dictionary<Deposit> = {};
+
+  /**
+   *  END of wallet 2.0
+   */
+
   constructor(chain?: Chain, backend?: DBBackend) {
     // TODO: We shouldn't default to a fake chain
     // but I didn't feel like updating all the constructor calls
