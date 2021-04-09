@@ -54,17 +54,17 @@ const addresses = {
   ERC20: undefined,
 };
 
-const tenPayouts = {ERC20: {}};
+/*const tenPayouts = {ERC20: {}};
 const fiftyPayouts = {ERC20: {}};
 const oneHundredPayouts = {ERC20: {}};
 
-// for (let i = 0; i < 100; i++) {
-//   const destination = randomExternalDestination();
-//   addresses[i.toString()] = destination;
-//   if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
-//   if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
-//   if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
-// }
+for (let i = 0; i < 100; i++) {
+  const destination = randomExternalDestination();
+  addresses[i.toString()] = destination;
+  if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
+  if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
+  if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
+}*/
 
 // Populate wallets and participants array
 for (let i = 0; i < 3; i++) {
