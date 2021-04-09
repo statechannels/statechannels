@@ -42,7 +42,7 @@ interface InternalEvents {
   newObjective: [Objective];
   addToOutbox: [Payload];
   lockUpdated: [ChannelLock];
-  crankObjective: DirectFunder.OpenChannelEvent;
+  crankRichObjectives: DirectFunder.OpenChannelEvent;
 }
 export type ChannelLock = {
   channelId: string;
@@ -154,8 +154,8 @@ export class Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  get crankRichObjectiveFeed(): Observable<DirectFunder.OpenChannelEvent> {
-    return fromEvent(this._eventEmitter, 'crankObjective');
+  get crankRichObjectivesFeed(): Observable<DirectFunder.OpenChannelEvent> {
+    return fromEvent(this._eventEmitter, 'crankRichObjectives');
   }
 
   private initializeChannel = (
@@ -571,7 +571,10 @@ export class Store {
     if (objectives) await Promise.all(objectives.map(_.bind(this.addRichObjective, this)));
 
     if (signedStates) {
-      this._eventEmitter.emit('crankObjective', {type: 'StatesReceived', states: signedStates});
+      this._eventEmitter.emit('crankRichObjectives', {
+        type: 'StatesReceived',
+        states: signedStates
+      });
     }
   }
 
@@ -592,7 +595,7 @@ export class Store {
         this.richObjectives[richObjective.channelId] = richObjective;
 
         this.chain.chainUpdatedFeed(richObjective.channelId).subscribe(chainInfo =>
-          this._eventEmitter.emit('crankObjective', {
+          this._eventEmitter.emit('crankRichObjectives', {
             type: 'FundingUpdated',
             amount: chainInfo.amount,
             finalized: true
