@@ -47,10 +47,8 @@ export type Message = {
   signedStates: SignedState[];
 };
 
-type Deposit = {amountOnChain: Uint256; amountDeposited: Uint256};
 export class ChannelWallet {
   public workflows: Workflow[];
-  protected depositsSubmitted: Dictionary<Deposit> = {};
   static async create(chainAddress?: Address): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
@@ -255,9 +253,9 @@ export class ChannelWallet {
             await Promise.all(action.states.map(state => this.store.addState(state, true)));
             break;
           case 'deposit':
-            if (this.depositsSubmitted[channelId]) {
+            if (this.store.depositsSubmitted[channelId]) {
               throw new Error(
-                `Attempting to submit a deposit for a channel with already submitted deposit ${this.depositsSubmitted[channelId]}`
+                `Attempting to submit a deposit for a channel with already submitted deposit ${this.store.depositsSubmitted[channelId]}`
               );
             }
             const fundingMilestones = DirectFunder.utils.fundingMilestone(
@@ -266,7 +264,7 @@ export class ChannelWallet {
             );
 
             // Record that a deposit will be made
-            this.depositsSubmitted[channelId] = {
+            this.store.depositsSubmitted[channelId] = {
               amountOnChain: fundingMilestones.targetBefore,
               amountDeposited: action.amount
             };
