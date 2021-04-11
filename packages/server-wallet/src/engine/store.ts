@@ -624,8 +624,11 @@ export class Store {
           }
           data = {targetChannelId, fundingStrategy, fundingLedgerChannelId};
           break;
+        case 'Fake':
+          data = {targetChannelId, fundingStrategy};
+          break;
         default:
-          throw new Error('Unsupported funding strategy');
+          throw new Error(`Unsupported funding strategy: ${fundingStrategy}`);
       }
       const o: OpenChannel = {type: 'OpenChannel', participants, data};
 
