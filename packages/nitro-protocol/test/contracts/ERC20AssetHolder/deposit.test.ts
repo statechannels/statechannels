@@ -9,12 +9,12 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {
   getRandomNonce,
   getTestProvider,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
-const signer0 = provider.getSigner(0); // Convention matches setupContracts function
+const signer0 = provider.getSigner(0); // Convention matchessetupContract function
 let signer0Address;
 let ERC20AssetHolder: Contract;
 let Token: Contract;
@@ -27,12 +27,12 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ERC20AssetHolder = setupContracts(
+  ERC20AssetHolder = setupContract(
     provider,
     ERC20AssetHolderArtifact,
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
-  Token = setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   signer0Address = await signer0.getAddress();
 });
 

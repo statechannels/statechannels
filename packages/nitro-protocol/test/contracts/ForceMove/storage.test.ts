@@ -3,12 +3,12 @@ import {Contract, ethers} from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts//test/TESTForceMove.sol/TESTForceMove.json';
 import {channelDataToStatus, parseStatus} from '../../../src/contract/channel-storage';
-import {getTestProvider, randomChannelId, setupContracts} from '../../test-helpers';
+import {getTestProvider, randomChannelId, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
 beforeAll(async () => {
-  ForceMove = setupContracts(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 const zeroData = {

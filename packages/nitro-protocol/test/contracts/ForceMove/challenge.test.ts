@@ -28,7 +28,7 @@ import {
   largeOutcome,
   nonParticipant,
   ongoingChallengeFingerprint,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 import {createChallengeTransaction, NITRO_MAX_GAS} from '../../../src/transactions';
@@ -84,7 +84,7 @@ async function createSignedCountingAppState(
   );
 }
 beforeAll(async () => {
-  ForceMove = setupContracts(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 // Scenarios are synonymous with channelNonce:

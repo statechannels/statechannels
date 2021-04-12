@@ -4,7 +4,7 @@ import TrivialAppArtifact from '../../../artifacts/contracts/TrivialApp.sol/Triv
 import {Channel} from '../../../src/contract/channel';
 import {validTransition} from '../../../src/contract/force-move-app';
 import {State, VariablePart} from '../../../src/contract/state';
-import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 let trivialApp: Contract;
@@ -26,7 +26,7 @@ function getRandomVariablePart(): VariablePart {
 }
 
 beforeAll(async () => {
-  trivialApp = setupContracts(provider, TrivialAppArtifact, process.env.TRIVIAL_APP_ADDRESS);
+  trivialApp = setupContract(provider, TrivialAppArtifact, process.env.TRIVIAL_APP_ADDRESS);
 });
 
 describe('validTransition', () => {

@@ -2,7 +2,7 @@ import {Contract, Wallet, utils} from 'ethers';
 const {id} = utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getTestProvider, setupContract} from '../../test-helpers';
 import {sign} from '../../../src/signatures';
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -10,7 +10,7 @@ let ForceMove: Contract;
 jest.setTimeout(10_000);
 
 beforeAll(async () => {
-  ForceMove = setupContracts(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 describe('_validSignatures (participants sign only their own states)', () => {

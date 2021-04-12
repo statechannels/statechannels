@@ -12,7 +12,7 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 
@@ -31,11 +31,7 @@ const addresses = {
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 const reason5 = 'h(allocation)!=assetOutcomeHash';

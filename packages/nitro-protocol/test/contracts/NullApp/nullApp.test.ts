@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {getVariablePart, State, Channel} from '../../../src';
 
@@ -9,7 +9,7 @@ const provider = getTestProvider();
 
 let NitroAdjudicator: Contract;
 beforeAll(async () => {
-  NitroAdjudicator = setupContracts(
+  NitroAdjudicator = setupContract(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
