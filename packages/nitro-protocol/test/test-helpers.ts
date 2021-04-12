@@ -50,6 +50,13 @@ export const getTestProvider = (): ethers.providers.JsonRpcProvider => {
   return new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 };
 
+/**
+ * Get a rich object representing an on-chain contract
+ * @param provider an ethers JsonRpcProvider
+ * @param artifact an object containing the abi of the contract in question
+ * @param address the ethereum address of the contract, once it is deployed
+ * @returns a rich (ethers) Contract object with a connected signer (ther 0th signer of the supplied provider)
+ */
 export function setupContracts(
   provider: ethers.providers.JsonRpcProvider,
   artifact: {abi: ethers.ContractInterface},
