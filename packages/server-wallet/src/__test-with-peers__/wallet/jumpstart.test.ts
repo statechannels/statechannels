@@ -17,10 +17,7 @@ describe('jumpstartObjectives', () => {
   it('returns an empty array when there are no objectives', async () => {
     const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
-    const jumpstartResponse = await wallet.jumpStartObjectives();
-    const jumpstartResults = await Promise.all(jumpstartResponse.map(r => r.done));
-
-    expect(jumpstartResults).toHaveLength(0);
+    expect(await wallet.jumpStartObjectives()).toHaveLength(0);
   });
 
   it('ignores completed objectives', async () => {
@@ -29,10 +26,7 @@ describe('jumpstartObjectives', () => {
     const createResponse = await wallet.createChannels([getWithPeersCreateChannelsArgs()]);
 
     await ObjectiveModel.succeed(createResponse[0].objectiveId, peerEngines.a.knex);
-    const jumpstartResponse = await wallet.jumpStartObjectives();
-    const jumpstartResults = await Promise.all(jumpstartResponse.map(r => r.done));
-
-    expect(jumpstartResults).toHaveLength(0);
+    expect(await wallet.jumpStartObjectives()).toHaveLength(0);
   });
 
   it('can jumpstart objectives successfully after a restart', async () => {
