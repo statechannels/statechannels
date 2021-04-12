@@ -28,7 +28,7 @@ const guarantee = {
 };
 
 beforeAll(async () => {
-  singleAssetPayments = await setupContracts(
+  singleAssetPayments = setupContracts(
     provider,
     SingleAssetPaymentsArtifact,
     process.env.SINGLE_ASSET_PAYMENT_ADDRESS

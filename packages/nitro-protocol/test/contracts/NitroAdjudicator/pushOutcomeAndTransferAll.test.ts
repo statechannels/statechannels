@@ -51,17 +51,17 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(
+  NitroAdjudicator = setupContracts(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  AssetHolder1 = await setupContracts(
+  AssetHolder1 = setupContracts(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER_ADDRESS
   );
-  AssetHolder2 = await setupContracts(
+  AssetHolder2 = setupContracts(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER2_ADDRESS

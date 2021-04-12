@@ -22,7 +22,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ETHAssetHolder = await setupContracts(
+  ETHAssetHolder = setupContracts(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER_ADDRESS

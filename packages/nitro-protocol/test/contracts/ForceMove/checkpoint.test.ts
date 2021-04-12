@@ -41,11 +41,7 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContracts(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
   appDefinition = getPlaceHolderContractAddress();
 });
 

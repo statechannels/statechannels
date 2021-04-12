@@ -37,11 +37,7 @@ const addresses = {
 const provider = getTestProvider();
 
 beforeAll(async () => {
-  hashTimeLock = await setupContracts(
-    provider,
-    HashLockedSwapArtifact,
-    process.env.HASH_LOCK_ADDRESS
-  );
+  hashTimeLock = setupContracts(provider, HashLockedSwapArtifact, process.env.HASH_LOCK_ADDRESS);
 });
 
 const preImage = '0xdeadbeef';

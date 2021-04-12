@@ -84,11 +84,7 @@ async function createSignedCountingAppState(
   );
 }
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContracts(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 // Scenarios are synonymous with channelNonce:

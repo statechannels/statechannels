@@ -76,27 +76,27 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(
+  NitroAdjudicator = setupContracts(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  EthAssetHolder1 = await setupContracts(
+  EthAssetHolder1 = setupContracts(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER_ADDRESS
   );
-  EthAssetHolder2 = await setupContracts(
+  EthAssetHolder2 = setupContracts(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER2_ADDRESS
   );
-  ERC20AssetHolder = await setupContracts(
+  ERC20AssetHolder = setupContracts(
     provider,
     ERC20AssetHolderArtifact,
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
-  Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  Token = setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   addresses.ETH = EthAssetHolder1.address;
   addresses.ETH2 = EthAssetHolder2.address;
   addresses.ERC20 = ERC20AssetHolder.address;

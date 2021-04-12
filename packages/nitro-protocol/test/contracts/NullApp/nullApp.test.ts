@@ -9,7 +9,7 @@ const provider = getTestProvider();
 
 let NitroAdjudicator: Contract;
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(
+  NitroAdjudicator = setupContracts(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS

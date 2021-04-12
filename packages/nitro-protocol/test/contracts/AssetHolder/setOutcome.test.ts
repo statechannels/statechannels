@@ -22,11 +22,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.ETH_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContracts(provider, AssetHolderArtifact, process.env.ETH_ASSET_HOLDER_ADDRESS);
   const channel: Channel = {chainId, participants, channelNonce};
   channelId = getChannelId(channel);
 });
