@@ -136,7 +136,7 @@ contract OutcomeTransformations {
      * @dev Computes the new outcome that should be stored against a target channel after a claim is made on its guarantor.
      * @param initialHoldings list of assets held on chain for the channel, for each asset.
      * @param outcome initial outcome stored on chain for the channel.
-     * @param targetChannelId the channelId of the target channel (used to validate th guarantee) TODO: remove?
+     * @param targetChannelId the channelId of the target channel (used to validate every guarantee in the guarantorOutcome, which much target the same channel)
      * @param indices list of list of indices expressing which destinations in the allocation should be paid out for each asset.
      * @param guarantorOutcome the outcome containing a guarantee which will be claimed for each asset.
      */
@@ -184,7 +184,7 @@ contract OutcomeTransformations {
                 gAssetOutcome.allocationOrGuaranteeBytes,
                 (Outcome.Guarantee)
             );
-            require(guarantee.targetChannelId == targetChannelId, 'incorret target channel');
+            require(guarantee.targetChannelId == targetChannelId, 'incorrect target channel');
             Outcome.AllocationItem[] memory allocation = abi.decode(
                 assetOutcome.allocationOrGuaranteeBytes,
                 (Outcome.AllocationItem[])
