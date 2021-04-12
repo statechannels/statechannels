@@ -22,7 +22,7 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 import {signStates} from '../../../src';
@@ -76,27 +76,27 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = setupContracts(
+  NitroAdjudicator = setupContract(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  EthAssetHolder1 = setupContracts(
+  EthAssetHolder1 = setupContract(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER_ADDRESS
   );
-  EthAssetHolder2 = setupContracts(
+  EthAssetHolder2 = setupContract(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER2_ADDRESS
   );
-  ERC20AssetHolder = setupContracts(
+  ERC20AssetHolder = setupContract(
     provider,
     ERC20AssetHolderArtifact,
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
-  Token = setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   addresses.ETH = EthAssetHolder1.address;
   addresses.ETH2 = EthAssetHolder2.address;
   addresses.ERC20 = ERC20AssetHolder.address;

@@ -57,15 +57,12 @@ export const getTestProvider = (): ethers.providers.JsonRpcProvider => {
  * @param address the ethereum address of the contract, once it is deployed
  * @returns a rich (ethers) Contract object with a connected signer (ther 0th signer of the supplied provider)
  */
-export function setupContracts(
+export function setupContract(
   provider: ethers.providers.JsonRpcProvider,
   artifact: {abi: ethers.ContractInterface},
   address: string
 ): Contract {
-  const signer = provider.getSigner(0);
-  // TODO: We should be use the address env variables instead of the address on the artifact
-  const contract = new ethers.Contract(address, artifact.abi, signer);
-  return contract;
+  return new ethers.Contract(address, artifact.abi, provider.getSigner(0));
 }
 
 export function getPlaceHolderContractAddress(): string {
