@@ -127,6 +127,8 @@ it('server + browser wallet interoperability test', async () => {
   });
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(output1), 'dummyDomain');
+
+  // TODO: the proper way to do this is to wait for a ChannelProposed or some sort of new objective notification
   await browserWallet.pushMessage(
     {
       jsonrpc: '2.0',
