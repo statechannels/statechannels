@@ -50,11 +50,11 @@ export const getTestProvider = (): ethers.providers.JsonRpcProvider => {
   return new ethers.providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 };
 
-export async function setupContracts(
+export function setupContracts(
   provider: ethers.providers.JsonRpcProvider,
   artifact: {abi: ethers.ContractInterface},
   address: string
-): Promise<ethers.Contract> {
+): Contract {
   const signer = provider.getSigner(0);
   // TODO: We should be use the address env variables instead of the address on the artifact
   const contract = new ethers.Contract(address, artifact.abi, signer);
