@@ -29,7 +29,7 @@ const addresses = {
 };
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
+  AssetHolder = setupContracts(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER_ADDRESS

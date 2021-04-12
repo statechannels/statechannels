@@ -10,11 +10,7 @@ let ForceMove: Contract;
 jest.setTimeout(10_000);
 
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContracts(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 describe('_validSignatures (participants sign only their own states)', () => {

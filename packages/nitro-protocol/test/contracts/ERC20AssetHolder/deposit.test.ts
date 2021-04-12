@@ -27,12 +27,12 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ERC20AssetHolder = await setupContracts(
+  ERC20AssetHolder = setupContracts(
     provider,
     ERC20AssetHolderArtifact,
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
-  Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  Token = setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   signer0Address = await signer0.getAddress();
 });
 

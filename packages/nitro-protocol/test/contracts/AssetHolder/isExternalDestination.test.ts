@@ -17,7 +17,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
+  AssetHolder = setupContracts(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER_ADDRESS

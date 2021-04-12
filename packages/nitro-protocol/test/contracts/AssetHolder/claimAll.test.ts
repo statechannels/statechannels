@@ -31,7 +31,7 @@ const addresses = {
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
+  AssetHolder = setupContracts(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER_ADDRESS
