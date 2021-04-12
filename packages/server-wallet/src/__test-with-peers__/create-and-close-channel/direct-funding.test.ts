@@ -88,18 +88,6 @@ it('Create a directly funded channel between two engines ', async () => {
     turnNum: 3,
   });
 
-  // TODO (DirectFunder) Remove hacky expectation
-  (['a', 'b'] as const).map(key => {
-    const objective = (peerEngines[key] as any).richObjectives[channelId];
-    const signatures = [{signer: expect.any(String)}, {signer: expect.any(String)}];
-    expect(objective).toMatchObject({
-      status: 'success',
-      preFundSetup: {signatures},
-      funding: {amount: BN.from(2), finalized: true},
-      postFundSetup: {signatures},
-    });
-  });
-
   const closeChannelParams: CloseChannelParams = {
     channelId,
   };
