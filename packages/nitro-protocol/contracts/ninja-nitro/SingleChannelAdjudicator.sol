@@ -21,6 +21,14 @@ contract SingleChannelAdjudicator is
 
     receive() external payable {} // solhint-disable-line no-empty-blocks
 
+    struct ChannelDataAlt {
+        uint48 turnNumRecord;
+        uint48 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes outcomeBytes;
+    }
+
     /**
      * @notice Verifies a conclusion proof, pays out all assets and selfdestructs
      * @dev Verifies a conclusion proof, pays out all assets and selfdestructs
@@ -313,7 +321,7 @@ contract SingleChannelAdjudicator is
      */
     function payOutTarget(
         bytes32 guarantorChannelId,
-        ChannelDataLite calldata cDL,
+        ChannelDataAlt calldata cDL,
         Outcome.OutcomeItem[] memory payouts
     ) external {
         Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
@@ -351,8 +359,8 @@ contract SingleChannelAdjudicator is
     function claim(
         bytes32 guarantorChannelId,
         bytes32 targetChannelId,
-        ChannelDataLite calldata guaranteeCDL,
-        ChannelDataLite calldata targetCDL,
+        ChannelDataAlt calldata guaranteeCDL,
+        ChannelDataAlt calldata targetCDL,
         uint256[][] memory indices
     ) external {
         // CHECKS
