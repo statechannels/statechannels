@@ -79,6 +79,9 @@ export class Wallet {
     const objectiveIds = objectives.map(o => o.objectiveId);
     // Instead of getting messages per objective we just get them all at once
     // This will prevent us from querying the database for each objective
+    // TODO: For now we pass in all messages for each objective
+    // but we should fix this in https://github.com/statechannels/statechannels/issues/3461
+    // by returning messages per objective
     const syncMessages = getMessages(await this._engine.syncObjectives(objectiveIds));
     return Promise.all(
       objectives.map(async o => {
