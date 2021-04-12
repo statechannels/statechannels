@@ -30,6 +30,7 @@
     "@microsoft/api-extractor": "7.13.1",
     "@pacote/jest-either": "4.0.4",
     "@statechannels/devtools": "0.5.6",
+    "@types/async-lock": "^1.1.2",
     "@types/autocannon": "4.1.0",
     "@types/body-parser": "1.19.0",
     "@types/eslint": "7.2.3",
