@@ -3,7 +3,7 @@ import shuffle from 'lodash.shuffle';
 
 import {
   getTestProvider,
-  setupContracts,
+  setupContract,
   randomExternalDestination,
   randomChannelId,
 } from '../../test-helpers';
@@ -15,11 +15,7 @@ const provider = getTestProvider();
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 import {AllocationItem, Guarantee} from '../../../src';

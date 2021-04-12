@@ -7,7 +7,7 @@ import {Channel, getChannelId} from '../../../src/contract/channel';
 import {
   getRandomNonce,
   getTestProvider,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 
@@ -22,7 +22,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ETHAssetHolder = setupContracts(
+  ETHAssetHolder = setupContract(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER_ADDRESS
