@@ -43,9 +43,11 @@ describe('EnsureObjectives', () => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
       });
 
-      await expect(
-        wallet.createChannels(Array(10).fill(getWithPeersCreateChannelsArgs()))
-      ).resolves.not.toThrow();
+      const response = await wallet.createChannels(
+        Array(10).fill(getWithPeersCreateChannelsArgs())
+      );
+
+      await expect(response).toBeObjectiveDoneType('Success');
     }
   );
 

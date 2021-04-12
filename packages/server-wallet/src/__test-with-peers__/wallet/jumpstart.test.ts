@@ -50,21 +50,15 @@ describe('jumpstartObjectives', () => {
     const createResponse = await wallet.createChannels(
       Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs())
     );
-    const createResults = await Promise.all(createResponse.map(r => r.done));
 
-    expect(createResults).toHaveLength(numberOfChannels);
-    // No messages were sent through so we expect them all to fail
-    expect(createResults.every(d => d.type === 'EnsureObjectiveFailed')).toBe(true);
+    await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
 
     await crashAndRestart('A');
 
     wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
     const jumpstartResponse = await wallet.jumpStartObjectives();
-    const jumpstartResults = await Promise.all(jumpstartResponse.map(r => r.done));
 
-    expect(jumpstartResults).toHaveLength(numberOfChannels);
-    // Jumpstart should of completed the objectives
-    expect(jumpstartResults.every(d => d.type === 'Success')).toBe(true);
+    await expect(jumpstartResponse).toBeObjectiveDoneType('Success');
   });
 });
