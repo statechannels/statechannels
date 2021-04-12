@@ -13,11 +13,13 @@ export type OpenChannelEvent = {now?: number} & (
   | {type: 'StatesReceived'; states: SignedState[]}
   | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
   | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number}
+  | {type: 'Approval'}
 );
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
 export enum WaitingFor {
+  approval = 'DirectFunder.approval',
   theirPreFundSetup = 'DirectFunder.theirPreFundSetup',
   safeToDeposit = 'DirectFunder.safeToDeposit',
   channelFunded = 'DirectFunder.channelFunded',
@@ -31,6 +33,7 @@ const enum Steps {
 
 export type OpenChannelObjective = {
   status: WaitingFor | 'success' | 'error';
+  approved: boolean;
   channelId: string;
   openingState: State;
   myIndex: number;
@@ -62,6 +65,7 @@ export function initialize(
     'signatures' in openingState ? mergeSignatures([], openingState.signatures) : [];
 
   return {
+    approved: false,
     channelId: calculateChannelId(openingState),
     myIndex,
     openingState: _.omit(openingState, 'signatures'),
@@ -133,6 +137,9 @@ export function openChannelCranker(
   switch (event.type) {
     case 'Crank':
       break;
+    case 'Approval':
+      objective.approved = true;
+      break;
     case 'DepositSubmitted':
       objective.fundingRequest = {
         tx: event.tx,
@@ -193,6 +200,10 @@ export function openChannelCranker(
   }
 
   // Then, transition & collect actions:
+  if (!objective.approved) {
+    objective.status = WaitingFor.approval;
+    return {objective, actions};
+  }
 
   if (!signedbyMe(objective, Steps.preFundSetup, me.signingAddress)) {
     signStateAction(Steps.preFundSetup, myPrivateKey, objective, actions);
