@@ -17,7 +17,7 @@ contract SingleChannelAdjudicator is
         adjudicatorFactoryAddress = a;
     }
 
-    receive() external payable {}
+    receive() external payable {} // solhint-disable-line no-empty-blocks
 
     /**
      * @notice Verifies a conclusion proof, pays out all assets and selfdestructs
