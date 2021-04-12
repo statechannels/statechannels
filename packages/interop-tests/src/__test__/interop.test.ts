@@ -127,6 +127,15 @@ it('server + browser wallet interoperability test', async () => {
   });
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(output1), 'dummyDomain');
+  await browserWallet.pushMessage(
+    {
+      jsonrpc: '2.0',
+      id: 2,
+      method: 'JoinChannel',
+      params: {channelId: output1.channelResult.channelId}
+    },
+    'dummyDomain'
+  );
 
   /** This is fragile. We are waiting for the third channelUpdated event. Note that these events consistently arrive in the following order.
    *  But the events are not guaranteed to arrive in this order:

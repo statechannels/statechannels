@@ -149,7 +149,11 @@ export class ChannelWallet {
         break;
       }
       case 'JOIN_CHANNEL':
-        this.getWorkflow(this.calculateWorkflowId(request)).service.send(request);
+        // This is wallet 1.0 logic. Leaving for now for reference.
+        // this.getWorkflow(this.calculateWorkflowId(request)).service.send(request);
+
+        // This wallet 2.0 logic
+        this.approveRichObjective(request.channelId);
         break;
       case 'APPROVE_BUDGET_AND_FUND': {
         const workflow = this.startWorkflow(
@@ -233,6 +237,8 @@ export class ChannelWallet {
    *  START of wallet 2.0
    */
 
+  // TODO: an event should be associated with a single objective. In other words, this function should not
+  //        map an event to all stored objectives
   private async crankRichObjectives(event: DirectFunder.OpenChannelEvent): Promise<void> {
     const richObjectives = this.store.richObjectives;
     for (const channelId of Object.keys(richObjectives)) {
@@ -278,6 +284,14 @@ export class ChannelWallet {
         }
       }
     }
+  }
+
+  approveRichObjective(channelId: string) {
+    const richObjective = this.store.richObjectives[channelId];
+    if (!richObjective) {
+      throw new Error(`Rich objective must exist for channelId ${channelId}`);
+    }
+    this.crankRichObjectives({type: 'Approval'});
   }
 
   /**
