@@ -124,9 +124,20 @@ describe('claim (ETH only)', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
       // Fund the guarantor channel
-      await guarantor.depositETH(heldBefore[guarantor.id]);
+      let gasUsed;
+      gasUsed = await guarantor.depositETH(heldBefore[guarantor.id]);
+      await writeGasConsumption(
+        'SingleChannelAdjudicator.claim.gas.md',
+        name + ': send ETH to Guarantor',
+        gasUsed
+      );
       // DEPLOY GUARANTOR CHANNEL
-      await guarantor.deploy();
+      gasUsed = await guarantor.deploy();
+      await writeGasConsumption(
+        'SingleChannelAdjudicator.claim.gas.md',
+        name + ': deploy Guarantor',
+        gasUsed
+      );
       // Compute an appropriate guarantee for the guarantor (using only ETH)
       const guarantee = {
         destinations: guaranteeDestinations,
@@ -135,7 +146,12 @@ describe('claim (ETH only)', () => {
       const guarantorOutcome: Outcome = [{assetHolderAddress: constants.AddressZero, guarantee}];
       if (guaranteeDestinations.length > 0) {
         // CONCLUDE GUARANTOR CHANNEL
-        await guarantor.conclude(guarantorOutcome);
+        gasUsed = await guarantor.conclude(guarantorOutcome);
+        await writeGasConsumption(
+          'SingleChannelAdjudicator.claim.gas.md',
+          name + ': conclude Guarantor',
+          gasUsed
+        );
       } else guarantor.outcome = guarantorOutcome; // Set this so that the claim tx should revert in the way we expect
       // Compute an appropriate allocation outcome for the target (using only ETH)
       const allocation = [];
@@ -147,10 +163,20 @@ describe('claim (ETH only)', () => {
       ];
 
       // DEPLOY TARGET CHANNEL
-      await target.deploy();
+      gasUsed = await target.deploy();
+      await writeGasConsumption(
+        'SingleChannelAdjudicator.claim.gas.md',
+        name + ': deploy Target',
+        gasUsed
+      );
       // CONCLUDE TARGET CHANNEL
       if (Object.keys(tOutcomeBefore).length > 0) {
-        await target.conclude(targetOutcome);
+        gasUsed = await target.conclude(targetOutcome);
+        await writeGasConsumption(
+          'SingleChannelAdjudicator.claim.gas.md',
+          name + ': conclude Target',
+          gasUsed
+        );
       }
 
       const tx = target.claimTx(guarantor, indices);
@@ -161,7 +187,11 @@ describe('claim (ETH only)', () => {
         const balancesBefore = await getBalances(payouts);
         // Extract logs
         const {events: eventsFromTx, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('SingleChannelAdjudicator.claim.gas.md', name, gasUsed);
+        await writeGasConsumption(
+          'SingleChannelAdjudicator.claim.gas.md',
+          name + ': Target. claim ',
+          gasUsed
+        );
 
         // Check new outcomeHash
         const newAllocation = [];
@@ -231,12 +261,13 @@ class TestChannel {
    * Deploys an instance of a SingleChannelAdjudicator for this channel
    */
   async deploy() {
-    await (await this.factory.createChannel(this.id)).wait();
+    const {gasUsed} = await (await this.factory.createChannel(this.id)).wait();
     this.adjudicator = setupContracts(
       provider,
       SingleChannelAdjudicatorArtifact,
       await this.getAddress()
     );
+    return gasUsed;
   }
 
   /**
@@ -244,12 +275,13 @@ class TestChannel {
    * @param amount number of wei
    */
   async depositETH(amount: BigNumberish) {
-    await (
+    const {gasUsed} = await (
       await provider.getSigner().sendTransaction({
         to: await this.getAddress(),
         value: amount,
       })
     ).wait();
+    return gasUsed;
   }
   async conclude(outcome: Outcome) {
     const states: State[] = [
@@ -267,7 +299,7 @@ class TestChannel {
       signState(states[0], wallets[0].privateKey).signature,
       signState(states[0], wallets[1].privateKey).signature,
     ];
-    const {blockNumber} = await (
+    const {blockNumber, gasUsed} = await (
       await this.adjudicator.conclude(
         this.turnNumRecord,
         getFixedPart(states[0]),
@@ -280,6 +312,7 @@ class TestChannel {
     ).wait();
     this.finalizesAt = (await provider.getBlock(blockNumber)).timestamp;
     this.outcome = outcome;
+    return gasUsed;
   }
   claimTx(guarantor: TestChannel, indices: number[]) {
     const guaranteeCDL: ChannelDataLite = {
