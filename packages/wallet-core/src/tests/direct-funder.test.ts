@@ -91,6 +91,7 @@ const richPreFS = richify(openingState);
 const richPostFS = richify({...openingState, turnNum: 3});
 
 const initial: OpenChannelObjective = {
+  approved: false,
   channelId,
   openingState,
   status: WaitingFor.theirPreFundSetup,
@@ -154,8 +155,11 @@ describe('cranking', () => {
   ];
 
   describe('as alice', () => {
-    const objectiveFixture = fixture(initial);
-    const empty = objectiveFixture();
+    const objectiveFixture = fixture({...initial, approved: true});
+
+    const notApproved = objectiveFixture({approved: false});
+    const approved = objectiveFixture();
+
     const zeroOutcomeState = addHash({
       ...openingState,
       outcome: {
@@ -167,7 +171,7 @@ describe('cranking', () => {
         ]
       }
     });
-    const zeroOutcome = initialize(signStateHelper(zeroOutcomeState, 'A'), 1);
+    const zeroOutcome = {...initialize(signStateHelper(zeroOutcomeState, 'A'), 1), approved: true};
 
     const aliceSignedPre = objectiveFixture({
       status: WaitingFor.theirPreFundSetup,
@@ -246,7 +250,8 @@ describe('cranking', () => {
     // prettier-ignore
     const cases: TestCase[] = [
       [msg = 'Nudging',
-             empty,          nudge, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendStates'}] ],
+             notApproved,    nudge, {preFundSetup: richPreFS.signedBy()},         [] ],
+      [ msg, approved,       nudge, {preFundSetup: richPreFS.signedBy('A')},      [{type: 'sendStates'}] ],
       [ msg, aliceSignedPre, nudge, {preFundSetup: richPreFS.signedBy('A')},      [] ],
       [ msg, bobSigned,      nudge, {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
       [ msg, readyToFund,    nudge, {funding: funding(0, true)},                  [{type: 'deposit', amount: deposits.A}] ],
@@ -254,7 +259,7 @@ describe('cranking', () => {
       
 
       [ msg = 'Receiving a preFundSetup state',
-             empty,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
+             approved,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
       [ msg, aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
 
@@ -317,8 +322,8 @@ describe('cranking', () => {
     const theFuture = MAX_WAITING_TIME + 500;
     //prettier-ignore
     const errorCases: ErrorCase[] = [
-      [ 'NonParticipantSignature', empty, receiveNonParticipantState, error, handleError({signature: {signer: 'eve'}})],
-      [ 'ReceivedUnexpectedState', empty, receiveUnexpectedState, error,     handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ],
+      [ 'NonParticipantSignature', approved, receiveNonParticipantState, error, handleError({signature: {signer: 'eve'}})],
+      [ 'ReceivedUnexpectedState', approved, receiveUnexpectedState, error,     handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ],
       [ 'TimedOutWhileFunding', depositPending, {type: 'Crank', now: theFuture}, error, handleError({now: theFuture}) ],
       [ 'UnexpectedEvent',      depositPending, {type: 'Unknown'} as any, error, handleError({event: {type: 'Unknown'}}) ]
     ];
@@ -388,17 +393,19 @@ test('pure objective cranker start to finish', () => {
   See https://github.com/statechannels/statechannels/blob/2b188f919cc0d1b3d4a12aca8918ddc0fb1bbaca/packages/server-wallet/src/__test-with-peers__/create-and-close-channel/direct-funding.test.ts#L73
 
   For the purpose of this test, I am arbitrarily deciding that the actions & events occur in this order:
-  1. Alice signs the preFS, triggers preFS action 1
-  2. Bob receives preFS event 1, trigers preFS action 2
-  3. Alice receives preFS event 2, triggers deposit action 1
-  4. Alice receives deposit event 1, does nothing
-  5. Bob receives deposit event 1, triggers deposit action 1
-  6. Bob receives deposit action 2 (UNFINALIZED)
-  7. Alice receives deposit action 2 (UNFINALIZED)
-  8. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
-  9. Alice receives deposit action 2 (FINALIZED), triggers postFS action 2
-  10. Alice receives postFS event 1, is finished
-  11. Bob receives postFS event 1, is finished
+  1. Alice tries to crank a non-appproved objective. No actions are taken
+  2. Alice approveves objective, signs the preFS, triggers preFS action 1
+  3. Bob receives preFS event 1, and tries to crank a non-approved objective
+  4. Bob approves objective, signs preFS, trigers preFS action 2
+  5. Alice receives preFS event 2, triggers deposit action 1
+  6. Alice receives deposit event 1, does nothing
+  7. Bob receives deposit event 1, triggers deposit action 1
+  8. Bob receives deposit action 2 (UNFINALIZED)
+  9. Alice receives deposit action 2 (UNFINALIZED)
+  10. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
+  11. Alice receives deposit action 2 (FINALIZED), triggers postFS action 2
+  12. Alice receives postFS event 1, is finished
+  13. Bob receives postFS event 1, is finished
 
   You can imagine a more exhaustive test here where
   - generated actions are put into a set
@@ -410,11 +417,28 @@ test('pure objective cranker start to finish', () => {
   // This is used just to kickstart Alice's cranker
   const nudge = {type: 'Crank' as const};
 
-  // 1. Alice signs the preFS, triggers preFS action 1
+  // 1. Objective has not been approved, so no actions are taken
   let output = crankAndExpect(
     'A',
     currentState,
     nudge,
+    {
+      status: WaitingFor.approval,
+      preFundSetup: richPreFS.signedBy(),
+      funding: {amount: BN.from(0), finalized: true},
+      fundingRequest: undefined,
+      postFundSetup: richPostFS.signedBy()
+    },
+    []
+  );
+
+  console.log('After crank 1');
+
+  // 2. Alice signs the preFS, triggers preFS action 1
+  output = crankAndExpect(
+    'A',
+    currentState,
+    {type: 'Approval'},
     {
       status: WaitingFor.theirPreFundSetup,
       preFundSetup: richPreFS.signedBy('A'),
@@ -425,12 +449,27 @@ test('pure objective cranker start to finish', () => {
     [{type: 'sendStates', states: [expect.objectContaining({turnNum: 0})]}]
   );
 
-  // 2. Bob nudges (representing a joinChannel call), triggers preFS action 2
+  // 3. Objective has not been approved, so no actions are taken
   expect(currentState.B.preFundSetup.signatures).toHaveLength(1);
   output = crankAndExpect(
     'B',
     currentState,
     nudge,
+    {
+      status: WaitingFor.approval,
+      preFundSetup: richPreFS.signedBy('A'),
+      funding: {amount: BN.from(0), finalized: true},
+      fundingRequest: undefined,
+      postFundSetup: richPostFS.signedBy()
+    },
+    []
+  );
+
+  // 4. Bob nudges (representing a joinChannel call), triggers preFS action 2
+  output = crankAndExpect(
+    'B',
+    currentState,
+    {type: 'Approval'},
     {
       status: WaitingFor.safeToDeposit,
       preFundSetup: richPreFS.signedBy('A', 'B'),
@@ -441,7 +480,7 @@ test('pure objective cranker start to finish', () => {
     [{type: 'sendStates', states: [expect.objectContaining({turnNum: 0})]}]
   );
 
-  // 3. Alice receives preFS event 2, triggers deposit action 1
+  // 5. Alice receives preFS event 2, triggers deposit action 1
   output = crankAndExpect(
     'A',
     currentState,
@@ -456,7 +495,7 @@ test('pure objective cranker start to finish', () => {
     [{type: 'deposit', amount: deposits.A}]
   );
 
-  // 4. Alice receives deposit event 1, does nothing
+  // 6. Alice receives deposit event 1, does nothing
   const alicesDeposit = output.actions[0];
   output = crankAndExpect(
     'A',
@@ -472,7 +511,7 @@ test('pure objective cranker start to finish', () => {
     []
   );
 
-  // 5. Bob receives deposit event 1, triggers deposit action 1
+  // 7. Bob receives deposit event 1, triggers deposit action 1
   output = crankAndExpect(
     'B',
     currentState,
@@ -488,7 +527,7 @@ test('pure objective cranker start to finish', () => {
   );
   const bobsDeposit = output.actions[0];
 
-  // 6. Bob receives deposit action 2 (UNFINALIZED)
+  // 8. Bob receives deposit action 2 (UNFINALIZED)
   output = crankAndExpect(
     'B',
     currentState,
@@ -503,7 +542,7 @@ test('pure objective cranker start to finish', () => {
     []
   );
 
-  // 7. Alice receives deposit action 2 (UNFINALIZED)
+  // 9. Alice receives deposit action 2 (UNFINALIZED)
   output = crankAndExpect(
     'A',
     currentState,
@@ -523,7 +562,7 @@ test('pure objective cranker start to finish', () => {
     finalized: true
   };
 
-  // 8. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
+  // 10. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1
   output = crankAndExpect(
     'B',
     currentState,
@@ -539,7 +578,7 @@ test('pure objective cranker start to finish', () => {
   );
   const bobsPostFS = output.actions[0];
 
-  // 9. Alice receives deposit action 2 (FINALIZED), triggers postFS action 2
+  // 10. Alice receives deposit action 2 (FINALIZED), triggers postFS action 2
   output = crankAndExpect(
     'A',
     currentState,
@@ -555,7 +594,7 @@ test('pure objective cranker start to finish', () => {
   );
   const alicesPostFS = output.actions[0];
 
-  // 10. Alice receives postFS event 1, is finished
+  // 12. Alice receives postFS event 1, is finished
   output = crankAndExpect(
     'A',
     currentState,
@@ -570,7 +609,7 @@ test('pure objective cranker start to finish', () => {
     []
   );
 
-  // 11. Bob receives postFS event 1, is finished
+  // 13. Bob receives postFS event 1, is finished
   output = crankAndExpect(
     'B',
     currentState,
