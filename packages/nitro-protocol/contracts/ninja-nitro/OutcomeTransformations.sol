@@ -4,9 +4,16 @@ pragma experimental ABIEncoderV2;
 
 import '../Outcome.sol';
 
+/**
+ * @dev Pure functions which compute an updated outcome (or part of an outcome) to be stored after a transfer or claim operation.
+ */
 contract OutcomeTransformations {
-    // Outcome transformation functions (pure)
-
+    /**
+     * @dev Computes the new allocation that should be stored against a channel after a transfer is made.
+     * @param initialHoldings initial number of assets held on chain for the channel.
+     * @param allocation initial allocation stored on chain for the channel (for a particular asset).
+     * @param indices list of indices expressing which destinations in the allocation should be paid out.
+     */
     function _computeNewAllocation(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
@@ -54,6 +61,13 @@ contract OutcomeTransformations {
         }
     }
 
+    /**
+     * @dev Computes the new allocation that should be stored against a target channel after a claim is made on its guarantor.
+     * @param initialHoldings initial number of assets held on chain for the channel.
+     * @param allocation initial allocation stored on chain for the channel (for a particular asset).
+     * @param indices list of indices expressing which destinations in the allocation should be paid out.
+     * @param guarantee the guarantee which will be claimed (for a particular asset).
+     */
     function _computeNewAllocationWithGuarantee(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
@@ -118,6 +132,14 @@ contract OutcomeTransformations {
         }
     }
 
+    /**
+     * @dev Computes the new outcome that should be stored against a target channel after a claim is made on its guarantor.
+     * @param initialHoldings list of assets held on chain for the channel, for each asset.
+     * @param outcome initial outcome stored on chain for the channel.
+     * @param targetChannelId the channelId of the target channel (used to validate th guarantee) TODO: remove?
+     * @param indices list of list of indices expressing which destinations in the allocation should be paid out for each asset.
+     * @param guarantorOutcome the outcome containing a guarantee which will be claimed for each asset.
+     */
     function _computeNewOutcomeAfterClaim(
         uint256[] memory initialHoldings,
         Outcome.OutcomeItem[] memory outcome,
