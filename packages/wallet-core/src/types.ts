@@ -97,7 +97,7 @@ type _Objective<Name, Data> = {
 type OpenChannelFunding =
   | {fundingStrategy: 'Direct' | 'Fake' | 'Unknown'; role?: 'app' | 'ledger'} // Default should be 'app'
   | {fundingStrategy: 'Ledger'; fundingLedgerChannelId: string}
-  | {fundingStrategy: 'Virtual'; rest: unknown}; // TODO: Updated in a later PR
+  | {fundingStrategy: 'Virtual'}; // TODO: Updated in a later PR
 
 export type OpenChannel = _Objective<'OpenChannel', {targetChannelId: string} & OpenChannelFunding>;
 export type CloseChannel = _Objective<

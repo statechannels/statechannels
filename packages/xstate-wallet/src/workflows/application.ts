@@ -436,7 +436,7 @@ export const workflow = (
       let data: OpenChannel['data'];
       switch (fundingStrategy) {
         case 'Virtual':
-          data = {fundingStrategy, targetChannelId, rest: undefined};
+          data = {fundingStrategy, targetChannelId};
           break;
         case 'Direct':
           data = {fundingStrategy, targetChannelId};
