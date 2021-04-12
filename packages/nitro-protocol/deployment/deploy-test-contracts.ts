@@ -106,6 +106,7 @@ export async function deploy(): Promise<Record<string, string>> {
     ADJUDICATOR_FACTORY_ADDRESS
   );
   await (await AdjudicatorFactory.setup(SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS)).wait();
+  // TODO for production deploys, ideally we call this method in the same transaction as deploying the factory (prevents frontrunning)
   // END Ninja-Nitro section
 
   return {
