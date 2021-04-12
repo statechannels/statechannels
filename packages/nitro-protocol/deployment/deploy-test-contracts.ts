@@ -73,12 +73,28 @@ export async function deploy(): Promise<Record<string, string>> {
 
   // BEGIN Ninja-Nitro section
   const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(adjudicatorFactoryArtifact as any);
+  const adjudicatorFactoryDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
+    adjudicatorFactoryArtifact as any
+  );
+  writeGasConsumption('AdjudicatorFactory.gas.md', 'deployment', adjudicatorFactoryDeploymentGas);
+  console.log(
+    `\nDeploying AdjudicatorFactory... (cost estimated to be ${adjudicatorFactoryDeploymentGas})\n`
+  );
+
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
     singleChannelAdjudicatorArtifact as any,
     {},
     ADJUDICATOR_FACTORY_ADDRESS // The mastercopy requires the adjudicator factory address as a constructor arg
     // It will be "baked into" the bytecode of the Mastercopy
   );
+
+  const masterCopyDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
+    singleChannelAdjudicatorArtifact as any,
+    {},
+    ADJUDICATOR_FACTORY_ADDRESS as any
+  );
+  writeGasConsumption('MasterCopy.gas.md', 'deployment', masterCopyDeploymentGas);
+  console.log(`\nDeploying MasterCopy... (cost estimated to be ${masterCopyDeploymentGas})\n`);
 
   // The following lines are not strictly part of deployment, but they constiture a crucial one-time setup
   // for the contracts. The factory needs to know the address of the mastercopy, and this is provided by calling
