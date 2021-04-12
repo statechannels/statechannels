@@ -14,7 +14,7 @@ import {
 } from '../../test-helpers';
 
 const provider = getTestProvider();
-const signer0 = provider.getSigner(0); // Convention matchessetupContract function
+const signer0 = provider.getSigner(0); // Convention matches setupContract function
 let signer0Address;
 let ERC20AssetHolder: Contract;
 let Token: Contract;
