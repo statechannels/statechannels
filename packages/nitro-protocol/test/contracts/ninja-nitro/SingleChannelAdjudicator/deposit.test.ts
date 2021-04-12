@@ -49,7 +49,7 @@ describe('deposit ETH', () => {
     ).wait();
     await writeGasConsumption(
       'SingleChannelAdjudicator.deposit.gas.md',
-      'ninja deposit (before contract deployed)',
+      'ninja deposit (after contract deployed)',
       gasUsed
     );
 
