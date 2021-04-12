@@ -259,7 +259,6 @@ export const workflow = (
       distinctUntilChanged((entry1, entry2) =>
         _.isEqual(serializeChannelEntry(entry1), serializeChannelEntry(entry2))
       ),
-      distinctUntilChanged((entry1, entry2) => _.isEqual(entry1, entry2)),
 
       map(storeEntry => ({
         type: 'CHANNEL_UPDATED',
@@ -272,19 +271,16 @@ export const workflow = (
       const entry = await store.getEntry(context.channelId);
 
       await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-      await messagingService.sendResponse(context.requestId, entry);
     },
 
     sendJoinChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-      await messagingService.sendResponse(context.requestId, entry);
     },
 
     sendChallengeChannelResponse: async (context: RequestIdExists & ChannelIdExists) => {
       const entry = await store.getEntry(context.channelId);
       await messagingService.sendResponse(context.requestId, serializeChannelEntry(entry));
-      await messagingService.sendResponse(context.requestId, entry);
     },
 
     spawnObservers: assign<ChannelIdExists>((context: ChannelIdExists) => ({
@@ -332,10 +328,6 @@ export const workflow = (
             event.requestId,
             serializeChannelEntry(await store.updateChannel(event.channelId, event))
           );
-          messagingService.sendResponse(
-            event.requestId,
-            await store.updateChannel(event.channelId, event)
-          );
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);
 
@@ -359,10 +351,6 @@ export const workflow = (
           messagingService.sendResponse(
             event.requestId,
             serializeChannelEntry(await store.updateChannel(event.channelId, {isFinal: true}))
-          );
-          messagingService.sendResponse(
-            event.requestId,
-            await store.updateChannel(event.channelId, {isFinal: true})
           );
         } catch (error) {
           const matches = reason => new RegExp(reason).test(error.message);
