@@ -3,9 +3,6 @@ import {
   simpleEthAllocation,
   serializeState,
   SignedState,
-  OpenChannel,
-  DirectFunder,
-  hashState,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import _ from 'lodash';
@@ -461,27 +458,6 @@ describe('when there is a request provided', () => {
           params: {data: {signedStates: expect.arrayContaining(signedStates)}},
         },
       ],
-    });
-  });
-});
-
-describe('direct-funder', () => {
-  it('stores but does not crank new objectives when they come in', async () => {
-    const signedState = stateSignedBy([bob()])({turnNum: zero, channelNonce: 9001});
-    const targetChannelId = calculateChannelId(signedState);
-    const {participants} = signedState;
-    const objectives: OpenChannel[] = [
-      {type: 'OpenChannel', data: {targetChannelId, fundingStrategy: 'Direct'}, participants},
-    ];
-    const signedStates = [serializeState(signedState)];
-
-    await engine.pushMessage({walletVersion: WALLET_VERSION, objectives, signedStates});
-
-    const currentState = (engine as any).richObjectives[targetChannelId];
-    expect(currentState).toMatchObject({
-      status: DirectFunder.WaitingFor.theirPreFundSetup,
-      myIndex: 0,
-      preFundSetup: {hash: hashState(signedState), signatures: signedState.signatures},
     });
   });
 });
