@@ -21,7 +21,6 @@ interface TestPeerEngines {
   b: Engine;
 }
 
-
 const lock = new AsyncLock();
 const LOCK_STRING = 'CONCURRENCY_LOCK';
 
@@ -32,7 +31,10 @@ try {
   if (err.message !== `EEXIST: file already exists, mkdir '${ARTIFACTS_DIR}'`) throw err;
 }
 const baseConfig = defaultTestConfig({
-  loggingConfiguration: {logLevel: 'trace', logDestination:  path.join(ARTIFACTS_DIR, 'with-peers.log')},
+  loggingConfiguration: {
+    logLevel: 'trace',
+    logDestination: path.join(ARTIFACTS_DIR, 'with-peers.log'),
+  },
 });
 export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: 'server_wallet_test_a',
@@ -64,104 +66,112 @@ export const participantIdB = 'b';
 export async function crashAndRestart(
   enginesToRestart: 'A' | 'B' | 'Both' = 'Both'
 ): Promise<void> {
-  return lock.acquire(LOCK_STRING, async ()=>{
-  try {
-    await messageService.destroy();
-
-    if (enginesToRestart === 'A' || enginesToRestart === 'Both') {
-      await peerEngines.a.destroy();
-      peerEngines.a = await Engine.create(aEngineConfig);
-    }
-
-    if (enginesToRestart === 'B' || enginesToRestart === 'Both') {
-      await peerEngines.b.destroy();
-      peerEngines.b = await Engine.create(bEngineConfig);
-    }
-
-    const handler = await createTestMessageHandler([
-      {participantId: participantIdA, engine: peerEngines.a},
-      {participantId: participantIdB, engine: peerEngines.b},
-    ]);
-
-    messageService = (await TestMessageService.create(handler,peerEngines.a.logger)) as TestMessageService;
-  } catch (error) {
-    logger.error(error, 'CrashAndRestart failed');
-    throw error;
-  }
-}
-);
-}
-
-export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
-  return async () => {
-    return lock.acquire(LOCK_STRING, async ()=>{
+  return lock.acquire(LOCK_STRING, async () => {
     try {
-      await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+      await messageService.destroy();
 
-      await Promise.all([
-        DBAdmin.createDatabase(aEngineConfig),
-        DBAdmin.createDatabase(bEngineConfig),
-      ]);
-
-      await Promise.all([
-        DBAdmin.migrateDatabase(aEngineConfig),
-        DBAdmin.migrateDatabase(bEngineConfig),
-      ]);
-
-      peerEngines = {
-        a: await Engine.create(aEngineConfig),
-        b: await Engine.create(bEngineConfig),
-      };
-
-      if (withWalletSeeding) {
-        await seedAlicesSigningWallet(peerEngines.a.knex);
-        await seedBobsSigningWallet(peerEngines.b.knex);
+      if (enginesToRestart === 'A' || enginesToRestart === 'Both') {
+        await peerEngines.a.destroy();
+        peerEngines.a = await Engine.create(aEngineConfig);
       }
 
-      participantA = {
-        signingAddress: await peerEngines.a.getSigningAddress(),
-        participantId: participantIdA,
-        destination: makeDestination(
-          '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
-        ),
-      };
-      participantB = {
-        signingAddress: await peerEngines.b.getSigningAddress(),
-        participantId: participantIdB,
-        destination: makeDestination(
-          '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
-        ),
-      };
+      if (enginesToRestart === 'B' || enginesToRestart === 'Both') {
+        await peerEngines.b.destroy();
+        peerEngines.b = await Engine.create(bEngineConfig);
+      }
 
-      const participantEngines = [
+      const handler = await createTestMessageHandler([
         {participantId: participantIdA, engine: peerEngines.a},
         {participantId: participantIdB, engine: peerEngines.b},
-      ];
+      ]);
 
-      const handler = createTestMessageHandler(participantEngines, peerEngines.a.logger);
-      messageService = (await TestMessageService.create(handler,peerEngines.a.logger)) as TestMessageService;
+      messageService = (await TestMessageService.create(
+        handler,
+        peerEngines.a.logger
+      )) as TestMessageService;
     } catch (error) {
-      logger.error(error, 'getPeersSetup failed');
+      logger.error(error, 'CrashAndRestart failed');
       throw error;
     }
   });
 }
+
+export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
+  return async () => {
+    return lock.acquire(LOCK_STRING, async () => {
+      try {
+        await Promise.all([
+          DBAdmin.dropDatabase(aEngineConfig),
+          DBAdmin.dropDatabase(bEngineConfig),
+        ]);
+
+        await Promise.all([
+          DBAdmin.createDatabase(aEngineConfig),
+          DBAdmin.createDatabase(bEngineConfig),
+        ]);
+
+        await Promise.all([
+          DBAdmin.migrateDatabase(aEngineConfig),
+          DBAdmin.migrateDatabase(bEngineConfig),
+        ]);
+
+        peerEngines = {
+          a: await Engine.create(aEngineConfig),
+          b: await Engine.create(bEngineConfig),
+        };
+
+        if (withWalletSeeding) {
+          await seedAlicesSigningWallet(peerEngines.a.knex);
+          await seedBobsSigningWallet(peerEngines.b.knex);
+        }
+
+        participantA = {
+          signingAddress: await peerEngines.a.getSigningAddress(),
+          participantId: participantIdA,
+          destination: makeDestination(
+            '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
+          ),
+        };
+        participantB = {
+          signingAddress: await peerEngines.b.getSigningAddress(),
+          participantId: participantIdB,
+          destination: makeDestination(
+            '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
+          ),
+        };
+
+        const participantEngines = [
+          {participantId: participantIdA, engine: peerEngines.a},
+          {participantId: participantIdB, engine: peerEngines.b},
+        ];
+
+        const handler = createTestMessageHandler(participantEngines, peerEngines.a.logger);
+        messageService = (await TestMessageService.create(
+          handler,
+          peerEngines.a.logger
+        )) as TestMessageService;
+      } catch (error) {
+        logger.error(error, 'getPeersSetup failed');
+        throw error;
+      }
+    });
+  };
 }
 
 export const peersTeardown: jest.Lifecycle = async () => {
-  return lock.acquire(LOCK_STRING, async ()=>{
-try{
-  await messageService.destroy();
-  await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
-  } catch (error) {
-    if (error.message==='aborted'){
-      // When we destroy the engines there still may open knex connections due to our use of delay in the TestMessageService
-      // These throw an abort error that can make the test output messy
-      // We just swallow the error here to avoid it
-      logger.trace({error},'Ignoring knex aborted error');
-      return;
-    }
+  return lock.acquire(LOCK_STRING, async () => {
+    try {
+      await messageService.destroy();
+      await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
+      await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+    } catch (error) {
+      if (error.message === 'aborted') {
+        // When we destroy the engines there still may open knex connections due to our use of delay in the TestMessageService
+        // These throw an abort error that can make the test output messy
+        // We just swallow the error here to avoid it
+        logger.trace({error}, 'Ignoring knex aborted error');
+        return;
+      }
       logger.error(error, 'peersTeardown failed');
       throw error;
     }
