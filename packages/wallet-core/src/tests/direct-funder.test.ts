@@ -259,7 +259,8 @@ describe('cranking', () => {
       
 
       [ msg = 'Receiving a preFundSetup state',
-             approved,          sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
+             notApproved,    sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('B')},      [] ],
+      [ msg, approved,       sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'sendStates'}, {type: 'deposit'}] ],
       [ msg, aliceSignedPre, sendState(richPreFS.stateSignedBy('B')), {preFundSetup: richPreFS.signedBy('A', 'B')}, [{type: 'deposit'}] ],
 
 
