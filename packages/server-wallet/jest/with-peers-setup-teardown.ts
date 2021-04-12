@@ -15,11 +15,16 @@ import {
 import {createLogger} from '../src/logger';
 import path from 'path';
 import * as fs from 'fs';
-
+import AsyncLock from 'async-lock';
 interface TestPeerEngines {
   a: Engine;
   b: Engine;
 }
+
+
+const lock = new AsyncLock();
+const LOCK_STRING = 'CONCURRENCY_LOCK';
+
 const ARTIFACTS_DIR = '../../artifacts';
 try {
   fs.mkdirSync(ARTIFACTS_DIR);
@@ -59,6 +64,7 @@ export const participantIdB = 'b';
 export async function crashAndRestart(
   enginesToRestart: 'A' | 'B' | 'Both' = 'Both'
 ): Promise<void> {
+  return lock.acquire(LOCK_STRING, async ()=>{
   try {
     await messageService.destroy();
 
@@ -83,9 +89,12 @@ export async function crashAndRestart(
     throw error;
   }
 }
+);
+}
 
 export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
   return async () => {
+    return lock.acquire(LOCK_STRING, async ()=>{
     try {
       await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
 
@@ -135,10 +144,12 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
       logger.error(error, 'getPeersSetup failed');
       throw error;
     }
-  };
+  });
+}
 }
 
 export const peersTeardown: jest.Lifecycle = async () => {
+  return lock.acquire(LOCK_STRING, async ()=>{
 try{
   await messageService.destroy();
   await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
@@ -154,4 +165,5 @@ try{
       logger.error(error, 'peersTeardown failed');
       throw error;
     }
+  });
 };
