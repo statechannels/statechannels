@@ -160,6 +160,10 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
 }
 
 export const peersTeardown = async (peerSetup: PeerSetup): Promise<void> => {
+  if (!peerSetup) {
+    logger.warn('No PeerSetup so no teardown needed');
+    return;
+  }
   try {
     const {messageService, peerEngines} = peerSetup;
     await messageService.destroy();
