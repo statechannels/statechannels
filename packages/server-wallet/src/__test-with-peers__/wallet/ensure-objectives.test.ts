@@ -13,7 +13,10 @@ jest.setTimeout(60_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
-
+process.on('unhandledRejection', () => {
+  console.error('Now what?');
+  console.error('I want to make sure that jest exits with an error!');
+});
 describe('EnsureObjectives', () => {
   // This is the percentages of messages that get dropped
   const testCases: LatencyOptions[] = [
@@ -76,8 +79,9 @@ describe('EnsureObjectives', () => {
     };
     peerEngines.b.on('objectiveStarted', listener);
 
-    const {done} = (await wallet.createChannels([getWithPeersCreateChannelsArgs()]))[0];
-    await expect(done).resolves.toMatchObject({type: 'EnsureObjectiveFailed'});
+    const result = await wallet.createChannels([getWithPeersCreateChannelsArgs()]);
+
+    expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
     peerEngines.b.removeListener('objectiveStarted', listener);
   });
 });
