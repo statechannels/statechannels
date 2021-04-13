@@ -8,13 +8,18 @@ import {
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ChannelWallet} from '@statechannels/xstate-wallet';
 import {constants, Contract, providers, Wallet} from 'ethers';
-import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
+import {BN, formatAmount, makeAddress, makeDestination, Uint256} from '@statechannels/wallet-core';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {WalletObjective} from '@statechannels/server-wallet/src/models/objective';
-import {isJsonRpcNotification, Message, PushMessageRequest} from '@statechannels/client-api-schema';
+import {
+  CreateChannelParams,
+  isJsonRpcNotification,
+  Message,
+  PushMessageRequest
+} from '@statechannels/client-api-schema';
 
 jest.setTimeout(60_000);
 
@@ -72,7 +77,16 @@ function serverMessageToBrowserMessage(serverOutput: Output): PushMessageRequest
   return generatePushMessage(serverOutput.outbox[0].params);
 }
 
-it('server + browser wallet interoperability test', async () => {
+function generatePushMessage(messageParams: Message): PushMessageRequest {
+  return {
+    jsonrpc: '2.0',
+    id: 111111111,
+    method: 'PushMessage',
+    params: messageParams
+  };
+}
+
+it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
   const serverWallet = await SingleThreadedEngine.create(serverConfig);
   const serverAddress = await serverWallet.getSigningAddress();
   const serverDestination = makeDestination(serverAddress);
@@ -128,7 +142,7 @@ it('server + browser wallet interoperability test', async () => {
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(output1), 'dummyDomain');
 
-  // TODO: the proper way to do this is to wait for a ChannelProposed or some sort of new objective notification
+  // TODO: the proper way to do this is to wait for a ChannelProposed or some sort of new objective notification'
   await browserWallet.pushMessage(
     {
       jsonrpc: '2.0',
@@ -162,11 +176,99 @@ it('server + browser wallet interoperability test', async () => {
   await serverWallet.destroy();
 });
 
-function generatePushMessage(messageParams: Message): PushMessageRequest {
-  return {
-    jsonrpc: '2.0',
-    id: 111111111,
-    method: 'PushMessage',
-    params: messageParams
+it.only('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
+  const serverWallet = await SingleThreadedEngine.create(serverConfig);
+  const serverAddress = await serverWallet.getSigningAddress();
+  const serverDestination = makeDestination(serverAddress);
+
+  const objectiveSuccededPromise = new Promise<void>(r => {
+    serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
+      if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
+    });
+  });
+
+  const browserWallet = await ChannelWallet.create(
+    makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
+  );
+  const browserAddress = await browserWallet.getAddress();
+  const browserDestination = makeDestination(browserAddress);
+
+  browserWallet.onSendMessage(message => {
+    if (isJsonRpcNotification(message)) {
+      serverWallet.pushMessage((message.params as Message).data);
+    }
+  });
+
+  const createChannelParams: CreateChannelParams = {
+    participants: [
+      {
+        participantId: browserAddress,
+        signingAddress: browserAddress,
+        destination: browserDestination
+      },
+      {
+        participantId: 'server',
+        signingAddress: serverAddress,
+        destination: serverDestination
+      }
+    ],
+    allocations: [
+      {
+        assetHolderAddress: ethAssetHolderAddress,
+        allocationItems: [
+          {
+            amount: formatAmount('0x3' as Uint256),
+            destination: serverDestination
+          },
+          {
+            amount: formatAmount('0x5' as Uint256),
+            destination: browserDestination
+          }
+        ]
+      }
+    ],
+    appDefinition: constants.AddressZero,
+    appData: '0x',
+    fundingStrategy: 'Direct',
+    challengeDuration: 86400 // one day
   };
-}
+
+  await browserWallet.pushMessage(
+    {
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'CreateChannel',
+      params: createChannelParams
+    },
+    'dummyDomain'
+  );
+  await new Promise(r => setTimeout(r, 1_000));
+  const channelId = Object.keys(browserWallet.getRichObjectives())[0];
+  await browserWallet.approveRichObjective(channelId);
+
+  await new Promise(r => setTimeout(r, 1_000));
+  const serverOutput1 = await serverWallet.joinChannel({channelId});
+  await browserWallet.pushMessage(serverMessageToBrowserMessage(serverOutput1), 'dummyDomain');
+
+  /** This is fragile. We are waiting for the third channelUpdated event. Note that these events consistently arrive in the following order.
+   *  But the events are not guaranteed to arrive in this order:
+   *  1. The first event is triggered by the registration of the channel with the chain service.
+   *      holdingUpdated is invoked when the initial holdings are read from the chain.
+   *  2. The second event is triggered by the server wallet deposit. The deposit results in a holdingUpdated invocation.
+   *  3. The third event is triggered by the browser wallet deposit.
+   */
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
+    .pipe(take(3))
+    .toPromise();
+
+  await browserWallet.pushMessage(
+    serverMessageToBrowserMessage(await postFundAPromise),
+    'dummyDomain'
+  );
+
+  await objectiveSuccededPromise;
+
+  await serverWallet.destroy();
+});
