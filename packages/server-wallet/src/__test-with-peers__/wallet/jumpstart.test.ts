@@ -53,9 +53,13 @@ describe('jumpstartObjectives', () => {
 
     await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
 
-    peerSetup = await crashAndRestart(peerSetup, 'A');
+    const restartedPeerSetup = await crashAndRestart(peerSetup, 'A');
 
-    wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
+    wallet = await Wallet.create(
+      restartedPeerSetup.peerEngines.a,
+      restartedPeerSetup.messageService,
+      {numberOfAttempts: 1}
+    );
 
     const jumpstartResponse = await wallet.jumpStartObjectives();
 

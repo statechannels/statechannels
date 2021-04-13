@@ -64,31 +64,55 @@ export async function crashAndRestart(
   try {
     await oldPeerSetup.messageService.destroy();
 
+    const restartA = enginesToRestart==='A' || enginesToRestart==='Both';
+    const restartB = enginesToRestart==='B' || enginesToRestart==='Both';
+    
+    if(restartA){
+    await   oldPeerSetup.peerEngines.a.destroy();
+    }
+    if (restartB){
+      await oldPeerSetup.peerEngines.b.destroy();
+    }
     const a =
-      enginesToRestart === 'A' || enginesToRestart === 'Both'
+    restartA
         ? await Engine.create(aEngineConfig)
         : oldPeerSetup.peerEngines.a;
 
     const b =
-      enginesToRestart === 'B' || enginesToRestart === 'Both'
+    restartB
         ? await Engine.create(bEngineConfig)
         : oldPeerSetup.peerEngines.b;
 
+        
     const handler = await createTestMessageHandler([
       {participantId: participantIdA, engine: a},
       {participantId: participantIdB, engine: b},
     ]);
 
+    const participantA = {
+      signingAddress: await a.getSigningAddress(),
+      participantId: participantIdA,
+      destination: makeDestination(
+        '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
+      ),
+    };
+    const participantB = {
+      signingAddress: await b.getSigningAddress(),
+      participantId: participantIdB,
+      destination: makeDestination(
+        '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
+      ),
+    };
+    
     const messageService = (await TestMessageService.create(
       handler,
       a.logger
     )) as TestMessageService;
-
     return {
       peerEngines: {a, b},
       messageService,
-      participantA: oldPeerSetup.participantA,
-      participantB: oldPeerSetup.participantB,
+      participantA,
+      participantB,
     };
   } catch (error) {
     logger.error(error, 'CrashAndRestart failed');
