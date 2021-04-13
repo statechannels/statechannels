@@ -355,6 +355,11 @@ export type SingleChannelOutput = {
 export class SingleThreadedEngine extends EventEmitter<EventEmitterType> implements EngineInterface, ChainEventSubscriberInterface {
     protected constructor(engineConfig: IncomingEngineConfig);
     addSigningKey(privateKey: PrivateKey): Promise<void>;
+    // (undocumented)
+    approveObjectives(objectiveIds: string[]): Promise<{
+        objectives: WalletObjective[];
+        messages: Message_3[];
+    }>;
     // Warning: (ae-forgotten-export) The symbol "AssetOutcomeUpdatedArg" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -437,6 +442,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 
 // @public (undocumented)
 export class Wallet {
+    approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
     // Warning: (ae-forgotten-export) The symbol "MessageServiceInterface" needs to be exported by the entry point index.d.ts
     static create(engine: Engine, messageService: MessageServiceInterface, retryOptions?: Partial<RetryOptions>): Promise<Wallet>;
     createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
