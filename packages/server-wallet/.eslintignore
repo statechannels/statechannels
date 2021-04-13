@@ -5,5 +5,4 @@ node_modules/
 /.etherlime-store/
 /lib/
 /dist/
-/jest/
 /deployment/
