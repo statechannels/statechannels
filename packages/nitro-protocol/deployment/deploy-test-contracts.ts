@@ -3,7 +3,7 @@
 import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
-import {getTestProvider, setupContracts, writeGasConsumption} from '../test/test-helpers';
+import {writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
@@ -15,8 +15,6 @@ import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
-import adjudicatorFactoryArtifact from '../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
-import singleChannelAdjudicatorArtifact from '../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 
 export async function deploy(): Promise<Record<string, string>> {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
@@ -71,43 +69,6 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_TOKEN_ADDRESS
   );
 
-  // BEGIN Ninja-Nitro section
-  const ADJUDICATOR_FACTORY_ADDRESS = await deployer.deploy(adjudicatorFactoryArtifact as any);
-  const adjudicatorFactoryDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
-    adjudicatorFactoryArtifact as any
-  );
-  writeGasConsumption('AdjudicatorFactory.gas.md', 'deployment', adjudicatorFactoryDeploymentGas);
-  console.log(
-    `\nDeploying AdjudicatorFactory... (cost estimated to be ${adjudicatorFactoryDeploymentGas})\n`
-  );
-
-  const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = await deployer.deploy(
-    singleChannelAdjudicatorArtifact as any,
-    {},
-    ADJUDICATOR_FACTORY_ADDRESS // The mastercopy requires the adjudicator factory address as a constructor arg
-    // It will be "baked into" the bytecode of the Mastercopy
-  );
-
-  const masterCopyDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
-    singleChannelAdjudicatorArtifact as any,
-    {},
-    ADJUDICATOR_FACTORY_ADDRESS as any
-  );
-  writeGasConsumption('MasterCopy.gas.md', 'deployment', masterCopyDeploymentGas);
-  console.log(`\nDeploying MasterCopy... (cost estimated to be ${masterCopyDeploymentGas})\n`);
-
-  // The following lines are not strictly part of deployment, but they constiture a crucial one-time setup
-  // for the contracts. The factory needs to know the address of the mastercopy, and this is provided by calling
-  // the setup method on the factory:
-  const provider = getTestProvider();
-  const AdjudicatorFactory = await setupContracts(
-    provider,
-    adjudicatorFactoryArtifact,
-    ADJUDICATOR_FACTORY_ADDRESS
-  );
-  await (await AdjudicatorFactory.setup(SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS)).wait();
-  // END Ninja-Nitro section
-
   return {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
@@ -122,7 +83,5 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_TOKEN_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER_ADDRESS,
     TEST_ASSET_HOLDER2_ADDRESS,
-    SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS,
-    ADJUDICATOR_FACTORY_ADDRESS,
   };
 }
