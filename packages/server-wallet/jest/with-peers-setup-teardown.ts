@@ -141,6 +141,8 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
         handler,
         peerEngines.a.logger
       )) as TestMessageService;
+
+      logger.trace('getPeersSetup complete');
     } catch (error) {
       logger.error(error, 'getPeersSetup failed');
       throw error;
@@ -150,7 +152,12 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 
 export const peersTeardown: jest.Lifecycle = async () => {
   try {
-    await messageService.destroy();
+    if (!messageService) {
+      logger.warn('Tearing down before the message service has been setup.');
+    } else {
+      await messageService.destroy();
+    }
+
     await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
     await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
   } catch (error) {
