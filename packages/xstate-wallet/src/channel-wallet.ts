@@ -16,8 +16,9 @@ import {
   DirectFunder,
   makeAddress
 } from '@statechannels/wallet-core';
-import ReactDOM from 'react-dom';
-import React from 'react';
+// TODO: factor UI out of channel-wallet
+// import ReactDOM from 'react-dom';
+// import React from 'react';
 import _ from 'lodash';
 
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
@@ -33,7 +34,8 @@ import {
 import {ADD_LOGS} from './config';
 import {logger} from './logger';
 import {ChainWatcher} from './chain';
-import {Wallet as WalletUi} from './ui/wallet';
+// TODO: factor UI out of channel-wallet
+// import {Wallet as WalletUi} from './ui/wallet';
 
 export interface Workflow {
   id: string;
@@ -209,22 +211,25 @@ export class ChannelWallet {
       .onTransition((state, event) => ADD_LOGS && logTransition(state, event, workflowId))
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
+
+    // TODO: factor UI out of channel wallet
     // TODO: Figure out how to resolve rendering priorities
-    this.renderUI(service);
+    //this.renderUI(service);
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
     return workflow;
   }
 
-  private renderUI(machine) {
-    if (document.getElementById('root')) {
-      ReactDOM.render(
-        React.createElement(WalletUi, {workflow: machine}),
-        document.getElementById('root')
-      );
-    }
-  }
+  // TODO: factor UI out of channel wallet
+  // private renderUI(machine) {
+  //   if (document.getElementById('root')) {
+  //     ReactDOM.render(
+  //       React.createElement(WalletUi, {workflow: machine}),
+  //       document.getElementById('root')
+  //     );
+  //   }
+  // }
 
   public onSendMessage(
     callback: (
@@ -306,6 +311,10 @@ export class ChannelWallet {
 
   public getRichObjectives() {
     return this.store.richObjectives;
+  }
+
+  public async destroy(): Promise<void> {
+    return this.store.chain.destroy();
   }
 
   /**
