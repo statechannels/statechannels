@@ -21,6 +21,7 @@ import {Contract, Wallet, utils, providers} from 'ethers';
 import {Observable, fromEvent, from, merge, interval} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
 import EventEmitter from 'eventemitter3';
+import _ from 'lodash';
 
 import {getProvider} from './utils/contract-utils';
 import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
@@ -57,6 +58,8 @@ export interface Chain {
   finalizeAndWithdraw: (finalizationProof: SignedState[]) => Promise<string | undefined>;
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
   balanceUpdatedFeed(address: string): Observable<Uint256>;
+
+  destroy(): Promise<void>;
 }
 
 type Updated = ChannelChainInfo & {channelId: string};
@@ -236,6 +239,10 @@ export class FakeChain implements Chain {
 
   public get selectedAddress() {
     return this.fakeSelectedAddress;
+  }
+
+  public async destroy(): Promise<void> {
+    _.noop();
   }
 }
 
@@ -494,6 +501,12 @@ export class ChainWatcher implements Chain {
       /* first */ // TODO: We cannot have a first because we can't "replay" events yet
       updates
     );
+  }
+
+  public async destroy(): Promise<void> {
+    await this._adjudicator?.removeAllListeners();
+    await Promise.all(this._assetHolders.map(assetHolder => assetHolder.removeAllListeners()));
+    await this.provider.removeAllListeners();
   }
 }
 
