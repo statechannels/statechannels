@@ -1,35 +1,37 @@
 import {Wallet} from '../../wallet';
-import {
-  getPeersSetup,
-  messageService,
-  peerEngines,
-  peersTeardown,
-} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
 import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {getWithPeersCreateChannelsArgs} from '../utils';
 
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
-
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await getPeersSetup();
+});
+afterAll(async () => {
+  await peersTeardown(peerSetup);
+});
 jest.setTimeout(60_000);
 
 describe('jumpstartObjectives', () => {
   it('returns an empty array when there are no objectives', async () => {
+    const {peerEngines, messageService} = peerSetup;
     const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
     expect(await wallet.jumpStartObjectives()).toHaveLength(0);
   });
 
   it('ignores completed objectives', async () => {
+    const {peerEngines, messageService} = peerSetup;
     const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
-    const createResponse = await wallet.createChannels([getWithPeersCreateChannelsArgs()]);
+    const createResponse = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
     await ObjectiveModel.succeed(createResponse[0].objectiveId, peerEngines.a.knex);
     expect(await wallet.jumpStartObjectives()).toHaveLength(0);
   });
 
   it('can jumpstart objectives successfully after a restart', async () => {
+    const {peerEngines, messageService} = peerSetup;
     let wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
     // This ensures that the channel will be joined so the objective can progress
@@ -41,7 +43,7 @@ describe('jumpstartObjectives', () => {
 
     messageService.setLatencyOptions({dropRate: 1});
     const createResponse = await wallet.createChannels(
-      Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs())
+      Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs(peerSetup))
     );
 
     await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
@@ -57,6 +59,7 @@ describe('jumpstartObjectives', () => {
   });
 
   it('can jumpstart multiple times', async () => {
+    const {peerEngines, messageService} = peerSetup;
     const wallet = await Wallet.create(peerEngines.a, messageService, {
       numberOfAttempts: 99999, // We want the wallet to keep trying
       initialDelay: 100,
@@ -74,7 +77,7 @@ describe('jumpstartObjectives', () => {
     messageService.setLatencyOptions({dropRate: 1});
 
     const createResponse = await wallet.createChannels(
-      Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs())
+      Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs(peerSetup))
     );
     const jumpstartResponse1 = await wallet.jumpStartObjectives();
     const jumpstartResponse2 = await wallet.jumpStartObjectives();

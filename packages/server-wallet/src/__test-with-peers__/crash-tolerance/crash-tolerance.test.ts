@@ -6,14 +6,7 @@ import {
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers} from 'ethers';
 
-import {
-  getPeersSetup,
-  messageService,
-  participantA,
-  participantB,
-  peersTeardown,
-  peerEngines,
-} from '../../../jest/with-peers-setup-teardown';
+import {PeerSetup, getPeersSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
 import {expectLatestStateToMatch} from '../utils';
@@ -21,10 +14,16 @@ import {expectLatestStateToMatch} from '../utils';
 let channelId: string;
 jest.setTimeout(10_000);
 
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await getPeersSetup();
+});
+afterAll(async () => {
+  await peersTeardown(peerSetup);
+});
 
 it('Create a directly-funded channel between two engines, of which one crashes midway through ', async () => {
+  const {participantA, participantB, messageService, peerEngines} = peerSetup;
   const allocation: Allocation = {
     allocationItems: [
       {destination: participantA.destination, amount: BigNumber.from(1).toHexString()},

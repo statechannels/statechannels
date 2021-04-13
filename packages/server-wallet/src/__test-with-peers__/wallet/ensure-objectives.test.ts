@@ -1,18 +1,18 @@
-import {
-  getPeersSetup,
-  messageService,
-  peersTeardown,
-  peerEngines,
-} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
 import {LatencyOptions} from '../../message-service/test-message-service';
 import {WalletObjective} from '../../models/objective';
 import {Wallet} from '../../wallet/wallet';
 import {getWithPeersCreateChannelsArgs} from '../utils';
 
 jest.setTimeout(60_000);
+let peerSetup: PeerSetup;
 
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
+beforeAll(async () => {
+  peerSetup = await getPeersSetup();
+});
+afterAll(async () => {
+  await peersTeardown(peerSetup);
+});
 
 describe('EnsureObjectives', () => {
   // This is the percentages of messages that get dropped
@@ -32,6 +32,7 @@ describe('EnsureObjectives', () => {
   test.each(testCases)(
     'can successfully create a channel with the latency options: %o',
     async options => {
+      const {peerEngines, messageService} = peerSetup;
       messageService.setLatencyOptions(options);
       const wallet = await Wallet.create(peerEngines.a, messageService, {
         numberOfAttempts: 100,
@@ -44,7 +45,7 @@ describe('EnsureObjectives', () => {
       });
 
       const response = await wallet.createChannels(
-        Array(10).fill(getWithPeersCreateChannelsArgs())
+        Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
 
       await expect(response).toBeObjectiveDoneType('Success');
@@ -53,6 +54,7 @@ describe('EnsureObjectives', () => {
 
   //  This is a nice sanity check to ensure that messages do get dropped
   test('fails when all messages are dropped', async () => {
+    const {peerEngines, messageService} = peerSetup;
     messageService.setLatencyOptions({dropRate: 1});
     // We limit the attempts to avoid wasting times in the test
     const wallet = await Wallet.create(peerEngines.a, messageService, {
@@ -64,7 +66,7 @@ describe('EnsureObjectives', () => {
       await peerEngines.b.joinChannels([channelId]);
     });
 
-    const {done} = (await wallet.createChannels([getWithPeersCreateChannelsArgs()]))[0];
+    const {done} = (await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]))[0];
     await expect(done).resolves.toMatchObject({type: 'EnsureObjectiveFailed'});
   });
 });

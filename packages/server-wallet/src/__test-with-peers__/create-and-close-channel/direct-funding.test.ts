@@ -6,14 +6,7 @@ import {
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {
-  peerEngines,
-  getPeersSetup,
-  participantA,
-  participantB,
-  peersTeardown,
-  messageService,
-} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
 import {expectLatestStateToMatch} from '../utils';
@@ -22,11 +15,16 @@ const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
 
 let channelId: string;
-
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await getPeersSetup();
+});
+afterAll(async () => {
+  await peersTeardown(peerSetup);
+});
 
 it('Create a directly funded channel between two engines ', async () => {
+  const {participantA, participantB, messageService, peerEngines} = peerSetup;
   const allocation: Allocation = {
     allocationItems: [
       {destination: participantA.destination, amount: BN.from(1)},
