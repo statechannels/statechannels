@@ -50,6 +50,8 @@ const serverConfig = defaultTestConfig({
 });
 
 let provider: providers.JsonRpcProvider;
+let serverWallet: SingleThreadedEngine;
+let browserWallet: ChannelWallet;
 
 beforeAll(async () => {
   await DBAdmin.truncateDatabase(serverConfig);
@@ -61,6 +63,17 @@ beforeAll(async () => {
     provider
   );
   mineOnEvent(assetHolder);
+
+  serverWallet = await SingleThreadedEngine.create(serverConfig);
+  browserWallet = await ChannelWallet.create(
+    makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
+  );
+});
+
+afterAll(async () => {
+  await serverWallet.destroy();
+  await browserWallet.destroy();
+  await provider.removeAllListeners();
 });
 
 async function mineBlocks(confirmations = 5) {
@@ -87,7 +100,6 @@ function generatePushMessage(messageParams: Message): PushMessageRequest {
 }
 
 it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
-  const serverWallet = await SingleThreadedEngine.create(serverConfig);
   const serverAddress = await serverWallet.getSigningAddress();
   const serverDestination = makeDestination(serverAddress);
 
@@ -97,9 +109,6 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
     });
   });
 
-  const browserWallet = await ChannelWallet.create(
-    makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
-  );
   const browserAddress = await browserWallet.getAddress();
   const browserDestination = makeDestination(browserAddress);
 
@@ -162,22 +171,16 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
    */
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
+  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
     .pipe(take(3))
     .toPromise();
 
-  await browserWallet.pushMessage(
-    serverMessageToBrowserMessage(await postFundAPromise),
-    'dummyDomain'
-  );
+  await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
 
   await objectiveSuccededPromise;
-
-  await serverWallet.destroy();
 });
 
-it.only('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
-  const serverWallet = await SingleThreadedEngine.create(serverConfig);
+it.skip('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
   const serverAddress = await serverWallet.getSigningAddress();
   const serverDestination = makeDestination(serverAddress);
 
@@ -187,9 +190,6 @@ it.only('browser wallet creates channel + cooperates with server wallet to fund 
     });
   });
 
-  const browserWallet = await ChannelWallet.create(
-    makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
-  );
   const browserAddress = await browserWallet.getAddress();
   const browserDestination = makeDestination(browserAddress);
 
@@ -217,12 +217,12 @@ it.only('browser wallet creates channel + cooperates with server wallet to fund 
         assetHolderAddress: ethAssetHolderAddress,
         allocationItems: [
           {
-            amount: formatAmount('0x3' as Uint256),
-            destination: serverDestination
-          },
-          {
             amount: formatAmount('0x5' as Uint256),
             destination: browserDestination
+          },
+          {
+            amount: formatAmount('0x3' as Uint256),
+            destination: serverDestination
           }
         ]
       }
@@ -269,6 +269,4 @@ it.only('browser wallet creates channel + cooperates with server wallet to fund 
   );
 
   await objectiveSuccededPromise;
-
-  await serverWallet.destroy();
 });
