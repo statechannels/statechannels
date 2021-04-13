@@ -1,5 +1,10 @@
 import {Wallet} from '../../wallet';
-import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
+import {
+  crashAndRestart,
+  getPeersSetup,
+  PeerSetup,
+  peersTeardown,
+} from '../../../jest/with-peers-setup-teardown';
 import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {getWithPeersCreateChannelsArgs} from '../utils';
 
@@ -48,8 +53,7 @@ describe('jumpstartObjectives', () => {
 
     await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
 
-    // TODO: Enable this once https://github.com/statechannels/statechannels/issues/3476 is fixed
-    // await crashAndRestart('A');
+    peerSetup = await crashAndRestart(peerSetup, 'A');
 
     wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 

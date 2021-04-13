@@ -6,7 +6,12 @@ import {
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, constants, ethers} from 'ethers';
 
-import {PeerSetup, getPeersSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
+import {
+  PeerSetup,
+  getPeersSetup,
+  peersTeardown,
+  crashAndRestart,
+} from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../../__test__/test-helpers';
 import {expectLatestStateToMatch} from '../utils';
@@ -60,8 +65,7 @@ it('Create a directly-funded channel between two engines, of which one crashes m
   });
 
   // Destroy Engine b and restart
-  // TODO: Enable this once https://github.com/statechannels/statechannels/issues/3476 is fixed
-  // await crashAndRestart('B');
+  peerSetup = await crashAndRestart(peerSetup, 'B');
 
   //      PreFund0B
   const resultB1 = await peerEngines.b.joinChannel({channelId});
