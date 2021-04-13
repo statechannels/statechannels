@@ -47,7 +47,8 @@ export type OpenChannelObjective = {
 
 export function initialize(
   openingState: State | SignedState,
-  myIndex: number
+  myIndex: number,
+  approved = false
 ): OpenChannelObjective {
   if (openingState.turnNum !== 0) {
     throw new Error(`Unexpected state due to turnNum ${openingState.turnNum}`);
@@ -65,7 +66,7 @@ export function initialize(
     'signatures' in openingState ? mergeSignatures([], openingState.signatures) : [];
 
   return {
-    approved: false,
+    approved,
     channelId: calculateChannelId(openingState),
     myIndex,
     openingState: _.omit(openingState, 'signatures'),

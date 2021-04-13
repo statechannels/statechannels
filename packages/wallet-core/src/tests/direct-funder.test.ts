@@ -171,7 +171,7 @@ describe('cranking', () => {
         ]
       }
     });
-    const zeroOutcome = {...initialize(signStateHelper(zeroOutcomeState, 'A'), 1), approved: true};
+    const zeroOutcome = initialize(signStateHelper(zeroOutcomeState, 'A'), 1, true);
 
     const aliceSignedPre = objectiveFixture({
       status: WaitingFor.theirPreFundSetup,
