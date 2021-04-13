@@ -2,7 +2,7 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Outgoing, Engine} from '../..';
+import {Outgoing} from '../..';
 import {Bytes32} from '../../type-aliases';
 import {
   getChannelResultFor,
@@ -22,11 +22,11 @@ import {
 } from '../../../jest/with-peers-setup-teardown';
 // TODO: this is temporary. This test file is refactored in
 // https://github.com/statechannels/statechannels/pull/3287
-async function crashAndRestart(engine: Engine): Promise<Engine> {
-  const config = engine.engineConfig;
-  await engine.destroy();
-  return Engine.create(config); // Wallet that will "restart"
-}
+// async function crashAndRestart(engine: Engine): Promise<Engine> {
+//   const config = engine.engineConfig;
+//   await engine.destroy();
+//   return Engine.create(config); // Wallet that will "restart"
+// }
 const ETH_ASSET_HOLDER_ADDRESS = makeAddress(ethers.constants.AddressZero);
 
 const tablesUsingLedgerChannels = [
@@ -91,9 +91,10 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
   await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
   await peerEngines.a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
 
-  // both wallets crash
-  peerEngines.a = await crashAndRestart(peerEngines.a);
-  peerEngines.b = await crashAndRestart(peerEngines.b);
+  // TODO: https://github.com/statechannels/statechannels/issues/3476
+  // // both wallets crash
+  // peerEngines.a = await crashAndRestart(peerEngines.a);
+  // peerEngines.b = await crashAndRestart(peerEngines.b);
 
   return channelId;
 };
