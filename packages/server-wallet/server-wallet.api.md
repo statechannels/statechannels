@@ -343,6 +343,7 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     destroy(): Promise<void>;
     // (undocumented)
     readonly engineConfig: EngineConfig;
+    getApprovedObjectives(): Promise<WalletObjective[]>;
     getChannels(): Promise<MultipleChannelOutput>;
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
     getObjective(objectiveId: string): Promise<WalletObjective>;

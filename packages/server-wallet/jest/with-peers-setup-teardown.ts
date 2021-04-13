@@ -77,7 +77,7 @@ export async function crashAndRestart(
       {participantId: participantIdB, engine: peerEngines.b},
     ]);
 
-    messageService = (await TestMessageService.create(handler)) as TestMessageService;
+    messageService = (await TestMessageService.create(handler,peerEngines.a.logger)) as TestMessageService;
   } catch (error) {
     logger.error(error, 'CrashAndRestart failed');
     throw error;
@@ -129,8 +129,8 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
         {participantId: participantIdB, engine: peerEngines.b},
       ];
 
-      const handler = createTestMessageHandler(participantEngines);
-      messageService = (await TestMessageService.create(handler)) as TestMessageService;
+      const handler = createTestMessageHandler(participantEngines, peerEngines.a.logger);
+      messageService = (await TestMessageService.create(handler,peerEngines.a.logger)) as TestMessageService;
     } catch (error) {
       logger.error(error, 'getPeersSetup failed');
       throw error;

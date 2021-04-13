@@ -1,29 +1,18 @@
-import {CreateChannelParams} from '@statechannels/client-api-schema';
-
 import {
   getPeersSetup,
   messageService,
-  participantA,
-  participantB,
   peersTeardown,
   peerEngines,
-} from '../../jest/with-peers-setup-teardown';
-import {LatencyOptions} from '../message-service/test-message-service';
-import {WalletObjective} from '../models/objective';
-import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
-import {Wallet} from '../wallet/wallet';
+} from '../../../jest/with-peers-setup-teardown';
+import {LatencyOptions} from '../../message-service/test-message-service';
+import {WalletObjective} from '../../models/objective';
+import {Wallet} from '../../wallet/wallet';
+import {getWithPeersCreateChannelsArgs} from '../utils';
 
 jest.setTimeout(60_000);
 
 beforeAll(getPeersSetup());
 afterAll(peersTeardown);
-
-function getCreateChannelsArgs(): CreateChannelParams {
-  return createChannelArgs({
-    participants: [participantA, participantB],
-    fundingStrategy: 'Fake',
-  });
-}
 
 describe('EnsureObjectives', () => {
   // This is the percentages of messages that get dropped
@@ -54,9 +43,11 @@ describe('EnsureObjectives', () => {
         await peerEngines.b.joinChannels([o.data.targetChannelId]);
       });
 
-      await expect(
-        wallet.createChannels(Array(10).fill(getCreateChannelsArgs()))
-      ).resolves.not.toThrow();
+      const response = await wallet.createChannels(
+        Array(10).fill(getWithPeersCreateChannelsArgs())
+      );
+
+      await expect(response).toBeObjectiveDoneType('Success');
     }
   );
 
@@ -73,7 +64,7 @@ describe('EnsureObjectives', () => {
       await peerEngines.b.joinChannels([channelId]);
     });
 
-    const {done} = (await wallet.createChannels([getCreateChannelsArgs()]))[0];
+    const {done} = (await wallet.createChannels([getWithPeersCreateChannelsArgs()]))[0];
     await expect(done).resolves.toMatchObject({type: 'EnsureObjectiveFailed'});
   });
 });

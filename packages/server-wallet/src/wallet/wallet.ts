@@ -52,14 +52,16 @@ export class Wallet {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,
             objectiveId: newObjective.objectiveId,
-            done: this.ensureObjective(newObjective, getMessages(createResult)).catch(error => ({
-              type: 'InternalError' as const,
-              error,
-            })),
+            done: this.ensureObjective(newObjective, getMessages(createResult)),
           };
         } catch (error) {
+          // TODO: This is slightly hacky but it's less painful then having to narrow the type down every time
+          // you get a result back from the createChannels method
+          // This should be looked at in https://github.com/statechannels/statechannels/issues/3461
           return {
-            channelParameters: p,
+            channelId: 'ERROR',
+            currentStatus: 'failed' as const,
+            objectiveId: 'ERROR',
             done: Promise.resolve({type: 'InternalError' as const, error}),
           };
         }
@@ -68,8 +70,35 @@ export class Wallet {
   }
 
   /**
+   * Finds any approved objectives and attempts to make progress on them.
+   * This is useful for restarting progress after a restart or crash.
+   * @returns A collection of ObjectiveResults. There will be an ObjectiveResult for each approved objective found.
+   */
+  public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
+    const objectives = await this._engine.getApprovedObjectives();
+    const objectiveIds = objectives.map(o => o.objectiveId);
+    // Instead of getting messages per objective we just get them all at once
+    // This will prevent us from querying the database for each objective
+    // TODO: For now we pass in all messages for each objective
+    // but we should fix this in https://github.com/statechannels/statechannels/issues/3461
+    // by returning messages per objective
+    const syncMessages = getMessages(await this._engine.syncObjectives(objectiveIds));
+    return Promise.all(
+      objectives.map(async o => {
+        return {
+          objectiveId: o.objectiveId,
+          currentStatus: o.status,
+          channelId: o.data.targetChannelId,
+          done: this.ensureObjective(o, syncMessages),
+        };
+      })
+    );
+  }
+
+  /**
    * Ensures that the provided objectives get completed.
    * Will resend messages as required to ensure that the objectives get completed.
+   * This should never throw an exception. Instead it should return an ObjectiveError
    * @param objectives The list of objectives to ensure get completed.
    * @param objectiveMessages The collection of outgoing messages related to the objective.
    * @returns A promise that resolves when all the objectives are completed
@@ -78,32 +107,39 @@ export class Wallet {
     objective: WalletObjective,
     objectiveMessages: Message[]
   ): Promise<ObjectiveSuccess | ObjectiveError> {
-    let isComplete = false;
+    try {
+      let isComplete = false;
 
-    const onObjectiveSucceeded = (o: WalletObjective) => {
-      if (o.objectiveId === o.objectiveId) {
-        isComplete = true;
-        this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+      const onObjectiveSucceeded = (o: WalletObjective) => {
+        if (o.objectiveId === o.objectiveId) {
+          isComplete = true;
+          this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
+        }
+      };
+
+      this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
+
+      // Now that we're listening for objective success we can now send messages
+      // that might trigger progress on the objective
+      await this._messageService.send(objectiveMessages);
+
+      const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
+      for (let i = 0; i < numberOfAttempts; i++) {
+        if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
+        const delayAmount = initialDelay * Math.pow(multiple, i);
+        await delay(delayAmount);
+
+        const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
+        await this._messageService.send(getMessages(outbox));
       }
-    };
-
-    this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
-
-    // Now that we're listening for objective success we can now send messages
-    // that might trigger progress on the objective
-    await this._messageService.send(objectiveMessages);
-
-    const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
-    for (let i = 0; i < numberOfAttempts; i++) {
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
-      const delayAmount = initialDelay * Math.pow(multiple, i);
-      await delay(delayAmount);
-
-      const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
-      await this._messageService.send(getMessages(outbox));
+      return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
+    } catch (error) {
+      return {
+        type: 'InternalError' as const,
+        error,
+      };
     }
-
-    return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
   }
 
   async destroy(): Promise<void> {
