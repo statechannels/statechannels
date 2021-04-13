@@ -44,7 +44,8 @@ export enum Errors {
   invalidTransition = 'Invalid transition',
   invalidAppData = 'Invalid app data',
   emittingDuringTransaction = 'Attempting to emit event during transaction',
-  notMyTurn = "Cannot update channel unless it's your turn"
+  notMyTurn = "Cannot update channel unless it's your turn",
+  objectiveAlreadyExists = 'Objective for a channel id already exists'
 }
 
 export interface DBBackend {

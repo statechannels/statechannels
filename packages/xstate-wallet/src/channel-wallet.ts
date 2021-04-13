@@ -13,7 +13,8 @@ import {
   SignedState,
   SharedObjective,
   Address,
-  DirectFunder
+  DirectFunder,
+  makeAddress
 } from '@statechannels/wallet-core';
 import ReactDOM from 'react-dom';
 import React from 'react';
@@ -134,6 +135,8 @@ export class ChannelWallet {
     const workflowId = this.calculateWorkflowId(request);
     switch (request.type) {
       case 'CREATE_CHANNEL': {
+        // This is wallet 1.0 logic. Leaving for now for reference.
+        /** 
         if (!this.isWorkflowIdInUse(workflowId)) {
           this.startWorkflow(
             Application.workflow(this.store, this.messagingService, request),
@@ -146,6 +149,13 @@ export class ChannelWallet {
             `There is already a workflow running with id ${workflowId}, no new workflow will be spawned`
           );
         }
+        */
+
+        // This wallet 2.0 logic
+        this.store.createAndStoreOpenChannelObjective({
+          ...request,
+          appDefinition: makeAddress(request.appDefinition)
+        });
         break;
       }
       case 'JOIN_CHANNEL':

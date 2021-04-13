@@ -50,6 +50,7 @@ export type ChannelLock = {
 };
 
 type Deposit = {amountOnChain: Uint256; amountDeposited: Uint256};
+type OpenChanneObjectiveParams = Omit<State, 'turnNum' | 'channelNonce' | 'isFinal'>;
 
 //FIXME
 const track = _.noop;
@@ -292,6 +293,27 @@ export class Store {
         }
       )
       .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
+
+  public async createAndStoreOpenChannelObjective(
+    params: OpenChanneObjectiveParams
+  ): Promise<DirectFunder.OpenChannelObjective> {
+    const addresses = params.participants.map(x => x.signingAddress);
+    // TODO: this is not concurrency safe as the new nonce is not saved to the store until a state is added to the store
+    const channelNonce = (await this.getNonce(addresses)) + 1;
+    const channelId = calculateChannelId({...params, channelNonce});
+
+    if (this.richObjectives[channelId]) {
+      // TODO: should include the channel id in the error
+      throw new Error(Errors.objectiveAlreadyExists);
+    }
+    const openingState: State = {
+      ...params,
+      turnNum: 0,
+      isFinal: false,
+      channelNonce
+    };
+    return (this.richObjectives[channelId] = DirectFunder.initialize(openingState, 0));
+  }
 
   private async getNonce(addresses: string[]): Promise<number> {
     return (await this.backend.getNonce(this.nonceKeyFromAddresses(addresses))) ?? -1;
