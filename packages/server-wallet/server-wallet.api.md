@@ -28,6 +28,7 @@ import Knex from 'knex';
 import { Level } from 'pino';
 import { Logger } from 'pino';
 import { Payload as Message } from '@statechannels/wallet-core';
+import { Message as Message_2 } from '@statechannels/client-api-schema';
 import { MessageQueuedNotification } from '@statechannels/client-api-schema';
 import { Model } from 'objection';
 import { ModelOptions } from 'objection';
@@ -314,6 +315,11 @@ export type SingleChannelOutput = {
 export class SingleThreadedEngine extends EventEmitter<EventEmitterType> implements EngineInterface, ChainEventSubscriberInterface {
     protected constructor(engineConfig: IncomingEngineConfig);
     addSigningKey(privateKey: PrivateKey): Promise<void>;
+    // (undocumented)
+    approveObjectives(objectiveIds: string[]): Promise<{
+        objectives: WalletObjective[];
+        messages: Message_2[];
+    }>;
     // Warning: (ae-forgotten-export) The symbol "AssetOutcomeUpdatedArg" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
