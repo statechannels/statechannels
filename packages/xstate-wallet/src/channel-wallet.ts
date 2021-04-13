@@ -31,7 +31,7 @@ import {
   MessagingServiceInterface,
   supportedFundingStrategyOrThrow
 } from './messaging';
-import {ADD_LOGS} from './config';
+import {ADD_LOGS, WALLET_VERSION} from './config';
 import {logger} from './logger';
 import {ChainWatcher} from './chain';
 // TODO: factor UI out of channel-wallet
@@ -273,9 +273,11 @@ export class ChannelWallet {
             break;
           case 'deposit':
             if (this.store.depositsSubmitted[channelId]) {
-              throw new Error(
-                `Attempting to submit a deposit for a channel with already submitted deposit ${this.store.depositsSubmitted[channelId]}`
+              logger.warn(
+                'Attempting to submit a deposit for a channel with already submitted deposit',
+                {depositSubmitted: this.store.depositsSubmitted[channelId]}
               );
+              continue;
             }
             const fundingMilestones = DirectFunder.utils.fundingMilestone(
               richObjective.openingState,
@@ -306,7 +308,26 @@ export class ChannelWallet {
     if (!richObjective) {
       throw new Error(`Rich objective must exist for channelId ${channelId}`);
     }
+
     await this.crankRichObjectives({type: 'Approval'});
+
+    // TODO: need a better way to figure out when to broadcast an objective
+    //        since we don't know here if we are the creator of the objective or received the objective from elsewhere
+    if (!richObjective.myIndex) {
+      // TODO: generalize to other objectives
+      const objectiveToSend: OpenChannel = {
+        type: 'OpenChannel',
+        participants: richObjective.openingState.participants,
+        data: {targetChannelId: channelId, fundingStrategy: 'Direct'}
+      };
+
+      // TODO: we might want to first crank the objective, gather all states that need to be sent, and then send
+      // both the objective and the new states
+      await this.messagingService.sendMessageNotification({
+        walletVersion: WALLET_VERSION,
+        objectives: [objectiveToSend]
+      });
+    }
   }
 
   public getRichObjectives() {
