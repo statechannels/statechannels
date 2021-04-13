@@ -371,7 +371,7 @@ contract SingleChannelAdjudicator is
             guaranteeCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         );
-        address guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
+        address payable guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
             guarantorChannelId
         );
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
