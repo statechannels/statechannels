@@ -296,12 +296,16 @@ export class ChannelWallet {
     }
   }
 
-  approveRichObjective(channelId: string) {
+  public async approveRichObjective(channelId: string): Promise<void> {
     const richObjective = this.store.richObjectives[channelId];
     if (!richObjective) {
       throw new Error(`Rich objective must exist for channelId ${channelId}`);
     }
-    this.crankRichObjectives({type: 'Approval'});
+    await this.crankRichObjectives({type: 'Approval'});
+  }
+
+  public getRichObjectives() {
+    return this.store.richObjectives;
   }
 
   /**
