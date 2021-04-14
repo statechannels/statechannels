@@ -1,3 +1,6 @@
+import path from 'path';
+import * as fs from 'fs';
+
 import {Participant} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
@@ -13,8 +16,6 @@ import {
   TestMessageService,
 } from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
-import path from 'path';
-import * as fs from 'fs';
 
 interface TestPeerEngines {
   a: Engine;
@@ -27,7 +28,10 @@ try {
   if (err.message !== `EEXIST: file already exists, mkdir '${ARTIFACTS_DIR}'`) throw err;
 }
 const baseConfig = defaultTestConfig({
-  loggingConfiguration: {logLevel: 'trace', logDestination:  path.join(ARTIFACTS_DIR, 'with-peers.log')},
+  loggingConfiguration: {
+    logLevel: 'trace',
+    logDestination: path.join(ARTIFACTS_DIR, 'with-peers.log'),
+  },
 });
 export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: 'server_wallet_test_a',
@@ -77,7 +81,10 @@ export async function crashAndRestart(
       {participantId: participantIdB, engine: peerEngines.b},
     ]);
 
-    messageService = (await TestMessageService.create(handler,peerEngines.a.logger)) as TestMessageService;
+    messageService = (await TestMessageService.create(
+      handler,
+      peerEngines.a.logger
+    )) as TestMessageService;
   } catch (error) {
     logger.error(error, 'CrashAndRestart failed');
     throw error;
@@ -130,7 +137,10 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
       ];
 
       const handler = createTestMessageHandler(participantEngines, peerEngines.a.logger);
-      messageService = (await TestMessageService.create(handler,peerEngines.a.logger)) as TestMessageService;
+      messageService = (await TestMessageService.create(
+        handler,
+        peerEngines.a.logger
+      )) as TestMessageService;
     } catch (error) {
       logger.error(error, 'getPeersSetup failed');
       throw error;
@@ -139,19 +149,19 @@ export function getPeersSetup(withWalletSeeding = false): jest.Lifecycle {
 }
 
 export const peersTeardown: jest.Lifecycle = async () => {
-try{
-  await messageService.destroy();
-  await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+  try {
+    await messageService.destroy();
+    await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
+    await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
   } catch (error) {
-    if (error.message==='aborted'){
+    if (error.message === 'aborted') {
       // When we destroy the engines there still may open knex connections due to our use of delay in the TestMessageService
       // These throw an abort error that can make the test output messy
       // We just swallow the error here to avoid it
-      logger.trace({error},'Ignoring knex aborted error');
+      logger.trace({error}, 'Ignoring knex aborted error');
       return;
     }
-      logger.error(error, 'peersTeardown failed');
-      throw error;
-    }
+    logger.error(error, 'peersTeardown failed');
+    throw error;
+  }
 };
