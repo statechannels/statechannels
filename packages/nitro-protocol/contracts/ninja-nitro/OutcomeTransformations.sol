@@ -10,7 +10,7 @@ import '../Outcome.sol';
 contract OutcomeTransformations {
     /**
      * @dev Computes the new allocation that should be stored against a channel after a transfer is made.
-     * @param initialHoldings initial number of assets held on chain for the channel.
+     * @param initialHoldings initial quantity of a given asset held on chain for the channel.
      * @param allocation initial allocation stored on chain for the channel (for a particular asset).
      * @param indices list of indices expressing which destinations in the allocation should be paid out.
      */
@@ -63,7 +63,7 @@ contract OutcomeTransformations {
 
     /**
      * @dev Computes the new allocation that should be stored against a target channel after a claim is made on its guarantor.
-     * @param initialHoldings initial number of assets held on chain for the channel.
+     * @param initialHoldings initial quantity of a given asset held on chain for the channel.
      * @param allocation initial allocation stored on chain for the channel (for a particular asset).
      * @param indices list of indices expressing which destinations in the allocation should be paid out.
      * @param guarantee the guarantee which will be claimed (for a particular asset).
@@ -134,7 +134,7 @@ contract OutcomeTransformations {
 
     /**
      * @dev Computes the new outcome that should be stored against a target channel after a claim is made on its guarantor.
-     * @param initialHoldings list of assets held on chain for the channel, for each asset.
+     * @param initialHoldings initial quantity of each asset held on chain for the channel. Order matches that of outcome.
      * @param outcome initial outcome stored on chain for the channel.
      * @param targetChannelId the channelId of the target channel (used to validate every guarantee in the guarantorOutcome, which much target the same channel)
      * @param indices list of list of indices expressing which destinations in the allocation should be paid out for each asset.
