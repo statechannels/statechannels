@@ -72,7 +72,6 @@ export class Store {
    *      - Create getters and setters.
    */
   public richObjectives: Dictionary<DirectFunder.OpenChannelObjective> = {};
-  public depositsSubmitted: Dictionary<Deposit> = {};
 
   /**
    *  END of wallet 2.0
