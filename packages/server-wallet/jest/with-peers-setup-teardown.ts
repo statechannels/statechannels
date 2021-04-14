@@ -183,7 +183,7 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
   }
 }
 
-export const peersTeardown = async (peerSetup: PeerSetup): Promise<void> => {
+export const teardownPeerSetup = async (peerSetup: PeerSetup): Promise<void> => {
   if (!peerSetup) {
     logger.warn('No PeerSetup so no teardown needed');
     return;

@@ -6,7 +6,7 @@ import {
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
 import {expectLatestStateToMatch} from '../utils';
@@ -20,7 +20,7 @@ beforeAll(async () => {
   peerSetup = await getPeersSetup();
 });
 afterAll(async () => {
-  await peersTeardown(peerSetup);
+  await teardownPeerSetup(peerSetup);
 });
 
 it('Create a directly funded channel between two engines ', async () => {

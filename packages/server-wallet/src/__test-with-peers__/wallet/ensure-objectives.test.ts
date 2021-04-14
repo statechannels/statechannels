@@ -1,4 +1,4 @@
-import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
 import {LatencyOptions} from '../../message-service/test-message-service';
 import {WalletObjective} from '../../models/objective';
 import {Wallet} from '../../wallet/wallet';
@@ -11,7 +11,7 @@ beforeAll(async () => {
   peerSetup = await getPeersSetup();
 });
 afterAll(async () => {
-  await peersTeardown(peerSetup);
+  await teardownPeerSetup(peerSetup);
 });
 
 describe('EnsureObjectives', () => {

@@ -7,7 +7,7 @@ import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
 import {ONE_DAY} from '../../__test__/test-helpers';
-import {getPeersSetup, peersTeardown, PeerSetup} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, teardownPeerSetup, PeerSetup} from '../../../jest/with-peers-setup-teardown';
 import {expectLatestStateToMatch} from '../utils';
 import {getMessages} from '../../message-service/utils';
 
@@ -17,7 +17,7 @@ beforeAll(async () => {
   peerSetup = await getPeersSetup();
 });
 afterAll(async () => {
-  await peersTeardown(peerSetup);
+  await teardownPeerSetup(peerSetup);
 });
 
 it('Create a fake-funded channel between two engines ', async () => {

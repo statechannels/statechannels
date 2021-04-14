@@ -9,7 +9,7 @@ import {BigNumber, constants, ethers} from 'ethers';
 import {
   PeerSetup,
   getPeersSetup,
-  peersTeardown,
+  teardownPeerSetup,
   crashAndRestart,
 } from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
@@ -24,7 +24,7 @@ beforeAll(async () => {
   peerSetup = await getPeersSetup();
 });
 afterAll(async () => {
-  await peersTeardown(peerSetup);
+  await teardownPeerSetup(peerSetup);
 });
 
 it('Create a directly-funded channel between two engines, of which one crashes midway through ', async () => {

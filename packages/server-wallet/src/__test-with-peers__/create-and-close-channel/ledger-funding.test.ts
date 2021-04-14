@@ -13,7 +13,7 @@ import {
 import {DBAdmin} from '../../db-admin/db-admin';
 import {
   getPeersSetup,
-  peersTeardown,
+  teardownPeerSetup,
   aEngineConfig,
   bEngineConfig,
   PeerSetup,
@@ -41,7 +41,7 @@ beforeAll(async () => {
   peerSetup = await getPeersSetup();
 });
 afterAll(async () => {
-  await peersTeardown(peerSetup);
+  await teardownPeerSetup(peerSetup);
 });
 /**
  * Create a directly funded channel that will be used as the ledger channel.
