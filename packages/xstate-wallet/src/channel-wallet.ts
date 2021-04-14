@@ -329,6 +329,9 @@ export class ChannelWallet {
     return this.store.richObjectives;
   }
 
+  /**
+   * Only used for testing
+   */
   public destroy(): void {
     this.store.chain.destroy();
   }
