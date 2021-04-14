@@ -80,6 +80,11 @@ describe('transfer', () => {
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, payouts, reason}) => {
+      // Extraneous keys would make sense in a monolithic Nitro implementation (e.g. in an AssetHolder governing multiple channels)
+      // Here, they are most likely keys that belong in "payouts" instead
+      if (Object.keys(heldAfter).length != 1 || Object.keys(heldBefore).length != 1)
+        throw Error('bad test case: heldBefore and heldAfter should contain exactly one key (c)');
+
       // Compute channelId
       const channelNonce = getRandomNonce(name);
       const channel: Channel = {chainId, participants, channelNonce};
