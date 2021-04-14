@@ -313,7 +313,8 @@ export class ChannelWallet {
 
     // TODO: need a better way to figure out when to broadcast an objective
     //        since we don't know here if we are the creator of the objective or received the objective from elsewhere
-    if (!richObjective.myIndex) {
+    const amCreator = richObjective.myIndex === 0;
+    if (amCreator) {
       // TODO: generalize to other objectives
       const objectiveToSend: OpenChannel = {
         type: 'OpenChannel',
