@@ -1,6 +1,6 @@
 {
-  "name": "@statechannels/xstate-wallet",
-  "description": "State channel wallet using xstate.",
+  "name": "@statechannels/browser-wallet",
+  "description": "A browser state channel wallet.",
   "version": "0.7.0",
   "author": "Alex Gap",
   "babel": {

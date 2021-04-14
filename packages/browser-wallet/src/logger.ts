@@ -9,7 +9,7 @@ const IS_BROWSER_CONTEXT = JEST_WORKER_ID === undefined;
 const LOG_TO_CONSOLE = LOG_DESTINATION === 'console';
 const LOG_TO_FILE = ADD_LOGS && !LOG_TO_CONSOLE;
 
-const name = 'xstate-wallet';
+const name = 'browser-wallet';
 
 const destination =
   LOG_TO_FILE && !IS_BROWSER_CONTEXT ? pino.destination(LOG_DESTINATION) : undefined;

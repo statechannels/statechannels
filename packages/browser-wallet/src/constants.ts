@@ -5,4 +5,4 @@ export const MOCK_ASSET_HOLDER_ADDRESS = '0x111111111111111111111111111111111111
 
 export const CONCLUDE_TIMEOUT = 30_000;
 
-export const DB_NAME = 'xstatewallet';
+export const DB_NAME = 'browserxstatewallet';

@@ -18,7 +18,7 @@ function getBool(val: string | undefined): boolean {
 
 export const GIT_VERSION = process.env.GIT_VERSION;
 
-export const WALLET_VERSION = '@statechannels/xstate-wallet@' + GIT_VERSION;
+export const WALLET_VERSION = '@statechannels/browser-wallet@' + GIT_VERSION;
 
 export const NODE_ENV: string = process.env.NODE_ENV as string;
 
