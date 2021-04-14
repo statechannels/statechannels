@@ -9,10 +9,7 @@ import './AdjudicatorFactory.sol';
 import './OutcomeTransformations.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
-contract SingleChannelAdjudicator is
-    ForceMove,
-    OutcomeTransformations //, IAssetHolder { // TODO
-{
+contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
     address public immutable adjudicatorFactoryAddress;
 
     constructor(address a) {
