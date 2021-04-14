@@ -1,10 +1,5 @@
 import {Wallet} from '../../wallet';
-import {
-  crashAndRestart,
-  getPeersSetup,
-  PeerSetup,
-  peersTeardown,
-} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, PeerSetup, peersTeardown} from '../../../jest/with-peers-setup-teardown';
 import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {getWithPeersCreateChannelsArgs} from '../utils';
 
@@ -35,9 +30,9 @@ describe('jumpstartObjectives', () => {
     expect(await wallet.jumpStartObjectives()).toHaveLength(0);
   });
 
-  it('can jumpstart objectives successfully after a restart', async () => {
+  it('can jumpstart objectives successfully after they fail to send', async () => {
     const {peerEngines, messageService} = peerSetup;
-    let wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
+    const wallet = await Wallet.create(peerEngines.a, messageService, {numberOfAttempts: 1});
 
     // This ensures that the channel will be joined so the objective can progress
     peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
@@ -52,14 +47,6 @@ describe('jumpstartObjectives', () => {
     );
 
     await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
-
-    const restartedPeerSetup = await crashAndRestart(peerSetup, 'A');
-
-    wallet = await Wallet.create(
-      restartedPeerSetup.peerEngines.a,
-      restartedPeerSetup.messageService,
-      {numberOfAttempts: 1}
-    );
 
     const jumpstartResponse = await wallet.jumpStartObjectives();
 
