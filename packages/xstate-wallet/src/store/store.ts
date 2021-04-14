@@ -49,7 +49,6 @@ export type ChannelLock = {
   release: () => void;
 };
 
-type Deposit = {amountOnChain: Uint256; amountDeposited: Uint256};
 type OpenChanneObjectiveParams = Omit<State, 'turnNum' | 'channelNonce' | 'isFinal'>;
 
 //FIXME
