@@ -27,11 +27,7 @@ export function serializeMessage(
 ): WireMessage {
   const signedStates = (message.signedStates || []).map(s => serializeState(s, channelId));
   const {objectives, requests} = message;
-  return {
-    recipient,
-    sender,
-    data: {walletVersion, signedStates, objectives, requests}
-  };
+  return {recipient, sender, data: {walletVersion, signedStates, objectives, requests}};
 }
 
 export function serializeState(state: SignedState, channelId?: string): SignedStateWire {

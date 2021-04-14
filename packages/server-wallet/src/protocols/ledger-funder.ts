@@ -38,6 +38,9 @@ export class LedgerFunder {
     response: EngineResponse,
     tx: Transaction
   ): Promise<boolean> {
+    if (objective.data.fundingStrategy !== 'Ledger') {
+      throw new Error('Unsupported funding strategy');
+    }
     const ledgerId = objective.data.fundingLedgerChannelId;
     // sanity check
     if (!ledgerId) {

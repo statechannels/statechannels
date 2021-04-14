@@ -12,7 +12,7 @@ import {
   State
 } from 'xstate';
 import {filter, map, distinctUntilChanged} from 'rxjs/operators';
-import {StateVariables} from '@statechannels/wallet-core';
+import {OpenChannel, StateVariables} from '@statechannels/wallet-core';
 import {StateChannelsError} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
@@ -418,11 +418,19 @@ export const workflow = (
       );
 
       // Create a open channel objective so we can coordinate with all participants
-      await store.addObjective({
-        type: 'OpenChannel',
-        data: {targetChannelId, fundingStrategy},
-        participants: [participants[1]]
-      });
+      let data: OpenChannel['data'];
+      switch (fundingStrategy) {
+        case 'Virtual':
+          data = {fundingStrategy, targetChannelId};
+          break;
+        case 'Direct':
+          data = {fundingStrategy, targetChannelId};
+          break;
+        case 'Ledger':
+          throw new Error('Unsupported funding type');
+      }
+
+      await store.addObjective({type: 'OpenChannel', data, participants: [participants[1]]});
       return targetChannelId;
     },
 

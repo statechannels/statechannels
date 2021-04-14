@@ -93,15 +93,13 @@ type _Objective<Name, Data> = {
   type: Name;
   data: Data;
 };
-export type OpenChannel = _Objective<
-  'OpenChannel',
-  {
-    targetChannelId: string;
-    fundingStrategy: FundingStrategy;
-    role?: 'app' | 'ledger'; // Default should be app
-    fundingLedgerChannelId?: string;
-  }
->;
+
+type OpenChannelFunding =
+  | {fundingStrategy: 'Direct' | 'Fake' | 'Unknown'; role?: 'app' | 'ledger'} // Default should be 'app'
+  | {fundingStrategy: 'Ledger'; fundingLedgerChannelId: string}
+  | {fundingStrategy: 'Virtual'}; // TODO: Updated in a later PR
+
+export type OpenChannel = _Objective<'OpenChannel', {targetChannelId: string} & OpenChannelFunding>;
 export type CloseChannel = _Objective<
   'CloseChannel',
   {
