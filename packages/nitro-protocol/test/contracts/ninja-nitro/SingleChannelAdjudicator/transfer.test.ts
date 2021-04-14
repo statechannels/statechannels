@@ -61,10 +61,10 @@ const reason1 = 'Indices must be sorted';
 describe('transfer', () => {
   it.each`
     name                               | heldBefore | setOutcome            | indices      | newOutcome            | heldAfter       | payouts         | reason
-    ${' 0. outcome not set         '}  | ${{c: 1}}  | ${{}}                 | ${[0]}       | ${{}}                 | ${{}}           | ${{A: 1}}       | ${reason0}
-    ${' 1. funded          -> 1 EOA'}  | ${{c: 1}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{}}           | ${{A: 1}}       | ${undefined}
+    ${' 0. outcome not set         '}  | ${{c: 1}}  | ${{}}                 | ${[0]}       | ${{}}                 | ${{c: 0}}       | ${{A: 1}}       | ${reason0}
+    ${' 1. funded          -> 1 EOA'}  | ${{c: 1}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{c: 0}}       | ${{A: 1}}       | ${undefined}
     ${' 2. overfunded      -> 1 EOA'}  | ${{c: 2}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{c: 1}}       | ${{A: 1}}       | ${undefined}
-    ${' 3. underfunded     -> 1 EOA'}  | ${{c: 1}}  | ${{A: 2}}             | ${[0]}       | ${{A: 1}}             | ${{}}           | ${{A: 1}}       | ${undefined}
+    ${' 3. underfunded     -> 1 EOA'}  | ${{c: 1}}  | ${{A: 2}}             | ${[0]}       | ${{A: 1}}             | ${{c: 0}}       | ${{A: 1}}       | ${undefined}
     ${' 4. funded      -> 1 channel'}  | ${{c: 1}}  | ${{C: 1}}             | ${[0]}       | ${{C: 0}}             | ${{c: 0, C: 1}} | ${{}}           | ${undefined}
     ${' 5. overfunded  -> 1 channel'}  | ${{c: 2}}  | ${{C: 1}}             | ${[0]}       | ${{C: 0}}             | ${{c: 1, C: 1}} | ${{}}           | ${undefined}
     ${' 6. underfunded -> 1 channel'}  | ${{c: 1}}  | ${{C: 2}}             | ${[0]}       | ${{C: 1}}             | ${{c: 0, C: 1}} | ${{}}           | ${undefined}
@@ -202,6 +202,11 @@ describe('transfer', () => {
             )
           ).toBe(true);
         });
+
+        // Check that the channel has the correct balance
+        expect(
+          (await provider.getBalance(SingleChannelAdjudicator.address)).eq(heldAfter[channelId])
+        ).toBe(true);
 
         // Check new outcomeHash
         const newAllocation = [];
