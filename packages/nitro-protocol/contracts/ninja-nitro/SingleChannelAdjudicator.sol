@@ -159,8 +159,8 @@ contract SingleChannelAdjudicator is
     }
 
     /**
-     * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
-     * @dev Checks if a given destination is external (and can therefore have assets transferred to it) or not.
+     * @notice Checks if a given destination is external (i.e. simply a padded Ethereum addtess), or a channelId (which has a corresponding create2 address)
+     * @dev Checks if a given destination is external (i.e. simply a padded Ethereum addtess), or a channelId (which has a corresponding create2 address)
      * @param destination Destination to be checked.
      * @return True if the destination is external, false otherwise.
      */
