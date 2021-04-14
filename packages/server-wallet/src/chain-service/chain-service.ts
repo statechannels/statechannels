@@ -141,6 +141,7 @@ export class ChainService implements ChainServiceInterface {
 
   // Only used for unit tests
   destructor(): void {
+    this.provider.polling = false;
     this.provider.removeAllListeners();
     this.addressToContract.forEach(contract => contract.removeAllListeners());
   }

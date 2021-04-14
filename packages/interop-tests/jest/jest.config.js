@@ -13,7 +13,7 @@ module.exports = {
   },
   globals: {
     'ts-jest': {tsconfig: './tsconfig.json'},
-    window: {localStorage: {}, addEventListener: (_p1, p2) => ({})}
+    window: {localStorage: {}, addEventListener: (_p1, _p2) => ({})}
   },
   globalSetup: '<rootDir>/jest/chain-setup.ts',
   globalTeardown: '<rootDir>/jest/test-teardown.ts'

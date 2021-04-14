@@ -58,6 +58,7 @@ const serverConfig = defaultTestConfig({
 });
 
 let provider: providers.JsonRpcProvider;
+let assetHolderContract: Contract;
 let serverWallet: SingleThreadedEngine;
 let browserWallet: ChannelWallet;
 let serverAddress: Address;
@@ -66,16 +67,18 @@ let browserAddress: Address;
 let browserDestination: Destination;
 let objectiveSuccededPromise: Promise<void>;
 
-beforeEach(async () => {
-  await DBAdmin.truncateDatabase(serverConfig);
-
+beforeAll(() => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
-  const assetHolder = new Contract(
+  assetHolderContract = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,
     provider
   );
-  mineOnEvent(assetHolder);
+  mineOnEvent(assetHolderContract);
+});
+
+beforeEach(async () => {
+  await DBAdmin.truncateDatabase(serverConfig);
 
   serverWallet = await SingleThreadedEngine.create(serverConfig);
   browserWallet = await ChannelWallet.create(
@@ -103,8 +106,13 @@ beforeEach(async () => {
 
 afterEach(async () => {
   await serverWallet.destroy();
-  await browserWallet.destroy();
-  await provider.removeAllListeners();
+  browserWallet.destroy();
+});
+
+afterAll(() => {
+  provider.polling = false;
+  provider.removeAllListeners();
+  assetHolderContract.removeAllListeners();
 });
 
 async function mineBlocks(confirmations = 5) {
@@ -237,11 +245,9 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
     },
     'dummyDomain'
   );
-  await new Promise(r => setTimeout(r, 1_000));
   const channelId = Object.keys(browserWallet.getRichObjectives())[0];
   await browserWallet.approveRichObjective(channelId);
 
-  await new Promise(r => setTimeout(r, 1_000));
   const serverOutput1 = await serverWallet.joinChannel({channelId});
   await browserWallet.pushMessage(serverMessageToBrowserMessage(serverOutput1), 'dummyDomain');
 
