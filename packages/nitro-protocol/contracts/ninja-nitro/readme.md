@@ -1,6 +1,6 @@
 # Ninja Nitro
 
-Ninja-Nitro is an alternative implementation of Nitro protocol, with a different contract architecture to the main implementation (Mono-Nitro) in this package.
+Ninja-Nitro is an alternative implementation of Nitro protocol, with a different contract architecture to the main implementation (Mono-Nitro) in this package. The additional files should all have namespaced paths.
 
 ## Overview
 
@@ -82,11 +82,16 @@ To maintain compatibility with the off-chain code we already have for Mono-Nitro
 
 ## Gas tradeoffs
 
-## TODO
+| Operation                                   | Mono | Ninja |
+| ------------------------------------------- | ---- | ----- |
+| infastructure deployment                    | 4.3M | 5.1M  |
+| unidirectional payment channel (happy path) | 212K | 167K  |
 
-any known quirks or deficiencies
-the overall state of maturity of the code in this folder
-what would need to be done next to elevate the code from "investigation / spike" to "ready for an audit"
-as much information on the tradeoffs that it offers vs. existing nitro implementation
-security (hopefully as secure or more secure)
-gas (e.g. cheaper for directly funded channels, same for disputes, more expensive for on-chain rebalancing)
+## TODO (in this readme)
+
+- [*] any known quirks or deficiencies
+- [ ] the overall state of maturity of the code in this folder
+- [ ] what would need to be done next to elevate the code from "investigation / spike" to "ready for an audit"
+- [ ] as much information on the tradeoffs that it offers vs. existing nitro implementation
+- [ ] security (hopefully as secure or more secure)
+- [ ] gas (e.g. cheaper for directly funded channels, same for disputes, more expensive for on-chain rebalancing)
