@@ -371,11 +371,9 @@ contract SingleChannelAdjudicator is
             guaranteeCDL.outcomeBytes,
             (Outcome.OutcomeItem[])
         );
-        address payable guarantor = AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(
-            guarantorChannelId
-        );
-        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
-            .getChannelAddress(targetChannelId);
+        AdjudicatorFactory adjudicatorFactory = AdjudicatorFactory(adjudicatorFactoryAddress);
+        address payable guarantor = adjudicatorFactory.getChannelAddress(guarantorChannelId);
+        address targetChannelAddress = adjudicatorFactory.getChannelAddress(targetChannelId);
         require(address(this) == targetChannelAddress, 'incorrect target channel address');
         _requireMatchingStorage(
             ChannelData(
