@@ -114,7 +114,7 @@ describe('claim (ETH only)', () => {
       const guarantor = new TestChannel(getRandomNonce(name + 'g'));
       addresses.t = target.id;
       addresses.g = guarantor.id;
-      // Transform input data (unpack addresses and BigNumber amounts)
+      // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, tOutcomeBefore, tOutcomeAfter, heldAfter, payouts] = [
         heldBefore,
         tOutcomeBefore,
@@ -124,7 +124,7 @@ describe('claim (ETH only)', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
       // Fund the guarantor channel
-      let gasUsed;
+      let gasUsed: BigNumber;
       gasUsed = await guarantor.depositETH(heldBefore[guarantor.id]);
       await writeGasConsumption(
         'SingleChannelAdjudicator.claim.gas.md',
@@ -152,7 +152,10 @@ describe('claim (ETH only)', () => {
           name + ': conclude Guarantor',
           gasUsed
         );
-      } else guarantor.outcome = guarantorOutcome; // Set this so that the claim tx should revert in the way we expect
+      } else {
+        // Set this so that the claim tx should revert in the way we expect
+        guarantor.outcome = guarantorOutcome;
+      }
       // Compute an appropriate allocation outcome for the target (using only ETH)
       const allocation = [];
       Object.keys(tOutcomeBefore).forEach(key =>
@@ -186,7 +189,7 @@ describe('claim (ETH only)', () => {
       } else {
         const balancesBefore = await getBalances(payouts);
         // Extract logs
-        const {events: eventsFromTx, gasUsed} = await (await tx).wait();
+        const {gasUsed} = await (await tx).wait();
         await writeGasConsumption(
           'SingleChannelAdjudicator.claim.gas.md',
           name + ': Target. claim ',
@@ -236,7 +239,7 @@ async function getBalances(payouts: AssetOutcomeShortHand) {
 class TestChannel {
   channel: Channel;
   id: string;
-  address: string = undefined;
+  protected address: string = undefined;
   factory: Contract;
   adjudicator?: Contract = undefined;
   turnNumRecord = 5;
