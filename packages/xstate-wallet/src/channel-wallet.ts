@@ -272,28 +272,22 @@ export class ChannelWallet {
             await Promise.all(action.states.map(state => this.store.addState(state, true)));
             break;
           case 'deposit':
-            if (this.store.depositsSubmitted[channelId]) {
-              logger.warn(
-                'Attempting to submit a deposit for a channel with already submitted deposit',
-                {depositSubmitted: this.store.depositsSubmitted[channelId]}
-              );
-              continue;
-            }
             const fundingMilestones = DirectFunder.utils.fundingMilestone(
               richObjective.openingState,
               richObjective.openingState.participants[richObjective.myIndex].destination
             );
 
-            // Record that a deposit will be made
-            this.store.depositsSubmitted[channelId] = {
-              amountOnChain: fundingMilestones.targetBefore,
-              amountDeposited: action.amount
-            };
-            await this.store.chain.deposit(
+            const txHash = await this.store.chain.deposit(
               channelId,
               fundingMilestones.targetBefore,
               action.amount
             );
+            this.crankRichObjectives({
+              type: 'DepositSubmitted',
+              tx: txHash ?? '',
+              attempt: 0,
+              submittedAt: Date.now()
+            });
 
             break;
           default:
