@@ -6,7 +6,7 @@ import {
   SingleThreadedEngine
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {ChannelWallet} from '@statechannels/xstate-wallet';
+import {ChannelWallet} from '@statechannels/browser-wallet';
 import {constants, Contract, providers, Wallet} from 'ethers';
 import {
   Address,
