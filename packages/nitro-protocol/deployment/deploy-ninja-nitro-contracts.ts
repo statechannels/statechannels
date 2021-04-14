@@ -41,7 +41,7 @@ export async function deploy(): Promise<Record<string, string>> {
   writeGasConsumption('MasterCopy.gas.md', 'deployment', masterCopyDeploymentGas);
   console.log(`\nDeploying MasterCopy... (cost estimated to be ${masterCopyDeploymentGas})\n`);
 
-  // The following lines are not strictly part of deployment, but they constiture a crucial one-time setup
+  // The following lines are not strictly part of deployment, but they constitute a crucial one-time setup
   // for the contracts. The factory needs to know the address of the mastercopy, and this is provided by calling
   // the setup method on the factory:
   const provider = getTestProvider();
