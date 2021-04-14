@@ -294,27 +294,6 @@ export class Store {
       )
       .then(({entry, signedState}) => this.emitChannelUpdatedEventAfterTX(entry, signedState));
 
-  public async createAndStoreOpenChannelObjective(
-    params: OpenChanneObjectiveParams
-  ): Promise<DirectFunder.OpenChannelObjective> {
-    const addresses = params.participants.map(x => x.signingAddress);
-    // TODO: this is not concurrency safe as the new nonce is not saved to the store until a state is added to the store
-    const channelNonce = (await this.getNonce(addresses)) + 1;
-    const channelId = calculateChannelId({...params, channelNonce});
-
-    if (this.richObjectives[channelId]) {
-      // TODO: should include the channel id in the error
-      throw new Error(Errors.objectiveAlreadyExists);
-    }
-    const openingState: State = {
-      ...params,
-      turnNum: 0,
-      isFinal: false,
-      channelNonce
-    };
-    return (this.richObjectives[channelId] = DirectFunder.initialize(openingState, 0));
-  }
-
   private async getNonce(addresses: string[]): Promise<number> {
     return (await this.backend.getNonce(this.nonceKeyFromAddresses(addresses))) ?? -1;
   }
@@ -590,7 +569,10 @@ export class Store {
    */
 
   async pushMessage2(signedStates: SignedState[] | undefined, objectives: Objective[] | undefined) {
-    if (objectives) await Promise.all(objectives.map(_.bind(this.addRichObjective, this)));
+    if (objectives)
+      await Promise.all(
+        objectives.map(_.bind(this.createAndStoreRichObjectiveFromObjective, this))
+      );
 
     if (signedStates) {
       this._eventEmitter.emit('crankRichObjectives', {
@@ -600,7 +582,30 @@ export class Store {
     }
   }
 
-  private async addRichObjective(objective: Objective) {
+  public async createAndStoreOpenChannelObjective(
+    params: OpenChanneObjectiveParams
+  ): Promise<DirectFunder.OpenChannelObjective> {
+    const addresses = params.participants.map(x => x.signingAddress);
+    // TODO: this is not concurrency safe as the new nonce is not saved to the store until a state is added to the store
+    const channelNonce = (await this.getNonce(addresses)) + 1;
+    const channelId = calculateChannelId({...params, channelNonce});
+
+    if (this.richObjectives[channelId]) {
+      // TODO: should include the channel id in the error
+      throw new Error(Errors.objectiveAlreadyExists);
+    }
+    const openingState: State = {
+      ...params,
+      turnNum: 0,
+      isFinal: false,
+      channelNonce
+    };
+    this.richObjectives[channelId] = DirectFunder.initialize(openingState, 0);
+    this.registerChannelWithChain(channelId);
+    return this.richObjectives[channelId];
+  }
+
+  private async createAndStoreRichObjectiveFromObjective(objective: Objective) {
     switch (objective.type) {
       case 'OpenChannel':
         if (this.richObjectives[objective.data.targetChannelId]) {
@@ -616,17 +621,21 @@ export class Store {
         );
         this.richObjectives[richObjective.channelId] = richObjective;
 
-        this.chain.chainUpdatedFeed(richObjective.channelId).subscribe(chainInfo =>
-          this._eventEmitter.emit('crankRichObjectives', {
-            type: 'FundingUpdated',
-            amount: chainInfo.amount,
-            finalized: true
-          })
-        );
+        this.registerChannelWithChain(richObjective.channelId);
         break;
       default:
         throw new Error(`addRichObjective not implemented for an objective type ${objective.type}`);
     }
+  }
+
+  private registerChannelWithChain(channelId): void {
+    this.chain.chainUpdatedFeed(channelId).subscribe(chainInfo =>
+      this._eventEmitter.emit('crankRichObjectives', {
+        type: 'FundingUpdated',
+        amount: chainInfo.amount,
+        finalized: true
+      })
+    );
   }
 
   /**
