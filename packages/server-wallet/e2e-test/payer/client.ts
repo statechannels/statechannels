@@ -203,14 +203,6 @@ export default class PayerClient {
     await this.time(`push message ${channelId}`, async () => this.engine.pushMessage(reply));
   }
 
-  public async syncChannel(channelId: string): Promise<void> {
-    const {
-      outbox: [{params}],
-    } = await this.engine.syncChannel({channelId});
-    const reply = await this.messageReceiverAndExpectReply(params.data);
-    await this.engine.pushMessage(reply);
-  }
-
   public emptyMessage(): Promise<unknown> {
     return this.messageReceiverAndExpectReply({
       walletVersion: '',

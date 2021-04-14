@@ -1,7 +1,6 @@
 import {
   UpdateChannelParams,
   CreateChannelParams,
-  SyncChannelParams,
   CloseChannelParams,
   GetStateParams,
   ChannelId,
@@ -10,7 +9,6 @@ import {
 
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
-import {Bytes32} from '../type-aliases';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
@@ -56,9 +54,6 @@ export interface EngineInterface {
   closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
   getChannels(): Promise<MultipleChannelOutput>;
   getState(args: GetStateParams): Promise<SingleChannelOutput>;
-
-  syncChannels(chanelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-  syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
 
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
