@@ -18,7 +18,7 @@ import {
   Address
 } from '@statechannels/wallet-core';
 import {Contract, Wallet, utils, providers} from 'ethers';
-import {Observable, fromEvent, from, merge, interval} from 'rxjs';
+import {Observable, fromEvent, from, merge} from 'rxjs';
 import {filter, map, flatMap, distinctUntilChanged} from 'rxjs/operators';
 import EventEmitter from 'eventemitter3';
 import _ from 'lodash';
@@ -59,7 +59,7 @@ export interface Chain {
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
   balanceUpdatedFeed(address: string): Observable<Uint256>;
 
-  destroy(): Promise<void>;
+  destroy(): void;
 }
 
 type Updated = ChannelChainInfo & {channelId: string};
@@ -241,7 +241,7 @@ export class FakeChain implements Chain {
     return this.fakeSelectedAddress;
   }
 
-  public async destroy(): Promise<void> {
+  public destroy(): void {
     _.noop();
   }
 }
@@ -458,7 +458,10 @@ export class ChainWatcher implements Chain {
       throw new Error('Not connected to contracts');
     }
 
-    const polledData = interval(5000).pipe(flatMap(() => this.getChainInfo(channelId)));
+    // TODO: removing 5 seconds polling as it is causing seems to be correlated with test process errors:
+    //        Error: could not detect network (event="noNetwork", code=NETWORK_ERROR, version=providers/5.0.9)
+    // Consider adding polling as an option to the chain watcher
+    //const polledData = interval(5000).pipe(flatMap(() => this.getChainInfo(channelId)));
 
     const depositEvents = fromEvent(this._assetHolders[0], 'Deposited').pipe(
       // TODO: Type event correctly, use ethers-utils.js
@@ -479,7 +482,9 @@ export class ChainWatcher implements Chain {
       flatMap(async () => this.getChainInfo(channelId))
     );
 
-    return merge(polledData, depositEvents, assetTransferEvents);
+    // TODO: see comment above around polling
+    // return merge(polledData, depositEvents, assetTransferEvents);
+    return merge(depositEvents, assetTransferEvents);
   }
 
   public challengeRegisteredFeed(channelId: string): Observable<ChallengeRegistered> {
@@ -503,10 +508,11 @@ export class ChainWatcher implements Chain {
     );
   }
 
-  public async destroy(): Promise<void> {
-    await this._adjudicator?.removeAllListeners();
-    await Promise.all(this._assetHolders.map(assetHolder => assetHolder.removeAllListeners()));
-    await this.provider.removeAllListeners();
+  public destroy(): void {
+    this.provider.polling = false;
+    this._adjudicator?.removeAllListeners();
+    this._assetHolders.map(assetHolder => assetHolder.removeAllListeners());
+    this.provider.removeAllListeners();
   }
 }
 

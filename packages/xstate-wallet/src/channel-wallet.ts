@@ -334,8 +334,8 @@ export class ChannelWallet {
     return this.store.richObjectives;
   }
 
-  public async destroy(): Promise<void> {
-    return this.store.chain.destroy();
+  public destroy(): void {
+    this.store.chain.destroy();
   }
 
   /**
