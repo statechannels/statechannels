@@ -8,7 +8,15 @@ import {
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ChannelWallet} from '@statechannels/xstate-wallet';
 import {constants, Contract, providers, Wallet} from 'ethers';
-import {BN, formatAmount, makeAddress, makeDestination, Uint256} from '@statechannels/wallet-core';
+import {
+  Address,
+  BN,
+  Destination,
+  formatAmount,
+  makeAddress,
+  makeDestination,
+  Uint256
+} from '@statechannels/wallet-core';
 import {fromEvent} from 'rxjs';
 import {take} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
@@ -52,8 +60,13 @@ const serverConfig = defaultTestConfig({
 let provider: providers.JsonRpcProvider;
 let serverWallet: SingleThreadedEngine;
 let browserWallet: ChannelWallet;
+let serverAddress: Address;
+let serverDestination: Destination;
+let browserAddress: Address;
+let browserDestination: Destination;
+let objectiveSuccededPromise: Promise<void>;
 
-beforeAll(async () => {
+beforeEach(async () => {
   await DBAdmin.truncateDatabase(serverConfig);
 
   provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -68,9 +81,27 @@ beforeAll(async () => {
   browserWallet = await ChannelWallet.create(
     makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
   );
+
+  serverAddress = await serverWallet.getSigningAddress();
+  serverDestination = makeDestination(serverAddress);
+
+  browserAddress = makeAddress(await browserWallet.getAddress());
+  browserDestination = makeDestination(browserAddress);
+
+  browserWallet.onSendMessage(message => {
+    if (isJsonRpcNotification(message)) {
+      serverWallet.pushMessage((message.params as Message).data);
+    }
+  });
+
+  objectiveSuccededPromise = new Promise<void>(r => {
+    serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
+      if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
+    });
+  });
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await serverWallet.destroy();
   await browserWallet.destroy();
   await provider.removeAllListeners();
@@ -100,24 +131,6 @@ function generatePushMessage(messageParams: Message): PushMessageRequest {
 }
 
 it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
-  const serverAddress = await serverWallet.getSigningAddress();
-  const serverDestination = makeDestination(serverAddress);
-
-  const objectiveSuccededPromise = new Promise<void>(r => {
-    serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
-      if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
-    });
-  });
-
-  const browserAddress = await browserWallet.getAddress();
-  const browserDestination = makeDestination(browserAddress);
-
-  browserWallet.onSendMessage(message => {
-    if (isJsonRpcNotification(message)) {
-      serverWallet.pushMessage((message.params as Message).data);
-    }
-  });
-
   const output1 = await serverWallet.createChannel({
     appData: '0x',
     appDefinition: constants.AddressZero,
@@ -180,25 +193,7 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
   await objectiveSuccededPromise;
 });
 
-it.skip('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
-  const serverAddress = await serverWallet.getSigningAddress();
-  const serverDestination = makeDestination(serverAddress);
-
-  const objectiveSuccededPromise = new Promise<void>(r => {
-    serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
-      if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
-    });
-  });
-
-  const browserAddress = await browserWallet.getAddress();
-  const browserDestination = makeDestination(browserAddress);
-
-  browserWallet.onSendMessage(message => {
-    if (isJsonRpcNotification(message)) {
-      serverWallet.pushMessage((message.params as Message).data);
-    }
-  });
-
+it('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
   const createChannelParams: CreateChannelParams = {
     participants: [
       {
@@ -259,14 +254,11 @@ it.skip('browser wallet creates channel + cooperates with server wallet to fund 
    */
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundAPromise = fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
+  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
     .pipe(take(3))
     .toPromise();
 
-  await browserWallet.pushMessage(
-    serverMessageToBrowserMessage(await postFundAPromise),
-    'dummyDomain'
-  );
+  await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
 
   await objectiveSuccededPromise;
 });
