@@ -59,6 +59,9 @@ export interface Chain {
   getChainInfo: (channelId: string) => Promise<ChannelChainInfo>;
   balanceUpdatedFeed(address: string): Observable<Uint256>;
 
+  /**
+   * Only used for testing
+   */
   destroy(): void;
 }
 
@@ -508,6 +511,9 @@ export class ChainWatcher implements Chain {
     );
   }
 
+  /**
+   * Only used for testing
+   */
   public destroy(): void {
     this.provider.polling = false;
     this._adjudicator?.removeAllListeners();
