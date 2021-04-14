@@ -158,8 +158,8 @@ describe('claim (ETH only)', () => {
       }
       // Compute an appropriate allocation outcome for the target (using only ETH)
       const allocation = [];
-      Object.keys(tOutcomeBefore).forEach(key =>
-        allocation.push({destination: key, amount: tOutcomeBefore[key]})
+      Object.keys(tOutcomeBefore).forEach(destination =>
+        allocation.push({destination, amount: tOutcomeBefore[destination]})
       );
       const targetOutcome: Outcome = [
         {assetHolderAddress: constants.AddressZero, allocationItems: allocation},
@@ -198,8 +198,8 @@ describe('claim (ETH only)', () => {
 
         // Check new outcomeHash
         const newAllocation = [];
-        Object.keys(tOutcomeAfter).forEach(key =>
-          newAllocation.push({destination: key, amount: tOutcomeAfter[key]})
+        Object.keys(tOutcomeAfter).forEach(destination =>
+          newAllocation.push({destination, amount: tOutcomeAfter[destination]})
         );
         const outcome: Outcome = [
           {assetHolderAddress: constants.AddressZero, allocationItems: newAllocation},
@@ -214,9 +214,9 @@ describe('claim (ETH only)', () => {
         expect(await target.statusOf()).toEqual(expectedFingerprint);
 
         const balancesAfter = await getBalances(payouts);
-        Object.keys(payouts).forEach(key =>
-          expect(BigNumber.from(balancesAfter[key])).toEqual(
-            BigNumber.from(balancesBefore[key]).add(BigNumber.from(payouts[key]))
+        Object.keys(payouts).forEach(destination =>
+          expect(BigNumber.from(balancesAfter[destination])).toEqual(
+            BigNumber.from(balancesBefore[destination]).add(BigNumber.from(payouts[destination]))
           )
         );
       }
@@ -227,8 +227,8 @@ describe('claim (ETH only)', () => {
 async function getBalances(payouts: AssetOutcomeShortHand) {
   const balances: Record<string, BigNumber> = {};
   await Promise.all(
-    Object.keys(payouts).map(async key => {
-      balances[key] = await provider.getBalance(convertBytes32ToAddress(key));
+    Object.keys(payouts).map(async destination => {
+      balances[destination] = await provider.getBalance(convertBytes32ToAddress(destination));
     })
   );
   return balances;
