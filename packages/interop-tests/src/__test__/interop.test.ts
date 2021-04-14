@@ -172,7 +172,7 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(output1), 'dummyDomain');
 
-  // TODO: the proper way to do this is to wait for a ChannelProposed or some sort of new objective notification'
+  // TODO: the proper way to do this is to wait for a ChannelProposed or some sort of new objective notification
   await browserWallet.pushMessage(
     {
       jsonrpc: '2.0',
