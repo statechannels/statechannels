@@ -64,26 +64,19 @@ export async function crashAndRestart(
   try {
     await oldPeerSetup.messageService.destroy();
 
-    const restartA = enginesToRestart==='A' || enginesToRestart==='Both';
-    const restartB = enginesToRestart==='B' || enginesToRestart==='Both';
-    
-    if(restartA){
-    await   oldPeerSetup.peerEngines.a.destroy();
+    const restartA = enginesToRestart === 'A' || enginesToRestart === 'Both';
+    const restartB = enginesToRestart === 'B' || enginesToRestart === 'Both';
+
+    if (restartA) {
+      await oldPeerSetup.peerEngines.a.destroy();
     }
-    if (restartB){
+    if (restartB) {
       await oldPeerSetup.peerEngines.b.destroy();
     }
-    const a =
-    restartA
-        ? await Engine.create(aEngineConfig)
-        : oldPeerSetup.peerEngines.a;
+    const a = restartA ? await Engine.create(aEngineConfig) : oldPeerSetup.peerEngines.a;
 
-    const b =
-    restartB
-        ? await Engine.create(bEngineConfig)
-        : oldPeerSetup.peerEngines.b;
+    const b = restartB ? await Engine.create(bEngineConfig) : oldPeerSetup.peerEngines.b;
 
-        
     const handler = await createTestMessageHandler([
       {participantId: participantIdA, engine: a},
       {participantId: participantIdB, engine: b},
@@ -103,7 +96,7 @@ export async function crashAndRestart(
         '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
       ),
     };
-    
+
     const messageService = (await TestMessageService.create(
       handler,
       a.logger
