@@ -281,15 +281,18 @@ describe('deployAndPayout', () => {
         // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(events).toMatchObject(expectedEvents);
 
-        // Check new holdings on each AssetHolder
-        // checkMultipleHoldings(heldAfter, [EthAssetHolder1, EthAssetHolder2, ERC20AssetHolder]);
-
-        // Check new assetOutcomeHash on each AssetHolder
-        //     checkMultipleAssetOutcomeHashes(channelId, newOutcome, [
-        //       EthAssetHolder1,
-        //       EthAssetHolder2,
-        //       ERC20AssetHolder,
-        //     ]);
+        // Test funding the channel again, after it was destroyed
+        await (
+          await provider.getSigner().sendTransaction({
+            to: SingleChannelAdjudicator.address,
+            value: 9,
+          })
+        ).wait();
+        expect(
+          (await provider.getBalance(convertBytes32ToAddress(SingleChannelAdjudicator.address))).eq(
+            9
+          )
+        ).toBe(true);
       }
     }
   );
