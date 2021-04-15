@@ -204,6 +204,10 @@ export class EngineResponse {
     }));
   }
 
+  public get messagesByObjective(): Map<string, WireMessage[]> {
+    return this.queuedMessages;
+  }
+
   public get channelResults(): ChannelResult[] {
     return Object.values(this._channelResults);
   }
