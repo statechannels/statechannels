@@ -80,10 +80,16 @@ To maintain compatibility with the off-chain code we already have for Mono-Nitro
 
 ## Gas tradeoffs
 
-| Operation                                   | Mono | Ninja |
-| ------------------------------------------- | ---- | ----- |
-| infastructure deployment                    | 4.3M | 5.1M  |
-| unidirectional payment channel (happy path) | 212K | 167K  |
+| Operation                                                      | Mono | Ninja |
+| -------------------------------------------------------------- | ---- | ----- |
+| infastructure deployment                                       | 4.3M | 5.1M  |
+| directly-funded unidirectional payment channel (happy path)    | 212K | 167K  |
+| directly-funded unidirectional payment channel (unhappy path)  | ?    | ?     |
+| ledger-funded unidirectional payment channel (unhappy path)    | ?    | ?     |
+| virtually-funded unidirectional payment channel (unhappy path) | ?    | ?     |
+
+Unidirectional payment channel: only one deposit and one payout
+The unhappy path: all channels in the funding tree are finalized on chain via `challenge` and timeout, and the funds are then transferred and claimed until they are all liquidated.
 
 ## TODO (in this readme)
 
