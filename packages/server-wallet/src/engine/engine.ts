@@ -68,6 +68,7 @@ import {
   EngineInterface,
   EngineEvent,
   hasNewObjective,
+  SyncObjectiveResult,
 } from './types';
 import {EngineResponse} from './engine-response';
 
@@ -290,7 +291,7 @@ export class SingleThreadedEngine
    * @param objectiveIds The ids of the objectives that should be sent to the counterparties
    * @returns A promise that resolves to an object containing the messages.
    */
-  public async syncObjectives(objectiveIds: string[]): Promise<Map<string, Message[]>> {
+  public async syncObjectives(objectiveIds: string[]): Promise<SyncObjectiveResult> {
     const response = EngineResponse.initialize();
     const objectives = await this.store.getObjectivesByIds(objectiveIds);
 
@@ -317,7 +318,7 @@ export class SingleThreadedEngine
       response.queueSendObjective(o, channel.myIndex, participants);
     }
 
-    return response.messagesByObjective;
+    return response.syncObjectiveResult;
   }
 
   /**
