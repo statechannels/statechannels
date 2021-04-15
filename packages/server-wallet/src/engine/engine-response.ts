@@ -17,7 +17,7 @@ import {EngineEvent, MultipleChannelOutput, SingleChannelOutput, Output} from '.
  */
 export class EngineResponse {
   _channelResults: Record<string, ChannelResult> = {};
-  private queuedMessages: WireMessage[] = [];
+  private queuedMessages: Map<string, WireMessage[]> = new Map();
   objectivesToApprove: WalletObjective[] = [];
   createdObjectives: WalletObjective[] = [];
   succeededObjectives: WalletObjective[] = [];
@@ -55,11 +55,11 @@ export class EngineResponse {
   /**
    * Queues state for sending to opponent
    */
-  queueState(state: SignedState, myIndex: number, channelId?: string): void {
+  queueState(state: SignedState, myIndex: number, objectiveId?: string, channelId?: string): void {
     const myParticipantId = state.participants[myIndex].participantId;
     state.participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.queuedMessages.push(
+        this.addMessage(
           serializeMessage(
             WALLET_VERSION,
             {
@@ -69,10 +69,17 @@ export class EngineResponse {
             p.participantId,
             myParticipantId,
             channelId
-          )
+          ),
+          objectiveId
         );
       }
     });
+  }
+
+  addMessage(message: WireMessage, objectiveId?: string): void {
+    const id = objectiveId ?? 'NO_OBJECTIVE_ID';
+    const previousValue = this.queuedMessages.get(id) ?? [];
+    this.queuedMessages.set(id, previousValue.concat(message));
   }
 
   /**
@@ -87,7 +94,7 @@ export class EngineResponse {
     if (isSharedObjective(objective)) {
       participants.forEach((p, i) => {
         if (i !== myIndex) {
-          this.queuedMessages.push(
+          this.addMessage(
             serializeMessage(
               WALLET_VERSION,
               {
@@ -96,7 +103,8 @@ export class EngineResponse {
               },
               p.participantId,
               myParticipantId
-            )
+            ),
+            objective.objectiveId
           );
         }
       });
@@ -119,13 +127,6 @@ export class EngineResponse {
   }
 
   /**
-   * Queues objectives for approval by the user
-   */
-  queueReceivedObjective(objective: WalletObjective): void {
-    this.objectivesToApprove.push(objective);
-  }
-
-  /**
    * Queue succeeded objectives, so we can emit events
    */
   queueSucceededObjective(objective: WalletObjective): void {
@@ -140,7 +141,7 @@ export class EngineResponse {
 
     participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.queuedMessages.push(
+        this.addMessage(
           serializeMessage(
             WALLET_VERSION,
             {
@@ -207,8 +208,11 @@ export class EngineResponse {
     return Object.values(this._channelResults);
   }
 
+  private get messageArray(): WireMessage[] {
+    return Array.from(this.queuedMessages.values()).reduce((a, b) => a.concat(b), []);
+  }
   private get outbox(): Outgoing[] {
-    return this.queuedMessages.map(m => ({
+    return this.messageArray.map(m => ({
       method: 'MessageQueued' as const,
       params: m,
     }));
@@ -237,7 +241,7 @@ export class EngineResponse {
   // -------------------------------
 
   public get _signedStates(): WireState[] {
-    return this.queuedMessages.flatMap(wireMessage => wireMessage.data.signedStates || []);
+    return this.messageArray.flatMap(wireMessage => wireMessage.data.signedStates || []);
   }
 }
 
