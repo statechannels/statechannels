@@ -50,7 +50,7 @@ Ninja-Nitro has no such mappings: but a public `holdings` function remains. This
 ### Deposits
 
 In Mono-Nitro, depositing requires calling a method on each `AssetHolder`.
-In Ninja-Nitro, depositing can be achieved simply by sending funds or tokens to the address of the `Proxy`, and this can even be done before the `Proxy` is created/deployed.
+In Ninja-Nitro, depositing can be achieved simply by sending funds or tokens to the address of the `Proxy`, and this can even be done before the `Proxy` is created/deployed. It can also be done after the `Proxy` is destroyed -- self destructing the adjudicator when the channel is finished is one way to save some gas.
 
 ### Adjudicator status
 
