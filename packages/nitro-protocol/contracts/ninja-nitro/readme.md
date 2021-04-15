@@ -71,12 +71,10 @@ In Mono-Nitro, funds for channels are tracked _internally_, while funds for any 
 
 In Ninja-Nitro, funds are always tracked externally. This is possible since (up to hash collisions) each channel now has a unique Ethereum address. Funds are therefore always paid _out_ of a `Proxy` contract after a `transfer` or `claim`. There is therefore no such thing as an internal destination in Ninja-Nitro. Everything is external.
 
-To maintain compatibility with the off-chain code we already have for Mono-Nitro, the Ninja-Nitro implementation should convert destinations to addresses in the following way:
+To maintain compatibility with the off-chain code we already have for Mono-Nitro, the Ninja-Nitro implementation converts destinations to addresses in the following way:
 
 - if the destination is a padded Ethereum address, slice off the Ethereum address and use that
 - if the destination is not a padded Ethereum address, compute the create2 address of that channel and use that
-
-> TODO it does not currently do this and our test suite is not adequate enough to tell us!
 
 > A future optimization might be to do away with the 32 byte destination concept altogether. Destinations would then always be Ethereum addresses, and trying to allocate funds to a 32 byte destination would raise an exception.
 
