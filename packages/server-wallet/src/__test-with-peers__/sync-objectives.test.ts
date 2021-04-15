@@ -1,20 +1,24 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
 import Knex from 'knex';
 
-import {peerEngines, getPeersSetup, peersTeardown} from '../../jest/with-peers-setup-teardown';
+import {getPeersSetup, teardownPeerSetup, PeerSetup} from '../../jest/with-peers-setup-teardown';
 import {WalletObjective, ObjectiveModel} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 import {bob} from '../engine/__test__/fixtures/participants';
 import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 
 jest.setTimeout(10_000);
-
-beforeAll(getPeersSetup(true));
-afterAll(peersTeardown);
-
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await getPeersSetup(true);
+});
+afterAll(async () => {
+  await teardownPeerSetup(peerSetup);
+});
 test('Objectives can be synced if a message is lost', async () => {
   const createChannelParams: CreateChannelParams = createChannelArgs();
 
+  const {peerEngines} = peerSetup;
   // We mimic not receiving a message containing objectives
   const messageToLose = await peerEngines.a.createChannel(createChannelParams);
 
@@ -40,7 +44,7 @@ test('Objectives can be synced if a message is lost', async () => {
 
 test('handles the objective being synced even if no message is lost', async () => {
   const createChannelParams: CreateChannelParams = createChannelArgs();
-
+  const {peerEngines} = peerSetup;
   const messageResponse = await peerEngines.a.createChannel(createChannelParams);
 
   const channelId = messageResponse.channelResult.channelId;
@@ -79,7 +83,7 @@ test('handles the objective being synced even if no message is lost', async () =
 
 test('Can successfully push the sync objective message multiple times', async () => {
   const createChannelParams: CreateChannelParams = createChannelArgs();
-
+  const {peerEngines} = peerSetup;
   // We mimic not receiving a message containing objectives
   const messageToLose = await peerEngines.a.createChannel(createChannelParams);
 

@@ -7,25 +7,24 @@ import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
 import {ONE_DAY} from '../../__test__/test-helpers';
-import {
-  peerEngines,
-  getPeersSetup,
-  participantA,
-  participantB,
-  peersTeardown,
-  messageService,
-} from '../../../jest/with-peers-setup-teardown';
+import {getPeersSetup, teardownPeerSetup, PeerSetup} from '../../../jest/with-peers-setup-teardown';
 import {expectLatestStateToMatch} from '../utils';
 import {getMessages} from '../../message-service/utils';
 
 let channelId: string;
-
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await getPeersSetup();
+});
+afterAll(async () => {
+  await teardownPeerSetup(peerSetup);
+});
 
 it('Create a fake-funded channel between two engines ', async () => {
   const assetHolderAddress = makeAddress(constants.AddressZero);
   const aBal = BigNumber.from(1).toHexString();
+
+  const {participantA, participantB, peerEngines, messageService} = peerSetup;
 
   const allocation: Allocation = {
     allocationItems: [{destination: participantA.destination, amount: aBal}],

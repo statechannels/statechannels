@@ -53,9 +53,8 @@ export class TestMessageService implements MessageServiceInterface {
 
   static async create(
     incomingMessageHandler: MessageHandler,
-
     logger?: Logger
-  ): Promise<MessageServiceInterface> {
+  ): Promise<TestMessageService> {
     const service = new TestMessageService(incomingMessageHandler, logger);
     return service;
   }

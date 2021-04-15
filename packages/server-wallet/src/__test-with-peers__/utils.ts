@@ -2,7 +2,7 @@ import {ChannelResult, CreateChannelParams} from '@statechannels/client-api-sche
 import _ from 'lodash';
 
 import {Engine} from '..';
-import {participantA, participantB} from '../../jest/with-peers-setup-teardown';
+import {PeerSetup} from '../../jest/with-peers-setup-teardown';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 
 export async function expectLatestStateToMatch(
@@ -14,9 +14,9 @@ export async function expectLatestStateToMatch(
   expect(latest.channelResult).toMatchObject(partial);
 }
 
-export function getWithPeersCreateChannelsArgs(): CreateChannelParams {
+export function getWithPeersCreateChannelsArgs(peerSetup: PeerSetup): CreateChannelParams {
   return createChannelArgs({
-    participants: [participantA, participantB],
+    participants: [peerSetup.participantA, peerSetup.participantB],
     fundingStrategy: 'Fake',
   });
 }
