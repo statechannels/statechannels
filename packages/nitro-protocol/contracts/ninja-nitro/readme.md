@@ -24,7 +24,7 @@ After a `pushOutcome` assets may be released by targetting each `AssetHolder` an
 
 ### Ninja-Nitro
 
-Ninja-Nitro, by contrast has 1 x `AdjudicatorFactory` contract, 1 x `SingleChannelAdjudicator` master contract, and k x `Proxy` contracts, one for each of the k channels in the network that resolves on chain. The factory and master contracts are "infastructure" and deployed once (most likely by the protocol team).
+Ninja-Nitro, by contrast has 1 x `AdjudicatorFactory` contract, 1 x `SingleChannelAdjudicator` master contract, and k x `Proxy` contracts, one for each of the k channels in the network that resolves on chain. The factory and master contracts are "infastructure" and deployed once (i.e. by us).
 
 The `AdjudicatorFactory` API is
 
