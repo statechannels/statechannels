@@ -98,10 +98,7 @@ export async function crashAndRestart(
       destination: destinationB,
     };
 
-    const messageService = (await TestMessageService.create(
-      handler,
-      a.logger
-    )) as TestMessageService;
+    const messageService = await TestMessageService.create(handler, a.logger);
     return {
       peerEngines: {a, b},
       messageService,
@@ -155,10 +152,7 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
     ];
 
     const handler = createTestMessageHandler(participantEngines, peerEngines.a.logger);
-    const messageService = (await TestMessageService.create(
-      handler,
-      peerEngines.a.logger
-    )) as TestMessageService;
+    const messageService = await TestMessageService.create(handler, peerEngines.a.logger);
 
     logger.trace('getPeersSetup complete');
     return {
