@@ -10,7 +10,7 @@ import {
 
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
-import {Bytes32} from '../type-aliases';
+import {Bytes32, WireMessage} from '../type-aliases';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
@@ -23,6 +23,10 @@ export type MultipleChannelOutput = {
   newObjectives: WalletObjective[];
 };
 
+export type SyncObjectiveResult = {
+  messagesByObjective: Record<string, WireMessage[]>;
+  outbox: Outgoing[];
+};
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
 type ChannelUpdatedEvent = {

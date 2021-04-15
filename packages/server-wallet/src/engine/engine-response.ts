@@ -9,7 +9,13 @@ import {WalletObjective, isSharedObjective, toWireObjective} from '../models/obj
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
-import {EngineEvent, MultipleChannelOutput, SingleChannelOutput, Output} from './types';
+import {
+  EngineEvent,
+  MultipleChannelOutput,
+  SingleChannelOutput,
+  Output,
+  SyncObjectiveResult,
+} from './types';
 
 /**
  * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
@@ -17,7 +23,8 @@ import {EngineEvent, MultipleChannelOutput, SingleChannelOutput, Output} from '.
  */
 export class EngineResponse {
   _channelResults: Record<string, ChannelResult> = {};
-  private queuedMessages: Map<string, WireMessage[]> = new Map();
+  private queuedMessages: Record<string, WireMessage[]> = {};
+
   objectivesToApprove: WalletObjective[] = [];
   createdObjectives: WalletObjective[] = [];
   succeededObjectives: WalletObjective[] = [];
@@ -78,8 +85,8 @@ export class EngineResponse {
 
   addMessage(message: WireMessage, objectiveId?: string): void {
     const id = objectiveId ?? 'NO_OBJECTIVE_ID';
-    const previousValue = this.queuedMessages.get(id) ?? [];
-    this.queuedMessages.set(id, previousValue.concat(message));
+    const previousValue = this.queuedMessages[id] ?? [];
+    this.queuedMessages[id] = previousValue.concat(message);
   }
 
   /**
@@ -204,22 +211,24 @@ export class EngineResponse {
     }));
   }
 
-  public get messagesByObjective(): Map<string, WireMessage[]> {
-    return this.queuedMessages;
+  public get syncObjectiveResult(): SyncObjectiveResult {
+    return {outbox: this.outbox, messagesByObjective: this.queuedMessages};
   }
 
   public get channelResults(): ChannelResult[] {
     return Object.values(this._channelResults);
   }
 
-  private get messageArray(): WireMessage[] {
-    return Array.from(this.queuedMessages.values()).reduce((a, b) => a.concat(b), []);
+  private get allMessages(): WireMessage[] {
+    return _.flatten(Object.values(this.queuedMessages));
   }
   private get outbox(): Outgoing[] {
-    return this.messageArray.map(m => ({
-      method: 'MessageQueued' as const,
-      params: m,
-    }));
+    return mergeOutgoing(
+      this.allMessages.map(m => ({
+        method: 'MessageQueued' as const,
+        params: m,
+      }))
+    );
   }
 
   public static mergeOutgoing(outgoing: Notice[]): Notice[] {
@@ -245,7 +254,7 @@ export class EngineResponse {
   // -------------------------------
 
   public get _signedStates(): WireState[] {
-    return this.messageArray.flatMap(wireMessage => wireMessage.data.signedStates || []);
+    return this.allMessages.flatMap(wireMessage => wireMessage.data.signedStates || []);
   }
 }
 

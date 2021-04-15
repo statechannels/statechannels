@@ -83,7 +83,7 @@ export class Wallet {
     const syncMessages = await this._engine.syncObjectives(objectiveIds);
     return Promise.all(
       objectives.map(async o => {
-        const messagesForObjective = syncMessages.get(o.objectiveId) ?? [];
+        const messagesForObjective = syncMessages.messagesByObjective[o.objectiveId];
         return {
           objectiveId: o.objectiveId,
           currentStatus: o.status,
@@ -129,8 +129,8 @@ export class Wallet {
         await delay(delayAmount);
 
         const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
-        const messages = _.flatten(Array.from(syncResult.values()));
-        await this._messageService.send(messages);
+
+        await this._messageService.send(getMessages(syncResult.outbox));
       }
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
