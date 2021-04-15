@@ -1,10 +1,12 @@
 # Ninja Nitro
 
-Ninja-Nitro is an alternative implementation of Nitro protocol, with a different contract architecture to the main implementation (Mono-Nitro) in this package. The additional files should all have namespaced paths.
+Ninja-Nitro is an alternative implementation of Nitro protocol, with a different contract architecture to the main implementation (henceforth Vanilla-Nitro\*) in this package. The additional files should all have namespaced paths.
+
+\*this is just a temporary name.
 
 ## Overview
 
-### Recap of Mono-Nitro
+### Recap of Vanilla-Nitro
 
 The main implementation has 1 x monolithic `Adjudicator` contract and m x `AssetHolder` contracts (one for each of the m Assets in the state channel network). The `Adjudicator` API is
 
@@ -44,19 +46,19 @@ Note however, that the Proxy contracts each have their own storage. See https://
 
 ### Holdings
 
-The Mono-Nitro system has m x `holdings` mappings, one in each AssetHolder. This mapping is `public`, so has a public getter function.
+The Vanilla-Nitro system has m x `holdings` mappings, one in each AssetHolder. This mapping is `public`, so has a public getter function.
 Ninja-Nitro has no such mappings: but a public `holdings` function remains. This functions simply i) reads the eth balance of the current contract using the Ethereum accounting system or ii) reads the token balance from a given ERC20 Token contract
 
 ### Deposits
 
-In Mono-Nitro, depositing requires calling a method on each `AssetHolder`.
+In Vanilla-Nitro, depositing requires calling a method on each `AssetHolder`.
 In Ninja-Nitro, depositing can be achieved simply by sending funds or tokens to the address of the `Proxy`, and this can even be done before the `Proxy` is created/deployed. It can also be done after the `Proxy` is destroyed -- self destructing the adjudicator when the channel is finished is one way to save some gas.
 
 ### Adjudicator status
 
-Ninja-Nitro was implemented by modifying a copy of Mono-Nitro. This means that certain quirks remain in the implementation which would probably not exist had it been written from scratch. These quirks may or may not be removed in future.
+Ninja-Nitro was implemented by modifying a copy of Vanilla-Nitro. This means that certain quirks remain in the implementation which would probably not exist had it been written from scratch. These quirks may or may not be removed in future.
 
-One such quirk is as follows. In Mono-Nitro, the hash of the status of a channel (which includes the full outcome, the address of any challenger, the time when the channel will finalize, etc) is stored in a mapping, keyed by the `channelId`.
+One such quirk is as follows. In Vanilla-Nitro, the hash of the status of a channel (which includes the full outcome, the address of any challenger, the time when the channel will finalize, etc) is stored in a mapping, keyed by the `channelId`.
 
 In Ninja-Nitro, exactly the same is true: only each proxy has its own mapping. The reason that this is quirky is that each of these mappings is only ever going to have a single entry, because each proxy is in a 1-1 relation to a `channelId`. The reason that this quirk is not actually very troublesome are:
 
@@ -67,11 +69,11 @@ In Ninja-Nitro, exactly the same is true: only each proxy has its own mapping. T
 
 ### External destinations
 
-In Mono-Nitro, funds for channels are tracked _internally_, while funds for any Ethereum address (e.g. an externally owned account) are typically paid out of the system when defunding a channel. Padding an Ethereum address with enough zeros results in a 32 byte number which we call an external destination. Channel ids are known as internal destinations.
+In Vanilla-Nitro, funds for channels are tracked _internally_, while funds for any Ethereum address (e.g. an externally owned account) are typically paid out of the system when defunding a channel. Padding an Ethereum address with enough zeros results in a 32 byte number which we call an external destination. Channel ids are known as internal destinations.
 
 In Ninja-Nitro, funds are always tracked externally. This is possible since (up to hash collisions) each channel now has a unique Ethereum address. Funds are therefore always paid _out_ of a `Proxy` contract after a `transfer` or `claim`. There is therefore no such thing as an internal destination in Ninja-Nitro. Everything is external.
 
-To maintain compatibility with the off-chain code we already have for Mono-Nitro, the Ninja-Nitro implementation converts destinations to addresses in the following way:
+To maintain compatibility with the off-chain code we already have for Vanilla-Nitro, the Ninja-Nitro implementation converts destinations to addresses in the following way:
 
 - if the destination is a padded Ethereum address, slice off the Ethereum address and use that
 - if the destination is not a padded Ethereum address, compute the create2 address of that channel and use that
@@ -80,13 +82,13 @@ To maintain compatibility with the off-chain code we already have for Mono-Nitro
 
 ## Gas tradeoffs
 
-| Operation                                                      | Mono | Ninja |
-| -------------------------------------------------------------- | ---- | ----- |
-| infastructure deployment                                       | 4.3M | 5.1M  |
-| directly-funded unidirectional payment channel (happy path)    | 212K | 167K  |
-| directly-funded unidirectional payment channel (unhappy path)  | ?    | ?     |
-| ledger-funded unidirectional payment channel (unhappy path)    | ?    | ?     |
-| virtually-funded unidirectional payment channel (unhappy path) | ?    | ?     |
+| Operation                                                      | Vanilla | Ninja |
+| -------------------------------------------------------------- | ------- | ----- |
+| infastructure deployment                                       | 4.3M    | 5.1M  |
+| directly-funded unidirectional payment channel (happy path)    | 212K    | 167K  |
+| directly-funded unidirectional payment channel (unhappy path)  | ?       | ?     |
+| ledger-funded unidirectional payment channel (unhappy path)    | ?       | ?     |
+| virtually-funded unidirectional payment channel (unhappy path) | ?       | ?     |
 
 Unidirectional payment channel: only one deposit and one payout
 The unhappy path: all channels in the funding tree are finalized on chain via `challenge` and timeout, and the funds are then transferred and claimed until they are all liquidated.
