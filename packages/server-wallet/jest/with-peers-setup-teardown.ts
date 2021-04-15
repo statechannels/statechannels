@@ -51,7 +51,12 @@ export type PeerSetup = {
 
 export const participantIdA = 'a';
 export const participantIdB = 'b';
-
+const destinationA = makeDestination(
+  '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
+);
+const destinationB = makeDestination(
+  '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
+);
 /**
  * This destroys the peerEngine(s) and the message service and then re-instantiates them.
  * This mimics a crash and restart
@@ -85,16 +90,12 @@ export async function crashAndRestart(
     const participantA = {
       signingAddress: await a.getSigningAddress(),
       participantId: participantIdA,
-      destination: makeDestination(
-        '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
-      ),
+      destination: destinationA,
     };
     const participantB = {
       signingAddress: await b.getSigningAddress(),
       participantId: participantIdB,
-      destination: makeDestination(
-        '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
-      ),
+      destination: destinationB,
     };
 
     const messageService = (await TestMessageService.create(
@@ -140,16 +141,12 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
     const participantA = {
       signingAddress: await peerEngines.a.getSigningAddress(),
       participantId: participantIdA,
-      destination: makeDestination(
-        '0x00000000000000000000000000000000000000000000000000000000000aaaa1'
-      ),
+      destination: destinationA,
     };
     const participantB = {
       signingAddress: await peerEngines.b.getSigningAddress(),
       participantId: participantIdB,
-      destination: makeDestination(
-        '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
-      ),
+      destination: destinationB,
     };
 
     const participantEngines = [
