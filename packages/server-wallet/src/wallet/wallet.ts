@@ -79,17 +79,16 @@ export class Wallet {
     const objectiveIds = objectives.map(o => o.objectiveId);
     // Instead of getting messages per objective we just get them all at once
     // This will prevent us from querying the database for each objective
-    // TODO: For now we pass in all messages for each objective
-    // but we should fix this in https://github.com/statechannels/statechannels/issues/3461
-    // by returning messages per objective
-    const syncMessages = getMessages(await this._engine.syncObjectives(objectiveIds));
+
+    const syncMessages = await this._engine.syncObjectives(objectiveIds);
     return Promise.all(
       objectives.map(async o => {
+        const messagesForObjective = syncMessages.get(o.objectiveId) ?? [];
         return {
           objectiveId: o.objectiveId,
           currentStatus: o.status,
           channelId: o.data.targetChannelId,
-          done: this.ensureObjective(o, syncMessages),
+          done: this.ensureObjective(o, messagesForObjective),
         };
       })
     );
@@ -129,8 +128,9 @@ export class Wallet {
         const delayAmount = initialDelay * Math.pow(multiple, i);
         await delay(delayAmount);
 
-        const {outbox} = await this._engine.syncObjectives([objective.objectiveId]);
-        await this._messageService.send(getMessages(outbox));
+        const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
+        const messages = _.flatten(Array.from(syncResult.values()));
+        await this._messageService.send(messages);
       }
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};

@@ -288,7 +288,7 @@ export class SingleThreadedEngine
    * @param objectiveIds The ids of the objectives that should be sent to the counterparties
    * @returns A promise that resolves to an object containing the messages.
    */
-  public async syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput> {
+  public async syncObjectives(objectiveIds: string[]): Promise<Map<string, Message[]>> {
     const response = EngineResponse.initialize();
     const objectives = await this.store.getObjectivesByIds(objectiveIds);
 
@@ -315,7 +315,7 @@ export class SingleThreadedEngine
       response.queueSendObjective(o, channel.myIndex, participants);
     }
 
-    return response.multipleChannelOutput();
+    return response.messagesByObjective;
   }
 
   /**
