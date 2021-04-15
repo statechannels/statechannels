@@ -90,12 +90,3 @@ To maintain compatibility with the off-chain code we already have for Mono-Nitro
 
 Unidirectional payment channel: only one deposit and one payout
 The unhappy path: all channels in the funding tree are finalized on chain via `challenge` and timeout, and the funds are then transferred and claimed until they are all liquidated.
-
-## TODO (in this readme)
-
-- [*] any known quirks or deficiencies
-- [ ] the overall state of maturity of the code in this folder
-- [ ] what would need to be done next to elevate the code from "investigation / spike" to "ready for an audit"
-- [ ] as much information on the tradeoffs that it offers vs. existing nitro implementation
-- [ ] security (hopefully as secure or more secure)
-- [ ] gas (e.g. cheaper for directly funded channels, same for disputes, more expensive for on-chain rebalancing)
