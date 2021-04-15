@@ -20,7 +20,7 @@ The `AssetHolder` API is:
 - `claim`
 - permissioned methods `transferAllAdjudicatorOnly` and `setAssetOutcomeHash` only callable from the `Adjudicator`.
 
-After a `pushOutcome` ssets may be released by targetting each `AssetHolder` and calling `claim` or `transfer` (which _are_ essential parts of the overall Nitro API). This is the unhappy path. The happy path will shortcut `pushOutcome` and use the permissioned methods.
+After a `pushOutcome` assets may be released by targetting each `AssetHolder` and calling `claim` or `transfer` (which _are_ essential parts of the overall Nitro API). This is the unhappy path. The happy path will shortcut `pushOutcome` and use the permissioned methods.
 
 ### Ninja-Nitro
 
@@ -45,7 +45,7 @@ Note however, that the Proxy contracts each have their own storage. See https://
 ### Holdings
 
 The Mono-Nitro system has m x `holdings` mappings, one in each AssetHolder. This mapping is `public`, so has a public getter function.
-Ninja-Nitro has no such mappings: but a public `holdings` function remains. This functions simply reads the balance of the current contract (or another contract) from either i) the Ethereum accounting system or ii) a given Token contract.
+Ninja-Nitro has no such mappings: but a public `holdings` function remains. This functions simply i) reads the eth balance of the current contract using the Ethereum accounting system or ii) reads the token balance from a given ERC20 Token contract
 
 ### Deposits
 
@@ -73,7 +73,7 @@ In Ninja-Nitro, funds are always tracked externally. This is possible since (up 
 
 To maintain compatibility with the off-chain code we already have for Mono-Nitro, the Ninja-Nitro implementation should convert destinations to addresses in the following way:
 
-- if the destination is a padded Ethereum address, slice of the Ethereum address and use that
+- if the destination is a padded Ethereum address, slice off the Ethereum address and use that
 - if the destination is not a padded Ethereum address, compute the create2 address of that channel and use that
 
 > TODO it does not currently do this and our test suite is not adequate enough to tell us!
