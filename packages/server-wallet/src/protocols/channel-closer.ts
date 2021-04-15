@@ -66,7 +66,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
         this.timingMetrics
       );
 
-      if (!(await this.areAllFinalStatesSigned(channel, tx, response))) {
+      if (!(await this.areAllFinalStatesSigned(objective.objectiveId, channel, tx, response))) {
         response.queueChannel(channel);
         return WaitingFor.theirFinalState;
       }
@@ -85,6 +85,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
   }
 
   private async areAllFinalStatesSigned(
+    objectiveId: string,
     channel: Channel,
     tx: Transaction,
     response: EngineResponse
@@ -102,16 +103,17 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
     if (channel.myTurn) {
       // I am the first to sign a final state
       if (!supported.isFinal) {
-        await this.signState(channel, supported.turnNum + 1, tx, response);
+        await this.signState(objectiveId, channel, supported.turnNum + 1, tx, response);
         return false;
       }
-      await this.signState(channel, supported.turnNum, tx, response);
+      await this.signState(objectiveId, channel, supported.turnNum, tx, response);
       return channel.hasConclusionProof;
     }
     return false;
   }
 
   private async signState(
+    objectiveId: string,
     channel: Channel,
     turnNum: number,
     tx: Transaction,
@@ -124,7 +126,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
 
     const vars: StateVariables = {...channel.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
-    response.queueState(signedState, myIndex, channelId);
+    response.queueState(signedState, myIndex, channelId, objectiveId);
   }
 
   private async completeObjective(

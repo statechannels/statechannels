@@ -309,7 +309,7 @@ export class SingleThreadedEngine
       // This could be refactored if performance is an issue
       const channel = await this.store.getChannelState(o.data.targetChannelId);
       // This will make sure any relevant channel information is synced
-      await this._syncChannel(channel.channelId, response);
+      await this._syncChannel(channel.channelId, response, o.objectiveId);
 
       const {participants} = channel;
       response.queueSendObjective(o, channel.myIndex, participants);
@@ -330,12 +330,16 @@ export class SingleThreadedEngine
     return response.singleChannelOutput();
   }
 
-  private async _syncChannel(channelId: string, response: EngineResponse): Promise<void> {
+  private async _syncChannel(
+    channelId: string,
+    response: EngineResponse,
+    objectiveId?: string
+  ): Promise<void> {
     const {states, channelState} = await this.store.getStates(channelId);
 
     const {myIndex, participants} = channelState;
 
-    states.forEach(s => response.queueState(s, myIndex, channelId));
+    states.forEach(s => response.queueState(s, myIndex, objectiveId, channelId));
 
     response.queueChannelRequest(channelId, myIndex, participants);
     response.queueChannelState(channelState);
@@ -508,7 +512,7 @@ export class SingleThreadedEngine
     );
 
     this.emit('objectiveStarted', objective);
-    response.queueState(signedState, channel.myIndex, channel.channelId);
+    response.queueState(signedState, channel.myIndex, objective.objectiveId, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
 
