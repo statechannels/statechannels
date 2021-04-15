@@ -41,9 +41,8 @@ for (let i = 0; i < 2; i++) {
 const addresses = {
   // Channels
   c: undefined,
-  d: randomChannelId(),
-  C: randomExternalDestination(),
-  X: randomExternalDestination(),
+  C: randomChannelId(),
+  X: randomChannelId(),
   // Externals
   A: randomExternalDestination(),
   B: randomExternalDestination(),
@@ -63,24 +62,23 @@ const reason1 = 'Indices must be sorted';
 // c is the channel we are transferring from.
 describe('transfer', () => {
   it.each`
-    name                                      | heldBefore | setOutcome            | indices      | newOutcome            | heldAfter | payouts               | reason
-    ${' 0. outcome not set         '}         | ${{c: 1}}  | ${{}}                 | ${[0]}       | ${{}}                 | ${{c: 0}} | ${{A: 1}}             | ${reason0}
-    ${' 1. funded          -> 1 EOA'}         | ${{c: 1}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{c: 0}} | ${{A: 1}}             | ${undefined}
-    ${' 2. overfunded      -> 1 EOA'}         | ${{c: 2}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{c: 1}} | ${{A: 1}}             | ${undefined}
-    ${' 3. underfunded     -> 1 EOA'}         | ${{c: 1}}  | ${{A: 2}}             | ${[0]}       | ${{A: 1}}             | ${{c: 0}} | ${{A: 1}}             | ${undefined}
-    ${' 4. funded      -> 1 channel'}         | ${{c: 1}}  | ${{C: 1}}             | ${[0]}       | ${{C: 0}}             | ${{c: 0}} | ${{C: 1}}             | ${undefined}
-    ${' 5. overfunded  -> 1 channel'}         | ${{c: 2}}  | ${{C: 1}}             | ${[0]}       | ${{C: 0}}             | ${{c: 1}} | ${{C: 1}}             | ${undefined}
-    ${' 6. underfunded -> 1 channel'}         | ${{c: 1}}  | ${{C: 2}}             | ${[0]}       | ${{C: 1}}             | ${{c: 0}} | ${{C: 1}}             | ${undefined}
-    ${' 7. -> 2 EOA         1 index'}         | ${{c: 2}}  | ${{A: 1, B: 1}}       | ${[0]}       | ${{A: 0, B: 1}}       | ${{c: 1}} | ${{A: 1}}             | ${undefined}
-    ${' 8. -> 2 EOA         1 index'}         | ${{c: 1}}  | ${{A: 1, B: 1}}       | ${[0]}       | ${{A: 0, B: 1}}       | ${{c: 0}} | ${{A: 1}}             | ${undefined}
-    ${' 9. -> 2 EOA         partial'}         | ${{c: 3}}  | ${{A: 2, B: 2}}       | ${[1]}       | ${{A: 2, B: 1}}       | ${{c: 2}} | ${{B: 1}}             | ${undefined}
-    ${'10. -> 2 chan             no'}         | ${{c: 1}}  | ${{C: 1, X: 1}}       | ${[1]}       | ${{C: 1, X: 1}}       | ${{c: 1}} | ${{}}                 | ${undefined}
-    ${'11. -> 2 chan           full'}         | ${{c: 1}}  | ${{C: 1, X: 1}}       | ${[0]}       | ${{C: 0, X: 1}}       | ${{c: 0}} | ${{C: 1}}             | ${undefined}
-    ${'12. -> 2 chan        partial'}         | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1]}       | ${{C: 2, X: 1}}       | ${{c: 2}} | ${{X: 1}}             | ${undefined}
-    ${'13. -> 2 indices'}                     | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[0, 1]}    | ${{C: 0, X: 1}}       | ${{c: 0}} | ${{C: 2, X: 1}}       | ${undefined}
-    ${'14. -> 3 indices'}                     | ${{c: 5}}  | ${{A: 1, C: 2, X: 2}} | ${[0, 1, 2]} | ${{A: 0, C: 0, X: 0}} | ${{c: 0}} | ${{A: 1, C: 2, X: 2}} | ${undefined}
-    ${'15. -> reverse order (see 13)'}        | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1, 0]}    | ${{C: 2, X: 1}}       | ${{c: 2}} | ${{X: 1}}             | ${reason1}
-    ${'16. -> allocation includes a channel'} | ${{c: 5}}  | ${{A: 1, C: 2, d: 2}} | ${[0, 1, 2]} | ${{A: 0, C: 0, d: 0}} | ${{c: 0}} | ${{A: 1, C: 2, d: 2}} | ${undefined}
+    name                               | heldBefore | setOutcome            | indices      | newOutcome            | heldAfter | payouts               | reason
+    ${' 0. outcome not set         '}  | ${{c: 1}}  | ${{}}                 | ${[0]}       | ${{}}                 | ${{c: 0}} | ${{A: 1}}             | ${reason0}
+    ${' 1. funded          -> 1 EOA'}  | ${{c: 1}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{c: 0}} | ${{A: 1}}             | ${undefined}
+    ${' 2. overfunded      -> 1 EOA'}  | ${{c: 2}}  | ${{A: 1}}             | ${[0]}       | ${{A: 0}}             | ${{c: 1}} | ${{A: 1}}             | ${undefined}
+    ${' 3. underfunded     -> 1 EOA'}  | ${{c: 1}}  | ${{A: 2}}             | ${[0]}       | ${{A: 1}}             | ${{c: 0}} | ${{A: 1}}             | ${undefined}
+    ${' 4. funded      -> 1 channel'}  | ${{c: 1}}  | ${{C: 1}}             | ${[0]}       | ${{C: 0}}             | ${{c: 0}} | ${{C: 1}}             | ${undefined}
+    ${' 5. overfunded  -> 1 channel'}  | ${{c: 2}}  | ${{C: 1}}             | ${[0]}       | ${{C: 0}}             | ${{c: 1}} | ${{C: 1}}             | ${undefined}
+    ${' 6. underfunded -> 1 channel'}  | ${{c: 1}}  | ${{C: 2}}             | ${[0]}       | ${{C: 1}}             | ${{c: 0}} | ${{C: 1}}             | ${undefined}
+    ${' 7. -> 2 EOA         1 index'}  | ${{c: 2}}  | ${{A: 1, B: 1}}       | ${[0]}       | ${{A: 0, B: 1}}       | ${{c: 1}} | ${{A: 1}}             | ${undefined}
+    ${' 8. -> 2 EOA         1 index'}  | ${{c: 1}}  | ${{A: 1, B: 1}}       | ${[0]}       | ${{A: 0, B: 1}}       | ${{c: 0}} | ${{A: 1}}             | ${undefined}
+    ${' 9. -> 2 EOA         partial'}  | ${{c: 3}}  | ${{A: 2, B: 2}}       | ${[1]}       | ${{A: 2, B: 1}}       | ${{c: 2}} | ${{B: 1}}             | ${undefined}
+    ${'10. -> 2 chan             no'}  | ${{c: 1}}  | ${{C: 1, X: 1}}       | ${[1]}       | ${{C: 1, X: 1}}       | ${{c: 1}} | ${{}}                 | ${undefined}
+    ${'11. -> 2 chan           full'}  | ${{c: 1}}  | ${{C: 1, X: 1}}       | ${[0]}       | ${{C: 0, X: 1}}       | ${{c: 0}} | ${{C: 1}}             | ${undefined}
+    ${'12. -> 2 chan        partial'}  | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1]}       | ${{C: 2, X: 1}}       | ${{c: 2}} | ${{X: 1}}             | ${undefined}
+    ${'13. -> 2 indices'}              | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[0, 1]}    | ${{C: 0, X: 1}}       | ${{c: 0}} | ${{C: 2, X: 1}}       | ${undefined}
+    ${'14. -> 3 indices'}              | ${{c: 5}}  | ${{A: 1, C: 2, X: 2}} | ${[0, 1, 2]} | ${{A: 0, C: 0, X: 0}} | ${{c: 0}} | ${{A: 1, C: 2, X: 2}} | ${undefined}
+    ${'15. -> reverse order (see 13)'} | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1, 0]}    | ${{C: 2, X: 1}}       | ${{c: 2}} | ${{X: 1}}             | ${reason1}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
     async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, payouts, reason}) => {
@@ -173,9 +171,14 @@ describe('transfer', () => {
       const finalizesAt = (await provider.getBlock(blockNumber)).timestamp;
 
       const balancesBefore: Record<string, BigNumber> = {};
-      Object.keys(payouts).forEach(async key => {
-        balancesBefore[key] = await provider.getBalance(convertBytes32ToAddress(key));
-      });
+      await Promise.all(
+        Object.keys(payouts).map(async key => {
+          const address = isExternalDestination(key)
+            ? convertBytes32ToAddress(key)
+            : await AdjudicatorFactory.getChannelAddress(key);
+          balancesBefore[key] = await provider.getBalance(address);
+        })
+      );
 
       // TRANSFER FROM CHANNEl
 
@@ -204,14 +207,16 @@ describe('transfer', () => {
         await writeGasConsumption('SingleChannelAdjudicator.transfer.gas.md', name, gasUsed);
         // expect(eventsFromTx).toMatchObject(expectedEvents);
         // Check that EOAs have the right balance
-        Object.keys(payouts).forEach(async key => {
-          const address = isExternalDestination(key)
-            ? convertBytes32ToAddress(key)
-            : await AdjudicatorFactory.getChannelAddress(key);
-          expect(
-            (await provider.getBalance(address)).eq(balancesBefore[key].add(payouts[key]))
-          ).toBe(true);
-        });
+        await Promise.all(
+          Object.keys(payouts).map(async key => {
+            const address = isExternalDestination(key)
+              ? convertBytes32ToAddress(key)
+              : await AdjudicatorFactory.getChannelAddress(key);
+            expect(
+              (await provider.getBalance(address)).eq(balancesBefore[key].add(payouts[key]))
+            ).toBe(true);
+          })
+        );
 
         // Check that the channel has the correct balance
         expect(
