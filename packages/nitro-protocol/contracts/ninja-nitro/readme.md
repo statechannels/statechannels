@@ -60,7 +60,7 @@ One such quirk is as follows. In Mono-Nitro, the hash of the status of a channel
 
 In Ninja-Nitro, exactly the same is true: only each proxy has its own mapping. The reason that this is quirky is that each of these mappings is only ever going to have a single entry, because each proxy is in a 1-1 relation to a `channelId`. The reason that this quirk is not actually very troublesome are:
 
-- the gas cost are not dramatically higher than storing a single hash without using a mapping (it may in fact cost precisely the same amount). See https://docs.soliditylang.org/en/v0.8.3/types.html?highlight=mapping#mapping-types
+- the gas cost are not dramatically higher than storing a single hash without using a mapping (investigations suggest around 100 gas difference). See https://docs.soliditylang.org/en/v0.8.3/types.html?highlight=mapping#mapping-types
 - we are able to reuse `ForceMove` (in the sense of `SingleChannelAdjudicator is ForceMove`) in its entirety without modifying it at all
 
 > A future optimization might be to replace the mapping with a regular, singleton storage variable. This would require a small but breaking change to `ForceMove.sol`.
