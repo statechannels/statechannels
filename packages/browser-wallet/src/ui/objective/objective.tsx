@@ -1,6 +1,7 @@
 import React from 'react';
 import '../wallet.scss';
 import {DirectFunder} from '@statechannels/wallet-core';
+import {Text as RimbleText} from 'rimble-ui';
 
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
 
@@ -12,19 +13,6 @@ interface Props {
 export const Objective = (props: Props) => {
   const {objective} = props;
 
-  if (!objective.approved) {
-    return (
-      <div
-        style={{
-          paddingTop: '50px',
-          textAlign: 'center'
-        }}
-        className="application-workflow-prompt"
-      >
-        <ConfirmCreateChannel />
-      </div>
-    );
-  }
   return (
     <div
       style={{
@@ -32,6 +20,14 @@ export const Objective = (props: Props) => {
         textAlign: 'center'
       }}
       className="application-workflow-prompt"
-    ></div>
+    >
+      {objective.status === 'DirectFunder.approval' && <ConfirmCreateChannel />}
+      {/** TODO: map status to UI for the user */}
+      {objective.status !== 'DirectFunder.approval' && (
+        <RimbleText fontSize={2} pb={2}>
+          {objective.status}
+        </RimbleText>
+      )}
+    </div>
   );
 };

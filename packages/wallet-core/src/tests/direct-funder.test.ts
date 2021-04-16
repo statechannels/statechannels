@@ -1,7 +1,7 @@
 import {ethers} from 'ethers';
 import * as _ from 'lodash';
-import {DirectFunder} from 'protocols';
 
+import {DirectFunder} from '../protocols';
 import {unreachable} from '../utils';
 import {addHash, calculateChannelId} from '../state-utils';
 import {BN} from '../bignumber';
