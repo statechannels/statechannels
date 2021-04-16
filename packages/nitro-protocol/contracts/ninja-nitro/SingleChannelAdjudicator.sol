@@ -164,6 +164,16 @@ contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
     }
 
     /**
+     * @notice Checks if a given destination is external (i.e. simply a padded Ethereum addtess), or a channelId (which has a corresponding create2 address)
+     * @dev Checks if a given destination is external (i.e. simply a padded Ethereum addtess), or a channelId (which has a corresponding create2 address)
+     * @param destination Destination to be checked.
+     * @return True if the destination is external, false otherwise.
+     */
+    function _isExternalDestination(bytes32 destination) internal pure returns (bool) {
+        return uint96(bytes12(destination)) == 0;
+    }
+
+    /**
      * @notice Converts a nitro destination to an ethereum address.
      * @dev Converts a nitro destination to an ethereum address.
      * @param destination The destination to be converted.
@@ -427,13 +437,16 @@ contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
         bytes32 destination,
         uint256 amount
     ) internal {
+        address payable recipient = _isExternalDestination(destination)
+            ? _bytes32ToAddress(destination)
+            : AdjudicatorFactory(adjudicatorFactoryAddress).getChannelAddress(destination);
         if (assetHolderAddress == address(0)) {
-            (bool success, ) = _bytes32ToAddress(destination).call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
+            (bool success, ) = recipient.call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
             require(success, 'Could not transfer ETH');
         } else {
             // assume ERC20 Token
             require(
-                IERC20(assetHolderAddress).transfer(_bytes32ToAddress(destination), amount),
+                IERC20(assetHolderAddress).transfer(recipient, amount),
                 'Could not transfer ERC20 tokens'
             );
         }
