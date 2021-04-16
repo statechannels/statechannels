@@ -6,11 +6,10 @@ import '../interfaces/IAssetHolder.sol';
 import '../ForceMove.sol';
 import '../Outcome.sol';
 import './AdjudicatorFactory.sol';
+import './OutcomeTransformations.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 
-contract SingleChannelAdjudicator is
-    ForceMove //, IAssetHolder { // TODO
-{
+contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
     address public immutable adjudicatorFactoryAddress;
 
     constructor(address a) {
@@ -18,6 +17,14 @@ contract SingleChannelAdjudicator is
     }
 
     receive() external payable {} // solhint-disable-line no-empty-blocks
+
+    struct ChannelDataAlt {
+        uint48 turnNumRecord;
+        uint48 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes outcomeBytes;
+    }
 
     /**
      * @notice Verifies a conclusion proof, pays out all assets and selfdestructs
@@ -49,18 +56,16 @@ contract SingleChannelAdjudicator is
             whoSignedWhat,
             sigs
         );
-        _transferAllAssets(outcomeBytes);
+        _transferAllAssets(abi.decode(outcomeBytes, (Outcome.OutcomeItem[])));
         selfdestruct(address(0));
     }
 
     /**
-     * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
-     * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
-     * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
+     * @notice Pays out all allocations for all assets in the supplied outcome
+     * @dev Pays out all allocations for all assets in the supplied outcome
+     * @param outcome An array of Outcome.OutcomeItem structs.
      */
-    function _transferAllAssets(bytes memory outcomeBytes) internal {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
-
+    function _transferAllAssets(Outcome.OutcomeItem[] memory outcome) internal {
         // loop over tokens
         for (uint256 i = 0; i < outcome.length; i++) {
             Outcome.AssetOutcome memory assetOutcome = abi.decode(
@@ -175,7 +180,7 @@ contract SingleChannelAdjudicator is
      * @return The rightmost 160 bits of the input string.
      */
     function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
-        return address(uint160(uint256(destination)));
+        return payable(uint160(uint256(destination)));
     }
 
     function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
@@ -318,153 +323,114 @@ contract SingleChannelAdjudicator is
         return newAllocation;
     }
 
-    function _computeNewAllocation(
-        uint256 initialHoldings,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices
-    )
-        public
-        pure
-        returns (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        )
-    {
-        // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
-        totalPayouts = 0;
-        newAllocation = new Outcome.AllocationItem[](allocation.length);
-        safeToDelete = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
-
-        // loop over allocations and decrease surplus
-        for (uint256 i = 0; i < allocation.length; i++) {
-            // copy destination part
-            newAllocation[i].destination = allocation[i].destination;
-            // compute new amount part
-            uint256 affordsForDestination = min(allocation[i].amount, surplus);
-            if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                // found a match
-                // reduce the current allocationItem.amount
-                newAllocation[i].amount = allocation[i].amount - affordsForDestination;
-                // increase the relevant payout
-                payouts[k] = affordsForDestination;
-                totalPayouts += affordsForDestination;
-                // move on to the next supplied index
-                ++k;
-            } else {
-                newAllocation[i].amount = allocation[i].amount;
-            }
-            if (newAllocation[i].amount != 0) safeToDelete = false;
-            // decrease surplus by the current amount if possible, else surplus goes to zero
-            surplus -= affordsForDestination;
-        }
+    /**
+     * @notice Pays out assets according to the supplied payouts, only if this channel has been finalized as a guarantor channel, and only if supplied by the __target__ of this channel
+     */
+    function payOutTarget(
+        bytes32 guarantorChannelId,
+        ChannelDataAlt calldata channelDataAlt,
+        Outcome.OutcomeItem[] memory payouts
+    ) external {
+        Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
+            channelDataAlt.outcomeBytes,
+            (Outcome.OutcomeItem[])
+        );
+        Outcome.AssetOutcome memory gAssetOutcome = abi.decode(
+            guarantorOutcome[0].assetOutcomeBytes, // The target channel contract has already checked that all entires have the same target
+            (Outcome.AssetOutcome)
+        );
+        Outcome.Guarantee memory guarantee = abi.decode(
+            gAssetOutcome.allocationOrGuaranteeBytes,
+            (Outcome.Guarantee)
+        );
+        address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
+            .getChannelAddress(guarantee.targetChannelId);
+        require(msg.sender == targetChannelAddress, 'only the target channel is auth');
+        bytes32 outcomeHash = keccak256(channelDataAlt.outcomeBytes);
+        _requireMatchingStorage(
+            ChannelData(
+                channelDataAlt.turnNumRecord,
+                channelDataAlt.finalizesAt,
+                channelDataAlt.stateHash,
+                channelDataAlt.challengerAddress,
+                outcomeHash
+            ),
+            guarantorChannelId
+        );
+        _transferAllAssets(payouts);
     }
 
-    function _computeNewAllocationWithGuarantee(
-        uint256 initialHoldings,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices,
-        Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
-    )
-        public
-        pure
-        returns (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        )
-    {
-        // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
-        totalPayouts = 0;
-        newAllocation = new Outcome.AllocationItem[](allocation.length);
-        safeToDelete = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
-
-        // copy allocation
-        for (uint256 i = 0; i < allocation.length; i++) {
-            newAllocation[i].destination = allocation[i].destination;
-            newAllocation[i].amount = allocation[i].amount;
+    /**
+     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     */
+    function claim(
+        bytes32 guarantorChannelId,
+        bytes32 targetChannelId,
+        ChannelDataAlt calldata guaranteeCDL,
+        ChannelDataAlt calldata targetCDL,
+        uint256[][] memory indices
+    ) external {
+        // CHECKS
+        for (uint256 i = 0; i < indices.length; i++) {
+            _requireIncreasingIndices(indices[i]);
         }
-
-        // for each guarantee destination
-        for (uint256 j = 0; j < guarantee.destinations.length; j++) {
-            if (surplus == 0) break;
-            for (uint256 i = 0; i < newAllocation.length; i++) {
-                if (surplus == 0) break;
-                // search for it in the allocation
-                if (guarantee.destinations[j] == newAllocation[i].destination) {
-                    // if we find it, compute new amount
-                    uint256 affordsForDestination = min(allocation[i].amount, surplus);
-                    // decrease surplus by the current amount regardless of hitting a specified index
-                    surplus -= affordsForDestination;
-                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                        // only if specified in supplied indices, or we if we are doing "all"
-                        // reduce the new allocationItem.amount
-                        newAllocation[i].amount -= affordsForDestination;
-                        // increase the relevant payout
-                        payouts[k] += affordsForDestination;
-                        totalPayouts += affordsForDestination;
-                        // move on to the next supplied index
-                        ++k;
-                    }
-                    break; // start again with the next guarantee destination
-                }
-            }
+        Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
+            guaranteeCDL.outcomeBytes,
+            (Outcome.OutcomeItem[])
+        );
+        AdjudicatorFactory adjudicatorFactory = AdjudicatorFactory(adjudicatorFactoryAddress);
+        address payable guarantor = adjudicatorFactory.getChannelAddress(guarantorChannelId);
+        address targetChannelAddress = adjudicatorFactory.getChannelAddress(targetChannelId);
+        require(address(this) == targetChannelAddress, 'incorrect target channel address');
+        _requireMatchingStorage(
+            ChannelData(
+                targetCDL.turnNumRecord,
+                targetCDL.finalizesAt,
+                targetCDL.stateHash,
+                targetCDL.challengerAddress,
+                keccak256(targetCDL.outcomeBytes)
+            ),
+            targetChannelId
+        );
+        // COMPUTATIONS
+        Outcome.OutcomeItem[] memory outcome = abi.decode(
+            targetCDL.outcomeBytes,
+            (Outcome.OutcomeItem[])
+        );
+        uint256[] memory initialHoldings = new uint256[](outcome.length);
+        for (uint256 i = 0; i < outcome.length; i++) {
+            initialHoldings[i] = _holdings(guarantor, outcome[i].assetHolderAddress);
         }
+        (
+            Outcome.OutcomeItem[] memory newOutcome,
+            Outcome.OutcomeItem[] memory payOuts
+        ) = _computeNewOutcomeAfterClaim(
+            initialHoldings,
+            outcome,
+            targetChannelId,
+            indices,
+            guarantorOutcome
+        );
+        // EFFECTS
 
-        for (uint256 i = 0; i < allocation.length; i++) {
-            if (newAllocation[i].amount != 0) {
-                safeToDelete = false;
-                break;
-            }
-        }
+        statusOf[targetChannelId] = _generateStatus(
+            ChannelData(
+                targetCDL.turnNumRecord,
+                targetCDL.finalizesAt,
+                targetCDL.stateHash,
+                targetCDL.challengerAddress,
+                keccak256(abi.encode(newOutcome))
+            )
+        );
+        // INTERACTIONS
+        SingleChannelAdjudicator(guarantor).payOutTarget(guarantorChannelId, guaranteeCDL, payOuts);
     }
-
-    // /**
-    //  * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-    //  * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-    //  * @param guarantorChannelId Unique identifier for a guarantor state channel.
-    //  * @param guaranteeBytes The abi.encode of Outcome.Guarantee
-    //  * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-    //  * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
-    //  */
-    // function claim(
-    //     bytes32 guarantorChannelId,
-    //     bytes calldata guaranteeBytes,
-    //     bytes calldata allocationBytes,
-    //     uint256[] memory indices
-    // ) external override {
-    //     // checks
-    //     _requireIncreasingIndices(indices);
-    //     _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
-    //     Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
-    //     _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
-    //     // effects and interactions
-    //     _claim(guarantorChannelId, guarantee, allocationBytes, indices);
-    // }
 
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
         for (uint256 i = 0; i + 1 < indices.length; i++) {
             require(indices[i] < indices[i + 1], 'Indices must be sorted');
         }
     }
-
-    function min(uint256 a, uint256 b) internal pure returns (uint256) {
-        return a > b ? b : a;
-    }
-
-    // **************
-    // Requirers
-    // **************
 
     function _transferAsset(
         address assetHolderAddress,
@@ -492,6 +458,19 @@ contract SingleChannelAdjudicator is
         } else {
             // assume ERC20 Token
             return IERC20(assetHolderAddress).balanceOf(address(this));
+        }
+    }
+
+    function _holdings(address channelAddress, address assetHolderAddress)
+        internal
+        view
+        returns (uint256)
+    {
+        if (assetHolderAddress == address(0)) {
+            return channelAddress.balance;
+        } else {
+            // assume ERC20 Token
+            return IERC20(assetHolderAddress).balanceOf(channelAddress);
         }
     }
 }
