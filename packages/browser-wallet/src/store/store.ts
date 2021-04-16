@@ -40,6 +40,7 @@ import {Errors, DBBackend, ObjectStores} from '.';
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
+  newRichObjective: DirectFunder.OpenChannelObjective;
   addToOutbox: [Payload];
   lockUpdated: [ChannelLock];
   crankRichObjectives: DirectFunder.OpenChannelEvent;
@@ -145,6 +146,16 @@ export class Store {
   get objectiveFeed(): Observable<Objective> {
     const newObjectives = fromEvent<Objective>(this._eventEmitter, 'newObjective');
     const currentObjectives = of(this.objectives).pipe(concatAll());
+
+    return merge(newObjectives, currentObjectives);
+  }
+
+  get richObjectiveFeed(): Observable<DirectFunder.OpenChannelObjective> {
+    const newObjectives = fromEvent<DirectFunder.OpenChannelObjective>(
+      this._eventEmitter,
+      'newRichObjective'
+    );
+    const currentObjectives = of(Object.values(this.richObjectives)).pipe(concatAll());
 
     return merge(newObjectives, currentObjectives);
   }
@@ -413,7 +424,6 @@ export class Store {
       //   walletVersion: WALLET_VERSION,
       //   objectives: [objective]
       // });
-      // this._eventEmitter.emit('newObjective', objective);
     }
   }
 
@@ -598,8 +608,10 @@ export class Store {
       isFinal: false,
       channelNonce
     };
-    this.richObjectives[channelId] = DirectFunder.initialize(openingState, 0);
+    const newObjective = DirectFunder.initialize(openingState, 0);
+    this.richObjectives[channelId] = newObjective;
     this.registerChannelWithChain(channelId);
+    this._eventEmitter.emit('newRichObjective', newObjective);
     return this.richObjectives[channelId];
   }
 
@@ -620,6 +632,8 @@ export class Store {
         this.richObjectives[richObjective.channelId] = richObjective;
 
         this.registerChannelWithChain(richObjective.channelId);
+        this._eventEmitter.emit('newRichObjective', richObjective);
+
         break;
       default:
         throw new Error(`addRichObjective not implemented for an objective type ${objective.type}`);
