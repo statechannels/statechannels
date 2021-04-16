@@ -81,8 +81,11 @@ const openingState: State = {
  * End of copy/paste from wallet-core direct-funder.test.ts
  */
 
-const objective = DirectFunder.initialize(openingState, 0);
-storiesOf('Objectives / OpenChannel', module).add(
-  'Create Channel',
-  renderComponentInFrontOfApp(<Objective objective={objective} />)
-);
+Object.keys(DirectFunder.WaitingFor).map(waitingForKey => {
+  const objective = DirectFunder.initialize(openingState, 0);
+  objective.status = DirectFunder.WaitingFor[waitingForKey];
+  storiesOf('Objectives', module).add(
+    waitingForKey,
+    renderComponentInFrontOfApp(<Objective objective={objective} />)
+  );
+});

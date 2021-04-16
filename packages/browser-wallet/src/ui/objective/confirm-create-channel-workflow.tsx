@@ -15,6 +15,7 @@ export const ConfirmCreateChannel = () => {
       <Button id="yes" onClick={onObjectiveEvent({type: 'Approval'})}>
         Yes
       </Button>
+      {/** TODO: add objective rejection */}
       <Button.Text onClick={onObjectiveEvent({type: 'Approval'})}>No</Button.Text>
     </Flex>
   );
