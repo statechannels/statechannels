@@ -91,6 +91,23 @@ export class Wallet {
     );
   }
 
+  public async closeChannels(channelIds: string[]): Promise<ObjectiveResult[]> {
+    return Promise.all(
+      channelIds.map(async channelId => {
+        const closeResult = await this._engine.closeChannel({channelId});
+
+        const {newObjective, channelResult} = closeResult;
+
+        return {
+          channelId: channelResult.channelId,
+          currentStatus: newObjective.status,
+          objectiveId: newObjective.objectiveId,
+          done: this.ensureObjective(newObjective, getMessages(closeResult)),
+        };
+      })
+    );
+  }
+
   /**
    * Finds any approved objectives and attempts to make progress on them.
    * This is useful for restarting progress after a restart or crash.
