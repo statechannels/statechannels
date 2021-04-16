@@ -3,7 +3,7 @@ import {interpret} from 'xstate';
 import React from 'react';
 
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
-import {ApplicationWorkflow} from '../application-workflow';
+import {ApplicationWorkflow} from '../workflows/application-workflow';
 import {Store} from '../../store';
 import {Application} from '../../workflows';
 

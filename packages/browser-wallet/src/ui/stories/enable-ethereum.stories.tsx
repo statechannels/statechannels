@@ -4,7 +4,7 @@ import React from 'react';
 
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
 import {ethereumEnableWorkflow} from '../../workflows/ethereum-enable';
-import {EnableEthereum} from '../enable-ethereum-workflow';
+import {EnableEthereum} from '../workflows/enable-ethereum-workflow';
 import {Store} from '../../store';
 import {WindowContext} from '../window-context';
 import {logger} from '../../logger';

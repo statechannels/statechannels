@@ -1,15 +1,14 @@
 import React from 'react';
-import './wallet.scss';
+import '../wallet.scss';
 import {useService} from '@xstate/react';
 import {utils} from 'ethers';
 import {Button, Heading, Flex, Text as RimbleText, Link, Loader} from 'rimble-ui';
 import {DomainBudget, BN} from '@statechannels/wallet-core';
 
-import {track} from '../segment-analytics';
-import {CloseLedgerAndWithdrawService} from '../workflows/close-ledger-and-withdraw';
-import {TARGET_NETWORK} from '../config';
-
-import {getAmountsFromBudget} from './selectors';
+import {track} from '../../segment-analytics';
+import {CloseLedgerAndWithdrawService} from '../../workflows/close-ledger-and-withdraw';
+import {TARGET_NETWORK} from '../../config';
+import {getAmountsFromBudget} from '../selectors';
 
 interface Props {
   service: CloseLedgerAndWithdrawService;

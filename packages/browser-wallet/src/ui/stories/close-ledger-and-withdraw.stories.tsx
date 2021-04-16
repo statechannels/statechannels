@@ -5,7 +5,7 @@ import {Participant, DomainBudget, ethBudget, BN, makeAddress} from '@statechann
 import {utils} from 'ethers';
 
 import {MessagingService, MessagingServiceInterface} from '../../messaging';
-import {CloseLedgerAndWithdraw} from '../close-ledger-and-withdraw';
+import {CloseLedgerAndWithdraw} from '../workflows/close-ledger-and-withdraw';
 import {Store} from '../../store';
 import {logger} from '../../logger';
 import {

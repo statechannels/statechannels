@@ -7,7 +7,7 @@ import React from 'react';
 import {workflow, config, WorkflowContext} from '../../workflows/confirm';
 import {logger} from '../../logger';
 import {Store} from '../../store';
-import {ConfirmCreateChannel} from '../confirm-create-channel-workflow';
+import {ConfirmCreateChannel} from '../workflows/confirm-create-channel-workflow';
 
 import {renderComponentInFrontOfApp} from './helpers';
 

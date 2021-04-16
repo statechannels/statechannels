@@ -1,7 +1,7 @@
 import React from 'react';
 import {Interpreter} from 'xstate';
 
-import './wallet.scss';
+import '../wallet.scss';
 
 interface Props {
   service: Interpreter<any>;

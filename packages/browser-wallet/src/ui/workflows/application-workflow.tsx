@@ -1,10 +1,9 @@
 import React from 'react';
-import './wallet.scss';
+import '../wallet.scss';
 import {Flex, Heading, Progress} from 'rimble-ui';
 
-import {Application} from '../workflows';
-
-import {ChannelId} from './channel-id';
+import {Application} from '../../workflows';
+import {ChannelId} from '../channel-id';
 import {
   isConfirmCreateChannel,
   getConfirmCreateChannelService,
@@ -13,9 +12,10 @@ import {
   isApplicationOpening,
   getApplicationStateValue,
   isApplicationChallenging
-} from './selectors';
-import {ChallengeChannel} from './challenge-channel-workflow';
+} from '../selectors';
+
 import {ConfirmCreateChannel} from './confirm-create-channel-workflow';
+import {ChallengeChannel} from './challenge-channel-workflow';
 
 interface Props {
   current: Application.WorkflowState;

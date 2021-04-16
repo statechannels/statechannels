@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import './wallet.scss';
+import '../wallet.scss';
 import {useService} from '@xstate/react';
 import {
   Button,
@@ -15,11 +15,10 @@ import {
 import {BN} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 
-import {ApproveBudgetAndFundService} from '../workflows/approve-budget-and-fund';
-import {track} from '../segment-analytics';
-import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../config';
-
-import {getAmountsFromBudget} from './selectors';
+import {ApproveBudgetAndFundService} from '../../workflows/approve-budget-and-fund';
+import {track} from '../../segment-analytics';
+import {ETH_ASSET_HOLDER_ADDRESS, TARGET_NETWORK, FAUCET_LINK} from '../../config';
+import {getAmountsFromBudget} from '../selectors';
 interface Props {
   service: ApproveBudgetAndFundService;
 }

@@ -1,10 +1,10 @@
 import React from 'react';
-import './wallet.scss';
+import '../wallet.scss';
 import {Button, Flex, Text as RimbleText} from 'rimble-ui';
 import {useService} from '@xstate/react';
 import {Interpreter} from 'xstate';
 
-import {track} from '../segment-analytics';
+import {track} from '../../segment-analytics';
 
 interface Props {
   service: Interpreter<any>;

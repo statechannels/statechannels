@@ -14,7 +14,7 @@ import {utils} from 'ethers';
 import {logger} from '../../logger';
 import {Store} from '../../store';
 import {MessagingServiceInterface, MessagingService} from '../../messaging';
-import {ApproveBudgetAndFund} from '../approve-budget-and-fund-workflow';
+import {ApproveBudgetAndFund} from '../workflows/approve-budget-and-fund-workflow';
 import {machine as approveBudgetAndFundWorkflow} from '../../workflows/approve-budget-and-fund';
 
 import {renderComponentInFrontOfApp} from './helpers';

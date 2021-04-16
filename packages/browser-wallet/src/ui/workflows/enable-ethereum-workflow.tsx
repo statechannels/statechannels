@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import {Sender} from 'xstate';
-import './wallet.scss';
+import '../wallet.scss';
 import {
   Button,
   Box,
@@ -16,11 +16,10 @@ import ConnectionBanner from '@rimble/connection-banner';
 // eslint-disable-next-line import/no-unresolved
 import RimbleUtils from '@rimble/utils';
 
-import {WorkflowState} from '../workflows/ethereum-enable';
-import {CHAIN_NETWORK_ID} from '../config';
-import {track} from '../segment-analytics';
-
-import {WindowContext} from './window-context';
+import {CHAIN_NETWORK_ID} from '../../config';
+import {track} from '../../segment-analytics';
+import {WorkflowState} from '../../workflows/ethereum-enable';
+import {WindowContext} from '../window-context';
 
 interface Props {
   current: WorkflowState;
