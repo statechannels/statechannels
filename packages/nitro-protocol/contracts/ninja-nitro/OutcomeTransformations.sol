@@ -134,15 +134,15 @@ contract OutcomeTransformations {
 
     /**
      * @dev Computes the new outcome that should be stored against a target channel after a claim is made on its guarantor.
-     * @param initialHoldings initial quantity of each asset held on chain for the channel. Order matches that of outcome.
-     * @param outcome initial outcome stored on chain for the channel.
+     * @param initialHoldings initial quantity of each asset held on chain for the guarantor channel. Order matches that of outcome.
+     * @param targetOutcome initial outcome stored on chain for the target channel.
      * @param targetChannelId the channelId of the target channel (used to validate every guarantee in the guarantorOutcome, which much target the same channel)
      * @param indices list of list of indices expressing which destinations in the allocation should be paid out for each asset.
      * @param guarantorOutcome the outcome containing a guarantee which will be claimed for each asset.
      */
     function _computeNewOutcomeAfterClaim(
         uint256[] memory initialHoldings,
-        Outcome.OutcomeItem[] memory outcome,
+        Outcome.OutcomeItem[] memory targetOutcome,
         bytes32 targetChannelId,
         uint256[][] memory indices,
         Outcome.OutcomeItem[] memory guarantorOutcome
@@ -152,18 +152,18 @@ contract OutcomeTransformations {
         returns (Outcome.OutcomeItem[] memory newOutcome, Outcome.OutcomeItem[] memory payOuts)
     {
         require(initialHoldings.length == indices.length, 'holdings/indices length mismatch');
-        require(outcome.length == indices.length, 'outcome/indices length mismatch');
-        require(outcome.length == guarantorOutcome.length, 'outcomes length mismatch');
-        newOutcome = new Outcome.OutcomeItem[](outcome.length);
-        payOuts = new Outcome.OutcomeItem[](outcome.length);
+        require(targetOutcome.length == indices.length, 'outcome/indices length mismatch');
+        require(targetOutcome.length == guarantorOutcome.length, 'outcomes length mismatch');
+        newOutcome = new Outcome.OutcomeItem[](targetOutcome.length);
+        payOuts = new Outcome.OutcomeItem[](targetOutcome.length);
         // loop over tokens
-        for (uint256 i = 0; i < outcome.length; i++) {
+        for (uint256 i = 0; i < targetOutcome.length; i++) {
             require(
-                outcome[i].assetHolderAddress == guarantorOutcome[i].assetHolderAddress,
+                targetOutcome[i].assetHolderAddress == guarantorOutcome[i].assetHolderAddress,
                 'mismatched assets'
             );
             Outcome.AssetOutcome memory assetOutcome = abi.decode(
-                outcome[i].assetOutcomeBytes,
+                targetOutcome[i].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
             require(
@@ -199,7 +199,7 @@ contract OutcomeTransformations {
             );
 
             newOutcome[i] = Outcome.OutcomeItem(
-                outcome[i].assetHolderAddress,
+                targetOutcome[i].assetHolderAddress,
                 abi.encode(
                     Outcome.AssetOutcome(
                         uint8(Outcome.AssetOutcomeType.Allocation),
@@ -209,7 +209,7 @@ contract OutcomeTransformations {
             );
 
             payOuts[i] = Outcome.OutcomeItem(
-                outcome[i].assetHolderAddress,
+                targetOutcome[i].assetHolderAddress,
                 abi.encode(
                     Outcome.AssetOutcome(
                         uint8(Outcome.AssetOutcomeType.Allocation),
