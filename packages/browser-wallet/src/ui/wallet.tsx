@@ -4,11 +4,11 @@ import {useService} from '@xstate/react';
 
 import {WindowContext} from './window-context';
 import './wallet.scss';
-import {ApplicationWorkflow} from './application-workflow';
-import {EnableEthereum} from './enable-ethereum-workflow';
+import {ApplicationWorkflow} from './workflows/application-workflow';
+import {EnableEthereum} from './workflows/enable-ethereum-workflow';
 import {Layout} from './layout';
-import {ApproveBudgetAndFund} from './approve-budget-and-fund-workflow';
-import {CloseLedgerAndWithdraw} from './close-ledger-and-withdraw';
+import {ApproveBudgetAndFund} from './workflows/approve-budget-and-fund-workflow';
+import {CloseLedgerAndWithdraw} from './workflows/close-ledger-and-withdraw';
 
 interface Props {
   workflow: Interpreter<any, any, any>;
