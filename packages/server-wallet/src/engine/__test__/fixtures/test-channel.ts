@@ -326,15 +326,13 @@ export class TestChannel {
       await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
     }
 
+    const {fundingStrategy} = objective.data;
+    let query = Channel.query(store.knex).where({channelId: this.channelId}).patch({fundingStrategy});
     if (objective.data.fundingStrategy === 'Ledger') {
-      const {fundingStrategy, fundingLedgerChannelId} = objective.data;
-      await Channel.query(store.knex)
-        .where({channelId: this.channelId})
-        .patch({fundingStrategy, fundingLedgerChannelId});
-    } else {
-      const {fundingStrategy} = objective.data;
-      await Channel.query(store.knex).where({channelId: this.channelId}).patch({fundingStrategy});
+        const {fundingLedgerChannelId} = objective.data;
+        query.patch({fundingLedgerChannelId});
     }
+    await query;
 
     // load in the other states
     for (const state of rest) {
