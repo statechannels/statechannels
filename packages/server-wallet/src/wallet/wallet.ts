@@ -33,6 +33,14 @@ export class Wallet {
     private _retryOptions: RetryOptions
   ) {}
 
+  /**
+   * Approves an objective that has been proposed by another participant.
+   * Once the objective has been approved progress can be made to completing the objective.
+   * @remarks
+   * This is used to "join" channels by approving a CreateChannel Objective.
+   * @param objectiveIds The ids of the objective you want to approve.
+   * @returns A promise that resolves to a collection of ObjectiveResult.
+   */
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
     const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
     return Promise.all(
