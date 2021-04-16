@@ -50,13 +50,15 @@ describe('EnsureObjectives', () => {
       };
       peerEngines.b.on('objectiveStarted', listener);
 
-      const response = await wallet.createChannels(
+      const createResponse = await wallet.createChannels(
         Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
 
-      await expect(response).toBeObjectiveDoneType('Success');
-
+      await expect(createResponse).toBeObjectiveDoneType('Success');
       peerEngines.b.removeListener('objectiveSucceeded', listener);
+
+      const closeResponse = await wallet.closeChannels(createResponse.map(r => r.channelId));
+      expect(closeResponse).toBeObjectiveDoneType('Success');
     }
   );
 
