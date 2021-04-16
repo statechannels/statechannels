@@ -4,7 +4,10 @@ import ReactDOM from 'react-dom';
 import {isStateChannelsRequest, WalletReady} from '@statechannels/client-api-schema';
 import {AnyInterpreter} from 'xstate';
 import React from 'react';
+import {DirectFunder} from '@statechannels/wallet-core';
+import _ from 'lodash';
 
+import {OnObjectiveEvent} from './channel-wallet-types';
 import {Backend} from './store/dexie-backend';
 import {Store} from './store';
 import {MemoryBackend} from './store/memory-backend';
@@ -35,7 +38,14 @@ const log = logger.trace.bind(logger);
 
   await store.initialize([], CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);
-  const channelWallet = new ChannelWallet(store, messagingService, renderUI);
+  const channelWallet = new ChannelWallet(
+    store,
+    messagingService,
+    (service: AnyInterpreter, onObjectiveEvent: OnObjectiveEvent) =>
+      renderUI(onObjectiveEvent, service),
+    (objective: DirectFunder.OpenChannelObjective, onObjectiveEvent: OnObjectiveEvent) =>
+      renderUI(onObjectiveEvent, undefined, objective)
+  );
 
   if (NODE_ENV === 'production') {
     Sentry.configureScope(async scope => {
@@ -66,10 +76,14 @@ const log = logger.trace.bind(logger);
   ReactDOM.render(App({wallet: channelWallet}), document.getElementById('root'));
 })();
 
-function renderUI(machine: AnyInterpreter) {
+function renderUI(
+  onObjectiveEvent: OnObjectiveEvent,
+  machine?: AnyInterpreter,
+  objective?: DirectFunder.OpenChannelObjective
+) {
   if (document.getElementById('root')) {
     ReactDOM.render(
-      React.createElement(WalletUI, {workflow: machine}),
+      React.createElement(WalletUI, {workflow: machine, objective, onObjectiveEvent}),
       document.getElementById('root')
     );
   }
