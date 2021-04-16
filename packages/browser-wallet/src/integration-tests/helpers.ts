@@ -47,7 +47,7 @@ export class Player {
   ) {
     this.store = new TestStore(chain, backend);
     this.messagingService = new MessagingService(this.store);
-    this.channelWallet = new ChannelWallet(this.store, this.messagingService, id);
+    this.channelWallet = new ChannelWallet(this.store, this.messagingService);
   }
   store: TestStore;
   messagingService: MessagingServiceInterface;

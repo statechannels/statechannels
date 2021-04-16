@@ -2,6 +2,8 @@ import * as Sentry from '@sentry/browser';
 import Url from 'url-parse';
 import ReactDOM from 'react-dom';
 import {isStateChannelsRequest, WalletReady} from '@statechannels/client-api-schema';
+import {AnyInterpreter} from 'xstate';
+import React from 'react';
 
 import {Backend} from './store/dexie-backend';
 import {Store} from './store';
@@ -12,6 +14,7 @@ import {CLEAR_STORAGE_ON_START, USE_INDEXED_DB, ADD_LOGS, NODE_ENV, GIT_VERSION}
 import {MessagingService} from './messaging';
 import {ChannelWallet} from './channel-wallet';
 import App from './ui/app';
+import {Wallet as WalletUI} from './ui/wallet';
 
 if (NODE_ENV === 'production') {
   Sentry.init({
@@ -32,7 +35,7 @@ const log = logger.trace.bind(logger);
 
   await store.initialize([], CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);
-  const channelWallet = new ChannelWallet(store, messagingService);
+  const channelWallet = new ChannelWallet(store, messagingService, renderUI);
 
   if (NODE_ENV === 'production') {
     Sentry.configureScope(async scope => {
@@ -62,3 +65,12 @@ const log = logger.trace.bind(logger);
 
   ReactDOM.render(App({wallet: channelWallet}), document.getElementById('root'));
 })();
+
+function renderUI(machine: AnyInterpreter) {
+  if (document.getElementById('root')) {
+    ReactDOM.render(
+      React.createElement(WalletUI, {workflow: machine}),
+      document.getElementById('root')
+    );
+  }
+}

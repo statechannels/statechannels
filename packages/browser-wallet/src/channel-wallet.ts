@@ -16,9 +16,6 @@ import {
   DirectFunder,
   makeAddress
 } from '@statechannels/wallet-core';
-// TODO: factor UI out of channel-wallet
-// import ReactDOM from 'react-dom';
-// import React from 'react';
 import _ from 'lodash';
 
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
@@ -34,12 +31,11 @@ import {
 import {ADD_LOGS, WALLET_VERSION} from './config';
 import {logger} from './logger';
 import {ChainWatcher} from './chain';
-// TODO: factor UI out of channel-wallet
-// import {Wallet as WalletUi} from './ui/wallet';
 
+export type AnyInterpreter = Interpreter<any, any, any>;
 export interface Workflow {
   id: string;
-  service: Interpreter<any, any, any>;
+  service: AnyInterpreter;
   domain: string; // TODO: Is this useful?
 }
 
@@ -50,17 +46,20 @@ export type Message = {
 
 export class ChannelWallet {
   public workflows: Workflow[];
-  static async create(chainAddress?: Address): Promise<ChannelWallet> {
+  static async create(
+    chainAddress?: Address,
+    onWorkflowStart?: (service: AnyInterpreter) => void
+  ): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
     await store.initialize();
-    return new ChannelWallet(store, new MessagingService(store));
+    return new ChannelWallet(store, new MessagingService(store), onWorkflowStart);
   }
 
   constructor(
     private store: Store,
     private messagingService: MessagingServiceInterface,
-    public id?: string
+    protected onWorkflowStart?: (service: AnyInterpreter) => void
   ) {
     this.workflows = [];
 
@@ -212,9 +211,7 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
 
-    // TODO: factor UI out of channel wallet
-    // TODO: Figure out how to resolve rendering priorities
-    //this.renderUI(service);
+    this.onWorkflowStart?.(service);
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
