@@ -151,10 +151,8 @@ contract OutcomeTransformations {
         pure
         returns (Outcome.OutcomeItem[] memory newOutcome, Outcome.OutcomeItem[] memory payOuts)
     {
-        require(
-            initialHoldings.length == indices.length && outcome.length == indices.length,
-            'holdings/indices length mismatch'
-        );
+        require(initialHoldings.length == indices.length, 'holdings/indices length mismatch');
+        require(outcome.length == indices.length, 'outcome/indices length mismatch');
         require(outcome.length == guarantorOutcome.length, 'outcomes length mismatch');
         newOutcome = new Outcome.OutcomeItem[](outcome.length);
         payOuts = new Outcome.OutcomeItem[](outcome.length);
