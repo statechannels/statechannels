@@ -179,8 +179,8 @@ contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
      * @param destination The destination to be converted.
      * @return The rightmost 160 bits of the input string.
      */
-    function _bytes32ToAddress(bytes32 destination) internal pure returns (address) {
-        return address(uint160(uint256(destination)));
+    function _bytes32ToAddress(bytes32 destination) internal pure returns (address payable) {
+        return payable(uint160(uint256(destination)));
     }
 
     function _requireChannelIdMatchesContract(bytes32 channelId) internal view {
