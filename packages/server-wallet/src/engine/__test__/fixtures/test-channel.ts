@@ -204,7 +204,10 @@ export class TestChannel {
     let data: OpenChannel['data'];
     switch (fundingStrategy) {
       case 'Ledger': {
-        const fundingLedgerChannelId = this.fundingLedgerChannelId as string;
+        if (!this.fundingLedgerChannelId) {
+          throw new Error('fundingLedgerChannelId must exist');
+        }
+        const fundingLedgerChannelId = this.fundingLedgerChannelId;
         data = {targetChannelId, fundingStrategy, fundingLedgerChannelId};
         break;
       }
