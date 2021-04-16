@@ -28,7 +28,8 @@ import Knex from 'knex';
 import { Level } from 'pino';
 import { Logger } from 'pino';
 import { Payload as Message } from '@statechannels/wallet-core';
-import { Message as Message_2 } from '@statechannels/client-api-schema';
+import { Message as Message_2 } from '@statechannels/wire-format';
+import { Message as Message_3 } from '@statechannels/client-api-schema';
 import { MessageQueuedNotification } from '@statechannels/client-api-schema';
 import { Model } from 'objection';
 import { ModelOptions } from 'objection';
@@ -180,6 +181,12 @@ export interface EngineInterface {
 }
 
 // @public (undocumented)
+export type EnsureObjectiveFailed = {
+    type: 'EnsureObjectiveFailed';
+    numberOfAttempts: number;
+};
+
+// @public (undocumented)
 export function extractDBConfigFromEngineConfig(engineConfig: EngineConfig): Config;
 
 // Warning: (ae-forgotten-export) The symbol "DatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
@@ -197,6 +204,12 @@ export function hasNewObjective(response: SingleChannelOutput): response is Sing
 
 // @public
 export type IncomingEngineConfig = RequiredEngineConfig & Partial<OptionalEngineConfig>;
+
+// @public
+export type InternalError = {
+    type: 'InternalError';
+    error: Error;
+};
 
 // @public
 export type LoggingConfiguration = {
@@ -239,6 +252,26 @@ export class MultiThreadedEngine extends SingleThreadedEngine {
 // @public
 export type NetworkConfiguration = {
     chainNetworkID: number;
+};
+
+// @public (undocumented)
+export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
+
+// @public (undocumented)
+export type ObjectiveError = EnsureObjectiveFailed | InternalError;
+
+// @public
+export type ObjectiveResult = {
+    done: Promise<ObjectiveDoneResult>;
+    currentStatus: ObjectiveStatus;
+    objectiveId: string;
+    channelId: string;
+};
+
+// @public (undocumented)
+export type ObjectiveSuccess = {
+    channelId: string;
+    type: 'Success';
 };
 
 // @public
@@ -302,6 +335,13 @@ export type RequiredEngineConfig = {
 };
 
 // @public (undocumented)
+export type RetryOptions = {
+    numberOfAttempts: number;
+    initialDelay: number;
+    multiple: number;
+};
+
+// @public (undocumented)
 export type SingleChannelOutput = {
     outbox: Outgoing[];
     channelResult: ChannelResult;
@@ -318,7 +358,7 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     // (undocumented)
     approveObjectives(objectiveIds: string[]): Promise<{
         objectives: WalletObjective[];
-        messages: Message_2[];
+        messages: Message_3[];
     }>;
     // Warning: (ae-forgotten-export) The symbol "AssetOutcomeUpdatedArg" needs to be exported by the entry point index.d.ts
     //
@@ -383,9 +423,15 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     store: Store;
     syncChannel({ channelId }: SyncChannelParams): Promise<SingleChannelOutput>;
     syncChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-    syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput>;
+    syncObjectives(objectiveIds: string[]): Promise<SyncObjectiveResult>;
     updateChannel({ channelId, allocations, appData, }: UpdateChannelParams): Promise<SingleChannelOutput>;
 }
+
+// @public (undocumented)
+export type SyncObjectiveResult = {
+    messagesByObjective: Record<string, WireMessage[]>;
+    outbox: Outgoing[];
+};
 
 // @public (undocumented)
 export function validateEngineConfig(config: Record<string, any>): {
@@ -394,10 +440,24 @@ export function validateEngineConfig(config: Record<string, any>): {
     errors: ValidationErrorItem[];
 };
 
+// @public (undocumented)
+export class Wallet {
+    // (undocumented)
+    approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
+    // Warning: (ae-forgotten-export) The symbol "MessageServiceInterface" needs to be exported by the entry point index.d.ts
+    static create(engine: Engine, messageService: MessageServiceInterface, retryOptions?: Partial<RetryOptions>): Promise<Wallet>;
+    createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
+    // (undocumented)
+    destroy(): Promise<void>;
+    jumpStartObjectives(): Promise<ObjectiveResult[]>;
+    }
+
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:72:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:27:3 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:76:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:53:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
