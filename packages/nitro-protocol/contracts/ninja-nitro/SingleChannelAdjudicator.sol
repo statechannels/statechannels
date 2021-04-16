@@ -318,11 +318,11 @@ contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
      */
     function payOutTarget(
         bytes32 guarantorChannelId,
-        ChannelDataAlt calldata cDL,
+        ChannelDataAlt calldata channelDataAlt,
         Outcome.OutcomeItem[] memory payouts
     ) external {
         Outcome.OutcomeItem[] memory guarantorOutcome = abi.decode(
-            cDL.outcomeBytes,
+            channelDataAlt.outcomeBytes,
             (Outcome.OutcomeItem[])
         );
         Outcome.AssetOutcome memory gAssetOutcome = abi.decode(
@@ -336,13 +336,13 @@ contract SingleChannelAdjudicator is ForceMove, OutcomeTransformations {
         address targetChannelAddress = AdjudicatorFactory(adjudicatorFactoryAddress)
             .getChannelAddress(guarantee.targetChannelId);
         require(msg.sender == targetChannelAddress, 'only the target channel is auth');
-        bytes32 outcomeHash = keccak256(cDL.outcomeBytes);
+        bytes32 outcomeHash = keccak256(channelDataAlt.outcomeBytes);
         _requireMatchingStorage(
             ChannelData(
-                cDL.turnNumRecord,
-                cDL.finalizesAt,
-                cDL.stateHash,
-                cDL.challengerAddress,
+                channelDataAlt.turnNumRecord,
+                channelDataAlt.finalizesAt,
+                channelDataAlt.stateHash,
+                channelDataAlt.challengerAddress,
                 outcomeHash
             ),
             guarantorChannelId
