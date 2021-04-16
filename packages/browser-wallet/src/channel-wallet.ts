@@ -1,4 +1,4 @@
-import {interpret, Interpreter, State} from 'xstate';
+import {interpret, State} from 'xstate';
 import {Guid} from 'guid-typescript';
 import {
   StateChannelsNotification,
@@ -10,14 +10,13 @@ import {
   Payload,
   isOpenChannel,
   OpenChannel,
-  SignedState,
-  SharedObjective,
   Address,
   DirectFunder,
   makeAddress
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
+import {Workflow, OnWorkflowStart, OnObjectiveStart} from './channel-wallet-types';
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
@@ -32,34 +31,25 @@ import {ADD_LOGS, WALLET_VERSION} from './config';
 import {logger} from './logger';
 import {ChainWatcher} from './chain';
 
-export type AnyInterpreter = Interpreter<any, any, any>;
-export interface Workflow {
-  id: string;
-  service: AnyInterpreter;
-  domain: string; // TODO: Is this useful?
-}
-
-export type Message = {
-  objectives: SharedObjective[];
-  signedStates: SignedState[];
-};
-
 export class ChannelWallet {
   public workflows: Workflow[];
   static async create(
     chainAddress?: Address,
-    onWorkflowStart?: (service: AnyInterpreter) => void
+    onWorkflowStart?: OnWorkflowStart,
+    onObjectiveStart?: OnObjectiveStart
   ): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
     await store.initialize();
-    return new ChannelWallet(store, new MessagingService(store), onWorkflowStart);
+    return new ChannelWallet(store, new MessagingService(store), onWorkflowStart, onObjectiveStart);
   }
 
   constructor(
     private store: Store,
     private messagingService: MessagingServiceInterface,
-    protected onWorkflowStart?: (service: AnyInterpreter) => void
+    protected onWorkflowStart?: OnWorkflowStart,
+    // TODO: wire up this method
+    protected onObjectiveStart?: OnObjectiveStart
   ) {
     this.workflows = [];
 
@@ -211,7 +201,7 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
 
-    this.onWorkflowStart?.(service);
+    this.onWorkflowStart?.(service, this.onObjectiveEvent);
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
@@ -282,6 +272,10 @@ export class ChannelWallet {
         }
       }
     }
+  }
+
+  public onObjectiveEvent(event: DirectFunder.OpenChannelEvent): void {
+    this.crankRichObjectives(event);
   }
 
   public async approveRichObjective(channelId: string): Promise<void> {
