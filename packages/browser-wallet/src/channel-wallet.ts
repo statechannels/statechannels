@@ -218,16 +218,6 @@ export class ChannelWallet {
     return workflow;
   }
 
-  // TODO: factor UI out of channel wallet
-  // private renderUI(machine) {
-  //   if (document.getElementById('root')) {
-  //     ReactDOM.render(
-  //       React.createElement(WalletUi, {workflow: machine}),
-  //       document.getElementById('root')
-  //     );
-  //   }
-  // }
-
   public onSendMessage(
     callback: (
       jsonRpcMessage: StateChannelsNotification | StateChannelsResponse | StateChannelsErrorResponse
