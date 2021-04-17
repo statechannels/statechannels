@@ -96,7 +96,7 @@ export class ChannelWallet {
     });
 
     this.store.richObjectiveFeed.subscribe(objective =>
-      this.onObjectiveStart?.(objective, _.bind(this.onObjectiveEvent, this))
+      this.onObjectiveStart?.(objective, _.bind(this.crankRichObjectives, this))
     );
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
@@ -203,7 +203,7 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
 
-    this.onWorkflowStart?.(service, this.onObjectiveEvent);
+    this.onWorkflowStart?.(service, _.bind(this.crankRichObjectives, this));
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
@@ -274,10 +274,6 @@ export class ChannelWallet {
         }
       }
     }
-  }
-
-  public onObjectiveEvent(event: DirectFunder.OpenChannelEvent): void {
-    this.crankRichObjectives(event);
   }
 
   public async approveRichObjective(channelId: string): Promise<void> {
