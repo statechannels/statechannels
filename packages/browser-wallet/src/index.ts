@@ -38,14 +38,7 @@ const log = logger.trace.bind(logger);
 
   await store.initialize([], CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);
-  const channelWallet = new ChannelWallet(
-    store,
-    messagingService,
-    (service: AnyInterpreter, onObjectiveEvent: OnObjectiveEvent) =>
-      renderUI(onObjectiveEvent, service),
-    (objective: DirectFunder.OpenChannelObjective, onObjectiveEvent: OnObjectiveEvent) =>
-      renderUI(onObjectiveEvent, undefined, objective)
-  );
+  const channelWallet = new ChannelWallet(store, messagingService, renderUI);
 
   if (NODE_ENV === 'production') {
     Sentry.configureScope(async scope => {
@@ -77,13 +70,19 @@ const log = logger.trace.bind(logger);
 })();
 
 function renderUI(
-  onObjectiveEvent: OnObjectiveEvent,
-  machine?: AnyInterpreter,
-  objective?: DirectFunder.OpenChannelObjective
+  update: {
+    service?: AnyInterpreter;
+    objective?: DirectFunder.OpenChannelObjective;
+  },
+  onObjectiveEvent: OnObjectiveEvent
 ) {
   if (document.getElementById('root')) {
     ReactDOM.render(
-      React.createElement(WalletUI, {workflow: machine, objective, onObjectiveEvent}),
+      React.createElement(WalletUI, {
+        workflow: update.service,
+        objective: update.objective,
+        onObjectiveEvent
+      }),
       document.getElementById('root')
     );
   }
