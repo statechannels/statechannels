@@ -12,11 +12,11 @@ export const ConfirmCreateChannel = () => {
       <RimbleText fontSize={2} pb={2}>
         Do you wish to create a channel?
       </RimbleText>
-      <Button id="yes" onClick={onObjectiveEvent({type: 'Approval'})}>
+      <Button id="yes" onClick={() => onObjectiveEvent({type: 'Approval'})}>
         Yes
       </Button>
       {/** TODO: add objective rejection */}
-      <Button.Text onClick={onObjectiveEvent({type: 'Approval'})}>No</Button.Text>
+      <Button.Text onClick={() => onObjectiveEvent({type: 'Approval'})}>No</Button.Text>
     </Flex>
   );
 };
