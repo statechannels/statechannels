@@ -48,7 +48,6 @@ export class ChannelWallet {
     private store: Store,
     private messagingService: MessagingServiceInterface,
     protected onWorkflowStart?: OnWorkflowStart,
-    // TODO: wire up this method
     protected onObjectiveStart?: OnObjectiveStart
   ) {
     this.workflows = [];
