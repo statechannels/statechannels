@@ -97,7 +97,7 @@ export class ChannelWallet {
     });
 
     this.store.richObjectiveFeed.subscribe(objective =>
-      this.onObjectiveStart?.(objective, this.onObjectiveEvent)
+      this.onObjectiveStart?.(objective, _.bind(this.onObjectiveEvent, this))
     );
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
