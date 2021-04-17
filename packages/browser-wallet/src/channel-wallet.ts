@@ -16,7 +16,7 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {Workflow, OnWorkflowStart, OnObjectiveStart} from './channel-wallet-types';
+import {Workflow, OnWorkflowStart, OnObjectiveUpdate} from './channel-wallet-types';
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
@@ -36,19 +36,24 @@ export class ChannelWallet {
   static async create(
     chainAddress?: Address,
     onWorkflowStart?: OnWorkflowStart,
-    onObjectiveStart?: OnObjectiveStart
+    onObjectiveUpdate?: OnObjectiveUpdate
   ): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
     await store.initialize();
-    return new ChannelWallet(store, new MessagingService(store), onWorkflowStart, onObjectiveStart);
+    return new ChannelWallet(
+      store,
+      new MessagingService(store),
+      onWorkflowStart,
+      onObjectiveUpdate
+    );
   }
 
   constructor(
     private store: Store,
     private messagingService: MessagingServiceInterface,
     protected onWorkflowStart?: OnWorkflowStart,
-    protected onObjectiveStart?: OnObjectiveStart
+    protected onObjectiveUpdate?: OnObjectiveUpdate
   ) {
     this.workflows = [];
 
@@ -96,7 +101,7 @@ export class ChannelWallet {
     });
 
     this.store.richObjectiveFeed.subscribe(objective =>
-      this.onObjectiveStart?.(objective, _.bind(this.crankRichObjectives, this))
+      this.onObjectiveUpdate?.(objective, _.bind(this.crankRichObjectives, this))
     );
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
@@ -243,6 +248,7 @@ export class ChannelWallet {
         await this.store.getPrivateKey(await this.store.getAddress())
       );
 
+      // TODO: this should invoke a store method
       richObjectives[channelId] = result.objective;
 
       for (const action of result.actions) {
@@ -273,7 +279,7 @@ export class ChannelWallet {
             throw new Error('Not expected to reach here');
         }
       }
-      this.onObjectiveStart?.(richObjective[channelId], _.bind(this.crankRichObjectives, this));
+      this.onObjectiveUpdate?.(richObjectives[channelId], _.bind(this.crankRichObjectives, this));
     }
   }
 

@@ -4,7 +4,7 @@ import {Interpreter} from 'xstate';
 export type AnyInterpreter = Interpreter<any, any, any>;
 export type OnObjectiveEvent = (event: DirectFunder.OpenChannelEvent) => void;
 export type OnWorkflowStart = (service: AnyInterpreter, onObjectiveEvent: OnObjectiveEvent) => void;
-export type OnObjectiveStart = (
+export type OnObjectiveUpdate = (
   objective: DirectFunder.OpenChannelObjective,
   onObjectiveEvent: OnObjectiveEvent
 ) => void;
