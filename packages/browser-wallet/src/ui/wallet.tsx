@@ -41,14 +41,16 @@ export const Wallet = (props: Props) => {
         </Layout>
       </WindowContext.Provider>
     );
+  } else if (props.objective) {
+    return (
+      <ObjectiveContext.Provider value={props.onObjectiveEvent}>
+        <Layout>
+          <Objective objective={props.objective} />
+        </Layout>
+        ;
+      </ObjectiveContext.Provider>
+    );
+  } else {
+    throw new Error('A wallet renders an objective or a workflow. Neither has been supplied.');
   }
-  if (props.objective) {
-    <ObjectiveContext.Provider value={props.onObjectiveEvent}>
-      <Layout>
-        <Objective objective={props.objective} />
-      </Layout>
-      ;
-    </ObjectiveContext.Provider>;
-  }
-  throw new Error('A wallet renders an objective or a workflow. Neither has been supplied.');
 };
