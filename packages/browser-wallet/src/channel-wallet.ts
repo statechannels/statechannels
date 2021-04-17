@@ -16,7 +16,7 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {UpdateUI, Workflow} from './channel-wallet-types';
+import {OnObjectiveEvent, UpdateUI, Workflow} from './channel-wallet-types';
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
@@ -39,18 +39,30 @@ export class ChannelWallet {
    * @param updateUI Callback that will be invoked when the channel wallet wants to update UI
    * @returns
    */
-  static async create(chainAddress?: Address, updateUI?: UpdateUI): Promise<ChannelWallet> {
+  static async create(
+    chainAddress?: Address,
+    updateUI?: UpdateUI,
+    setOnObjectiveEvent?: (callback: OnObjectiveEvent) => void
+  ): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
     await store.initialize();
-    return new ChannelWallet(store, new MessagingService(store), updateUI);
+    const wallet = new ChannelWallet(
+      store,
+      new MessagingService(store),
+      updateUI,
+      setOnObjectiveEvent
+    );
+    return wallet;
   }
 
   constructor(
     private store: Store,
     private messagingService: MessagingServiceInterface,
-    protected updateUI?: UpdateUI
+    protected updateUI?: UpdateUI,
+    setOnObjectiveEvent?: (callback: OnObjectiveEvent) => void
   ) {
+    setOnObjectiveEvent?.(_.bind(this.crankRichObjectives, this));
     this.workflows = [];
 
     // Whenever the store wants to send something call sendMessage
@@ -96,9 +108,7 @@ export class ChannelWallet {
       }
     });
 
-    this.store.richObjectiveFeed.subscribe(objective =>
-      this.updateUI?.({objective}, _.bind(this.crankRichObjectives, this))
-    );
+    this.store.richObjectiveFeed.subscribe(objective => this.updateUI?.({objective}));
     this.messagingService.requestFeed.subscribe(x => this.handleRequest(x));
   }
 
@@ -204,7 +214,7 @@ export class ChannelWallet {
       .onDone(() => (this.workflows = this.workflows.filter(w => w.id !== workflowId)))
       .start();
 
-    this.updateUI?.({service}, _.bind(this.crankRichObjectives, this));
+    this.updateUI?.({service});
 
     const workflow = {id: workflowId, service, domain: 'TODO'};
     this.workflows.push(workflow);
@@ -275,10 +285,7 @@ export class ChannelWallet {
             throw new Error('Not expected to reach here');
         }
       }
-      this.updateUI?.(
-        {objective: richObjectives[channelId]},
-        _.bind(this.crankRichObjectives, this)
-      );
+      this.updateUI?.({objective: richObjectives[channelId]});
     }
   }
 

@@ -10,14 +10,10 @@ export type OnObjectiveEvent = (event: DirectFunder.OpenChannelEvent) => void;
  * UI needs a way to communicate objective events to the channel wallet. UI invokes onObjectiveEvent
  * when UI triggers an objetive event
  */
-export type UpdateUI = (
-  update: {
-    service?: AnyInterpreter;
-    objective?: DirectFunder.OpenChannelObjective;
-  },
-
-  onObjectiveEvent: OnObjectiveEvent
-) => void;
+export type UpdateUI = (update: {
+  service?: AnyInterpreter;
+  objective?: DirectFunder.OpenChannelObjective;
+}) => void;
 
 export interface Workflow {
   id: string;

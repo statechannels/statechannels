@@ -14,10 +14,10 @@ import {Objective} from './objective/objective';
 import {ObjectiveContext} from './objective/objective-context';
 
 interface Props {
-  onObjectiveEvent(event: DirectFunder.OpenChannelEvent): void;
   workflow?: Interpreter<any, any, any>;
   // TODO: generalize to all rich objectives
   objective?: DirectFunder.OpenChannelObjective;
+  onObjectiveEvent(event: DirectFunder.OpenChannelEvent): void;
 }
 
 export const Wallet = (props: Props) => {
