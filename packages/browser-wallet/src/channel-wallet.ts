@@ -273,6 +273,7 @@ export class ChannelWallet {
             throw new Error('Not expected to reach here');
         }
       }
+      this.onObjectiveStart?.(richObjective[channelId], _.bind(this.crankRichObjectives, this));
     }
   }
 
