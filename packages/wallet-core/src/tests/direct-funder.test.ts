@@ -94,7 +94,7 @@ const initial: OpenChannelObjective = {
   approved: false,
   channelId,
   openingState,
-  status: WaitingFor.theirPreFundSetup,
+  status: WaitingFor.approval,
   myIndex: 0,
   preFundSetup: richPreFS.signedBy(),
   funding: {amount: BN.from(0), finalized: true},

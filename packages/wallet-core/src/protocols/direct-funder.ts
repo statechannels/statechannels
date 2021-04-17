@@ -70,7 +70,7 @@ export function initialize(
     channelId: calculateChannelId(openingState),
     myIndex,
     openingState: _.omit(openingState, 'signatures'),
-    status: WaitingFor.theirPreFundSetup,
+    status: approved ? WaitingFor.theirPreFundSetup : WaitingFor.approval,
     preFundSetup: {hash: hashState(setupState(openingState, Steps.preFundSetup)), signatures},
     funding: {amount: BN.from(0), finalized: true},
     fundingRequest: undefined,
