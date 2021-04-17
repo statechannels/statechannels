@@ -27,6 +27,10 @@ if (NODE_ENV === 'production') {
 }
 
 const log = logger.trace.bind(logger);
+let onObjectiveEvent: OnObjectiveEvent | undefined = undefined;
+function setOnObjectiveEvent(callback: OnObjectiveEvent): void {
+  onObjectiveEvent = callback;
+}
 
 (async function () {
   log({version: GIT_VERSION}, 'Wallet initializing');
@@ -38,7 +42,8 @@ const log = logger.trace.bind(logger);
 
   await store.initialize([], CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);
-  const channelWallet = new ChannelWallet(store, messagingService, renderUI);
+
+  const channelWallet = new ChannelWallet(store, messagingService, renderUI, setOnObjectiveEvent);
 
   if (NODE_ENV === 'production') {
     Sentry.configureScope(async scope => {
@@ -69,13 +74,14 @@ const log = logger.trace.bind(logger);
   ReactDOM.render(App({wallet: channelWallet}), document.getElementById('root'));
 })();
 
-function renderUI(
-  update: {
-    service?: AnyInterpreter;
-    objective?: DirectFunder.OpenChannelObjective;
-  },
-  onObjectiveEvent: OnObjectiveEvent
-) {
+function renderUI(update: {
+  service?: AnyInterpreter;
+  objective?: DirectFunder.OpenChannelObjective;
+}) {
+  if (!onObjectiveEvent) {
+    throw new Error('onObjectiveEventCallback must be defined');
+  }
+
   if (document.getElementById('root')) {
     ReactDOM.render(
       React.createElement(WalletUI, {
