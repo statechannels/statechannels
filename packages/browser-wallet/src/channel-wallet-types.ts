@@ -3,9 +3,19 @@ import {Interpreter} from 'xstate';
 
 export type AnyInterpreter = Interpreter<any, any, any>;
 export type OnObjectiveEvent = (event: DirectFunder.OpenChannelEvent) => void;
-export type OnWorkflowStart = (service: AnyInterpreter, onObjectiveEvent: OnObjectiveEvent) => void;
-export type OnObjectiveUpdate = (
-  objective: DirectFunder.OpenChannelObjective,
+/**
+ * The channel wallet is not able to update UI. The channel wallet is supplied a callback to invoke
+ * when UI should be updated.
+ *
+ * UI needs a way to communicate objective events to the channel wallet. UI invokes onObjectiveEvent
+ * when UI triggers an objetive event
+ */
+export type UpdateUI = (
+  update: {
+    service?: AnyInterpreter;
+    objective?: DirectFunder.OpenChannelObjective;
+  },
+
   onObjectiveEvent: OnObjectiveEvent
 ) => void;
 
