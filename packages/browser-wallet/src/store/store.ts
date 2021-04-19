@@ -581,10 +581,13 @@ export class Store {
         objectives.map(_.bind(this.createAndStoreRichObjectiveFromObjective, this))
       );
 
-    if (signedStates) {
+    if (signedStates?.length) {
+      // TODO: account for the case a message containing states for many channels
+      const channelId = calculateChannelId(signedStates[0]);
       this._eventEmitter.emit('crankRichObjectives', {
         type: 'StatesReceived',
-        states: signedStates
+        states: signedStates,
+        channelId
       });
     }
   }
@@ -644,7 +647,8 @@ export class Store {
       this._eventEmitter.emit('crankRichObjectives', {
         type: 'FundingUpdated',
         amount: chainInfo.amount,
-        finalized: true
+        finalized: true,
+        channelId
       })
     );
   }

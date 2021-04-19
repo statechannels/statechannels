@@ -248,7 +248,7 @@ export class ChannelWallet {
     // TODO: this should invoke a store method
     const richObjective = this.store.richObjectives[event.channelId];
     if (!richObjective) {
-      throw new Error(`Unable to map event ${JSON.stringify(event)} to an objectie`);
+      throw new Error(`Unable to map event ${JSON.stringify(event)} to an objective`);
     }
     const channelId = richObjective.channelId;
     const result = DirectFunder.openChannelCranker(
