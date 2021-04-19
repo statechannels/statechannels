@@ -1,8 +1,13 @@
-import {DirectFunder, SharedObjective, SignedState} from '@statechannels/wallet-core';
+import {
+  RichObjective,
+  RichObjectiveEvent,
+  SharedObjective,
+  SignedState
+} from '@statechannels/wallet-core';
 import {Interpreter} from 'xstate';
 
 export type AnyInterpreter = Interpreter<any, any, any>;
-export type OnObjectiveEvent = (event: DirectFunder.OpenChannelEvent) => void;
+export type OnObjectiveEvent = (event: RichObjectiveEvent) => void;
 /**
  * The channel wallet is not able to update UI. The channel wallet is supplied a callback to invoke
  * when UI should be updated.
@@ -10,10 +15,7 @@ export type OnObjectiveEvent = (event: DirectFunder.OpenChannelEvent) => void;
  * UI needs a way to communicate objective events to the channel wallet. UI invokes onObjectiveEvent
  * when UI triggers an objetive event
  */
-export type UpdateUI = (update: {
-  service?: AnyInterpreter;
-  objective?: DirectFunder.OpenChannelObjective;
-}) => void;
+export type UpdateUI = (update: {service?: AnyInterpreter; objective?: RichObjective}) => void;
 
 export interface Workflow {
   id: string;

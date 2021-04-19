@@ -4,7 +4,7 @@ import ReactDOM from 'react-dom';
 import {isStateChannelsRequest, WalletReady} from '@statechannels/client-api-schema';
 import {AnyInterpreter} from 'xstate';
 import React from 'react';
-import {DirectFunder} from '@statechannels/wallet-core';
+import {RichObjective} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
 import {OnObjectiveEvent} from './channel-wallet-types';
@@ -74,10 +74,7 @@ function setOnObjectiveEvent(callback: OnObjectiveEvent): void {
   ReactDOM.render(App({wallet: channelWallet}), document.getElementById('root'));
 })();
 
-function renderUI(update: {
-  service?: AnyInterpreter;
-  objective?: DirectFunder.OpenChannelObjective;
-}) {
+function renderUI(update: {service?: AnyInterpreter; objective?: RichObjective}) {
   if (!onObjectiveEvent) {
     throw new Error('onObjectiveEventCallback must be defined');
   }

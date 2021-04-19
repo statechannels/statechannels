@@ -91,6 +91,7 @@ const richPreFS = richify(openingState);
 const richPostFS = richify({...openingState, turnNum: 3});
 
 const initial: OpenChannelObjective = {
+  type: 'OpenChannel',
   approved: false,
   channelId,
   openingState,
@@ -223,23 +224,26 @@ describe('cranking', () => {
 
     const sendState: (signedState?: SignedState) => OpenChannelEvent = s => ({
       type: 'StatesReceived',
-      states: s ? [s] : []
+      states: s ? [s] : [],
+      channelId
     });
 
     const submitted = (attempt: number, submittedAt = 0): OpenChannelEvent => ({
       type: 'DepositSubmitted',
       tx: 'tx',
       attempt,
-      submittedAt
+      submittedAt,
+      channelId
     });
 
     const deposit = (amount: number | Uint256, finalized = false): OpenChannelEvent => ({
       type: 'FundingUpdated',
       amount: BN.from(amount),
-      finalized
+      finalized,
+      channelId
     });
 
-    const nudge = {type: 'Crank'} as const;
+    const nudge = {type: 'Crank', channelId} as const;
 
     const funding = (amount: number | Uint256, finalized = false) => ({
       amount: BN.from(amount),
@@ -325,7 +329,7 @@ describe('cranking', () => {
     const errorCases: ErrorCase[] = [
       [ 'NonParticipantSignature', approved, receiveNonParticipantState, error, handleError({signature: {signer: 'eve'}})],
       [ 'ReceivedUnexpectedState', approved, receiveUnexpectedState, error,     handleError({received: expect.any(String), expected: [richPreFS.stateHash, richPostFS.stateHash]}) ],
-      [ 'TimedOutWhileFunding', depositPending, {type: 'Crank', now: theFuture}, error, handleError({now: theFuture}) ],
+      [ 'TimedOutWhileFunding', depositPending, {type: 'Crank', now: theFuture, channelId}, error, handleError({now: theFuture}) ],
       [ 'UnexpectedEvent',      depositPending, {type: 'Unknown'} as any, error, handleError({event: {type: 'Unknown'}}) ]
     ];
     test.each(errorCases)('error %s', (msg, before, event, after, actionGenerator) => {
@@ -349,10 +353,11 @@ function generateEvent(action: Action, objective: OpenChannelObjective): OpenCha
       return {
         type: 'FundingUpdated',
         amount: BN.add(action.amount, objective.funding.amount),
-        finalized: false
+        finalized: false,
+        channelId
       };
     case 'sendStates':
-      return {type: 'StatesReceived', states: action.states};
+      return {type: 'StatesReceived', states: action.states, channelId};
     case 'handleError':
       throw action.error;
     default:
@@ -416,7 +421,7 @@ test('pure objective cranker start to finish', () => {
   */
 
   // This is used just to kickstart Alice's cranker
-  const nudge = {type: 'Crank' as const};
+  const nudge = {type: 'Crank' as const, channelId};
 
   // 1. Objective has not been approved, so no actions are taken
   let output = crankAndExpect(
@@ -439,7 +444,7 @@ test('pure objective cranker start to finish', () => {
   output = crankAndExpect(
     'A',
     currentState,
-    {type: 'Approval'},
+    {type: 'Approval', channelId},
     {
       status: WaitingFor.theirPreFundSetup,
       preFundSetup: richPreFS.signedBy('A'),
@@ -470,7 +475,7 @@ test('pure objective cranker start to finish', () => {
   output = crankAndExpect(
     'B',
     currentState,
-    {type: 'Approval'},
+    {type: 'Approval', channelId},
     {
       status: WaitingFor.safeToDeposit,
       preFundSetup: richPreFS.signedBy('A', 'B'),
@@ -560,7 +565,8 @@ test('pure objective cranker start to finish', () => {
   const finalFundingEvent: OpenChannelEvent = {
     type: 'FundingUpdated',
     amount: currentState.B.funding.amount,
-    finalized: true
+    finalized: true,
+    channelId
   };
 
   // 10. Bob receives deposit action 2 (FINALIZED), triggers postFS action 1

@@ -4,7 +4,11 @@ import {Button, Flex, Text as RimbleText} from 'rimble-ui';
 
 import {ObjectiveContext} from './objective-context';
 
-export const ConfirmCreateChannel = () => {
+interface Props {
+  channelId: string;
+}
+
+export const ConfirmCreateChannel = ({channelId}: Props) => {
   const onObjectiveEvent = useContext(ObjectiveContext);
 
   return (
@@ -12,11 +16,11 @@ export const ConfirmCreateChannel = () => {
       <RimbleText fontSize={2} pb={2}>
         Do you wish to create a channel?
       </RimbleText>
-      <Button id="yes" onClick={() => onObjectiveEvent({type: 'Approval'})}>
+      <Button id="yes" onClick={() => onObjectiveEvent({type: 'Approval', channelId})}>
         Yes
       </Button>
       {/** TODO: add objective rejection */}
-      <Button.Text onClick={() => onObjectiveEvent({type: 'Approval'})}>No</Button.Text>
+      <Button.Text onClick={() => onObjectiveEvent({type: 'Approval', channelId})}>No</Button.Text>
     </Flex>
   );
 };

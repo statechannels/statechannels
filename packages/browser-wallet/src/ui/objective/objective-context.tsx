@@ -1,6 +1,6 @@
-import {DirectFunder} from '@statechannels/wallet-core';
+import {RichObjectiveEvent} from '@statechannels/wallet-core';
 import React from 'react';
 
-export const ObjectiveContext = React.createContext<
-  (onObjectiveEvent: DirectFunder.OpenChannelEvent) => void
->(() => {});
+export const ObjectiveContext = React.createContext<(onObjectiveEvent: RichObjectiveEvent) => void>(
+  () => {}
+);
