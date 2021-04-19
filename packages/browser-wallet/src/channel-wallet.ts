@@ -12,7 +12,9 @@ import {
   OpenChannel,
   Address,
   DirectFunder,
-  makeAddress
+  makeAddress,
+  RichObjectiveEvent,
+  RichObjective
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
@@ -64,7 +66,7 @@ export class ChannelWallet {
     protected updateUI?: UpdateUI,
     setTriggerObjectiveEvent?: (callback: TriggerObjectiveEvent) => void
   ) {
-    setTriggerObjectiveEvent?.(_.bind(this.crankRichObjectives, this));
+    setTriggerObjectiveEvent?.(_.bind(this.crankRichObjective, this));
     this.workflows = [];
 
     // Whenever the store wants to send something call sendMessage
@@ -72,7 +74,7 @@ export class ChannelWallet {
       this.messagingService.sendMessageNotification(m);
     });
 
-    store.crankRichObjectivesFeed.subscribe(_.bind(this.crankRichObjectives, this));
+    store.crankRichObjectivesFeed.subscribe(_.bind(this.crankRichObjective, this));
 
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
@@ -244,58 +246,59 @@ export class ChannelWallet {
    *  START of wallet 2.0
    */
 
-  // TODO: an event should be associated with a single objective. In other words, this function should not
-  //        map an event to all stored objectives
-  private async crankRichObjectives(event: DirectFunder.OpenChannelEvent): Promise<void> {
-    const richObjectives = this.store.richObjectives;
-    for (const channelId of Object.keys(richObjectives)) {
-      const richObjective = richObjectives[channelId];
-      const result = DirectFunder.openChannelCranker(
-        richObjective,
-        event,
-        await this.store.getPrivateKey(await this.store.getAddress())
-      );
+  private async crankRichObjective(event: RichObjectiveEvent): Promise<void> {
+    // TODO: this should invoke a store method
+    const richObjective = this.store.richObjectives[event.channelId];
+    if (!richObjective) {
+      throw new Error(`Unable to map event ${JSON.stringify(event)} to an objectie`);
+    }
+    const channelId = richObjective.channelId;
+    const result = DirectFunder.openChannelCranker(
+      richObjective,
+      event,
+      await this.store.getPrivateKey(await this.store.getAddress())
+    );
 
-      // TODO: this should invoke a store method
-      richObjectives[channelId] = result.objective;
+    this.store.richObjectives[channelId] = result.objective;
 
-      for (const action of result.actions) {
-        switch (action.type) {
-          case 'sendStates':
-            await Promise.all(action.states.map(state => this.store.addState(state, true)));
-            break;
-          case 'deposit':
-            const fundingMilestones = DirectFunder.utils.fundingMilestone(
-              richObjective.openingState,
-              richObjective.openingState.participants[richObjective.myIndex].destination
-            );
+    for (const action of result.actions) {
+      switch (action.type) {
+        case 'sendStates':
+          await Promise.all(action.states.map(state => this.store.addState(state, true)));
+          break;
+        case 'deposit':
+          const fundingMilestones = DirectFunder.utils.fundingMilestone(
+            richObjective.openingState,
+            richObjective.openingState.participants[richObjective.myIndex].destination
+          );
 
-            const txHash = await this.store.chain.deposit(
-              channelId,
-              fundingMilestones.targetBefore,
-              action.amount
-            );
-            this.crankRichObjectives({
-              type: 'DepositSubmitted',
-              tx: txHash ?? '',
-              attempt: 0,
-              submittedAt: Date.now()
-            });
+          const txHash = await this.store.chain.deposit(
+            channelId,
+            fundingMilestones.targetBefore,
+            action.amount
+          );
+          this.crankRichObjective({
+            channelId: channelId,
+            type: 'DepositSubmitted',
+            tx: txHash ?? '',
+            attempt: 0,
+            submittedAt: Date.now()
+          });
 
-            break;
-          default:
-            throw new Error('Not expected to reach here');
-        }
+          break;
+        default:
+          throw new Error('Not expected to reach here');
       }
-      this.updateUI?.({objective: richObjectives[channelId]});
+
+      this.updateUI?.({objective: this.store.richObjectives[channelId]});
 
       // TODO: we might want to first crank the objective, gather all states that need to be sent, and then send
       // both the objective and the new states
-      if (event.type === 'Approval') this.sendObjective(richObjectives[channelId]);
+      if (event.type === 'Approval') this.sendObjective(this.store.richObjectives[channelId]);
     }
   }
 
-  private async sendObjective(richObjective: DirectFunder.OpenChannelObjective) {
+  private async sendObjective(richObjective: RichObjective) {
     // TODO: need a better way to figure out when to broadcast an objective
     //        since we don't know here if we are the creator of the objective or received the objective from elsewhere
     const amCreator = richObjective.myIndex === 0;
@@ -314,9 +317,9 @@ export class ChannelWallet {
     }
   }
 
-  public async approveRichObjective(_channelId: string): Promise<void> {
+  public async approveRichObjective(channelId: string): Promise<void> {
     // TODO: it seems that an objective event should have an objective id or a channel id associated with the event
-    this.crankRichObjectives({type: 'Approval'});
+    this.crankRichObjective({type: 'Approval', channelId: channelId});
   }
 
   public getRichObjectives() {

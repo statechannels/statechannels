@@ -1,7 +1,7 @@
 import React from 'react';
 import {Interpreter} from 'xstate';
 import {useService} from '@xstate/react';
-import {DirectFunder} from '@statechannels/wallet-core';
+import {RichObjective, RichObjectiveEvent} from '@statechannels/wallet-core';
 
 import {WindowContext} from './window-context';
 import './wallet.scss';
@@ -16,8 +16,8 @@ import {ObjectiveContext} from './objective/objective-context';
 interface Props {
   workflow?: Interpreter<any, any, any>;
   // TODO: generalize to all rich objectives
-  objective?: DirectFunder.OpenChannelObjective;
-  triggerObjectiveEvent(event: DirectFunder.OpenChannelEvent): void;
+  objective?: RichObjective;
+  triggerObjectiveEvent(event: RichObjectiveEvent): void;
 }
 
 export const Wallet = (props: Props) => {

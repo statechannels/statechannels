@@ -5,16 +5,19 @@ import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
 import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
 
+import {BaseObjective, BaseObjectiveEvent} from './objective';
+
 // TODO: This ought to be configurable
 export const MAX_WAITING_TIME = 5_000;
 
-export type OpenChannelEvent = {now?: number} & (
-  | {type: 'Crank'} // Allows you to crank it every now and then to see if it's timed out.
-  | {type: 'StatesReceived'; states: SignedState[]}
-  | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
-  | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number}
-  | {type: 'Approval'}
-);
+export type OpenChannelEvent = BaseObjectiveEvent &
+  (
+    | {type: 'Crank'} // Allows you to crank it every now and then to see if it's timed out.
+    | {type: 'StatesReceived'; states: SignedState[]}
+    | {type: 'FundingUpdated'; amount: Uint256; finalized: boolean}
+    | {type: 'DepositSubmitted'; tx: string; attempt: number; submittedAt: number}
+    | {type: 'Approval'}
+  );
 
 export type SignedStateHash = {hash: string; signatures: SignatureEntry[]};
 
@@ -31,7 +34,7 @@ const enum Steps {
   postFundSetup = 'postFundSetup'
 }
 
-export type OpenChannelObjective = {
+export type OpenChannelObjective = BaseObjective & {
   status: WaitingFor | 'success' | 'error';
   approved: boolean;
   channelId: string;
@@ -66,6 +69,7 @@ export function initialize(
     'signatures' in openingState ? mergeSignatures([], openingState.signatures) : [];
 
   return {
+    type: 'OpenChannel',
     approved,
     channelId: calculateChannelId(openingState),
     myIndex,
