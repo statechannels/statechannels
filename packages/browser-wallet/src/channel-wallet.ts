@@ -288,17 +288,14 @@ export class ChannelWallet {
         }
       }
       this.updateUI?.({objective: richObjectives[channelId]});
+
+      // TODO: we might want to first crank the objective, gather all states that need to be sent, and then send
+      // both the objective and the new states
+      if (event.type === 'Approval') this.sendObjective(richObjectives[channelId]);
     }
   }
 
-  public async approveRichObjective(channelId: string): Promise<void> {
-    const richObjective = this.store.richObjectives[channelId];
-    if (!richObjective) {
-      throw new Error(`Rich objective must exist for channelId ${channelId}`);
-    }
-
-    await this.crankRichObjectives({type: 'Approval'});
-
+  private async sendObjective(richObjective: DirectFunder.OpenChannelObjective) {
     // TODO: need a better way to figure out when to broadcast an objective
     //        since we don't know here if we are the creator of the objective or received the objective from elsewhere
     const amCreator = richObjective.myIndex === 0;
@@ -307,16 +304,19 @@ export class ChannelWallet {
       const objectiveToSend: OpenChannel = {
         type: 'OpenChannel',
         participants: richObjective.openingState.participants,
-        data: {targetChannelId: channelId, fundingStrategy: 'Direct'}
+        data: {targetChannelId: richObjective.channelId, fundingStrategy: 'Direct'}
       };
 
-      // TODO: we might want to first crank the objective, gather all states that need to be sent, and then send
-      // both the objective and the new states
       await this.messagingService.sendMessageNotification({
         walletVersion: WALLET_VERSION,
         objectives: [objectiveToSend]
       });
     }
+  }
+
+  public async approveRichObjective(_channelId: string): Promise<void> {
+    // TODO: it seems that an objective event should have an objective id or a channel id associated with the event
+    this.crankRichObjectives({type: 'Approval'});
   }
 
   public getRichObjectives() {
