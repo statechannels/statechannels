@@ -49,6 +49,17 @@ describe('EnsureObjectives', () => {
       );
 
       await expect(response).toBeObjectiveDoneType('Success');
+
+      const {channelResults: aChannels} = await peerEngines.a.getChannels();
+      const {channelResults: bChannels} = await peerEngines.b.getChannels();
+
+      for (const a of aChannels) {
+        expect(a.status).toEqual('running');
+      }
+
+      for (const b of bChannels) {
+        expect(b.status).toEqual('running');
+      }
     }
   );
 
