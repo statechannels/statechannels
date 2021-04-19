@@ -584,11 +584,13 @@ export class Store {
     if (signedStates?.length) {
       // TODO: account for the case a message containing states for many channels
       const channelId = calculateChannelId(signedStates[0]);
-      this._eventEmitter.emit('crankRichObjectives', {
-        type: 'StatesReceived',
-        states: signedStates,
-        channelId
-      });
+      if (this.richObjectives[channelId]) {
+        this._eventEmitter.emit('crankRichObjectives', {
+          type: 'StatesReceived',
+          states: signedStates,
+          channelId
+        });
+      }
     }
   }
 
