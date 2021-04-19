@@ -59,36 +59,42 @@ expect.extend({
     received: ObjectiveResult[],
     expected: ObjectiveDoneResult['type']
   ) => {
-    const pass = received.length > 0 && received.every(async o => (await o.done).type === expected);
+    const results = await Promise.all(received.map(async r => ({...r, resolved: await r.done})));
+
+    const pass = received.length > 0 && results.every(r => r.resolved.type === expected);
     if (pass) {
-      const matchingObjectives = received.filter(async o => (await o.done).type === expected);
+      const matchingObjectives = printObjectives(results.filter(r => r.resolved.type === expected));
       return {
         pass,
         message: () =>
-          `expected every objective to not be ${expected}. Failing objectives: ${printObjectives(
-            matchingObjectives
-          )}`,
+          `expected every objective to not be ${expected}. Failing objectives: ${matchingObjectives}`,
       };
     } else {
       if (received.length === 0) {
         return {message: () => 'expected at least one ObjectiveResult', pass};
       } else {
-        const notMatchingObjectives = received.filter(async o => (await o.done).type === expected);
+        const notMatchingObjectives = printObjectives(
+          results.filter(r => r.resolved.type !== expected)
+        );
+
         return {
           pass,
           message: () =>
-            `expected every objective to be ${expected}. Failing objectives: ${printObjectives(
-              notMatchingObjectives
-            )}`,
+            `expected every objective to be ${expected}. Failing objectives: ${notMatchingObjectives}`,
         };
       }
     }
   },
 });
 
-async function printObjectives(results: ObjectiveResult[]): Promise<string> {
+function printObjectives(
+  objectiveResults: Array<ObjectiveResult & {resolved: ObjectiveDoneResult}>
+): string {
   return JSON.stringify(
-    results.map(async r => ({type: (await r.done).type, objectiveId: r.objectiveId})),
+    objectiveResults.map(r => ({
+      type: r.resolved.type,
+      objectiveId: r.objectiveId,
+    })),
     null,
     1
   );
