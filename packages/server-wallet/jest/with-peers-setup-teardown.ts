@@ -177,7 +177,8 @@ export const teardownPeerSetup = async (peerSetup: PeerSetup): Promise<void> => 
     await messageService.destroy();
 
     await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
-    await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+    // Disable the db deletion so we can inspect afterwards
+    // await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
   } catch (error) {
     if (error.message === 'aborted') {
       // When we destroy the engines there still may open knex connections due to our use of delay in the TestMessageService
