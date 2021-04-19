@@ -22,7 +22,9 @@ import {
   BN,
   Uint256,
   makeAddress,
-  DirectFunder
+  DirectFunder,
+  RichObjective,
+  RichObjectiveEvent
 } from '@statechannels/wallet-core';
 import {Dictionary} from 'lodash';
 
@@ -40,10 +42,10 @@ import {Errors, DBBackend, ObjectStores} from '.';
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
-  newRichObjective: DirectFunder.OpenChannelObjective;
+  newRichObjective: RichObjective;
   addToOutbox: [Payload];
   lockUpdated: [ChannelLock];
-  crankRichObjectives: DirectFunder.OpenChannelEvent;
+  crankRichObjectives: RichObjectiveEvent;
 }
 export type ChannelLock = {
   channelId: string;
@@ -71,7 +73,7 @@ export class Store {
    *      - Store this information in permanent storage instead of memory.
    *      - Create getters and setters.
    */
-  public richObjectives: Dictionary<DirectFunder.OpenChannelObjective> = {};
+  public richObjectives: Dictionary<RichObjective> = {};
 
   /**
    *  END of wallet 2.0
@@ -150,11 +152,8 @@ export class Store {
     return merge(newObjectives, currentObjectives);
   }
 
-  get richObjectiveFeed(): Observable<DirectFunder.OpenChannelObjective> {
-    const newObjectives = fromEvent<DirectFunder.OpenChannelObjective>(
-      this._eventEmitter,
-      'newRichObjective'
-    );
+  get richObjectiveFeed(): Observable<RichObjective> {
+    const newObjectives = fromEvent<RichObjective>(this._eventEmitter, 'newRichObjective');
     const currentObjectives = of(Object.values(this.richObjectives)).pipe(concatAll());
 
     return merge(newObjectives, currentObjectives);
@@ -164,7 +163,7 @@ export class Store {
     return fromEvent(this._eventEmitter, 'addToOutbox');
   }
 
-  get crankRichObjectivesFeed(): Observable<DirectFunder.OpenChannelEvent> {
+  get crankRichObjectivesFeed(): Observable<RichObjectiveEvent> {
     return fromEvent(this._eventEmitter, 'crankRichObjectives');
   }
 

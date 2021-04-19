@@ -21,7 +21,9 @@ export const Objective = (props: Props) => {
       }}
       className="application-workflow-prompt"
     >
-      {objective.status === 'DirectFunder.approval' && <ConfirmCreateChannel />}
+      {objective.status === 'DirectFunder.approval' && (
+        <ConfirmCreateChannel channelId={objective.channelId} />
+      )}
       {/** TODO: map status to UI for the user */}
       {objective.status !== 'DirectFunder.approval' && (
         <RimbleText fontSize={2} pb={2}>
