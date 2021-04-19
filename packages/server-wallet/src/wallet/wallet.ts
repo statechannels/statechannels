@@ -44,14 +44,12 @@ export class Wallet {
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
     const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
     return Promise.all(
-      objectives.map(async o => {
-        return {
-          objectiveId: o.objectiveId,
-          currentStatus: o.status,
-          channelId: o.data.targetChannelId,
-          done: this.ensureObjective(o, messages),
-        };
-      })
+      objectives.map(async o => ({
+        objectiveId: o.objectiveId,
+        currentStatus: o.status,
+        channelId: o.data.targetChannelId,
+        done: this.ensureObjective(o, messages),
+      }))
     );
   }
 
