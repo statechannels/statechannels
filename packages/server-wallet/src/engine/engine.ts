@@ -555,16 +555,16 @@ export class SingleThreadedEngine
     objectiveIds: string[]
   ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
     const objectives = await this.store.getObjectivesByIds(objectiveIds);
-
+    const channelIds: string[] = [];
     const response = EngineResponse.initialize();
     for (const objective of objectives) {
-      const {targetChannelId: channelId} = objective.data;
-      await this.registerChannelWithChainService(channelId);
+      const {targetChannelId} = objective.data;
+      channelIds.push(targetChannelId);
+      await this.registerChannelWithChainService(targetChannelId);
 
       await this.store.approveObjective(objective.objectiveId);
-
-      await this.takeActions([channelId], response);
     }
+    await this.takeActions(channelIds, response);
     return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
 
