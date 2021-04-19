@@ -2,6 +2,7 @@ import 'hardhat-watcher';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-etherscan';
 import {HardhatUserConfig} from 'hardhat/config';
+import {getPrivateKeyWithEth} from '@statechannels/devtools';
 
 const infuraToken = process.env.INFURA_TOKEN;
 const rinkebyDeployerPK = process.env.RINKEBY_DEPLOYER_PK;
@@ -57,6 +58,11 @@ const config: HardhatUserConfig = {
       url: infuraToken ? 'https://mainnet.infura.io/v3/' + infuraToken : '',
       accounts: mainnetDeployerPK ? [mainnetDeployerPK] : undefined,
       chainId: 1,
+    },
+    arbitrum_testnet_v4: {
+      url: 'https://kovan4.arbitrum.io/rpc',
+      accounts: [getPrivateKeyWithEth()], // just use a dummy account from devtools
+      chainId: 212984383488152,
     },
   },
   etherscan: {

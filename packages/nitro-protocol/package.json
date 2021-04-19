@@ -82,6 +82,7 @@
     "contract:compile:watch": "yarn hardhat watch compilation",
     "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --export-all addresses.json && node ./scripts/postdeploy.js",
     "contract:deploy-mainnet": "yarn hardhat deploy --network mainnet --export-all addresses.json && node ./scripts/postdeploy.js",
+    "contract:deploy-arbitrum-testnet": "yarn hardhat deploy --network arbitrum_testnet_v4 --export-all addresses.json && node ./scripts/postdeploy.js",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn solhint:check",
