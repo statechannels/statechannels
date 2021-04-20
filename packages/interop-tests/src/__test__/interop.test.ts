@@ -141,7 +141,7 @@ function generatePushMessage(messageParams: Message): PushMessageRequest {
 }
 
 // In theory, we should be able to check the channelResult. In practice, the channelResult seems to have an incorrect turn number
-function constainsPostfundState(singleChannelOutput: SingleChannelOutput): boolean {
+function containsPostfundState(singleChannelOutput: SingleChannelOutput): boolean {
   if (!singleChannelOutput.outbox.length) return false;
 
   const signedStates = deserializeMessage(singleChannelOutput.outbox[0].params as WireMessage)
@@ -196,7 +196,7 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(constainsPostfundState))
+    .pipe(first(containsPostfundState))
     .toPromise();
 
   serverWallet.on('channelUpdated', e => console.log(JSON.stringify(e)));
@@ -257,7 +257,7 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(constainsPostfundState))
+    .pipe(first(containsPostfundState))
     .toPromise();
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
