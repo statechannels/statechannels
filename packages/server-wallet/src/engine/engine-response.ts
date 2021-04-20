@@ -143,7 +143,12 @@ export class EngineResponse {
   /**
    * Add a GetChannelRequest to outbox for given channelId
    */
-  queueChannelRequest(channelId: string, myIndex: number, participants: Participant[]): void {
+  queueChannelRequest(
+    channelId: string,
+    myIndex: number,
+    participants: Participant[],
+    objectiveId?: string
+  ): void {
     const myParticipantId = participants[myIndex].participantId;
 
     participants.forEach((p, i) => {
@@ -158,7 +163,8 @@ export class EngineResponse {
             p.participantId,
             myParticipantId,
             channelId
-          )
+          ),
+          objectiveId
         );
       }
     });

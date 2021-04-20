@@ -341,8 +341,7 @@ export class SingleThreadedEngine
     const {myIndex, participants} = channelState;
 
     states.forEach(s => response.queueState(s, myIndex, objectiveId, channelId));
-
-    response.queueChannelRequest(channelId, myIndex, participants);
+    response.queueChannelRequest(channelId, myIndex, participants, objectiveId);
     response.queueChannelState(channelState);
   }
 
