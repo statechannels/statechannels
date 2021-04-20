@@ -1,6 +1,6 @@
 import {EventEmitter} from 'eventemitter3';
 import {filter, map, concatAll} from 'rxjs/operators';
-import {Observable, fromEvent, merge, from, of} from 'rxjs';
+import {Observable, fromEvent, merge, from, of, Subject} from 'rxjs';
 import {Wallet, constants} from 'ethers';
 import * as _ from 'lodash';
 import AsyncLock from 'async-lock';
@@ -42,10 +42,8 @@ import {Errors, DBBackend, ObjectStores} from '.';
 interface InternalEvents {
   channelUpdated: [ChannelStoreEntry];
   newObjective: [Objective];
-  newRichObjective: RichObjective;
   addToOutbox: [Payload];
   lockUpdated: [ChannelLock];
-  crankRichObjectives: RichObjectiveEvent;
 }
 export type ChannelLock = {
   channelId: string;
@@ -74,6 +72,9 @@ export class Store {
    *      - Create getters and setters.
    */
   public richObjectives: Dictionary<RichObjective> = {};
+
+  public richObjectiveFeed = new Subject<RichObjective>();
+  public crankRichObjectivesFeed = new Subject<RichObjectiveEvent>();
 
   /**
    *  END of wallet 2.0
@@ -152,19 +153,8 @@ export class Store {
     return merge(newObjectives, currentObjectives);
   }
 
-  get richObjectiveFeed(): Observable<RichObjective> {
-    const newObjectives = fromEvent<RichObjective>(this._eventEmitter, 'newRichObjective');
-    const currentObjectives = of(Object.values(this.richObjectives)).pipe(concatAll());
-
-    return merge(newObjectives, currentObjectives);
-  }
-
   get outboxFeed(): Observable<Payload> {
     return fromEvent(this._eventEmitter, 'addToOutbox');
-  }
-
-  get crankRichObjectivesFeed(): Observable<RichObjectiveEvent> {
-    return fromEvent(this._eventEmitter, 'crankRichObjectives');
   }
 
   private initializeChannel = (
@@ -585,7 +575,7 @@ export class Store {
       // TODO: account for the case a message containing states for many channels
       const channelId = calculateChannelId(signedStates[0]);
       if (this.richObjectives[channelId]) {
-        this._eventEmitter.emit('crankRichObjectives', {
+        this.crankRichObjectivesFeed.next({
           type: 'StatesReceived',
           states: signedStates,
           channelId
@@ -615,7 +605,7 @@ export class Store {
     const newObjective = DirectFunder.initialize(openingState, 0);
     this.richObjectives[channelId] = newObjective;
     this.registerChannelWithChain(channelId);
-    this._eventEmitter.emit('newRichObjective', newObjective);
+    this.richObjectiveFeed.next(newObjective);
     return this.richObjectives[channelId];
   }
 
@@ -636,7 +626,7 @@ export class Store {
         this.richObjectives[richObjective.channelId] = richObjective;
 
         this.registerChannelWithChain(richObjective.channelId);
-        this._eventEmitter.emit('newRichObjective', richObjective);
+        this.richObjectiveFeed.next(richObjective);
 
         break;
       default:
@@ -646,7 +636,7 @@ export class Store {
 
   private registerChannelWithChain(channelId): void {
     this.chain.chainUpdatedFeed(channelId).subscribe(chainInfo =>
-      this._eventEmitter.emit('crankRichObjectives', {
+      this.crankRichObjectivesFeed.next({
         type: 'FundingUpdated',
         amount: chainInfo.amount,
         finalized: true,
