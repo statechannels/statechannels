@@ -11,6 +11,7 @@ import {constants, Contract, providers, Wallet} from 'ethers';
 import {
   Address,
   BN,
+  deserializeMessage,
   Destination,
   formatAmount,
   makeAddress,
@@ -18,7 +19,7 @@ import {
   Uint256
 } from '@statechannels/wallet-core';
 import {fromEvent} from 'rxjs';
-import {take} from 'rxjs/operators';
+import {first} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {WalletObjective} from '@statechannels/server-wallet/src/models/objective';
@@ -28,6 +29,7 @@ import {
   Message,
   PushMessageRequest
 } from '@statechannels/client-api-schema';
+import {Message as WireMessage} from '@statechannels/wire-format';
 
 jest.setTimeout(60_000);
 
@@ -138,6 +140,15 @@ function generatePushMessage(messageParams: Message): PushMessageRequest {
   };
 }
 
+// In theory, we should be able to check the channelResult. In practice, the channelResult seems to have an incorrect turn number
+function constainsPostfundState(singleChannelOutput: SingleChannelOutput): boolean {
+  if (!singleChannelOutput.outbox.length) return false;
+
+  const signedStates = deserializeMessage(singleChannelOutput.outbox[0].params as WireMessage)
+    .signedStates;
+  return signedStates ? signedStates?.some(ss => ss.turnNum === 3) : false;
+}
+
 it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
   const output1 = await serverWallet.createChannel({
     appData: '0x',
@@ -183,20 +194,13 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
     'dummyDomain'
   );
 
-  /** This is fragile. We are waiting for the third channelUpdated event. Note that these events consistently arrive in the following order.
-   *  But the events are not guaranteed to arrive in this order:
-   *  1. The first event is triggered by the registration of the channel with the chain service.
-   *      holdingUpdated is invoked when the initial holdings are read from the chain.
-   *  2. The second event is triggered by the server wallet deposit. The deposit results in a holdingUpdated invocation.
-   *  3. The third event is triggered by the browser wallet deposit.
-   */
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(take(3))
+    .pipe(first(constainsPostfundState))
     .toPromise();
 
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
+  serverWallet.on('channelUpdated', e => console.log(JSON.stringify(e)));
+  await browserWallet.pushMessage(serverMessageToBrowserMessage(await postFundA), 'dummyDomain');
 
   await objectiveSuccededPromise;
 });
@@ -251,17 +255,9 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
   const serverOutput1 = await serverWallet.joinChannel({channelId});
   await browserWallet.pushMessage(serverMessageToBrowserMessage(serverOutput1), 'dummyDomain');
 
-  /** This is fragile. We are waiting for the third channelUpdated event. Note that these events consistently arrive in the following order.
-   *  But the events are not guaranteed to arrive in this order:
-   *  1. The first event is triggered by the registration of the channel with the chain service.
-   *      holdingUpdated is invoked when the initial holdings are read from the chain.
-   *  2. The second event is triggered by the server wallet deposit. The deposit results in a holdingUpdated invocation.
-   *  3. The third event is triggered by the browser wallet deposit.
-   */
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(take(3))
+    .pipe(first(constainsPostfundState))
     .toPromise();
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
