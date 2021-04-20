@@ -49,6 +49,12 @@ describe('EnsureObjectives', () => {
       );
 
       await expect(response).toBeObjectiveDoneType('Success');
+
+      // Ensure that all of A's channels are running
+      const {channelResults: aChannels} = await peerEngines.a.getChannels();
+      for (const a of aChannels) {
+        expect(a.status).toEqual('running');
+      }
     }
   );
 

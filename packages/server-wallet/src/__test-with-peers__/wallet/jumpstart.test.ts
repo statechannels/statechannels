@@ -48,8 +48,8 @@ describe('jumpstartObjectives', () => {
 
     await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
 
+    messageService.setLatencyOptions({dropRate: 0});
     const jumpstartResponse = await wallet.jumpStartObjectives();
-
     await expect(jumpstartResponse).toBeObjectiveDoneType('Success');
   });
 

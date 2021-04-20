@@ -111,7 +111,7 @@ export class Wallet {
       let isComplete = false;
 
       const onObjectiveSucceeded = (o: WalletObjective) => {
-        if (o.objectiveId === o.objectiveId) {
+        if (objective.objectiveId === o.objectiveId) {
           isComplete = true;
           this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
         }
