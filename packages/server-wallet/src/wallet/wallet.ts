@@ -130,7 +130,8 @@ export class Wallet {
 
         const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
 
-        await this._messageService.send(getMessages(syncResult.outbox));
+        const messagesForObjective = syncResult.messagesByObjective[objective.objectiveId];
+        await this._messageService.send(messagesForObjective);
       }
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
