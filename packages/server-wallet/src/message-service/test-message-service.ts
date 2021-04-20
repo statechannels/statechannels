@@ -5,6 +5,7 @@ import delay from 'delay';
 import {AbortController} from 'abort-controller';
 
 import {Engine} from '..';
+import {WirePayload} from '../type-aliases';
 
 import {MessageHandler, MessageServiceInterface} from './types';
 
@@ -117,9 +118,24 @@ export const createTestMessageHandler = (
       throw new Error(`Invalid recipient ${message.recipient}`);
     }
 
-    logger?.trace({message}, 'Pushing message into engine');
+    logger?.trace({message: formatMessageForLogger(message)}, 'Pushing message into engine');
     const result = await matching.engine.pushMessage(message.data);
 
     await me.send(result.outbox.map(o => o.params));
   };
 };
+
+function formatMessageForLogger(message: Message) {
+  const data = message.data as WirePayload;
+  return {
+    to: message.recipient,
+    from: message.sender,
+    objectives: data.objectives?.map(o => `${o.type}-${(o.data as any).targetChannelId}`),
+    states: data.signedStates?.map(s => ({
+      channelId: s.channelId,
+      turnNum: s.turnNum,
+      signatureCount: s.signatures.length,
+    })),
+    requests: data.requests?.map(r => `${r.type}-${r.channelId}`),
+  };
+}
