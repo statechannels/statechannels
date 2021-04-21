@@ -14,6 +14,7 @@ module.exports = {
     'plugin:import/warnings',
   ],
   rules: {
+    'no-self-compare': 'error',
     // It's annoying having to deal with these jest rules
     'jest/no-disabled-tests': 'off',
     'jest/expect-expect': 'off',
