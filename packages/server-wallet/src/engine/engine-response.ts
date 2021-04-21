@@ -86,7 +86,9 @@ export class EngineResponse {
   addMessage(message: WireMessage, objectiveId?: string): void {
     const id = objectiveId ?? 'NO_OBJECTIVE_ID';
     const previousValue = this.queuedMessages[id] ?? [];
-    this.queuedMessages[id] = previousValue.concat(message);
+    const mergedMessages = mergeMessages(previousValue.concat(message));
+
+    this.queuedMessages[id] = mergedMessages;
   }
 
   /**
@@ -268,6 +270,11 @@ export class EngineResponse {
 // Utilities
 // -----------
 
+export function mergeMessages(messages: WireMessage[]): WireMessage[] {
+  return mergeOutgoing(messages.map(m => ({method: 'MessageQueued' as const, params: m}))).map(
+    o => o.params as WireMessage
+  );
+}
 // Merges any messages to the same recipient into one message
 // This makes message delivery less painful with the request/response model
 export function mergeOutgoing(outgoing: Notice[]): Notice[] {
