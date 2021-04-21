@@ -4,7 +4,7 @@ import _ from 'lodash';
 import {MessageServiceInterface} from '../message-service/types';
 import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
-import {Engine} from '../engine';
+import {Engine, SyncObjectiveResult} from '../engine';
 
 import {RetryOptions, ObjectiveResult, ObjectiveError, ObjectiveSuccess} from './types';
 
@@ -130,7 +130,10 @@ export class Wallet {
 
         const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
 
-        const messagesForObjective = syncResult.messagesByObjective[objective.objectiveId];
+        const messagesForObjective = this.getMessagesForObjective(
+          objective.objectiveId,
+          syncResult
+        );
         await this._messageService.send(messagesForObjective);
       }
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
@@ -141,6 +144,23 @@ export class Wallet {
         error,
       };
     }
+  }
+
+  /**
+   * Gets a message for a specific objective from a SyncObjectiveResult
+   * Throws if there are additional messages or the message is missing
+   */
+  private getMessagesForObjective(objectiveId: string, result: SyncObjectiveResult) {
+    const objectiveIds = Object.keys(result.messagesByObjective);
+    if (!objectiveIds.includes(objectiveId)) {
+      throw new Error(`No messages for objective ${objectiveId}`);
+
+      // This is a sanity check to prevent us from losing messages
+    } else if (objectiveIds.length !== 1) {
+      throw new Error(`There are messages for multiple objectives ${objectiveIds}`);
+    }
+
+    return result.messagesByObjective[objectiveId];
   }
 
   async destroy(): Promise<void> {
