@@ -47,8 +47,7 @@ describe('SyncObjective', () => {
     // We only expect 1 outbox
     expect(result.outbox).toHaveLength(1);
 
-    // We expect the message to contain the objective as well as the sync channel payload
-    expect(result.outbox[0]).toMatchObject({
+    const expectedPayload = {
       method: 'MessageQueued',
       params: {
         sender: 'alice',
@@ -62,6 +61,14 @@ describe('SyncObjective', () => {
           objectives: [{type: 'OpenChannel', data: {targetChannelId: channelId}}],
         },
       },
-    });
+    };
+    // We expect the message to contain the objective as well as the sync channel payload
+    expect(result.outbox[0]).toMatchObject(expectedPayload);
+
+    // We expect the message to be correctly indexed by objective id
+    const objectiveIds = Object.keys(result.messagesByObjective);
+    expect(objectiveIds).toHaveLength(1);
+    const messagesByObjective = result.messagesByObjective[objectiveIds[0]];
+    expect(messagesByObjective).toMatchObject([expectedPayload.params]);
   });
 });
