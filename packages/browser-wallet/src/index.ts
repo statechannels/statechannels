@@ -81,7 +81,7 @@ function setTriggerObjectiveEvent(callback: TriggerObjectiveEvent): void {
 
 function renderUI(update: {service?: AnyInterpreter; objective?: RichObjective}) {
   if (!triggerObjectiveEvent) {
-    throw new Error('onObjectiveEventCallback must be defined');
+    throw new Error('triggerObjectiveEvent must be defined');
   }
 
   if (document.getElementById('root')) {
