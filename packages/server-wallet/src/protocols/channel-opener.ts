@@ -50,7 +50,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
 
     // if we haven't signed the pre-fund, sign it
     if (!channel.prefundSigned) {
-      await this.signPrefundSetup(channel, response, tx);
+      await this.signPrefundSetup(objective.objectiveId, channel, response, tx);
     }
 
     // if we don't have a complete preFundSetup, we are still waitingFor theirPreFundState and cannot progress
@@ -65,7 +65,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
 
     // if the channel is funded and I haven't signed the post-fund, sign it
     if (funded && !channel.postfundSigned) {
-      await this.signPostfundSetup(channel, response, tx);
+      await this.signPostfundSetup(objective.objectiveId, channel, response, tx);
     }
 
     // If we are still waitingFor theirPostFundState, we cannot complete
@@ -109,6 +109,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
   }
 
   private async signPrefundSetup(
+    objectiveId: string,
     channel: Channel,
     response: EngineResponse,
     tx: Transaction
@@ -116,11 +117,12 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
     // TODO: should probably have more checking around the form of channel.latest
     const prefund = {...channel.latest, turnNum: 0};
     const signedState = await this.store.signState(channel, prefund, tx);
-    response.queueState(signedState, channel.myIndex, channel.channelId);
+    response.queueState(signedState, channel.myIndex, channel.channelId, objectiveId);
     response.queueChannel(channel);
   }
 
   private async signPostfundSetup(
+    objectiveId: string,
     channel: Channel,
     response: EngineResponse,
     tx: Transaction
@@ -128,7 +130,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
     // TODO: should probably have more checking around the form of channel.latest
     const postfund = {...channel.latest, turnNum: channel.nParticipants * 2 - 1};
     const signedState = await this.store.signState(channel, postfund, tx);
-    response.queueState(signedState, channel.myIndex, channel.channelId);
+    response.queueState(signedState, channel.myIndex, channel.channelId, objectiveId);
     response.queueChannel(channel);
   }
 }
