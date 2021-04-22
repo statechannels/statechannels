@@ -16,6 +16,7 @@ module.exports = {
     'plugin:import/typescript'
   ],
   rules: {
+    'no-self-compare': 'error',
     'import/order': [
       1,
       {
