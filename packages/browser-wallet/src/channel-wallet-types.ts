@@ -8,7 +8,7 @@ export type TriggerObjectiveEvent = (event: DirectFunder.OpenChannelEvent) => vo
  * when UI should be updated.
  *
  * UI needs a way to communicate objective events to the channel wallet. UI invokes triggerObjectiveEvent
- * when UI triggers an objetive event
+ * when UI triggers an objective event
  */
 export type UpdateUI = (update: {
   service?: AnyInterpreter;
