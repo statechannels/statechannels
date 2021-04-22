@@ -230,6 +230,7 @@ export class EngineResponse {
   private get allMessages(): WireMessage[] {
     return _.flatten(Object.values(this.queuedMessages));
   }
+
   private get outbox(): Outgoing[] {
     return mergeOutgoing(
       this.allMessages.map(m => ({
