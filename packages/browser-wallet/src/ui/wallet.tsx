@@ -15,7 +15,6 @@ import {ObjectiveContext} from './objective/objective-context';
 
 interface Props {
   workflow?: Interpreter<any, any, any>;
-  // TODO: generalize to all rich objectives
   objective?: RichObjective;
   triggerObjectiveEvent(event: RichObjectiveEvent): void;
 }
