@@ -74,7 +74,7 @@ export class Store {
   public richObjectives: Dictionary<RichObjective> = {};
 
   public richObjectiveFeed = new Subject<RichObjective>();
-  public crankRichObjectiveFeed = new Subject<RichObjectiveEvent>();
+  public richObjectiveEventFeed = new Subject<RichObjectiveEvent>();
 
   /**
    *  END of wallet 2.0
@@ -575,7 +575,7 @@ export class Store {
       // TODO: account for the case a message containing states for many channels
       const channelId = calculateChannelId(signedStates[0]);
       if (this.richObjectives[channelId]) {
-        this.crankRichObjectiveFeed.next({
+        this.richObjectiveEventFeed.next({
           type: 'StatesReceived',
           states: signedStates,
           channelId
@@ -636,7 +636,7 @@ export class Store {
 
   private registerChannelWithChain(channelId): void {
     this.chain.chainUpdatedFeed(channelId).subscribe(chainInfo =>
-      this.crankRichObjectiveFeed.next({
+      this.richObjectiveEventFeed.next({
         type: 'FundingUpdated',
         amount: chainInfo.amount,
         finalized: true,
