@@ -74,7 +74,7 @@ export class ChannelWallet {
       this.messagingService.sendMessageNotification(m);
     });
 
-    store.crankRichObjectiveFeed.subscribe(_.bind(this.crankRichObjective, this));
+    store.richObjectiveEventFeed.subscribe(_.bind(this.crankRichObjective, this));
 
     // Whenever an OpenChannel objective is received
     // we alert the user that there is a new channel
