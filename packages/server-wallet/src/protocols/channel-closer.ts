@@ -126,7 +126,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
 
     const vars: StateVariables = {...channel.supported, turnNum, isFinal: true};
     const signedState = await this.store.signState(channel, vars, tx);
-    response.queueState(signedState, myIndex, objectiveId, channelId);
+    response.queueState(signedState, myIndex, channelId, objectiveId);
   }
 
   private async completeObjective(

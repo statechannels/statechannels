@@ -340,7 +340,7 @@ export class SingleThreadedEngine
 
     const {myIndex, participants} = channelState;
 
-    states.forEach(s => response.queueState(s, myIndex, objectiveId, channelId));
+    states.forEach(s => response.queueState(s, myIndex, channelId, objectiveId));
     response.queueChannelRequest(channelId, myIndex, participants, objectiveId);
     response.queueChannelState(channelState);
   }
@@ -512,7 +512,7 @@ export class SingleThreadedEngine
     );
 
     this.emit('objectiveStarted', objective);
-    response.queueState(signedState, channel.myIndex, objective.objectiveId, channel.channelId);
+    response.queueState(signedState, channel.myIndex, channel.channelId, objective.objectiveId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
 

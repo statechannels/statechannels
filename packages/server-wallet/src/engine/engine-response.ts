@@ -62,7 +62,7 @@ export class EngineResponse {
   /**
    * Queues state for sending to opponent
    */
-  queueState(state: SignedState, myIndex: number, objectiveId?: string, channelId?: string): void {
+  queueState(state: SignedState, myIndex: number, channelId: string, objectiveId?: string): void {
     const myParticipantId = state.participants[myIndex].participantId;
     state.participants.forEach((p, i) => {
       if (i !== myIndex) {
