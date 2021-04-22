@@ -7,7 +7,7 @@ import React from 'react';
 import {DirectFunder} from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {OnObjectiveEvent} from './channel-wallet-types';
+import {TriggerObjectiveEvent} from './channel-wallet-types';
 import {Backend} from './store/dexie-backend';
 import {Store} from './store';
 import {MemoryBackend} from './store/memory-backend';
@@ -27,9 +27,9 @@ if (NODE_ENV === 'production') {
 }
 
 const log = logger.trace.bind(logger);
-let onObjectiveEvent: OnObjectiveEvent | undefined = undefined;
-function setOnObjectiveEvent(callback: OnObjectiveEvent): void {
-  onObjectiveEvent = callback;
+let triggerObjectiveEvent: TriggerObjectiveEvent | undefined = undefined;
+function setTriggerObjectiveEvent(callback: TriggerObjectiveEvent): void {
+  triggerObjectiveEvent = callback;
 }
 
 (async function () {
@@ -43,7 +43,12 @@ function setOnObjectiveEvent(callback: OnObjectiveEvent): void {
   await store.initialize([], CLEAR_STORAGE_ON_START);
   const messagingService = new MessagingService(store);
 
-  const channelWallet = new ChannelWallet(store, messagingService, renderUI, setOnObjectiveEvent);
+  const channelWallet = new ChannelWallet(
+    store,
+    messagingService,
+    renderUI,
+    setTriggerObjectiveEvent
+  );
 
   if (NODE_ENV === 'production') {
     Sentry.configureScope(async scope => {
@@ -78,8 +83,8 @@ function renderUI(update: {
   service?: AnyInterpreter;
   objective?: DirectFunder.OpenChannelObjective;
 }) {
-  if (!onObjectiveEvent) {
-    throw new Error('onObjectiveEventCallback must be defined');
+  if (!triggerObjectiveEvent) {
+    throw new Error('triggerObjectiveEventCallback must be defined');
   }
 
   if (document.getElementById('root')) {
@@ -87,7 +92,7 @@ function renderUI(update: {
       React.createElement(WalletUI, {
         workflow: update.service,
         objective: update.objective,
-        onObjectiveEvent
+        triggerObjectiveEvent
       }),
       document.getElementById('root')
     );
