@@ -16,7 +16,7 @@ import {
 } from '@statechannels/wallet-core';
 import _ from 'lodash';
 
-import {OnObjectiveEvent, UpdateUI, Workflow} from './channel-wallet-types';
+import {TriggerObjectiveEvent, UpdateUI, Workflow} from './channel-wallet-types';
 import {serializeChannelEntry} from './utils/wallet-core-v0.8.0';
 import {AppRequestEvent} from './event-types';
 import {Store} from './store';
@@ -42,7 +42,7 @@ export class ChannelWallet {
   static async create(
     chainAddress?: Address,
     updateUI?: UpdateUI,
-    setOnObjectiveEvent?: (callback: OnObjectiveEvent) => void
+    setTriggerObjectiveEvent?: (callback: TriggerObjectiveEvent) => void
   ): Promise<ChannelWallet> {
     const chain = new ChainWatcher(chainAddress);
     const store = new Store(chain);
@@ -51,7 +51,7 @@ export class ChannelWallet {
       store,
       new MessagingService(store),
       updateUI,
-      setOnObjectiveEvent
+      setTriggerObjectiveEvent
     );
     return wallet;
   }
@@ -60,9 +60,9 @@ export class ChannelWallet {
     private store: Store,
     private messagingService: MessagingServiceInterface,
     protected updateUI?: UpdateUI,
-    setOnObjectiveEvent?: (callback: OnObjectiveEvent) => void
+    setTriggerObjectiveEvent?: (callback: TriggerObjectiveEvent) => void
   ) {
-    setOnObjectiveEvent?.(_.bind(this.crankRichObjectives, this));
+    setTriggerObjectiveEvent?.(_.bind(this.crankRichObjectives, this));
     this.workflows = [];
 
     // Whenever the store wants to send something call sendMessage

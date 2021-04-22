@@ -17,7 +17,7 @@ interface Props {
   workflow?: Interpreter<any, any, any>;
   // TODO: generalize to all rich objectives
   objective?: DirectFunder.OpenChannelObjective;
-  onObjectiveEvent(event: DirectFunder.OpenChannelEvent): void;
+  triggerObjectiveEvent(event: DirectFunder.OpenChannelEvent): void;
 }
 
 export const Wallet = (props: Props) => {
@@ -43,7 +43,7 @@ export const Wallet = (props: Props) => {
     );
   } else if (props.objective) {
     return (
-      <ObjectiveContext.Provider value={props.onObjectiveEvent}>
+      <ObjectiveContext.Provider value={props.triggerObjectiveEvent}>
         <Layout>
           <Objective objective={props.objective} />
         </Layout>
