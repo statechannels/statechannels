@@ -123,6 +123,9 @@ export class Wallet {
       // that might trigger progress on the objective
       await this._messageService.send(objectiveMessages);
 
+      /**
+       * Consult https://github.com/statechannels/statechannels/issues/3518 for background on this retry logic
+       */
       const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
       for (let i = 0; i < numberOfAttempts; i++) {
         if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
