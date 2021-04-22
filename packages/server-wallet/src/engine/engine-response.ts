@@ -83,7 +83,7 @@ export class EngineResponse {
     });
   }
 
-  addMessage(message: WireMessage, objectiveId?: string): void {
+  private addMessage(message: WireMessage, objectiveId?: string): void {
     const id = objectiveId ?? 'NO_OBJECTIVE_ID';
     const previousValue = this.queuedMessages[id] ?? [];
     const mergedMessages = mergeMessages(previousValue.concat(message));
