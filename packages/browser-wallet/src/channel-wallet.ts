@@ -37,6 +37,8 @@ export class ChannelWallet {
    *
    * @param chainAddress Ethereum address for the wallet
    * @param updateUI Callback that will be invoked when the channel wallet wants to update UI
+   * @param setTriggerObjectiveEvent The invoker of the create API might wish to send objective events to the wallet. The wallet
+   *  calls setTriggerObjectiveEvent to hand back the invoker the callback to use for objective events.
    * @returns
    */
   static async create(
