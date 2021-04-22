@@ -83,6 +83,12 @@ export class EngineResponse {
     });
   }
 
+  /**
+   * Adds a message to the current collection of messages.
+   * If no objective id is provided a placeholder of NO_OBJECTIVE_ID is used.
+   * @param message The message to add.
+   * @param objectiveId The optional objective id to associate the message with.
+   */
   private addMessage(message: WireMessage, objectiveId?: string): void {
     const id = objectiveId ?? 'NO_OBJECTIVE_ID';
     const previousValue = this.queuedMessages[id] ?? [];
