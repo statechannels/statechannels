@@ -14,7 +14,7 @@ import {addHash} from '../../../state-utils';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import {alice as aliceP, bob as bobP, charlie as charlieP} from '../fixtures/participants';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateSignedBy} from '../fixtures/states';
+import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
@@ -57,7 +57,10 @@ const five = 5;
 const six = 6;
 
 it('does not set the status of an objective if it already exists', async () => {
-  const {channelId} = await Channel.query(engine.knex).insert(channel());
+  // TODO: We pass in a signed state to avoid https://github.com/statechannels/statechannels/issues/3525
+  const channelToInsert = channel({vars: [stateWithHashSignedBy([alice()])()]});
+
+  const {channelId} = await Channel.query(engine.knex).insert(channelToInsert);
 
   const objective: OpenChannel = {
     type: 'OpenChannel',
