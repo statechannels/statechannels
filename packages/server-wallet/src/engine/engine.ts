@@ -371,8 +371,9 @@ export class SingleThreadedEngine
           participants: [],
           data: {targetChannelId: channelId},
         },
-        true, // preApprove
-        tx
+
+        tx,
+        'approved'
       );
       this.emit('objectiveStarted', objective);
 
@@ -972,8 +973,9 @@ export class SingleThreadedEngine
           participants: [],
           data: {targetChannelId: arg.channelId},
         },
-        true, // preApproved
-        tx
+
+        tx,
+        'approved'
       );
       this.emit('objectiveStarted', objective);
     });

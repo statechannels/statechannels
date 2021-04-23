@@ -23,8 +23,9 @@ export class CloseChannelObjective {
               txSubmitterOrder: [1, 0],
             },
           },
-          true,
-          tx
+
+          tx,
+          'approved'
         );
         // add new objective to the response
         response.queueCreatedObjective(walletObjective, channel.myIndex, channel.participants);

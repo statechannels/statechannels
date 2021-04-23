@@ -27,7 +27,7 @@ import {MultiThreadedEngine, Engine} from '../..';
 const dropNonVariables = (s: SignedState): any =>
   _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
 
-jest.setTimeout(20_000);
+jest.setTimeout(120_000);
 
 let engine: Engine;
 let multiThreadedEngine: MultiThreadedEngine;
@@ -69,7 +69,7 @@ it('does not set the status of an objective if it already exists', async () => {
     },
   };
 
-  const inserted = await ObjectiveModel.insert(objective, true, engine.knex);
+  const inserted = await ObjectiveModel.insert(objective, engine.knex, 'approved');
   //Sanity check: We expect the objective to be approved since we used the preApproved flag
   expect(inserted.status).toBe('approved');
 
@@ -78,9 +78,7 @@ it('does not set the status of an objective if it already exists', async () => {
     signedStates: [],
     objectives: [objective],
   });
-
   const latest = await ObjectiveModel.forId(objectiveId(objective), engine.knex);
-
   // The status should still be approved after we receive the message in a payload
   expect(latest.status).toBe('approved');
 });
@@ -324,8 +322,9 @@ describe('when the application protocol returns an action', () => {
           role: 'app',
         },
       },
-      true,
-      engine.knex
+
+      engine.knex,
+      'approved'
     );
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);
