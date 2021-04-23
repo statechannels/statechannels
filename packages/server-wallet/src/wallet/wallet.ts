@@ -127,6 +127,14 @@ export class Wallet {
     objectiveMessages: Message[]
   ): Promise<ObjectiveSuccess | ObjectiveError> {
     try {
+      // If the objective is already done we want to exit immediately
+      if (objective.status === 'succeeded') {
+        this._engine.logger.debug(
+          {objective},
+          'Objective passed into ensureObjective has already succeeded'
+        );
+        return {type: 'Success', channelId: objective.data.targetChannelId};
+      }
       let isComplete = false;
 
       const onObjectiveSucceeded = (o: WalletObjective) => {
