@@ -191,11 +191,12 @@ export class ObjectiveModel extends Model {
         .returning('*')
         .first();
 
-      const shouldOverride = !!approvalStatus || !!waitingFor;
+      // Knex does not like properties with undefined values so we strip them out
+      const override = _.pickBy({status: approvalStatus, waitingFor}, _.identity);
       // This allows for for the insert method to override the existing status or waitingFor if desired
-      const model = shouldOverride
-        ? await query.onConflict('objectiveId').merge({status: approvalStatus, waitingFor})
-        : await query.onConflict('objectiveId').ignore();
+      const model = _.isEmpty(override)
+        ? await query.onConflict('objectiveId').ignore()
+        : await query.onConflict('objectiveId').merge(override);
       // this avoids a UniqueViolationError being thrown
       // and turns the query into an upsert. We are either:
       // - re-approving the objective.
