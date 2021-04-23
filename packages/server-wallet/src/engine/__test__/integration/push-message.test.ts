@@ -3,6 +3,8 @@ import {
   simpleEthAllocation,
   serializeState,
   SignedState,
+  OpenChannel,
+  objectiveId,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import _ from 'lodash';
@@ -53,6 +55,35 @@ const zero = 0;
 const four = 4;
 const five = 5;
 const six = 6;
+
+it('does not set the status of an objective if it already exists', async () => {
+  const {channelId} = await Channel.query(engine.knex).insert(channel());
+
+  const objective: OpenChannel = {
+    type: 'OpenChannel',
+    participants: [],
+    data: {
+      targetChannelId: channelId,
+      fundingStrategy: 'Direct',
+      role: 'app',
+    },
+  };
+
+  const inserted = await ObjectiveModel.insert(objective, true, engine.knex);
+  //Sanity check: We expect the objective to be approved since we used the preApproved flag
+  expect(inserted.status).toBe('approved');
+
+  await engine.pushMessage({
+    walletVersion: WALLET_VERSION,
+    signedStates: [],
+    objectives: [objective],
+  });
+
+  const latest = await ObjectiveModel.forId(objectiveId(objective), engine.knex);
+
+  // The status should still be approved after we receive the message in a payload
+  expect(latest.status).toBe('approved');
+});
 
 it('stores states contained in the message, in a single channel model', async () => {
   const channelsBefore = await Channel.query(engine.knex).select();
