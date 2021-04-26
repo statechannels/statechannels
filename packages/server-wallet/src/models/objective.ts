@@ -149,8 +149,8 @@ export class ObjectiveModel extends Model {
 
   static async insert<O extends SupportedObjective = SupportedObjective>(
     objectiveToBeStored: O,
-    preApproved: boolean,
     tx: TransactionOrKnex,
+    approvalStatus?: 'approved' | 'pending',
     waitingFor?: WaitingFor // TODO this should be correlated to O
   ): Promise<WalletObjective<O>> {
     const id: string = objectiveId(objectiveToBeStored);
@@ -159,7 +159,7 @@ export class ObjectiveModel extends Model {
       const query = ObjectiveModel.query(trx)
         .insert({
           objectiveId: id,
-          status: preApproved ? 'approved' : 'pending',
+          status: approvalStatus ?? 'pending',
           type: objectiveToBeStored.type,
           data: objectiveToBeStored.data,
           createdAt: new Date(),
@@ -191,9 +191,12 @@ export class ObjectiveModel extends Model {
         .returning('*')
         .first();
 
-      const model = await query
-        .onConflict('objectiveId')
-        .merge({status: preApproved ? 'approved' : 'pending'});
+      // Knex does not like properties with undefined values so we strip them out
+      const override = _.pickBy({status: approvalStatus, waitingFor}, _.identity);
+      // This allows for for the insert method to override the existing status or waitingFor if desired
+      const model = _.isEmpty(override)
+        ? await query.onConflict('objectiveId').ignore()
+        : await query.onConflict('objectiveId').merge(override);
       // this avoids a UniqueViolationError being thrown
       // and turns the query into an upsert. We are either:
       // - re-approving the objective.

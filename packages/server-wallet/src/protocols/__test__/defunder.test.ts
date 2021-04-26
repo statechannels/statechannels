@@ -40,8 +40,8 @@ async function ensureCloseObjective(
   // add the closeChannel objective and approve
   return ObjectiveModel.insert(
     channel.closeChannelObjective([participantIndex, 1 - participantIndex]),
-    true,
-    tx
+    tx,
+    'approved'
   );
 }
 
@@ -49,8 +49,8 @@ async function ensureDefundObjective(
   channel: TestChannel,
   tx: Transaction
 ): Promise<WalletObjective<DefundChannel>> {
-  // add a preapproved defundChannel objective and approve
-  return ObjectiveModel.insert(channel.defundChannelObjective(), true, tx);
+  // add an approved defundChannel objective and approve
+  return ObjectiveModel.insert(channel.defundChannelObjective(), tx, 'approved');
 }
 
 function testShouldSubmitCollaborativeTx(channel: Channel, order: number[], outcome: boolean) {

@@ -38,7 +38,7 @@ describe('SyncObjective', () => {
       .insert(channel({vars: [stateWithHashSignedBy([alice()])()]}))
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding');
-    const objective = await ObjectiveModel.insert(openChannelObjective(), false, testKnex);
+    const objective = await ObjectiveModel.insert(openChannelObjective(), testKnex);
 
     const {channelId} = targetChannel;
 

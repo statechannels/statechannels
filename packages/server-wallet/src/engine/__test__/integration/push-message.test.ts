@@ -3,6 +3,8 @@ import {
   simpleEthAllocation,
   serializeState,
   SignedState,
+  OpenChannel,
+  objectiveId,
 } from '@statechannels/wallet-core';
 import {ChannelResult} from '@statechannels/client-api-schema';
 import _ from 'lodash';
@@ -12,7 +14,7 @@ import {addHash} from '../../../state-utils';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import {alice as aliceP, bob as bobP, charlie as charlieP} from '../fixtures/participants';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {stateSignedBy} from '../fixtures/states';
+import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
@@ -53,6 +55,36 @@ const zero = 0;
 const four = 4;
 const five = 5;
 const six = 6;
+
+it('does not set the status of an objective if it already exists', async () => {
+  // TODO: We pass in a signed state to avoid https://github.com/statechannels/statechannels/issues/3525
+  const channelToInsert = channel({vars: [stateWithHashSignedBy([alice()])()]});
+
+  const {channelId} = await Channel.query(engine.knex).insert(channelToInsert);
+
+  const objective: OpenChannel = {
+    type: 'OpenChannel',
+    participants: [],
+    data: {
+      targetChannelId: channelId,
+      fundingStrategy: 'Direct',
+      role: 'app',
+    },
+  };
+
+  const inserted = await ObjectiveModel.insert(objective, engine.knex, 'approved');
+  //Sanity check: We expect the objective to be approved since we used the 'approved' parameter
+  expect(inserted.status).toBe('approved');
+
+  await engine.pushMessage({
+    walletVersion: WALLET_VERSION,
+    signedStates: [],
+    objectives: [objective],
+  });
+  const latest = await ObjectiveModel.forId(objectiveId(objective), engine.knex);
+  // The status should still be approved after we receive the message in a payload
+  expect(latest.status).toBe('approved');
+});
 
 it('stores states contained in the message, in a single channel model', async () => {
   const channelsBefore = await Channel.query(engine.knex).select();
@@ -293,8 +325,9 @@ describe('when the application protocol returns an action', () => {
           role: 'app',
         },
       },
-      true,
-      engine.knex
+
+      engine.knex,
+      'approved'
     );
 
     expect(c.latestSignedByMe?.turnNum).toEqual(0);

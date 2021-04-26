@@ -66,7 +66,7 @@ beforeEach(async () => {
       participants: [],
       data: {targetChannelId: testChan.channelId},
     },
-    false,
+
     knex
   );
 
@@ -76,7 +76,7 @@ beforeEach(async () => {
       participants: [],
       data: {targetChannelId: testChan2.channelId},
     },
-    false,
+
     knex
   );
 

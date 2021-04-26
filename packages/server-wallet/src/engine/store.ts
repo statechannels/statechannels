@@ -322,8 +322,8 @@ export class Store {
       const storedObjectives: WalletObjective[] = [];
       for (const o of deserializedObjectives) {
         if (isSupportedObjective(o)) {
-          const preApprove = o.type === 'CloseChannel'; // Close channel objectives do not need co-operative approval
-          storedObjectives.push(await ObjectiveModel.insert(o, preApprove, tx));
+          const status = o.type === 'CloseChannel' ? 'approved' : undefined; // Close channel objectives do not need co-operative approval
+          storedObjectives.push(await ObjectiveModel.insert(o, tx, status));
         } else this.logger.warn('Unsupported objective received');
       }
 
@@ -625,8 +625,9 @@ export class Store {
 
       const objective = await ObjectiveModel.insert(
         o,
-        true, // preApproved
+
         tx,
+        'approved',
         OpenChannelWaitingFor.theirPreFundSetup
       );
       return {channel: await this.getChannelState(channelId, tx), firstSignedState, objective};
