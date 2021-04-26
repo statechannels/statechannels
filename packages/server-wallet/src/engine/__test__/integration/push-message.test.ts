@@ -27,7 +27,7 @@ import {MultiThreadedEngine, Engine} from '../..';
 const dropNonVariables = (s: SignedState): any =>
   _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
 
-jest.setTimeout(120_000);
+jest.setTimeout(20_000);
 
 let engine: Engine;
 let multiThreadedEngine: MultiThreadedEngine;
