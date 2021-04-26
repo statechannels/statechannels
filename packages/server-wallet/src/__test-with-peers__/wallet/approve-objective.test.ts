@@ -12,6 +12,34 @@ beforeAll(async () => {
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
 });
+
+test('approving a completed objective returns immediately', async () => {
+  const {peerEngines, messageService} = peerSetup;
+  messageService.setLatencyOptions({dropRate: 0});
+
+  const wallet = await Wallet.create(peerEngines.a, messageService, {
+    numberOfAttempts: 100,
+    initialDelay: 50,
+    multiple: 1,
+  });
+  const walletB = await Wallet.create(peerEngines.b, messageService, {
+    numberOfAttempts: 100,
+    initialDelay: 50,
+    multiple: 1,
+  });
+
+  const createResult = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
+  await new Promise<void>(resolve => peerEngines.b.on('objectiveStarted', () => resolve()));
+  const {objectiveId} = createResult[0];
+
+  const approveResult = await walletB.approveObjectives([objectiveId]);
+
+  await expect(createResult).toBeObjectiveDoneType('Success');
+  await expect(approveResult).toBeObjectiveDoneType('Success');
+
+  const secondApprove = await walletB.approveObjectives([objectiveId]);
+  await expect(secondApprove).toBeObjectiveDoneType('Success');
+});
 test('can approve the objective multiple times', async () => {
   const {peerEngines, messageService} = peerSetup;
   messageService.setLatencyOptions({dropRate: 0});
