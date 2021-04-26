@@ -73,7 +73,7 @@ it('does not set the status of an objective if it already exists', async () => {
   };
 
   const inserted = await ObjectiveModel.insert(objective, engine.knex, 'approved');
-  //Sanity check: We expect the objective to be approved since we used the preApproved flag
+  //Sanity check: We expect the objective to be approved since we used the 'approved' parameter
   expect(inserted.status).toBe('approved');
 
   await engine.pushMessage({
