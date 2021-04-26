@@ -49,7 +49,7 @@ async function ensureDefundObjective(
   channel: TestChannel,
   tx: Transaction
 ): Promise<WalletObjective<DefundChannel>> {
-  // add a approved defundChannel objective and approve
+  // add an approved defundChannel objective and approve
   return ObjectiveModel.insert(channel.defundChannelObjective(), tx, 'approved');
 }
 
