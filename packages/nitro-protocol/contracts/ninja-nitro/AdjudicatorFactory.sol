@@ -42,7 +42,6 @@ contract AdjudicatorFactory {
     /// @dev Allows us to create new channel contract and get it all set up in one transaction
     function createChannel(bytes32 channelId) public returns (address payable channel) {
         channel = payable(_deployChannelProxy(channelId));
-        emit ChannelCreation(channel);
     }
 
     /// @dev Allows us to create new channel contract, payout all of the funds, and destroy the contract
