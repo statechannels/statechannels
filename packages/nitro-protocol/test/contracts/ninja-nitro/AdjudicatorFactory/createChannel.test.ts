@@ -25,10 +25,10 @@ const channelNonce = getRandomNonce('deployAndPayout');
 /**
  * We expect the gas cost of this call to be roughly as follows:
  * 21K base fee
- * 32K CREATE2 base fee
- * 200 gas per byte of contract code  = 200 x 90 + 18000
- * a little bit more to hash the contract init code
- * so roughly 71000
+ * 32K CREATE2 base fee (G_create)
+ * G_codedeposit = 200 gas per byte of contract code  = 200 x 45 = 9K
+ * G_sha3word = 6 x words_of_init_code = 12
+ * so roughly 62000
  */
 describe('deployAndPayout', () => {
   it('create2s the channel', async () => {
@@ -50,7 +50,7 @@ describe('deployAndPayout', () => {
     // e.g. 0x363d3d373d3d3d363d73655341aabd39a5ee0939796df610ad685a984c535af43d82803e903d91602b57fd5bf3
     //      ......................address-of-master-copy-goes-in-thisspace..............................
     // See https://eips.ethereum.org/EIPS/eip-1167
-    expect(byteCode).toHaveLength(92); // 90 bytes plus the 0x prefix
+    expect(byteCode).toHaveLength(92); // 90 hexits (45 bytes) plus the 0x prefix
     expect(receipt.gasUsed).toBeTruthy();
   });
 });
