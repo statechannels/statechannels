@@ -733,13 +733,20 @@ export class SingleThreadedEngine
    * @param channelId - The id of the channel to try and close.
    * @returns A promise that resolves to the channel output.
    */
-  async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
+  async closeChannel({
+    channelId,
+  }: CloseChannelParams): Promise<SingleChannelOutput & {newObjective: WalletObjective}> {
     const response = EngineResponse.initialize();
 
     await this._closeChannel(channelId, response);
     await this.takeActions([channelId], response);
 
-    return response.singleChannelOutput();
+    const result = response.singleChannelOutput();
+    if (!hasNewObjective(result)) {
+      throw new Error('No new objective created for create channel');
+    } else {
+      return result;
+    }
   }
 
   private async _closeChannel(channelId: Bytes32, response: EngineResponse): Promise<void> {
