@@ -88,7 +88,7 @@ describe('EnsureObjectives', () => {
 
     const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
-    expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
+    await expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
     peerEngines.b.removeListener('objectiveStarted', listener);
   });
 });
