@@ -40,9 +40,8 @@ contract AdjudicatorFactory {
     }
 
     /// @dev Allows us to create new channel contract and get it all set up in one transaction
-    function createChannel(bytes32 channelId) public returns (address payable channel) {
-        channel = payable(_deployChannelProxy(channelId));
-        emit ChannelCreation(channel);
+    function createChannel(bytes32 channelId) public {
+        _deployChannelProxy(channelId);
     }
 
     /// @dev Allows us to create new channel contract, payout all of the funds, and destroy the contract
@@ -77,7 +76,7 @@ contract AdjudicatorFactory {
 
     /// @dev Allows us to create new channel contact using CREATE2
     function _deployChannelProxy(bytes32 channelId) internal returns (address) {
-        bytes32 salt = channelId;
-        return Create2.deploy(0, salt, getProxyCreationCode());
+        // the channelId is used as the create2 salt
+        return Create2.deploy(0, channelId, getProxyCreationCode());
     }
 }
