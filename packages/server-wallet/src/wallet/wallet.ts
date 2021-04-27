@@ -90,6 +90,30 @@ export class Wallet {
   }
 
   /**
+   Closes the specified channels
+   * @param channelIds The ids of the channels to close.
+   * @returns A promise that resolves to a collection of ObjectiveResult.
+   */
+  public async closeChannels(channelIds: string[]): Promise<ObjectiveResult[]> {
+    return Promise.all(
+      channelIds.map(async channelId => {
+        const closeResult = await this._engine.closeChannel({channelId});
+
+        const {newObjective, channelResult} = closeResult;
+        // TODO: We just refetch to get the latest status
+        // Long term we should make sure the engine returns the latest objectives
+        const latest = await this._engine.getObjective(newObjective.objectiveId);
+        return {
+          channelId: channelResult.channelId,
+          currentStatus: latest.status,
+          objectiveId: newObjective.objectiveId,
+          done: this.ensureObjective(latest, getMessages(closeResult)),
+        };
+      })
+    );
+  }
+
+  /**
    * Finds any approved objectives and attempts to make progress on them.
    * This is useful for restarting progress after a restart or crash.
    * @returns A collection of ObjectiveResults. There will be an ObjectiveResult for each approved objective found.

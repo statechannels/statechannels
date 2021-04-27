@@ -113,7 +113,10 @@ export async function crashAndRestart(
 
 export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetup> {
   try {
-    await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+    await Promise.all([
+      DBAdmin.truncateDatabase(aEngineConfig),
+      DBAdmin.truncateDatabase(bEngineConfig),
+    ]);
 
     await Promise.all([
       DBAdmin.createDatabase(aEngineConfig),
@@ -177,7 +180,7 @@ export const teardownPeerSetup = async (peerSetup: PeerSetup): Promise<void> => 
     await messageService.destroy();
 
     await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
-    await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+    // await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
   } catch (error) {
     logger.error(error, 'peersTeardown failed');
     throw error;
