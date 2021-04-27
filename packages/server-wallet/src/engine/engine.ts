@@ -552,23 +552,26 @@ export class SingleThreadedEngine
     return response.multipleChannelOutput();
   }
 
+  private async approveObjective(objectiveId: string): Promise<WalletObjective> {
+    return this.store.transaction(async tx => {
+      const objective = await this.store.getAndLockObjective(objectiveId, tx);
+      if (objective.status === 'pending') {
+        const approved = await this.store.approveObjective(objectiveId, tx);
+        await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
+        return approved;
+      } else {
+        return objective;
+      }
+    });
+  }
+
   async approveObjectives(
     objectiveIds: string[]
   ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
     const objectives: WalletObjective[] = [];
     const response = EngineResponse.initialize();
     for (const objectiveId of objectiveIds) {
-      const result = await this.store.transaction(async tx => {
-        const objective = await this.store.getAndLockObjective(objectiveId, tx);
-        if (objective.status === 'pending') {
-          const approved = await this.store.approveObjective(objectiveId, tx);
-          await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
-          return approved;
-        } else {
-          return objective;
-        }
-      });
-
+      const result = await this.approveObjective(objectiveId);
       objectives.push(result);
     }
 
