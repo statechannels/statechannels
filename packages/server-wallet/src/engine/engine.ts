@@ -568,17 +568,20 @@ export class SingleThreadedEngine
   async approveObjectives(
     objectiveIds: string[]
   ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
-    const objectives: WalletObjective[] = [];
+    const channelIds: string[] = [];
     const response = EngineResponse.initialize();
     for (const objectiveId of objectiveIds) {
       const result = await this.approveObjective(objectiveId);
-      objectives.push(result);
+      channelIds.push(result.data.targetChannelId);
     }
 
-    await this.takeActions(
-      objectives.map(o => o.data.targetChannelId),
-      response
-    );
+    await this.takeActions(channelIds, response);
+
+    // Some objectives may now be completed so we want to refetch them
+    // This could be handled by pulling objectives off the response
+    // But this is more straightforward for now
+    const objectives = await this.store.getObjectivesByIds(objectiveIds);
+
     return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
 
