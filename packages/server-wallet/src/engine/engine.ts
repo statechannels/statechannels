@@ -28,6 +28,7 @@ import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
+import {Transaction} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {createLogger} from '../logger';
@@ -554,17 +555,27 @@ export class SingleThreadedEngine
   async approveObjectives(
     objectiveIds: string[]
   ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
-    const objectives = await this.store.getObjectivesByIds(objectiveIds);
-    const channelIds: string[] = [];
+    const objectives: WalletObjective[] = [];
     const response = EngineResponse.initialize();
-    for (const objective of objectives) {
-      const {targetChannelId} = objective.data;
-      channelIds.push(targetChannelId);
-      await this.registerChannelWithChainService(targetChannelId);
+    for (const objectiveId of objectiveIds) {
+      const result = await this.store.transaction(async tx => {
+        const objective = await this.store.getAndLockObjective(objectiveId, tx);
+        if (objective.status === 'pending') {
+          const approved = await this.store.approveObjective(objectiveId, tx);
+          await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
+          return approved;
+        } else {
+          return objective;
+        }
+      });
 
-      await this.store.approveObjective(objective.objectiveId);
+      objectives.push(result);
     }
-    await this.takeActions(channelIds, response);
+
+    await this.takeActions(
+      objectives.map(o => o.data.targetChannelId),
+      response
+    );
     return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
 
@@ -1003,8 +1014,11 @@ export class SingleThreadedEngine
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  private async registerChannelWithChainService(channelId: string): Promise<void> {
-    const channel = await this.store.getChannelState(channelId);
+  private async registerChannelWithChainService(
+    channelId: string,
+    tx?: Transaction
+  ): Promise<void> {
+    const channel = await this.store.getChannelState(channelId, tx);
     const channelResult = ChannelState.toChannelResult(channel);
 
     const assetHolderAddresses = channelResult.allocations.map(a =>
