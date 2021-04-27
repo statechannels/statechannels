@@ -2,7 +2,7 @@ import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-pe
 import {LatencyOptions} from '../../message-service/test-message-service';
 import {WalletObjective} from '../../models/objective';
 import {Wallet} from '../../wallet/wallet';
-import {getWithPeersCreateChannelsArgs, waitForObjectiveStarted} from '../utils';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
 
 jest.setTimeout(60_000);
 let peerSetup: PeerSetup;
@@ -50,7 +50,7 @@ describe('EnsureObjectives', () => {
       );
 
       const objectiveIds = response.map(o => o.objectiveId);
-      await waitForObjectiveStarted(objectiveIds, peerEngines.b);
+      await waitForObjectiveEvent(objectiveIds, 'objectiveStarted', peerEngines.b);
       const bResponse = await walletB.approveObjectives(objectiveIds);
       await expect(response).toBeObjectiveDoneType('Success');
       await expect(bResponse).toBeObjectiveDoneType('Success');

@@ -2,7 +2,7 @@ import _ from 'lodash';
 
 import {Wallet} from '../..';
 import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
-import {getWithPeersCreateChannelsArgs, waitForObjectiveStarted} from '../utils';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
 jest.setTimeout(60_000);
 let peerSetup: PeerSetup;
 
@@ -24,7 +24,7 @@ test('approving a completed objective returns immediately', async () => {
   const createResult = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
   const {objectiveId} = createResult[0];
-  await waitForObjectiveStarted([objectiveId], peerEngines.b);
+  await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
 
   const approveResult = await walletB.approveObjectives([objectiveId]);
 
@@ -43,7 +43,7 @@ test('can approve the objective multiple times', async () => {
 
   const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
   const {objectiveId} = result[0];
-  await waitForObjectiveStarted([objectiveId], peerEngines.b);
+  await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
 
   await messageService.freeze();
   const firstResult = await walletB.approveObjectives([objectiveId]);
