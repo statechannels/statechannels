@@ -13,6 +13,7 @@ afterAll(async () => {
   await teardownPeerSetup(peerSetup);
 });
 const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 100, initialDelay: 50, multiple: 1};
+
 test('approving a completed objective returns immediately', async () => {
   const {peerEngines, messageService} = peerSetup;
   messageService.setLatencyOptions({dropRate: 0});
@@ -33,26 +34,27 @@ test('approving a completed objective returns immediately', async () => {
   const secondApprove = await walletB.approveObjectives([objectiveId]);
   await expect(secondApprove).toBeObjectiveDoneType('Success');
 });
+
 test('can approve the objective multiple times', async () => {
   const {peerEngines, messageService} = peerSetup;
-  messageService.setLatencyOptions({dropRate: 0});
 
   const wallet = await Wallet.create(peerEngines.a, messageService, DEFAULT__RETRY_OPTIONS);
   const walletB = await Wallet.create(peerEngines.b, messageService, DEFAULT__RETRY_OPTIONS);
 
   const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
-  await new Promise<void>(resolve => peerEngines.b.on('objectiveStarted', () => resolve()));
   const {objectiveId} = result[0];
+  await waitForObjectiveStarted([objectiveId], peerEngines.b);
 
-  const approveCalls = 50;
-  const approvePromises = _.range(approveCalls).map(() => walletB.approveObjectives([objectiveId]));
+  await messageService.freeze();
+  const firstResult = await walletB.approveObjectives([objectiveId]);
+  const secondResult = await walletB.approveObjectives([objectiveId]);
+  // The objectives should be approved but should not have progressed further
+  // due to the message service being frozen
+  expect(firstResult[0].currentStatus).toBe('approved');
+  expect(secondResult[0].currentStatus).toBe('approved');
 
-  const results = _.flatten(await Promise.all(approvePromises));
+  await messageService.unfreeze();
 
-  // We expect an objective result from each call which points to the same objective
-  expect(results).toHaveLength(approveCalls);
-  for (const result of results) {
-    expect(result.objectiveId).toEqual(objectiveId);
-  }
-  await expect(results).toBeObjectiveDoneType('Success');
+  await expect(firstResult).toBeObjectiveDoneType('Success');
+  await expect(secondResult).toBeObjectiveDoneType('Success');
 });
