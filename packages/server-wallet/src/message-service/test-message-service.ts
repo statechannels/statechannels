@@ -5,6 +5,7 @@ import delay from 'delay';
 import {AbortController} from 'abort-controller';
 
 import {Engine} from '..';
+import {WirePayload} from '../type-aliases';
 
 import {MessageHandler, MessageServiceInterface} from './types';
 
@@ -28,7 +29,8 @@ export type LatencyOptions = {
 export class TestMessageService implements MessageServiceInterface {
   private _handleMessages: (messages: Message[]) => Promise<void>;
   private _options: LatencyOptions;
-
+  private _frozen = false;
+  private _messageQueue: Message[] = [];
   protected _destroyed = false;
 
   /* This is used to signal the delay function to abort */
@@ -58,20 +60,32 @@ export class TestMessageService implements MessageServiceInterface {
     const service = new TestMessageService(incomingMessageHandler, logger);
     return service;
   }
+
+  public freeze(): void {
+    this._frozen = true;
+  }
+  public async unfreeze(): Promise<void> {
+    this._frozen = false;
+    await this._handleMessages(this._messageQueue);
+  }
   public setLatencyOptions(incomingOptions: Partial<LatencyOptions>): void {
     this._options = _.merge(this._options, incomingOptions);
   }
   async send(messages: Message[]): Promise<void> {
-    const shouldDrop = Math.random() > 1 - this._options.dropRate;
+    if (this._frozen) {
+      this._messageQueue.push(...messages);
+    } else {
+      const shouldDrop = Math.random() > 1 - this._options.dropRate;
 
-    if (!shouldDrop) {
-      const {meanDelay} = this._options;
-      if (meanDelay) {
-        const delayAmount = meanDelay / 2 + Math.random() * meanDelay;
+      if (!shouldDrop) {
+        const {meanDelay} = this._options;
+        if (meanDelay) {
+          const delayAmount = meanDelay / 2 + Math.random() * meanDelay;
 
-        await delay(delayAmount, {signal: this._abortController.signal});
+          await delay(delayAmount, {signal: this._abortController.signal});
+        }
+        await this._handleMessages(messages);
       }
-      await this._handleMessages(messages);
     }
   }
 
@@ -117,9 +131,24 @@ export const createTestMessageHandler = (
       throw new Error(`Invalid recipient ${message.recipient}`);
     }
 
-    logger?.trace({message}, 'Pushing message into engine');
+    logger?.trace({message: formatMessageForLogger(message)}, 'Pushing message into engine');
     const result = await matching.engine.pushMessage(message.data);
 
     await me.send(result.outbox.map(o => o.params));
   };
 };
+
+function formatMessageForLogger(message: Message) {
+  const data = message.data as WirePayload;
+  return {
+    to: message.recipient,
+    from: message.sender,
+    objectives: data.objectives?.map(o => `${o.type}-${(o.data as any).targetChannelId}`),
+    states: data.signedStates?.map(s => ({
+      channelId: s.channelId,
+      turnNum: s.turnNum,
+      signatureCount: s.signatures.length,
+    })),
+    requests: data.requests?.map(r => `${r.type}-${r.channelId}`),
+  };
+}

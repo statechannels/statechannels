@@ -34,6 +34,26 @@ export class Wallet {
   ) {}
 
   /**
+   * Approves an objective that has been proposed by another participant.
+   * Once the objective has been approved progress can be made to completing the objective.
+   * @remarks
+   * This is used to "join" channels by approving a CreateChannel Objective.
+   * @param objectiveIds The ids of the objective you want to approve.
+   * @returns A promise that resolves to a collection of ObjectiveResult.
+   */
+  public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
+    const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
+    return Promise.all(
+      objectives.map(async o => ({
+        objectiveId: o.objectiveId,
+        currentStatus: o.status,
+        channelId: o.data.targetChannelId,
+        done: this.ensureObjective(o, messages),
+      }))
+    );
+  }
+
+  /**
    Creates channels using the given parameters.
    * @param channelParameters The parameters to use for channel creation. A channel will be created for each entry in the array.
    * @returns A promise that resolves to a collection of ObjectiveResult.
@@ -107,6 +127,14 @@ export class Wallet {
     objectiveMessages: Message[]
   ): Promise<ObjectiveSuccess | ObjectiveError> {
     try {
+      // If the objective is already done we want to exit immediately
+      if (objective.status === 'succeeded') {
+        this._engine.logger.debug(
+          {objective},
+          'Objective passed into ensureObjective has already succeeded'
+        );
+        return {type: 'Success', channelId: objective.data.targetChannelId};
+      }
       let isComplete = false;
 
       const onObjectiveSucceeded = (o: WalletObjective) => {
