@@ -552,9 +552,15 @@ export class SingleThreadedEngine
     return response.multipleChannelOutput();
   }
 
-  private async approveObjective(objectiveId: string): Promise<WalletObjective> {
+  private async approveObjective(
+    objectiveId: string,
+    targetChannelId: string
+  ): Promise<WalletObjective> {
     return this.store.transaction(async tx => {
-      const objective = await this.store.getAndLockObjective(objectiveId, tx);
+      await this.store.getAndLockChannel(targetChannelId, tx);
+
+      const objective = await this.store.getObjective(objectiveId, tx);
+
       if (objective.status === 'pending') {
         const approved = await this.store.approveObjective(objectiveId, tx);
         await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
@@ -570,9 +576,11 @@ export class SingleThreadedEngine
   ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
     const channelIds: string[] = [];
     const response = EngineResponse.initialize();
-    for (const objectiveId of objectiveIds) {
-      const result = await this.approveObjective(objectiveId);
-      channelIds.push(result.data.targetChannelId);
+    let objectives = await this.store.getObjectivesByIds(objectiveIds);
+    for (const objective of objectives) {
+      const {objectiveId, data} = objective;
+      await this.approveObjective(objectiveId, data.targetChannelId);
+      channelIds.push(data.targetChannelId);
     }
 
     await this.takeActions(channelIds, response);
@@ -580,7 +588,7 @@ export class SingleThreadedEngine
     // Some objectives may now be completed so we want to refetch them
     // This could be handled by pulling objectives off the response
     // But this is more straightforward for now
-    const objectives = await this.store.getObjectivesByIds(objectiveIds);
+    objectives = await this.store.getObjectivesByIds(objectiveIds);
 
     return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
