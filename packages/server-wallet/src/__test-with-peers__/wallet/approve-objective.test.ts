@@ -12,21 +12,13 @@ beforeAll(async () => {
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
 });
-
+const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 100, initialDelay: 50, multiple: 1};
 test('approving a completed objective returns immediately', async () => {
   const {peerEngines, messageService} = peerSetup;
   messageService.setLatencyOptions({dropRate: 0});
 
-  const wallet = await Wallet.create(peerEngines.a, messageService, {
-    numberOfAttempts: 100,
-    initialDelay: 50,
-    multiple: 1,
-  });
-  const walletB = await Wallet.create(peerEngines.b, messageService, {
-    numberOfAttempts: 100,
-    initialDelay: 50,
-    multiple: 1,
-  });
+  const wallet = await Wallet.create(peerEngines.a, messageService, DEFAULT__RETRY_OPTIONS);
+  const walletB = await Wallet.create(peerEngines.b, messageService, DEFAULT__RETRY_OPTIONS);
 
   const createResult = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
@@ -45,16 +37,8 @@ test('can approve the objective multiple times', async () => {
   const {peerEngines, messageService} = peerSetup;
   messageService.setLatencyOptions({dropRate: 0});
 
-  const wallet = await Wallet.create(peerEngines.a, messageService, {
-    numberOfAttempts: 100,
-    initialDelay: 50,
-    multiple: 1,
-  });
-  const walletB = await Wallet.create(peerEngines.b, messageService, {
-    numberOfAttempts: 100,
-    initialDelay: 50,
-    multiple: 1,
-  });
+  const wallet = await Wallet.create(peerEngines.a, messageService, DEFAULT__RETRY_OPTIONS);
+  const walletB = await Wallet.create(peerEngines.b, messageService, DEFAULT__RETRY_OPTIONS);
 
   const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
   await new Promise<void>(resolve => peerEngines.b.on('objectiveStarted', () => resolve()));
