@@ -1,9 +1,8 @@
 import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
 import {LatencyOptions} from '../../message-service/test-message-service';
 import {WalletObjective} from '../../models/objective';
-import {ObjectiveResult} from '../../wallet';
 import {Wallet} from '../../wallet/wallet';
-import {getWithPeersCreateChannelsArgs} from '../utils';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveStarted} from '../utils';
 
 jest.setTimeout(60_000);
 let peerSetup: PeerSetup;
@@ -46,17 +45,13 @@ describe('EnsureObjectives', () => {
         multiple: 1,
       });
 
-      const bResponse: ObjectiveResult[] = [];
-      const listener = async (o: WalletObjective) => {
-        const result = await walletB.approveObjectives([o.objectiveId]);
-        bResponse.push(...result);
-      };
-      peerEngines.b.on('objectiveStarted', listener);
-
       const response = await wallet.createChannels(
         Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
 
+      const objectiveIds = response.map(o => o.objectiveId);
+      await waitForObjectiveStarted(objectiveIds, peerEngines.b);
+      const bResponse = await walletB.approveObjectives(objectiveIds);
       await expect(response).toBeObjectiveDoneType('Success');
       await expect(bResponse).toBeObjectiveDoneType('Success');
       // Ensure that all of A's channels are running
@@ -70,7 +65,6 @@ describe('EnsureObjectives', () => {
       for (const b of bChannels) {
         expect(b.status).toEqual('running');
       }
-      peerEngines.b.removeListener('objectiveStarted', listener);
     }
   );
 
@@ -94,7 +88,7 @@ describe('EnsureObjectives', () => {
 
     const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
-    expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
+    await expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
     peerEngines.b.removeListener('objectiveStarted', listener);
   });
 });

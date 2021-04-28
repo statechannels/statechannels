@@ -362,7 +362,7 @@ export class Store {
     return LedgerRequest.ledgersWithNewRequestsIds(tx || this.knex);
   }
 
-  async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
+  async approveObjective(objectiveId: string, tx?: Transaction): Promise<WalletObjective> {
     const objective = await ObjectiveModel.approve(objectiveId, tx || this.knex);
 
     if (objective.type === 'OpenChannel') {
@@ -384,6 +384,7 @@ export class Store {
         .where({channelId})
         .patch({fundingStrategy, fundingLedgerChannelId});
     }
+    return objective;
   }
 
   async markObjectiveStatus<O extends WalletObjective>(

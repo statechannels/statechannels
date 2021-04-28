@@ -28,6 +28,7 @@ import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
+import {Transaction} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {createLogger} from '../logger';
@@ -551,20 +552,44 @@ export class SingleThreadedEngine
     return response.multipleChannelOutput();
   }
 
+  private async approveObjective(
+    objectiveId: string,
+    targetChannelId: string
+  ): Promise<WalletObjective> {
+    return this.store.transaction(async tx => {
+      await this.store.getAndLockChannel(targetChannelId, tx);
+
+      const objective = await this.store.getObjective(objectiveId, tx);
+
+      if (objective.status === 'pending') {
+        const approved = await this.store.approveObjective(objectiveId, tx);
+        await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
+        return approved;
+      } else {
+        return objective;
+      }
+    });
+  }
+
   async approveObjectives(
     objectiveIds: string[]
   ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
-    const objectives = await this.store.getObjectivesByIds(objectiveIds);
     const channelIds: string[] = [];
     const response = EngineResponse.initialize();
+    let objectives = await this.store.getObjectivesByIds(objectiveIds);
     for (const objective of objectives) {
-      const {targetChannelId} = objective.data;
-      channelIds.push(targetChannelId);
-      await this.registerChannelWithChainService(targetChannelId);
-
-      await this.store.approveObjective(objective.objectiveId);
+      const {objectiveId, data} = objective;
+      await this.approveObjective(objectiveId, data.targetChannelId);
+      channelIds.push(data.targetChannelId);
     }
+
     await this.takeActions(channelIds, response);
+
+    // Some objectives may now be completed so we want to refetch them
+    // This could be handled by pulling objectives off the response
+    // But this is more straightforward for now
+    objectives = await this.store.getObjectivesByIds(objectiveIds);
+
     return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
 
@@ -1003,8 +1028,11 @@ export class SingleThreadedEngine
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  private async registerChannelWithChainService(channelId: string): Promise<void> {
-    const channel = await this.store.getChannelState(channelId);
+  private async registerChannelWithChainService(
+    channelId: string,
+    tx?: Transaction
+  ): Promise<void> {
+    const channel = await this.store.getChannelState(channelId, tx);
     const channelResult = ChannelState.toChannelResult(channel);
 
     const assetHolderAddresses = channelResult.allocations.map(a =>
