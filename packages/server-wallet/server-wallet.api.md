@@ -377,7 +377,9 @@ export class SingleThreadedEngine extends EventEmitter<EventEmitterType> impleme
     //
     // (undocumented)
     channelFinalized(arg: ChannelFinalizedArg): Promise<void>;
-    closeChannel({ channelId }: CloseChannelParams): Promise<SingleChannelOutput>;
+    closeChannel({ channelId, }: CloseChannelParams): Promise<SingleChannelOutput & {
+        newObjective: WalletObjective;
+    }>;
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     static create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine>;
@@ -443,6 +445,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 // @public (undocumented)
 export class Wallet {
     approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
+    closeChannels(channelIds: string[]): Promise<ObjectiveResult[]>;
     // Warning: (ae-forgotten-export) The symbol "MessageServiceInterface" needs to be exported by the entry point index.d.ts
     static create(engine: Engine, messageService: MessageServiceInterface, retryOptions?: Partial<RetryOptions>): Promise<Wallet>;
     createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
