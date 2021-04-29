@@ -65,21 +65,24 @@ describe('CloseChannels', () => {
 
       // Now that the channels are up and running we can set the latency options
       messageService.setLatencyOptions(options);
+      // Freeze messages so we can set up our listeners for engineToWaitOn
+      messageService.freeze();
 
       const channelIds = response.map(o => o.channelId);
       const closingWallet = options.closer === 'A' ? wallet : walletB;
       // We want to to make sure the non closing wallet manages to complete all the objectives
       const engineToWaitOn = options.closer === 'A' ? peerEngines.b : peerEngines.a;
 
-      const closeChannelObjectiveIds = channelIds.map(c => `CloseChannel-${c}`);
-      // Since closing requires no approval we need to setup the promise
-      // before we call closeChannel. Otherwise we could miss events
+      const closeResponse = await closingWallet.closeChannels(channelIds);
+
       const allObjectivesSucceeded = waitForObjectiveEvent(
-        closeChannelObjectiveIds,
+        closeResponse.map(o => o.objectiveId),
         'objectiveSucceeded',
         engineToWaitOn
       );
-      const closeResponse = await closingWallet.closeChannels(channelIds);
+
+      // Now that we're done with the setup we can unfreeze and let the messages fly
+      await messageService.unfreeze();
 
       await expect(closeResponse).toBeObjectiveDoneType('Success');
       await allObjectivesSucceeded;
