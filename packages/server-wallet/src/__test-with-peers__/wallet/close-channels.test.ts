@@ -74,7 +74,11 @@ describe('CloseChannels', () => {
       const engineToWaitOn = options.closer === 'A' ? peerEngines.b : peerEngines.a;
 
       const closeResponse = await closingWallet.closeChannels(channelIds);
+      const secondCloseResponse = await closingWallet.closeChannels(channelIds);
 
+      // Since messages are frozen we expect everything stuck on the approved status
+      expect(closeResponse.every(o => o.currentStatus === 'approved')).toBe(true);
+      expect(secondCloseResponse.every(o => o.currentStatus === 'approved')).toBe(true);
       const allObjectivesSucceeded = waitForObjectiveEvent(
         closeResponse.map(o => o.objectiveId),
         'objectiveSucceeded',
@@ -84,7 +88,10 @@ describe('CloseChannels', () => {
       // Now that we're done with the setup we can unfreeze and let the messages fly
       await messageService.unfreeze();
 
+      // We expect both promises to resolve to success
       await expect(closeResponse).toBeObjectiveDoneType('Success');
+      await expect(secondCloseResponse).toBeObjectiveDoneType('Success');
+
       await allObjectivesSucceeded;
 
       // Ensure that A has all closed channels
