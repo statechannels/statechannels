@@ -7,6 +7,7 @@ import {WalletObjective} from '../models/objective';
 import {Engine, SyncObjectiveResult} from '../engine';
 
 import {RetryOptions, ObjectiveResult, ObjectiveError, ObjectiveSuccess} from './types';
+import {ObjectiveMonitor} from './objective-monitor';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -27,11 +28,16 @@ export class Wallet {
   ): Promise<Wallet> {
     return new Wallet(engine, messageService, {...DEFAULTS, ...retryOptions});
   }
+
+  private _objectiveMonitor: ObjectiveMonitor;
+
   private constructor(
     private _engine: Engine,
     private _messageService: MessageServiceInterface,
     private _retryOptions: RetryOptions
-  ) {}
+  ) {
+    this._objectiveMonitor = new ObjectiveMonitor(_engine, _engine.logger);
+  }
 
   /**
    * Approves an objective that has been proposed by another participant.
@@ -43,6 +49,7 @@ export class Wallet {
    */
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
     const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
+    this._objectiveMonitor.monitorObjectives(objectives);
     return Promise.all(
       objectives.map(async o => ({
         objectiveId: o.objectiveId,
@@ -68,6 +75,7 @@ export class Wallet {
 
           const {newObjective, channelResult} = createResult;
 
+          this._objectiveMonitor.monitorObjectives([newObjective]);
           return {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,
@@ -98,7 +106,7 @@ export class Wallet {
     return Promise.all(
       channelIds.map(async channelId => {
         const closeResult = await this._engine.closeChannel({channelId});
-
+        this._objectiveMonitor.monitorObjectives([closeResult.newObjective]);
         const {newObjective, channelResult} = closeResult;
         // TODO: We just refetch to get the latest status
         // Long term we should make sure the engine returns the latest objectives
@@ -159,16 +167,6 @@ export class Wallet {
         );
         return {type: 'Success', channelId: objective.data.targetChannelId};
       }
-      let isComplete = false;
-
-      const onObjectiveSucceeded = (o: WalletObjective) => {
-        if (objective.objectiveId === o.objectiveId) {
-          isComplete = true;
-          this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
-        }
-      };
-
-      this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
 
       // Now that we're listening for objective success we can now send messages
       // that might trigger progress on the objective
@@ -179,7 +177,9 @@ export class Wallet {
        */
       const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
       for (let i = 0; i < numberOfAttempts; i++) {
-        if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
+        if (this._objectiveMonitor.isComplete(objective.objectiveId)) {
+          return {channelId: objective.data.targetChannelId, type: 'Success'};
+        }
         const delayAmount = initialDelay * Math.pow(multiple, i);
         await delay(delayAmount);
 
@@ -191,7 +191,6 @@ export class Wallet {
         );
         await this._messageService.send(messagesForObjective);
       }
-      if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
     } catch (error) {
       return {
@@ -219,6 +218,7 @@ export class Wallet {
   }
 
   async destroy(): Promise<void> {
+    this._objectiveMonitor.destroy();
     return this._engine.destroy();
   }
 }
