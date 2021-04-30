@@ -137,6 +137,7 @@ export class Wallet {
    */
   public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
     const objectives = await this._engine.getApprovedObjectives();
+    this._objectiveMonitor.monitorObjectives(objectives);
     const objectiveIds = objectives.map(o => o.objectiveId);
     // Instead of getting messages per objective we just get them all at once
     // This will prevent us from querying the database for each objective
