@@ -200,7 +200,14 @@ export class Wallet {
         );
         await this._messageService.send(messagesForObjective);
       }
-      return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
+      if (this._objectiveMonitor.isComplete(objective.objectiveId)) {
+        return {channelId: objective.data.targetChannelId, type: 'Success'};
+      } else {
+        return {
+          numberOfAttempts: this._retryOptions.numberOfAttempts,
+          type: 'EnsureObjectiveFailed',
+        };
+      }
     } catch (error) {
       return {
         type: 'InternalError' as const,
