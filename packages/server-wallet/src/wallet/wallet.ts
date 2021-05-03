@@ -37,6 +37,15 @@ export class Wallet {
     private _retryOptions: RetryOptions
   ) {
     this._objectiveMonitor = new ObjectiveMonitor(_engine, _engine.logger);
+
+    // The CloseChannel objective gets auto approved so there will be no call to approveObjectives.
+    // This means we have to call ensureObjective when we detect a new CloseChannel objective.
+    this._objectiveMonitor.on('newObjective', async o => {
+      if (o.type === 'CloseChannel') {
+        this._engine.logger.trace({objectiveId: o.objectiveId}, 'Ensuring CloseChannel');
+        await this.ensureObjective(o, []);
+      }
+    });
   }
 
   /**
