@@ -55,9 +55,12 @@ export type PeerSetup = {
   participantA: Participant;
   participantB: Participant;
   messageService: LegacyEngineMessageHandler;
-  peerWallets: TestPeerWallets;
 };
 
+export type PeerSetupWithWallets = PeerSetup & {peerWallets: TestPeerWallets};
+const isPeerSetupWithWallets = (
+  setup: PeerSetupWithWallets | PeerSetup
+): setup is PeerSetupWithWallets => 'peerWallets' in setup;
 export const participantIdA = 'a';
 export const participantIdB = 'b';
 const destinationA = makeDestination(
@@ -82,10 +85,10 @@ export async function crashAndRestart(
     const restartB = enginesToRestart === 'B' || enginesToRestart === 'Both';
 
     if (restartA) {
-      await oldPeerSetup.peerWallets.a.destroy();
+      await oldPeerSetup.peerEngines.a.destroy();
     }
     if (restartB) {
-      await oldPeerSetup.peerWallets.b.destroy();
+      await oldPeerSetup.peerEngines.b.destroy();
     }
     const a = restartA ? await Engine.create(aEngineConfig) : oldPeerSetup.peerEngines.a;
 
@@ -102,9 +105,6 @@ export async function crashAndRestart(
       destination: destinationB,
     };
 
-    const walletA = await Wallet.create(a, TestMessageService.create, DEFAULT__RETRY_OPTIONS);
-    const walletB = await Wallet.create(b, TestMessageService.create, DEFAULT__RETRY_OPTIONS);
-    // TestMessageService.linkMessageServices(walletA.messageService, walletB.messageService);
     const participantEngines = [
       {participantId: participantIdA, engine: a},
       {participantId: participantIdB, engine: b},
@@ -112,7 +112,7 @@ export async function crashAndRestart(
 
     return {
       peerEngines: {a, b},
-      peerWallets: {a: walletA, b: walletB},
+
       messageService: new LegacyEngineMessageHandler(participantEngines),
       participantA,
       participantB,
@@ -123,7 +123,28 @@ export async function crashAndRestart(
   }
 }
 
-export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetup> {
+export async function setupPeerWallets(withWalletsSeeding = false): Promise<PeerSetupWithWallets> {
+  const peerSetup = await setupPeerEngines(withWalletsSeeding);
+  const peerWallets = {
+    a: await Wallet.create(
+      peerSetup.peerEngines.a,
+      TestMessageService.create,
+      DEFAULT__RETRY_OPTIONS
+    ),
+    b: await Wallet.create(
+      peerSetup.peerEngines.b,
+      TestMessageService.create,
+      DEFAULT__RETRY_OPTIONS
+    ),
+  };
+  TestMessageService.linkMessageServices(
+    peerWallets.a.messageService,
+    peerWallets.b.messageService
+  );
+  return {...peerSetup, peerWallets};
+}
+
+export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerSetup> {
   try {
     await Promise.all([
       DBAdmin.truncateDatabase(aEngineConfig),
@@ -167,18 +188,11 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
     ];
 
     const messageService = new LegacyEngineMessageHandler(participantEngines);
-    const peerWallets = {
-      a: await Wallet.create(peerEngines.a, TestMessageService.create, DEFAULT__RETRY_OPTIONS),
-      b: await Wallet.create(peerEngines.b, TestMessageService.create, DEFAULT__RETRY_OPTIONS),
-    };
-    TestMessageService.linkMessageServices(
-      peerWallets.a.messageService,
-      peerWallets.b.messageService
-    );
+
     logger.trace('getPeersSetup complete');
     return {
       peerEngines,
-      peerWallets,
+
       messageService,
       participantA,
       participantB,
@@ -189,17 +203,22 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
   }
 }
 
-export const teardownPeerSetup = async (peerSetup: PeerSetup): Promise<void> => {
+export const teardownPeerSetup = async (
+  peerSetup: PeerSetup | PeerSetupWithWallets
+): Promise<void> => {
   if (!peerSetup) {
     logger.warn('No PeerSetup so no teardown needed');
     return;
   }
   try {
-    const {messageService, peerWallets} = peerSetup;
+    const {messageService, peerEngines} = peerSetup;
     await messageService.destroy();
-
-    await Promise.all([peerWallets.a.destroy(), peerWallets.b.destroy()]);
-
+    if (isPeerSetupWithWallets(peerSetup)) {
+      const {peerWallets} = peerSetup;
+      await Promise.all([peerWallets.a.destroy(), peerWallets.b.destroy()]);
+    } else {
+      await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
+    }
     await Promise.all([
       DBAdmin.truncateDatabase(aEngineConfig),
       DBAdmin.truncateDatabase(bEngineConfig),

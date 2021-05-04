@@ -1,7 +1,7 @@
 import {CreateChannelParams} from '@statechannels/client-api-schema';
 import Knex from 'knex';
 
-import {getPeersSetup, teardownPeerSetup, PeerSetup} from '../../jest/with-peers-setup-teardown';
+import {setupPeerEngines, teardownPeerSetup, PeerSetup} from '../../jest/with-peers-setup-teardown';
 import {WalletObjective, ObjectiveModel} from '../models/objective';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 import {bob} from '../engine/__test__/fixtures/participants';
@@ -10,7 +10,7 @@ import {getChannelResultFor, getPayloadFor} from '../__test__/test-helpers';
 jest.setTimeout(10_000);
 let peerSetup: PeerSetup;
 beforeAll(async () => {
-  peerSetup = await getPeersSetup(true);
+  peerSetup = await setupPeerEngines(true);
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);

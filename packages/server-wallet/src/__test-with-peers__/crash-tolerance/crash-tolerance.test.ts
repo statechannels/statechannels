@@ -8,7 +8,7 @@ import {BigNumber, constants, ethers} from 'ethers';
 
 import {
   PeerSetup,
-  getPeersSetup,
+  setupPeerEngines,
   teardownPeerSetup,
   crashAndRestart,
 } from '../../../jest/with-peers-setup-teardown';
@@ -21,7 +21,7 @@ jest.setTimeout(10_000);
 
 let peerSetup: PeerSetup;
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerEngines();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
