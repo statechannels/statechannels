@@ -1,7 +1,11 @@
 import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
-import {MessageServiceInterface} from '../message-service/types';
+import {
+  MessageHandler,
+  MessageServiceFactory,
+  MessageServiceInterface,
+} from '../message-service/types';
 import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {Engine, SyncObjectiveResult} from '../engine';
@@ -22,16 +26,29 @@ export class Wallet {
    */
   public static async create(
     engine: Engine,
-    messageService: MessageServiceInterface,
+    messageServiceFactory: MessageServiceFactory,
     retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<Wallet> {
-    return new Wallet(engine, messageService, {...DEFAULTS, ...retryOptions});
+    return new Wallet(engine, messageServiceFactory, {...DEFAULTS, ...retryOptions});
   }
+
+  private _messageService: MessageServiceInterface;
+
   private constructor(
     private _engine: Engine,
-    private _messageService: MessageServiceInterface,
+    messageServiceFactory: MessageServiceFactory,
     private _retryOptions: RetryOptions
-  ) {}
+  ) {
+    const handler: MessageHandler = async message => {
+      const {outbox} = await this._engine.pushMessage(message.data);
+
+      // TODO: This will result in duplicate messages being sent out.
+      // We should partition the messages into those for the new Objectives and all the rest
+      await this.messageService.send(getMessages(outbox));
+    };
+
+    this._messageService = messageServiceFactory(handler);
+  }
 
   /**
    * Approves an objective that has been proposed by another participant.
@@ -120,11 +137,13 @@ export class Wallet {
    */
   public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
     const objectives = await this._engine.getApprovedObjectives();
+
     const objectiveIds = objectives.map(o => o.objectiveId);
     // Instead of getting messages per objective we just get them all at once
     // This will prevent us from querying the database for each objective
 
     const syncMessages = await this._engine.syncObjectives(objectiveIds);
+
     return Promise.all(
       objectives.map(async o => {
         const messagesForObjective = syncMessages.messagesByObjective[o.objectiveId];
@@ -172,6 +191,7 @@ export class Wallet {
 
       // Now that we're listening for objective success we can now send messages
       // that might trigger progress on the objective
+
       await this._messageService.send(objectiveMessages);
 
       /**
@@ -181,6 +201,7 @@ export class Wallet {
       for (let i = 0; i < numberOfAttempts; i++) {
         if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
         const delayAmount = initialDelay * Math.pow(multiple, i);
+
         await delay(delayAmount);
 
         const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
@@ -189,6 +210,7 @@ export class Wallet {
           objective.objectiveId,
           syncResult
         );
+
         await this._messageService.send(messagesForObjective);
       }
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
@@ -218,7 +240,12 @@ export class Wallet {
     return result.messagesByObjective[objectiveId];
   }
 
+  public get messageService(): MessageServiceInterface {
+    return this._messageService;
+  }
+
   async destroy(): Promise<void> {
-    return this._engine.destroy();
+    await this._messageService.destroy();
+    await this._engine.destroy();
   }
 }

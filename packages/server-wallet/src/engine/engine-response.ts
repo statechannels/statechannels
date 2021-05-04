@@ -13,7 +13,6 @@ import {
   EngineEvent,
   MultipleChannelOutput,
   SingleChannelOutput,
-  Output,
   SyncObjectiveResult,
 } from './types';
 
@@ -183,6 +182,7 @@ export class EngineResponse {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
       newObjectives: this.createdObjectives,
+      messagesByObjective: this.queuedMessages,
     };
   }
 
@@ -248,20 +248,6 @@ export class EngineResponse {
 
   public static mergeOutgoing(outgoing: Notice[]): Notice[] {
     return mergeOutgoing(outgoing);
-  }
-
-  public static mergeOutputs(
-    outputs: (SingleChannelOutput | MultipleChannelOutput)[]
-  ): MultipleChannelOutput {
-    const channelResults = mergeChannelResults(
-      outputs.flatMap(m => (isSingleChannelMessage(m) ? [m.channelResult] : m.channelResults))
-    );
-
-    const outbox = mergeOutgoing(outputs.flatMap(m => m.outbox));
-    const newObjectives = outputs.flatMap(m =>
-      isSingleChannelMessage(m) ? (m.newObjective ? [m.newObjective] : []) : m.newObjectives
-    );
-    return {channelResults, outbox, newObjectives};
   }
 
   // -------------------------------
@@ -334,6 +320,3 @@ function mergeChannelResults(channelResults: ChannelResult[]): ChannelResult[] {
 
   return _.sortedUniqBy(sorted, a => a.channelId);
 }
-
-const isSingleChannelMessage = (output: Output): output is SingleChannelOutput =>
-  'channelResult' in output;
