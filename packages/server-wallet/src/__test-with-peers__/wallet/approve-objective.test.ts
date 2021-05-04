@@ -1,8 +1,13 @@
 import _ from 'lodash';
 
-import {Wallet} from '../..';
 import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
-import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
+import {
+  freeze,
+  getWithPeersCreateChannelsArgs,
+  setLatencyOptions,
+  unfreeze,
+  waitForObjectiveEvent,
+} from '../utils';
 jest.setTimeout(60_000);
 let peerSetup: PeerSetup;
 
@@ -12,48 +17,43 @@ beforeAll(async () => {
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
 });
-const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 100, initialDelay: 50, multiple: 1};
 
 test('approving a completed objective returns immediately', async () => {
-  const {peerEngines, messageService} = peerSetup;
-  messageService.setLatencyOptions({dropRate: 0});
+  const {peerEngines, peerWallets} = peerSetup;
+  setLatencyOptions(peerWallets, {dropRate: 0});
 
-  const wallet = await Wallet.create(peerEngines.a, messageService, DEFAULT__RETRY_OPTIONS);
-  const walletB = await Wallet.create(peerEngines.b, messageService, DEFAULT__RETRY_OPTIONS);
-
-  const createResult = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
+  const createResult = await peerWallets.a.createChannels([
+    getWithPeersCreateChannelsArgs(peerSetup),
+  ]);
 
   const {objectiveId} = createResult[0];
   await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
 
-  const approveResult = await walletB.approveObjectives([objectiveId]);
+  const approveResult = await peerWallets.b.approveObjectives([objectiveId]);
 
   await expect(createResult).toBeObjectiveDoneType('Success');
   await expect(approveResult).toBeObjectiveDoneType('Success');
 
-  const secondApprove = await walletB.approveObjectives([objectiveId]);
+  const secondApprove = await peerWallets.b.approveObjectives([objectiveId]);
   await expect(secondApprove).toBeObjectiveDoneType('Success');
 });
 
 test('can approve the objective multiple times', async () => {
-  const {peerEngines, messageService} = peerSetup;
+  const {peerEngines, peerWallets} = peerSetup;
 
-  const wallet = await Wallet.create(peerEngines.a, messageService, DEFAULT__RETRY_OPTIONS);
-  const walletB = await Wallet.create(peerEngines.b, messageService, DEFAULT__RETRY_OPTIONS);
-
-  const result = await wallet.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
+  const result = await peerWallets.a.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
   const {objectiveId} = result[0];
   await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
 
-  await messageService.freeze();
-  const firstResult = await walletB.approveObjectives([objectiveId]);
-  const secondResult = await walletB.approveObjectives([objectiveId]);
+  freeze(peerWallets);
+  const firstResult = await peerWallets.b.approveObjectives([objectiveId]);
+  const secondResult = await peerWallets.b.approveObjectives([objectiveId]);
   // The objectives should be approved but should not have progressed further
   // due to the message service being frozen
   expect(firstResult[0].currentStatus).toBe('approved');
   expect(secondResult[0].currentStatus).toBe('approved');
 
-  await messageService.unfreeze();
+  unfreeze(peerWallets);
 
   await expect(firstResult).toBeObjectiveDoneType('Success');
   await expect(secondResult).toBeObjectiveDoneType('Success');

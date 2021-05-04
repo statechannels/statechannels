@@ -21,6 +21,7 @@ export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
+  messagesByObjective: Record<string, WireMessage[]>;
 };
 
 export type SyncObjectiveResult = {
@@ -67,7 +68,9 @@ export interface EngineInterface {
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
   // Engine <-> Engine communication
-  pushMessage(m: unknown): Promise<MultipleChannelOutput>;
+  pushMessage(
+    m: unknown
+  ): Promise<MultipleChannelOutput & {messagesByObjective: Record<string, WireMessage[]>}>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 }
 

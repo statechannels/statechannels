@@ -18,8 +18,10 @@ export type RetryOptions = {
   multiple: number;
 };
 
-export type ObjectiveError = EnsureObjectiveFailed | InternalError;
-
+export type ObjectiveError = EnsureObjectiveFailed | InternalError | EnsureAlreadyInProgress;
+export type EnsureAlreadyInProgress = {
+  type: 'EnsureAlreadyInProgress';
+};
 export type EnsureObjectiveFailed = {
   type: 'EnsureObjectiveFailed';
   numberOfAttempts: number;

@@ -17,7 +17,7 @@ export type MessageHandler = (
  */
 export type MessageServiceFactory = (
   incomingMessageHandler: MessageHandler
-) => Promise<MessageServiceInterface>;
+) => MessageServiceInterface;
 
 export interface MessageServiceInterface {
   /**
