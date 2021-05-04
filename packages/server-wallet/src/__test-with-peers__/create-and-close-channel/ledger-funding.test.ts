@@ -12,7 +12,7 @@ import {
 } from '../../__test__/test-helpers';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {
-  getPeersSetup,
+  setupPeerEngines,
   teardownPeerSetup,
   aEngineConfig,
   bEngineConfig,
@@ -38,7 +38,7 @@ jest.setTimeout(10_000);
 
 let peerSetup: PeerSetup;
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerEngines();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);

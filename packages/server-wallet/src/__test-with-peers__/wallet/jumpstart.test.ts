@@ -1,10 +1,14 @@
-import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
+import {
+  teardownPeerSetup,
+  PeerSetupWithWallets,
+  setupPeerWallets,
+} from '../../../jest/with-peers-setup-teardown';
 import {ObjectiveModel, WalletObjective} from '../../models/objective';
 import {getWithPeersCreateChannelsArgs, setLatencyOptions, waitForObjectiveEvent} from '../utils';
 
-let peerSetup: PeerSetup;
+let peerSetup: PeerSetupWithWallets;
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerWallets();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);

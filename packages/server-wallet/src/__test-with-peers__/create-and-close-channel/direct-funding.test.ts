@@ -6,7 +6,11 @@ import {
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
+import {
+  setupPeerEngines,
+  PeerSetup,
+  teardownPeerSetup,
+} from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
 import {expectLatestStateToMatch} from '../utils';
@@ -17,7 +21,7 @@ jest.setTimeout(10_000);
 let channelId: string;
 let peerSetup: PeerSetup;
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerEngines();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);

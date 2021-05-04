@@ -1,13 +1,17 @@
-import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
+import {
+  teardownPeerSetup,
+  setupPeerWallets,
+  PeerSetupWithWallets,
+} from '../../../jest/with-peers-setup-teardown';
 import {LatencyOptions} from '../../message-service/test-message-service';
 import {WalletObjective} from '../../models/objective';
 import {getWithPeersCreateChannelsArgs, setLatencyOptions, waitForObjectiveEvent} from '../utils';
 
 jest.setTimeout(60_000);
-let peerSetup: PeerSetup;
+let peerSetup: PeerSetupWithWallets;
 
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerWallets();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
