@@ -183,11 +183,6 @@ export interface EngineInterface {
 }
 
 // @public (undocumented)
-export type EnsureAlreadyInProgress = {
-    type: 'EnsureAlreadyInProgress';
-};
-
-// @public (undocumented)
 export type EnsureObjectiveFailed = {
     type: 'EnsureObjectiveFailed';
     numberOfAttempts: number;
@@ -268,7 +263,7 @@ export type NetworkConfiguration = {
 export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
 
 // @public (undocumented)
-export type ObjectiveError = EnsureObjectiveFailed | InternalError | EnsureAlreadyInProgress;
+export type ObjectiveError = EnsureObjectiveFailed | InternalError;
 
 // @public
 export type ObjectiveResult = {
@@ -472,7 +467,7 @@ export class Wallet {
 //
 // src/engine/types.ts:73:39 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
 // src/engine/types.ts:79:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
-// src/wallet/types.ts:55:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:53:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
