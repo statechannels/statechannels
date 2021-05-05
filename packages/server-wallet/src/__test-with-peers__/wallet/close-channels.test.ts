@@ -3,14 +3,8 @@ import {
   PeerSetupWithWallets,
   setupPeerWallets,
 } from '../../../jest/with-peers-setup-teardown';
-import {LatencyOptions} from '../../message-service/test-message-service';
-import {
-  freeze,
-  getWithPeersCreateChannelsArgs,
-  setLatencyOptions,
-  unfreeze,
-  waitForObjectiveEvent,
-} from '../utils';
+import {LatencyOptions, TestMessageService} from '../../message-service/test-message-service';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
 
 jest.setTimeout(120_000);
 let peerSetup: PeerSetupWithWallets;
@@ -48,9 +42,9 @@ describe('CloseChannels', () => {
       const {peerEngines, peerWallets} = peerSetup;
       // Always reset the latency options back to no drop / delay
       // This prevents the next test from using delay/dropping when doing setup
-      setLatencyOptions(peerWallets, {dropRate: 0, meanDelay: undefined});
+      TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0, meanDelay: undefined});
       const response = await peerWallets.a.createChannels(
-        Array(1).fill(getWithPeersCreateChannelsArgs(peerSetup))
+        Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
       const createChannelObjectiveIds = response.map(o => o.objectiveId);
       await waitForObjectiveEvent(createChannelObjectiveIds, 'objectiveStarted', peerEngines.b);
@@ -60,9 +54,9 @@ describe('CloseChannels', () => {
       await expect(bResponse).toBeObjectiveDoneType('Success');
 
       // Now that the channels are up and running we can set the latency options
-      setLatencyOptions(peerWallets, options);
+      TestMessageService.setLatencyOptions(peerWallets, options);
       // Freeze messages so we can set up our listeners for engineToWaitOn
-      freeze(peerWallets);
+      TestMessageService.freeze(peerWallets);
 
       const channelIds = response.map(o => o.channelId);
       const closingWallet = options.closer === 'A' ? peerWallets.a : peerWallets.b;
@@ -82,7 +76,7 @@ describe('CloseChannels', () => {
       );
 
       // Now that we're done with the setup we can unfreeze and let the messages fly
-      unfreeze(peerWallets);
+      TestMessageService.unfreeze(peerWallets);
 
       // We expect both promises to resolve to success
       await expect(closeResponse).toBeObjectiveDoneType('Success');

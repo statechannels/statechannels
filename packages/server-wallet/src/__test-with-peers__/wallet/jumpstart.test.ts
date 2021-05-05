@@ -15,7 +15,7 @@ afterAll(async () => {
 });
 jest.setTimeout(600000_000);
 
-describe.skip('jumpstartObjectives', () => {
+describe('jumpstartObjectives', () => {
   it('returns an empty array when there are no objectives', async () => {
     const {peerWallets} = peerSetup;
 
