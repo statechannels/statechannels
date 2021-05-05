@@ -4,10 +4,7 @@ import {Message} from '@statechannels/client-api-schema';
  * This is the handler that any messaging service implementation should call when receiving a message
  * The handler is responsible for pushing the message into the appropriate wallet
  */
-export type MessageHandler = (
-  message: Message,
-  messageService: MessageServiceInterface
-) => Promise<void>;
+export type MessageHandler = (message: Message) => Promise<void>;
 
 /**
  * A MessageServiceFactory is responsible for generating a MessageService.

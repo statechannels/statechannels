@@ -51,7 +51,7 @@ export class TestMessageService
     this._abortController = new AbortController();
     this._handleMessages = async messages => {
       for (const message of messages) {
-        if (!this._destroyed) return handleMessage(message, this);
+        if (!this._destroyed) return handleMessage(message);
       }
     };
   }
