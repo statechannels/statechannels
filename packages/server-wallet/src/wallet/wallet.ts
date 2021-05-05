@@ -42,8 +42,6 @@ export class Wallet {
     const handler: MessageHandler = async message => {
       const {outbox} = await this._engine.pushMessage(message.data);
 
-      // TODO: This will result in duplicate messages being sent out.
-      // We should partition the messages into those for the new Objectives and all the rest
       await this.messageService.send(getMessages(outbox));
     };
 
