@@ -213,6 +213,7 @@ export class Wallet {
       if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
     } catch (error) {
+      this._engine.logger.error({err: error}, 'Uncaught error in EnsureObjective');
       return {
         type: 'InternalError' as const,
         error,
