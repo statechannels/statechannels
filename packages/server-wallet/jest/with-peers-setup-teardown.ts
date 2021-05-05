@@ -24,7 +24,7 @@ export interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
-const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 100, initialDelay: 100, multiple: 1};
+const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 20, initialDelay: 500, multiple: 1.1};
 
 const aDatabase = 'server_wallet_test_a';
 const bDatabase = 'server_wallet_test_b';
