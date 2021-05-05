@@ -11,9 +11,8 @@ export type MessageHandler = (
 
 /**
  * A MessageServiceFactory is responsible for generating a MessageService.
- * Eventually the wallet will require a MessageServiceFactory.
- * The wallet will use it to construct the messagingService that it can use to send messages.
- * messageHandler should be triggered whenever the messaging service receives a message.
+ * This is used by the Wallet to construct the messaging service that will be used.
+ * The incomingMessageHandler will be supplied by the Wallet to handle messages.
  */
 export type MessageServiceFactory = (
   incomingMessageHandler: MessageHandler
