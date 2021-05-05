@@ -50,7 +50,7 @@ describe('CloseChannels', () => {
       // This prevents the next test from using delay/dropping when doing setup
       setLatencyOptions(peerWallets, {dropRate: 0, meanDelay: undefined});
       const response = await peerWallets.a.createChannels(
-        Array(1).fill(getWithPeersCreateChannelsArgs(peerSetup))
+        Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
       const createChannelObjectiveIds = response.map(o => o.objectiveId);
       await waitForObjectiveEvent(createChannelObjectiveIds, 'objectiveStarted', peerEngines.b);
