@@ -7,6 +7,7 @@ import {getChannelId} from '@statechannels/nitro-protocol';
 import {EventEmitter} from 'eventemitter3';
 
 import {WirePayload} from '../type-aliases';
+import {TestPeerWallets} from '../../jest/with-peers-setup-teardown';
 
 import {MessageHandler, MessageServiceInterface} from './types';
 
@@ -58,6 +59,41 @@ export class TestMessageService
     };
   }
 
+  static setLatencyOptions(peerWallets: TestPeerWallets, options: Partial<LatencyOptions>): void {
+    const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
+
+    for (const messageService of messageServices) {
+      if (!isTestMessageService(messageService)) {
+        throw new Error('Can only set latency options on a TestMessageService');
+      } else {
+        messageService.setLatencyOptions(options);
+      }
+    }
+  }
+
+  static unfreeze(peerWallets: TestPeerWallets): void {
+    const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
+
+    for (const messageService of messageServices) {
+      if (!isTestMessageService(messageService)) {
+        throw new Error('Can only set latency options on a TestMessageService');
+      } else {
+        messageService.unfreeze();
+      }
+    }
+  }
+
+  static freeze(peerWallets: TestPeerWallets): void {
+    const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
+
+    for (const messageService of messageServices) {
+      if (!isTestMessageService(messageService)) {
+        throw new Error('Can only set latency options on a TestMessageService');
+      } else {
+        messageService.freeze();
+      }
+    }
+  }
   static linkMessageServices(
     messageService1: MessageServiceInterface,
     messageService2: MessageServiceInterface,

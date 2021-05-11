@@ -2,10 +2,9 @@ import {ChannelResult, CreateChannelParams} from '@statechannels/client-api-sche
 import _ from 'lodash';
 
 import {Engine} from '..';
-import {PeerSetup, TestPeerWallets} from '../../jest/with-peers-setup-teardown';
+import {PeerSetup} from '../../jest/with-peers-setup-teardown';
 import {EngineEvent} from '../engine';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
-import {isTestMessageService, LatencyOptions} from '../message-service/test-message-service';
 import {WalletObjective} from '../models/objective';
 
 export async function expectLatestStateToMatch(
@@ -43,43 +42,4 @@ export function waitForObjectiveEvent(
     };
     engine.on(objectiveEventType, listener);
   });
-}
-
-export function setLatencyOptions(
-  peerWallets: TestPeerWallets,
-  options: Partial<LatencyOptions>
-): void {
-  const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
-
-  for (const messageService of messageServices) {
-    if (!isTestMessageService(messageService)) {
-      throw new Error('Can only set latency options on a TestMessageService');
-    } else {
-      messageService.setLatencyOptions(options);
-    }
-  }
-}
-
-export function unfreeze(peerWallets: TestPeerWallets): void {
-  const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
-
-  for (const messageService of messageServices) {
-    if (!isTestMessageService(messageService)) {
-      throw new Error('Can only set latency options on a TestMessageService');
-    } else {
-      messageService.unfreeze();
-    }
-  }
-}
-
-export function freeze(peerWallets: TestPeerWallets): void {
-  const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
-
-  for (const messageService of messageServices) {
-    if (!isTestMessageService(messageService)) {
-      throw new Error('Can only set latency options on a TestMessageService');
-    } else {
-      messageService.freeze();
-    }
-  }
 }
