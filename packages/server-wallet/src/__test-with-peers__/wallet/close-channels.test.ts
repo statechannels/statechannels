@@ -14,7 +14,6 @@ afterAll(async () => {
 });
 
 describe('CloseChannels', () => {
-  // This is the percentages of messages that get dropped
   const testCases: Array<LatencyOptions & {closer: 'A' | 'B'}> = [
     // No latency/message dropping
     {
