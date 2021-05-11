@@ -5,13 +5,8 @@ import {
   setupPeerWallets,
   PeerSetupWithWallets,
 } from '../../../jest/with-peers-setup-teardown';
-import {
-  freeze,
-  getWithPeersCreateChannelsArgs,
-  setLatencyOptions,
-  unfreeze,
-  waitForObjectiveEvent,
-} from '../utils';
+import {TestMessageService} from '../../message-service/test-message-service';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
 jest.setTimeout(60_000);
 let peerSetup: PeerSetupWithWallets;
 
@@ -24,7 +19,7 @@ afterAll(async () => {
 
 test('approving a completed objective returns immediately', async () => {
   const {peerEngines, peerWallets} = peerSetup;
-  setLatencyOptions(peerWallets, {dropRate: 0});
+  TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0});
 
   const createResult = await peerWallets.a.createChannels([
     getWithPeersCreateChannelsArgs(peerSetup),
@@ -49,7 +44,7 @@ test('can approve the objective multiple times', async () => {
   const {objectiveId} = result[0];
   await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
 
-  freeze(peerWallets);
+  TestMessageService.freeze(peerWallets);
   const firstResult = await peerWallets.b.approveObjectives([objectiveId]);
   const secondResult = await peerWallets.b.approveObjectives([objectiveId]);
   // The objectives should be approved but should not have progressed further
@@ -57,7 +52,7 @@ test('can approve the objective multiple times', async () => {
   expect(firstResult[0].currentStatus).toBe('approved');
   expect(secondResult[0].currentStatus).toBe('approved');
 
-  unfreeze(peerWallets);
+  TestMessageService.unfreeze(peerWallets);
 
   await expect(firstResult).toBeObjectiveDoneType('Success');
   await expect(secondResult).toBeObjectiveDoneType('Success');
