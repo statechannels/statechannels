@@ -743,7 +743,7 @@ export class SingleThreadedEngine
 
     const result = response.singleChannelOutput();
     if (!hasNewObjective(result)) {
-      throw new Error('No new objective created for create channel');
+      throw new Error('No new objective created for closeChannel');
     } else {
       return result;
     }
