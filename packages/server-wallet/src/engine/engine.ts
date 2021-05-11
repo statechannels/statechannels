@@ -731,7 +731,7 @@ export class SingleThreadedEngine
    * This objective continues working after this call resolves, and will attempt to defund the channel.
    *
    * @param channelId - The id of the channel to try and close.
-   * @returns A promise that resolves to the channel output.
+   * @returns A promise that resolves to the channel output. Will always return a new objective.
    */
   async closeChannel({
     channelId,
