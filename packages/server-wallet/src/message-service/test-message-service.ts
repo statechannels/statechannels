@@ -3,6 +3,7 @@ import _ from 'lodash';
 import {Logger} from 'pino';
 import delay from 'delay';
 import {AbortController} from 'abort-controller';
+import {getChannelId} from '@statechannels/nitro-protocol';
 
 import {Engine} from '..';
 import {WirePayload} from '../type-aliases';
@@ -85,6 +86,8 @@ export class TestMessageService implements MessageServiceInterface {
           await delay(delayAmount, {signal: this._abortController.signal});
         }
         await this._handleMessages(messages);
+      } else {
+        this._logger?.trace({messages: messages.map(formatMessageForLogger)}, 'Messages dropped');
       }
     }
   }
@@ -144,11 +147,21 @@ function formatMessageForLogger(message: Message) {
     to: message.recipient,
     from: message.sender,
     objectives: data.objectives?.map(o => `${o.type}-${(o.data as any).targetChannelId}`),
-    states: data.signedStates?.map(s => ({
-      channelId: s.channelId,
-      turnNum: s.turnNum,
-      signatureCount: s.signatures.length,
-    })),
+
+    states: data.signedStates?.map(s => {
+      const {turnNum, isFinal, signatures, channelNonce, chainId, participants} = s;
+
+      return {
+        turnNum,
+        isFinal,
+        sigCount: signatures.length,
+        channelId: getChannelId({
+          channelNonce,
+          chainId,
+          participants: participants.map(p => p.signingAddress),
+        }),
+      };
+    }),
     requests: data.requests?.map(r => `${r.type}-${r.channelId}`),
   };
 }

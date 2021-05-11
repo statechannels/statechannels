@@ -3,6 +3,7 @@ import _ from 'lodash';
 
 import {Engine} from '..';
 import {PeerSetup} from '../../jest/with-peers-setup-teardown';
+import {EngineEvent} from '../engine';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 import {WalletObjective} from '../models/objective';
 
@@ -22,7 +23,11 @@ export function getWithPeersCreateChannelsArgs(peerSetup: PeerSetup): CreateChan
   });
 }
 
-export function waitForObjectiveStarted(objectiveIds: string[], engine: Engine): Promise<void> {
+export function waitForObjectiveEvent(
+  objectiveIds: string[],
+  objectiveEventType: EngineEvent['type'],
+  engine: Engine
+): Promise<void> {
   const handledObjectiveIds = new Set<string>();
   return new Promise<void>(resolve => {
     const listener = (o: WalletObjective) => {
@@ -30,11 +35,11 @@ export function waitForObjectiveStarted(objectiveIds: string[], engine: Engine):
         handledObjectiveIds.add(o.objectiveId);
 
         if (handledObjectiveIds.size === _.uniq(objectiveIds).length) {
-          engine.removeListener('objectiveStarted');
+          engine.removeListener(objectiveEventType);
           resolve();
         }
       }
     };
-    engine.on('objectiveStarted', listener);
+    engine.on(objectiveEventType, listener);
   });
 }
