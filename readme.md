@@ -55,7 +55,7 @@ This repository is a monorepo, and contains the following packages maintained wi
 
 ```shell
 sudo mkdir -p /etc/paths.d &&
-echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresap
+echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresapp
 ```
 
 The rest of the dependencies can be installed by running
