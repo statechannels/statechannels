@@ -30,13 +30,6 @@ export type SyncObjectiveResult = {
 };
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
-type ChannelUpdatedEvent = {
-  type: 'channelUpdated';
-  value: SingleChannelOutput;
-};
-
-export type EngineEvent = ChannelUpdatedEvent;
-
 export interface EngineInterface {
   // App utilities
   registerAppDefinition(appDefinition: string): Promise<void>;
