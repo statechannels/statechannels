@@ -6,7 +6,7 @@ import {
   PeerSetupWithWallets,
 } from '../../../jest/with-peers-setup-teardown';
 import {TestMessageService} from '../../message-service/test-message-service';
-import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveProposals} from '../utils';
 jest.setTimeout(60_000);
 let peerSetup: PeerSetupWithWallets;
 
@@ -18,7 +18,7 @@ afterAll(async () => {
 });
 
 test('approving a completed objective returns immediately', async () => {
-  const {peerEngines, peerWallets} = peerSetup;
+  const {peerWallets} = peerSetup;
   TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0});
 
   const createResult = await peerWallets.a.createChannels([
@@ -26,7 +26,7 @@ test('approving a completed objective returns immediately', async () => {
   ]);
 
   const {objectiveId} = createResult[0];
-  await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
+  await waitForObjectiveProposals([objectiveId], peerWallets.b);
 
   const approveResult = await peerWallets.b.approveObjectives([objectiveId]);
 
@@ -38,11 +38,11 @@ test('approving a completed objective returns immediately', async () => {
 });
 
 test('can approve the objective multiple times', async () => {
-  const {peerEngines, peerWallets} = peerSetup;
+  const {peerWallets} = peerSetup;
 
   const result = await peerWallets.a.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
   const {objectiveId} = result[0];
-  await waitForObjectiveEvent([objectiveId], 'objectiveStarted', peerEngines.b);
+  await waitForObjectiveProposals([objectiveId], peerWallets.b);
 
   TestMessageService.freeze(peerWallets);
   const firstResult = await peerWallets.b.approveObjectives([objectiveId]);

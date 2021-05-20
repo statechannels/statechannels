@@ -4,8 +4,7 @@ import {
   PeerSetupWithWallets,
 } from '../../../jest/with-peers-setup-teardown';
 import {LatencyOptions, TestMessageService} from '../../message-service/test-message-service';
-import {WalletObjective} from '../../models/objective';
-import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveProposals} from '../utils';
 
 jest.setTimeout(60_000);
 let peerSetup: PeerSetupWithWallets;
@@ -43,7 +42,7 @@ describe('EnsureObjectives', () => {
       );
 
       const objectiveIds = response.map(o => o.objectiveId);
-      await waitForObjectiveEvent(objectiveIds, 'objectiveStarted', peerEngines.b);
+      await waitForObjectiveProposals(objectiveIds, peerWallets.b);
       const bResponse = await peerWallets.b.approveObjectives(objectiveIds);
       await expect(response).toBeObjectiveDoneType('Success');
       await expect(bResponse).toBeObjectiveDoneType('Success');
@@ -65,16 +64,11 @@ describe('EnsureObjectives', () => {
   // TODO: Determine why this is failing
   //  This is a nice sanity check to ensure that messages do get dropped
   test.skip('fails when all messages are dropped', async () => {
-    const {peerEngines, peerWallets} = peerSetup;
+    const {peerWallets} = peerSetup;
     TestMessageService.setLatencyOptions(peerWallets, {dropRate: 1});
-    const listener = async (o: WalletObjective) => {
-      await peerWallets.b.approveObjectives([o.objectiveId]);
-    };
-    peerEngines.b.on('objectiveStarted', listener);
 
     const result = await peerWallets.a.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
     await expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
-    peerEngines.b.removeListener('objectiveStarted', listener);
   });
 });

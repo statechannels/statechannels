@@ -36,8 +36,7 @@ it('throws an error when challenging with a non ledger channel', async () => {
 });
 it('submits a challenge when no challenge exists for a channel', async () => {
   const spy = jest.spyOn(w.chainService, 'challenge');
-  const callback = jest.fn();
-  w.once('objectiveStarted', callback);
+
   const c = channel({
     channelNonce: 1,
     // Set a random address so this will be a "ledger" channel
@@ -56,7 +55,6 @@ it('submits a challenge when no challenge exists for a channel', async () => {
 
   await w.challenge(channelId);
   expect(spy).toHaveBeenCalledWith(c.initialSupport, alice().privateKey);
-  expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'SubmitChallenge'}));
 });
 
 it('stores the challenge state on the challenge created event', async () => {
