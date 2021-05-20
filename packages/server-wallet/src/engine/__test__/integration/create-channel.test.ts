@@ -22,12 +22,11 @@ afterEach(async () => {
 describe('happy path', () => {
   beforeEach(async () => seedAlicesSigningWallet(w.knex));
 
-  it('creates a channel, emits an ObjectiveStarted event, and allows an objective to be queried through the API', async () => {
+  it('creates a channel, and allows an objective to be queried through the API', async () => {
     expect(await Channel.query(w.knex).resultSize()).toEqual(0);
 
     const appData = '0xaf00';
-    const callback = jest.fn();
-    w.once('objectiveStarted', callback);
+
     const createResult = await w.createChannels(createChannelArgs({appData}), 1);
     const channelId = '0x4460dab6d4438f3bf1719720fcced4054a38baf60f315e49995eead80cfa498f';
     expect(createResult).toMatchObject({channelResults: [{channelId}]});
@@ -61,7 +60,7 @@ describe('happy path', () => {
       ],
       channelResults: [{channelId: expect.any(String), turnNum: 0, appData}],
     });
-    expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'OpenChannel'}));
+
     expect(createResult.channelResults[0].channelId).toEqual(channelId);
     expect(await Channel.query(w.knex).resultSize()).toEqual(1);
 

@@ -90,7 +90,7 @@ export default class PayerClient {
 
   public async createPayerChannel(receiver: Participant): Promise<TestChannelResult> {
     const events: EngineEvent[] = [];
-    const names = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
+    const names = ['channelUpdated'] as const;
     names.map(event => this.engine.on(event, e => events.push({...e, event})));
 
     const {

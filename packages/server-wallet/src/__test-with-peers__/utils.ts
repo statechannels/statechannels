@@ -1,9 +1,8 @@
 import {ChannelResult, CreateChannelParams} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
-import {Engine} from '..';
+import {Engine, Wallet} from '..';
 import {PeerSetup} from '../../jest/with-peers-setup-teardown';
-import {EngineEvent} from '../engine';
 import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
 import {WalletObjective} from '../models/objective';
 
@@ -23,11 +22,7 @@ export function getWithPeersCreateChannelsArgs(peerSetup: PeerSetup): CreateChan
   });
 }
 
-export function waitForObjectiveEvent(
-  objectiveIds: string[],
-  objectiveEventType: EngineEvent['type'],
-  engine: Engine
-): Promise<void> {
+export function waitForObjectiveProposals(objectiveIds: string[], wallet: Wallet): Promise<void> {
   const handledObjectiveIds = new Set<string>();
   return new Promise<void>(resolve => {
     const listener = (o: WalletObjective) => {
@@ -39,6 +34,6 @@ export function waitForObjectiveEvent(
         }
       }
     };
-    engine.on(objectiveEventType, listener);
+    wallet.on('ObjectiveProposed', listener);
   });
 }
