@@ -35,7 +35,6 @@ export function waitForObjectiveEvent(
         handledObjectiveIds.add(o.objectiveId);
 
         if (handledObjectiveIds.size === _.uniq(objectiveIds).length) {
-          engine.removeListener(objectiveEventType);
           resolve();
         }
       }

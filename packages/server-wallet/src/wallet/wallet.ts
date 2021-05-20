@@ -180,7 +180,6 @@ export class Wallet {
       const onObjectiveSucceeded = (o: WalletObjective) => {
         if (objective.objectiveId === o.objectiveId) {
           isComplete = true;
-          this._engine.removeListener('objectiveSucceeded', onObjectiveSucceeded);
         }
       };
 
