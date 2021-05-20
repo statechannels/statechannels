@@ -1,6 +1,6 @@
 import _ from 'lodash';
 
-import {ObjectiveStatus} from '../models/objective';
+import {ObjectiveStatus, WalletObjective} from '../models/objective';
 
 export type RetryOptions = {
   /**
@@ -58,4 +58,8 @@ export type ObjectiveResult = {
 
   // The channelId for the objective
   channelId: string;
+};
+
+export type ObjectiveProposed = {
+  ObjectiveProposed: WalletObjective;
 };

@@ -35,16 +35,7 @@ type ChannelUpdatedEvent = {
   value: SingleChannelOutput;
 };
 
-type ObjectiveStarted = {
-  type: 'objectiveStarted';
-  value: WalletObjective;
-};
-type ObjectiveSucceeded = {
-  type: 'objectiveSucceeded';
-  value: WalletObjective;
-};
-
-export type EngineEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
+export type EngineEvent = ChannelUpdatedEvent;
 
 export interface EngineInterface {
   // App utilities
