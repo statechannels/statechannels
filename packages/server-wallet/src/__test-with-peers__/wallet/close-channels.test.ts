@@ -43,20 +43,23 @@ describe('CloseChannels', () => {
       // Always reset the latency options back to no drop / delay
       // This prevents the next test from using delay/dropping when doing setup
       TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0, meanDelay: undefined});
-      const response = await peerWallets.a.createChannels(
+
+      const closingWallet = options.closer === 'A' ? peerWallets.a : peerWallets.b;
+      const walletReceivingClose = options.closer === 'A' ? peerWallets.b : peerWallets.a;
+
+      const response = await closingWallet.createChannels(
         Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
       const createChannelObjectiveIds = response.map(o => o.objectiveId);
 
-      const closingWallet = options.closer === 'A' ? peerWallets.a : peerWallets.b;
-      const walletToWaitOn = options.closer === 'A' ? peerWallets.b : peerWallets.a;
+      await waitForObjectiveProposals(createChannelObjectiveIds, walletReceivingClose);
 
-      await waitForObjectiveProposals(createChannelObjectiveIds, walletToWaitOn);
-
-      const bResponse = await peerWallets.b.approveObjectives(createChannelObjectiveIds);
+      const receivingCloseResponse = await walletReceivingClose.approveObjectives(
+        createChannelObjectiveIds
+      );
       // Sanity check that create channel succeeds
       await expect(response).toBeObjectiveDoneType('Success');
-      await expect(bResponse).toBeObjectiveDoneType('Success');
+      await expect(receivingCloseResponse).toBeObjectiveDoneType('Success');
 
       // Now that the channels are up and running we can set the latency options
       TestMessageService.setLatencyOptions(peerWallets, options);
@@ -84,8 +87,8 @@ describe('CloseChannels', () => {
       for (const a of aChannels) {
         expect(a.status).toEqual('closed');
       }
-      // Ensure that A has all closed channels
-      const {channelResults: bChannels} = await peerEngines.a.getChannels();
+      // Ensure that B has all closed channels
+      const {channelResults: bChannels} = await peerEngines.b.getChannels();
       for (const b of bChannels) {
         expect(b.status).toEqual('closed');
       }
