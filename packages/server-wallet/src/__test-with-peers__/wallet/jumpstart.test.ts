@@ -4,8 +4,8 @@ import {
   setupPeerWallets,
 } from '../../../jest/with-peers-setup-teardown';
 import {TestMessageService} from '../../message-service/test-message-service';
-import {ObjectiveModel, WalletObjective} from '../../models/objective';
-import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
+import {ObjectiveModel} from '../../models/objective';
+import {getWithPeersCreateChannelsArgs, waitForObjectiveProposals} from '../utils';
 
 let peerSetup: PeerSetupWithWallets;
 beforeAll(async () => {
@@ -35,12 +35,7 @@ describe('jumpstartObjectives', () => {
   });
 
   it('can jumpstart objectives successfully after they fail to send', async () => {
-    const {peerEngines, peerWallets} = peerSetup;
-
-    // This ensures that the channel will be joined so the objective can progress
-    peerEngines.b.on('objectiveStarted', async (o: WalletObjective) => {
-      await peerEngines.b.joinChannels([o.data.targetChannelId]);
-    });
+    const {peerWallets} = peerSetup;
 
     const numberOfChannels = 5;
 
@@ -53,11 +48,14 @@ describe('jumpstartObjectives', () => {
 
     TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0});
     const jumpstartResponse = await peerWallets.a.jumpStartObjectives();
+    const objectiveIds = createResponse.map(r => r.objectiveId);
+    await waitForObjectiveProposals(objectiveIds, peerWallets.b);
+    await peerWallets.b.approveObjectives(objectiveIds);
     await expect(jumpstartResponse).toBeObjectiveDoneType('Success');
   });
 
   it('can jumpstart multiple times', async () => {
-    const {peerWallets, peerEngines} = peerSetup;
+    const {peerWallets} = peerSetup;
 
     const numberOfChannels = 1;
 
@@ -74,7 +72,7 @@ describe('jumpstartObjectives', () => {
 
     // Allow the messages through. The next retry from jumpstart or create will get a message through.
     TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0});
-    await waitForObjectiveEvent(objectiveIds, 'objectiveStarted', peerEngines.b);
+    await waitForObjectiveProposals(objectiveIds, peerWallets.b);
     await peerWallets.b.approveObjectives(objectiveIds);
     await expect(createResponse).toBeObjectiveDoneType('Success');
 

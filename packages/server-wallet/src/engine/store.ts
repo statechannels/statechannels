@@ -428,6 +428,11 @@ export class Store {
     return await ObjectiveModel.forId(objectiveId, tx);
   }
 
+  async isObjectiveComplete(objectiveId: string): Promise<boolean> {
+    const {status} = await ObjectiveModel.forId(objectiveId, this.knex);
+    return status === 'failed' || status === 'succeeded';
+  }
+
   /**
    * Gets and locks the objective with the supplied id
    * @param objectiveId

@@ -34,7 +34,7 @@ async function startWorker() {
   logger.debug(`Worker %o starting`, threadId);
   const engine = await SingleThreadedEngine.create(engineConfig);
 
-  const events = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
+  const events = ['channelUpdated'] as const;
   events.forEach(name => engine.on(name, relayEngineEvents(name)));
 
   parentPort?.on('message', async (message: any) => {
