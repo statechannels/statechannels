@@ -1006,8 +1006,10 @@ export class SingleThreadedEngine
         tx,
         'approved'
       );
+
       // TODO: The response is currently not returned or sent anywhere
-      response.queueCreatedObjective(objective, 0, []);
+      const channel = await this.store.getChannel(arg.channelId, tx);
+      response.queueCreatedObjective(objective, channel?.myIndex || 0, channel?.participants || []);
     });
 
     await this.takeActions([arg.channelId], response);
