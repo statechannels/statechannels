@@ -9,13 +9,12 @@ import {WalletObjective, isSharedObjective, toWireObjective} from '../models/obj
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
 
-import {
-  EngineEvent,
-  MultipleChannelOutput,
-  SingleChannelOutput,
-  SyncObjectiveResult,
-} from './types';
+import {MultipleChannelOutput, SingleChannelOutput, SyncObjectiveResult} from './types';
 
+type ChannelUpdatedEvent = {
+  type: 'channelUpdated';
+  value: SingleChannelOutput;
+};
 /**
  * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
  * to be returned to the user after a call.
@@ -214,7 +213,7 @@ export class EngineResponse {
     return this.channelResults;
   }
 
-  channelUpdatedEvents(): EngineEvent[] {
+  channelUpdatedEvents(): ChannelUpdatedEvent[] {
     return this.channelResults.map(channelResult => ({
       type: 'channelUpdated' as const,
       value: {
