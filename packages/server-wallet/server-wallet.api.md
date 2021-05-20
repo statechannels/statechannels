@@ -142,11 +142,9 @@ export abstract class Engine extends SingleThreadedEngine implements EngineInter
 export type EngineConfig = RequiredEngineConfig & OptionalEngineConfig;
 
 // Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ObjectiveStarted" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ObjectiveSucceeded" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export type EngineEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
+export type EngineEvent = ChannelUpdatedEvent;
 
 // @public (undocumented)
 export interface EngineInterface {
@@ -260,6 +258,11 @@ export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
 
 // @public (undocumented)
 export type ObjectiveError = EnsureObjectiveFailed | InternalError;
+
+// @public (undocumented)
+export type ObjectiveProposed = {
+    ObjectiveProposed: WalletObjective;
+};
 
 // @public
 export type ObjectiveResult = {
@@ -443,7 +446,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 };
 
 // @public (undocumented)
-export class Wallet {
+export class Wallet extends EventEmitter<ObjectiveProposed> {
     approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
     closeChannels(channelIds: string[]): Promise<ObjectiveResult[]>;
     // Warning: (ae-forgotten-export) The symbol "MessageServiceFactory" needs to be exported by the entry point index.d.ts
@@ -462,7 +465,7 @@ export class Wallet {
 // Warnings were encountered during analysis:
 //
 // src/engine/types.ts:24:3 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
-// src/engine/types.ts:77:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:68:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 // src/wallet/types.ts:53:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
