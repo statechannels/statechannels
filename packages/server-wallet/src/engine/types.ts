@@ -70,7 +70,7 @@ export interface EngineInterface {
   // Engine <-> Engine communication
   pushMessage(
     m: unknown
-  ): Promise<MultipleChannelOutput & {messagesByObjective: Record<string, WireMessage[]>}>;
+  ): Promise<MultipleChannelOutput>}>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 }
 

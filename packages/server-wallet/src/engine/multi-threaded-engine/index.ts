@@ -44,7 +44,7 @@ export class MultiThreadedEngine extends SingleThreadedEngine {
 
   async pushMessage(
     rawPayload: unknown
-  ): Promise<MultipleChannelOutput & {messagesByObjective: Record<string, WireMessage[]>}> {
+  ): Promise<MultipleChannelOutput> {
     return this.workerManager.pushMessage(rawPayload);
   }
 
