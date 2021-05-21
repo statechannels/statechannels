@@ -2,7 +2,6 @@ import {
   DBAdmin,
   defaultTestConfig,
   Output,
-  SingleChannelOutput,
   SingleThreadedEngine
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
@@ -11,25 +10,20 @@ import {constants, Contract, providers, Wallet} from 'ethers';
 import {
   Address,
   BN,
-  deserializeMessage,
   Destination,
   formatAmount,
   makeAddress,
   makeDestination,
   Uint256
 } from '@statechannels/wallet-core';
-import {fromEvent} from 'rxjs';
-import {first} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
-
 import {
   CreateChannelParams,
   isJsonRpcNotification,
   Message,
   PushMessageRequest
 } from '@statechannels/client-api-schema';
-import {Message as WireMessage} from '@statechannels/wire-format';
 
 jest.setTimeout(60_000);
 
@@ -133,15 +127,6 @@ function generatePushMessage(messageParams: Message): PushMessageRequest {
   };
 }
 
-// In theory, we should be able to check the channelResult. In practice, the channelResult seems to have an incorrect turn number
-function containsPostfundState(singleChannelOutput: SingleChannelOutput): boolean {
-  if (!singleChannelOutput.outbox.length) return false;
-
-  const signedStates = deserializeMessage(singleChannelOutput.outbox[0].params as WireMessage)
-    .signedStates;
-  return signedStates ? signedStates?.some(ss => ss.turnNum === 3) : false;
-}
-
 it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
   const output1 = await serverWallet.createChannel({
     appData: '0x',
@@ -186,14 +171,6 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
     },
     'dummyDomain'
   );
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(containsPostfundState))
-    .toPromise();
-
-  serverWallet.on('channelUpdated', e => console.log(JSON.stringify(e)));
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(await postFundA), 'dummyDomain');
 });
 
 it('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
@@ -245,11 +222,4 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
 
   const serverOutput1 = await serverWallet.joinChannel({channelId});
   await browserWallet.pushMessage(serverMessageToBrowserMessage(serverOutput1), 'dummyDomain');
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(containsPostfundState))
-    .toPromise();
-
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
 });
