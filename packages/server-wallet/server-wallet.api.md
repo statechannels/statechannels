@@ -141,13 +141,6 @@ export abstract class Engine extends SingleThreadedEngine implements EngineInter
 // @public
 export type EngineConfig = RequiredEngineConfig & OptionalEngineConfig;
 
-// Warning: (ae-forgotten-export) The symbol "ChannelUpdatedEvent" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ObjectiveStarted" needs to be exported by the entry point index.d.ts
-// Warning: (ae-forgotten-export) The symbol "ObjectiveSucceeded" needs to be exported by the entry point index.d.ts
-//
-// @public (undocumented)
-export type EngineEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
-
 // @public (undocumented)
 export interface EngineInterface {
     // (undocumented)
@@ -265,6 +258,11 @@ export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
 // @public (undocumented)
 export type ObjectiveError = EnsureObjectiveFailed | InternalError;
 
+// @public (undocumented)
+export type ObjectiveProposed = {
+    ObjectiveProposed: WalletObjective;
+};
+
 // @public
 export type ObjectiveResult = {
     done: Promise<ObjectiveDoneResult>;
@@ -353,11 +351,10 @@ export type SingleChannelOutput = {
     newObjective: WalletObjective | undefined;
 };
 
-// Warning: (ae-forgotten-export) The symbol "EventEmitterType" needs to be exported by the entry point index.d.ts
 // Warning: (ae-forgotten-export) The symbol "ChainEventSubscriberInterface" needs to be exported by the entry point index.d.ts
 //
 // @public
-export class SingleThreadedEngine extends EventEmitter<EventEmitterType> implements EngineInterface, ChainEventSubscriberInterface {
+export class SingleThreadedEngine implements EngineInterface, ChainEventSubscriberInterface {
     protected constructor(engineConfig: IncomingEngineConfig);
     addSigningKey(privateKey: PrivateKey): Promise<void>;
     // (undocumented)
@@ -447,7 +444,7 @@ export function validateEngineConfig(config: Record<string, any>): {
 };
 
 // @public (undocumented)
-export class Wallet {
+export class Wallet extends EventEmitter<ObjectiveProposed> {
     approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
     closeChannels(channelIds: string[]): Promise<ObjectiveResult[]>;
     // Warning: (ae-forgotten-export) The symbol "MessageServiceFactory" needs to be exported by the entry point index.d.ts
@@ -465,8 +462,8 @@ export class Wallet {
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:73:39 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
-// src/engine/types.ts:79:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:57:39 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:63:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 // src/wallet/types.ts:53:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
