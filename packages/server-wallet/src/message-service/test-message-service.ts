@@ -105,7 +105,7 @@ export class TestMessageService
 
     messageService1.on('deliveryRequested', async (messages: Message[]) => {
       logger?.trace(
-        {messages: messages.map(m => formatMessageForLogger(m))},
+        {messages: messages.map(formatMessageForLogger)},
         'TestMessageService delivering message to B'
       );
 
@@ -113,7 +113,7 @@ export class TestMessageService
     });
     messageService2.on('deliveryRequested', async (messages: Message[]) => {
       logger?.trace(
-        {messages: messages.map(m => formatMessageForLogger(m))},
+        {messages: messages.map(formatMessageForLogger)},
         'TestMessageService delivering message to A'
       );
 
