@@ -37,6 +37,9 @@ export class TestMessageService
   private _messageQueue: Message[] = [];
   protected _destroyed = false;
 
+  // This field is just used for the type guard
+  public readonly isTest = true;
+
   /* This is used to signal the delay function to abort */
   protected _abortController: AbortController;
   /**
@@ -48,6 +51,7 @@ export class TestMessageService
    */
   protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
     super();
+
     this._options = {dropRate: 0, meanDelay: undefined};
     this._abortController = new AbortController();
     this._handleMessages = async messages => {
@@ -192,5 +196,6 @@ function formatMessageForLogger(message: Message) {
 export function isTestMessageService(
   messageService: MessageServiceInterface
 ): messageService is TestMessageService {
-  return '_frozen' in messageService;
+  // Check for the field that will only be set on our test message service
+  return 'isTest' in messageService;
 }
