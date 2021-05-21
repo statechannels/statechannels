@@ -29,14 +29,14 @@ export class Wallet {
     messageServiceFactory: MessageServiceFactory,
     retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<Wallet> {
-    return new Wallet(engine, messageServiceFactory, {...DEFAULTS, ...retryOptions});
+    return new Wallet(messageServiceFactory, engine, {...DEFAULTS, ...retryOptions});
   }
 
   private _messageService: MessageServiceInterface;
 
   private constructor(
-    private _engine: Engine,
     messageServiceFactory: MessageServiceFactory,
+    private _engine: Engine,
     private _retryOptions: RetryOptions
   ) {
     const handler: MessageHandler = async message => {
