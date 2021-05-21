@@ -5,7 +5,6 @@ import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {IncomingEngineConfig} from '../../config';
 import {MultipleChannelOutput, SingleChannelOutput, EngineEvent} from '../types';
 import {SingleThreadedEngine} from '../engine';
-import {WireMessage} from '../../type-aliases';
 
 import {WorkerManager} from './manager';
 
@@ -42,9 +41,7 @@ export class MultiThreadedEngine extends SingleThreadedEngine {
     return this.workerManager.updateChannel(args);
   }
 
-  async pushMessage(
-    rawPayload: unknown
-  ): Promise<MultipleChannelOutput> {
+  async pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput> {
     return this.workerManager.pushMessage(rawPayload);
   }
 

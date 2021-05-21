@@ -68,9 +68,7 @@ export interface EngineInterface {
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
   // Engine <-> Engine communication
-  pushMessage(
-    m: unknown
-  ): Promise<MultipleChannelOutput>}>;
+  pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
 }
 
