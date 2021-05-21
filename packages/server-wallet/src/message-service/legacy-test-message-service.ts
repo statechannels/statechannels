@@ -10,7 +10,7 @@ import {MessageServiceInterface} from './types';
  * It handles pushing messages into engines automatically
  * This should be phased out eventually.
  */
-export class LegacyEngineMessageHandler implements MessageServiceInterface {
+export class LegacyTestMessageHandler implements MessageServiceInterface {
   private _destroyed = false;
   public constructor(
     private _engines: {participantId: string; engine: Engine}[],

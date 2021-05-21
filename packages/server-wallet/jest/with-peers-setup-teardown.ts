@@ -13,7 +13,7 @@ import {
 } from '../src/db/seeds/1_signing_wallet_seeds';
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
-import {LegacyEngineMessageHandler} from '../src/message-service/legacy-engine-message-service';
+import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
 
 interface TestPeerEngines {
   a: Engine;
@@ -54,7 +54,7 @@ export type PeerSetup = {
   peerEngines: TestPeerEngines;
   participantA: Participant;
   participantB: Participant;
-  messageService: LegacyEngineMessageHandler;
+  messageService: LegacyTestMessageHandler;
 };
 
 export type PeerSetupWithWallets = PeerSetup & {peerWallets: TestPeerWallets};
@@ -113,7 +113,7 @@ export async function crashAndRestart(
     return {
       peerEngines: {a, b},
 
-      messageService: new LegacyEngineMessageHandler(participantEngines),
+      messageService: new LegacyTestMessageHandler(participantEngines),
       participantA,
       participantB,
     };
@@ -187,7 +187,7 @@ export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerS
       {participantId: participantIdB, engine: peerEngines.b},
     ];
 
-    const messageService = new LegacyEngineMessageHandler(participantEngines);
+    const messageService = new LegacyTestMessageHandler(participantEngines);
 
     logger.trace('getPeersSetup complete');
     return {
