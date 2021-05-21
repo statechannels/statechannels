@@ -2,7 +2,7 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Outgoing, Engine} from '../..';
+import {Engine, Outgoing} from '../..';
 import {Bytes32} from '../../type-aliases';
 import {
   getChannelResultFor,
@@ -12,7 +12,7 @@ import {
 } from '../../__test__/test-helpers';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {
-  getPeersSetup,
+  setupPeerEngines,
   teardownPeerSetup,
   aEngineConfig,
   bEngineConfig,
@@ -38,7 +38,7 @@ jest.setTimeout(10_000);
 
 let peerSetup: PeerSetup;
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerEngines();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
@@ -391,6 +391,7 @@ describe('Funding multiple channels synchronously (in bulk)', () => {
       channelResults,
       outbox: [],
       newObjectives: [],
+      messagesByObjective: {},
     });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
@@ -490,6 +491,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
       channelResults,
       outbox: [],
       newObjectives: [],
+      messagesByObjective: {},
     });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
@@ -580,6 +582,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
       channelResults,
       outbox: [],
       newObjectives: [],
+      messagesByObjective: {},
     });
 
     const {

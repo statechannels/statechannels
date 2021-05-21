@@ -1,13 +1,16 @@
-import {getPeersSetup, PeerSetup, teardownPeerSetup} from '../../../jest/with-peers-setup-teardown';
-import {LatencyOptions} from '../../message-service/test-message-service';
-import {Wallet} from '../../wallet/wallet';
+import {
+  teardownPeerSetup,
+  PeerSetupWithWallets,
+  setupPeerWallets,
+} from '../../../jest/with-peers-setup-teardown';
+import {LatencyOptions, TestMessageService} from '../../message-service/test-message-service';
 import {getWithPeersCreateChannelsArgs, waitForObjectiveEvent} from '../utils';
 
 jest.setTimeout(120_000);
-let peerSetup: PeerSetup;
+let peerSetup: PeerSetupWithWallets;
 
 beforeAll(async () => {
-  peerSetup = await getPeersSetup();
+  peerSetup = await setupPeerWallets();
 });
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
@@ -36,39 +39,27 @@ describe('CloseChannels', () => {
   test.each(testCases)(
     'can successfully create and close channel with the latency options: %o',
     async options => {
-      const {peerEngines, messageService} = peerSetup;
+      const {peerEngines, peerWallets} = peerSetup;
       // Always reset the latency options back to no drop / delay
       // This prevents the next test from using delay/dropping when doing setup
-      peerSetup.messageService.setLatencyOptions({dropRate: 0, meanDelay: undefined});
-
-      const wallet = await Wallet.create(peerEngines.a, messageService, {
-        numberOfAttempts: 100,
-        initialDelay: 50,
-        multiple: 1,
-      });
-      const walletB = await Wallet.create(peerEngines.b, messageService, {
-        numberOfAttempts: 100,
-        initialDelay: 50,
-        multiple: 1,
-      });
-
-      const response = await wallet.createChannels(
+      TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0, meanDelay: undefined});
+      const response = await peerWallets.a.createChannels(
         Array(10).fill(getWithPeersCreateChannelsArgs(peerSetup))
       );
       const createChannelObjectiveIds = response.map(o => o.objectiveId);
       await waitForObjectiveEvent(createChannelObjectiveIds, 'objectiveStarted', peerEngines.b);
-      const bResponse = await walletB.approveObjectives(createChannelObjectiveIds);
+      const bResponse = await peerWallets.b.approveObjectives(createChannelObjectiveIds);
       // Sanity check that create channel succeeds
       await expect(response).toBeObjectiveDoneType('Success');
       await expect(bResponse).toBeObjectiveDoneType('Success');
 
       // Now that the channels are up and running we can set the latency options
-      messageService.setLatencyOptions(options);
+      TestMessageService.setLatencyOptions(peerWallets, options);
       // Freeze messages so we can set up our listeners for engineToWaitOn
-      messageService.freeze();
+      TestMessageService.freeze(peerWallets);
 
       const channelIds = response.map(o => o.channelId);
-      const closingWallet = options.closer === 'A' ? wallet : walletB;
+      const closingWallet = options.closer === 'A' ? peerWallets.a : peerWallets.b;
       // We want to to make sure the non closing wallet manages to complete all the objectives
       const engineToWaitOn = options.closer === 'A' ? peerEngines.b : peerEngines.a;
 
@@ -85,7 +76,7 @@ describe('CloseChannels', () => {
       );
 
       // Now that we're done with the setup we can unfreeze and let the messages fly
-      await messageService.unfreeze();
+      TestMessageService.unfreeze(peerWallets);
 
       // We expect both promises to resolve to success
       await expect(closeResponse).toBeObjectiveDoneType('Success');

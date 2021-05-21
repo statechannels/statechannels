@@ -4,9 +4,10 @@ import {Logger} from 'pino';
 import delay from 'delay';
 import {AbortController} from 'abort-controller';
 import {getChannelId} from '@statechannels/nitro-protocol';
+import {EventEmitter} from 'eventemitter3';
 
-import {Engine} from '..';
 import {WirePayload} from '../type-aliases';
+import {TestPeerWallets} from '../../jest/with-peers-setup-teardown';
 
 import {MessageHandler, MessageServiceInterface} from './types';
 
@@ -27,12 +28,17 @@ export type LatencyOptions = {
  * All the engines will share the same message service.
  * The message service is responsible for calling pushMessage on the appropriate engines.
  */
-export class TestMessageService implements MessageServiceInterface {
+export class TestMessageService
+  extends EventEmitter<{deliveryRequested: {messages: Message[]}}>
+  implements MessageServiceInterface {
   private _handleMessages: (messages: Message[]) => Promise<void>;
   private _options: LatencyOptions;
   private _frozen = false;
   private _messageQueue: Message[] = [];
   protected _destroyed = false;
+
+  // This field is just used for the type guard
+  public readonly isTest = true;
 
   /* This is used to signal the delay function to abort */
   protected _abortController: AbortController;
@@ -44,20 +50,81 @@ export class TestMessageService implements MessageServiceInterface {
    * @returns
    */
   protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
+    super();
+
     this._options = {dropRate: 0, meanDelay: undefined};
     this._abortController = new AbortController();
     this._handleMessages = async messages => {
       for (const message of messages) {
-        // This prevents triggering messages after the service is destroyed
-        if (!this._destroyed) return handleMessage(message, this);
+        if (!this._destroyed) {
+          await handleMessage(message);
+        }
       }
     };
   }
 
-  static async create(
-    incomingMessageHandler: MessageHandler,
+  static setLatencyOptions(peerWallets: TestPeerWallets, options: Partial<LatencyOptions>): void {
+    const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
+
+    for (const messageService of messageServices) {
+      if (!isTestMessageService(messageService)) {
+        throw new Error('Can only set latency options on a TestMessageService');
+      } else {
+        messageService.setLatencyOptions(options);
+      }
+    }
+  }
+
+  static unfreeze(peerWallets: TestPeerWallets): void {
+    const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
+
+    for (const messageService of messageServices) {
+      if (!isTestMessageService(messageService)) {
+        throw new Error('Can only set latency options on a TestMessageService');
+      } else {
+        messageService.unfreeze();
+      }
+    }
+  }
+
+  static freeze(peerWallets: TestPeerWallets): void {
+    const messageServices = [peerWallets.a.messageService, peerWallets.b.messageService];
+
+    for (const messageService of messageServices) {
+      if (!isTestMessageService(messageService)) {
+        throw new Error('Can only set latency options on a TestMessageService');
+      } else {
+        messageService.freeze();
+      }
+    }
+  }
+  static linkMessageServices(
+    messageService1: MessageServiceInterface,
+    messageService2: MessageServiceInterface,
     logger?: Logger
-  ): Promise<TestMessageService> {
+  ): void {
+    if (!isTestMessageService(messageService1) || !isTestMessageService(messageService2)) {
+      throw new Error('Cannot link message services besides the TestMessageService');
+    }
+
+    messageService1.on('deliveryRequested', async (messages: Message[]) => {
+      logger?.trace(
+        {messages: messages.map(formatMessageForLogger)},
+        'TestMessageService delivering message to B'
+      );
+
+      await messageService2._handleMessages(messages);
+    });
+    messageService2.on('deliveryRequested', async (messages: Message[]) => {
+      logger?.trace(
+        {messages: messages.map(formatMessageForLogger)},
+        'TestMessageService delivering message to A'
+      );
+
+      await messageService1._handleMessages(messages);
+    });
+  }
+  static create(incomingMessageHandler: MessageHandler, logger?: Logger): TestMessageService {
     const service = new TestMessageService(incomingMessageHandler, logger);
     return service;
   }
@@ -85,7 +152,9 @@ export class TestMessageService implements MessageServiceInterface {
 
           await delay(delayAmount, {signal: this._abortController.signal});
         }
-        await this._handleMessages(messages);
+        if (!this._destroyed) {
+          this.emit('deliveryRequested', messages);
+        }
       } else {
         this._logger?.trace({messages: messages.map(formatMessageForLogger)}, 'Messages dropped');
       }
@@ -95,51 +164,9 @@ export class TestMessageService implements MessageServiceInterface {
   async destroy(): Promise<void> {
     this._abortController.abort();
     this._destroyed = true;
+    this.removeAllListeners();
   }
 }
-
-/**
- * This is a helper method that sets up a message service for a collection of engines.
- * Whenever handleMessages or send are called they are pushed into the appropriate engine.
- * Any response to the pushMessage is then sent to the other participants
- * @param engines The collection of engines that will be communicating. A participantId must be provided for each engine.
- * @returns A messaging service that is responsible for calling pushMessage on the correct engine.
- * @example
- * const handler = createTestMessageHandler(..bla)
- * const ms = createTestMessageHandler(handler)
- * const result = engine.createChannel(..bla);
- *
- * // This will send all the messages from the result of the create channel call
- * // and will handle any responses to those messages and so on...
- * await ms.handleMessages(result.outbox);
- */
-export const createTestMessageHandler = (
-  engines: {participantId: string; engine: Engine}[],
-  logger?: Logger
-): MessageHandler => {
-  const hasUniqueParticipants = new Set(engines.map(w => w.participantId)).size === engines.length;
-  const hasUniqueEngines = new Set(engines.map(w => w.engine)).size === engines.length;
-
-  if (!hasUniqueParticipants) {
-    throw new Error('Duplicate participant ids');
-  }
-
-  if (!hasUniqueEngines) {
-    throw new Error('Duplicate engines');
-  }
-  return async (message, me) => {
-    const matching = engines.find(w => w.participantId === message.recipient);
-
-    if (!matching) {
-      throw new Error(`Invalid recipient ${message.recipient}`);
-    }
-
-    logger?.trace({message: formatMessageForLogger(message)}, 'Pushing message into engine');
-    const result = await matching.engine.pushMessage(message.data);
-
-    await me.send(result.outbox.map(o => o.params));
-  };
-};
 
 function formatMessageForLogger(message: Message) {
   const data = message.data as WirePayload;
@@ -164,4 +191,11 @@ function formatMessageForLogger(message: Message) {
     }),
     requests: data.requests?.map(r => `${r.type}-${r.channelId}`),
   };
+}
+
+export function isTestMessageService(
+  messageService: MessageServiceInterface
+): messageService is TestMessageService {
+  // Check for the field that will only be set on our test message service
+  return 'isTest' in messageService;
 }

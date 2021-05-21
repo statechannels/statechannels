@@ -6,21 +6,29 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 
 import {Engine} from '../src/engine';
-import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection} from '../src';
+import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection, Wallet} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
 } from '../src/db/seeds/1_signing_wallet_seeds';
-import {
-  createTestMessageHandler,
-  TestMessageService,
-} from '../src/message-service/test-message-service';
+import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
+import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
 
 interface TestPeerEngines {
   a: Engine;
   b: Engine;
 }
+
+export interface TestPeerWallets {
+  a: Wallet;
+  b: Wallet;
+}
+const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 20, initialDelay: 500, multiple: 1.1};
+
+const aDatabase = 'server_wallet_test_a';
+const bDatabase = 'server_wallet_test_b';
+
 const ARTIFACTS_DIR = '../../artifacts';
 try {
   fs.mkdirSync(ARTIFACTS_DIR);
@@ -34,10 +42,10 @@ const baseConfig = defaultTestConfig({
   },
 });
 export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
-  database: 'server_wallet_test_a',
+  database: aDatabase,
 });
 export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
-  database: 'server_wallet_test_b',
+  database: bDatabase,
 });
 
 const logger: Logger = createLogger(baseConfig);
@@ -46,9 +54,13 @@ export type PeerSetup = {
   peerEngines: TestPeerEngines;
   participantA: Participant;
   participantB: Participant;
-  messageService: TestMessageService;
+  messageService: LegacyTestMessageHandler;
 };
 
+export type PeerSetupWithWallets = PeerSetup & {peerWallets: TestPeerWallets};
+const isPeerSetupWithWallets = (
+  setup: PeerSetupWithWallets | PeerSetup
+): setup is PeerSetupWithWallets => 'peerWallets' in setup;
 export const participantIdA = 'a';
 export const participantIdB = 'b';
 const destinationA = makeDestination(
@@ -82,11 +94,6 @@ export async function crashAndRestart(
 
     const b = restartB ? await Engine.create(bEngineConfig) : oldPeerSetup.peerEngines.b;
 
-    const handler = await createTestMessageHandler([
-      {participantId: participantIdA, engine: a},
-      {participantId: participantIdB, engine: b},
-    ]);
-
     const participantA = {
       signingAddress: await a.getSigningAddress(),
       participantId: participantIdA,
@@ -98,10 +105,15 @@ export async function crashAndRestart(
       destination: destinationB,
     };
 
-    const messageService = await TestMessageService.create(handler, a.logger);
+    const participantEngines = [
+      {participantId: participantIdA, engine: a},
+      {participantId: participantIdB, engine: b},
+    ];
+
     return {
       peerEngines: {a, b},
-      messageService,
+
+      messageService: new LegacyTestMessageHandler(participantEngines),
       participantA,
       participantB,
     };
@@ -111,9 +123,33 @@ export async function crashAndRestart(
   }
 }
 
-export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetup> {
+export async function setupPeerWallets(withWalletsSeeding = false): Promise<PeerSetupWithWallets> {
+  const peerSetup = await setupPeerEngines(withWalletsSeeding);
+  const peerWallets = {
+    a: await Wallet.create(
+      peerSetup.peerEngines.a,
+      TestMessageService.create,
+      DEFAULT__RETRY_OPTIONS
+    ),
+    b: await Wallet.create(
+      peerSetup.peerEngines.b,
+      TestMessageService.create,
+      DEFAULT__RETRY_OPTIONS
+    ),
+  };
+  TestMessageService.linkMessageServices(
+    peerWallets.a.messageService,
+    peerWallets.b.messageService
+  );
+  return {...peerSetup, peerWallets};
+}
+
+export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerSetup> {
   try {
-    await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+    await Promise.all([
+      DBAdmin.truncateDatabase(aEngineConfig),
+      DBAdmin.truncateDatabase(bEngineConfig),
+    ]);
 
     await Promise.all([
       DBAdmin.createDatabase(aEngineConfig),
@@ -151,12 +187,12 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
       {participantId: participantIdB, engine: peerEngines.b},
     ];
 
-    const handler = createTestMessageHandler(participantEngines, peerEngines.a.logger);
-    const messageService = await TestMessageService.create(handler, peerEngines.a.logger);
+    const messageService = new LegacyTestMessageHandler(participantEngines);
 
     logger.trace('getPeersSetup complete');
     return {
       peerEngines,
+
       messageService,
       participantA,
       participantB,
@@ -167,7 +203,9 @@ export async function getPeersSetup(withWalletSeeding = false): Promise<PeerSetu
   }
 }
 
-export const teardownPeerSetup = async (peerSetup: PeerSetup): Promise<void> => {
+export const teardownPeerSetup = async (
+  peerSetup: PeerSetup | PeerSetupWithWallets
+): Promise<void> => {
   if (!peerSetup) {
     logger.warn('No PeerSetup so no teardown needed');
     return;
@@ -175,9 +213,16 @@ export const teardownPeerSetup = async (peerSetup: PeerSetup): Promise<void> => 
   try {
     const {messageService, peerEngines} = peerSetup;
     await messageService.destroy();
-
-    await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
-    await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+    if (isPeerSetupWithWallets(peerSetup)) {
+      const {peerWallets} = peerSetup;
+      await Promise.all([peerWallets.a.destroy(), peerWallets.b.destroy()]);
+    } else {
+      await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
+    }
+    await Promise.all([
+      DBAdmin.truncateDatabase(aEngineConfig),
+      DBAdmin.truncateDatabase(bEngineConfig),
+    ]);
   } catch (error) {
     logger.error(error, 'peersTeardown failed');
     throw error;

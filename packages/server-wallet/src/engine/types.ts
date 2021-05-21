@@ -21,6 +21,7 @@ export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
+  messagesByObjective: Record<string, WireMessage[]>;
 };
 
 export type SyncObjectiveResult = {

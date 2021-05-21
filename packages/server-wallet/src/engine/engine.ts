@@ -65,7 +65,6 @@ import {Store, AppHandler, MissingAppHandler} from './store';
 import {
   SingleChannelOutput,
   MultipleChannelOutput,
-  Output,
   EngineInterface,
   EngineEvent,
   hasNewObjective,
@@ -241,23 +240,6 @@ export class SingleThreadedEngine
       makeAddress(appDefinition),
       bytecode
     );
-  }
-
-  /**
-   * Streamlines engine output messsages.
-   *
-   * @remarks
-   * Helps to enable more efficient messaging. Channel results are sorted and deduplicated. Messages to the same recipient are merged.
-   *
-   * @privateRemarks
-   * TODO: Consider whether we need to make this method public (at time of writing, it is used only once in consuming code)
-   * TODO: Is this method well named? "Merge" doesn't really do justice to what is going on. "Messages" is not in harmony with "Output[]".
-   *
-   * @param output - An array of output messages and channel results.
-   * @returns A streamlined output of messages.
-   */
-  public static mergeOutputs(output: Output[]): MultipleChannelOutput {
-    return EngineResponse.mergeOutputs(output);
   }
 
   /**
