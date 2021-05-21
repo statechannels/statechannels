@@ -61,12 +61,11 @@ describe('EnsureObjectives', () => {
     }
   );
 
-  // TODO: Determine why this is failing
   //  This is a nice sanity check to ensure that messages do get dropped
-  test.skip('fails when all messages are dropped', async () => {
+  test('fails when all messages are dropped', async () => {
     const {peerWallets} = peerSetup;
     TestMessageService.setLatencyOptions(peerWallets, {dropRate: 1});
-
+    peerWallets.b.on('ObjectiveProposed', o => peerWallets.b.approveObjectives([o.objectiveId]));
     const result = await peerWallets.a.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
     await expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
