@@ -52,12 +52,12 @@ contract TwoOfThree is IForceMoveApp2 {
             );
 
             // slice off the two party outcome and data
-            a.appData = aAppData.twoPartyAppData;
-            b.appData = bAppData.twoPartyAppData;
+            a.appData = abi.encode(aAppData.twoPartyAppData);
+            b.appData = abi.encode(bAppData.twoPartyAppData);
             a.outcome = encode2PartyAllocation(allocationA[0], allocationA[1]);
             b.outcome = encode2PartyAllocation(allocationB[0], allocationB[1]);
 
-            return bAppData.twoPartyApp.validTransition(a, b, turnNumB, nParticipants, signedBy);
+            return bAppData.twoPartyApp.validTransition(a, b, turnNumB, 2, signedBy);
         } else return false;
     }
 
