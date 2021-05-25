@@ -6,7 +6,7 @@ import '../interfaces/IForceMoveApp.sol';
 import '../Outcome.sol';
 
 /**
- * @dev The HashLockedSwap contract complies with the ForceMoveApp interface and implements a HashLockedSwaped payment
+ * @dev The HashLockedSwap contract complies with the IForceMoveApp2 interface and implements a HashLockedSwaped payment
  */
 contract HashLockedSwap is IForceMoveApp2 {
     struct AppData {
@@ -19,10 +19,15 @@ contract HashLockedSwap is IForceMoveApp2 {
         VariablePart memory b,
         uint48 turnNumB,
         uint256,
-        uint8
+        uint8 signedBy
     ) public override pure returns (bool) {
         // is this the first and only swap?
         require(turnNumB == 4, 'turnNumB != 4');
+
+        // only required for IForceMoveApp2 interface, where turn taking is not enforced at the protocol level
+        // given the turnNumB == 4 we can recover turn taking by noting 4 % 2 = 0
+        // implying participant 0 needs to sign state b
+        require(signedBy == 1 || signedBy == 3, 'participant0 must sign turnNum 4');
 
         // Decode variables.
         // Assumptions:
