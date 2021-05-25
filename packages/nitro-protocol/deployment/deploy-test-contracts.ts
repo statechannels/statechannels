@@ -15,6 +15,8 @@ import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
+import twoOfThreeArtifact from '../artifacts/contracts/examples/TwoOfThree.sol/TwoOfThree.json';
+import hashLockedSwap2Artifact from '../artifacts/contracts/examples/HashLockedSwap2.sol/HashLockedSwap.json';
 
 export async function deploy(): Promise<Record<string, string>> {
   const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
@@ -30,6 +32,8 @@ export async function deploy(): Promise<Record<string, string>> {
 
   const COUNTING_APP_ADDRESS = await deployer.deploy(countingAppArtifact as any);
   const HASH_LOCK_ADDRESS = await deployer.deploy(hashLockedSwapArtifact as any);
+  const HASH_LOCK_2_ADDRESS = await deployer.deploy(hashLockedSwap2Artifact as any);
+  const TWO_OF_THREE_ADDRESS = await deployer.deploy(twoOfThreeArtifact as any);
   const SINGLE_ASSET_PAYMENT_ADDRESS = await deployer.deploy(singleAssetPaymentsArtifact as any);
   const TEST_NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(testNitroAdjudicatorArtifact as any);
   const TRIVIAL_APP_ADDRESS = await deployer.deploy(trivialAppArtifact as any);
@@ -72,6 +76,8 @@ export async function deploy(): Promise<Record<string, string>> {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
     HASH_LOCK_ADDRESS,
+    HASH_LOCK_2_ADDRESS,
+    TWO_OF_THREE_ADDRESS,
     SINGLE_ASSET_PAYMENT_ADDRESS,
     TRIVIAL_APP_ADDRESS,
     TEST_FORCE_MOVE_ADDRESS,
