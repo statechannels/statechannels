@@ -77,12 +77,12 @@ const incorrectPreImage: HashLockedSwapData = {
 
 describe('validTransition', () => {
   it.each`
-    isValid  | signedBy | dataA                 | balancesA                                    | turnNumB | dataB                | balancesB                                    | description
-    ${true}  | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
-    ${true}  | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
-    ${false} | ${0b000} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'no signatures implies false'}
-    ${true}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver unlocks the conditional payment'}
-    ${false} | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver cannot unlock with incorrect preimage'}
+    isValid                 | signedBy | dataA                 | balancesA                                    | turnNumB | dataB                | balancesB                                    | description
+    ${true}                 | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
+    ${true}                 | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
+    ${false}                | ${0b000} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'no signatures implies false'}
+    ${true}                 | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver unlocks the conditional payment'}
+    ${'Incorrect preimage'} | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver cannot unlock with incorrect preimage'}
   `(
     '$description',
     async ({
@@ -127,7 +127,7 @@ describe('validTransition', () => {
         appData: encodeTwoOfThreeData(dataB),
       };
 
-      if (isValid) {
+      if (isValid == true) {
         const isValidFromCall = await twoOfThree.validTransition(
           variablePartA,
           variablePartB,
@@ -136,7 +136,7 @@ describe('validTransition', () => {
           signedBy
         );
         expect(isValidFromCall).toBe(true);
-      } else {
+      } else if (typeof isValid == 'string') {
         await expectRevert(
           () =>
             twoOfThree.validTransition(
@@ -146,8 +146,17 @@ describe('validTransition', () => {
               numParticipants,
               signedBy
             ),
-          'Incorrect preimage'
+          isValid
         );
+      } else if (isValid == false) {
+        const isValidFromCall = await twoOfThree.validTransition(
+          variablePartA,
+          variablePartB,
+          turnNumB,
+          numParticipants,
+          signedBy
+        );
+        expect(isValidFromCall).toBe(false);
       }
     }
   );
