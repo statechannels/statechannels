@@ -34,8 +34,14 @@ contract TwoOfThree is IForceMoveApp2 {
             // Assumptions:
             //  - single asset in this channel
             //  - three parties in this channel
-            Outcome.AllocationItem[] memory allocationA = decode3PartyAllocation(a.outcome);
-            Outcome.AllocationItem[] memory allocationB = decode3PartyAllocation(b.outcome);
+            (
+                Outcome.AllocationItem[] memory allocationA,
+                address aAssetHolderAddress
+            ) = decode3PartyAllocation(a.outcome);
+            (
+                Outcome.AllocationItem[] memory allocationB,
+                address bAssetHolderAddress
+            ) = decode3PartyAllocation(b.outcome);
 
             // slots for each participant unchanged
             require(
@@ -52,12 +58,16 @@ contract TwoOfThree is IForceMoveApp2 {
             );
 
             // slice off the two party outcome and data
-            a.appData = abi.encode(aAppData.twoPartyAppData);
-            b.appData = abi.encode(bAppData.twoPartyAppData);
-            a.outcome = encode2PartyAllocation(allocationA[0], allocationA[1]);
-            b.outcome = encode2PartyAllocation(allocationB[0], allocationB[1]);
+            VariablePart memory a2 = VariablePart(
+                encode2PartyAllocation(allocationA[0], allocationA[1], aAssetHolderAddress),
+                aAppData.twoPartyAppData
+            );
+            VariablePart memory b2 = VariablePart(
+                encode2PartyAllocation(allocationB[0], allocationB[1], bAssetHolderAddress),
+                bAppData.twoPartyAppData
+            );
 
-            return bAppData.twoPartyApp.validTransition(a, b, turnNumB, 2, signedBy);
+            return bAppData.twoPartyApp.validTransition(a2, b2, turnNumB, 2, signedBy);
         } else return false;
     }
 
@@ -65,7 +75,7 @@ contract TwoOfThree is IForceMoveApp2 {
     function decode3PartyAllocation(bytes memory outcomeBytes)
         private
         pure
-        returns (Outcome.AllocationItem[] memory allocation)
+        returns (Outcome.AllocationItem[] memory allocation, address assetHolderAddress)
     {
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
@@ -87,6 +97,7 @@ contract TwoOfThree is IForceMoveApp2 {
             assetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
+        assetHolderAddress = outcome[0].assetHolderAddress;
 
         // Throws unless there are exactly 3 allocations
         require(allocation.length == 3, 'allocation.length != 3');
@@ -94,12 +105,18 @@ contract TwoOfThree is IForceMoveApp2 {
 
     function encode2PartyAllocation(
         Outcome.AllocationItem memory firstAllocationItem,
-        Outcome.AllocationItem memory secondAllocationItem
-    ) private pure returns (bytes memory outcome) {
-        Outcome.AssetOutcome memory assetOutcome = Outcome.AssetOutcome(
-            uint8(Outcome.AssetOutcomeType.Allocation),
-            abi.encode([firstAllocationItem, secondAllocationItem])
+        Outcome.AllocationItem memory secondAllocationItem,
+        address assetHolderAddress
+    ) private pure returns (bytes memory outcomeBytes) {
+        Outcome.AllocationItem[] memory allocation = new Outcome.AllocationItem[](2);
+        allocation[0] = firstAllocationItem;
+        allocation[1] = secondAllocationItem;
+        bytes memory allocationBytes = abi.encode(allocation);
+        bytes memory assetOutcomeBytes = abi.encode(
+            Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), allocationBytes)
         );
-        outcome = abi.encode([assetOutcome]);
+        Outcome.OutcomeItem[] memory outcome = new Outcome.OutcomeItem[](1);
+        outcome[0] = Outcome.OutcomeItem(assetHolderAddress, assetOutcomeBytes);
+        outcomeBytes = abi.encode(outcome);
     }
 }
