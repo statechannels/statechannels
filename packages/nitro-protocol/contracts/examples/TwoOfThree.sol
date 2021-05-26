@@ -19,7 +19,7 @@ contract TwoOfThree is IForceMoveApp2 {
         VariablePart memory a, // TODO consider less confusing variable names
         VariablePart memory b,
         uint48 turnNumB,
-        uint256 nParticipants,
+        uint256,
         uint8 signedBy // Who has signed state b?
     ) public override pure returns (bool) {
         // If the new state is signed by all three participants, it is automatically considered a valid transition
