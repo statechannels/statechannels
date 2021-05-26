@@ -75,14 +75,17 @@ const incorrectPreImage: HashLockedSwapData = {
   h: HashZero,
 };
 
+const msg0 = 'amount for participant 2 cannot change without their signature';
+const msg1 = 'Incorrect preimage';
 describe('validTransition', () => {
   it.each`
-    isValid                 | signedBy | dataA                 | balancesA                                    | turnNumB | dataB                | balancesB                                    | description
-    ${true}                 | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
-    ${true}                 | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
-    ${false}                | ${0b000} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'no signatures implies false'}
-    ${true}                 | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver unlocks the conditional payment'}
-    ${'Incorrect preimage'} | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver cannot unlock with incorrect preimage'}
+    isValid  | signedBy | dataA                 | balancesA                                    | turnNumB | dataB                | balancesB                                    | description
+    ${true}  | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
+    ${true}  | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
+    ${false} | ${0b000} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'no signatures implies false'}
+    ${true}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver unlocks the conditional payment'}
+    ${msg0}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 2}} | ${'Receiver unlocks the conditional payment, but tries to grief the intermediary'}
+    ${msg1}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver cannot unlock with incorrect preimage'}
   `(
     '$description',
     async ({
