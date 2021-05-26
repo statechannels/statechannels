@@ -52,10 +52,7 @@ contract TwoOfThree is IForceMoveApp2 {
             );
 
             // participant 2's slot may not change
-            require(
-                allocationA[2].amount == allocationB[2].amount,
-                'amount for participant 2 cannot change without their signature'
-            );
+            require(allocationA[2].amount == allocationB[2].amount, 'p2.amt: no sig');
 
             // slice off the two party outcome and data
             VariablePart memory a2 = VariablePart(

@@ -75,7 +75,7 @@ const incorrectPreImage: HashLockedSwapData = {
   h: HashZero,
 };
 
-const msg0 = 'amount for participant 2 cannot change without their signature';
+const msg0 = 'p2.amt: no sig';
 const msg1 = 'Incorrect preimage';
 describe('validTransition', () => {
   it.each`
