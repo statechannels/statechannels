@@ -67,7 +67,7 @@ export class DBAdmin {
   static async migrateDatabase(config: IncomingEngineConfig): Promise<void> {
     const knex = getKnexFromConfig(config);
     await DBAdmin.migrateDatabaseFromKnex(knex);
-    knex.destroy();
+    await knex.destroy();
   }
 
   /**
@@ -93,7 +93,7 @@ export class DBAdmin {
   ): Promise<void> {
     const knex = getKnexFromConfig(config);
     await DBAdmin.truncateDataBaseFromKnex(knex, tables);
-    knex.destroy();
+    await knex.destroy();
   }
 
   /**
