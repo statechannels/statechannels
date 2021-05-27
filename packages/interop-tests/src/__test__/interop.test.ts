@@ -69,7 +69,7 @@ let browserAddress: Address;
 let browserDestination: Destination;
 let objectiveSuccededPromise: Promise<void>;
 
-beforeAll(() => {
+beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
   assetHolderContract = new Contract(
     ethAssetHolderAddress,
@@ -77,12 +77,13 @@ beforeAll(() => {
     provider
   );
   mineOnEvent(assetHolderContract);
+  // TODO: The onSendMessage listener can still be executing
+  // so we can't properly restart the engine
+  await DBAdmin.truncateDatabase(serverConfig);
+  serverWallet = await SingleThreadedEngine.create(serverConfig);
 });
 
 beforeEach(async () => {
-  await DBAdmin.truncateDatabase(serverConfig);
-
-  serverWallet = await SingleThreadedEngine.create(serverConfig);
   browserWallet = await ChannelWallet.create(
     makeAddress(new Wallet(TEST_ACCOUNTS[1].privateKey).address)
   );
@@ -95,6 +96,7 @@ beforeEach(async () => {
 
   browserWallet.onSendMessage(message => {
     if (isJsonRpcNotification(message)) {
+      // TODO: Since we're not awaiting this it can execute while knex is being destroyed
       serverWallet.pushMessage((message.params as Message).data);
     }
   });
@@ -107,11 +109,11 @@ beforeEach(async () => {
 });
 
 afterEach(async () => {
-  await serverWallet.destroy();
   browserWallet.destroy();
 });
 
-afterAll(() => {
+afterAll(async () => {
+  await serverWallet.destroy();
   provider.polling = false;
   provider.removeAllListeners();
   assetHolderContract.removeAllListeners();
