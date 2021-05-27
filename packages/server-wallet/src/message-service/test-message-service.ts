@@ -4,7 +4,6 @@ import {Logger} from 'pino';
 import delay from 'delay';
 import {AbortController} from 'abort-controller';
 import {getChannelId} from '@statechannels/nitro-protocol';
-import {EventEmitter} from 'eventemitter3';
 
 import {WirePayload} from '../type-aliases';
 import {TestPeerWallets} from '../../jest/with-peers-setup-teardown';
@@ -28,10 +27,9 @@ export type LatencyOptions = {
  * All the engines will share the same message service.
  * The message service is responsible for calling pushMessage on the appropriate engines.
  */
-export class TestMessageService
-  extends EventEmitter<{deliveryRequested: {messages: Message[]}}>
-  implements MessageServiceInterface {
+export class TestMessageService implements MessageServiceInterface {
   private _handleMessages: (messages: Message[]) => Promise<void>;
+  private _sendMessage: ((messages: Message[]) => Promise<void>) | undefined = undefined;
   private _options: LatencyOptions;
   private _frozen = false;
   private _messageQueue: Message[] = [];
@@ -50,8 +48,6 @@ export class TestMessageService
    * @returns
    */
   protected constructor(handleMessage: MessageHandler, protected _logger?: Logger) {
-    super();
-
     this._options = {dropRate: 0, meanDelay: undefined};
     this._abortController = new AbortController();
     this._handleMessages = async messages => {
@@ -107,22 +103,21 @@ export class TestMessageService
       throw new Error('Cannot link message services besides the TestMessageService');
     }
 
-    messageService1.on('deliveryRequested', async (messages: Message[]) => {
+    messageService1._sendMessage = async messages => {
       logger?.trace(
         {messages: messages.map(formatMessageForLogger)},
         'TestMessageService delivering message to B'
       );
-
       await messageService2._handleMessages(messages);
-    });
-    messageService2.on('deliveryRequested', async (messages: Message[]) => {
+    };
+
+    messageService2._sendMessage = async messages => {
       logger?.trace(
         {messages: messages.map(formatMessageForLogger)},
         'TestMessageService delivering message to A'
       );
-
       await messageService1._handleMessages(messages);
-    });
+    };
   }
   static create(incomingMessageHandler: MessageHandler, logger?: Logger): TestMessageService {
     const service = new TestMessageService(incomingMessageHandler, logger);
@@ -153,7 +148,11 @@ export class TestMessageService
           await delay(delayAmount, {signal: this._abortController.signal});
         }
         if (!this._destroyed) {
-          this.emit('deliveryRequested', messages);
+          if (!this._sendMessage) {
+            throw new Error('No sendMessage defined');
+          } else {
+            await this._sendMessage(messages);
+          }
         }
       } else {
         this._logger?.trace({messages: messages.map(formatMessageForLogger)}, 'Messages dropped');
@@ -164,7 +163,6 @@ export class TestMessageService
   async destroy(): Promise<void> {
     this._abortController.abort();
     this._destroyed = true;
-    this.removeAllListeners();
   }
 }
 
