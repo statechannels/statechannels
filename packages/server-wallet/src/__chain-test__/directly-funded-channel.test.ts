@@ -104,7 +104,8 @@ afterAll(async () => {
   provider.polling = false;
 });
 
-it('Create a directly funded channel between two engines ', async () => {
+// TODO: This should be re-enabled once the chain service has been decoupled from the engine
+it.skip('Create a directly funded channel between two engines ', async () => {
   const participantA: Participant = {
     signingAddress: await a.getSigningAddress(),
     participantId: 'a',
