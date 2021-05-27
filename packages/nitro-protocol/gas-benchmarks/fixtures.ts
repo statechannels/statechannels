@@ -5,7 +5,7 @@ import {Channel, getChannelId} from '../src';
 export const chainId = '0x1';
 export const channelNonce = 2;
 
-export const TokenAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI stablecoin on mainnet
+export const tokenAddress = '0x6b175474e89094c44da98b954eedeac495271d0f'; // DAI stablecoin on mainnet
 
 export const Alice = new Wallet(
   '0x277fb9e0ad81dc836c60294e385b10dfcc0a9586eeb0b1d31da92e384a0d2efa'

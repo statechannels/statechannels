@@ -3,8 +3,12 @@ import {GanacheServer} from '@statechannels/devtools';
 
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
+import erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
+
+import {tokenAddress} from './fixtures';
 
 export let ethAssetHolder: Contract;
+export let erc20AssetHolder: Contract;
 export let nitroAdjudicator: Contract;
 const ganacheServer = new GanacheServer(5555, 1);
 let snapshotId = 0;
@@ -14,6 +18,11 @@ const ethAssetHolderFactory = new ContractFactory(
   ethAssetHolderArtifact.bytecode
 ).connect(ganacheServer.provider.getSigner(0));
 
+const erc20AssetHolderFactory = new ContractFactory(
+  erc20AssetHolderArtifact.abi,
+  erc20AssetHolderArtifact.bytecode
+).connect(ganacheServer.provider.getSigner(0));
+
 const nitroAdjudicatorFactory = new ContractFactory(
   nitroAdjudicatorArtifact.abi,
   nitroAdjudicatorArtifact.bytecode
@@ -21,18 +30,15 @@ const nitroAdjudicatorFactory = new ContractFactory(
 
 beforeAll(async () => {
   await ganacheServer.ready();
-  //   console.log('deploying contracts...');
   nitroAdjudicator = await nitroAdjudicatorFactory.deploy();
   ethAssetHolder = await ethAssetHolderFactory.deploy(nitroAdjudicator.address);
+  erc20AssetHolder = await erc20AssetHolderFactory.deploy(nitroAdjudicator.address, tokenAddress);
   snapshotId = await ganacheServer.provider.send('evm_snapshot', []);
-  //   console.log('contracts deployed');
 });
 
 beforeEach(async () => {
-  //   console.log('resetting local blockchain...');
   await ganacheServer.provider.send('evm_revert', [snapshotId]);
   snapshotId = await ganacheServer.provider.send('evm_snapshot', []);
-  //   console.log('local blockchain reset');
 });
 
 afterAll(async () => {
