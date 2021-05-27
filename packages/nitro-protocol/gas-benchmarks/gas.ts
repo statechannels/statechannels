@@ -2,7 +2,6 @@ type GasRequiredTo = Record<
   string,
   {
     vanillaNitro: number;
-    // ninjaNitro: number; monoNitro: number // TODO
   }
 >;
 
