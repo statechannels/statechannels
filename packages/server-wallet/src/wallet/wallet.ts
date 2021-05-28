@@ -114,7 +114,11 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
    * @returns A promise that resolves to a collection of ObjectiveResult.
    */
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
-    const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
+    const {objectives, messages, chainRequests} = await this._engine.approveObjectives(
+      objectiveIds
+    );
+    const transactions = await this._chainService.handleChainRequests(chainRequests);
+    await Promise.all(transactions.map(tr => tr.wait()));
     return Promise.all(
       objectives.map(async o => ({
         objectiveId: o.objectiveId,
@@ -137,6 +141,7 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
       channelParameters.map(async p => {
         try {
           const createResult = await this._engine.createChannel(p);
+
           const assetHolders = createResult.channelResult.allocations.map(a =>
             makeAddress(a.assetHolderAddress)
           );
@@ -151,8 +156,9 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
             listener
           );
 
-          const {newObjective, channelResult} = createResult;
-
+          const {newObjective, channelResult, chainRequests} = createResult;
+          const transactions = await this._chainService.handleChainRequests(chainRequests);
+          await Promise.all(transactions.map(tr => tr.wait()));
           return {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,

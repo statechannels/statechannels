@@ -46,6 +46,7 @@ import {
   ChannelFinalizedArg,
   AssetOutcomeUpdatedArg,
   ChallengeRegisteredArg,
+  ChainRequest,
 } from '../chain-service';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
@@ -480,7 +481,7 @@ export class SingleThreadedEngine implements EngineInterface {
 
   async approveObjectives(
     objectiveIds: string[]
-  ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
+  ): Promise<{objectives: WalletObjective[]; messages: Message[]; chainRequests: ChainRequest[]}> {
     const channelIds: string[] = [];
     const response = EngineResponse.initialize();
     let objectives = await this.store.getObjectivesByIds(objectiveIds);
@@ -497,7 +498,11 @@ export class SingleThreadedEngine implements EngineInterface {
     // But this is more straightforward for now
     objectives = await this.store.getObjectivesByIds(objectiveIds);
 
-    return {objectives, messages: getMessages(response.multipleChannelOutput())};
+    return {
+      objectives,
+      messages: getMessages(response.multipleChannelOutput()),
+      chainRequests: response.chainRequests,
+    };
   }
 
   /**
