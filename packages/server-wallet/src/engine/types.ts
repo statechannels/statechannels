@@ -54,6 +54,8 @@ export interface EngineInterface {
   // Engine <-> Engine communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
+
+  crank(channelIds: string[]): Promise<MultipleChannelOutput>;
 }
 
 export function hasNewObjective(
