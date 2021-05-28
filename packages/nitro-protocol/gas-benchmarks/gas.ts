@@ -8,7 +8,9 @@ type GasRequiredTo = Record<
 type Path =
   | 'deployInfrastructureContracts'
   | 'directlyFundAChannelWithETHFirst'
-  | 'directlyFundAChannelWithETHSecond';
+  | 'directlyFundAChannelWithETHSecond'
+  | 'directlyFundAChannelWithERC20First'
+  | 'directlyFundAChannelWithERC20Second';
 
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
@@ -22,6 +24,30 @@ export const gasRequiredTo: GasRequiredTo = {
     vanillaNitro: 49008,
   },
   directlyFundAChannelWithETHSecond: {
+    // meaning the second participant in the channel
     vanillaNitro: 34020,
+  },
+  directlyFundAChannelWithERC20First: {
+    // The depositor begins with zero tokens approved for the AssetHolder
+    // The AssetHolder begins with some token balance already
+    // The depositor retains a nonzero balance of tokens after depositing
+    // The depositor retains some tokens approved for the AssetHolder after depositing
+    vanillaNitro: {
+      approve: 45083,
+      // ^^^^^
+      // In principle this only needs to be done once per account
+      // (the cost may be amortized over several deposits into this AssetHolder)
+      deposit: 73454,
+    },
+  },
+  directlyFundAChannelWithERC20Second: {
+    // meaning the second participant in the channel
+    vanillaNitro: {
+      approve: 45083,
+      // ^^^^^
+      // In principle this only needs to be done once per account
+      // (the cost may be amortized over several deposits into this AssetHolder)
+      deposit: 58466,
+    },
   },
 };
