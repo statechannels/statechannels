@@ -14,7 +14,7 @@ import {
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
 import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
-import {ChainService} from '../src/chain-service';
+import {MockChainService} from '../src/chain-service';
 
 interface TestPeerEngines {
   a: Engine;
@@ -45,17 +45,14 @@ const baseConfig = defaultTestConfig({
 export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: aDatabase,
 });
+
 export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: bDatabase,
 });
 
-const chainServiceA = new ChainService({
-  ...aEngineConfig.chainServiceConfiguration,
-});
+const chainServiceA = new MockChainService();
 
-const chainServiceB = new ChainService({
-  ...bEngineConfig.chainServiceConfiguration,
-});
+const chainServiceB = new MockChainService();
 
 const logger: Logger = createLogger(baseConfig);
 
