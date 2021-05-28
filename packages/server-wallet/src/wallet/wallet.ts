@@ -1,6 +1,7 @@
 import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
+import {makeAddress} from '@statechannels/wallet-core';
 
 import {
   MessageHandler,
@@ -10,6 +11,7 @@ import {
 import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {Engine, SyncObjectiveResult} from '../engine';
+import {ChainServiceInterface} from '../chain-service';
 
 import {
   RetryOptions,
@@ -18,6 +20,7 @@ import {
   ObjectiveSuccess,
   ObjectiveProposed,
 } from './types';
+import {createChainListener} from './chain-listener';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -33,25 +36,44 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
    */
   public static async create(
     engine: Engine,
+    chainService: ChainServiceInterface,
     messageServiceFactory: MessageServiceFactory,
     retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<Wallet> {
-    return new Wallet(messageServiceFactory, engine, {...DEFAULTS, ...retryOptions});
+    return new Wallet(messageServiceFactory, engine, chainService, {...DEFAULTS, ...retryOptions});
   }
 
   private _messageService: MessageServiceInterface;
+  private _destroyed = false;
 
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
+    private _chainService: ChainServiceInterface,
     private _retryOptions: RetryOptions
   ) {
     super();
+
     const handler: MessageHandler = async message => {
-      const {outbox, newObjectives} = await this._engine.pushMessage(message.data);
+      const {outbox, newObjectives, channelResults} = await this._engine.pushMessage(message.data);
       // Receiving messages from other participants may have resulted in new proposed objectives
       for (const o of newObjectives) {
         this.emit('ObjectiveProposed', o);
+
+        // If this is a new open channel objective that means there is a new channel to be monitored in the chain service
+        if (o.type === 'OpenChannel') {
+          const listener = createChainListener(
+            this._engine,
+            this._engine.store,
+            this.messageService
+          );
+          const assetHolders = _.uniq(
+            _.flatten(channelResults.map(cr => cr.allocations.map(a => a.assetHolderAddress))).map(
+              makeAddress
+            )
+          );
+          this._chainService.registerChannel(o.data.targetChannelId, assetHolders, listener);
+        }
       }
       await this.messageService.send(getMessages(outbox));
     };
@@ -91,6 +113,19 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
       channelParameters.map(async p => {
         try {
           const createResult = await this._engine.createChannel(p);
+          const assetHolders = createResult.channelResult.allocations.map(a =>
+            makeAddress(a.assetHolderAddress)
+          );
+          const listener = createChainListener(
+            this._engine,
+            this._engine.store,
+            this.messageService
+          );
+          this._chainService.registerChannel(
+            createResult.channelResult.channelId,
+            assetHolders,
+            listener
+          );
 
           const {newObjective, channelResult} = createResult;
 
@@ -250,6 +285,7 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
   }
 
   async destroy(): Promise<void> {
+    this._chainService.destructor();
     await this._messageService.destroy();
     await this._engine.destroy();
   }

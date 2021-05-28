@@ -611,6 +611,14 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     return response.singleChannelOutput(false);
   }
 
+  public async crank(channelIds: string[]): Promise<MultipleChannelOutput> {
+    const response = EngineResponse.initialize();
+
+    await this.takeActions(channelIds, response);
+
+    return response.multipleChannelOutput();
+  }
+
   /**
    * Updates a channel with a new state.
    *

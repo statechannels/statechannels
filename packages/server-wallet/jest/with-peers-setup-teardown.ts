@@ -14,6 +14,7 @@ import {
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
 import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
+import {ChainService} from '../src/chain-service';
 
 interface TestPeerEngines {
   a: Engine;
@@ -46,6 +47,14 @@ export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
 });
 export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: bDatabase,
+});
+
+const chainServiceA = new ChainService({
+  ...aEngineConfig.chainServiceConfiguration,
+});
+
+const chainServiceB = new ChainService({
+  ...bEngineConfig.chainServiceConfiguration,
 });
 
 const logger: Logger = createLogger(baseConfig);
@@ -125,14 +134,17 @@ export async function crashAndRestart(
 
 export async function setupPeerWallets(withWalletsSeeding = false): Promise<PeerSetupWithWallets> {
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
+
   const peerWallets = {
     a: await Wallet.create(
       peerSetup.peerEngines.a,
+      chainServiceA,
       TestMessageService.create,
       DEFAULT__RETRY_OPTIONS
     ),
     b: await Wallet.create(
       peerSetup.peerEngines.b,
+      chainServiceB,
       TestMessageService.create,
       DEFAULT__RETRY_OPTIONS
     ),
