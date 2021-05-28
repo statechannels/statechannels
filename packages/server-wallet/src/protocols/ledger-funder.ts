@@ -3,7 +3,6 @@ import _ from 'lodash';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
-import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {WalletObjective} from '../models/objective';
@@ -13,18 +12,18 @@ import {EngineResponse} from '../engine/engine-response';
 export class LedgerFunder {
   constructor(
     private store: Store,
-    private chainService: ChainServiceInterface,
+
     private logger: Logger,
     private timingMetrics = false
   ) {}
 
   public static create(
     store: Store,
-    chainService: ChainServiceInterface,
+
     logger: Logger,
     timingMetrics = false
   ): LedgerFunder {
-    return new LedgerFunder(store, chainService, logger, timingMetrics);
+    return new LedgerFunder(store, logger, timingMetrics);
   }
 
   /**

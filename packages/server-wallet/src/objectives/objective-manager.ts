@@ -6,7 +6,6 @@ import {Bytes32} from '../type-aliases';
 import {ChannelOpener, WaitingFor as ChannelOpenerWaitingFor} from '../protocols/channel-opener';
 import {ChannelCloser, WaitingFor as ChannelCloserWaitingFor} from '../protocols/channel-closer';
 import {Store} from '../engine/store';
-import {ChainServiceInterface} from '../chain-service';
 import {EngineResponse} from '../engine/engine-response';
 import {
   ChallengeSubmitter,
@@ -40,17 +39,17 @@ export interface Cranker<O extends WalletObjective> {
 export class ObjectiveManager {
   private store: Store;
   private logger: Logger;
-  private chainService: ChainServiceInterface;
+
   private timingMetrics: boolean;
 
   static create(params: ObjectiveManagerParams): ObjectiveManager {
     return new this(params);
   }
 
-  private constructor({store, logger, chainService, timingMetrics}: ObjectiveManagerParams) {
+  private constructor({store, logger, timingMetrics}: ObjectiveManagerParams) {
     this.store = store;
     this.logger = logger;
-    this.chainService = chainService;
+
     this.timingMetrics = timingMetrics;
   }
 
@@ -99,23 +98,23 @@ export class ObjectiveManager {
   }
 
   private get channelDefunder(): ChannelDefunder {
-    return ChannelDefunder.create(this.store, this.chainService, this.logger, this.timingMetrics);
+    return ChannelDefunder.create(this.store, this.logger, this.timingMetrics);
   }
 
   private get challengeSubmitter(): ChallengeSubmitter {
     return ChallengeSubmitter.create(
       this.store,
-      this.chainService,
+
       this.logger,
       this.timingMetrics
     );
   }
   private get channelOpener(): ChannelOpener {
-    return ChannelOpener.create(this.store, this.chainService, this.logger, this.timingMetrics);
+    return ChannelOpener.create(this.store, this.logger, this.timingMetrics);
   }
 
   private get channelCloser(): ChannelCloser {
-    return ChannelCloser.create(this.store, this.chainService, this.logger, this.timingMetrics);
+    return ChannelCloser.create(this.store, this.logger, this.timingMetrics);
   }
 
   public async commenceCloseChannel(channelId: Bytes32, response: EngineResponse): Promise<void> {

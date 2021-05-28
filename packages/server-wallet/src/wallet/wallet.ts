@@ -2,6 +2,7 @@ import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {makeAddress} from '@statechannels/wallet-core';
+import {utils} from 'ethers';
 
 import {
   MessageHandler,
@@ -12,6 +13,7 @@ import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {Engine, SyncObjectiveResult} from '../engine';
 import {ChainServiceInterface} from '../chain-service';
+import * as ChannelState from '../protocols/state';
 
 import {
   RetryOptions,
@@ -40,7 +42,13 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
     messageServiceFactory: MessageServiceFactory,
     retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<Wallet> {
-    return new Wallet(messageServiceFactory, engine, chainService, {...DEFAULTS, ...retryOptions});
+    await chainService.checkChainId(engine.engineConfig.networkConfiguration.chainNetworkID);
+    const wallet = new Wallet(messageServiceFactory, engine, chainService, {
+      ...DEFAULTS,
+      ...retryOptions,
+    });
+    await wallet.registerExistingChannelsWithChainService();
+    return wallet;
   }
 
   private _messageService: MessageServiceInterface;
@@ -80,7 +88,23 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
 
     this._messageService = messageServiceFactory(handler);
   }
-
+  /**
+   * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
+   *
+   * @remarks
+   * Storing the bytecode is necessary for the engine to verify ForceMoveApp transitions.
+   *
+   * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
+   * @returns A promise that resolves when the bytecode has been successfully stored.
+   */
+  public async registerAppDefinition(appDefinition: string): Promise<void> {
+    const bytecode = await this._chainService.fetchBytecode(appDefinition);
+    await this._engine.store.upsertBytecode(
+      utils.hexlify(this._engine.engineConfig.networkConfiguration.chainNetworkID),
+      makeAddress(appDefinition),
+      bytecode
+    );
+  }
   /**
    * Approves an objective that has been proposed by another participant.
    * Once the objective has been approved progress can be made to completing the objective.
@@ -282,6 +306,31 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
 
   public get messageService(): MessageServiceInterface {
     return this._messageService;
+  }
+
+  /**
+   * Registers any channels existing in the database with the chain service.
+   *
+   * @remarks
+   * Enables the chain service to alert the engine of of any blockchain events for existing channels.
+   *
+   * @returns A promise that resolves when the channels have been successfully registered.
+   */
+  private async registerExistingChannelsWithChainService(): Promise<void> {
+    const channelsToRegister = (await this._engine.store.getNonFinalizedChannels())
+      .map(ChannelState.toChannelResult)
+      .map(cr => ({
+        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+        channelId: cr.channelId,
+      }));
+
+    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
+      this._chainService.registerChannel(
+        channelId,
+        assetHolderAddresses,
+        createChainListener(this._engine, this._engine.store, this._messageService)
+      );
+    }
   }
 
   async destroy(): Promise<void> {

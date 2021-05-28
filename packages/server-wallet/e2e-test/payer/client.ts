@@ -11,6 +11,7 @@ import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {DeepPartial, defaultConfig, EngineConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
+import {ChainServiceInterface, MockChainService} from '../../src/chain-service';
 
 export default class PayerClient {
   readonly config: EngineConfig;
@@ -18,7 +19,8 @@ export default class PayerClient {
   private constructor(
     private readonly pk: Bytes32,
     private readonly receiverHttpServerURL: string,
-    public readonly engine: Engine
+    public readonly engine: Engine,
+    public readonly chainService: ChainServiceInterface
   ) {
     this.config = engine.engineConfig;
     this.provider = new providers.JsonRpcProvider(this.config.chainServiceConfiguration.provider);
@@ -29,11 +31,12 @@ export default class PayerClient {
     partialConfig?: DeepPartial<EngineConfig>
   ): Promise<PayerClient> {
     const mergedConfig = _.merge(payerConfig, partialConfig);
+    const chainService = new MockChainService();
     const engine = recordFunctionMetrics(
       await Engine.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
     );
-    return new PayerClient(pk, receiverHttpServerURL, engine);
+    return new PayerClient(pk, receiverHttpServerURL, engine, chainService);
   }
 
   public async warmup(): Promise<void> {

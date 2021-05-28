@@ -3,7 +3,6 @@ import {Transaction} from 'objection';
 
 import {defaultTestConfig} from '../..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
-import {MockChainService} from '../../chain-service';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {createLogger} from '../../logger';
 import {AdjudicatorStatusModel} from '../../models/adjudicator-status';
@@ -15,6 +14,7 @@ import {Store} from '../../engine/store';
 import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {TestLedgerChannel} from '../../engine/__test__/fixtures/test-ledger-channel';
 import {Defunder, shouldSubmitCollaborativeTx} from '../defunder';
+import {EngineResponse} from '../../engine/engine-response';
 
 const testChannel = TestChannel.create({
   aBal: 5,
@@ -137,45 +137,49 @@ describe('Direct channel defunding', () => {
       states: [3, 4],
       funds: 8,
     });
-    const chainService = new MockChainService();
-    const spy = jest.spyOn(chainService, 'concludeAndWithdraw');
+
+    const response = new EngineResponse();
+
     const logger = createLogger(defaultTestConfig());
 
     let channel = await Channel.forId(testChannel.channelId, testKnex);
-    const defunder = new Defunder(store, chainService, logger);
+    const defunder = new Defunder(store, logger);
 
     await testKnex.transaction(async tx => {
       const objective = await ensureCloseObjective(testChannel, tx, 1);
       // Defunder should take no actions as there is no conclusion proof.
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
       });
-      expect(spy).not.toHaveBeenCalled();
+      expect(response.chainRequests).toHaveLength(0);
 
       // Add a conclusion proof to the store.
       const state = testChannel.wireState(5);
       channel = await store.addSignedState(channel.channelId, state, tx);
 
       // Defunder should NOT submit a transaction since we are not the transaction submitter.
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
       });
-      expect(spy).not.toHaveBeenCalled();
+      expect(response.chainRequests).toHaveLength(0);
 
       // Defunder should submit a transaction since there is a conclusion proof and we are the transaction submitter.
       objective.data.txSubmitterOrder = [0, 1];
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: true,
         isChannelDefunded: false,
       });
-      expect(spy).toHaveBeenCalledWith(channel.support);
+      expect(response.chainRequests[0]).toMatchObject({
+        type: 'ConcludeAndWithdraw',
+        finalizationProof: channel.support,
+      });
 
       // The channel has NOT been fully defunded.
       // Defunder does not complete
       await Funding.updateFunding(tx, channel.channelId, '0x03', testChannel.assetHolderAddress);
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
       });
@@ -183,7 +187,7 @@ describe('Direct channel defunding', () => {
       // The channel has been fully defunded
       // Defunder completes
       await Funding.updateFunding(tx, channel.channelId, '0x00', testChannel.assetHolderAddress);
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: true,
       });
@@ -200,12 +204,12 @@ describe('Direct channel defunding', () => {
     const state3 = testChannel.signedStateWithHash(3);
     const state4 = testChannel.signedStateWithHash(4);
 
-    const chainService = new MockChainService();
-    const spy = jest.spyOn(chainService, 'pushOutcomeAndWithdraw');
+    const response = new EngineResponse();
+
     const logger = createLogger(defaultTestConfig());
 
     const channel = await Channel.forId(testChannel.channelId, testKnex);
-    const defunder = new Defunder(store, chainService, logger);
+    const defunder = new Defunder(store, logger);
     await AdjudicatorStatusModel.insertAdjudicatorStatus(testKnex, channel.channelId, 1, [
       state4,
       state3,
@@ -215,16 +219,20 @@ describe('Direct channel defunding', () => {
     await testKnex.transaction(async tx => {
       const objective = await ensureDefundObjective(testChannel, tx);
 
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: true,
         isChannelDefunded: false,
       });
-      expect(spy).toHaveBeenCalledWith(state4, channel.myAddress);
 
+      expect(response.chainRequests[0]).toMatchObject({
+        type: 'PushOutcomeAndWithdraw',
+        state: state4,
+        challengerAddress: channel.myAddress,
+      });
       // The channel has been fully defunded
       // Defunder completes
       await Funding.updateFunding(tx, channel.channelId, '0x00', testChannel.assetHolderAddress);
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: true,
       });
@@ -254,16 +262,16 @@ describe('Ledger funded channel defunding', () => {
       funds: 8,
     });
 
-    const chainService = new MockChainService();
+    const engineResponse = new EngineResponse();
     const logger = createLogger(defaultTestConfig());
-    const defunder = new Defunder(store, chainService, logger);
+    const defunder = new Defunder(store, logger);
 
     let channel = await Channel.forId(testLedgerFundedChannel.channelId, testKnex);
     await testKnex.transaction(async tx => {
       const objective = await ensureCloseObjective(testLedgerFundedChannel, tx);
 
       // There is no conclusion proof
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, engineResponse, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
       });
@@ -274,7 +282,7 @@ describe('Ledger funded channel defunding', () => {
         testLedgerFundedChannel.wireState(5),
         tx
       );
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, engineResponse, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
       });
@@ -287,9 +295,9 @@ describe('Ledger funded channel defunding', () => {
       });
 
       await LedgerRequest.setRequestStatus(channel.channelId, 'defund', 'succeeded', tx);
-
+      const response = new EngineResponse();
       // Defunder should is now done
-      expect(await defunder.crank(channel, objective, tx)).toEqual({
+      expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: true,
       });

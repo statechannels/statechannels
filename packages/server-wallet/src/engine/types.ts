@@ -8,6 +8,7 @@ import {
   ChannelResult,
 } from '@statechannels/client-api-schema';
 
+import {ChainRequest} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
 import {Bytes32, WireMessage} from '../type-aliases';
@@ -16,12 +17,14 @@ export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
   newObjective: WalletObjective | undefined;
+  chainRequests: ChainRequest[];
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
   messagesByObjective: Record<string, WireMessage[]>;
+  chainRequests: ChainRequest[];
 };
 
 export type SyncObjectiveResult = {
@@ -31,9 +34,6 @@ export type SyncObjectiveResult = {
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
 export interface EngineInterface {
-  // App utilities
-  registerAppDefinition(appDefinition: string): Promise<void>;
-  registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
   // App channel management
   createChannels(
     args: CreateChannelParams,

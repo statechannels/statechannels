@@ -3,7 +3,6 @@ import _ from 'lodash';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
-import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {WalletObjective} from '../models/objective';
@@ -13,18 +12,18 @@ import {EngineResponse} from '../engine/engine-response';
 export class DirectFunder {
   constructor(
     private store: Store,
-    private chainService: ChainServiceInterface,
+
     private logger: Logger,
     private timingMetrics = false
   ) {}
 
   public static create(
     store: Store,
-    chainService: ChainServiceInterface,
+
     logger: Logger,
     timingMetrics = false
   ): DirectFunder {
-    return new DirectFunder(store, chainService, logger, timingMetrics);
+    return new DirectFunder(store, logger, timingMetrics);
   }
 
   /**
@@ -59,12 +58,15 @@ export class DirectFunder {
     // otherwise, deposit
     const amountToDeposit = BN.sub(targetAfter, currentAmount); // previous checks imply this is >0
     await ChainServiceRequest.insertOrUpdate(channel.channelId, 'fund', tx);
-    await this.chainService.fundChannel({
-      channelId: channel.channelId,
-      assetHolderAddress: assetHolderAddress,
-      expectedHeld: BN.from(currentAmount),
-      amount: BN.from(amountToDeposit),
-    });
+    await response.queueChainRequest([
+      {
+        type: 'FundChannel',
+        channelId: channel.channelId,
+        assetHolderAddress: assetHolderAddress,
+        expectedHeld: BN.from(currentAmount),
+        amount: BN.from(amountToDeposit),
+      },
+    ]);
 
     return false;
   }
