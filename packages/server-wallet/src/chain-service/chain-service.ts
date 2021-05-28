@@ -17,6 +17,7 @@ import {
   State,
   toNitroSignedState,
   toNitroState,
+  unreachable,
 } from '@statechannels/wallet-core';
 import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
 import {NonceManager} from '@ethersproject/experimental';
@@ -33,6 +34,7 @@ import {
   AllowanceMode,
   AssetOutcomeUpdatedArg,
   ChainEventSubscriberInterface,
+  ChainRequest,
   ChainServiceArgs,
   ChainServiceInterface,
   FundChannelArg,
@@ -131,6 +133,33 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
+  public async handleChainRequests(
+    chainRequests: ChainRequest[]
+  ): Promise<providers.TransactionResponse[]> {
+    const responses = Array(chainRequests.length);
+    for (const chainRequest of chainRequests) {
+      switch (chainRequest.type) {
+        case 'Challenge':
+          responses.push(this.challenge(chainRequest.challengeStates, chainRequest.privateKey));
+          break;
+        case 'ConcludeAndWithdraw':
+          responses.push(this.concludeAndWithdraw(chainRequest.finalizationProof));
+          break;
+        case 'FundChannel':
+          responses.push(this.fundChannel(chainRequest));
+          break;
+        case 'PushOutcomeAndWithdraw':
+          responses.push(
+            this.pushOutcomeAndWithdraw(chainRequest.state, chainRequest.challengerAddress)
+          );
+          break;
+        default:
+          unreachable(chainRequest);
+      }
+    }
+    return responses;
+  }
+
   public async checkChainId(networkChainId: number): Promise<void> {
     const rpcChainId = (await this.provider.getNetwork()).chainId;
     if (rpcChainId !== networkChainId)
@@ -221,7 +250,7 @@ export class ChainService implements ChainServiceInterface {
 
   async concludeAndWithdraw(
     finalizationProof: SignedState[]
-  ): Promise<providers.TransactionResponse | void> {
+  ): Promise<providers.TransactionResponse> {
     if (!finalizationProof.length)
       throw new Error('ChainService: concludeAndWithdraw was called with an empty array?');
 
@@ -245,7 +274,7 @@ export class ChainService implements ChainServiceInterface {
           {channelId, determinedBy: 'Revert reason'},
           'Transaction to conclude channel failed: channel is already finalized'
         );
-        return;
+        throw new Error('Conclude failed');
       }
 
       const [, finalizesAt] = await this.nitroAdjudicator.unpackStatus(channelId);
@@ -260,7 +289,7 @@ export class ChainService implements ChainServiceInterface {
           {channelId, determinedBy: 'Javascript check'},
           'Transaction to conclude channel failed: channel is already finalized'
         );
-        return;
+        throw new Error('Conclude failed');
       }
 
       throw reason;

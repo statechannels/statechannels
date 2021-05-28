@@ -81,6 +81,7 @@ export type ChainRequest =
   | PushOutcomeAndWithdrawRequest
   | ChallengeRequest;
 interface ChainModifierInterface {
+  handleChainRequests(chainRequests: ChainRequest[]): Promise<providers.TransactionResponse[]>;
   // TODO: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
   concludeAndWithdraw(
