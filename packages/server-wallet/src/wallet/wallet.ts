@@ -196,9 +196,9 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
        * Consult https://github.com/statechannels/statechannels/issues/3518 for background on this retry logic
        */
       const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
-      const {objectiveId} = objective;
+      const isComplete = async () => this._engine.store.isObjectiveComplete(objective.objectiveId);
       for (let i = 0; i < numberOfAttempts; i++) {
-        if (await this._engine.store.isObjectiveComplete(objectiveId)) {
+        if (await isComplete()) {
           return {channelId: objective.data.targetChannelId, type: 'Success'};
         }
         const delayAmount = initialDelay * Math.pow(multiple, i);
@@ -215,7 +215,7 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
         await this._messageService.send(messagesForObjective);
       }
 
-      if (await this._engine.store.isObjectiveComplete(objectiveId)) {
+      if (await isComplete()) {
         return {channelId: objective.data.targetChannelId, type: 'Success'};
       }
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
