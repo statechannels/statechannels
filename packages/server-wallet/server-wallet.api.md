@@ -5,8 +5,8 @@
 ```ts
 
 import { Address } from '@statechannels/wallet-core';
-import { AllocationItem } from '@statechannels/nitro-protocol';
-import { AllocationItem as AllocationItem_2 } from '@statechannels/wallet-core';
+import { AllocationItem } from '@statechannels/wallet-core';
+import { AllocationItem as AllocationItem_2 } from '@statechannels/nitro-protocol';
 import { AssetOutcome } from '@statechannels/nitro-protocol';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
@@ -148,6 +148,8 @@ export interface EngineInterface {
     // (undocumented)
     closeChannel(args: CloseChannelParams): Promise<SingleChannelOutput>;
     // (undocumented)
+    crank(channelIds: string[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
     // (undocumented)
     getChannels(): Promise<MultipleChannelOutput>;
@@ -159,10 +161,6 @@ export interface EngineInterface {
     pushMessage(m: unknown): Promise<MultipleChannelOutput>;
     // (undocumented)
     pushUpdate(m: unknown): Promise<SingleChannelOutput>;
-    // (undocumented)
-    registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
-    // (undocumented)
-    registerAppDefinition(appDefinition: string): Promise<void>;
     // (undocumented)
     syncChannel(args: SyncChannelParams): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "Bytes32" needs to be exported by the entry point index.d.ts
@@ -224,6 +222,7 @@ export type MultipleChannelOutput = {
     channelResults: ChannelResult[];
     newObjectives: WalletObjective[];
     messagesByObjective: Record<string, WireMessage[]>;
+    chainRequests: ChainRequest[];
 };
 
 // @public
@@ -345,27 +344,23 @@ export type SingleChannelOutput = {
     outbox: Outgoing[];
     channelResult: ChannelResult;
     newObjective: WalletObjective | undefined;
+    chainRequests: ChainRequest[];
 };
 
-// Warning: (ae-forgotten-export) The symbol "ChainEventSubscriberInterface" needs to be exported by the entry point index.d.ts
-//
 // @public
-export class SingleThreadedEngine implements EngineInterface, ChainEventSubscriberInterface {
+export class SingleThreadedEngine implements EngineInterface {
     protected constructor(engineConfig: IncomingEngineConfig);
     addSigningKey(privateKey: PrivateKey): Promise<void>;
     // (undocumented)
     approveObjectives(objectiveIds: string[]): Promise<{
         objectives: WalletObjective[];
         messages: Message_3[];
+        chainRequests: ChainRequest[];
     }>;
     // Warning: (ae-forgotten-export) The symbol "AssetOutcomeUpdatedArg" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
     assetOutcomeUpdated({ channelId, assetHolderAddress, externalPayouts, }: AssetOutcomeUpdatedArg): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    chainService: ChainServiceInterface;
     challenge(channelId: string): Promise<SingleChannelOutput>;
     // Warning: (ae-forgotten-export) The symbol "ChallengeRegisteredArg" needs to be exported by the entry point index.d.ts
     //
@@ -379,6 +374,8 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
         newObjective: WalletObjective;
     }>;
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
+    // (undocumented)
+    crank(channelIds: string[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     static create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine>;
     createChannel(args: CreateChannelParams): Promise<SingleChannelOutput & {
@@ -415,7 +412,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     pushMessage(rawPayload: unknown): Promise<MultipleChannelOutput>;
     pushUpdate(rawPayload: unknown): Promise<SingleChannelOutput>;
     registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
-    registerAppDefinition(appDefinition: string): Promise<void>;
     // Warning: (ae-forgotten-export) The symbol "Store" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -443,8 +439,9 @@ export function validateEngineConfig(config: Record<string, any>): {
 export class Wallet extends EventEmitter<ObjectiveProposed> {
     approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
     closeChannels(channelIds: string[]): Promise<ObjectiveResult[]>;
+    // Warning: (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "MessageServiceFactory" needs to be exported by the entry point index.d.ts
-    static create(engine: Engine, messageServiceFactory: MessageServiceFactory, retryOptions?: Partial<RetryOptions>): Promise<Wallet>;
+    static create(engine: Engine, chainService: ChainServiceInterface, messageServiceFactory: MessageServiceFactory, retryOptions?: Partial<RetryOptions>): Promise<Wallet>;
     createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
     // (undocumented)
     destroy(): Promise<void>;
@@ -453,13 +450,15 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
     //
     // (undocumented)
     get messageService(): MessageServiceInterface;
+    registerAppDefinition(appDefinition: string): Promise<void>;
     }
 
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:24:3 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
-// src/engine/types.ts:61:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:26:3 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:27:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:63:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
 // src/wallet/types.ts:53:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
