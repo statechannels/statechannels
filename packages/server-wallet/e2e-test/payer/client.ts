@@ -11,7 +11,7 @@ import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {DeepPartial, defaultConfig, EngineConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
-import {ChainServiceInterface, MockChainService} from '../../src/chain-service';
+import {ChainService, ChainServiceInterface} from '../../src/chain-service';
 
 export default class PayerClient {
   readonly config: EngineConfig;
@@ -31,7 +31,7 @@ export default class PayerClient {
     partialConfig?: DeepPartial<EngineConfig>
   ): Promise<PayerClient> {
     const mergedConfig = _.merge(payerConfig, partialConfig);
-    const chainService = new MockChainService();
+    const chainService = new ChainService(mergedConfig.chainServiceConfiguration);
     const engine = recordFunctionMetrics(
       await Engine.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
@@ -169,7 +169,9 @@ export default class PayerClient {
     await blocksMined;
   }
   public async challenge(channelId: string): Promise<ChannelResult> {
-    const {channelResult} = await this.engine.challenge(channelId);
+    const {channelResult, chainRequests} = await this.engine.challenge(channelId);
+    const transactions = await this.chainService.handleChainRequests(chainRequests);
+    await Promise.all(transactions.map(tr => tr.wait()));
     return channelResult;
   }
 
