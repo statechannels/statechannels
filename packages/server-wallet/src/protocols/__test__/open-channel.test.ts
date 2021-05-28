@@ -6,7 +6,6 @@ import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {EngineResponse} from '../../engine/engine-response';
 import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
-import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {WalletObjective} from '../../models/objective';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
@@ -171,10 +170,9 @@ const crankAndAssert = async (
   const fundsToDeposit = args.fundsToDeposit || 0;
   const completesObj = args.completesObj || false;
 
-  const chainService = new MockChainService();
-  const channelOpener = ChannelOpener.create(store, chainService, logger, timingMetrics);
+  const channelOpener = ChannelOpener.create(store, logger, timingMetrics);
   const response = EngineResponse.initialize();
-  const spy = jest.spyOn(chainService, 'fundChannel');
+
   await store.transaction(async tx => {
     await channelOpener.crank(objective, response, tx);
   });
@@ -183,11 +181,12 @@ const crankAndAssert = async (
   expect(response._signedStates).toMatchObject(
     statesToSign.map((n: number) => testChan.wireState(Number(n)))
   );
+
   // check that funds were deposited
   if (fundsToDeposit > 0) {
-    expect(spy).toHaveBeenCalledWith(expect.objectContaining({amount: BN.from(fundsToDeposit)}));
+    expect(response.chainRequests[0]).toMatchObject({amount: BN.from(fundsToDeposit)});
   } else {
-    expect(spy).not.toHaveBeenCalled();
+    expect(response.chainRequests).toHaveLength(0);
   }
 
   const reloadedObjective = await store.getObjective(objective.objectiveId);

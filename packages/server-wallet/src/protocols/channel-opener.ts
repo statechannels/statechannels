@@ -6,7 +6,6 @@ import {Transaction} from 'objection';
 import {Store} from '../engine/store';
 import {WalletObjective} from '../models/objective';
 import {EngineResponse} from '../engine/engine-response';
-import {ChainServiceInterface} from '../chain-service';
 import {Channel} from '../models/channel';
 import {Nothing, Cranker} from '../objectives/objective-manager';
 
@@ -20,20 +19,15 @@ export enum WaitingFor {
 }
 
 export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
-  constructor(
-    private store: Store,
-    private chainService: ChainServiceInterface,
-    private logger: Logger,
-    private timingMetrics = false
-  ) {}
+  constructor(private store: Store, private logger: Logger, private timingMetrics = false) {}
 
   public static create(
     store: Store,
-    chainService: ChainServiceInterface,
+
     logger: Logger,
     timingMetrics = false
   ): ChannelOpener {
-    return new ChannelOpener(store, chainService, logger, timingMetrics);
+    return new ChannelOpener(store, logger, timingMetrics);
   }
 
   public async crank(
@@ -101,11 +95,11 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
   }
 
   private get directFunder(): DirectFunder {
-    return DirectFunder.create(this.store, this.chainService, this.logger, this.timingMetrics);
+    return DirectFunder.create(this.store, this.logger, this.timingMetrics);
   }
 
   private get ledgerFunder(): LedgerFunder {
-    return LedgerFunder.create(this.store, this.chainService, this.logger, this.timingMetrics);
+    return LedgerFunder.create(this.store, this.logger, this.timingMetrics);
   }
 
   private async signPrefundSetup(

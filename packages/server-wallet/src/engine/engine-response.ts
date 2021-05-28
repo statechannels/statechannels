@@ -8,13 +8,10 @@ import {Channel} from '../models/channel';
 import {WalletObjective, isSharedObjective, toWireObjective} from '../models/objective';
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
+import {ChainRequest} from '../chain-service';
 
 import {MultipleChannelOutput, SingleChannelOutput, SyncObjectiveResult} from './types';
 
-type ChannelUpdatedEvent = {
-  type: 'channelUpdated';
-  value: SingleChannelOutput;
-};
 /**
  * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
  * to be returned to the user after a call.
@@ -28,8 +25,14 @@ export class EngineResponse {
   succeededObjectives: WalletObjective[] = [];
   requests: string[] = [];
 
+  chainRequests: ChainRequest[] = [];
+
   static initialize(): EngineResponse {
     return new this();
+  }
+
+  queueChainRequest(chainRequest: ChainRequest[]): void {
+    this.chainRequests.push(...chainRequest);
   }
 
   /**
@@ -182,6 +185,7 @@ export class EngineResponse {
       channelResults: mergeChannelResults(this.channelResults),
       newObjectives: this.createdObjectives,
       messagesByObjective: this.queuedMessages,
+      chainRequests: this.chainRequests,
     };
   }
 
@@ -206,22 +210,12 @@ export class EngineResponse {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
       newObjective: this.createdObjectives[0],
+      chainRequests: this.chainRequests,
     };
   }
 
   updatedChannels(): ChannelResult[] {
     return this.channelResults;
-  }
-
-  channelUpdatedEvents(): ChannelUpdatedEvent[] {
-    return this.channelResults.map(channelResult => ({
-      type: 'channelUpdated' as const,
-      value: {
-        channelResult,
-        outbox: this.outbox, // TODO: doesn't seem like this should be on this event?
-        newObjective: this.createdObjectives[0], // TODO: This one neither?
-      },
-    }));
   }
 
   public get syncObjectiveResult(): SyncObjectiveResult {

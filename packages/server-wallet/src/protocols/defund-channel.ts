@@ -2,7 +2,6 @@ import {DefundChannel} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
-import {ChainServiceInterface} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Cranker, Nothing} from '../objectives/objective-manager';
 import {Store} from '../engine/store';
@@ -17,17 +16,17 @@ export const enum WaitingFor {
 export class ChannelDefunder implements Cranker<WalletObjective<DefundChannel>> {
   constructor(
     private store: Store,
-    private chainService: ChainServiceInterface,
+
     private logger: Logger,
     private timingMetrics = false
   ) {}
   public static create(
     store: Store,
-    chainService: ChainServiceInterface,
+
     logger: Logger,
     timingMetrics = false
   ): ChannelDefunder {
-    return new ChannelDefunder(store, chainService, logger, timingMetrics);
+    return new ChannelDefunder(store, logger, timingMetrics);
   }
 
   public async crank(
@@ -54,10 +53,9 @@ export class ChannelDefunder implements Cranker<WalletObjective<DefundChannel>> 
 
     const {didSubmitTransaction} = await Defunder.create(
       this.store,
-      this.chainService,
       this.logger,
       this.timingMetrics
-    ).crank(channel, objective, tx);
+    ).crank(channel, objective, response, tx);
 
     // A better methodology is likely to create a Challenge objective that succeeds after a
     // channel has been defunded (instead of succeeding an objective on transaction submission)

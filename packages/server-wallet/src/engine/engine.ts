@@ -27,13 +27,11 @@ import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
-import {Transaction} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
-import * as ChannelState from '../protocols/state';
 import {PushMessageError} from '../errors/engine-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {
@@ -44,11 +42,7 @@ import {
   validateEngineConfig,
 } from '../config';
 import {
-  ChainServiceInterface,
-  ChainEventSubscriberInterface,
   HoldingUpdatedArg,
-  ChainService,
-  MockChainService,
   ChannelFinalizedArg,
   AssetOutcomeUpdatedArg,
   ChallengeRegisteredArg,
@@ -83,10 +77,10 @@ export class ConfigValidationError extends Error {
 /**
  * A single-threaded Nitro engine
  */
-export class SingleThreadedEngine implements EngineInterface, ChainEventSubscriberInterface {
+export class SingleThreadedEngine implements EngineInterface {
   knex: Knex;
   store: Store;
-  chainService: ChainServiceInterface;
+
   objectiveManager: ObjectiveManager;
   ledgerManager: LedgerManager;
   logger: Logger;
@@ -94,12 +88,7 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
   readonly engineConfig: EngineConfig;
 
   public static async create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine> {
-    const engine = new SingleThreadedEngine(engineConfig);
-
-    await engine.chainService.checkChainId(engineConfig.networkConfiguration.chainNetworkID);
-
-    await engine.registerExistingChannelsWithChainService();
-    return engine;
+    return new SingleThreadedEngine(engineConfig);
   }
 
   /**
@@ -140,18 +129,9 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
       setupMetrics(this.engineConfig.metricsConfiguration.metricsOutputFile as string);
     }
 
-    if (this.engineConfig.chainServiceConfiguration.attachChainService) {
-      this.chainService = new ChainService({
-        ...this.engineConfig.chainServiceConfiguration,
-        logger: this.logger,
-      });
-    } else {
-      this.chainService = new MockChainService();
-    }
-
     this.objectiveManager = ObjectiveManager.create({
       store: this.store,
-      chainService: this.chainService,
+
       logger: this.logger,
       timingMetrics: this.engineConfig.metricsConfiguration.timingMetrics,
     });
@@ -173,45 +153,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
    */
   public async addSigningKey(privateKey: PrivateKey): Promise<void> {
     await this.store.addSigningKey(privateKey);
-  }
-
-  /**
-   * Registers any channels existing in the database with the chain service.
-   *
-   * @remarks
-   * Enables the chain service to alert the engine of of any blockchain events for existing channels.
-   *
-   * @returns A promise that resolves when the channels have been successfully registered.
-   */
-  private async registerExistingChannelsWithChainService(): Promise<void> {
-    const channelsToRegister = (await this.store.getNonFinalizedChannels())
-      .map(ChannelState.toChannelResult)
-      .map(cr => ({
-        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
-        channelId: cr.channelId,
-      }));
-
-    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
-      this.chainService.registerChannel(channelId, assetHolderAddresses, this);
-    }
-  }
-
-  /**
-   * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
-   *
-   * @remarks
-   * Storing the bytecode is necessary for the engine to verify ForceMoveApp transitions.
-   *
-   * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
-   * @returns A promise that resolves when the bytecode has been successfully stored.
-   */
-  public async registerAppDefinition(appDefinition: string): Promise<void> {
-    const bytecode = await this.chainService.fetchBytecode(appDefinition);
-    await this.store.upsertBytecode(
-      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
-      makeAddress(appDefinition),
-      bytecode
-    );
   }
 
   /**
@@ -242,7 +183,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
    */
   public async destroy(): Promise<void> {
     await this.knex.destroy();
-    this.chainService.destructor();
   }
 
   /**
@@ -491,8 +431,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
 
-    this.registerChannelWithChainService(channel.channelId);
-
     return channel.channelId;
   }
 
@@ -518,8 +456,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
 
     await this.takeActions(channelIds, response);
 
-    await Promise.all(channelIds.map(id => this.registerChannelWithChainService(id)));
-
     return response.multipleChannelOutput();
   }
 
@@ -534,7 +470,7 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
 
       if (objective.status === 'pending') {
         const approved = await this.store.approveObjective(objectiveId, tx);
-        await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
+
         return approved;
       } else {
         return objective;
@@ -603,8 +539,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     }
 
     await this.takeActions([channelId], response);
-
-    this.registerChannelWithChainService(channelId);
 
     // set strict=false to silently drop any ledger channel updates from channelResults
     // TODO: change api so that joinChannel returns a MultipleChannelOutput
@@ -1006,19 +940,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     });
 
     await this.takeActions([arg.channelId], response);
-  }
-
-  private async registerChannelWithChainService(
-    channelId: string,
-    tx?: Transaction
-  ): Promise<void> {
-    const channel = await this.store.getChannelState(channelId, tx);
-    const channelResult = ChannelState.toChannelResult(channel);
-
-    const assetHolderAddresses = channelResult.allocations.map(a =>
-      makeAddress(a.assetHolderAddress)
-    );
-    this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
 }
 

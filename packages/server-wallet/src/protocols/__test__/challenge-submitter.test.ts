@@ -5,7 +5,6 @@ import {Store} from '../../engine/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {defaultTestConfig} from '../../config';
 import {EngineResponse} from '../../engine/engine-response';
-import {MockChainService} from '../../chain-service';
 import {createLogger} from '../../logger';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
 import {ChallengeSubmitter} from '../challenge-submitter';
@@ -107,18 +106,18 @@ const crankAndAssert = async (
 ): Promise<void> => {
   const completesObj = args.completesObj || false;
   const callsChallenge = args.callsChallenge || false;
-  const chainService = new MockChainService();
-  const challengeSubmitter = ChallengeSubmitter.create(store, chainService, logger, timingMetrics);
+
+  const challengeSubmitter = ChallengeSubmitter.create(store, logger, timingMetrics);
   const response = EngineResponse.initialize();
-  const spy = jest.spyOn(chainService, 'challenge');
+
   await store.transaction(async tx => {
     await challengeSubmitter.crank(objective, response, tx);
   });
 
   if (callsChallenge) {
-    expect(spy).toHaveBeenCalled();
+    expect(response.chainRequests[0]).toMatchObject({type: 'Challenge'});
   } else {
-    expect(spy).not.toHaveBeenCalled();
+    expect(response.chainRequests).toHaveLength(0);
   }
 
   const reloadedObjective = await store.getObjective(objective.objectiveId);

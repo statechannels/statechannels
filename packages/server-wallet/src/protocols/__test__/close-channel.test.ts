@@ -2,7 +2,6 @@ import {CloseChannel} from '@statechannels/wallet-core';
 
 import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {MockChainService} from '../../chain-service';
 import {defaultTestConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
@@ -127,13 +126,11 @@ const crankAndAssert = async (
   const withdraws = args.withdraws || false;
   const completesObj = args.completesObj || false;
 
-  const chainService = new MockChainService();
-
   const logger = createLogger(defaultTestConfig());
   const timingMetrics = false;
-  const channelCloser = ChannelCloser.create(store, chainService, logger, timingMetrics);
+  const channelCloser = ChannelCloser.create(store, logger, timingMetrics);
   const response = EngineResponse.initialize();
-  const spy = jest.spyOn(chainService, 'concludeAndWithdraw');
+
   await store.transaction(async tx => {
     await channelCloser.crank(objective, response, tx);
   });
@@ -144,9 +141,9 @@ const crankAndAssert = async (
   );
   // check that funds were deposited
   if (withdraws) {
-    expect(spy).toHaveBeenCalled();
+    expect(response.chainRequests[0]).toMatchObject({type: 'ConcludeAndWithdraw'});
   } else {
-    expect(spy).not.toHaveBeenCalled();
+    expect(response.chainRequests).toHaveLength(0);
   }
 
   const reloadedObjective = await store.getObjective(objective.objectiveId);

@@ -9,7 +9,6 @@ import {Logger} from 'pino';
 import {isExternalDestination} from '@statechannels/nitro-protocol';
 
 import {Store} from '../engine/store';
-import {ChainServiceInterface} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {EngineResponse} from '../engine/engine-response';
 import {Channel} from '../models/channel';
@@ -26,18 +25,18 @@ export const enum WaitingFor {
 export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
   constructor(
     private store: Store,
-    private chainService: ChainServiceInterface,
+
     private logger: Logger,
     private timingMetrics = false
   ) {}
 
   public static create(
     store: Store,
-    chainService: ChainServiceInterface,
+
     logger: Logger,
     timingMetrics = false
   ): ChannelCloser {
-    return new ChannelCloser(store, chainService, logger, timingMetrics);
+    return new ChannelCloser(store, logger, timingMetrics);
   }
 
   public async crank(
@@ -61,7 +60,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
 
       const defunder = Defunder.create(
         this.store,
-        this.chainService,
+
         this.logger,
         this.timingMetrics
       );
@@ -71,7 +70,7 @@ export class ChannelCloser implements Cranker<WalletObjective<CloseChannel>> {
         return WaitingFor.theirFinalState;
       }
 
-      if (!(await defunder.crank(channel, objective, tx)).isChannelDefunded) {
+      if (!(await defunder.crank(channel, objective, response, tx)).isChannelDefunded) {
         response.queueChannel(channel);
         return WaitingFor.defunding;
       }
