@@ -392,6 +392,7 @@ describe('Funding multiple channels synchronously (in bulk)', () => {
       outbox: [],
       newObjectives: [],
       messagesByObjective: {},
+      chainRequests: [],
     });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
@@ -492,6 +493,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
       outbox: [],
       newObjectives: [],
       messagesByObjective: {},
+      chainRequests: [],
     });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
@@ -583,6 +585,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
       outbox: [],
       newObjectives: [],
       messagesByObjective: {},
+      chainRequests: [],
     });
 
     const {
