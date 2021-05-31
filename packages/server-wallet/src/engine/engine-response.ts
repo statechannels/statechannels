@@ -186,6 +186,7 @@ export class EngineResponse {
       newObjectives: this.createdObjectives,
       messagesByObjective: this.queuedMessages,
       chainRequests: this.chainRequests,
+      completedObjectives: this.succeededObjectives,
     };
   }
 

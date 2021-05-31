@@ -23,6 +23,7 @@ export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
+  completedObjectives: WalletObjective[];
   messagesByObjective: Record<string, WireMessage[]>;
   chainRequests: ChainRequest[];
 };
