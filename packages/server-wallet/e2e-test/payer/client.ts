@@ -11,7 +11,7 @@ import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {DeepPartial, defaultConfig, EngineConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
-import {ChainService, ChainServiceInterface} from '../../src/chain-service';
+import {ChainService, ChainServiceInterface, MockChainService} from '../../src/chain-service';
 
 export default class PayerClient {
   readonly config: EngineConfig;
@@ -31,7 +31,13 @@ export default class PayerClient {
     partialConfig?: DeepPartial<EngineConfig>
   ): Promise<PayerClient> {
     const mergedConfig = _.merge(payerConfig, partialConfig);
-    const chainService = new ChainService(mergedConfig.chainServiceConfiguration);
+    let chainService: ChainServiceInterface;
+
+    if (mergedConfig.chainServiceConfiguration.attachChainService) {
+      chainService = new ChainService(mergedConfig.chainServiceConfiguration);
+    } else {
+      chainService = new MockChainService();
+    }
     const engine = recordFunctionMetrics(
       await Engine.create(mergedConfig),
       payerConfig.metricsConfiguration.timingMetrics
@@ -42,6 +48,7 @@ export default class PayerClient {
   public async warmup(): Promise<void> {
     this.engine instanceof MultiThreadedEngine && (await this.engine.warmUpThreads());
   }
+
   public async destroy(): Promise<void> {
     this.provider.removeAllListeners();
     await this.engine.destroy();
@@ -88,7 +95,7 @@ export default class PayerClient {
   public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
-      channelResults: [{channelId}],
+      channelResults: [channel],
     } = await this.engine.createChannels(
       {
         appData: '0x',
@@ -111,7 +118,16 @@ export default class PayerClient {
       },
       1
     );
-
+    console.log('b4');
+    const {channelId} = channel;
+    const assetHolderAddress = makeAddress(channel.allocations[0].assetHolderAddress);
+    this.chainService.registerChannel(channelId, [assetHolderAddress], {
+      assetOutcomeUpdated: () => _.noop(),
+      holdingUpdated: () => _.noop(),
+      challengeRegistered: () => _.noop(),
+      channelFinalized: () => _.noop(),
+    });
+    console.log('a4');
     const prefund2 = await this.messageReceiverAndExpectReply(params.data);
 
     const postfund1 = await this.engine.pushMessage(prefund2);
@@ -171,7 +187,8 @@ export default class PayerClient {
   public async challenge(channelId: string): Promise<ChannelResult> {
     const {channelResult, chainRequests} = await this.engine.challenge(channelId);
     const transactions = await this.chainService.handleChainRequests(chainRequests);
-    await Promise.all(transactions.map(tr => tr.wait()));
+    const result = await Promise.all(transactions.map(tr => tr.wait()));
+    console.log(result);
     return channelResult;
   }
 
