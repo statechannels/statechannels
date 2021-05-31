@@ -118,7 +118,7 @@ export default class PayerClient {
       },
       1
     );
-    console.log('b4');
+
     const {channelId} = channel;
     const assetHolderAddress = makeAddress(channel.allocations[0].assetHolderAddress);
     this.chainService.registerChannel(channelId, [assetHolderAddress], {
@@ -127,7 +127,7 @@ export default class PayerClient {
       challengeRegistered: () => _.noop(),
       channelFinalized: () => _.noop(),
     });
-    console.log('a4');
+
     const prefund2 = await this.messageReceiverAndExpectReply(params.data);
 
     const postfund1 = await this.engine.pushMessage(prefund2);
