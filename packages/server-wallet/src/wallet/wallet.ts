@@ -20,7 +20,7 @@ import {
   ObjectiveResult,
   ObjectiveError,
   ObjectiveSuccess,
-  ObjectiveProposed,
+  WalletEvents,
 } from './types';
 import {createChainListener} from './chain-listener';
 
@@ -28,7 +28,7 @@ export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
 const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
-export class Wallet extends EventEmitter<ObjectiveProposed> {
+export class Wallet extends EventEmitter<WalletEvents> {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
    * @param engine The engine to use.
@@ -62,7 +62,18 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
     super();
 
     const handler: MessageHandler = async message => {
-      const {outbox, newObjectives, channelResults} = await this._engine.pushMessage(message.data);
+      const {
+        outbox,
+        newObjectives,
+        channelResults,
+        completedObjectives,
+      } = await this._engine.pushMessage(message.data);
+
+      // Receiving messages from other participants may have resulted in completed objectives
+      for (const o of completedObjectives) {
+        this.emit('ObjectiveCompleted', o);
+      }
+
       // Receiving messages from other participants may have resulted in new proposed objectives
       for (const o of newObjectives) {
         this.emit('ObjectiveProposed', o);
@@ -112,6 +123,11 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
     const {objectives, messages, chainRequests} = await this._engine.approveObjectives(
       objectiveIds
     );
+
+    // Emit for any succeed objectives
+    const completedObjectives = objectives.filter(o => o.status === 'succeeded');
+    completedObjectives.forEach(o => this.emit('ObjectiveCompleted', o));
+
     const transactions = await this._chainService.handleChainRequests(chainRequests);
     await Promise.all(transactions.map(tr => tr.wait()));
     return Promise.all(
@@ -237,55 +253,67 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
     objective: WalletObjective,
     objectiveMessages: Message[]
   ): Promise<ObjectiveSuccess | ObjectiveError> {
-    try {
-      // If the objective is already done we want to exit immediately
-      if (objective.status === 'succeeded') {
-        this._engine.logger.debug(
-          {objective},
-          'Objective passed into ensureObjective has already succeeded'
-        );
-        return {type: 'Success', channelId: objective.data.targetChannelId};
-      }
-
-      // Now that we're listening for objective success we can now send messages
-      // that might trigger progress on the objective
-
-      await this._messageService.send(objectiveMessages);
-
-      /**
-       * Consult https://github.com/statechannels/statechannels/issues/3518 for background on this retry logic
-       */
-      const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
-      const isComplete = async () => this._engine.store.isObjectiveComplete(objective.objectiveId);
-      for (let i = 0; i < numberOfAttempts; i++) {
-        if (await isComplete()) {
-          return {channelId: objective.data.targetChannelId, type: 'Success'};
+    // eslint-disable-next-line no-async-promise-executor
+    return new Promise(async resolve => {
+      try {
+        // If the objective is already done we want to exit immediately
+        if (objective.status === 'succeeded') {
+          this._engine.logger.debug(
+            {objective},
+            'Objective passed into ensureObjective has already succeeded'
+          );
+          resolve({type: 'Success', channelId: objective.data.targetChannelId});
         }
-        const delayAmount = initialDelay * Math.pow(multiple, i);
+        let isComplete = false;
+        this.on('ObjectiveCompleted', (o: WalletObjective) => {
+          if (o.objectiveId == objective.objectiveId && o.status === 'succeeded') {
+            isComplete = true;
+            resolve({type: 'Success', channelId: objective.data.targetChannelId});
+          }
+        });
+        // Now that we're listening for objective success we can now send messages
+        // that might trigger progress on the objective
 
-        await delay(delayAmount);
+        await this._messageService.send(objectiveMessages);
 
-        const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
+        /**
+         * Consult https://github.com/statechannels/statechannels/issues/3518 for background on this retry logic
+         */
+        const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
 
-        const messagesForObjective = this.getMessagesForObjective(
-          objective.objectiveId,
-          syncResult
-        );
+        for (let i = 0; i < numberOfAttempts; i++) {
+          if (isComplete) {
+            resolve({channelId: objective.data.targetChannelId, type: 'Success'});
+          }
+          const delayAmount = initialDelay * Math.pow(multiple, i);
 
-        await this._messageService.send(messagesForObjective);
+          await delay(delayAmount);
+
+          const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
+
+          const messagesForObjective = this.getMessagesForObjective(
+            objective.objectiveId,
+            syncResult
+          );
+
+          await this._messageService.send(messagesForObjective);
+        }
+
+        if (isComplete) {
+          resolve({channelId: objective.data.targetChannelId, type: 'Success'});
+        }
+        resolve({
+          numberOfAttempts: this._retryOptions.numberOfAttempts,
+          type: 'EnsureObjectiveFailed',
+        });
+      } catch (error) {
+        this._engine.logger.error({err: error}, 'Uncaught error in EnsureObjective');
+        resolve({
+          type: 'InternalError' as const,
+          error,
+        });
       }
-
-      if (await isComplete()) {
-        return {channelId: objective.data.targetChannelId, type: 'Success'};
-      }
-      return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
-    } catch (error) {
-      this._engine.logger.error({err: error}, 'Uncaught error in EnsureObjective');
-      return {
-        type: 'InternalError' as const,
-        error,
-      };
-    }
+    });
   }
 
   /**
