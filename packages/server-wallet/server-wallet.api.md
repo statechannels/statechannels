@@ -357,19 +357,7 @@ export class SingleThreadedEngine implements EngineInterface {
         messages: Message_3[];
         chainRequests: ChainRequest[];
     }>;
-    // Warning: (ae-forgotten-export) The symbol "AssetOutcomeUpdatedArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    assetOutcomeUpdated({ channelId, assetHolderAddress, externalPayouts, }: AssetOutcomeUpdatedArg): Promise<void>;
     challenge(channelId: string): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "ChallengeRegisteredArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    challengeRegistered(arg: ChallengeRegisteredArg): Promise<void>;
-    // Warning: (ae-forgotten-export) The symbol "ChannelFinalizedArg" needs to be exported by the entry point index.d.ts
-    //
-    // (undocumented)
-    channelFinalized(arg: ChannelFinalizedArg): Promise<void>;
     closeChannel({ channelId, }: CloseChannelParams): Promise<SingleChannelOutput & {
         newObjective: WalletObjective;
     }>;
@@ -392,9 +380,6 @@ export class SingleThreadedEngine implements EngineInterface {
     getObjective(objectiveId: string): Promise<WalletObjective>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;
-    // Warning: (ae-forgotten-export) The symbol "HoldingUpdatedArg" needs to be exported by the entry point index.d.ts
-    // Warning: (ae-forgotten-export) The symbol "EngineResponse" needs to be exported by the entry point index.d.ts
-    holdingUpdated({ channelId, amount, assetHolderAddress }: HoldingUpdatedArg, response?: EngineResponse): Promise<SingleChannelOutput>;
     joinChannel({ channelId }: JoinChannelParams): Promise<SingleChannelOutput>;
     joinChannels(channelIds: ChannelId[]): Promise<MultipleChannelOutput>;
     // (undocumented)
