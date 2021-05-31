@@ -360,7 +360,7 @@ export class SingleThreadedEngine
         tx,
         'approved'
       );
-      this.emit('objectiveStarted', objective);
+      response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
 
       response.queueChannel(channel);
     });
@@ -497,7 +497,6 @@ export class SingleThreadedEngine
       fundingLedgerChannelId
     );
 
-    this.emit('objectiveStarted', objective);
     response.queueState(signedState, channel.myIndex, channel.channelId, objective.objectiveId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
@@ -937,9 +936,6 @@ export class SingleThreadedEngine
         channelIds = [...channelIds, ...touchedChannels];
       }
     }
-
-    response.createdObjectives.map(o => this.emit('objectiveStarted', o));
-    response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
   }
 
   /**
@@ -1010,7 +1006,10 @@ export class SingleThreadedEngine
         tx,
         'approved'
       );
-      this.emit('objectiveStarted', objective);
+
+      // TODO: The response is currently not returned or sent anywhere
+      const channel = await this.store.getChannel(arg.channelId, tx);
+      response.queueCreatedObjective(objective, channel?.myIndex || 0, channel?.participants || []);
     });
 
     await this.takeActions([arg.channelId], response);

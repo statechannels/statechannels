@@ -22,7 +22,7 @@ import {fromEvent} from 'rxjs';
 import {first} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
-import {WalletObjective} from '@statechannels/server-wallet/src/models/objective';
+
 import {
   CreateChannelParams,
   isJsonRpcNotification,
@@ -67,7 +67,6 @@ let serverAddress: Address;
 let serverDestination: Destination;
 let browserAddress: Address;
 let browserDestination: Destination;
-let objectiveSuccededPromise: Promise<void>;
 
 beforeAll(() => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -97,12 +96,6 @@ beforeEach(async () => {
     if (isJsonRpcNotification(message)) {
       serverWallet.pushMessage((message.params as Message).data);
     }
-  });
-
-  objectiveSuccededPromise = new Promise<void>(r => {
-    serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
-      if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
-    });
   });
 });
 
@@ -201,8 +194,6 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
 
   serverWallet.on('channelUpdated', e => console.log(JSON.stringify(e)));
   await browserWallet.pushMessage(serverMessageToBrowserMessage(await postFundA), 'dummyDomain');
-
-  await objectiveSuccededPromise;
 });
 
 it('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
@@ -261,6 +252,4 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
     .toPromise();
 
   await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
-
-  await objectiveSuccededPromise;
 });

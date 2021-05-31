@@ -1,5 +1,6 @@
 import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
+import EventEmitter from 'eventemitter3';
 
 import {
   MessageHandler,
@@ -10,13 +11,19 @@ import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {Engine, SyncObjectiveResult} from '../engine';
 
-import {RetryOptions, ObjectiveResult, ObjectiveError, ObjectiveSuccess} from './types';
+import {
+  RetryOptions,
+  ObjectiveResult,
+  ObjectiveError,
+  ObjectiveSuccess,
+  ObjectiveProposed,
+} from './types';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
 const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
-export class Wallet {
+export class Wallet extends EventEmitter<ObjectiveProposed> {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
    * @param engine The engine to use.
@@ -39,9 +46,13 @@ export class Wallet {
     private _engine: Engine,
     private _retryOptions: RetryOptions
   ) {
+    super();
     const handler: MessageHandler = async message => {
-      const {outbox} = await this._engine.pushMessage(message.data);
-
+      const {outbox, newObjectives} = await this._engine.pushMessage(message.data);
+      // Receiving messages from other participants may have resulted in new proposed objectives
+      for (const o of newObjectives) {
+        this.emit('ObjectiveProposed', o);
+      }
       await this.messageService.send(getMessages(outbox));
     };
 
@@ -175,15 +186,6 @@ export class Wallet {
         );
         return {type: 'Success', channelId: objective.data.targetChannelId};
       }
-      let isComplete = false;
-
-      const onObjectiveSucceeded = (o: WalletObjective) => {
-        if (objective.objectiveId === o.objectiveId) {
-          isComplete = true;
-        }
-      };
-
-      this._engine.on('objectiveSucceeded', onObjectiveSucceeded);
 
       // Now that we're listening for objective success we can now send messages
       // that might trigger progress on the objective
@@ -194,8 +196,11 @@ export class Wallet {
        * Consult https://github.com/statechannels/statechannels/issues/3518 for background on this retry logic
        */
       const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
+      const isComplete = async () => this._engine.store.isObjectiveComplete(objective.objectiveId);
       for (let i = 0; i < numberOfAttempts; i++) {
-        if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
+        if (await isComplete()) {
+          return {channelId: objective.data.targetChannelId, type: 'Success'};
+        }
         const delayAmount = initialDelay * Math.pow(multiple, i);
 
         await delay(delayAmount);
@@ -209,7 +214,10 @@ export class Wallet {
 
         await this._messageService.send(messagesForObjective);
       }
-      if (isComplete) return {channelId: objective.data.targetChannelId, type: 'Success'};
+
+      if (await isComplete()) {
+        return {channelId: objective.data.targetChannelId, type: 'Success'};
+      }
       return {numberOfAttempts: this._retryOptions.numberOfAttempts, type: 'EnsureObjectiveFailed'};
     } catch (error) {
       this._engine.logger.error({err: error}, 'Uncaught error in EnsureObjective');
