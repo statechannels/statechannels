@@ -17,7 +17,6 @@ import {
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
-  makeDestination,
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -28,7 +27,7 @@ import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
 
-import {Bytes32, Uint256} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
@@ -41,13 +40,7 @@ import {
   IncomingEngineConfig,
   validateEngineConfig,
 } from '../config';
-import {
-  HoldingUpdatedArg,
-  ChannelFinalizedArg,
-  AssetOutcomeUpdatedArg,
-  ChallengeRegisteredArg,
-  ChainRequest,
-} from '../chain-service';
+import {ChainRequest} from '../chain-service';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
@@ -873,78 +866,6 @@ export class SingleThreadedEngine implements EngineInterface {
         channelIds = [...channelIds, ...touchedChannels];
       }
     }
-  }
-
-  /**
-   * Update the engine's knowledge about the on-chain funding for a channel.
-   *
-   * @param args - An object specifying the channelId, asset holder address and amount.
-   * @returns A promise that resolves to a channel output.
-   */
-  // ChainEventSubscriberInterface implementation
-  async holdingUpdated(
-    {channelId, amount, assetHolderAddress}: HoldingUpdatedArg,
-    response = EngineResponse.initialize()
-  ): Promise<SingleChannelOutput> {
-    await this.store.updateFunding(channelId, amount, assetHolderAddress);
-    await this.takeActions([channelId], response);
-
-    // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
-    // multiple channel output. So, we set strict to false
-    return response.singleChannelOutput(false);
-  }
-
-  async assetOutcomeUpdated({
-    channelId,
-    assetHolderAddress,
-    externalPayouts,
-  }: AssetOutcomeUpdatedArg): Promise<void> {
-    const response = EngineResponse.initialize();
-    const transferredOut = externalPayouts.map(ai => ({
-      toAddress: makeDestination(ai.destination),
-      amount: ai.amount as Uint256,
-    }));
-
-    await this.store.updateTransferredOut(channelId, assetHolderAddress, transferredOut);
-
-    await this.takeActions([channelId], response);
-  }
-
-  async challengeRegistered(arg: ChallengeRegisteredArg): Promise<void> {
-    const response = EngineResponse.initialize();
-    const {channelId, finalizesAt: finalizedAt, challengeStates} = arg;
-
-    await this.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
-    await this.takeActions([arg.channelId], response);
-  }
-
-  async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
-    const response = EngineResponse.initialize();
-
-    await this.store.markAdjudicatorStatusAsFinalized(
-      arg.channelId,
-      arg.blockNumber,
-      arg.blockTimestamp,
-      arg.finalizedAt
-    );
-    await this.knex.transaction(async tx => {
-      const objective = await ObjectiveModel.insert(
-        {
-          type: 'DefundChannel',
-          participants: [],
-          data: {targetChannelId: arg.channelId},
-        },
-
-        tx,
-        'approved'
-      );
-
-      // TODO: The response is currently not returned or sent anywhere
-      const channel = await this.store.getChannel(arg.channelId, tx);
-      response.queueCreatedObjective(objective, channel?.myIndex || 0, channel?.participants || []);
-    });
-
-    await this.takeActions([arg.channelId], response);
   }
 }
 
