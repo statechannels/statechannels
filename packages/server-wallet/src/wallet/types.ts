@@ -60,6 +60,7 @@ export type ObjectiveResult = {
   channelId: string;
 };
 
-export type ObjectiveProposed = {
+export type WalletEvents = {
+  ObjectiveCompleted: WalletObjective;
   ObjectiveProposed: WalletObjective;
 };
