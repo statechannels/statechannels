@@ -1,16 +1,20 @@
+import path from 'path';
+
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
 import _ from 'lodash';
-import {fromEvent} from 'rxjs';
-import {take} from 'rxjs/operators';
 
+import {ChainService} from '../chain-service';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Engine, SingleChannelOutput} from '../engine';
-import {getChannelResultFor, getPayloadFor, ONE_DAY} from '../__test__/test-helpers';
+import {Engine} from '../engine';
+import {TestMessageService} from '../message-service/test-message-service';
+import {SyncOptions, Wallet} from '../wallet';
+import {ONE_DAY} from '../__test__/test-helpers';
+import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
@@ -18,6 +22,7 @@ const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!)
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const rpcEndpoint = process.env.RPC_ENDPOINT;
+const delay = async (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 const config = {
   ...defaultTestConfig(),
@@ -29,11 +34,17 @@ const config = {
 };
 
 let provider: providers.JsonRpcProvider;
-let a: Engine;
-let b: Engine;
-
+let a: Wallet;
+let b: Wallet;
+let aEngine: Engine;
+let bEngine: Engine;
+const ARTIFACTS_DIR = '../../artifacts';
 const bEngineConfig: EngineConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
+  loggingConfiguration: {
+    logDestination: path.join(ARTIFACTS_DIR, 'direct-funding.log'),
+    logLevel: 'trace',
+  },
   chainServiceConfiguration: {
     attachChainService: true,
     provider: rpcEndpoint,
@@ -44,6 +55,10 @@ const bEngineConfig: EngineConfig = {
 };
 const aEngineConfig: EngineConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_a'}),
+  loggingConfiguration: {
+    logDestination: path.join(ARTIFACTS_DIR, 'direct-funding.log'),
+    logLevel: 'trace',
+  },
   chainServiceConfiguration: {
     attachChainService: true,
     provider: rpcEndpoint,
@@ -86,9 +101,26 @@ beforeAll(async () => {
     })
   );
 
-  a = await Engine.create(aEngineConfig);
-  b = await Engine.create(bEngineConfig);
+  aEngine = await Engine.create(aEngineConfig);
+  bEngine = await Engine.create(bEngineConfig);
+  const aChainService = new ChainService({
+    ...aEngineConfig.chainServiceConfiguration,
+    logger: aEngine.logger,
+  });
+  const bChainService = new ChainService({
+    ...bEngineConfig.chainServiceConfiguration,
+    logger: bEngine.logger,
+  });
 
+  const syncOptions: SyncOptions = {
+    pollInterval: 50,
+    timeOutThreshold: 30_000,
+    staleThreshold: 1_000,
+  };
+  a = await Wallet.create(aEngine, aChainService, TestMessageService.create, syncOptions);
+  b = await Wallet.create(bEngine, bChainService, TestMessageService.create, syncOptions);
+
+  TestMessageService.linkMessageServices(a.messageService, b.messageService, aEngine.logger);
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,
@@ -100,19 +132,18 @@ beforeAll(async () => {
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
   await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
-
   provider.polling = false;
+  provider.removeAllListeners();
 });
 
-// TODO: This should be re-enabled once the chain service has been decoupled from the engine
-it.skip('Create a directly funded channel between two engines ', async () => {
+it('Create a directly funded channel between two wallets ', async () => {
   const participantA: Participant = {
-    signingAddress: await a.getSigningAddress(),
+    signingAddress: await aEngine.getSigningAddress(),
     participantId: 'a',
     destination: makeDestination(aAddress),
   };
   const participantB: Participant = {
-    signingAddress: await b.getSigningAddress(),
+    signingAddress: await bEngine.getSigningAddress(),
     participantId: 'b',
     destination: makeDestination(bAddress),
   };
@@ -139,143 +170,27 @@ it.skip('Create a directly funded channel between two engines ', async () => {
     fundingStrategy: 'Direct',
     challengeDuration: ONE_DAY,
   };
-
-  // the type assertion is due to
-  // https://github.com/devanshj/rxjs-from-emitter/blob/master/docs/solving-some-from-event-flaws.md#the-way-fromevent-checks-if-the-first-argument-passed-is-an-emitter-or-not-is-incorrect
-  const postFundAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
-    .pipe(take(2))
-    .toPromise();
-
-  const postFundBPromise = fromEvent<SingleChannelOutput>(b as any, 'channelUpdated')
-    .pipe(take(2))
-    .toPromise();
-
-  const channelClosedAPromise = fromEvent<SingleChannelOutput>(a as any, 'channelUpdated')
-    .pipe(take(4))
-    .toPromise();
-
-  //        A <> B
-  // PreFund0
-  const preFundA = await a.createChannel(channelParams);
-
-  const channelId = preFundA.channelResult.channelId;
-
   const aBalanceInit = await getBalance(aAddress);
   const bBalanceInit = await getBalance(bAddress);
 
-  expect(preFundA.channelResult).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
+  const response = await a.createChannels([channelParams]);
+  await waitForObjectiveProposals([response[0].objectiveId], b);
+  const bResponse = await b.approveObjectives([response[0].objectiveId]);
 
-  const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, preFundA.outbox));
+  await expect(response).toBeObjectiveDoneType('Success');
+  await expect(bResponse).toBeObjectiveDoneType('Success');
 
-  expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
-    status: 'proposed',
-    turnNum: 0,
-  });
+  const assetHolderBalance = await getBalance(ethAssetHolderAddress);
+  expect(assetHolderBalance.toHexString()).toBe('0x01');
 
-  const prefundB = await b.joinChannel({channelId});
-  expect(getChannelResultFor(channelId, [prefundB.channelResult])).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  const resultA0 = await a.pushMessage(getPayloadFor(participantA.participantId, prefundB.outbox));
-
-  expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  const postFundA = await postFundAPromise;
-  const postFundB = await postFundBPromise;
-
-  expect(postFundA.channelResult).toMatchObject({
-    channelId,
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  expect(postFundB.channelResult).toMatchObject({
-    channelId,
-    status: 'opening',
-    turnNum: 0,
-  });
-
-  await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
-
-  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, postFundB.outbox));
-  expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
-    status: 'running',
-    turnNum: 3,
-  });
-
-  const resultB1 = await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
-  expect(getChannelResultFor(channelId, resultB1.channelResults)).toMatchObject({
-    status: 'running',
-    turnNum: 3,
-    // TODO: the fundingStatus is incorrect as the funding table is not joined with channels table
-    //  when processing the pushMessage above
-    // fundingStatus: 'Funded',
-  });
-
-  const closeA = await a.closeChannel({channelId});
-  expect(closeA.channelResult).toMatchObject({
-    status: 'closing',
-    turnNum: 4,
-    // TODO: the fundingStatus is incorrect as the funding table is not joined with channels table
-    //  when processing the pushMessage above
-    // fundingStatus: 'Funded',
-  });
-
-  const closeB = await b.pushMessage(getPayloadFor(participantB.participantId, closeA.outbox));
-  expect(getChannelResultFor(channelId, closeB.channelResults)).toMatchObject({
-    status: 'closed',
-    turnNum: 4,
-    fundingStatus: 'Defunded',
-  });
-
-  const close2A = await a.pushMessage(getPayloadFor(participantA.participantId, closeB.outbox));
-  expect(getChannelResultFor(channelId, close2A.channelResults)).toMatchObject({
-    status: 'closed',
-    turnNum: 4,
-    fundingStatus: 'Funded',
-  });
-
-  // Mine a few blocks, but not enough for the chain service to update holdings
-  // Then wait 500ms so that, if the chain service incorrectly updated holdings,
-  // then the updated holdings would have been processed by the engine.
-  await mineBlocks(3);
-  await new Promise(r => setTimeout(r, 500));
-  expect((await a.getState({channelId})).channelResult).toMatchObject({
-    status: 'closed',
-    turnNum: 4,
-    fundingStatus: 'Funded',
-  });
-
-  await mineBlocks(2);
-
-  const channelClosedA = await channelClosedAPromise;
-
-  expect(channelClosedA.channelResult).toMatchObject({
-    status: 'closed',
-    turnNum: 4,
-    fundingStatus: 'Defunded',
-  });
+  const {channelId} = response[0];
+  const closeResponse = await b.closeChannels([channelId]);
+  await expect(closeResponse).toBeObjectiveDoneType('Success');
 
   const aBalanceFinal = await getBalance(aAddress);
   const bBalanceFinal = await getBalance(bAddress);
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
-
-  // TODO: remove this
-  // The reason for the wait:
-  // - B CloseChannel objective succeeds BEFORE AssetTransferred event arrives
-  // - B has no funds in the channel, so B does not wait for an AssetTransferred event to complete the CloseObjective
-  // - AssetTransferred event arrives to B after the test finishes running
-  // - We see "Error: Unable to acquire a connection"
-  // - The error does NOT fail the test
-  await new Promise(r => setTimeout(r, 500));
-}, 50_000);
+  await delay(1000);
+}, 5_000_000);
