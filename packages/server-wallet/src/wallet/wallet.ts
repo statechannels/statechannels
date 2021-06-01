@@ -1,8 +1,8 @@
-import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
+import {CreateChannelParams, Message, Uint256} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {makeAddress} from '@statechannels/wallet-core';
-import {utils} from 'ethers';
+import {makeAddress, makeDestination} from '@statechannels/wallet-core';
+import {providers, utils} from 'ethers';
 
 import {
   MessageHandler,
@@ -11,8 +11,15 @@ import {
 } from '../message-service/types';
 import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
-import {Engine, SyncObjectiveResult} from '../engine';
-import {ChainServiceInterface} from '../chain-service';
+import {
+  Engine,
+  hasNewObjective,
+  isMultipleChannelOutput,
+  MultipleChannelOutput,
+  SingleChannelOutput,
+  SyncObjectiveResult,
+} from '../engine';
+import {ChainEventSubscriberInterface, ChainServiceInterface} from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
 import {
@@ -21,8 +28,8 @@ import {
   ObjectiveError,
   ObjectiveSuccess,
   WalletEvents,
+  ObjectiveDoneResult,
 } from './types';
-import {createChainListener} from './chain-listener';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -52,7 +59,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   private _messageService: MessageServiceInterface;
-  private _destroyed = false;
 
   private constructor(
     messageServiceFactory: MessageServiceFactory,
@@ -63,29 +69,18 @@ export class Wallet extends EventEmitter<WalletEvents> {
     super();
 
     const handler: MessageHandler = async message => {
-      const {
-        outbox,
-        newObjectives,
-        channelResults,
-        completedObjectives,
-      } = await this._engine.pushMessage(message.data);
-
-      // Receiving messages from other participants may have resulted in completed objectives
+      const result = await this._engine.pushMessage(message.data);
+      const {newObjectives, channelResults, completedObjectives} = result;
       for (const o of completedObjectives) {
-        this.emit('ObjectiveCompleted', o);
+        if (o.type === 'CloseChannel') {
+          this._engine.logger.trace({objective: o}, 'Objective completed');
+          this.emit('ObjectiveCompleted', o);
+        }
       }
-
-      // Receiving messages from other participants may have resulted in new proposed objectives
       for (const o of newObjectives) {
-        this.emit('ObjectiveProposed', o);
-
         // If this is a new open channel objective that means there is a new channel to be monitored in the chain service
         if (o.type === 'OpenChannel') {
-          const listener = createChainListener(
-            this._engine,
-            this._engine.store,
-            this.messageService
-          );
+          const listener = this.createChainListener(o.data.targetChannelId);
           const assetHolders = _.uniq(
             _.flatten(channelResults.map(cr => cr.allocations.map(a => a.assetHolderAddress))).map(
               makeAddress
@@ -94,7 +89,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
           this._chainService.registerChannel(o.data.targetChannelId, assetHolders, listener);
         }
       }
-      await this.messageService.send(getMessages(outbox));
+
+      await this.handleEngineOutput(result);
     };
 
     this._messageService = messageServiceFactory(handler);
@@ -161,20 +157,15 @@ export class Wallet extends EventEmitter<WalletEvents> {
           const assetHolders = createResult.channelResult.allocations.map(a =>
             makeAddress(a.assetHolderAddress)
           );
-          const listener = createChainListener(
-            this._engine,
-            this._engine.store,
-            this.messageService
-          );
+          const listener = this.createChainListener(createResult.channelResult.channelId);
           this._chainService.registerChannel(
             createResult.channelResult.channelId,
             assetHolders,
             listener
           );
 
-          const {newObjective, channelResult, chainRequests} = createResult;
-          const transactions = await this._chainService.handleChainRequests(chainRequests);
-          await Promise.all(transactions.map(tr => tr.wait()));
+          const {newObjective, channelResult} = createResult;
+          await this.handleEngineOutput(createResult);
           return {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,
@@ -182,6 +173,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
             done: this.ensureObjective(newObjective, getMessages(createResult)),
           };
         } catch (error) {
+          this._engine.logger.error({err: error}, 'Uncaught InternalError in CreateChannel');
           // TODO: This is slightly hacky but it's less painful then having to narrow the type down every time
           // you get a result back from the createChannels method
           // This should be looked at in https://github.com/statechannels/statechannels/issues/3461
@@ -204,17 +196,35 @@ export class Wallet extends EventEmitter<WalletEvents> {
   public async closeChannels(channelIds: string[]): Promise<ObjectiveResult[]> {
     return Promise.all(
       channelIds.map(async channelId => {
-        const closeResult = await this._engine.closeChannel({channelId});
+        // TODO: This currently is skipping the ensureObjective logic
+        // Using ensureObjectives seems to keep executing AFTER destroy has been called
+        // Still need to figure this out
+        const done: Promise<ObjectiveDoneResult> = new Promise(resolve =>
+          this.on('ObjectiveCompleted', (o: WalletObjective) => {
+            if (
+              o.type === 'CloseChannel' &&
+              o.data.targetChannelId === channelId &&
+              o.status === 'succeeded'
+            ) {
+              this._engine.logger.trace({objective: o}, 'Objective Suceeded');
+              resolve({type: 'Success', channelId});
+            }
+          })
+        );
 
+        const closeResult = await this._engine.closeChannel({channelId});
         const {newObjective, channelResult} = closeResult;
+
         // TODO: We just refetch to get the latest status
         // Long term we should make sure the engine returns the latest objectives
         const latest = await this._engine.getObjective(newObjective.objectiveId);
+        await this.handleEngineOutput(closeResult);
+
         return {
           channelId: channelResult.channelId,
           currentStatus: latest.status,
           objectiveId: newObjective.objectiveId,
-          done: this.ensureObjective(latest, getMessages(closeResult)),
+          done,
         };
       })
     );
@@ -312,13 +322,144 @@ export class Wallet extends EventEmitter<WalletEvents> {
           type: 'EnsureObjectiveFailed',
         });
       } catch (error) {
-        this._engine.logger.error({err: error}, 'Uncaught error in EnsureObjective');
+        this._engine.logger.error({err: error, objective}, 'Uncaught error in EnsureObjective');
         resolve({
           type: 'InternalError' as const,
           error,
         });
       }
     });
+  }
+
+  private emitObjectiveEvents(result: MultipleChannelOutput | SingleChannelOutput): void {
+    if (isMultipleChannelOutput(result)) {
+      // Receiving messages from other participants may have resulted in completed objectives
+      for (const o of result.completedObjectives) {
+        this.emit('ObjectiveCompleted', o);
+      }
+
+      // Receiving messages from other participants may have resulted in new proposed objectives
+      for (const o of result.newObjectives) {
+        if (o.status === 'pending') {
+          this.emit('ObjectiveProposed', o);
+        }
+      }
+    } else {
+      if (hasNewObjective(result)) {
+        if (result.newObjective.status === 'pending') {
+          this.emit('ObjectiveProposed', result.newObjective);
+        }
+      }
+    }
+  }
+
+  /**
+   * Waits for the transactions.wait() promise to resolve on all transaction responses.
+   * @param response
+   */
+  private async waitForTransactions(
+    response: Promise<providers.TransactionResponse[]>
+  ): Promise<void> {
+    const transactions = await response;
+    await Promise.all(transactions.map(tr => tr.wait()));
+  }
+
+  /**
+   * Emits events, sends messages and requests transactions based on the output of the engine.
+   * @param output
+   */
+  private async handleEngineOutput(
+    output: MultipleChannelOutput | SingleChannelOutput
+  ): Promise<void> {
+    this.emitObjectiveEvents(output);
+    await this._messageService.send(getMessages(output));
+    await this.waitForTransactions(this._chainService.handleChainRequests(output.chainRequests));
+  }
+
+  /**
+   * Creates a listener that will be subscribed to the chain service.
+   * It creates a listener for a specific channel id.
+   * @param channelIdToListenFor The channel Id the listener is for
+   * @returns A chain event subscriber that can be passed into the chain service.
+   */
+  private createChainListener(channelIdToListenFor: string): ChainEventSubscriberInterface {
+    return {
+      holdingUpdated: async ({channelId, amount, assetHolderAddress}) => {
+        if (channelId !== channelIdToListenFor) return;
+
+        this._engine.logger.trace({channelId, amount}, 'holdingUpdated');
+        try {
+          await this._engine.store.updateFunding(channelId, amount, assetHolderAddress);
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'holdingUpdated error');
+          throw err;
+        }
+      },
+      assetOutcomeUpdated: async ({channelId, assetHolderAddress, externalPayouts}) => {
+        try {
+          if (channelId !== channelIdToListenFor) return;
+
+          this._engine.logger.trace(
+            {channelId, assetHolderAddress, externalPayouts},
+            'assetOutcomeUpdated'
+          );
+          const transferredOut = externalPayouts.map(ai => ({
+            toAddress: makeDestination(ai.destination),
+            amount: ai.amount as Uint256,
+          }));
+
+          await this._engine.store.updateTransferredOut(
+            channelId,
+            assetHolderAddress,
+            transferredOut
+          );
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'assetOutcomeUpdated error');
+          throw err;
+        }
+      },
+      challengeRegistered: async ({channelId, finalizesAt: finalizedAt, challengeStates}) => {
+        try {
+          if (channelId !== channelIdToListenFor) return;
+          this._engine.logger.trace(
+            {channelId, finalizedAt, challengeStates},
+            'challengeRegistered'
+          );
+          await this._engine.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'challengeRegistered error');
+          throw err;
+        }
+      },
+      channelFinalized: async ({channelId, blockNumber, blockTimestamp, finalizedAt}) => {
+        try {
+          if (channelId !== channelIdToListenFor) return;
+
+          this._engine.logger.trace(
+            {channelId, blockNumber, blockTimestamp, finalizedAt},
+            'channelFinalized'
+          );
+
+          await this._engine.store.markAdjudicatorStatusAsFinalized(
+            channelId,
+            blockNumber,
+            blockTimestamp,
+            finalizedAt
+          );
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'channelFinalized error');
+          throw err;
+        }
+      },
+    };
   }
 
   /**
@@ -362,7 +503,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       this._chainService.registerChannel(
         channelId,
         assetHolderAddresses,
-        createChainListener(this._engine, this._engine.store, this._messageService)
+        this.createChainListener(channelId)
       );
     }
   }
