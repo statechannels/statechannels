@@ -670,13 +670,17 @@ export class Store {
     blockTimestamp: number,
     finalizedAt: number
   ): Promise<void> {
-    await AdjudicatorStatusModel.setFinalized(
-      this.knex,
-      channelId,
-      blockNumber,
-      blockTimestamp,
-      finalizedAt
-    );
+    this.knex.transaction(async tx => {
+      await this.getAndLockChannel(channelId, tx);
+
+      await AdjudicatorStatusModel.setFinalized(
+        tx,
+        channelId,
+        blockNumber,
+        blockTimestamp,
+        finalizedAt
+      );
+    });
   }
 
   async updateTransferredOut(
