@@ -137,6 +137,8 @@ export class ChainService implements ChainServiceInterface {
     chainRequests: ChainRequest[]
   ): Promise<providers.TransactionResponse[]> {
     const responses: providers.TransactionResponse[] = [];
+
+    this.logger.trace({chainRequests}, 'Handling chain requests');
     for (const chainRequest of chainRequests) {
       let response;
       switch (chainRequest.type) {
@@ -176,9 +178,13 @@ export class ChainService implements ChainServiceInterface {
 
   // Only used for unit tests
   destructor(): void {
+    this.logger.trace('Starting destroy');
     this.provider.polling = false;
     this.provider.removeAllListeners();
+
     this.addressToContract.forEach(contract => contract.removeAllListeners());
+
+    this.logger.trace('Completed destroy');
   }
 
   private addContractMapping(
@@ -538,6 +544,10 @@ export class ChainService implements ChainServiceInterface {
   private listenForContractEvents(assetHolderContract: Contract): void {
     // Listen to all contract events
     assetHolderContract.on({}, async (ethersEvent: Event) => {
+      this.logger.trace(
+        {address: assetHolderContract.address, event: ethersEvent},
+        'AssetHolder event being handled'
+      );
       await this.waitForConfirmations(ethersEvent);
       this.onAssetHolderEvent(assetHolderContract, ethersEvent);
     });
