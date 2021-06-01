@@ -59,6 +59,12 @@ export interface EngineInterface {
   crank(channelIds: string[]): Promise<MultipleChannelOutput>;
 }
 
+export function isMultipleChannelOutput(
+  output: SingleChannelOutput | MultipleChannelOutput
+): output is MultipleChannelOutput {
+  return 'newObjectives' in output;
+}
+
 export function hasNewObjective(
   response: SingleChannelOutput
 ): response is SingleChannelOutput & {newObjective: WalletObjective} {
