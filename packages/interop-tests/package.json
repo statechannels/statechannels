@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "main": "index.js",
   "license": "MIT",
+  "private": true,
   "devDependencies": {
     "@statechannels/browser-wallet": "0.7.0",
     "@statechannels/devtools": "0.5.6",
