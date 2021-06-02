@@ -239,8 +239,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   public async jumpStartObjectives(): Promise<ObjectiveResult[]> {
     const objectives = await this._engine.getApprovedObjectives();
     const objectiveIds = objectives.map(o => o.objectiveId);
-    // Instead of getting messages per objective we just get them all at once
-    // This will prevent us from querying the database for each objective
+    await this._engine.store.updateObjectiveProgressDate(objectiveIds);
 
     const {outbox} = await this._engine.syncObjectives(objectiveIds);
 
