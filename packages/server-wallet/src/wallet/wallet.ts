@@ -1,10 +1,10 @@
-import {CreateChannelParams, Message, Uint256} from '@statechannels/client-api-schema';
+import {CreateChannelParams, Uint256} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {providers, utils} from 'ethers';
-
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
+
 import {
   MessageHandler,
   MessageServiceFactory,
@@ -23,14 +23,7 @@ import {
 import {ChainEventSubscriberInterface, ChainServiceInterface} from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
-import {
-  RetryOptions,
-  ObjectiveResult,
-  ObjectiveError,
-  ObjectiveSuccess,
-  WalletEvents,
-  ObjectiveDoneResult,
-} from './types';
+import {RetryOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -128,20 +121,21 @@ export class Wallet extends EventEmitter<WalletEvents> {
       objectiveIds
     );
 
-    // Emit for any succeed objectives
+    const results = objectives.map(async o => ({
+      objectiveId: o.objectiveId,
+      currentStatus: o.status,
+      channelId: o.data.targetChannelId,
+      done: this.createObjectiveSuccessPromise(o),
+    }));
+
+    // TODO: ApproveObjective should probably just return a MultipleChannelOuput
     const completedObjectives = objectives.filter(o => o.status === 'succeeded');
     completedObjectives.forEach(o => this.emit('ObjectiveCompleted', o));
-
     const transactions = await this._chainService.handleChainRequests(chainRequests);
+    await this.messageService.send(messages);
     await Promise.all(transactions.map(tr => tr.wait()));
-    return Promise.all(
-      objectives.map(async o => ({
-        objectiveId: o.objectiveId,
-        currentStatus: o.status,
-        channelId: o.data.targetChannelId,
-        done: this.ensureObjective(o, messages),
-      }))
-    );
+
+    return Promise.all(results);
   }
 
   /**
@@ -168,12 +162,13 @@ export class Wallet extends EventEmitter<WalletEvents> {
           );
 
           const {newObjective, channelResult} = createResult;
+          const done = this.createObjectiveSuccessPromise(newObjective);
           await this.handleEngineOutput(createResult);
           return {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,
             objectiveId: newObjective.objectiveId,
-            done: this.ensureObjective(newObjective, getMessages(createResult)),
+            done,
           };
         } catch (error) {
           this._engine.logger.error({err: error}, 'Uncaught InternalError in CreateChannel');
@@ -193,8 +188,15 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
   private async syncObjectives() {
     const TIME_TO_CONSIDER_STALE = 1000;
+    const TIME_TO_CONSIDER_FAILED = 50_000;
     const staleDate = Date.now() - TIME_TO_CONSIDER_STALE;
+    const timeOutDate = Date.now() - TIME_TO_CONSIDER_FAILED;
     const objectives = await this._engine.store.getApprovedObjectives();
+    const timedOutObjectives = objectives.filter(o => o.progressLastMadeAt.getTime() < timeOutDate);
+
+    for (const o of timedOutObjectives) {
+      this.emit('ObjectiveTimedOut', o);
+    }
     const staleObjectives = objectives
       .filter(o => o.progressLastMadeAt.getTime() < staleDate)
       .map(o => o.objectiveId);
@@ -240,94 +242,20 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // Instead of getting messages per objective we just get them all at once
     // This will prevent us from querying the database for each objective
 
-    const syncMessages = await this._engine.syncObjectives(objectiveIds);
+    const {outbox} = await this._engine.syncObjectives(objectiveIds);
 
-    return Promise.all(
-      objectives.map(async o => {
-        const messagesForObjective = syncMessages.messagesByObjective[o.objectiveId];
-        return {
-          objectiveId: o.objectiveId,
-          currentStatus: o.status,
-          channelId: o.data.targetChannelId,
-          done: this.ensureObjective(o, messagesForObjective),
-        };
-      })
-    );
-  }
-
-  /**
-   * Ensures that the provided objectives get completed.
-   * Will resend messages as required to ensure that the objectives get completed.
-   * This should never throw an exception. Instead it should return an ObjectiveError
-   * @param objectives The list of objectives to ensure get completed.
-   * @param objectiveMessages The collection of outgoing messages related to the objective.
-   * @returns A promise that resolves when all the objectives are completed
-   */
-  private async ensureObjective(
-    objective: WalletObjective,
-    objectiveMessages: Message[]
-  ): Promise<ObjectiveSuccess | ObjectiveError> {
-    // eslint-disable-next-line no-async-promise-executor
-    return new Promise(async resolve => {
-      try {
-        // If the objective is already done we want to exit immediately
-        if (objective.status === 'succeeded') {
-          this._engine.logger.debug(
-            {objective},
-            'Objective passed into ensureObjective has already succeeded'
-          );
-          resolve({type: 'Success', channelId: objective.data.targetChannelId});
-        }
-        let isComplete = false;
-        this.on('ObjectiveCompleted', (o: WalletObjective) => {
-          if (o.objectiveId == objective.objectiveId && o.status === 'succeeded') {
-            isComplete = true;
-            resolve({type: 'Success', channelId: objective.data.targetChannelId});
-          }
-        });
-        // Now that we're listening for objective success we can now send messages
-        // that might trigger progress on the objective
-
-        await this._messageService.send(objectiveMessages);
-
-        /**
-         * Consult https://github.com/statechannels/statechannels/issues/3518 for background on this retry logic
-         */
-        const {multiple, initialDelay, numberOfAttempts} = this._retryOptions;
-
-        for (let i = 0; i < numberOfAttempts; i++) {
-          if (isComplete) {
-            resolve({channelId: objective.data.targetChannelId, type: 'Success'});
-          }
-          const delayAmount = initialDelay * Math.pow(multiple, i);
-
-          await delay(delayAmount);
-
-          const syncResult = await this._engine.syncObjectives([objective.objectiveId]);
-
-          const messagesForObjective = this.getMessagesForObjective(
-            objective.objectiveId,
-            syncResult
-          );
-
-          await this._messageService.send(messagesForObjective);
-        }
-
-        if (isComplete) {
-          resolve({channelId: objective.data.targetChannelId, type: 'Success'});
-        }
-        resolve({
-          numberOfAttempts: this._retryOptions.numberOfAttempts,
-          type: 'EnsureObjectiveFailed',
-        });
-      } catch (error) {
-        this._engine.logger.error({err: error, objective}, 'Uncaught error in EnsureObjective');
-        resolve({
-          type: 'InternalError' as const,
-          error,
-        });
-      }
+    const results = objectives.map(async o => {
+      const done = this.createObjectiveSuccessPromise(o);
+      return {
+        objectiveId: o.objectiveId,
+        currentStatus: o.status,
+        channelId: o.data.targetChannelId,
+        done,
+      };
     });
+
+    await this.messageService.send(getMessages(outbox));
+    return Promise.all(results);
   }
 
   private emitObjectiveEvents(result: MultipleChannelOutput | SingleChannelOutput): void {
@@ -486,14 +414,25 @@ export class Wallet extends EventEmitter<WalletEvents> {
     objective: WalletObjective
   ): Promise<ObjectiveDoneResult> {
     // TODO: This should resolve to an error
-    return new Promise(resolve =>
+    return new Promise<ObjectiveDoneResult>(resolve => {
+      this.on('ObjectiveTimedOut', o => {
+        console.log(o);
+        if (o.objectiveId === objective.objectiveId) {
+          this._engine.logger.trace({objective: o}, 'Objective Timed out');
+
+          resolve({
+            type: 'EnsureObjectiveFailed',
+            numberOfAttempts: 0,
+          });
+        }
+      });
       this.on('ObjectiveCompleted', (o: WalletObjective) => {
         if (o.objectiveId === objective.objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Suceeded');
           resolve({type: 'Success', channelId: o.data.targetChannelId});
         }
-      })
-    );
+      });
+    });
   }
 
   /**
