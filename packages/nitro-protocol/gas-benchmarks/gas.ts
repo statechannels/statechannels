@@ -16,16 +16,16 @@ export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
       NitroAdjudicator: 2421626, // Singleton
-      ETHAssetHolder: 1632711, // Singleton (could be more in principle)
-      ERC20AssetHolder: 1654810, // Per Token (could be more in principle)
+      ETHAssetHolder: 1634011, // Singleton (could be more in principle)
+      ERC20AssetHolder: 1657410, // Per Token (could be more in principle)
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 48996,
+    vanillaNitro: 47596,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 34008,
+    vanillaNitro: 30508,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -33,21 +33,21 @@ export const gasRequiredTo: GasRequiredTo = {
     // The depositor retains a nonzero balance of tokens after depositing
     // The depositor retains some tokens approved for the AssetHolder after depositing
     vanillaNitro: {
-      approve: 45083,
+      approve: 46383,
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 73442,
+      deposit: 72842,
     },
   },
   directlyFundAChannelWithERC20Second: {
     // meaning the second participant in the channel
     vanillaNitro: {
-      approve: 45083,
+      approve: 46383,
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 58454,
+      deposit: 55754,
     },
   },
 };
