@@ -394,7 +394,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   ): Promise<ObjectiveDoneResult> {
     // TODO: This should resolve to an error
     return new Promise<ObjectiveDoneResult>(resolve => {
-      this.on('ObjectiveTimedOut', (o: WalletObjective) => {
+      this.on('ObjectiveTimedOut', o => {
         if (o.objectiveId === objective.objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Timed out');
 
@@ -405,7 +405,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
           });
         }
       });
-      this.on('ObjectiveCompleted', (o: WalletObjective) => {
+      this.on('ObjectiveCompleted', o => {
         if (o.objectiveId === objective.objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Suceeded');
           resolve({type: 'Success', channelId: o.data.targetChannelId});

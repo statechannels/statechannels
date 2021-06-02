@@ -61,8 +61,8 @@ export type ObjectiveResult = {
   channelId: string;
 };
 
-export type WalletEvents = {
-  ObjectiveCompleted: WalletObjective;
-  ObjectiveProposed: WalletObjective;
-  ObjectiveTimedOut: WalletObjective;
-};
+export interface WalletEvents {
+  ObjectiveCompleted: (o: WalletObjective) => void;
+  ObjectiveProposed: (o: WalletObjective) => void;
+  ObjectiveTimedOut: (o: WalletObjective) => void;
+}
