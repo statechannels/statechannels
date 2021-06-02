@@ -44,7 +44,7 @@ describe('jumpstartObjectives', () => {
       Array(numberOfChannels).fill(getWithPeersCreateChannelsArgs(peerSetup))
     );
 
-    await expect(createResponse).toBeObjectiveDoneType('EnsureObjectiveFailed');
+    await expect(createResponse).toBeObjectiveDoneType('ObjectiveTimedOutError');
 
     TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0});
     const jumpstartResponse = await peerWallets.a.jumpStartObjectives();

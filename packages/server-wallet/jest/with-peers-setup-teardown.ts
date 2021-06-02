@@ -6,7 +6,13 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 
 import {Engine} from '../src/engine';
-import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection, Wallet} from '../src';
+import {
+  DBAdmin,
+  defaultTestConfig,
+  overwriteConfigWithDatabaseConnection,
+  SyncOptions,
+  Wallet,
+} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
@@ -25,7 +31,11 @@ export interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
-const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 20, initialDelay: 500, multiple: 1.1};
+const DEFAULT_SYNC_OPTIONS: SyncOptions = {
+  pollInterval: 50,
+  staleThreshold: 1_000,
+  timeOutThreshold: 45_000,
+};
 
 const aDatabase = 'server_wallet_test_a';
 const bDatabase = 'server_wallet_test_b';
@@ -137,13 +147,13 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
       peerSetup.peerEngines.a,
       chainServiceA,
       TestMessageService.create,
-      DEFAULT__RETRY_OPTIONS
+      DEFAULT_SYNC_OPTIONS
     ),
     b: await Wallet.create(
       peerSetup.peerEngines.b,
       chainServiceB,
       TestMessageService.create,
-      DEFAULT__RETRY_OPTIONS
+      DEFAULT_SYNC_OPTIONS
     ),
   };
   TestMessageService.linkMessageServices(
