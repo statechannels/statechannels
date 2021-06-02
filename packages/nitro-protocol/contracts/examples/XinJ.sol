@@ -89,8 +89,6 @@ contract XinJ is
             toAppData
         );
 
-        requireEmbeddedChannelIsValid(from, to, fromAppData, toAppData);
-
         require(
             Xallocation[0].amount == toAllocation[0].amount &&
                 Xallocation[1].amount == toAllocation[1].amount &&
@@ -100,12 +98,13 @@ contract XinJ is
         return true;
     }
 
-    function requireEmbeddedChannelIsValid(
-        VariablePart memory from,
-        VariablePart memory to,
-        AppData memory fromAppData,
-        AppData memory toAppData
-    ) internal pure {
+    function requireHighestSupportedXState(AppData memory fromAppData, AppData memory toAppData)
+        internal
+        pure
+        returns (Outcome.AllocationItem[] memory Xallocation)
+    {
+        // TODO escape hatch for doubly-signed states. For now we restrict to turn-taking in X.
+
         require(
             fromAppData.supportProofForX.fixedPart.appDefinition ==
                 toAppData.supportProofForX.fixedPart.appDefinition
@@ -114,18 +113,6 @@ contract XinJ is
             fromAppData.supportProofForX.fixedPart.challengeDuration ==
                 toAppData.supportProofForX.fixedPart.challengeDuration
         ); // TODO this is actually never used so could be 0
-        // TODO require channel id of the fixed part of the support proof for X matches toAppData.channelIdForX, and check this hasn't been changed.
-    }
-
-    function requireHighestSupportedXState(AppData memory fromAppData, AppData memory toAppData)
-        internal
-        pure
-        returns (Outcome.AllocationItem[] memory Xallocation)
-    {
-        // TODO escape hatch for doubly-signed states. For now we restrict to turn-taking in X.
-        // TODO requireCorrectSignaturesInSupportProofForX;
-
-        // uint256 embeddedSignedByFrom = ;
 
         bytes32 appPartHash = keccak256(
             abi.encode(
@@ -135,35 +122,39 @@ contract XinJ is
             )
         );
 
-        IForceMove.State memory fromState = IForceMove.State(
-            toAppData.supportProofForX.turnNumTo - 1,
-            false, // Assume isFinal is false
-            toAppData.channelIdForX,
-            appPartHash,
-            keccak256(toAppData.supportProofForX.variableParts[0].outcome)
-        );
-
         address fromSigner = ForceMoveAppUtilities._recoverSigner(
-            keccak256(abi.encode(fromState)),
+            keccak256(
+                abi.encode(
+                    IForceMove.State(
+                        toAppData.supportProofForX.turnNumTo - 1,
+                        false, // Assume isFinal is false
+                        toAppData.channelIdForX,
+                        appPartHash,
+                        keccak256(toAppData.supportProofForX.variableParts[0].outcome)
+                    )
+                )
+            ),
             toAppData.supportProofForX.sigs[0]
         );
 
-        require(fromSigner == address(0xa)); // TODO we need the participants array inside here
-
-        IForceMove.State memory toState = IForceMove.State(
-            toAppData.supportProofForX.turnNumTo,
-            false, // Assume isFinal is false
-            toAppData.channelIdForX,
-            appPartHash,
-            keccak256(toAppData.supportProofForX.variableParts[1].outcome)
-        );
+        require(fromSigner == toAppData.supportProofForX.fixedPart.participants[0]);
 
         address toSigner = ForceMoveAppUtilities._recoverSigner(
-            keccak256(abi.encode(toState)),
+            keccak256(
+                abi.encode(
+                    IForceMove.State(
+                        toAppData.supportProofForX.turnNumTo,
+                        false, // Assume isFinal is false
+                        toAppData.channelIdForX,
+                        appPartHash,
+                        keccak256(toAppData.supportProofForX.variableParts[1].outcome)
+                    )
+                )
+            ),
             toAppData.supportProofForX.sigs[1]
         );
 
-        require(toSigner == address(0xb)); // TODO we need the participants array inside here
+        require(fromSigner == toAppData.supportProofForX.fixedPart.participants[1]);
 
         require(
             IForceMoveApp2(toAppData.supportProofForX.fixedPart.appDefinition).validTransition(
