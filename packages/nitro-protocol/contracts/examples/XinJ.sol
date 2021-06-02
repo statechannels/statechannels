@@ -30,9 +30,9 @@ contract XinJ is
     function validTransition(
         VariablePart memory from,
         VariablePart memory to,
-        uint48 turnNumTo,
-        uint256,
-        uint256 signedByFrom, // Who has signed the "from" state?
+        uint48, // turnNumTo (unused)
+        uint256, // nParticipants (unused)
+        uint256, // signedByFrom (unused) - Who has signed the "from" state?
         uint256 signedByTo // Who has signed the "to" state?
     ) public override pure returns (bool) {
         bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, 0);
@@ -44,14 +44,8 @@ contract XinJ is
         // Assumptions:
         //  - single asset in this channel
         //  - three parties in this channel
-        (
-            Outcome.AllocationItem[] memory fromAllocation,
-            address fromAssetHolderAddress
-        ) = decode3PartyAllocation(from.outcome);
-        (
-            Outcome.AllocationItem[] memory toAllocation,
-            address toAssetHolderAddress
-        ) = decode3PartyAllocation(to.outcome);
+        Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
+        Outcome.AllocationItem[] memory toAllocation = decode3PartyAllocation(to.outcome);
 
         // slots for each participant unchanged
         require(
@@ -154,7 +148,7 @@ contract XinJ is
             toAppData.supportProofForX.sigs[1]
         );
 
-        require(fromSigner == toAppData.supportProofForX.fixedPart.participants[1]);
+        require(toSigner == toAppData.supportProofForX.fixedPart.participants[1]);
 
         require(
             IForceMoveApp2(toAppData.supportProofForX.fixedPart.appDefinition).validTransition(
@@ -174,7 +168,7 @@ contract XinJ is
     function decode3PartyAllocation(bytes memory outcomeBytes)
         private
         pure
-        returns (Outcome.AllocationItem[] memory allocation, address assetHolderAddress)
+        returns (Outcome.AllocationItem[] memory allocation)
     {
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
@@ -196,8 +190,6 @@ contract XinJ is
             assetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
-        assetHolderAddress = outcome[0].assetHolderAddress;
-
         // Throws unless there are exactly 3 allocations
         require(allocation.length == 3, 'allocation.length != 3');
     }
