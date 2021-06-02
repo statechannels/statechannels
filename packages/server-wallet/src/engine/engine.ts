@@ -23,7 +23,6 @@ import {
 import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
-import EventEmitter from 'eventemitter3';
 import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
@@ -66,7 +65,6 @@ import {
   SingleChannelOutput,
   MultipleChannelOutput,
   EngineInterface,
-  EngineEvent,
   hasNewObjective,
   SyncObjectiveResult,
 } from './types';
@@ -75,10 +73,6 @@ import {EngineResponse} from './engine-response';
 // TODO: The client-api does not currently allow for outgoing messages to be
 // declared as the result of a wallet API call.
 // Nor does it allow for multiple channel results
-
-type EventEmitterType = {
-  [key in EngineEvent['type']]: EngineEvent['value'];
-};
 
 export class ConfigValidationError extends Error {
   constructor(public errors: ValidationErrorItem[]) {
@@ -89,9 +83,7 @@ export class ConfigValidationError extends Error {
 /**
  * A single-threaded Nitro engine
  */
-export class SingleThreadedEngine
-  extends EventEmitter<EventEmitterType>
-  implements EngineInterface, ChainEventSubscriberInterface {
+export class SingleThreadedEngine implements EngineInterface, ChainEventSubscriberInterface {
   knex: Knex;
   store: Store;
   chainService: ChainServiceInterface;
@@ -115,8 +107,6 @@ export class SingleThreadedEngine
    * @readonly
    */
   protected constructor(engineConfig: IncomingEngineConfig) {
-    super();
-
     const populatedConfig = _.assign({}, defaultConfig, engineConfig);
     // Even though the config hasn't been validated we attempt to create a logger
     // This allows us to log out any config validation errors
@@ -952,8 +942,6 @@ export class SingleThreadedEngine
     await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
-    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
-
     // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
     // multiple channel output. So, we set strict to false
     return response.singleChannelOutput(false);
@@ -973,8 +961,6 @@ export class SingleThreadedEngine
     await this.store.updateTransferredOut(channelId, assetHolderAddress, transferredOut);
 
     await this.takeActions([channelId], response);
-
-    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
   async challengeRegistered(arg: ChallengeRegisteredArg): Promise<void> {
@@ -983,7 +969,6 @@ export class SingleThreadedEngine
 
     await this.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
     await this.takeActions([arg.channelId], response);
-    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
   async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
@@ -1013,7 +998,6 @@ export class SingleThreadedEngine
     });
 
     await this.takeActions([arg.channelId], response);
-    response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
   private async registerChannelWithChainService(

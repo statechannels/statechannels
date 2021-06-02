@@ -11,12 +11,6 @@ import {recordFunctionMetrics, timerFactory} from '../../src/metrics';
 import {payerConfig} from '../e2e-utils';
 import {DeepPartial, defaultConfig, EngineConfig} from '../../src/config';
 import {ONE_DAY} from '../../src/__test__/test-helpers';
-import {EngineEvent} from '../../src/engine/types';
-
-type TestChannelResult = {
-  channelResult: ChannelResult;
-  events: EngineEvent[];
-};
 
 export default class PayerClient {
   readonly config: EngineConfig;
@@ -88,11 +82,7 @@ export default class PayerClient {
     return channelResults;
   }
 
-  public async createPayerChannel(receiver: Participant): Promise<TestChannelResult> {
-    const events: EngineEvent[] = [];
-    const names = ['channelUpdated'] as const;
-    names.map(event => this.engine.on(event, e => events.push({...e, event})));
-
+  public async createPayerChannel(receiver: Participant): Promise<ChannelResult> {
     const {
       outbox: [{params}],
       channelResults: [{channelId}],
@@ -127,7 +117,7 @@ export default class PayerClient {
 
     const {channelResult} = await this.engine.getState({channelId});
 
-    return {channelResult, events};
+    return channelResult;
   }
   /**
    * Mines a block that with a timestamp =  currentBlock.timestamp + timeIncrease

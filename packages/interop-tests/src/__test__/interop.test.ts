@@ -2,7 +2,6 @@ import {
   DBAdmin,
   defaultTestConfig,
   Output,
-  SingleChannelOutput,
   SingleThreadedEngine
 } from '@statechannels/server-wallet';
 import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
@@ -11,25 +10,20 @@ import {constants, Contract, providers, Wallet} from 'ethers';
 import {
   Address,
   BN,
-  deserializeMessage,
   Destination,
   formatAmount,
   makeAddress,
   makeDestination,
   Uint256
 } from '@statechannels/wallet-core';
-import {fromEvent} from 'rxjs';
-import {first} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
-
 import {
   CreateChannelParams,
   isJsonRpcNotification,
   Message,
   PushMessageRequest
 } from '@statechannels/client-api-schema';
-import {Message as WireMessage} from '@statechannels/wire-format';
 
 jest.setTimeout(60_000);
 
@@ -68,7 +62,7 @@ let serverDestination: Destination;
 let browserAddress: Address;
 let browserDestination: Destination;
 
-beforeAll(() => {
+beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
   assetHolderContract = new Contract(
     ethAssetHolderAddress,
@@ -76,12 +70,13 @@ beforeAll(() => {
     provider
   );
   mineOnEvent(assetHolderContract);
+  // TODO: The onSendMessage listener can still be executing
+  // so we can't properly restart the engine
+  await DBAdmin.truncateDatabase(serverConfig);
+  serverWallet = await SingleThreadedEngine.create(serverConfig);
 });
 
 beforeEach(async () => {
-  await DBAdmin.truncateDatabase(serverConfig);
-
-  serverWallet = await SingleThreadedEngine.create(serverConfig);
   browserWallet = await ChannelWallet.create(
     makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
   );
@@ -94,17 +89,18 @@ beforeEach(async () => {
 
   browserWallet.onSendMessage(message => {
     if (isJsonRpcNotification(message)) {
+      // TODO: Since we're not awaiting this it can execute while knex is being destroyed
       serverWallet.pushMessage((message.params as Message).data);
     }
   });
 });
 
 afterEach(async () => {
-  await serverWallet.destroy();
   browserWallet.destroy();
 });
 
-afterAll(() => {
+afterAll(async () => {
+  await serverWallet.destroy();
   provider.polling = false;
   provider.removeAllListeners();
   assetHolderContract.removeAllListeners();
@@ -131,15 +127,6 @@ function generatePushMessage(messageParams: Message): PushMessageRequest {
     method: 'PushMessage',
     params: messageParams
   };
-}
-
-// In theory, we should be able to check the channelResult. In practice, the channelResult seems to have an incorrect turn number
-function containsPostfundState(singleChannelOutput: SingleChannelOutput): boolean {
-  if (!singleChannelOutput.outbox.length) return false;
-
-  const signedStates = deserializeMessage(singleChannelOutput.outbox[0].params as WireMessage)
-    .signedStates;
-  return signedStates ? signedStates?.some(ss => ss.turnNum === 3) : false;
 }
 
 it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
@@ -186,14 +173,6 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
     },
     'dummyDomain'
   );
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(containsPostfundState))
-    .toPromise();
-
-  serverWallet.on('channelUpdated', e => console.log(JSON.stringify(e)));
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(await postFundA), 'dummyDomain');
 });
 
 it('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
@@ -245,11 +224,4 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
 
   const serverOutput1 = await serverWallet.joinChannel({channelId});
   await browserWallet.pushMessage(serverMessageToBrowserMessage(serverOutput1), 'dummyDomain');
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(containsPostfundState))
-    .toPromise();
-
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
 });
