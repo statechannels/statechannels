@@ -259,6 +259,19 @@ export class ObjectiveModel extends Model {
       .first();
   }
 
+  static async updateProgressDate(
+    objectiveId: string,
+    tx: TransactionOrKnex
+  ): Promise<WalletObjective<SupportedObjective>> {
+    return (
+      await ObjectiveModel.query(tx)
+        .findById(objectiveId)
+        .patch({progressLastMadeAt: new Date(Date.now())})
+        .returning('*')
+        .first()
+    ).toObjective();
+  }
+
   static async updateWaitingFor(
     objectiveId: string,
     waitingFor: WaitingFor,
