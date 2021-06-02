@@ -54,7 +54,6 @@ import {
   MultipleChannelOutput,
   EngineInterface,
   hasNewObjective,
-  SyncObjectiveResult,
 } from './types';
 import {EngineResponse} from './engine-response';
 
@@ -198,7 +197,7 @@ export class SingleThreadedEngine implements EngineInterface {
    * @param objectiveIds The ids of the objectives that should be sent to the counterparties
    * @returns A promise that resolves to an object containing the messages.
    */
-  public async syncObjectives(objectiveIds: string[]): Promise<SyncObjectiveResult> {
+  public async syncObjectives(objectiveIds: string[]): Promise<Message[]> {
     const response = EngineResponse.initialize();
     const objectives = await this.store.getObjectivesByIds(objectiveIds);
 
@@ -219,13 +218,13 @@ export class SingleThreadedEngine implements EngineInterface {
       // This could be refactored if performance is an issue
       const channel = await this.store.getChannelState(o.data.targetChannelId);
       // This will make sure any relevant channel information is synced
-      await this._syncChannel(channel.channelId, response, o.objectiveId);
+      await this._syncChannel(channel.channelId, response);
 
       const {participants} = channel;
       response.queueSendObjective(o, channel.myIndex, participants);
     }
 
-    return response.syncObjectiveResult;
+    return response.allMessages;
   }
 
   /**
@@ -240,17 +239,13 @@ export class SingleThreadedEngine implements EngineInterface {
     return response.singleChannelOutput();
   }
 
-  private async _syncChannel(
-    channelId: string,
-    response: EngineResponse,
-    objectiveId?: string
-  ): Promise<void> {
+  private async _syncChannel(channelId: string, response: EngineResponse): Promise<void> {
     const {states, channelState} = await this.store.getStates(channelId);
 
     const {myIndex, participants} = channelState;
 
-    states.forEach(s => response.queueState(s, myIndex, channelId, objectiveId));
-    response.queueChannelRequest(channelId, myIndex, participants, objectiveId);
+    states.forEach(s => response.queueState(s, myIndex, channelId));
+    response.queueChannelRequest(channelId, myIndex, participants);
     response.queueChannelState(channelState);
   }
 
@@ -421,7 +416,7 @@ export class SingleThreadedEngine implements EngineInterface {
       fundingLedgerChannelId
     );
 
-    response.queueState(signedState, channel.myIndex, channel.channelId, objective.objectiveId);
+    response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
 

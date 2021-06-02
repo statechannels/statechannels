@@ -30,7 +30,7 @@ test('Objectives can be synced if a message is lost', async () => {
   expect(await getObjective(peerEngines.b.knex, objectiveId)).toBeUndefined();
 
   // We would then call sync after some time of waiting and not making progress
-  const {outbox} = await peerEngines.a.syncObjectives([objectiveId]);
+  const outbox = await peerEngines.a.syncObjectives([objectiveId]);
 
   // After sync funding should continue as normal
   const {channelResults} = await peerEngines.b.pushMessage(
@@ -51,13 +51,18 @@ test('handles the objective being synced even if no message is lost', async () =
   const objectiveId = `OpenChannel-${channelId}`;
 
   // The initial message is received
-  await peerEngines.b.pushMessage(getPayloadFor(bob().participantId, messageResponse.outbox));
+  await peerEngines.b.pushMessage(
+    getPayloadFor(
+      bob().participantId,
+      messageResponse.outbox.map(o => o.params)
+    )
+  );
 
   // We expect both objectives to be there
   expect(await getObjective(peerEngines.a.knex, objectiveId)).toBeDefined();
   expect(await getObjective(peerEngines.b.knex, objectiveId)).toBeDefined();
 
-  const {outbox: syncOutbox} = await peerEngines.a.syncObjectives([objectiveId]);
+  const syncOutbox = await peerEngines.a.syncObjectives([objectiveId]);
 
   // Now we push in the sync payload
   const {outbox, channelResults} = await peerEngines.b.pushMessage(
@@ -98,11 +103,11 @@ test('Can successfully push the sync objective message multiple times', async ()
   const syncResult = await peerEngines.a.syncObjectives([objectiveId]);
 
   // We push the message to B
-  await peerEngines.b.pushMessage(getPayloadFor(bob().participantId, syncResult.outbox));
+  await peerEngines.b.pushMessage(getPayloadFor(bob().participantId, syncResult));
 
   // We push the message to B again and check the results
   const {outbox, channelResults} = await peerEngines.b.pushMessage(
-    getPayloadFor(bob().participantId, syncResult.outbox)
+    getPayloadFor(bob().participantId, syncResult)
   );
 
   // The only expected result is a sync channel response
