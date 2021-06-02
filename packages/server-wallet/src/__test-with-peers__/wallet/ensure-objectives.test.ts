@@ -68,6 +68,6 @@ describe('EnsureObjectives', () => {
     peerWallets.b.on('ObjectiveProposed', o => peerWallets.b.approveObjectives([o.objectiveId]));
     const result = await peerWallets.a.createChannels([getWithPeersCreateChannelsArgs(peerSetup)]);
 
-    await expect(result).toBeObjectiveDoneType('EnsureObjectiveFailed');
+    await expect(result).toBeObjectiveDoneType('ObjectiveTimedOutError');
   });
 });
