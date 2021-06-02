@@ -23,12 +23,12 @@ import {
 import {ChainEventSubscriberInterface, ChainServiceInterface} from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
-import {RetryOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
+import {SyncOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
 
-const DEFAULTS: RetryOptions = {numberOfAttempts: 10, multiple: 2, initialDelay: 50};
+const DEFAULTS: SyncOptions = {pollInterval: 100, timeOutThreshold: 60_000, staleThreshold: 1_000};
 export class Wallet extends EventEmitter<WalletEvents> {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
@@ -41,7 +41,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     engine: Engine,
     chainService: ChainServiceInterface,
     messageServiceFactory: MessageServiceFactory,
-    retryOptions: Partial<RetryOptions> = DEFAULTS
+    retryOptions: Partial<SyncOptions> = DEFAULTS
   ): Promise<Wallet> {
     await chainService.checkChainId(engine.engineConfig.networkConfiguration.chainNetworkID);
     const wallet = new Wallet(messageServiceFactory, engine, chainService, {
@@ -55,12 +55,12 @@ export class Wallet extends EventEmitter<WalletEvents> {
   private _messageService: MessageServiceInterface;
   private _syncInterval = setIntervalAsync(async () => {
     await this.syncObjectives();
-  }, 1000);
+  }, this._syncOptions.pollInterval);
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
     private _chainService: ChainServiceInterface,
-    private _retryOptions: RetryOptions
+    private _syncOptions: SyncOptions
   ) {
     super();
 
@@ -187,10 +187,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   private async syncObjectives() {
-    const TIME_TO_CONSIDER_STALE = 1000;
-    const TIME_TO_CONSIDER_FAILED = 50_000;
-    const staleDate = Date.now() - TIME_TO_CONSIDER_STALE;
-    const timeOutDate = Date.now() - TIME_TO_CONSIDER_FAILED;
+    const staleDate = Date.now() - this._syncOptions.staleThreshold;
+    const timeOutDate = Date.now() - this._syncOptions.timeOutThreshold;
     const objectives = await this._engine.store.getApprovedObjectives();
     const timedOutObjectives = objectives.filter(o => o.progressLastMadeAt.getTime() < timeOutDate);
 
@@ -414,14 +412,15 @@ export class Wallet extends EventEmitter<WalletEvents> {
   ): Promise<ObjectiveDoneResult> {
     // TODO: This should resolve to an error
     return new Promise<ObjectiveDoneResult>(resolve => {
-      this.on('ObjectiveTimedOut', o => {
+      this.on('ObjectiveTimedOut', (o: WalletObjective) => {
         console.log(o);
         if (o.objectiveId === objective.objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Timed out');
 
           resolve({
-            type: 'EnsureObjectiveFailed',
-            numberOfAttempts: 0,
+            type: 'ObjectiveTimedOutError',
+            objectiveId: o.objectiveId,
+            lastProgressMadeAt: o.progressLastMadeAt,
           });
         }
       });

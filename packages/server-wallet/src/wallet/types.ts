@@ -2,29 +2,30 @@ import _ from 'lodash';
 
 import {ObjectiveStatus, WalletObjective} from '../models/objective';
 
-export type RetryOptions = {
-  /**
-   * The number of attempts to make.
-   */
-  numberOfAttempts: number;
-  /**
-   * The initial delay to use in milliseconds
-   */
-  initialDelay: number;
+export type SyncOptions = {
+  // How often we check for stale or timed out objectives in milliseconds.
+  pollInterval: number;
 
   /**
-   * The multiple that the delay is multiplied by each time
+   * The amount of time (in milliseconds) that we wait for until we consider an objective timed out.
+   * When an objective is timed out we give up trying to complete it and return an error.
    */
-  multiple: number;
+  timeOutThreshold: number;
+
+  /**
+   * The amount of time (in milliseconds) that we wait for until we consider an objective "stale"
+   * If an objective is stale we attempt to sync the objectives with the other participants.
+   */
+  staleThreshold: number;
 };
 
-export type ObjectiveError = EnsureObjectiveFailed | InternalError;
+export type ObjectiveError = ObjectiveTimedOutError | InternalError;
 
-export type EnsureObjectiveFailed = {
-  type: 'EnsureObjectiveFailed';
-  numberOfAttempts: number;
+export type ObjectiveTimedOutError = {
+  lastProgressMadeAt: Date;
+  objectiveId: string;
+  type: 'ObjectiveTimedOutError';
 };
-
 /**
  * This is the catch-all error that will be returned if some error is thrown and not handled.
  */
