@@ -168,7 +168,12 @@ it.skip('Create a directly funded channel between two engines ', async () => {
     turnNum: 0,
   });
 
-  const resultB0 = await b.pushMessage(getPayloadFor(participantB.participantId, preFundA.outbox));
+  const resultB0 = await b.pushMessage(
+    getPayloadFor(
+      participantB.participantId,
+      preFundA.outbox.map(o => o.params)
+    )
+  );
 
   expect(getChannelResultFor(channelId, resultB0.channelResults)).toMatchObject({
     status: 'proposed',
@@ -181,7 +186,12 @@ it.skip('Create a directly funded channel between two engines ', async () => {
     turnNum: 0,
   });
 
-  const resultA0 = await a.pushMessage(getPayloadFor(participantA.participantId, prefundB.outbox));
+  const resultA0 = await a.pushMessage(
+    getPayloadFor(
+      participantA.participantId,
+      prefundB.outbox.map(o => o.params)
+    )
+  );
 
   expect(getChannelResultFor(channelId, resultA0.channelResults)).toMatchObject({
     status: 'opening',
@@ -203,15 +213,30 @@ it.skip('Create a directly funded channel between two engines ', async () => {
     turnNum: 0,
   });
 
-  await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
+  await b.pushMessage(
+    getPayloadFor(
+      participantB.participantId,
+      postFundA.outbox.map(o => o.params)
+    )
+  );
 
-  const resultA1 = await a.pushMessage(getPayloadFor(participantA.participantId, postFundB.outbox));
+  const resultA1 = await a.pushMessage(
+    getPayloadFor(
+      participantA.participantId,
+      postFundB.outbox.map(o => o.params)
+    )
+  );
   expect(getChannelResultFor(channelId, resultA1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
   });
 
-  const resultB1 = await b.pushMessage(getPayloadFor(participantB.participantId, postFundA.outbox));
+  const resultB1 = await b.pushMessage(
+    getPayloadFor(
+      participantB.participantId,
+      postFundA.outbox.map(o => o.params)
+    )
+  );
   expect(getChannelResultFor(channelId, resultB1.channelResults)).toMatchObject({
     status: 'running',
     turnNum: 3,
@@ -229,14 +254,24 @@ it.skip('Create a directly funded channel between two engines ', async () => {
     // fundingStatus: 'Funded',
   });
 
-  const closeB = await b.pushMessage(getPayloadFor(participantB.participantId, closeA.outbox));
+  const closeB = await b.pushMessage(
+    getPayloadFor(
+      participantB.participantId,
+      closeA.outbox.map(o => o.params)
+    )
+  );
   expect(getChannelResultFor(channelId, closeB.channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 4,
     fundingStatus: 'Defunded',
   });
 
-  const close2A = await a.pushMessage(getPayloadFor(participantA.participantId, closeB.outbox));
+  const close2A = await a.pushMessage(
+    getPayloadFor(
+      participantA.participantId,
+      closeB.outbox.map(o => o.params)
+    )
+  );
   expect(getChannelResultFor(channelId, close2A.channelResults)).toMatchObject({
     status: 'closed',
     turnNum: 4,
