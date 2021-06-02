@@ -413,7 +413,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // TODO: This should resolve to an error
     return new Promise<ObjectiveDoneResult>(resolve => {
       this.on('ObjectiveTimedOut', (o: WalletObjective) => {
-        console.log(o);
         if (o.objectiveId === objective.objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Timed out');
 
