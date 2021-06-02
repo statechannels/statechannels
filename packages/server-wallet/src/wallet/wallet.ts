@@ -392,7 +392,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
   private async createObjectiveDoneResult(
     objective: WalletObjective
   ): Promise<ObjectiveDoneResult> {
-    // TODO: This should resolve to an error
     return new Promise<ObjectiveDoneResult>(resolve => {
       this.on('ObjectiveTimedOut', o => {
         if (o.objectiveId === objective.objectiveId) {
