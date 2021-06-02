@@ -106,6 +106,9 @@ contract XinJ is
         returns (Outcome.AllocationItem[] memory Xallocation)
     {
         // TODO escape hatch for doubly-signed states. For now we restrict to turn-taking in X.
+
+        // The following checks follow the protocol-level validTransition function
+        // They are the members of FixedPart that do not affect the channelId
         require(
             fromAppData.supportProofForX.fixedPart.appDefinition ==
                 toAppData.supportProofForX.fixedPart.appDefinition
