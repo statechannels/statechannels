@@ -24,6 +24,7 @@
     "pg-connection-string": "^2.4.0",
     "pino": "6.2.0",
     "rxjs": "6.6.3",
+    "set-interval-async": "^2.0.3",
     "tarn": "3.0.0"
   },
   "devDependencies": {
@@ -43,6 +44,7 @@
     "@types/pg": "7.14.0",
     "@types/pino": "6.0.0",
     "@types/prettier": "1.19.0",
+    "@types/set-interval-async": "^1.0.0",
     "@types/yargs": "15.0.5",
     "@typescript-eslint/eslint-plugin": "4.13.0",
     "@typescript-eslint/parser": "4.13.0",
