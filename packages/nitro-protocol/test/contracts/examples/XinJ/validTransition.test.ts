@@ -1,12 +1,12 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, ethers, utils} from 'ethers';
+import {Contract, ethers, Signature, utils} from 'ethers';
 
 const {HashZero} = ethers.constants;
 // import HashLockedSwapArtifact from '../../../../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
 import TwoOfThreeArtifact from '../../../../artifacts/contracts/examples/TwoOfThree.sol/TwoOfThree.json';
-import {Bytes32} from '../../../../src';
+import {Bytes32, convertBytes32ToAddress} from '../../../../src';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
-import {VariablePart} from '../../../../src/contract/state';
+import {FixedPart, VariablePart} from '../../../../src/contract/state';
 import {Bytes} from '../../../../src/contract/types';
 import {
   getTestProvider,
@@ -22,16 +22,11 @@ interface HashLockedSwapData {
   preImage: Bytes;
 }
 
-function encodeTwoOfThreeData(data: HashLockedSwapData) {
-  return utils.defaultAbiCoder.encode(
-    ['tuple(address twoPartyApp, bytes twoPartyAppData)'],
-    [
-      {
-        twoPartyApp: process.env.HASH_LOCK_2_ADDRESS,
-        twoPartyAppData: encodeHashLockedSwapData(data),
-      },
-    ]
-  );
+interface SupportProof {
+  fixedPart: FixedPart;
+  variableParts: [VariablePart, VariablePart] | [VariablePart];
+  turnNumTo: number;
+  sigs: [Signature, Signature];
 }
 
 function encodeHashLockedSwapData(data: HashLockedSwapData): string {
@@ -49,6 +44,24 @@ const addresses = {
   Receiver: randomExternalDestination(),
   Intermediary: randomExternalDestination(),
 };
+
+const supportProofForX: SupportProof = {
+  fixedPart: {
+    appDefinition: process.env.HASH_LOCK_2_ADDRESS,
+    challengeDuration: 0,
+    chainId: '0x1',
+    participants: [
+      convertBytes32ToAddress(addresses.Sender),
+      convertBytes32ToAddress(addresses.Receiver),
+      convertBytes32ToAddress(addresses.Intermediary),
+    ],
+    channelNonce: 99,
+  },
+  variableParts: [{outcome: '', appData: ''}],
+  turnNumTo: 4,
+  sigs: ['', ''],
+};
+
 const provider = getTestProvider();
 
 beforeAll(async () => {
