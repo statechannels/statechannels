@@ -11,7 +11,7 @@ import {
 import {ChainRequest} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
-import {Bytes32, WireMessage} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
@@ -24,14 +24,10 @@ export type MultipleChannelOutput = {
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
   completedObjectives: WalletObjective[];
-  messagesByObjective: Record<string, WireMessage[]>;
+
   chainRequests: ChainRequest[];
 };
 
-export type SyncObjectiveResult = {
-  messagesByObjective: Record<string, WireMessage[]>;
-  outbox: Outgoing[];
-};
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
 export interface EngineInterface {

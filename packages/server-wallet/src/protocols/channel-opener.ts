@@ -111,7 +111,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
     // TODO: should probably have more checking around the form of channel.latest
     const prefund = {...channel.latest, turnNum: 0};
     const signedState = await this.store.signState(channel, prefund, tx);
-    response.queueState(signedState, channel.myIndex, channel.channelId, objectiveId);
+    response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueChannel(channel);
   }
 
@@ -124,7 +124,7 @@ export class ChannelOpener implements Cranker<WalletObjective<OpenChannel>> {
     // TODO: should probably have more checking around the form of channel.latest
     const postfund = {...channel.latest, turnNum: channel.nParticipants * 2 - 1};
     const signedState = await this.store.signState(channel, postfund, tx);
-    response.queueState(signedState, channel.myIndex, channel.channelId, objectiveId);
+    response.queueState(signedState, channel.myIndex, channel.channelId);
     response.queueChannel(channel);
   }
 }

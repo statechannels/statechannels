@@ -49,9 +49,11 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   private _messageService: MessageServiceInterface;
+
   private _syncInterval = setIntervalAsync(async () => {
     await this.syncObjectives();
   }, this._syncOptions.pollInterval);
+
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
@@ -191,12 +193,13 @@ export class Wallet extends EventEmitter<WalletEvents> {
     for (const o of timedOutObjectives) {
       this.emit('ObjectiveTimedOut', o);
     }
+
     const staleObjectives = objectives
       .filter(o => o.progressLastMadeAt.getTime() < staleDate)
       .map(o => o.objectiveId);
 
-    const syncResult = await this._engine.syncObjectives(staleObjectives);
-    await this._messageService.send(getMessages(syncResult.outbox));
+    const syncMessages = await this._engine.syncObjectives(staleObjectives);
+    await this._messageService.send(syncMessages);
   }
 
   /**
@@ -235,7 +238,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     const objectiveIds = objectives.map(o => o.objectiveId);
     await this._engine.store.updateObjectiveProgressDate(objectiveIds);
 
-    const {outbox} = await this._engine.syncObjectives(objectiveIds);
+    const syncMessages = await this._engine.syncObjectives(objectiveIds);
 
     const results = objectives.map(async o => {
       const done = this.createObjectiveDoneResult(o);
@@ -247,7 +250,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       };
     });
 
-    await this.messageService.send(getMessages(outbox));
+    await this.messageService.send(syncMessages);
     return Promise.all(results);
   }
 
