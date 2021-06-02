@@ -4,6 +4,7 @@ import EventEmitter from 'eventemitter3';
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {providers, utils} from 'ethers';
 
+import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
 import {
   MessageHandler,
   MessageServiceFactory,
@@ -59,7 +60,9 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   private _messageService: MessageServiceInterface;
-
+  private _syncInterval = setIntervalAsync(async () => {
+    await this.syncObjectives();
+  }, 1000);
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
@@ -188,6 +191,18 @@ export class Wallet extends EventEmitter<WalletEvents> {
     );
   }
 
+  private async syncObjectives() {
+    const TIME_TO_CONSIDER_STALE = 1000;
+    const staleDate = Date.now() - TIME_TO_CONSIDER_STALE;
+    const objectives = await this._engine.store.getApprovedObjectives();
+    const staleObjectives = objectives
+      .filter(o => o.progressLastMadeAt.getTime() < staleDate)
+      .map(o => o.objectiveId);
+
+    const syncResult = await this._engine.syncObjectives(staleObjectives);
+    await this._messageService.send(getMessages(syncResult.outbox));
+  }
+
   /**
    Closes the specified channels
    * @param channelIds The ids of the channels to close.
@@ -196,22 +211,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
   public async closeChannels(channelIds: string[]): Promise<ObjectiveResult[]> {
     return Promise.all(
       channelIds.map(async channelId => {
-        // TODO: This currently is skipping the ensureObjective logic
-        // Using ensureObjectives seems to keep executing AFTER destroy has been called
-        // Still need to figure this out
-        const done: Promise<ObjectiveDoneResult> = new Promise(resolve =>
-          this.on('ObjectiveCompleted', (o: WalletObjective) => {
-            if (
-              o.type === 'CloseChannel' &&
-              o.data.targetChannelId === channelId &&
-              o.status === 'succeeded'
-            ) {
-              this._engine.logger.trace({objective: o}, 'Objective Suceeded');
-              resolve({type: 'Success', channelId});
-            }
-          })
-        );
-
         const closeResult = await this._engine.closeChannel({channelId});
         const {newObjective, channelResult} = closeResult;
 
@@ -224,7 +223,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
           channelId: channelResult.channelId,
           currentStatus: latest.status,
           objectiveId: newObjective.objectiveId,
-          done,
+          done: this.createObjectiveSuccessPromise(newObjective),
         };
       })
     );
@@ -483,6 +482,20 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return this._messageService;
   }
 
+  private async createObjectiveSuccessPromise(
+    objective: WalletObjective
+  ): Promise<ObjectiveDoneResult> {
+    // TODO: This should resolve to an error
+    return new Promise(resolve =>
+      this.on('ObjectiveCompleted', (o: WalletObjective) => {
+        if (o.objectiveId === objective.objectiveId) {
+          this._engine.logger.trace({objective: o}, 'Objective Suceeded');
+          resolve({type: 'Success', channelId: o.data.targetChannelId});
+        }
+      })
+    );
+  }
+
   /**
    * Registers any channels existing in the database with the chain service.
    *
@@ -509,6 +522,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   async destroy(): Promise<void> {
+    await clearIntervalAsync(this._syncInterval);
     this._chainService.destructor();
     await this._messageService.destroy();
     await this._engine.destroy();
