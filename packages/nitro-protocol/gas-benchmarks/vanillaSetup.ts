@@ -63,6 +63,6 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  hardhatProcess.kill();
+  hardhatProcess.kill('SIGINT');
   await hardhatProcessExited;
 });
