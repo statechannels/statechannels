@@ -172,12 +172,6 @@ export interface EngineInterface {
 }
 
 // @public (undocumented)
-export type EnsureObjectiveFailed = {
-    type: 'EnsureObjectiveFailed';
-    numberOfAttempts: number;
-};
-
-// @public (undocumented)
 export function extractDBConfigFromEngineConfig(engineConfig: EngineConfig): Config;
 
 // Warning: (ae-forgotten-export) The symbol "DatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
@@ -201,6 +195,9 @@ export type InternalError = {
     type: 'InternalError';
     error: Error;
 };
+
+// @public (undocumented)
+export function isMultipleChannelOutput(output: SingleChannelOutput | MultipleChannelOutput): output is MultipleChannelOutput;
 
 // @public
 export type LoggingConfiguration = {
@@ -252,7 +249,7 @@ export type NetworkConfiguration = {
 export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
 
 // @public (undocumented)
-export type ObjectiveError = EnsureObjectiveFailed | InternalError;
+export type ObjectiveError = ObjectiveTimedOutError | InternalError;
 
 // @public
 export type ObjectiveResult = {
@@ -266,6 +263,13 @@ export type ObjectiveResult = {
 export type ObjectiveSuccess = {
     channelId: string;
     type: 'Success';
+};
+
+// @public (undocumented)
+export type ObjectiveTimedOutError = {
+    lastProgressMadeAt: Date;
+    objectiveId: string;
+    type: 'ObjectiveTimedOutError';
 };
 
 // @public
@@ -326,13 +330,6 @@ export type RequiredDatabaseConfiguration = {
 export type RequiredEngineConfig = {
     databaseConfiguration: RequiredDatabaseConfiguration;
     networkConfiguration: NetworkConfiguration;
-};
-
-// @public (undocumented)
-export type RetryOptions = {
-    numberOfAttempts: number;
-    initialDelay: number;
-    multiple: number;
 };
 
 // @public (undocumented)
@@ -410,6 +407,13 @@ export type SyncObjectiveResult = {
 };
 
 // @public (undocumented)
+export type SyncOptions = {
+    pollInterval: number;
+    timeOutThreshold: number;
+    staleThreshold: number;
+};
+
+// @public (undocumented)
 export function validateEngineConfig(config: Record<string, any>): {
     valid: boolean;
     value: EngineConfig | undefined;
@@ -422,7 +426,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     closeChannels(channelIds: string[]): Promise<ObjectiveResult[]>;
     // Warning: (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "MessageServiceFactory" needs to be exported by the entry point index.d.ts
-    static create(engine: Engine, chainService: ChainServiceInterface, messageServiceFactory: MessageServiceFactory, retryOptions?: Partial<RetryOptions>): Promise<Wallet>;
+    static create(engine: Engine, chainService: ChainServiceInterface, messageServiceFactory: MessageServiceFactory, retryOptions?: Partial<SyncOptions>): Promise<Wallet>;
     createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
     // (undocumented)
     destroy(): Promise<void>;
@@ -438,6 +442,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 export type WalletEvents = {
     ObjectiveCompleted: WalletObjective;
     ObjectiveProposed: WalletObjective;
+    ObjectiveTimedOut: WalletObjective;
 };
 
 
@@ -445,8 +450,8 @@ export type WalletEvents = {
 //
 // src/engine/types.ts:27:3 - (ae-forgotten-export) The symbol "WireMessage" needs to be exported by the entry point index.d.ts
 // src/engine/types.ts:28:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
-// src/engine/types.ts:64:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
-// src/wallet/types.ts:53:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:70:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:54:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 
