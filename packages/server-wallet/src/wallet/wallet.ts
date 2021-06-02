@@ -125,7 +125,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       objectiveId: o.objectiveId,
       currentStatus: o.status,
       channelId: o.data.targetChannelId,
-      done: this.createObjectiveSuccessPromise(o),
+      done: this.createObjectiveDoneResult(o),
     }));
 
     // TODO: ApproveObjective should probably just return a MultipleChannelOuput
@@ -162,7 +162,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
           );
 
           const {newObjective, channelResult} = createResult;
-          const done = this.createObjectiveSuccessPromise(newObjective);
+          const done = this.createObjectiveDoneResult(newObjective);
           await this.handleEngineOutput(createResult);
           return {
             channelId: channelResult.channelId,
@@ -223,7 +223,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
           channelId: channelResult.channelId,
           currentStatus: latest.status,
           objectiveId: newObjective.objectiveId,
-          done: this.createObjectiveSuccessPromise(newObjective),
+          done: this.createObjectiveDoneResult(newObjective),
         };
       })
     );
@@ -242,7 +242,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     const {outbox} = await this._engine.syncObjectives(objectiveIds);
 
     const results = objectives.map(async o => {
-      const done = this.createObjectiveSuccessPromise(o);
+      const done = this.createObjectiveDoneResult(o);
       return {
         objectiveId: o.objectiveId,
         currentStatus: o.status,
@@ -407,7 +407,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return this._messageService;
   }
 
-  private async createObjectiveSuccessPromise(
+  private async createObjectiveDoneResult(
     objective: WalletObjective
   ): Promise<ObjectiveDoneResult> {
     // TODO: This should resolve to an error
