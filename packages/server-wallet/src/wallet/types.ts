@@ -63,4 +63,5 @@ export type ObjectiveResult = {
 export type WalletEvents = {
   ObjectiveCompleted: WalletObjective;
   ObjectiveProposed: WalletObjective;
+  ObjectiveTimedOut: WalletObjective;
 };
