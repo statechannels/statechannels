@@ -19,7 +19,8 @@ contract HashLockedSwap is IForceMoveApp2 {
         VariablePart memory b,
         uint48 turnNumB,
         uint256,
-        uint8 signedBy
+        uint256 signedByFrom, // Who has signed the "from" state?
+        uint256 signedByTo // Who has signed the "to" state?
     ) public override pure returns (bool) {
         // is this the first and only swap?
         require(turnNumB == 4, 'turnNumB != 4');
@@ -27,7 +28,8 @@ contract HashLockedSwap is IForceMoveApp2 {
         // only required for IForceMoveApp2 interface, where turn taking is not enforced at the protocol level
         // given the turnNumB == 4 we can recover turn taking by noting 4 % 2 = 0
         // implying participant 0 needs to sign state b
-        require(signedBy == 1 || signedBy == 3, 'participant0 must sign turnNum 4');
+        require(ForceMoveAppUtilities.isSignedBy(signedByFrom, 1));
+        require(ForceMoveAppUtilities.isSignedBy(signedByTo, 0));
 
         // Decode variables.
         // Assumptions:

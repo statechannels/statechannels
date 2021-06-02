@@ -13,9 +13,10 @@ contract XinJ is
     IForceMoveApp2 // We need a new interface to allow signedBy information into the validTransition function
 {
     struct SupportProof {
-        FixedPart fixedPart;
-        VariablePart[] variableParts;
-        Signature[] sigs;
+        IForceMove.FixedPart fixedPart;
+        VariablePart[2] variableParts;
+        uint48 turnNumTo;
+        IForceMove.Signature[2] sigs; // one for each state (for now)
     }
 
     enum AlreadyMoved {A, B, AB, ABC}
@@ -31,9 +32,11 @@ contract XinJ is
         VariablePart memory to,
         uint48 turnNumTo,
         uint256,
-        bool signedByA, // Who has signed the "to" state?
-        bool signedByB // Who has signed the "to" state?
+        uint256 signedByFrom, // Who has signed the "from" state?
+        uint256 signedByTo // Who has signed the "to" state?
     ) public override pure returns (bool) {
+        bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, 0);
+        bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, 1);
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
 
@@ -59,7 +62,7 @@ contract XinJ is
         );
 
         // participant 2's slot may not change
-        require(fromAllocationA[2].amount == toAllocationB[2].amount, 'p2.amt constant');
+        require(fromAllocation[2].amount == toAllocation[2].amount, 'p2.amt constant');
 
         // Allowed transitions are
         //    AB
@@ -86,13 +89,13 @@ contract XinJ is
             toAppData
         );
 
-        requireEmbeddedChannelIsValid(from, to);
+        requireEmbeddedChannelIsValid(from, to, fromAppData, toAppData);
 
         require(
             Xallocation[0].amount == toAllocation[0].amount &&
                 Xallocation[1].amount == toAllocation[1].amount &&
-                Xallocation[0].destination == toAllocation[0].destiantion &&
-                Xallocation[1].destination == toAllocation[1].destiantion
+                Xallocation[0].destination == toAllocation[0].destination &&
+                Xallocation[1].destination == toAllocation[1].destination
         );
         return true;
     }
@@ -114,24 +117,66 @@ contract XinJ is
         // TODO require channel id of the fixed part of the support proof for X matches toAppData.channelIdForX, and check this hasn't been changed.
     }
 
-    function requireHighesSupportedXState(AppData memory fromAppData, AppData memory toAppData)
+    function requireHighestSupportedXState(AppData memory fromAppData, AppData memory toAppData)
         internal
-        view
+        pure
         returns (Outcome.AllocationItem[] memory Xallocation)
     {
         // TODO escape hatch for doubly-signed states. For now we restrict to turn-taking in X.
         // TODO requireCorrectSignaturesInSupportProofForX;
-        require(
-            toAppData.rulesForX.validTransition(
-                toAppData.supportProofForX.states[0],
-                toAppData.supportProofForX.states[1]
+
+        // uint256 embeddedSignedByFrom = ;
+
+        bytes32 appPartHash = keccak256(
+            abi.encode(
+                toAppData.supportProofForX.fixedPart.challengeDuration,
+                toAppData.supportProofForX.fixedPart.appDefinition,
+                toAppData.supportProofForX.variableParts[0].appData
             )
         );
-        require(
-            toAppData.supportProofForX.states[1].turnNum >=
-                fromAppData.supportProofForX.states[1].turnNum
+
+        IForceMove.State memory fromState = IForceMove.State(
+            toAppData.supportProofForX.turnNumTo - 1,
+            false, // Assume isFinal is false
+            toAppData.channelIdForX,
+            appPartHash,
+            keccak256(toAppData.supportProofForX.variableParts[0].outcome)
         );
-        return decode2PartyAllocation(toAppData.supportProofForX.states[1].outcome);
+
+        address fromSigner = ForceMoveAppUtilities._recoverSigner(
+            keccak256(abi.encode(fromState)),
+            toAppData.supportProofForX.sigs[0]
+        );
+
+        require(fromSigner == address(0xa)); // TODO we need the participants array inside here
+
+        IForceMove.State memory toState = IForceMove.State(
+            toAppData.supportProofForX.turnNumTo,
+            false, // Assume isFinal is false
+            toAppData.channelIdForX,
+            appPartHash,
+            keccak256(toAppData.supportProofForX.variableParts[1].outcome)
+        );
+
+        address toSigner = ForceMoveAppUtilities._recoverSigner(
+            keccak256(abi.encode(toState)),
+            toAppData.supportProofForX.sigs[1]
+        );
+
+        require(toSigner == address(0xb)); // TODO we need the participants array inside here
+
+        require(
+            IForceMoveApp2(toAppData.supportProofForX.fixedPart.appDefinition).validTransition(
+                toAppData.supportProofForX.variableParts[0],
+                toAppData.supportProofForX.variableParts[1],
+                toAppData.supportProofForX.turnNumTo,
+                2, // nParticipants
+                1, // signedByFrom = 0b01; participant 0 only. Implied by require statement above.
+                2 // signedByTo = 0b10; participant 1 only. Implied by require statement above.
+            )
+        );
+        require(toAppData.supportProofForX.turnNumTo >= fromAppData.supportProofForX.turnNumTo);
+        return decode2PartyAllocation(toAppData.supportProofForX.variableParts[1].outcome);
     }
 
     // TODO write a reusable decodeNPartyAllocation fn
