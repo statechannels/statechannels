@@ -232,21 +232,4 @@ contract XinJ is
         // Throws unless there are exactly 2 allocations
         require(allocation.length == 2, 'allocation.length != 2');
     }
-
-    function encode2PartyAllocation(
-        Outcome.AllocationItem memory firstAllocationItem,
-        Outcome.AllocationItem memory secondAllocationItem,
-        address assetHolderAddress
-    ) private pure returns (bytes memory outcomeBytes) {
-        Outcome.AllocationItem[] memory allocation = new Outcome.AllocationItem[](2);
-        allocation[0] = firstAllocationItem;
-        allocation[1] = secondAllocationItem;
-        bytes memory allocationBytes = abi.encode(allocation);
-        bytes memory assetOutcomeBytes = abi.encode(
-            Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), allocationBytes)
-        );
-        Outcome.OutcomeItem[] memory outcome = new Outcome.OutcomeItem[](1);
-        outcome[0] = Outcome.OutcomeItem(assetHolderAddress, assetOutcomeBytes);
-        outcomeBytes = abi.encode(outcome);
-    }
 }
