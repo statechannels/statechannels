@@ -14,9 +14,10 @@ contract XinJ is
 {
     struct SupportProof {
         IForceMove.FixedPart fixedPart;
-        VariablePart[2] variableParts;
+        VariablePart[] variableParts; // either one or two states
         uint48 turnNumTo;
-        IForceMove.Signature[2] sigs; // one for each state (for now)
+        IForceMove.Signature[2] sigs; // one for each participant
+        uint8[] whoSignedWhat; // whoSignedWhat = [0,0] or [0,1] or [1,0]
     }
 
     enum AlreadyMoved {A, B, AB, ABC}
@@ -105,8 +106,6 @@ contract XinJ is
         pure
         returns (Outcome.AllocationItem[] memory Xallocation)
     {
-        // TODO escape hatch for doubly-signed states. For now we restrict to turn-taking in X.
-
         // The following checks follow the protocol-level validTransition function
         // They are the members of FixedPart that do not affect the channelId
         require(
@@ -116,7 +115,17 @@ contract XinJ is
         require(
             fromAppData.supportProofForX.fixedPart.challengeDuration ==
                 toAppData.supportProofForX.fixedPart.challengeDuration
-        ); // TODO this is actually never used so could be 0
+        ); // this is actually never used so could be 0
+
+        // A support proof requires 2 signatures
+        // But it may have either 1 or two states.
+        // If both signatures on the same state, it is supported
+        // Else one signature per state and we must check for a valid transition
+        require(
+            toAppData.supportProofForX.variableParts.length == 1 ||
+                toAppData.supportProofForX.variableParts.length == 2
+        );
+        require(toAppData.supportProofForX.whoSignedWhat.length == 2);
 
         bytes32 appPartHash = keccak256(
             abi.encode(
@@ -126,8 +135,43 @@ contract XinJ is
             )
         );
 
-        address fromSigner = ForceMoveAppUtilities._recoverSigner(
-            keccak256(
+        // hash the greatest state first (either the later of a pair, or the only state provided)
+        bytes32 greaterStateHash = keccak256(
+            abi.encode(
+                IForceMove.State(
+                    toAppData.supportProofForX.turnNumTo,
+                    false, // Assume isFinal is false
+                    toAppData.channelIdForX,
+                    appPartHash,
+                    keccak256(
+                        toAppData.supportProofForX.variableParts[toAppData
+                            .supportProofForX
+                            .variableParts
+                            .length - 1]
+                            .outcome
+                    )
+                )
+            )
+        );
+
+        if (
+            (toAppData.supportProofForX.whoSignedWhat[0] == 0) &&
+            (toAppData.supportProofForX.whoSignedWhat[1] == 0)
+        ) {
+            require(
+                (ForceMoveAppUtilities._recoverSigner(
+                    greaterStateHash,
+                    toAppData.supportProofForX.sigs[0]
+                ) == toAppData.supportProofForX.fixedPart.participants[0])
+            );
+            require(
+                ForceMoveAppUtilities._recoverSigner(
+                    greaterStateHash,
+                    toAppData.supportProofForX.sigs[1]
+                ) == toAppData.supportProofForX.fixedPart.participants[1]
+            );
+        } else {
+            bytes32 lesserStateHash = keccak256(
                 abi.encode(
                     IForceMove.State(
                         toAppData.supportProofForX.turnNumTo - 1,
@@ -137,39 +181,54 @@ contract XinJ is
                         keccak256(toAppData.supportProofForX.variableParts[0].outcome)
                     )
                 )
-            ),
-            toAppData.supportProofForX.sigs[0]
-        );
+            );
 
-        require(fromSigner == toAppData.supportProofForX.fixedPart.participants[0]);
+            if (
+                (toAppData.supportProofForX.whoSignedWhat[0] == 0) &&
+                (toAppData.supportProofForX.whoSignedWhat[1] == 1)
+            ) {
+                require(
+                    (ForceMoveAppUtilities._recoverSigner(
+                        lesserStateHash,
+                        toAppData.supportProofForX.sigs[0]
+                    ) == toAppData.supportProofForX.fixedPart.participants[0])
+                );
+                require(
+                    ForceMoveAppUtilities._recoverSigner(
+                        greaterStateHash,
+                        toAppData.supportProofForX.sigs[1]
+                    ) == toAppData.supportProofForX.fixedPart.participants[1]
+                );
+            } else if (
+                (toAppData.supportProofForX.whoSignedWhat[0] == 1) &&
+                (toAppData.supportProofForX.whoSignedWhat[1] == 0)
+            ) {
+                require(
+                    (ForceMoveAppUtilities._recoverSigner(
+                        greaterStateHash,
+                        toAppData.supportProofForX.sigs[0]
+                    ) == toAppData.supportProofForX.fixedPart.participants[0])
+                );
+                require(
+                    ForceMoveAppUtilities._recoverSigner(
+                        lesserStateHash,
+                        toAppData.supportProofForX.sigs[1]
+                    ) == toAppData.supportProofForX.fixedPart.participants[1]
+                );
+            } else revert();
 
-        address toSigner = ForceMoveAppUtilities._recoverSigner(
-            keccak256(
-                abi.encode(
-                    IForceMove.State(
-                        toAppData.supportProofForX.turnNumTo,
-                        false, // Assume isFinal is false
-                        toAppData.channelIdForX,
-                        appPartHash,
-                        keccak256(toAppData.supportProofForX.variableParts[1].outcome)
-                    )
+            require(
+                IForceMoveApp2(toAppData.supportProofForX.fixedPart.appDefinition).validTransition(
+                    toAppData.supportProofForX.variableParts[0],
+                    toAppData.supportProofForX.variableParts[1],
+                    toAppData.supportProofForX.turnNumTo,
+                    2, // nParticipants
+                    toAppData.supportProofForX.whoSignedWhat[0] == 0 ? 1 : 2, // signedByFrom = 0b01 or 0b10; participant 0 or 1 only. Implied by require statement above.
+                    toAppData.supportProofForX.whoSignedWhat[0] == 0 ? 2 : 1 //    signedByTo = 0b10 or 0b01; participant 1 or 0 only. Implied by require statement above.
                 )
-            ),
-            toAppData.supportProofForX.sigs[1]
-        );
+            );
+        }
 
-        require(toSigner == toAppData.supportProofForX.fixedPart.participants[1]);
-
-        require(
-            IForceMoveApp2(toAppData.supportProofForX.fixedPart.appDefinition).validTransition(
-                toAppData.supportProofForX.variableParts[0],
-                toAppData.supportProofForX.variableParts[1],
-                toAppData.supportProofForX.turnNumTo,
-                2, // nParticipants
-                1, // signedByFrom = 0b01; participant 0 only. Implied by require statement above.
-                2 // signedByTo = 0b10; participant 1 only. Implied by require statement above.
-            )
-        );
         return decode2PartyAllocation(toAppData.supportProofForX.variableParts[1].outcome);
     }
 
