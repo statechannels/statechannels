@@ -47,7 +47,7 @@ contract XinJ is
         Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
         Outcome.AllocationItem[] memory toAllocation = decode3PartyAllocation(to.outcome);
 
-        // slots for each participant unchanged
+        // destination slots for each participant unchanged
         require(
             fromAllocation[0].destination == toAllocation[0].destination &&
                 fromAllocation[1].destination == toAllocation[1].destination &&
@@ -55,10 +55,10 @@ contract XinJ is
             'destinations may not change'
         );
 
-        // participant 2's slot may not change
+        // participant 2's amount may not change
         require(fromAllocation[2].amount == toAllocation[2].amount, 'p2.amt constant');
 
-        // Allowed transitions are
+        // Allowed named-state transitions are
         //    AB
         //    ^^
         //   /  \
@@ -72,17 +72,25 @@ contract XinJ is
                 (toAppData.alreadyMoved == AlreadyMoved.A && signedByA) ||
                     (toAppData.alreadyMoved == AlreadyMoved.B && signedByB)
             );
-        } else if (fromAppData.alreadyMoved == AlreadyMoved.A) {
+        } else {
+            // If a support proof has already been supplied, the current support proof must be greater
+            require(toAppData.supportProofForX.turnNumTo > fromAppData.supportProofForX.turnNumTo);
+        }
+
+        if (fromAppData.alreadyMoved == AlreadyMoved.A) {
             require(toAppData.alreadyMoved == AlreadyMoved.AB && signedByB);
         } else if (fromAppData.alreadyMoved == AlreadyMoved.B) {
             require(toAppData.alreadyMoved == AlreadyMoved.AB && signedByA);
         }
 
-        Outcome.AllocationItem[] memory Xallocation = requireHighestSupportedXState(
+        // validate the supplied support proof
+        // extract the allocation
+        Outcome.AllocationItem[] memory Xallocation = validateSupportProofForX(
             fromAppData,
             toAppData
         );
 
+        // ensure A,B part of the outcome of X has been absorbed into the outcome of J
         require(
             Xallocation[0].amount == toAllocation[0].amount &&
                 Xallocation[1].amount == toAllocation[1].amount &&
@@ -92,13 +100,12 @@ contract XinJ is
         return true;
     }
 
-    function requireHighestSupportedXState(AppData memory fromAppData, AppData memory toAppData)
+    function validateSupportProofForX(AppData memory fromAppData, AppData memory toAppData)
         internal
         pure
         returns (Outcome.AllocationItem[] memory Xallocation)
     {
         // TODO escape hatch for doubly-signed states. For now we restrict to turn-taking in X.
-
         require(
             fromAppData.supportProofForX.fixedPart.appDefinition ==
                 toAppData.supportProofForX.fixedPart.appDefinition
@@ -160,7 +167,6 @@ contract XinJ is
                 2 // signedByTo = 0b10; participant 1 only. Implied by require statement above.
             )
         );
-        require(toAppData.supportProofForX.turnNumTo >= fromAppData.supportProofForX.turnNumTo);
         return decode2PartyAllocation(toAppData.supportProofForX.variableParts[1].outcome);
     }
 
