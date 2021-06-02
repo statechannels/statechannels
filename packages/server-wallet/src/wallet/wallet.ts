@@ -18,15 +18,11 @@ import {
   isMultipleChannelOutput,
   MultipleChannelOutput,
   SingleChannelOutput,
-  SyncObjectiveResult,
 } from '../engine';
 import {ChainEventSubscriberInterface, ChainServiceInterface} from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
 import {SyncOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
-
-export const delay = async (ms: number): Promise<void> =>
-  new Promise(resolve => setTimeout(resolve, ms));
 
 const DEFAULTS: SyncOptions = {pollInterval: 100, timeOutThreshold: 60_000, staleThreshold: 1_000};
 export class Wallet extends EventEmitter<WalletEvents> {
@@ -384,23 +380,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
         }
       },
     };
-  }
-
-  /**
-   * Gets a message for a specific objective from a SyncObjectiveResult
-   * Throws if there are additional messages or the message is missing
-   */
-  private getMessagesForObjective(objectiveId: string, result: SyncObjectiveResult) {
-    const objectiveIds = Object.keys(result.messagesByObjective);
-    if (!objectiveIds.includes(objectiveId)) {
-      throw new Error(`No messages for objective ${objectiveId}`);
-
-      // This is a sanity check to prevent us from losing messages
-    } else if (objectiveIds.length !== 1) {
-      throw new Error(`There are messages for multiple objectives ${objectiveIds}`);
-    }
-
-    return result.messagesByObjective[objectiveId];
   }
 
   public get messageService(): MessageServiceInterface {
