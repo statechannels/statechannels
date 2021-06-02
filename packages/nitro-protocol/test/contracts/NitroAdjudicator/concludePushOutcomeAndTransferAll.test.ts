@@ -61,10 +61,9 @@ const addresses = {
 const tenPayouts = {ERC20: {}};
 const fiftyPayouts = {ERC20: {}};
 const oneHundredPayouts = {ERC20: {}};
-
 for (let i = 0; i < 100; i++) {
-  const destination = randomExternalDestination();
-  addresses[i.toString()] = destination;
+  addresses[i.toString()] =
+    '0x000000000000000000000000e0c3b40fdff77c786dd3737837887c85' + (0x2392fa22 + i).toString(16); // they need to be distinct because JS objects
   if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
   if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
   if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
