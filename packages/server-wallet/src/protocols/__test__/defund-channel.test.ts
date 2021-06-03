@@ -29,7 +29,6 @@ const testChan2 = TestChannel.create({aBal: 5, bBal: 5, finalFrom: FINAL});
 let objective: WalletObjective<DefundChannel>;
 let objective2: WalletObjective<DefundChannel>;
 
-
 beforeEach(async () => {
   store = new Store(
     knex,
