@@ -157,7 +157,7 @@ function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
           amount: xOutcome[0].allocationItems[1].amount,
         },
         {
-          destination: xOutcome[0].allocationItems[0].destination,
+          destination: convertAddressToBytes32(Irene.address),
           amount: '0xa',
         },
       ],
@@ -261,14 +261,16 @@ describe('XinJ', () => {
     );
   });
   it('returns true / reverts for a correct / incorrect ABC => B transition', async () => {
-    toVariablePartForJ.appData = encodeXinJData({
-      alreadyMoved: AlreadyMoved.B,
-      channelIdForX: getChannelId(stateForX.channel),
-      supportProofForX: supportProofForX(stateForX),
-    });
     const result = await xInJ.validTransition(
       fromVariablePartForJ,
-      toVariablePartForJ,
+      {
+        ...toVariablePartForJ,
+        appData: encodeXinJData({
+          alreadyMoved: AlreadyMoved.B,
+          channelIdForX: getChannelId(stateForX.channel),
+          supportProofForX: supportProofForX(stateForX),
+        }),
+      },
       turnNumTo,
       nParticipants,
       signedByFrom,
@@ -280,7 +282,32 @@ describe('XinJ', () => {
       () =>
         xInJ.validTransition(
           fromVariablePartForJ,
-          toVariablePartForJ,
+          {
+            ...toVariablePartForJ,
+            appData: encodeXinJData({
+              alreadyMoved: AlreadyMoved.B,
+              channelIdForX: getChannelId(stateForX.channel),
+              supportProofForX: supportProofForX(stateForX),
+            }),
+          },
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      reason
+    );
+  });
+  // eslint-disable-next-line jest/expect-expect
+  it('reverts if destinations change', async () => {
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
+    maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
+    const reason: RevertReason = 'destinations may not change';
+    await expectRevert(
+      () =>
+        xInJ.validTransition(
+          fromVariablePartForJ,
+          {...toVariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
           signedByFrom,
