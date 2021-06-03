@@ -14,7 +14,7 @@ import '../interfaces/IForceMove.sol';
 // If the three parties agree, they can *un-embed* X from J off-chain by reverting J to a null app and updating the outcome accordingly.
 // Any participant can challenge with the latest triply signed state. Then, Alice and Bob get exactly 1 chance each to progress J on chain.
 // To progress J on chain, a support proof for X must be provided. Inferior support proofs are rejected. Participant 2 (Irene)'s balance is protected.
-// Irene retains the unilateral right to close the channel -- Alice and Bob get only 1 chance to update it each before Irene's signature is required.
+// Irene retains the unilateral right to close J -- Alice and Bob each get only 1 chance to update J before Irene's signature is required again.
 
 /**
  * @dev The XinJ contract embeds a subchannel.
