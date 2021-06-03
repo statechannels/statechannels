@@ -188,7 +188,6 @@ export default class PayerClient {
     const {channelResult, chainRequests} = await this.engine.challenge(channelId);
     const transactions = await this.chainService.handleChainRequests(chainRequests);
     const result = await Promise.all(transactions.map(tr => tr.wait()));
-    console.log(result);
     return channelResult;
   }
 
