@@ -1,6 +1,6 @@
 import {defaultAbiCoder, ParamType} from '@ethersproject/abi';
 import {expectRevert} from '@statechannels/devtools';
-import {constants, Contract, ethers, Signature, utils, Wallet} from 'ethers';
+import {BigNumber, constants, Contract, ethers, Signature, utils, Wallet} from 'ethers';
 import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
 
 const {HashZero} = ethers.constants;
@@ -12,7 +12,12 @@ import {
   getChannelId,
   signState,
 } from '../../../../src';
-import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {
+  Allocation,
+  AllocationAssetOutcome,
+  encodeOutcome,
+  Outcome,
+} from '../../../../src/contract/outcome';
 import {
   FixedPart,
   getFixedPart,
@@ -125,6 +130,28 @@ function encodeXinJData(data: XinJData) {
   );
 }
 
+function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
+  return [
+    {
+      assetHolderAddress: xOutcome[0].assetHolderAddress,
+      allocationItems: [
+        {
+          destination: xOutcome[0].allocationItems[0].destination,
+          amount: xOutcome[0].allocationItems[0].amount,
+        },
+        {
+          destination: xOutcome[0].allocationItems[1].destination,
+          amount: xOutcome[0].allocationItems[1].amount,
+        },
+        {
+          destination: xOutcome[0].allocationItems[0].destination,
+          amount: '0xa',
+        },
+      ],
+    },
+  ];
+}
+
 // *****
 
 let xInJ: Contract;
@@ -173,11 +200,11 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
 console.log(supportProofForX(stateForX));
 
 const fromVariablePartForJ: VariablePart = {
-  outcome: encodeOutcome([]),
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
   appData: encodeXinJData({
     alreadyMoved: AlreadyMoved.ABC,
     channelIdForX: getChannelId(stateForX.channel),
-    supportProofForX: supportProofForX(stateForX), // TODO this is awkard. We would like to use a null value here
+    supportProofForX: supportProofForX(stateForX), // TODO this is awkward. We would like to use a null value here
   }),
 };
 
