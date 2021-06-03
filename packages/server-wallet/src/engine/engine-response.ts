@@ -1,7 +1,11 @@
 import _ from 'lodash';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, Message} from '@statechannels/client-api-schema';
 import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
-import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
+import {
+  Message as WireMessage,
+  Payload,
+  SignedState as WireState,
+} from '@statechannels/wire-format';
 
 import {Notice, Outgoing} from '../protocols/actions';
 import {Channel} from '../models/channel';
@@ -18,7 +22,7 @@ import {MultipleChannelOutput, SingleChannelOutput} from './types';
  */
 export class EngineResponse {
   _channelResults: Record<string, ChannelResult> = {};
-  private _messages: WireMessage[] = [];
+  private _messages: Message[] = [];
 
   objectivesToApprove: WalletObjective[] = [];
   createdObjectives: WalletObjective[] = [];
@@ -201,8 +205,13 @@ export class EngineResponse {
     return Object.values(this._channelResults);
   }
 
-  public get allMessages(): WireMessage[] {
-    return this._messages;
+  public get allMessages(): Message[] {
+    return mergeOutgoing(
+      this._messages.map(m => ({
+        method: 'MessageQueued' as const,
+        params: m,
+      }))
+    ).map(o => o.params);
   }
 
   public get outbox(): Outgoing[] {
@@ -223,7 +232,7 @@ export class EngineResponse {
   // -------------------------------
 
   public get _signedStates(): WireState[] {
-    return this.allMessages.flatMap(wireMessage => wireMessage.data.signedStates || []);
+    return this._messages.flatMap(m => (m.data as Payload).signedStates || []);
   }
 }
 
