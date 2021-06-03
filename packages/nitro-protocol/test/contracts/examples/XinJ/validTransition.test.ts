@@ -236,7 +236,7 @@ describe('XinJ', () => {
   const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
   const nParticipants = 0; // TODO this is unused
   const signedByFrom = 0b00; // TODO this is unused
-  it('returns true / false for a correct / incorrect ABC => A transition', async () => {
+  it('returns true / reverts for a correct / incorrect ABC => A transition', async () => {
     const result = await xInJ.validTransition(
       fromVariablePartForJ,
       toVariablePartForJ,
@@ -260,7 +260,7 @@ describe('XinJ', () => {
       reason
     );
   });
-  it('returns true for a correct ABC=>B transition', async () => {
+  it('returns true / reverts for a correct / incorrect ABC => B transition', async () => {
     toVariablePartForJ.appData = encodeXinJData({
       alreadyMoved: AlreadyMoved.B,
       channelIdForX: getChannelId(stateForX.channel),
