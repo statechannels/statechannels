@@ -99,10 +99,32 @@ const stateForX: State = {
   appData: '0x',
 };
 
+const greaterStateForX: State = {
+  turnNum: 5,
+  isFinal: false,
+  channel: {
+    chainId: '0x1',
+    participants: [Alice.address, Bob.address],
+    channelNonce: 87,
+  },
+  challengeDuration: 0,
+  outcome: [
+    {
+      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      allocationItems: [
+        {destination: convertAddressToBytes32(Alice.address), amount: '0x4'},
+        {destination: convertAddressToBytes32(Bob.address), amount: '0x6'},
+      ],
+    },
+  ],
+  appDefinition: constants.AddressZero, // We will run the null app in X (for demonstration purposes)
+  appData: '0x',
+};
+
 const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
   fixedPart: getFixedPart(stateForX),
   variableParts: [getVariablePart(stateForX)],
-  turnNumTo: 4,
+  turnNumTo: stateForX.turnNum,
   sigs: [
     signState(stateForX, Alice.privateKey).signature,
     signState(stateForX, Bob.privateKey).signature,
@@ -110,7 +132,7 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
   whoSignedWhat: [0, 0],
 });
 
-const fromVariablePartForJ: VariablePart = {
+const ABCvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
   appData: encodeXinJData({
     alreadyMoved: AlreadyMoved.ABC,
@@ -119,12 +141,32 @@ const fromVariablePartForJ: VariablePart = {
   }),
 };
 
-const toVariablePartForJ: VariablePart = {
+const AvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
   appData: encodeXinJData({
     alreadyMoved: AlreadyMoved.A,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(stateForX),
+  }),
+};
+
+const BvariablePartForJ: VariablePart = {
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
+  appData: encodeXinJData({
+    alreadyMoved: AlreadyMoved.B,
+    channelIdForX: getChannelId(stateForX.channel),
+    supportProofForX: supportProofForX(stateForX),
+  }),
+};
+
+const ABvariablePartForJ: VariablePart = {
+  outcome: encodeOutcome(
+    absorbOutcomeOfXIntoJ(greaterStateForX.outcome as [AllocationAssetOutcome])
+  ),
+  appData: encodeXinJData({
+    alreadyMoved: AlreadyMoved.AB,
+    channelIdForX: getChannelId(stateForX.channel),
+    supportProofForX: supportProofForX(greaterStateForX),
   }),
 };
 
@@ -140,8 +182,8 @@ describe('XinJ', () => {
   const signedByFrom = 0b00; // TODO this is unused
   it('returns true / reverts for a correct / incorrect ABC => A transition', async () => {
     const result = await xInJ.validTransition(
-      fromVariablePartForJ,
-      toVariablePartForJ,
+      ABCvariablePartForJ,
+      AvariablePartForJ,
       turnNumTo,
       nParticipants,
       signedByFrom,
@@ -152,8 +194,8 @@ describe('XinJ', () => {
     await expectRevert(
       () =>
         xInJ.validTransition(
-          fromVariablePartForJ,
-          toVariablePartForJ,
+          ABCvariablePartForJ,
+          AvariablePartForJ,
           turnNumTo,
           nParticipants,
           signedByFrom,
@@ -164,15 +206,8 @@ describe('XinJ', () => {
   });
   it('returns true / reverts for a correct / incorrect ABC => B transition', async () => {
     const result = await xInJ.validTransition(
-      fromVariablePartForJ,
-      {
-        ...toVariablePartForJ,
-        appData: encodeXinJData({
-          alreadyMoved: AlreadyMoved.B,
-          channelIdForX: getChannelId(stateForX.channel),
-          supportProofForX: supportProofForX(stateForX),
-        }),
-      },
+      ABCvariablePartForJ,
+      BvariablePartForJ,
       turnNumTo,
       nParticipants,
       signedByFrom,
@@ -183,15 +218,8 @@ describe('XinJ', () => {
     await expectRevert(
       () =>
         xInJ.validTransition(
-          fromVariablePartForJ,
-          {
-            ...toVariablePartForJ,
-            appData: encodeXinJData({
-              alreadyMoved: AlreadyMoved.B,
-              channelIdForX: getChannelId(stateForX.channel),
-              supportProofForX: supportProofForX(stateForX),
-            }),
-          },
+          ABCvariablePartForJ,
+          BvariablePartForJ,
           turnNumTo,
           nParticipants,
           signedByFrom,
@@ -208,8 +236,56 @@ describe('XinJ', () => {
     await expectRevert(
       () =>
         xInJ.validTransition(
-          fromVariablePartForJ,
-          {...toVariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
+          ABCvariablePartForJ,
+          {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      reason
+    );
+  });
+  it('returns true / reverts for a correct / incorrect A => AB transition', async () => {
+    const result = await xInJ.validTransition(
+      AvariablePartForJ,
+      ABvariablePartForJ,
+      turnNumTo,
+      nParticipants,
+      signedByFrom,
+      0b10 // signedByTo = just Bob
+    );
+    expect(result).toBe(true);
+    const reason: RevertReason = 'incorrect move from A';
+    await expectRevert(
+      () =>
+        xInJ.validTransition(
+          AvariablePartForJ,
+          ABvariablePartForJ,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      reason
+    );
+  });
+  it('returns true / reverts for a correct / incorrect B => AB transition', async () => {
+    const result = await xInJ.validTransition(
+      AvariablePartForJ,
+      ABvariablePartForJ,
+      turnNumTo,
+      nParticipants,
+      signedByFrom,
+      0b10 // signedByTo = just Bob
+    );
+    expect(result).toBe(true);
+    const reason: RevertReason = 'incorrect move from A';
+    await expectRevert(
+      () =>
+        xInJ.validTransition(
+          AvariablePartForJ,
+          ABvariablePartForJ,
           turnNumTo,
           nParticipants,
           signedByFrom,
