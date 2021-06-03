@@ -179,6 +179,7 @@ export class ChainService implements ChainServiceInterface {
   // Only used for unit tests
   destructor(): void {
     this.logger.trace('Starting destroy');
+    this.channelToEventTrackers.clear();
     this.provider.polling = false;
     this.provider.removeAllListeners();
 
@@ -461,6 +462,9 @@ export class ChainService implements ChainServiceInterface {
     channelId: string,
     eventTracker: EventTracker
   ): Promise<void> {
+    // If the destructor has been called we want to abort right away
+    // We use this.provider.polling since we know the destructor sets that to false
+    if (!this.provider.polling) return;
     const currentBlock = await this.provider.getBlockNumber();
     const confirmedBlock = currentBlock - this.blockConfirmations;
     const currentHolding = BN.from(await contract.holdings(channelId));
