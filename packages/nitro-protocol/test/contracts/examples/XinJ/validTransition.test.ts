@@ -180,10 +180,11 @@ beforeAll(async () => {
   xInJ = setupContract(provider, xInJArtifact, process.env.X_IN_J_ADDRESS);
 });
 
-describe('XinJ', () => {
-  const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
-  const nParticipants = 0; // TODO this is unused
-  const signedByFrom = 0b00; // TODO this is unused
+const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
+const nParticipants = 0; // TODO this is unused
+const signedByFrom = 0b00; // TODO this is unused
+
+describe('XinJ: named state transitions', () => {
   it('returns true / reverts for a correct / incorrect ABC => A transition', async () => {
     const result = await xInJ.validTransition(
       ABCvariablePartForJ,
@@ -230,23 +231,6 @@ describe('XinJ', () => {
       'incorrect move from ABC'
     );
   });
-  // eslint-disable-next-line jest/expect-expect
-  it('reverts if destinations change', async () => {
-    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
-    maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
-    await expectRevert(
-      () =>
-        xInJ.validTransition(
-          ABCvariablePartForJ,
-          {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
-          turnNumTo,
-          nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
-        ),
-      'destinations may not change'
-    );
-  });
   it('returns true / reverts for a correct / incorrect A => AB transition', async () => {
     const result = await xInJ.validTransition(
       AvariablePartForJ,
@@ -291,6 +275,26 @@ describe('XinJ', () => {
           0b10 // signedByTo = just Bob
         ),
       'incorrect move from B'
+    );
+  });
+});
+
+describe('XinJ: reversions', () => {
+  // eslint-disable-next-line jest/expect-expect
+  it('reverts if destinations change', async () => {
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
+    maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
+    await expectRevert(
+      () =>
+        xInJ.validTransition(
+          ABCvariablePartForJ,
+          {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'destinations may not change'
     );
   });
 });
