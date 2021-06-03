@@ -34,7 +34,7 @@ contract EmbeddedApplication is
     // Finite states for J
     enum AlreadyMoved {A, B, AB, ABC}
 
-    // Applicatoin Data for J
+    // Application Data for J
     struct AppData {
         bytes32 channelIdForX;
         SupportProof supportProofForX;
