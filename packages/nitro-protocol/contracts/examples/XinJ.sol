@@ -6,12 +6,23 @@ import '../interfaces/IForceMoveApp.sol';
 import '../Outcome.sol';
 import '../interfaces/IForceMove.sol';
 
+// The EmbeddedApplication allows a 2-party subchannel X to be *embedded* in the current 3-party channel J.
+// This is in contract to having the application channel X being *funded* by the current channel J.
+// J references X in its AppData. Each state for J contains a support proof for X. Initially, this can be the PreFundSetup of X.
+// When there is a supported state (triply signed) in J containing a support proof for X, we say that X has been *embedded* in J.
+// Participant 0 (Alice) and Participant 1 (Bob) can run X off-chain in the usual fashion.
+// If the three parties agree, they can *un-embed* X from J off-chain by reverting J to a null app and updating the outcome accordingly.
+// Any participant can challenge with the latest triply signed state. Then, Alice and Bob get exactly 1 chance each to progress J on chain.
+// To progress J on chain, a support proof for X must be provided. Inferior support proofs are rejected. Participant 2 (Irene)'s balance is protected.
+// Irene retains the unilateral right to close the channel -- Alice and Bob get only 1 chance to update it each before Irene's signature is required.
+
 /**
- * @dev The XinJ contract embeds a subchannel
+ * @dev The XinJ contract embeds a subchannel.
  */
 contract XinJ is
     IForceMoveApp2 // We need a new interface to allow signedBy information into the validTransition function
 {
+    // 2-party SupportProof
     struct SupportProof {
         IForceMove.FixedPart fixedPart;
         VariablePart[] variableParts; // either one or two states
@@ -20,8 +31,10 @@ contract XinJ is
         uint8[2] whoSignedWhat; // whoSignedWhat = [0,0] or [0,1] or [1,0]
     }
 
+    // Finite states for J
     enum AlreadyMoved {A, B, AB, ABC}
 
+    // Applicatoin Data for J
     struct AppData {
         bytes32 channelIdForX;
         SupportProof supportProofForX;
@@ -36,19 +49,14 @@ contract XinJ is
         uint256, // signedByFrom (unused) - Who has signed the "from" state?
         uint256 signedByTo // Who has signed the "to" state?
     ) public override pure returns (bool) {
+        // parameter wrangling
         bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, 0);
         bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, 1);
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
-
-        // Decode variables.
-        // Assumptions:
-        //  - single asset in this channel
-        //  - three parties in this channel
         Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
         Outcome.AllocationItem[] memory toAllocation = decode3PartyAllocation(to.outcome);
 
-        // destination slots for each participant unchanged
         require(
             fromAllocation[0].destination == toAllocation[0].destination &&
                 fromAllocation[1].destination == toAllocation[1].destination &&
@@ -56,7 +64,6 @@ contract XinJ is
             'destinations may not change'
         );
 
-        // participant 2's amount may not change
         require(fromAllocation[2].amount == toAllocation[2].amount, 'p2.amt constant');
 
         // Allowed named-state transitions are
