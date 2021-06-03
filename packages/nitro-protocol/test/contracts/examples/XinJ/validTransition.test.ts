@@ -1,12 +1,25 @@
+import {defaultAbiCoder, ParamType} from '@ethersproject/abi';
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, ethers, Signature, utils} from 'ethers';
+import {constants, Contract, ethers, Signature, utils, Wallet} from 'ethers';
+import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
 
 const {HashZero} = ethers.constants;
 // import HashLockedSwapArtifact from '../../../../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
-import TwoOfThreeArtifact from '../../../../artifacts/contracts/examples/TwoOfThree.sol/TwoOfThree.json';
-import {Bytes32, convertBytes32ToAddress} from '../../../../src';
+import {
+  Bytes32,
+  convertAddressToBytes32,
+  convertBytes32ToAddress,
+  getChannelId,
+  signState,
+} from '../../../../src';
 import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
-import {FixedPart, VariablePart} from '../../../../src/contract/state';
+import {
+  FixedPart,
+  getFixedPart,
+  getVariablePart,
+  State,
+  VariablePart,
+} from '../../../../src/contract/state';
 import {Bytes} from '../../../../src/contract/types';
 import {
   getTestProvider,
@@ -15,165 +28,190 @@ import {
   setupContract,
 } from '../../../test-helpers';
 
+const revertReasons = [
+  // each reason represents a distinct code path that we should check in this test
+  'destinations may not change',
+  'p2.amt constant',
+  'incorrect move from ABC',
+  'inferior support proof',
+  'incorrect move from A',
+  'incorrect move from B',
+  'move from ABC,A,B only',
+  'X / J outcome mismatch',
+  'appDefinition changed',
+  'challengeDuration changed',
+  '1 or 2 states required',
+  'whoSignedWhat.length must be 2',
+  'sig0 !by participant0',
+  'sig1 !by participant1',
+  'sig0 on state0 !by participant0',
+  'sig0 on state1 !by participant1',
+  'sig0 on state1 !by participant0',
+  'sig0 on state0 !by participant1',
+  'invalid transition in X',
+];
+
 // Utilities
 // TODO: move to a src file
-interface HashLockedSwapData {
-  h: Bytes32;
-  preImage: Bytes;
-}
 
 interface SupportProof {
   fixedPart: FixedPart;
   variableParts: [VariablePart, VariablePart] | [VariablePart];
   turnNumTo: number;
   sigs: [Signature, Signature];
+  whoSignedWhat: [number, number];
 }
 
-function encodeHashLockedSwapData(data: HashLockedSwapData): string {
-  return utils.defaultAbiCoder.encode(['tuple(bytes32 h, bytes preImage)'], [data]);
+enum AlreadyMoved {
+  'A',
+  'B',
+  'AB',
+  'ABC',
 }
+interface XinJData {
+  channelIdForX: Bytes32;
+  supportProofForX: SupportProof;
+  alreadyMoved: AlreadyMoved;
+}
+
+function encodeXinJData(data: XinJData) {
+  return defaultAbiCoder.encode(
+    [
+      {
+        type: 'tuple',
+        components: [
+          {name: 'channelIdForX', type: 'bytes32'},
+          {
+            name: 'supportProofForX',
+            type: 'tuple',
+            components: [
+              {
+                name: 'fixedPart',
+                type: 'tuple',
+                components: [
+                  {name: 'chainId', type: 'uint256'},
+                  {name: 'participants', type: 'address[]'},
+                  {name: 'channelNonce', type: 'uint48'},
+                  {name: 'appDefinition', type: 'address'},
+                  {name: 'challengeDuration', type: 'uint48'},
+                ],
+              },
+              {
+                name: 'variableParts',
+                type: 'tuple[]',
+                components: [
+                  {name: 'outcome', type: 'bytes'},
+                  {name: 'appData', type: 'bytes'},
+                ],
+              },
+              {name: 'turnNumTo', type: 'uint48'},
+              {
+                name: 'sigs',
+                type: 'tuple[]',
+                components: [
+                  {name: 'v', type: 'uint8'},
+                  {name: 'r', type: 'bytes32'},
+                  {name: 's', type: 'bytes32'},
+                ],
+              },
+              {name: 'whoSignedWhat', type: 'uint8[]'},
+            ],
+          },
+          {name: 'alreadyMoved', type: 'uint8'},
+        ],
+      } as ParamType,
+    ],
+    [data]
+  );
+}
+
 // *****
 
-// let hashTimeLock: Contract;
-let twoOfThree: Contract;
+let xInJ: Contract;
 
 const numParticipants = 3;
-const addresses = {
-  // Participants
-  Sender: randomExternalDestination(),
-  Receiver: randomExternalDestination(),
-  Intermediary: randomExternalDestination(),
+
+const Alice = Wallet.createRandom();
+const Bob = Wallet.createRandom();
+const Irene = Wallet.createRandom();
+
+const stateForX: State = {
+  turnNum: 4,
+  isFinal: false,
+  channel: {
+    chainId: '0x1',
+    participants: [Alice.address, Bob.address],
+    channelNonce: 87,
+  },
+  challengeDuration: 0,
+  outcome: [
+    {
+      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+      allocationItems: [
+        {destination: convertAddressToBytes32(Alice.address), amount: '0x6'},
+        {destination: convertAddressToBytes32(Bob.address), amount: '0x4'},
+      ],
+    },
+  ],
+  appDefinition: constants.AddressZero, // We will run the null app in X (for demonstration purposes)
+  appData: '0x',
 };
 
-const supportProofForX: SupportProof = {
-  fixedPart: {
-    appDefinition: process.env.HASH_LOCK_2_ADDRESS,
-    challengeDuration: 0,
-    chainId: '0x1',
-    participants: [
-      convertBytes32ToAddress(addresses.Sender),
-      convertBytes32ToAddress(addresses.Receiver),
-      convertBytes32ToAddress(addresses.Intermediary),
-    ],
-    channelNonce: 99,
-  },
-  variableParts: [{outcome: '', appData: ''}],
+console.log(stateForX);
+
+const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
+  fixedPart: getFixedPart(stateForX),
+  variableParts: [getVariablePart(stateForX)],
   turnNumTo: 4,
-  sigs: ['', ''],
+  sigs: [
+    signState(stateForX, Alice.privateKey).signature,
+    signState(stateForX, Bob.privateKey).signature,
+  ],
+  whoSignedWhat: [0, 0],
+});
+
+console.log(supportProofForX(stateForX));
+
+const fromVariablePartForJ: VariablePart = {
+  outcome: encodeOutcome([]),
+  appData: encodeXinJData({
+    alreadyMoved: AlreadyMoved.ABC,
+    channelIdForX: getChannelId(stateForX.channel),
+    supportProofForX: supportProofForX(stateForX), // TODO this is awkard. We would like to use a null value here
+  }),
+};
+
+const toVariablePartForJ: VariablePart = {
+  outcome: encodeOutcome([]),
+  appData: encodeXinJData({
+    alreadyMoved: AlreadyMoved.A,
+    channelIdForX: getChannelId(stateForX.channel),
+    supportProofForX: supportProofForX(stateForX),
+  }),
 };
 
 const provider = getTestProvider();
 
+console.log(toVariablePartForJ);
+
 beforeAll(async () => {
-  // hashTimeLock = setupContract(provider, HashLockedSwapArtifact, process.env.HASH_LOCK_2_ADDRESS);
-  twoOfThree = setupContract(provider, TwoOfThreeArtifact, process.env.TWO_OF_THREE_ADDRESS);
+  xInJ = setupContract(provider, xInJArtifact, process.env.X_IN_J_ADDRESS);
 });
 
-const preImage = '0xdeadbeef';
-const conditionalPayment: HashLockedSwapData = {
-  h: utils.sha256(preImage),
-  // ^^^^ important field (SENDER)
-  preImage: '0x',
-};
-
-const correctPreImage: HashLockedSwapData = {
-  preImage: preImage,
-  // ^^^^ important field (RECEIVER)
-  h: HashZero,
-};
-
-const incorrectPreImage: HashLockedSwapData = {
-  preImage: '0xdeadc0de',
-  // ^^^^ important field (RECEIVER)
-  h: HashZero,
-};
-
-const msg0 = 'p2.amt: no sig';
-const msg1 = 'Incorrect preimage';
-describe('validTransition', () => {
-  it.each`
-    isValid  | signedBy | dataA                 | balancesA                                    | turnNumB | dataB                | balancesB                                    | description
-    ${true}  | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
-    ${true}  | ${0b111} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Unanimous signatures implies true'}
-    ${false} | ${0b000} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'no signatures implies false'}
-    ${true}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver unlocks the conditional payment'}
-    ${msg0}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${correctPreImage}   | ${{Sender: 0, Receiver: 1, Intermediary: 2}} | ${'Receiver unlocks the conditional payment, but tries to grief the intermediary'}
-    ${msg1}  | ${0b011} | ${conditionalPayment} | ${{Sender: 1, Receiver: 0, Intermediary: 5}} | ${4}     | ${incorrectPreImage} | ${{Sender: 0, Receiver: 1, Intermediary: 5}} | ${'Receiver cannot unlock with incorrect preimage'}
-  `(
-    '$description',
-    async ({
-      isValid,
-      signedBy,
-      dataA,
-      balancesA,
-      turnNumB,
-      dataB,
-      balancesB,
-    }: {
-      isValid;
-      signedBy;
-      dataA;
-      balancesA;
-      turnNumB;
-      dataB;
-      balancesB;
-    }) => {
-      balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
-      const allocationA: Allocation = [];
-      Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key, amount: balancesA[key]})
-      );
-      const outcomeA = [
-        {assetHolderAddress: ethers.constants.AddressZero, allocationItems: allocationA},
-      ];
-      const variablePartA: VariablePart = {
-        outcome: encodeOutcome(outcomeA),
-        appData: encodeTwoOfThreeData(dataA),
-      };
-      balancesB = replaceAddressesAndBigNumberify(balancesB, addresses);
-      const allocationB: Allocation = [];
-      Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key, amount: balancesB[key]})
-      );
-      const outcomeB = [
-        {assetHolderAddress: ethers.constants.AddressZero, allocationItems: allocationB},
-      ];
-      const variablePartB: VariablePart = {
-        outcome: encodeOutcome(outcomeB),
-        appData: encodeTwoOfThreeData(dataB),
-      };
-
-      if (isValid == true) {
-        const isValidFromCall = await twoOfThree.validTransition(
-          variablePartA,
-          variablePartB,
-          turnNumB,
-          numParticipants,
-          signedBy
-        );
-        expect(isValidFromCall).toBe(true);
-      } else if (typeof isValid == 'string') {
-        await expectRevert(
-          () =>
-            twoOfThree.validTransition(
-              variablePartA,
-              variablePartB,
-              turnNumB,
-              numParticipants,
-              signedBy
-            ),
-          isValid
-        );
-      } else if (isValid == false) {
-        const isValidFromCall = await twoOfThree.validTransition(
-          variablePartA,
-          variablePartB,
-          turnNumB,
-          numParticipants,
-          signedBy
-        );
-        expect(isValidFromCall).toBe(false);
-      }
-    }
-  );
+describe('XinJ', () => {
+  it('returns true for a correct ABC=>A transition', async () => {
+    const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
+    const nParticipants = 0; // TODO this is unused
+    const signedByFrom = 0b00; // TODO this is unused
+    const signedByTo = 0b01; // just by Alice
+    const result = await xInJ.validTransition(
+      fromVariablePartForJ,
+      toVariablePartForJ,
+      turnNumTo,
+      nParticipants,
+      signedByFrom,
+      signedByTo
+    );
+    expect(result).toBe(true);
+  });
 });
