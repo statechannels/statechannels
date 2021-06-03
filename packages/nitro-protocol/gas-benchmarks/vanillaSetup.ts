@@ -16,13 +16,13 @@ export let nitroAdjudicator: Contract;
 export let token: Contract;
 
 const logFile = './hardhat-network-output.log';
-const hardHatNetworkEndpoint = 'http://localhost:8545';
+const hardHatNetworkEndpoint = 'http://localhost:9546'; // the port should be unique
 
 jest.setTimeout(15_000); // give hardhat network a chance to get going
 if (existsSync(logFile)) truncateSync(logFile);
-const hardhatProcess = exec('npx hardhat node --no-deploy', (error, stdout) =>
-  promises.appendFile(logFile, stdout)
-);
+const hardhatProcess = exec('npx hardhat node --no-deploy --port 9546', (error, stdout, stderr) => {
+  promises.appendFile(logFile, stdout);
+});
 const hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
 
 const provider = new providers.JsonRpcProvider(hardHatNetworkEndpoint);
