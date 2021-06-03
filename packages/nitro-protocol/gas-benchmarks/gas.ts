@@ -1,7 +1,7 @@
 type GasRequiredTo = Record<
   Path,
   {
-    vanillaNitro: number | any;
+    vanillaNitro: number | Record<string, number>;
   }
 >;
 
