@@ -224,7 +224,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
       channelIds.map(async channelId => {
         const closeResult = await this._engine.closeChannel({channelId});
         const {newObjective, channelResult} = closeResult;
-
+        // create the promise before we send anything out
+        const done = this.createObjectiveDoneResult(newObjective);
         // TODO: We just refetch to get the latest status
         // Long term we should make sure the engine returns the latest objectives
         const latest = await this._engine.getObjective(newObjective.objectiveId);
@@ -234,7 +235,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
           channelId: channelResult.channelId,
           currentStatus: latest.status,
           objectiveId: newObjective.objectiveId,
-          done: this.createObjectiveDoneResult(newObjective),
+          done,
         };
       })
     );
