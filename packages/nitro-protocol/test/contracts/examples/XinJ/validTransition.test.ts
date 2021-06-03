@@ -272,24 +272,24 @@ describe('XinJ', () => {
   });
   it('returns true / reverts for a correct / incorrect B => AB transition', async () => {
     const result = await xInJ.validTransition(
-      AvariablePartForJ,
+      BvariablePartForJ,
       ABvariablePartForJ,
       turnNumTo,
       nParticipants,
       signedByFrom,
-      0b10 // signedByTo = just Bob
+      0b01 // signedByTo = just Alice
     );
     expect(result).toBe(true);
-    const reason: RevertReason = 'incorrect move from A';
+    const reason: RevertReason = 'incorrect move from B';
     await expectRevert(
       () =>
         xInJ.validTransition(
-          AvariablePartForJ,
+          BvariablePartForJ,
           ABvariablePartForJ,
           turnNumTo,
           nParticipants,
           signedByFrom,
-          0b01 // signedByTo = just Alice
+          0b10 // signedByTo = just Bob
         ),
       reason
     );
