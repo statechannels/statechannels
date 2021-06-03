@@ -17,7 +17,7 @@ contract XinJ is
         VariablePart[] variableParts; // either one or two states
         uint48 turnNumTo;
         IForceMove.Signature[2] sigs; // one for each participant
-        uint8[] whoSignedWhat; // whoSignedWhat = [0,0] or [0,1] or [1,0]
+        uint8[2] whoSignedWhat; // whoSignedWhat = [0,0] or [0,1] or [1,0]
     }
 
     enum AlreadyMoved {A, B, AB, ABC}

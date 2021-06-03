@@ -112,14 +112,14 @@ function encodeXinJData(data: XinJData) {
               {name: 'turnNumTo', type: 'uint48'},
               {
                 name: 'sigs',
-                type: 'tuple[]',
+                type: 'tuple[2]',
                 components: [
                   {name: 'v', type: 'uint8'},
                   {name: 'r', type: 'bytes32'},
                   {name: 's', type: 'bytes32'},
                 ],
               },
-              {name: 'whoSignedWhat', type: 'uint8[]'},
+              {name: 'whoSignedWhat', type: 'uint8[2]'},
             ],
           },
           {name: 'alreadyMoved', type: 'uint8'},
