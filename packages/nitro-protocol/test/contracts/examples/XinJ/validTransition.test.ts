@@ -1,4 +1,4 @@
-import {expectRevert} from '@statechannels/devtools';
+import {expectRevert as innerExpectRevert} from '@statechannels/devtools';
 import {constants, Contract, Wallet} from 'ethers';
 
 import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
@@ -30,6 +30,10 @@ type RevertReason =
   | 'sig0 on state0 !by participant1'
   | 'invalid whoSignedWhat'
   | 'invalid transition in X';
+
+function expectRevert(fn: () => void, reason: RevertReason) {
+  innerExpectRevert(fn, reason);
+}
 
 // We also want to check each transition:
 //    AB
@@ -190,7 +194,6 @@ describe('XinJ', () => {
       0b01 // signedByTo = just Alice
     );
     expect(result).toBe(true);
-    const reason: RevertReason = 'incorrect move from ABC';
     await expectRevert(
       () =>
         xInJ.validTransition(
@@ -201,7 +204,7 @@ describe('XinJ', () => {
           signedByFrom,
           0b10 // signedByTo = just Bob
         ),
-      reason
+      'incorrect move from ABC'
     );
   });
   it('returns true / reverts for a correct / incorrect ABC => B transition', async () => {
@@ -214,7 +217,6 @@ describe('XinJ', () => {
       0b10 // signedByTo = just Bob
     );
     expect(result).toBe(true);
-    const reason: RevertReason = 'incorrect move from ABC';
     await expectRevert(
       () =>
         xInJ.validTransition(
@@ -225,14 +227,13 @@ describe('XinJ', () => {
           signedByFrom,
           0b01 // signedByTo = just Alice
         ),
-      reason
+      'incorrect move from ABC'
     );
   });
   // eslint-disable-next-line jest/expect-expect
   it('reverts if destinations change', async () => {
     const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
     maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
-    const reason: RevertReason = 'destinations may not change';
     await expectRevert(
       () =>
         xInJ.validTransition(
@@ -243,7 +244,7 @@ describe('XinJ', () => {
           signedByFrom,
           0b01 // signedByTo = just Alice
         ),
-      reason
+      'destinations may not change'
     );
   });
   it('returns true / reverts for a correct / incorrect A => AB transition', async () => {
@@ -256,7 +257,6 @@ describe('XinJ', () => {
       0b10 // signedByTo = just Bob
     );
     expect(result).toBe(true);
-    const reason: RevertReason = 'incorrect move from A';
     await expectRevert(
       () =>
         xInJ.validTransition(
@@ -267,7 +267,7 @@ describe('XinJ', () => {
           signedByFrom,
           0b01 // signedByTo = just Alice
         ),
-      reason
+      'incorrect move from A'
     );
   });
   it('returns true / reverts for a correct / incorrect B => AB transition', async () => {
@@ -280,7 +280,6 @@ describe('XinJ', () => {
       0b01 // signedByTo = just Alice
     );
     expect(result).toBe(true);
-    const reason: RevertReason = 'incorrect move from B';
     await expectRevert(
       () =>
         xInJ.validTransition(
@@ -291,7 +290,7 @@ describe('XinJ', () => {
           signedByFrom,
           0b10 // signedByTo = just Bob
         ),
-      reason
+      'incorrect move from B'
     );
   });
 });
