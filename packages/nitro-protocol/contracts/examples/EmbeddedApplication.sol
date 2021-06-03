@@ -17,7 +17,7 @@ import '../interfaces/IForceMove.sol';
 // Irene retains the unilateral right to close J -- Alice and Bob each get only 1 chance to update J before Irene's signature is required again.
 
 /**
- * @dev The XinJ contract embeds a subchannel.
+ * @dev The EmbeddedApplication contract embeds a subchannel X.
  */
 contract EmbeddedApplication is
     IForceMoveApp2 // We need a new interface to allow signedBy information into the validTransition function
