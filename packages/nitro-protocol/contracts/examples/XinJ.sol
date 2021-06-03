@@ -71,17 +71,28 @@ contract XinJ is
         if (fromAppData.alreadyMoved == AlreadyMoved.ABC) {
             require(
                 (toAppData.alreadyMoved == AlreadyMoved.A && signedByA) ||
-                    (toAppData.alreadyMoved == AlreadyMoved.B && signedByB)
+                    (toAppData.alreadyMoved == AlreadyMoved.B && signedByB),
+                'incorrect move from ABC'
             );
         } else {
             // If a support proof has already been supplied, the current support proof must be greater
-            require(toAppData.supportProofForX.turnNumTo > fromAppData.supportProofForX.turnNumTo);
-        }
-
-        if (fromAppData.alreadyMoved == AlreadyMoved.A) {
-            require(toAppData.alreadyMoved == AlreadyMoved.AB && signedByB);
-        } else if (fromAppData.alreadyMoved == AlreadyMoved.B) {
-            require(toAppData.alreadyMoved == AlreadyMoved.AB && signedByA);
+            require(
+                toAppData.supportProofForX.turnNumTo > fromAppData.supportProofForX.turnNumTo,
+                'inferior support proof'
+            );
+            if (fromAppData.alreadyMoved == AlreadyMoved.A) {
+                require(
+                    toAppData.alreadyMoved == AlreadyMoved.AB && signedByB,
+                    'incorrect move from A'
+                );
+            } else if (fromAppData.alreadyMoved == AlreadyMoved.B) {
+                require(
+                    toAppData.alreadyMoved == AlreadyMoved.AB && signedByA,
+                    'incorrect move from B'
+                );
+            } else {
+                revert('move from ABC,A,B only');
+            }
         }
 
         // validate the supplied support proof
@@ -96,7 +107,8 @@ contract XinJ is
             Xallocation[0].amount == toAllocation[0].amount &&
                 Xallocation[1].amount == toAllocation[1].amount &&
                 Xallocation[0].destination == toAllocation[0].destination &&
-                Xallocation[1].destination == toAllocation[1].destination
+                Xallocation[1].destination == toAllocation[1].destination,
+            'X / J outcome mismatch'
         );
         return true;
     }
@@ -110,11 +122,13 @@ contract XinJ is
         // They are the members of FixedPart that do not affect the channelId
         require(
             fromAppData.supportProofForX.fixedPart.appDefinition ==
-                toAppData.supportProofForX.fixedPart.appDefinition
+                toAppData.supportProofForX.fixedPart.appDefinition,
+            'appDefinition changed'
         );
         require(
             fromAppData.supportProofForX.fixedPart.challengeDuration ==
-                toAppData.supportProofForX.fixedPart.challengeDuration
+                toAppData.supportProofForX.fixedPart.challengeDuration,
+            'challengeDuration changed'
         ); // this is actually never used so could be 0
 
         // A support proof requires 2 signatures
@@ -123,9 +137,13 @@ contract XinJ is
         // Else one signature per state and we must check for a valid transition
         require(
             toAppData.supportProofForX.variableParts.length == 1 ||
-                toAppData.supportProofForX.variableParts.length == 2
+                toAppData.supportProofForX.variableParts.length == 2,
+            '1 or 2 states required'
         );
-        require(toAppData.supportProofForX.whoSignedWhat.length == 2);
+        require(
+            toAppData.supportProofForX.whoSignedWhat.length == 2,
+            'whoSignedWhat.length must be 2'
+        );
 
         bytes32 appPartHash = keccak256(
             abi.encode(
@@ -162,13 +180,15 @@ contract XinJ is
                 (ForceMoveAppUtilities._recoverSigner(
                     greaterStateHash,
                     toAppData.supportProofForX.sigs[0]
-                ) == toAppData.supportProofForX.fixedPart.participants[0])
+                ) == toAppData.supportProofForX.fixedPart.participants[0]),
+                'sig0 !by participant0'
             );
             require(
                 ForceMoveAppUtilities._recoverSigner(
                     greaterStateHash,
                     toAppData.supportProofForX.sigs[1]
-                ) == toAppData.supportProofForX.fixedPart.participants[1]
+                ) == toAppData.supportProofForX.fixedPart.participants[1],
+                'sig1 !by by participant1'
             );
         } else {
             bytes32 lesserStateHash = keccak256(
@@ -191,13 +211,15 @@ contract XinJ is
                     (ForceMoveAppUtilities._recoverSigner(
                         lesserStateHash,
                         toAppData.supportProofForX.sigs[0]
-                    ) == toAppData.supportProofForX.fixedPart.participants[0])
+                    ) == toAppData.supportProofForX.fixedPart.participants[0]),
+                    'sig0 on state0 !by participant0'
                 );
                 require(
                     ForceMoveAppUtilities._recoverSigner(
                         greaterStateHash,
                         toAppData.supportProofForX.sigs[1]
-                    ) == toAppData.supportProofForX.fixedPart.participants[1]
+                    ) == toAppData.supportProofForX.fixedPart.participants[1],
+                    'sig1 on state1 !by participant1'
                 );
             } else if (
                 (toAppData.supportProofForX.whoSignedWhat[0] == 1) &&
@@ -207,13 +229,15 @@ contract XinJ is
                     (ForceMoveAppUtilities._recoverSigner(
                         greaterStateHash,
                         toAppData.supportProofForX.sigs[0]
-                    ) == toAppData.supportProofForX.fixedPart.participants[0])
+                    ) == toAppData.supportProofForX.fixedPart.participants[0]),
+                    'sig0 on state1 !by participant0'
                 );
                 require(
                     ForceMoveAppUtilities._recoverSigner(
                         lesserStateHash,
                         toAppData.supportProofForX.sigs[1]
-                    ) == toAppData.supportProofForX.fixedPart.participants[1]
+                    ) == toAppData.supportProofForX.fixedPart.participants[1],
+                    'sig1 on state0 !by participant1'
                 );
             } else revert();
 
@@ -225,7 +249,8 @@ contract XinJ is
                     2, // nParticipants
                     toAppData.supportProofForX.whoSignedWhat[0] == 0 ? 1 : 2, // signedByFrom = 0b01 or 0b10; participant 0 or 1 only. Implied by require statement above.
                     toAppData.supportProofForX.whoSignedWhat[0] == 0 ? 2 : 1 //    signedByTo = 0b10 or 0b01; participant 1 or 0 only. Implied by require statement above.
-                )
+                ),
+                'invalid transition in X'
             );
         }
 
