@@ -83,9 +83,12 @@ library ForceMoveAppUtilities {
         uint256 signedByFrom,
         uint256 signedByTo
     ) internal pure returns (bool) {
-        require(turnNumB > 0);
-        require(isSignedBy(signedByFrom, (turnNumB - 1) % nParticipants));
-        require(isSignedBy(signedByTo, turnNumB % nParticipants));
+        require(
+            turnNumB > 0 &&
+                isSignedBy(signedByFrom, (turnNumB - 1) % nParticipants) &&
+                isSignedBy(signedByTo, turnNumB % nParticipants),
+            'roundRobin violation'
+        );
         return true;
     }
 
