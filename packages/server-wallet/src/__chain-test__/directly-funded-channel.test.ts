@@ -179,6 +179,7 @@ it('Create a directly funded channel between two wallets ', async () => {
   };
   const aBalanceInit = await getBalance(aAddress);
   const bBalanceInit = await getBalance(bAddress);
+  const assetHolderBalanceInit = await getBalance(ethAssetHolderAddress);
 
   const response = await a.createChannels([channelParams]);
   await waitForObjectiveProposals([response[0].objectiveId], b);
@@ -187,8 +188,8 @@ it('Create a directly funded channel between two wallets ', async () => {
   await expect(response).toBeObjectiveDoneType('Success');
   await expect(bResponse).toBeObjectiveDoneType('Success');
 
-  const assetHolderBalance = await getBalance(ethAssetHolderAddress);
-  expect(assetHolderBalance.toHexString()).toBe('0x01');
+  const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
+  expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual('0x01');
 
   const {channelId} = response[0];
   const closeResponse = await b.closeChannels([channelId]);
