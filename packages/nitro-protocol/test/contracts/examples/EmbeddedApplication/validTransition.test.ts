@@ -35,8 +35,8 @@ type RevertReason =
   | 'invalid whoSignedWhat'
   | 'invalid transition in X';
 
-function expectRevert(fn: () => void, reason: RevertReason) {
-  innerExpectRevert(fn, reason);
+async function expectRevert(fn: () => void, reason: RevertReason) {
+  return innerExpectRevert(fn, reason);
 }
 
 // We also want to check each transition:
