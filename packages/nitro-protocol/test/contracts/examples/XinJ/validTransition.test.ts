@@ -1,23 +1,10 @@
 import {defaultAbiCoder, ParamType} from '@ethersproject/abi';
 import {expectRevert} from '@statechannels/devtools';
-import {BigNumber, constants, Contract, ethers, Signature, utils, Wallet} from 'ethers';
-import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
+import {constants, Contract, Signature, Wallet} from 'ethers';
 
-const {HashZero} = ethers.constants;
-// import HashLockedSwapArtifact from '../../../../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
-import {
-  Bytes32,
-  convertAddressToBytes32,
-  convertBytes32ToAddress,
-  getChannelId,
-  signState,
-} from '../../../../src';
-import {
-  Allocation,
-  AllocationAssetOutcome,
-  encodeOutcome,
-  Outcome,
-} from '../../../../src/contract/outcome';
+import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
+import {Bytes32, convertAddressToBytes32, getChannelId, signState} from '../../../../src';
+import {AllocationAssetOutcome, encodeOutcome} from '../../../../src/contract/outcome';
 import {
   FixedPart,
   getFixedPart,
@@ -25,13 +12,7 @@ import {
   State,
   VariablePart,
 } from '../../../../src/contract/state';
-import {Bytes} from '../../../../src/contract/types';
-import {
-  getTestProvider,
-  randomExternalDestination,
-  replaceAddressesAndBigNumberify,
-  setupContract,
-} from '../../../test-helpers';
+import {getTestProvider, setupContract} from '../../../test-helpers';
 
 type RevertReason =
   // each reason represents a distinct code path that we should check in this test
@@ -168,8 +149,6 @@ function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
 // *****
 
 let xInJ: Contract;
-
-const numParticipants = 3;
 
 const Alice = Wallet.createRandom();
 const Bob = Wallet.createRandom();
