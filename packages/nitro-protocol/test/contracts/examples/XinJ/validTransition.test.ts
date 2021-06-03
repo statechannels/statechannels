@@ -1,17 +1,11 @@
-import {defaultAbiCoder, ParamType} from '@ethersproject/abi';
 import {expectRevert} from '@statechannels/devtools';
-import {constants, Contract, Signature, Wallet} from 'ethers';
+import {constants, Contract, Wallet} from 'ethers';
 
 import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
-import {Bytes32, convertAddressToBytes32, getChannelId, signState} from '../../../../src';
+import {convertAddressToBytes32, getChannelId, signState} from '../../../../src';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../../src/contract/outcome';
-import {
-  FixedPart,
-  getFixedPart,
-  getVariablePart,
-  State,
-  VariablePart,
-} from '../../../../src/contract/state';
+import {getFixedPart, getVariablePart, State, VariablePart} from '../../../../src/contract/state';
+import {AlreadyMoved, encodeXinJData, SupportProof} from '../../../../src/contract/X-in-J';
 import {getTestProvider, setupContract} from '../../../test-helpers';
 
 type RevertReason =
@@ -52,77 +46,6 @@ type RevertReason =
 
 // Utilities
 // TODO: move to a src file
-
-interface SupportProof {
-  fixedPart: FixedPart;
-  variableParts: [VariablePart, VariablePart] | [VariablePart];
-  turnNumTo: number;
-  sigs: [Signature, Signature];
-  whoSignedWhat: [number, number];
-}
-
-enum AlreadyMoved {
-  'A',
-  'B',
-  'AB',
-  'ABC',
-}
-interface XinJData {
-  channelIdForX: Bytes32;
-  supportProofForX: SupportProof;
-  alreadyMoved: AlreadyMoved;
-}
-
-function encodeXinJData(data: XinJData) {
-  return defaultAbiCoder.encode(
-    [
-      {
-        type: 'tuple',
-        components: [
-          {name: 'channelIdForX', type: 'bytes32'},
-          {
-            name: 'supportProofForX',
-            type: 'tuple',
-            components: [
-              {
-                name: 'fixedPart',
-                type: 'tuple',
-                components: [
-                  {name: 'chainId', type: 'uint256'},
-                  {name: 'participants', type: 'address[]'},
-                  {name: 'channelNonce', type: 'uint48'},
-                  {name: 'appDefinition', type: 'address'},
-                  {name: 'challengeDuration', type: 'uint48'},
-                ],
-              },
-              {
-                name: 'variableParts',
-                type: 'tuple[]',
-                components: [
-                  {name: 'outcome', type: 'bytes'},
-                  {name: 'appData', type: 'bytes'},
-                ],
-              },
-              {name: 'turnNumTo', type: 'uint48'},
-              {
-                name: 'sigs',
-                type: 'tuple[2]',
-                components: [
-                  {name: 'v', type: 'uint8'},
-                  {name: 'r', type: 'bytes32'},
-                  {name: 's', type: 'bytes32'},
-                ],
-              },
-              {name: 'whoSignedWhat', type: 'uint8[2]'},
-            ],
-          },
-          {name: 'alreadyMoved', type: 'uint8'},
-        ],
-      } as ParamType,
-    ],
-    [data]
-  );
-}
 
 function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
   return [
