@@ -21,11 +21,11 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 49008,
+    vanillaNitro: 48996,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 34020,
+    vanillaNitro: 34008,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -37,7 +37,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 73454,
+      deposit: 73442,
     },
   },
   directlyFundAChannelWithERC20Second: {
@@ -47,7 +47,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 58466,
+      deposit: 58454,
     },
   },
 };
