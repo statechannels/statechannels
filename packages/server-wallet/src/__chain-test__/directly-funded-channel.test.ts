@@ -17,7 +17,7 @@ import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 
-jest.setTimeout(30_000);
+jest.setTimeout(60_000);
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
