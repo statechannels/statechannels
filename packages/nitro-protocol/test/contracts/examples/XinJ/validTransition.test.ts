@@ -53,6 +53,7 @@ const revertReasons = [
   'sig0 on state1 !by participant1',
   'sig0 on state1 !by participant0',
   'sig0 on state0 !by participant1',
+  'invalid whoSignedWhat',
   'invalid transition in X',
 ];
 
@@ -184,8 +185,6 @@ const stateForX: State = {
   appData: '0x',
 };
 
-console.log(stateForX);
-
 const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
   fixedPart: getFixedPart(stateForX),
   variableParts: [getVariablePart(stateForX)],
@@ -196,8 +195,6 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
   ],
   whoSignedWhat: [0, 0],
 });
-
-console.log(supportProofForX(stateForX));
 
 const fromVariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
@@ -218,8 +215,6 @@ const toVariablePartForJ: VariablePart = {
 };
 
 const provider = getTestProvider();
-
-console.log(toVariablePartForJ);
 
 beforeAll(async () => {
   xInJ = setupContract(provider, xInJArtifact, process.env.X_IN_J_ADDRESS);

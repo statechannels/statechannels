@@ -239,7 +239,7 @@ contract XinJ is
                     ) == toAppData.supportProofForX.fixedPart.participants[1],
                     'sig1 on state0 !by participant1'
                 );
-            } else revert();
+            } else revert('invalid whoSignedWhat');
 
             require(
                 IForceMoveApp2(toAppData.supportProofForX.fixedPart.appDefinition).validTransition(
@@ -254,7 +254,14 @@ contract XinJ is
             );
         }
 
-        return decode2PartyAllocation(toAppData.supportProofForX.variableParts[1].outcome);
+        return
+            decode2PartyAllocation(
+                toAppData.supportProofForX.variableParts[toAppData
+                    .supportProofForX
+                    .variableParts
+                    .length - 1]
+                    .outcome
+            );
     }
 
     // TODO write a reusable decodeNPartyAllocation fn
@@ -266,7 +273,7 @@ contract XinJ is
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         // Throws if more than one asset
-        require(outcome.length == 1, 'outcome: Only one asset allowed');
+        require(outcome.length == 1, 'outcome: Exactly one asset allowed');
 
         Outcome.AssetOutcome memory assetOutcome = abi.decode(
             outcome[0].assetOutcomeBytes,
