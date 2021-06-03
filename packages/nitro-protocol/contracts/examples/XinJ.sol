@@ -273,7 +273,7 @@ contract XinJ is
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         // Throws if more than one asset
-        require(outcome.length == 1, 'outcome: Exactly one asset allowed');
+        require(outcome.length == 1, 'outcome: Exactly 1 asset allowed');
 
         Outcome.AssetOutcome memory assetOutcome = abi.decode(
             outcome[0].assetOutcomeBytes,
