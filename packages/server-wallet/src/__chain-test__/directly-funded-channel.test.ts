@@ -200,4 +200,8 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
+
+  // TODO: This is slightly hacky but it's a workaround for chain event listeners promises
+  // that are still executing when destroy is called.
+  await new Promise(resolve => setTimeout(resolve, 2_000));
 });
