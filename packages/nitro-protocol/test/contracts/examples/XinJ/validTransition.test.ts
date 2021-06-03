@@ -200,7 +200,7 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
 console.log(supportProofForX(stateForX));
 
 const fromVariablePartForJ: VariablePart = {
-  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
   appData: encodeXinJData({
     alreadyMoved: AlreadyMoved.ABC,
     channelIdForX: getChannelId(stateForX.channel),
@@ -209,7 +209,7 @@ const fromVariablePartForJ: VariablePart = {
 };
 
 const toVariablePartForJ: VariablePart = {
-  outcome: encodeOutcome([]),
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
   appData: encodeXinJData({
     alreadyMoved: AlreadyMoved.A,
     channelIdForX: getChannelId(stateForX.channel),
