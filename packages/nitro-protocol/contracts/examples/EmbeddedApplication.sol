@@ -19,7 +19,7 @@ import '../interfaces/IForceMove.sol';
 /**
  * @dev The XinJ contract embeds a subchannel.
  */
-contract XinJ is
+contract EmbeddedApplication is
     IForceMoveApp2 // We need a new interface to allow signedBy information into the validTransition function
 {
     // 2-party SupportProof

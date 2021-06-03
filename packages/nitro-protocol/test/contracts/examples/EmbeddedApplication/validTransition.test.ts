@@ -1,11 +1,15 @@
 import {expectRevert as innerExpectRevert} from '@statechannels/devtools';
 import {constants, Contract, Wallet} from 'ethers';
 
-import xInJArtifact from '../../../../artifacts/contracts/examples/XinJ.sol/XinJ.json';
+import embeddedApplicationArtifact from '../../../../artifacts/contracts/examples/EmbeddedApplication.sol/EmbeddedApplication.json';
 import {convertAddressToBytes32, getChannelId, signState} from '../../../../src';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../../src/contract/outcome';
 import {getFixedPart, getVariablePart, State, VariablePart} from '../../../../src/contract/state';
-import {AlreadyMoved, encodeXinJData, SupportProof} from '../../../../src/contract/X-in-J';
+import {
+  AlreadyMoved,
+  encodeEmbeddedApplicationData,
+  SupportProof,
+} from '../../../../src/contract/embedded-application';
 import {getTestProvider, setupContract} from '../../../test-helpers';
 
 type RevertReason =
@@ -49,8 +53,6 @@ function expectRevert(fn: () => void, reason: RevertReason) {
 // TODO we will need to have something more interesting than the null app in order to test [0,1] and [1,0] cases
 
 // Utilities
-// TODO: move to a src file
-
 function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
   return [
     {
@@ -75,7 +77,7 @@ function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
 
 // *****
 
-let xInJ: Contract;
+let embeddedApplication: Contract;
 
 const Alice = Wallet.createRandom();
 const Bob = Wallet.createRandom();
@@ -138,7 +140,7 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
 
 const ABCvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
-  appData: encodeXinJData({
+  appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.ABC,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(stateForX), // TODO this is awkward. We would like to use a null value here
@@ -147,7 +149,7 @@ const ABCvariablePartForJ: VariablePart = {
 
 const AvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
-  appData: encodeXinJData({
+  appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.A,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(stateForX),
@@ -156,7 +158,7 @@ const AvariablePartForJ: VariablePart = {
 
 const BvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
-  appData: encodeXinJData({
+  appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.B,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(stateForX),
@@ -167,7 +169,7 @@ const ABvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(
     absorbOutcomeOfXIntoJ(greaterStateForX.outcome as [AllocationAssetOutcome])
   ),
-  appData: encodeXinJData({
+  appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.AB,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(greaterStateForX),
@@ -177,16 +179,20 @@ const ABvariablePartForJ: VariablePart = {
 const provider = getTestProvider();
 
 beforeAll(async () => {
-  xInJ = setupContract(provider, xInJArtifact, process.env.X_IN_J_ADDRESS);
+  embeddedApplication = setupContract(
+    provider,
+    embeddedApplicationArtifact,
+    process.env.EMBEDDED_APPLICATION_ADDRESS
+  );
 });
 
 const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
 const nParticipants = 0; // TODO this is unused
 const signedByFrom = 0b00; // TODO this is unused
 
-describe('XinJ: named state transitions', () => {
+describe('EmbeddedApplication: named state transitions', () => {
   it('returns true / reverts for a correct / incorrect ABC => A transition', async () => {
-    const result = await xInJ.validTransition(
+    const result = await embeddedApplication.validTransition(
       ABCvariablePartForJ,
       AvariablePartForJ,
       turnNumTo,
@@ -197,7 +203,7 @@ describe('XinJ: named state transitions', () => {
     expect(result).toBe(true);
     await expectRevert(
       () =>
-        xInJ.validTransition(
+        embeddedApplication.validTransition(
           ABCvariablePartForJ,
           AvariablePartForJ,
           turnNumTo,
@@ -209,7 +215,7 @@ describe('XinJ: named state transitions', () => {
     );
   });
   it('returns true / reverts for a correct / incorrect ABC => B transition', async () => {
-    const result = await xInJ.validTransition(
+    const result = await embeddedApplication.validTransition(
       ABCvariablePartForJ,
       BvariablePartForJ,
       turnNumTo,
@@ -220,7 +226,7 @@ describe('XinJ: named state transitions', () => {
     expect(result).toBe(true);
     await expectRevert(
       () =>
-        xInJ.validTransition(
+        embeddedApplication.validTransition(
           ABCvariablePartForJ,
           BvariablePartForJ,
           turnNumTo,
@@ -232,7 +238,7 @@ describe('XinJ: named state transitions', () => {
     );
   });
   it('returns true / reverts for a correct / incorrect A => AB transition', async () => {
-    const result = await xInJ.validTransition(
+    const result = await embeddedApplication.validTransition(
       AvariablePartForJ,
       ABvariablePartForJ,
       turnNumTo,
@@ -243,7 +249,7 @@ describe('XinJ: named state transitions', () => {
     expect(result).toBe(true);
     await expectRevert(
       () =>
-        xInJ.validTransition(
+        embeddedApplication.validTransition(
           AvariablePartForJ,
           ABvariablePartForJ,
           turnNumTo,
@@ -255,7 +261,7 @@ describe('XinJ: named state transitions', () => {
     );
   });
   it('returns true / reverts for a correct / incorrect B => AB transition', async () => {
-    const result = await xInJ.validTransition(
+    const result = await embeddedApplication.validTransition(
       BvariablePartForJ,
       ABvariablePartForJ,
       turnNumTo,
@@ -266,7 +272,7 @@ describe('XinJ: named state transitions', () => {
     expect(result).toBe(true);
     await expectRevert(
       () =>
-        xInJ.validTransition(
+        embeddedApplication.validTransition(
           BvariablePartForJ,
           ABvariablePartForJ,
           turnNumTo,
@@ -279,14 +285,14 @@ describe('XinJ: named state transitions', () => {
   });
 });
 
-describe('XinJ: reversions', () => {
+describe('EmbeddedApplication: reversions', () => {
   // eslint-disable-next-line jest/expect-expect
   it('reverts if destinations change', async () => {
     const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
     maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
     await expectRevert(
       () =>
-        xInJ.validTransition(
+        embeddedApplication.validTransition(
           ABCvariablePartForJ,
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,

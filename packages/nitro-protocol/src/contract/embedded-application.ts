@@ -18,13 +18,13 @@ export enum AlreadyMoved {
   'AB',
   'ABC',
 }
-export interface XinJData {
+export interface EmbeddedApplicationData {
   channelIdForX: Bytes32;
   supportProofForX: SupportProof;
   alreadyMoved: AlreadyMoved;
 }
 
-export function encodeXinJData(data: XinJData): Bytes {
+export function encodeEmbeddedApplicationData(data: EmbeddedApplicationData): Bytes {
   return defaultAbiCoder.encode(
     [
       {
