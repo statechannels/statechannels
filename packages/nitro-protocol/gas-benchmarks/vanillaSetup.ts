@@ -4,6 +4,7 @@ import {promises, existsSync, truncateSync} from 'fs';
 import {ContractFactory, Contract} from '@ethersproject/contracts';
 import {providers} from 'ethers';
 import waitOn from 'wait-on';
+import kill from 'tree-kill';
 
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
@@ -24,6 +25,7 @@ const hardhatProcess = exec('npx hardhat node --no-deploy --port 9546', (error, 
   promises.appendFile(logFile, stdout);
 });
 const hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
+const hardhatProcessClosed = new Promise(resolve => hardhatProcess.on('close', resolve));
 
 const provider = new providers.JsonRpcProvider(hardHatNetworkEndpoint);
 
@@ -63,6 +65,7 @@ beforeEach(async () => {
 });
 
 afterAll(async () => {
-  hardhatProcess.kill('SIGINT');
+  await kill(hardhatProcess.pid);
   await hardhatProcessExited;
+  await hardhatProcessClosed;
 });
