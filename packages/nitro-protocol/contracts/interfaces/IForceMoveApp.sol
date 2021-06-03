@@ -31,7 +31,7 @@ interface IForceMoveApp {
 }
 
 /**
- * @dev The IForceMoveApp interface calls for its children to implement an application-specific validTransition function, defining the state machine of a ForceMove state channel DApp.
+ * @dev This is a proposed new interface, which delegates turn-taking or other signature semantics to validTransition though the inclusion of a pair of signedBy fields.
  */
 interface IForceMoveApp2 {
     struct VariablePart {
