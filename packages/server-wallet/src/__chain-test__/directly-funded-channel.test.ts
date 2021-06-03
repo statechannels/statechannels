@@ -16,13 +16,14 @@ import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 
+jest.setTimeout(30_000);
+
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const rpcEndpoint = process.env.RPC_ENDPOINT;
-const delay = async (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
 
 const config = {
   ...defaultTestConfig(),
@@ -192,5 +193,4 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
-  await delay(1000);
-}, 5_000_000);
+});
