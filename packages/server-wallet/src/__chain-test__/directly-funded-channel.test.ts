@@ -116,9 +116,9 @@ beforeAll(async () => {
     });
 
     const syncOptions: SyncOptions = {
-      pollInterval: 50,
-      timeOutThreshold: 30_000,
-      staleThreshold: 1_000,
+      pollInterval: 1_000,
+      timeOutThreshold: 60_000,
+      staleThreshold: 10_000,
     };
     a = await Wallet.create(aEngine, aChainService, TestMessageService.create, syncOptions);
     b = await Wallet.create(bEngine, bChainService, TestMessageService.create, syncOptions);
