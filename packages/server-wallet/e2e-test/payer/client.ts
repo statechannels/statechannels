@@ -187,7 +187,7 @@ export default class PayerClient {
   public async challenge(channelId: string): Promise<ChannelResult> {
     const {channelResult, chainRequests} = await this.engine.challenge(channelId);
     const transactions = await this.chainService.handleChainRequests(chainRequests);
-    const result = await Promise.all(transactions.map(tr => tr.wait()));
+    await Promise.all(transactions.map(tr => tr.wait()));
     return channelResult;
   }
 
