@@ -92,42 +92,47 @@ function mineOnEvent(contract: Contract) {
 }
 
 beforeAll(async () => {
-  provider = new providers.JsonRpcProvider(rpcEndpoint);
+  try {
+    provider = new providers.JsonRpcProvider(rpcEndpoint);
 
-  await Promise.all(
-    [aEngineConfig, bEngineConfig].map(async config => {
-      await DBAdmin.dropDatabase(config);
-      await DBAdmin.createDatabase(config);
-      await DBAdmin.migrateDatabase(config);
-    })
-  );
+    await Promise.all(
+      [aEngineConfig, bEngineConfig].map(async config => {
+        await DBAdmin.dropDatabase(config);
+        await DBAdmin.createDatabase(config);
+        await DBAdmin.migrateDatabase(config);
+      })
+    );
 
-  aEngine = await Engine.create(aEngineConfig);
-  bEngine = await Engine.create(bEngineConfig);
-  const aChainService = new ChainService({
-    ...aEngineConfig.chainServiceConfiguration,
-    logger: aEngine.logger,
-  });
-  const bChainService = new ChainService({
-    ...bEngineConfig.chainServiceConfiguration,
-    logger: bEngine.logger,
-  });
+    aEngine = await Engine.create(aEngineConfig);
+    bEngine = await Engine.create(bEngineConfig);
+    const aChainService = new ChainService({
+      ...aEngineConfig.chainServiceConfiguration,
+      logger: aEngine.logger,
+    });
+    const bChainService = new ChainService({
+      ...bEngineConfig.chainServiceConfiguration,
+      logger: bEngine.logger,
+    });
 
-  const syncOptions: SyncOptions = {
-    pollInterval: 50,
-    timeOutThreshold: 30_000,
-    staleThreshold: 1_000,
-  };
-  a = await Wallet.create(aEngine, aChainService, TestMessageService.create, syncOptions);
-  b = await Wallet.create(bEngine, bChainService, TestMessageService.create, syncOptions);
+    const syncOptions: SyncOptions = {
+      pollInterval: 50,
+      timeOutThreshold: 30_000,
+      staleThreshold: 1_000,
+    };
+    a = await Wallet.create(aEngine, aChainService, TestMessageService.create, syncOptions);
+    b = await Wallet.create(bEngine, bChainService, TestMessageService.create, syncOptions);
 
-  TestMessageService.linkMessageServices(a.messageService, b.messageService, aEngine.logger);
-  const assetHolder = new Contract(
-    ethAssetHolderAddress,
-    ContractArtifacts.EthAssetHolderArtifact.abi,
-    provider
-  );
-  mineOnEvent(assetHolder);
+    TestMessageService.linkMessageServices(a.messageService, b.messageService, aEngine.logger);
+    const assetHolder = new Contract(
+      ethAssetHolderAddress,
+      ContractArtifacts.EthAssetHolderArtifact.abi,
+      provider
+    );
+    mineOnEvent(assetHolder);
+  } catch (error) {
+    console.error('beforeAll failed');
+    console.error(error);
+  }
 });
 
 afterAll(async () => {
