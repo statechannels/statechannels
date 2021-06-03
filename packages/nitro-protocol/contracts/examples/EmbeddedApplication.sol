@@ -7,7 +7,7 @@ import '../Outcome.sol';
 import '../interfaces/IForceMove.sol';
 
 // The EmbeddedApplication allows a 2-party subchannel X to be *embedded* in the current 3-party channel J.
-// This is in contract to having the application channel X being *funded* by the current channel J.
+// This is in contrast to having the application channel X being *funded* by the current channel J.
 // J references X in its AppData. Each state for J contains a support proof for X. Initially, this can be the PreFundSetup of X.
 // When there is a supported state (triply signed) in J containing a support proof for X, we say that X has been *embedded* in J.
 // Participant 0 (Alice) and Participant 1 (Bob) can run X off-chain in the usual fashion.
