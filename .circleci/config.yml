@@ -163,6 +163,7 @@ jobs:
           file: test-stats
       - upload_gas_report:
           package: nitro-protocol
+      - upload_artifacts 
       - notify_slack
 
   server-wallet-e2e-test:

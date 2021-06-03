@@ -15,6 +15,7 @@ import {TestMessageService} from '../message-service/test-message-service';
 import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
+import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 
 jest.setTimeout(30_000);
 
@@ -39,7 +40,7 @@ let a: Wallet;
 let b: Wallet;
 let aEngine: Engine;
 let bEngine: Engine;
-const ARTIFACTS_DIR = '../../artifacts';
+
 const bEngineConfig: EngineConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
   loggingConfiguration: {
