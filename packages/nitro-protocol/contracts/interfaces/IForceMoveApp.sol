@@ -75,6 +75,20 @@ library ForceMoveAppUtilities {
         return ((signedBy >> participantIndex) % 2 == 1);
     }
 
+    // This function can be used inside validTransition
+    // To recover the legacy "turn taking" semantics
+    function isRoundRobin(
+        uint256 nParticipants,
+        uint48 turnNumB,
+        uint256 signedByFrom,
+        uint256 signedByTo
+    ) internal pure returns (bool) {
+        require(turnNumB > 0);
+        require(isSignedBy(signedByFrom, (turnNumB - 1) % nParticipants));
+        require(isSignedBy(signedByTo, turnNumB % nParticipants));
+        return true;
+    }
+
     /**
      * @notice Given a digest and ethereum digital signature, recover the signer
      * @dev Given a digest and digital signature, recover the signer
