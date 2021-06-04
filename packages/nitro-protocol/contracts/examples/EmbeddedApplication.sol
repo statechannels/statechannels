@@ -195,7 +195,7 @@ contract EmbeddedApplication is
                     greaterStateHash,
                     toAppData.supportProofForX.sigs[1]
                 ) == toAppData.supportProofForX.fixedPart.participants[1],
-                'sig1 !by by participant1'
+                'sig1 !by participant1'
             );
         } else {
             bytes32 lesserStateHash = keccak256(
