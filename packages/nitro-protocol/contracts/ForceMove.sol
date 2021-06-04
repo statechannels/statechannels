@@ -176,7 +176,7 @@ contract ForceMove is IForceMove {
         );
 
         _requireValidTransition(
-            fixedPart.participants.length,
+            uint8(fixedPart.participants.length),
             isFinalAB,
             variablePartAB,
             turnNumRecord + 1,
@@ -392,7 +392,7 @@ contract ForceMove is IForceMove {
         Signature[] memory sigs,
         uint8[] memory whoSignedWhat // whoSignedWhat[i] is the index of the state in stateHashes that was signed by participants[i]
     ) internal pure returns (bool) {
-        uint256 nParticipants = participants.length;
+        uint8 nParticipants = uint8(participants.length);
         uint256 nStates = stateHashes.length;
 
         require(
@@ -420,7 +420,7 @@ contract ForceMove is IForceMove {
     function _acceptableWhoSignedWhat(
         uint8[] memory whoSignedWhat,
         uint48 largestTurnNum,
-        uint256 nParticipants,
+        uint8 nParticipants,
         uint256 nStates
     ) internal pure returns (bool) {
         require(whoSignedWhat.length == nParticipants, '|whoSignedWhat|!=nParticipants');
@@ -527,7 +527,7 @@ contract ForceMove is IForceMove {
             );
             if (turnNum < largestTurnNum) {
                 _requireValidTransition(
-                    fixedPart.participants.length,
+                    uint8(fixedPart.participants.length),
                     [turnNum >= firstFinalTurnNum, turnNum + 1 >= firstFinalTurnNum],
                     [variableParts[i], variableParts[i + 1]],
                     turnNum + 1,
@@ -551,7 +551,7 @@ contract ForceMove is IForceMove {
     * @return true if the later state is a validTransition from its predecessor, false otherwise.
     */
     function _requireValidProtocolTransition(
-        uint256 nParticipants,
+        uint8 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         IForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint48 turnNumB
@@ -585,7 +585,7 @@ contract ForceMove is IForceMove {
     * @return true if the later state is a validTransition from its predecessor, false otherwise.
     */
     function _requireValidTransition(
-        uint256 nParticipants,
+        uint8 nParticipants,
         bool[2] memory isFinalAB, // [a.isFinal, b.isFinal]
         IForceMoveApp.VariablePart[2] memory ab, // [a,b]
         uint48 turnNumB,
@@ -935,7 +935,7 @@ contract ForceMove is IForceMove {
             (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
             'Bad |signatures|v|whoSignedWhat|'
         );
-        require(numParticipants < type(uint8).max, 'Too many participants!');
+        require(numParticipants <= type(uint8).max, 'Too many participants!');
         return true;
     }
 }

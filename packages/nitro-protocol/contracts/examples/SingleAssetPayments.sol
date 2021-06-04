@@ -22,7 +22,7 @@ contract SingleAssetPayments is IForceMoveApp {
         VariablePart memory a,
         VariablePart memory b,
         uint48 turnNumB,
-        uint256 nParticipants
+        uint8 nParticipants
     ) public override pure returns (bool) {
         Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
         Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));

@@ -31,7 +31,7 @@ contract MyStateChannelApp is IForceMoveApp {
     VariablePart memory a,
     VariablePart memory b,
     uint256 turnNumB,
-    uint256 nParticipants
+    uint8 nParticipants
   ) public override pure returns (bool) {
     Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
     Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
@@ -41,6 +41,7 @@ contract MyStateChannelApp is IForceMoveApp {
     return true;
   }
 }
+
 ```
 
 ### Import precompiled artifacts for deployment/testing
@@ -107,6 +108,7 @@ After succesfully deploying you should see some changes to `addresses.json`. Ple
 ```
 INFURA_TOKEN=[your token here] RINKEBY_DEPLOYER_PK=[private key used for rinkeby deploy] yarn contract:deploy-rinkeby
 ```
+
 ### For mainnet
 
 WARNING: This can be expensive. Each contract will take several million gas to deploy. Choose your moment and [gas price](https://ethgas.watch/) wisely!
@@ -114,18 +116,21 @@ WARNING: This can be expensive. Each contract will take several million gas to d
 ```
 INFURA_TOKEN=[your token here] MAINNET_DEPLOYER_PK=[private key used for mainnet deploy] yarn contract:deploy-mainnet --gasprice [your-chosen-gasPrice-here]
 ```
+
 ### To a local blockchain (for testing)
 
-Contract deployment is handled automatically by our test setup scripts. Note that a **different** set of contracts is deployed when testing. Those contracts expose some helper functions that should not exist on production contracts. 
-## Verifying on etherscan
- This is a somewhat manual process, but easier than using the etherscan GUI. 
- 
- After deployment, run
+Contract deployment is handled automatically by our test setup scripts. Note that a **different** set of contracts is deployed when testing. Those contracts expose some helper functions that should not exist on production contracts.
 
- ```
- ETHERSCAN_API_KEY=<a-secret> INFURA_TOKEN=<another-secret> yarn hardhat --network rinkeby verify <DeployedContractAddress> 'ConstructorArgs'
- ```
- 
- for each contract you wish to verify. Swap rinkeby for mainnet as appropriate.
+## Verifying on etherscan
+
+This is a somewhat manual process, but easier than using the etherscan GUI.
+
+After deployment, run
+
+```
+ETHERSCAN_API_KEY=<a-secret> INFURA_TOKEN=<another-secret> yarn hardhat --network rinkeby verify <DeployedContractAddress> 'ConstructorArgs'
+```
+
+for each contract you wish to verify. Swap rinkeby for mainnet as appropriate.
 
 You need to provide both `ETHERSCAN_API_KEY` and `INFURA_TOKEN` for this to work. For more info, see the [docs](https://hardhat.org/plugins/nomiclabs-hardhat-etherscan.html).

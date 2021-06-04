@@ -53,7 +53,7 @@ contract TESTNitroAdjudicator is NitroAdjudicator {
     function acceptableWhoSignedWhat(
         uint8[] memory whoSignedWhat,
         uint48 largestTurnNum,
-        uint256 nParticipants,
+        uint8 nParticipants,
         uint256 nStates
     ) public pure returns (bool) {
         return _acceptableWhoSignedWhat(whoSignedWhat, largestTurnNum, nParticipants, nStates);
