@@ -16,6 +16,29 @@ import '../interfaces/IForceMove.sol';
 // To progress J on chain, a support proof for X must be provided. Inferior support proofs are rejected. Participant 2 (Irene)'s balance is protected.
 // Irene retains the unilateral right to close J -- Alice and Bob each get only 1 chance to update J before Irene's signature is required again.
 
+// How to do virtual funding with an EmbeddedApplication
+// ---
+// Off chain setup (substeps with a letter may be executed in any order):
+//
+// 0. Assume (as usual) that A,I and B,I have funded ledger channels already.
+// 1. A, B, I sign prefund for J that allocates to {A, B, I}
+// 2a. A and I sign a guarantee $G_{AI}$ targeting J with priority {A, I}
+// 2b. B and I sign a guarantee $G_{BI}$ targeting J with priority {B, I}
+// 3. A, B, I sign postfund for J that allocates to {A, B, I} and embeds X.
+
+// Off chain teardown:
+//
+// 1. A, B, I triple sign an ABC update to J that absorbs the latest outcome of X and unembeds X.
+// 2a. A and I remove $G_{AI}$ and absorb the outcome of J into their ledger channel
+// 2b. B and I remove $G_{BI}$ and absorb the outcome of J into their ledger channel
+
+// On chain challenge path:
+//
+// 1. J outcome recorded on chain. Each A and B can unilaterally progress the channel once.
+// (So the the latency of finalizing a channel on chain is at most 6 timeout periods. In practice, since I never needs to update the channel, the latency is likely 3 timeout periods.)
+// 2. Claim with $G_{AI}$ is called.
+// 3. Claim with $G_{BI}$ is called. After this, all participants have pulled out their funds.
+
 /**
  * @dev The EmbeddedApplication contract embeds a subchannel X.
  */
