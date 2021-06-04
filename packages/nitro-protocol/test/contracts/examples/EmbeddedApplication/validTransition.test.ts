@@ -288,7 +288,7 @@ describe('EmbeddedApplication: named state transitions', () => {
       'incorrect move from B'
     );
   });
-  it('returns reverts when trying to move from AB', async () => {
+  it('reverts when trying to move from AB', async () => {
     const evenGreaterSupportProofForX = {
       ...ABvariablePartForJ,
       appData: encodeEmbeddedApplicationData({
