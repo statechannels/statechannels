@@ -16,8 +16,8 @@ export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
       NitroAdjudicator: 2421626, // Singleton
-      ETHAssetHolder: 1632711, // Singleton (could be more in principle)
-      ERC20AssetHolder: 1654810, // Per Token (could be more in principle)
+      ETHAssetHolder: 1651445, // Singleton (could be more in principle)
+      ERC20AssetHolder: 1673544, // Per Token (could be more in principle)
     },
   },
   directlyFundAChannelWithETHFirst: {
