@@ -64,6 +64,9 @@ const config: HardhatUserConfig = {
       accounts: [getPrivateKeyWithEth()], // just use a dummy account from devtools
       chainId: 212984383488152,
     },
+    hardhat: {
+      hardfork: 'berlin',
+    },
   },
   etherscan: {
     // Your API key for Etherscan
