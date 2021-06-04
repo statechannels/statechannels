@@ -235,6 +235,8 @@ contract AssetHolder is IAssetHolder {
         );
         uint256 initialHoldings = holdings[fromChannelId];
 
+        require(initialHoldings > 0, 'no holdings for this channel');
+
         (
             Outcome.AllocationItem[] memory newAllocation,
             bool safeToDelete,
