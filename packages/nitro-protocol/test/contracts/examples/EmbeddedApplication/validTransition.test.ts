@@ -1,3 +1,4 @@
+/* eslint-disable jest/expect-expect */
 import {expectRevert as innerExpectRevert} from '@statechannels/devtools';
 import {constants, Contract, Wallet} from 'ethers';
 
@@ -14,26 +15,26 @@ import {getTestProvider, setupContract} from '../../../test-helpers';
 
 type RevertReason =
   // each reason represents a distinct code path that we should check in this test
-  | 'destinations may not change'
-  | 'p2.amt !constant'
-  | 'total allocation changed'
+  | 'destinations may not change' // tested
+  | 'p2.amt !constant' // tested
+  | 'total allocation changed' // tested
   | 'incorrect move from ABC'
-  | 'inferior support proof'
-  | 'incorrect move from A'
-  | 'incorrect move from B'
+  | 'inferior support proof' // tested
+  | 'incorrect move from A' // tested
+  | 'incorrect move from B' // tested
   | 'move from ABC,A,B only'
-  | 'X / J outcome mismatch'
-  | 'appDefinition changed'
-  | 'challengeDuration changed'
-  | '1 or 2 states required'
+  | 'X / J outcome mismatch' // tested
+  | 'X.appDefinition changed' // tested
+  | 'X.challengeDuration changed' // tested
+  | '1 or 2 states required' // tested
   | 'whoSignedWhat.length must be 2'
-  | 'sig0 !by participant0'
-  | 'sig1 !by participant1'
+  | 'sig0 !by participant0' // tested
+  | 'sig1 !by participant1' // tested
   | 'sig0 on state0 !by participant0'
   | 'sig0 on state1 !by participant1'
   | 'sig0 on state1 !by participant0'
   | 'sig0 on state0 !by participant1'
-  | 'invalid whoSignedWhat'
+  | 'invalid whoSignedWhat' // tested
   | 'invalid transition in X';
 
 async function expectRevert(fn: () => void, reason: RevertReason) {
@@ -84,6 +85,25 @@ const Alice = Wallet.createRandom();
 const Bob = Wallet.createRandom();
 const Irene = Wallet.createRandom();
 
+const sixFour: [AllocationAssetOutcome] = [
+  {
+    assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+    allocationItems: [
+      {destination: convertAddressToBytes32(Alice.address), amount: '0x6'},
+      {destination: convertAddressToBytes32(Bob.address), amount: '0x4'},
+    ],
+  },
+];
+const fourSix: [AllocationAssetOutcome] = [
+  {
+    assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+    allocationItems: [
+      {destination: convertAddressToBytes32(Alice.address), amount: '0x4'},
+      {destination: convertAddressToBytes32(Bob.address), amount: '0x6'},
+    ],
+  },
+];
+
 const stateForX: State = {
   turnNum: 4,
   isFinal: false,
@@ -93,15 +113,7 @@ const stateForX: State = {
     channelNonce: 87,
   },
   challengeDuration: 0,
-  outcome: [
-    {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
-      allocationItems: [
-        {destination: convertAddressToBytes32(Alice.address), amount: '0x6'},
-        {destination: convertAddressToBytes32(Bob.address), amount: '0x4'},
-      ],
-    },
-  ],
+  outcome: sixFour,
   appDefinition: constants.AddressZero, // We will run the null app in X (for demonstration purposes)
   appData: '0x',
 };
@@ -115,15 +127,7 @@ const greaterStateForX: State = {
     channelNonce: 87,
   },
   challengeDuration: 0,
-  outcome: [
-    {
-      assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
-      allocationItems: [
-        {destination: convertAddressToBytes32(Alice.address), amount: '0x4'},
-        {destination: convertAddressToBytes32(Bob.address), amount: '0x6'},
-      ],
-    },
-  ],
+  outcome: fourSix,
   appDefinition: constants.AddressZero, // We will run the null app in X (for demonstration purposes)
   appData: '0x',
 };
@@ -287,7 +291,6 @@ describe('EmbeddedApplication: named state transitions', () => {
 });
 
 describe('EmbeddedApplication: reversions', () => {
-  // eslint-disable-next-line jest/expect-expect
   it('reverts if destinations change', async () => {
     const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
     maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
@@ -302,6 +305,200 @@ describe('EmbeddedApplication: reversions', () => {
           0b01 // signedByTo = just Alice
         ),
       'destinations may not change'
+    );
+  });
+  it('reverts if Irene`s balance changes', async () => {
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
+    maliciousOutcome[0].allocationItems[2].amount = '0x0';
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'p2.amt !constant'
+    );
+  });
+  it('reverts if the total amount allocated changes', async () => {
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
+    maliciousOutcome[0].allocationItems[1].amount = '0xaaa';
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'total allocation changed'
+    );
+  });
+  it('reverts if an inferior support proof is provided', async () => {
+    const inferiorSupportProof = {...ABvariablePartForJ};
+    (inferiorSupportProof.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.AB,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: supportProofForX(stateForX),
+    })),
+      await expectRevert(
+        () =>
+          embeddedApplication.validTransition(
+            AvariablePartForJ,
+            inferiorSupportProof,
+            turnNumTo,
+            nParticipants,
+            signedByFrom,
+            0b10 // signedByTo = just Bob
+          ),
+        'inferior support proof'
+      );
+  });
+  it('reverts if J does not absorb X', async () => {
+    const notProperlyAbsorbed = {...AvariablePartForJ};
+    notProperlyAbsorbed.outcome = encodeOutcome(absorbOutcomeOfXIntoJ(fourSix));
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          notProperlyAbsorbed,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'X / J outcome mismatch'
+    );
+  });
+  it('reverts if X.appDefinition changes', async () => {
+    const appDefinitionChanged = {...AvariablePartForJ};
+    appDefinitionChanged.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.A,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: supportProofForX({...stateForX, appDefinition: Alice.address}),
+    });
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          appDefinitionChanged,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'X.appDefinition changed'
+    );
+  });
+  it('reverts if X.challengeDuration changes', async () => {
+    const challengeDurationChanged = {...AvariablePartForJ};
+    challengeDurationChanged.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.A,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: supportProofForX({...stateForX, challengeDuration: 7}),
+    });
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          challengeDurationChanged,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'X.challengeDuration changed'
+    );
+  });
+  it('reverts if no states in support proof', async () => {
+    const malicious = {...AvariablePartForJ};
+    malicious.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.A,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: {...supportProofForX(stateForX), variableParts: [] as any}, // type system is trying to stop us hacking
+    });
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          malicious,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      '1 or 2 states required'
+    );
+  });
+  it('reverts if whoSignedWhat is invalid', async () => {
+    const malicious = {...AvariablePartForJ};
+    malicious.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.A,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: {...supportProofForX(stateForX), whoSignedWhat: [9, 9]}, // type system is trying to stop us hacking
+    });
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          malicious,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'invalid whoSignedWhat'
+    );
+  });
+  it('reverts if sig0 is corrupted', async () => {
+    const malicious = {...AvariablePartForJ};
+    malicious.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.A,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: {
+        ...supportProofForX(stateForX),
+        sigs: [supportProofForX(stateForX).sigs[1], supportProofForX(stateForX).sigs[1]],
+      }, // type system is trying to stop us hacking
+    });
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          malicious,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'sig0 !by participant0'
+    );
+  });
+  it('reverts if sig1 is corrupted', async () => {
+    const malicious = {...AvariablePartForJ};
+    malicious.appData = encodeEmbeddedApplicationData({
+      alreadyMoved: AlreadyMoved.A,
+      channelIdForX: getChannelId(stateForX.channel),
+      supportProofForX: {
+        ...supportProofForX(stateForX),
+        sigs: [supportProofForX(stateForX).sigs[0], supportProofForX(stateForX).sigs[0]],
+      }, // type system is trying to stop us hacking
+    });
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABCvariablePartForJ,
+          malicious,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b01 // signedByTo = just Alice
+        ),
+      'sig1 !by participant1'
     );
   });
 });

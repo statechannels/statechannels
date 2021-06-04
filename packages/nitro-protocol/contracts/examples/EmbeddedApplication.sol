@@ -158,12 +158,12 @@ contract EmbeddedApplication is
         require(
             fromAppData.supportProofForX.fixedPart.appDefinition ==
                 toAppData.supportProofForX.fixedPart.appDefinition,
-            'appDefinition changed'
+            'X.appDefinition changed'
         );
         require(
             fromAppData.supportProofForX.fixedPart.challengeDuration ==
                 toAppData.supportProofForX.fixedPart.challengeDuration,
-            'challengeDuration changed'
+            'X.challengeDuration changed'
         ); // this is actually never used so could be 0
 
         // A support proof requires 2 signatures
