@@ -18,11 +18,11 @@ type RevertReason =
   | 'destinations may not change' // tested
   | 'p2.amt !constant' // tested
   | 'total allocation changed' // tested
-  | 'incorrect move from ABC'
+  | 'incorrect move from ABC' // tested
   | 'inferior support proof' // tested
   | 'incorrect move from A' // tested
   | 'incorrect move from B' // tested
-  | 'move from ABC,A,B only'
+  | 'move from ABC,A,B only' //tested
   | 'X / J outcome mismatch' // tested
   | 'X.appDefinition changed' // tested
   | 'X.challengeDuration changed' // tested
@@ -286,6 +286,28 @@ describe('EmbeddedApplication: named state transitions', () => {
           0b10 // signedByTo = just Bob
         ),
       'incorrect move from B'
+    );
+  });
+  it('returns reverts when trying to move from AB', async () => {
+    const evenGreaterSupportProofForX = {
+      ...ABvariablePartForJ,
+      appData: encodeEmbeddedApplicationData({
+        alreadyMoved: AlreadyMoved.A,
+        channelIdForX: getChannelId(stateForX.channel),
+        supportProofForX: supportProofForX({...greaterStateForX, turnNum: 99}),
+      }),
+    };
+    await expectRevert(
+      () =>
+        embeddedApplication.validTransition(
+          ABvariablePartForJ,
+          evenGreaterSupportProofForX,
+          turnNumTo,
+          nParticipants,
+          signedByFrom,
+          0b10 // signedByTo = just Bob
+        ),
+      'move from ABC,A,B only'
     );
   });
 });
