@@ -28,6 +28,8 @@ import {
 import {signStates} from '../../../src';
 import {NITRO_MAX_GAS} from '../../../src/transactions';
 
+jest.setTimeout(15_000);
+
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
 let EthAssetHolder1: Contract;
