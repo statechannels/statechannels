@@ -27,7 +27,6 @@ type RevertReason =
   | 'X.appDefinition changed' // tested
   | 'X.challengeDuration changed' // tested
   | '1 or 2 states required' // tested
-  | 'whoSignedWhat.length must be 2'
   | 'sig0 !by participant0' // tested
   | 'sig1 !by participant1' // tested
   | 'sig0 on state0 !by participant0'

@@ -175,10 +175,6 @@ contract EmbeddedApplication is
                 toAppData.supportProofForX.variableParts.length == 2,
             '1 or 2 states required'
         );
-        require(
-            toAppData.supportProofForX.whoSignedWhat.length == 2,
-            'whoSignedWhat.length must be 2'
-        );
 
         bytes32 appPartHash = keccak256(
             abi.encode(
