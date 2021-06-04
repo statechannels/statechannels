@@ -15,7 +15,7 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 2421626, // Singleton
+      NitroAdjudicator: 2421830, // Singleton
       ETHAssetHolder: 1634011, // Singleton (could be more in principle)
       ERC20AssetHolder: 1657410, // Per Token (could be more in principle)
     },
