@@ -1,31 +1,31 @@
-import {channelId} from './fixtures';
+import {channelId, finalizationProof, finalState} from './fixtures';
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
 
 describe('Consumes the expected gas for deployments', () => {
-  it(`when deploying the NitroAdjudicator >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator} gas`, async () => {
+  it(`when deploying the NitroAdjudicator`, async () => {
     await expect(await nitroAdjudicator.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator
     );
   });
-  it(`when deploying the ETHAssetHolder >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ETHAssetHolder} gas`, async () => {
+  it(`when deploying the ETHAssetHolder`, async () => {
     await expect(await ethAssetHolder.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ETHAssetHolder
     );
   });
-  it(`when deploying the ERC20AssetHolder >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ERC20AssetHolder} gas`, async () => {
+  it(`when deploying the ERC20AssetHolder`, async () => {
     await expect(await erc20AssetHolder.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ERC20AssetHolder
     );
   });
 });
 describe('Consumes the expected gas for deposits', () => {
-  it(`when directly funding a channel with ETH (first deposit) >>>>>  ${gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro} gas`, async () => {
+  it(`when directly funding a channel with ETH (first deposit)`, async () => {
     await expect(await ethAssetHolder.deposit(channelId, 0, 5, {value: 5})).toConsumeGas(
       gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro
     );
   });
-  it(`when directly funding a channel with ETH (second deposit) >>>>> ${gasRequiredTo.directlyFundAChannelWithETHSecond.vanillaNitro} gas`, async () => {
+  it(`when directly funding a channel with ETH (second deposit)`, async () => {
     // begin setup
     const setupTX = ethAssetHolder.deposit(channelId, 0, 5, {value: 5});
     await (await setupTX).wait();
@@ -57,5 +57,23 @@ describe('Consumes the expected gas for deposits', () => {
     await expect(await erc20AssetHolder.deposit(channelId, 5, 5)).toConsumeGas(
       gasRequiredTo.directlyFundAChannelWithERC20Second.vanillaNitro.deposit
     );
+  });
+});
+describe('Consumes the expected gas for happy-path exits', () => {
+  it(`when exiting a directly funded with ETH channel`, async () => {
+    // we completely liquidate the channel (paying out both parties)
+    // This is the first the adjudicator learns about the channel
+    const fP = finalizationProof(finalState(ethAssetHolder.address));
+    const tx = nitroAdjudicator.concludePushOutcomeAndTransferAll(
+      fP.largestTurnNum,
+      fP.fixedPart,
+      fP.appPartHash,
+      fP.outcomeBytes,
+      fP.numStates,
+      fP.whoSignedWhat,
+      fP.sigs
+    );
+    const {gasUsed} = await (await tx).wait();
+    expect(gasUsed.toNumber()).toEqual(gasRequiredTo.ETHexit.vanillaNitro);
   });
 });
