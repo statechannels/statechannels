@@ -2,7 +2,7 @@ import {channelId} from './fixtures';
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
 
-describe('Consumes the expected gas', () => {
+describe('Consumes the expected gas for deployments', () => {
   it(`when deploying the NitroAdjudicator >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator} gas`, async () => {
     await expect(await nitroAdjudicator.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator
@@ -18,6 +18,8 @@ describe('Consumes the expected gas', () => {
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ERC20AssetHolder
     );
   });
+});
+describe('Consumes the expected gas for deposits', () => {
   it(`when directly funding a channel with ETH (first deposit) >>>>>  ${gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro} gas`, async () => {
     await expect(await ethAssetHolder.deposit(channelId, 0, 5, {value: 5})).toConsumeGas(
       gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro
