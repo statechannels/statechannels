@@ -97,7 +97,7 @@
     "prettier:write": "prettier --write './contracts/**/*.sol'",
     "test": "yarn test:contracts && yarn test:app --all",
     "test:app": "jest -c ./config/jest/jest.config.js",
-    "test:ci": "yarn test:ci:app && yarn test:ci:contracts && yarn test:ci:gas",
+    "test:ci": "yarn test:ci:gas && yarn test:ci:app && yarn test:ci:contracts ",
     "test:ci:app": "yarn test:app --all --ci --bail --maxWorkers=4",
     "test:ci:gas": "yarn test:gas",
     "test:ci:contracts": "yarn test:contracts --all --ci --bail --maxWorkers=4",
