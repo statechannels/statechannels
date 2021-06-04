@@ -15,7 +15,8 @@ import {getTestProvider, setupContract} from '../../../test-helpers';
 type RevertReason =
   // each reason represents a distinct code path that we should check in this test
   | 'destinations may not change'
-  | 'p2.amt constant'
+  | 'p2.amt !constant'
+  | 'total allocation changed'
   | 'incorrect move from ABC'
   | 'inferior support proof'
   | 'incorrect move from A'

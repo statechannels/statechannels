@@ -87,7 +87,12 @@ contract EmbeddedApplication is
             'destinations may not change'
         );
 
-        require(fromAllocation[2].amount == toAllocation[2].amount, 'p2.amt constant');
+        require(fromAllocation[2].amount == toAllocation[2].amount, 'p2.amt !constant');
+        require(
+            fromAllocation[0].amount + fromAllocation[1].amount + fromAllocation[2].amount ==
+                toAllocation[0].amount + toAllocation[1].amount + toAllocation[2].amount,
+            'total allocation changed'
+        );
 
         // Allowed named-state transitions are
         //    AB
