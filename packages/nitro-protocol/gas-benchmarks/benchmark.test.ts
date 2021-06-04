@@ -60,9 +60,11 @@ describe('Consumes the expected gas for deposits', () => {
   });
 });
 describe('Consumes the expected gas for happy-path exits', () => {
-  it(`when exiting a directly funded with ETH channel`, async () => {
-    // we completely liquidate the channel (paying out both parties)
-    // This is the first the adjudicator learns about the channel
+  it(`when exiting a directly funded (with ETH) channel`, async () => {
+    // begin setup
+    const setupTX = ethAssetHolder.deposit(channelId, 0, 10, {value: 10});
+    await (await setupTX).wait();
+    // end setup
     const fP = finalizationProof(finalState(ethAssetHolder.address));
     const tx = nitroAdjudicator.concludePushOutcomeAndTransferAll(
       fP.largestTurnNum,

@@ -16,9 +16,9 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 2421830, // Singleton
-      ETHAssetHolder: 1634011, // Singleton (could be more in principle)
-      ERC20AssetHolder: 1657410, // Per Token (could be more in principle)
+      NitroAdjudicator: 2421626, // Singleton
+      ETHAssetHolder: 1652745, // Singleton (could be more in principle)
+      ERC20AssetHolder: 1676144, // Per Token (could be more in principle)
     },
   },
   directlyFundAChannelWithETHFirst: {
@@ -52,6 +52,7 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   ETHexit: {
-    vanillaNitro: 110791,
+    // we completely liquidate the channel (paying out both parties)
+    vanillaNitro: 146807,
   },
 };
