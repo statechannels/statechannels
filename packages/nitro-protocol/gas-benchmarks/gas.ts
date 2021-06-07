@@ -11,7 +11,8 @@ type Path =
   | 'directlyFundAChannelWithETHSecond'
   | 'directlyFundAChannelWithERC20First'
   | 'directlyFundAChannelWithERC20Second'
-  | 'ETHexit';
+  | 'ETHexit'
+  | 'ERC20exit';
 
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
@@ -52,7 +53,12 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   ETHexit: {
-    // we completely liquidate the channel (paying out both parties)
+    // e completely liquidate the channel (paying out both parties)
     vanillaNitro: 146807,
+  },
+  ERC20exit: {
+    // We completely liquidate the channel (paying out both parties)
+    // This is cheaper than the ETHexit because storage slots are zero-ed out.
+    vanillaNitro: 124162,
   },
 };

@@ -78,4 +78,22 @@ describe('Consumes the expected gas for happy-path exits', () => {
     const {gasUsed} = await (await tx).wait();
     expect(gasUsed.toNumber()).toEqual(gasRequiredTo.ETHexit.vanillaNitro);
   });
+  it(`when exiting a directly funded (with ERC20s) channel`, async () => {
+    // begin setup
+    await (await token.increaseAllowance(erc20AssetHolder.address, 100)).wait();
+    await (await erc20AssetHolder.deposit(channelId, 0, 10)).wait();
+    // end setup
+    const fP = finalizationProof(finalState(erc20AssetHolder.address));
+    const tx = nitroAdjudicator.concludePushOutcomeAndTransferAll(
+      fP.largestTurnNum,
+      fP.fixedPart,
+      fP.appPartHash,
+      fP.outcomeBytes,
+      fP.numStates,
+      fP.whoSignedWhat,
+      fP.sigs
+    );
+    const {gasUsed} = await (await tx).wait();
+    expect(gasUsed.toNumber()).toEqual(gasRequiredTo.ERC20exit.vanillaNitro);
+  });
 });
