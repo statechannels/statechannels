@@ -112,6 +112,7 @@ jobs:
             - packages/*/dist
             - packages/*/build
             - packages/nitro-protocol/artifacts
+            - packages/nitro-protocol/typechain
             - packages/*/lib
             - packages/*/node_modules
             - packages/client-api-schema/types
