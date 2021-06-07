@@ -2,9 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     // This prevents conflicting @types from the parents node_modules/@types
-        "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "typeRoots": ["./node_modules/@types"],
     "allowSyntheticDefaultImports": true,
     "lib": ["ES2019"],
     "target": "es2019",
@@ -13,7 +11,8 @@
     "esModuleInterop": true,
     "noImplicitAny": true,
     "allowJs": true, // We want to include loader.js to load worker threads
-    "removeComments": false
+    "removeComments": false,
+    "skipLibCheck": true
   },
   "references": [
     {

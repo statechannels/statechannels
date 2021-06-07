@@ -5,7 +5,7 @@
   "author": "",
   "dependencies": {
     "@connext/pure-evm-wasm": "0.1.4",
-    "@ethersproject/experimental": "5.0.5",
+    "@ethersproject/experimental": "5.3.0",
     "@statechannels/client-api-schema": "0.10.1",
     "@statechannels/nitro-protocol": "0.17.0",
     "@statechannels/wallet-core": "0.14.1",
