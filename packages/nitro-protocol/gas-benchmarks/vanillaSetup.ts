@@ -1,19 +1,20 @@
 import {exec} from 'child_process';
 import {promises, existsSync, truncateSync} from 'fs';
 
-import {ContractFactory, Contract} from '@ethersproject/contracts';
-import {providers} from 'ethers';
+import {ContractFactory, providers} from 'ethers';
 import waitOn from 'wait-on';
 import kill from 'tree-kill';
+import {BigNumber} from '@ethersproject/bignumber';
 
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
-import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
-import {Transaction} from 'ethers';
-
 import {NitroAdjudicator} from '../typechain/NitroAdjudicator';
+import {ETHAssetHolder} from '../typechain/ETHAssetHolder';
+import {ERC20AssetHolder} from '../typechain/ERC20AssetHolder';
+import {Token} from '../typechain/Token';
+
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
@@ -23,10 +24,10 @@ declare global {
   }
 }
 
-export let ethAssetHolder: Contract;
-export let erc20AssetHolder: Contract;
+export let ethAssetHolder: ETHAssetHolder;
+export let erc20AssetHolder: ERC20AssetHolder;
 export let nitroAdjudicator: NitroAdjudicator;
-export let token: Contract;
+export let token: Token;
 
 const logFile = './hardhat-network-output.log';
 const hardHatNetworkEndpoint = 'http://localhost:9546'; // the port should be unique
@@ -64,10 +65,15 @@ const nitroAdjudicatorFactory = new ContractFactory(
 
 beforeAll(async () => {
   await waitOn({resources: [hardHatNetworkEndpoint]});
-  nitroAdjudicator = ((await nitroAdjudicatorFactory.deploy()) as unkown) as NitroAdjudicator;
-  ethAssetHolder = await ethAssetHolderFactory.deploy(nitroAdjudicator.address);
-  token = await tokenFactory.deploy(provider.getSigner(0).getAddress());
-  erc20AssetHolder = await erc20AssetHolderFactory.deploy(nitroAdjudicator.address, token.address);
+  nitroAdjudicator = ((await nitroAdjudicatorFactory.deploy()) as unknown) as NitroAdjudicator;
+  ethAssetHolder = ((await ethAssetHolderFactory.deploy(
+    nitroAdjudicator.address
+  )) as unknown) as ETHAssetHolder;
+  token = ((await tokenFactory.deploy(provider.getSigner(0).getAddress())) as unknown) as Token;
+  erc20AssetHolder = ((await erc20AssetHolderFactory.deploy(
+    nitroAdjudicator.address,
+    token.address
+  )) as unknown) as ERC20AssetHolder;
   snapshotId = await provider.send('evm_snapshot', []);
 });
 
