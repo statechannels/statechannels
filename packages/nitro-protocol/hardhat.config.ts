@@ -1,6 +1,7 @@
 import 'hardhat-watcher';
 import 'hardhat-deploy';
 import '@nomiclabs/hardhat-etherscan';
+import '@typechain/hardhat';
 import {HardhatUserConfig} from 'hardhat/config';
 import {getPrivateKeyWithEth} from '@statechannels/devtools';
 
