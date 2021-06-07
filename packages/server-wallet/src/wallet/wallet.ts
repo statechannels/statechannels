@@ -1,4 +1,9 @@
-import {ChannelResult, CreateChannelParams, Uint256} from '@statechannels/client-api-schema';
+import {
+  Allocation,
+  ChannelResult,
+  CreateChannelParams,
+  Uint256,
+} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
@@ -196,6 +201,16 @@ export class Wallet extends EventEmitter<WalletEvents> {
         }
       })
     );
+  }
+
+  public async updateChannel(
+    channelId: string,
+    allocations: Allocation[],
+    appData: string
+  ): Promise<ChannelResult> {
+    const result = await this._engine.updateChannel({channelId, allocations, appData});
+    await this.handleEngineOutput(result);
+    return result.channelResult;
   }
 
   private async syncObjectives() {
