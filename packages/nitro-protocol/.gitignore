@@ -22,6 +22,7 @@ dist
 ganache/*[.js,.json]
 .eslintcache
 gas-artifacts
+typechain
 
 # hardhat directories
 cache
