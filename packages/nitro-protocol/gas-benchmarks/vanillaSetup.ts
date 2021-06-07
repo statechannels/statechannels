@@ -13,6 +13,7 @@ import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
 import {Transaction} from 'ethers';
 
+import {NitroAdjudicator} from '../typechain/NitroAdjudicator';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
@@ -24,7 +25,7 @@ declare global {
 
 export let ethAssetHolder: Contract;
 export let erc20AssetHolder: Contract;
-export let nitroAdjudicator: Contract;
+export let nitroAdjudicator: NitroAdjudicator;
 export let token: Contract;
 
 const logFile = './hardhat-network-output.log';
@@ -63,7 +64,7 @@ const nitroAdjudicatorFactory = new ContractFactory(
 
 beforeAll(async () => {
   await waitOn({resources: [hardHatNetworkEndpoint]});
-  nitroAdjudicator = await nitroAdjudicatorFactory.deploy();
+  nitroAdjudicator = ((await nitroAdjudicatorFactory.deploy()) as unkown) as NitroAdjudicator;
   ethAssetHolder = await ethAssetHolderFactory.deploy(nitroAdjudicator.address);
   token = await tokenFactory.deploy(provider.getSigner(0).getAddress());
   erc20AssetHolder = await erc20AssetHolderFactory.deploy(nitroAdjudicator.address, token.address);
