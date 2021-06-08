@@ -17,7 +17,6 @@ import {
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
-  makeDestination,
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
@@ -27,13 +26,11 @@ import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
-import {Transaction} from 'objection';
 
-import {Bytes32, Uint256} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
-import * as ChannelState from '../protocols/state';
 import {PushMessageError} from '../errors/engine-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
 import {
@@ -43,16 +40,7 @@ import {
   IncomingEngineConfig,
   validateEngineConfig,
 } from '../config';
-import {
-  ChainServiceInterface,
-  ChainEventSubscriberInterface,
-  HoldingUpdatedArg,
-  ChainService,
-  MockChainService,
-  ChannelFinalizedArg,
-  AssetOutcomeUpdatedArg,
-  ChallengeRegisteredArg,
-} from '../chain-service';
+import {ChainRequest} from '../chain-service';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
@@ -83,10 +71,10 @@ export class ConfigValidationError extends Error {
 /**
  * A single-threaded Nitro engine
  */
-export class SingleThreadedEngine implements EngineInterface, ChainEventSubscriberInterface {
+export class SingleThreadedEngine implements EngineInterface {
   knex: Knex;
   store: Store;
-  chainService: ChainServiceInterface;
+
   objectiveManager: ObjectiveManager;
   ledgerManager: LedgerManager;
   logger: Logger;
@@ -94,12 +82,7 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
   readonly engineConfig: EngineConfig;
 
   public static async create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine> {
-    const engine = new SingleThreadedEngine(engineConfig);
-
-    await engine.chainService.checkChainId(engineConfig.networkConfiguration.chainNetworkID);
-
-    await engine.registerExistingChannelsWithChainService();
-    return engine;
+    return new SingleThreadedEngine(engineConfig);
   }
 
   /**
@@ -140,18 +123,9 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
       setupMetrics(this.engineConfig.metricsConfiguration.metricsOutputFile as string);
     }
 
-    if (this.engineConfig.chainServiceConfiguration.attachChainService) {
-      this.chainService = new ChainService({
-        ...this.engineConfig.chainServiceConfiguration,
-        logger: this.logger,
-      });
-    } else {
-      this.chainService = new MockChainService();
-    }
-
     this.objectiveManager = ObjectiveManager.create({
       store: this.store,
-      chainService: this.chainService,
+
       logger: this.logger,
       timingMetrics: this.engineConfig.metricsConfiguration.timingMetrics,
     });
@@ -173,45 +147,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
    */
   public async addSigningKey(privateKey: PrivateKey): Promise<void> {
     await this.store.addSigningKey(privateKey);
-  }
-
-  /**
-   * Registers any channels existing in the database with the chain service.
-   *
-   * @remarks
-   * Enables the chain service to alert the engine of of any blockchain events for existing channels.
-   *
-   * @returns A promise that resolves when the channels have been successfully registered.
-   */
-  private async registerExistingChannelsWithChainService(): Promise<void> {
-    const channelsToRegister = (await this.store.getNonFinalizedChannels())
-      .map(ChannelState.toChannelResult)
-      .map(cr => ({
-        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
-        channelId: cr.channelId,
-      }));
-
-    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
-      this.chainService.registerChannel(channelId, assetHolderAddresses, this);
-    }
-  }
-
-  /**
-   * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
-   *
-   * @remarks
-   * Storing the bytecode is necessary for the engine to verify ForceMoveApp transitions.
-   *
-   * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
-   * @returns A promise that resolves when the bytecode has been successfully stored.
-   */
-  public async registerAppDefinition(appDefinition: string): Promise<void> {
-    const bytecode = await this.chainService.fetchBytecode(appDefinition);
-    await this.store.upsertBytecode(
-      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
-      makeAddress(appDefinition),
-      bytecode
-    );
   }
 
   /**
@@ -242,7 +177,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
    */
   public async destroy(): Promise<void> {
     await this.knex.destroy();
-    this.chainService.destructor();
   }
 
   /**
@@ -491,8 +425,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
 
-    this.registerChannelWithChainService(channel.channelId);
-
     return channel.channelId;
   }
 
@@ -518,8 +450,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
 
     await this.takeActions(channelIds, response);
 
-    await Promise.all(channelIds.map(id => this.registerChannelWithChainService(id)));
-
     return response.multipleChannelOutput();
   }
 
@@ -534,7 +464,7 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
 
       if (objective.status === 'pending') {
         const approved = await this.store.approveObjective(objectiveId, tx);
-        await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
+
         return approved;
       } else {
         return objective;
@@ -544,7 +474,7 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
 
   async approveObjectives(
     objectiveIds: string[]
-  ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
+  ): Promise<{objectives: WalletObjective[]; messages: Message[]; chainRequests: ChainRequest[]}> {
     const channelIds: string[] = [];
     const response = EngineResponse.initialize();
     let objectives = await this.store.getObjectivesByIds(objectiveIds);
@@ -561,7 +491,11 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
     // But this is more straightforward for now
     objectives = await this.store.getObjectivesByIds(objectiveIds);
 
-    return {objectives, messages: getMessages(response.multipleChannelOutput())};
+    return {
+      objectives,
+      messages: getMessages(response.multipleChannelOutput()),
+      chainRequests: response.chainRequests,
+    };
   }
 
   /**
@@ -604,11 +538,17 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
 
     await this.takeActions([channelId], response);
 
-    this.registerChannelWithChainService(channelId);
-
     // set strict=false to silently drop any ledger channel updates from channelResults
     // TODO: change api so that joinChannel returns a MultipleChannelOutput
     return response.singleChannelOutput(false);
+  }
+
+  public async crank(channelIds: string[]): Promise<MultipleChannelOutput> {
+    const response = EngineResponse.initialize();
+
+    await this.takeActions(channelIds, response);
+
+    return response.multipleChannelOutput();
   }
 
   /**
@@ -926,91 +866,6 @@ export class SingleThreadedEngine implements EngineInterface, ChainEventSubscrib
         channelIds = [...channelIds, ...touchedChannels];
       }
     }
-  }
-
-  /**
-   * Update the engine's knowledge about the on-chain funding for a channel.
-   *
-   * @param args - An object specifying the channelId, asset holder address and amount.
-   * @returns A promise that resolves to a channel output.
-   */
-  // ChainEventSubscriberInterface implementation
-  async holdingUpdated(
-    {channelId, amount, assetHolderAddress}: HoldingUpdatedArg,
-    response = EngineResponse.initialize()
-  ): Promise<SingleChannelOutput> {
-    await this.store.updateFunding(channelId, amount, assetHolderAddress);
-    await this.takeActions([channelId], response);
-
-    // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
-    // multiple channel output. So, we set strict to false
-    return response.singleChannelOutput(false);
-  }
-
-  async assetOutcomeUpdated({
-    channelId,
-    assetHolderAddress,
-    externalPayouts,
-  }: AssetOutcomeUpdatedArg): Promise<void> {
-    const response = EngineResponse.initialize();
-    const transferredOut = externalPayouts.map(ai => ({
-      toAddress: makeDestination(ai.destination),
-      amount: ai.amount as Uint256,
-    }));
-
-    await this.store.updateTransferredOut(channelId, assetHolderAddress, transferredOut);
-
-    await this.takeActions([channelId], response);
-  }
-
-  async challengeRegistered(arg: ChallengeRegisteredArg): Promise<void> {
-    const response = EngineResponse.initialize();
-    const {channelId, finalizesAt: finalizedAt, challengeStates} = arg;
-
-    await this.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
-    await this.takeActions([arg.channelId], response);
-  }
-
-  async channelFinalized(arg: ChannelFinalizedArg): Promise<void> {
-    const response = EngineResponse.initialize();
-
-    await this.store.markAdjudicatorStatusAsFinalized(
-      arg.channelId,
-      arg.blockNumber,
-      arg.blockTimestamp,
-      arg.finalizedAt
-    );
-    await this.knex.transaction(async tx => {
-      const objective = await ObjectiveModel.insert(
-        {
-          type: 'DefundChannel',
-          participants: [],
-          data: {targetChannelId: arg.channelId},
-        },
-
-        tx,
-        'approved'
-      );
-
-      // TODO: The response is currently not returned or sent anywhere
-      const channel = await this.store.getChannel(arg.channelId, tx);
-      response.queueCreatedObjective(objective, channel?.myIndex || 0, channel?.participants || []);
-    });
-
-    await this.takeActions([arg.channelId], response);
-  }
-
-  private async registerChannelWithChainService(
-    channelId: string,
-    tx?: Transaction
-  ): Promise<void> {
-    const channel = await this.store.getChannelState(channelId, tx);
-    const channelResult = ChannelState.toChannelResult(channel);
-
-    const assetHolderAddresses = channelResult.allocations.map(a =>
-      makeAddress(a.assetHolderAddress)
-    );
-    this.chainService.registerChannel(channelId, assetHolderAddresses, this);
   }
 }
 

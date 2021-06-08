@@ -1,6 +1,8 @@
 import {CreateChannelParams, Message} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
+import {makeAddress} from '@statechannels/wallet-core';
+import {utils} from 'ethers';
 
 import {
   MessageHandler,
@@ -10,6 +12,8 @@ import {
 import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {Engine, SyncObjectiveResult} from '../engine';
+import {ChainServiceInterface} from '../chain-service';
+import * as ChannelState from '../protocols/state';
 
 import {
   RetryOptions,
@@ -18,6 +22,7 @@ import {
   ObjectiveSuccess,
   ObjectiveProposed,
 } from './types';
+import {createChainListener} from './chain-listener';
 
 export const delay = async (ms: number): Promise<void> =>
   new Promise(resolve => setTimeout(resolve, ms));
@@ -33,10 +38,17 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
    */
   public static async create(
     engine: Engine,
+    chainService: ChainServiceInterface,
     messageServiceFactory: MessageServiceFactory,
     retryOptions: Partial<RetryOptions> = DEFAULTS
   ): Promise<Wallet> {
-    return new Wallet(messageServiceFactory, engine, {...DEFAULTS, ...retryOptions});
+    await chainService.checkChainId(engine.engineConfig.networkConfiguration.chainNetworkID);
+    const wallet = new Wallet(messageServiceFactory, engine, chainService, {
+      ...DEFAULTS,
+      ...retryOptions,
+    });
+    await wallet.registerExistingChannelsWithChainService();
+    return wallet;
   }
 
   private _messageService: MessageServiceInterface;
@@ -44,21 +56,50 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
+    private _chainService: ChainServiceInterface,
     private _retryOptions: RetryOptions
   ) {
     super();
+
     const handler: MessageHandler = async message => {
-      const {outbox, newObjectives} = await this._engine.pushMessage(message.data);
+      const {outbox, newObjectives, channelResults} = await this._engine.pushMessage(message.data);
       // Receiving messages from other participants may have resulted in new proposed objectives
       for (const o of newObjectives) {
         this.emit('ObjectiveProposed', o);
+
+        // If this is a new open channel objective that means there is a new channel to be monitored in the chain service
+        if (o.type === 'OpenChannel') {
+          const listener = createChainListener(this._engine, this.messageService);
+          const assetHolders = _.uniq(
+            _.flatten(channelResults.map(cr => cr.allocations.map(a => a.assetHolderAddress))).map(
+              makeAddress
+            )
+          );
+          this._chainService.registerChannel(o.data.targetChannelId, assetHolders, listener);
+        }
       }
       await this.messageService.send(getMessages(outbox));
     };
 
     this._messageService = messageServiceFactory(handler);
   }
-
+  /**
+   * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
+   *
+   * @remarks
+   * Storing the bytecode is necessary for the engine to verify ForceMoveApp transitions.
+   *
+   * @param  appDefinition - An ethereum address where ForceMoveApp rules are deployed.
+   * @returns A promise that resolves when the bytecode has been successfully stored.
+   */
+  public async registerAppDefinition(appDefinition: string): Promise<void> {
+    const bytecode = await this._chainService.fetchBytecode(appDefinition);
+    await this._engine.store.upsertBytecode(
+      utils.hexlify(this._engine.engineConfig.networkConfiguration.chainNetworkID),
+      makeAddress(appDefinition),
+      bytecode
+    );
+  }
   /**
    * Approves an objective that has been proposed by another participant.
    * Once the objective has been approved progress can be made to completing the objective.
@@ -68,7 +109,11 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
    * @returns A promise that resolves to a collection of ObjectiveResult.
    */
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
-    const {objectives, messages} = await this._engine.approveObjectives(objectiveIds);
+    const {objectives, messages, chainRequests} = await this._engine.approveObjectives(
+      objectiveIds
+    );
+    const transactions = await this._chainService.handleChainRequests(chainRequests);
+    await Promise.all(transactions.map(tr => tr.wait()));
     return Promise.all(
       objectives.map(async o => ({
         objectiveId: o.objectiveId,
@@ -92,8 +137,23 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
         try {
           const createResult = await this._engine.createChannel(p);
 
-          const {newObjective, channelResult} = createResult;
+          const assetHolders = createResult.channelResult.allocations.map(a =>
+            makeAddress(a.assetHolderAddress)
+          );
+          const listener = createChainListener(
+            this._engine,
 
+            this.messageService
+          );
+          this._chainService.registerChannel(
+            createResult.channelResult.channelId,
+            assetHolders,
+            listener
+          );
+
+          const {newObjective, channelResult, chainRequests} = createResult;
+          const transactions = await this._chainService.handleChainRequests(chainRequests);
+          await Promise.all(transactions.map(tr => tr.wait()));
           return {
             channelId: channelResult.channelId,
             currentStatus: newObjective.status,
@@ -249,7 +309,33 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
     return this._messageService;
   }
 
+  /**
+   * Registers any channels existing in the database with the chain service.
+   *
+   * @remarks
+   * Enables the chain service to alert the engine of of any blockchain events for existing channels.
+   *
+   * @returns A promise that resolves when the channels have been successfully registered.
+   */
+  private async registerExistingChannelsWithChainService(): Promise<void> {
+    const channelsToRegister = (await this._engine.store.getNonFinalizedChannels())
+      .map(ChannelState.toChannelResult)
+      .map(cr => ({
+        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+        channelId: cr.channelId,
+      }));
+
+    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
+      this._chainService.registerChannel(
+        channelId,
+        assetHolderAddresses,
+        createChainListener(this._engine, this._messageService)
+      );
+    }
+  }
+
   async destroy(): Promise<void> {
+    this._chainService.destructor();
     await this._messageService.destroy();
     await this._engine.destroy();
   }

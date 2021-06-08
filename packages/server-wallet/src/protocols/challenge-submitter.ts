@@ -2,7 +2,6 @@ import {SignedState, State, SubmitChallenge} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
-import {ChainServiceInterface} from '../chain-service';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {WalletObjective} from '../models/objective';
@@ -18,20 +17,10 @@ export const enum WaitingFor {
 }
 
 export class ChallengeSubmitter implements Cranker<WalletObjective<SubmitChallenge>> {
-  constructor(
-    private store: Store,
-    private chainService: ChainServiceInterface,
-    private logger: Logger,
-    private timingMetrics = false
-  ) {}
+  constructor(private store: Store, private logger: Logger, private timingMetrics = false) {}
 
-  public static create(
-    store: Store,
-    chainService: ChainServiceInterface,
-    logger: Logger,
-    timingMetrics = false
-  ): ChallengeSubmitter {
-    return new ChallengeSubmitter(store, chainService, logger, timingMetrics);
+  public static create(store: Store, logger: Logger, timingMetrics = false): ChallengeSubmitter {
+    return new ChallengeSubmitter(store, logger, timingMetrics);
   }
   public async crank(
     objective: WalletObjective<SubmitChallenge>,
@@ -76,7 +65,13 @@ export class ChallengeSubmitter implements Cranker<WalletObjective<SubmitChallen
       return Nothing.ToWaitFor;
     }
 
-    await this.chainService.challenge(channel.initialSupport, channel.signingWallet.privateKey);
+    response.queueChainRequest([
+      {
+        type: 'Challenge',
+        challengeStates: channel.initialSupport,
+        privateKey: channel.signingWallet.privateKey,
+      },
+    ]);
 
     objective = await this.store.markObjectiveStatus(objective, 'succeeded', tx);
     response.queueChannel(channel);
