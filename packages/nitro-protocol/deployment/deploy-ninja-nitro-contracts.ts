@@ -3,7 +3,7 @@
 import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
-import {getTestProvider, setupContracts, writeGasConsumption} from '../test/test-helpers';
+import {getTestProvider, setupContract, writeGasConsumption} from '../test/test-helpers';
 import adjudicatorFactoryArtifact from '../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import singleChannelAdjudicatorArtifact from '../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
@@ -45,7 +45,7 @@ export async function deploy(): Promise<Record<string, string>> {
   // for the contracts. The factory needs to know the address of the mastercopy, and this is provided by calling
   // the setup method on the factory:
   const provider = getTestProvider();
-  const AdjudicatorFactory = await setupContracts(
+  const AdjudicatorFactory = await setupContract(
     provider,
     adjudicatorFactoryArtifact,
     ADJUDICATOR_FACTORY_ADDRESS

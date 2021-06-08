@@ -11,7 +11,7 @@ import {
   getTestProvider,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../../test-helpers';
 import {
@@ -55,7 +55,7 @@ for (let i = 0; i < 2; i++) {
 }
 
 beforeAll(async () => {
-  AdjudicatorFactory = await setupContracts(
+  AdjudicatorFactory = await setupContract(
     provider,
     AdjudicatorFactoryArtifact,
     process.env.ADJUDICATOR_FACTORY_ADDRESS
@@ -248,7 +248,7 @@ class TestChannel {
   constructor(channelNonce: number) {
     this.channel = {chainId, participants, channelNonce};
     this.id = getChannelId(this.channel);
-    this.factory = setupContracts(
+    this.factory = setupContract(
       provider,
       AdjudicatorFactoryArtifact,
       process.env.ADJUDICATOR_FACTORY_ADDRESS
@@ -265,7 +265,7 @@ class TestChannel {
    */
   async deploy() {
     const {gasUsed} = await (await this.factory.createChannel(this.id)).wait();
-    this.adjudicator = setupContracts(
+    this.adjudicator = setupContract(
       provider,
       SingleChannelAdjudicatorArtifact,
       await this.getAddress()

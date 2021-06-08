@@ -5,7 +5,7 @@ import TokenArtifact from '../../../../artifacts/contracts/Token.sol/Token.json'
 import {
   getTestProvider,
   randomChannelId,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../../test-helpers';
 
@@ -14,12 +14,12 @@ let AdjudicatorFactory: Contract;
 let Token: Contract;
 
 beforeAll(async () => {
-  AdjudicatorFactory = await setupContracts(
+  AdjudicatorFactory = await setupContract(
     provider,
     AdjudicatorFactoryArtifact,
     process.env.ADJUDICATOR_FACTORY_ADDRESS
   );
-  Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  Token = await setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
 });
 
 describe('deposit ETH', () => {

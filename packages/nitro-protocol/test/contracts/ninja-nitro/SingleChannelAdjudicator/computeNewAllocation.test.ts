@@ -1,7 +1,7 @@
 import {Contract, BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
-import {getTestProvider, setupContracts, randomExternalDestination} from '../../../test-helpers';
+import {getTestProvider, setupContract, randomExternalDestination} from '../../../test-helpers';
 // eslint-disable-next-line import/order
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 
@@ -10,7 +10,7 @@ const provider = getTestProvider();
 let MasterCopy: Contract;
 
 beforeAll(async () => {
-  MasterCopy = await setupContracts(
+  MasterCopy = await setupContract(
     provider,
     SingleChannelAdjudicatorArtifact,
     process.env.SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS

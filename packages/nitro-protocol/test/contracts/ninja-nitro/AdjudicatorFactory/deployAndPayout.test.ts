@@ -19,7 +19,7 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../../test-helpers';
 import {convertBytes32ToAddress, signStates} from '../../../../src';
@@ -72,8 +72,8 @@ for (let i = 0; i < 3; i++) {
 }
 beforeAll(async () => {
   appDefinition = getPlaceHolderContractAddress();
-  Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
-  AdjudicatorFactory = await setupContracts(
+  Token = await setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  AdjudicatorFactory = await setupContract(
     provider,
     AdjudicatorFactoryArtifact,
     process.env.ADJUDICATOR_FACTORY_ADDRESS
@@ -128,7 +128,7 @@ describe('deployAndPayout', () => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
       const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
-      const SingleChannelAdjudicator = await setupContracts(
+      const SingleChannelAdjudicator = await setupContract(
         provider,
         SingleChannelAdjudicatorArtifact,
         adjudicatorAddress

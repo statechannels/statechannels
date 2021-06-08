@@ -11,7 +11,7 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../../test-helpers';
 import {encodeAllocation, encodeOutcome} from '../../../../src/contract/outcome';
@@ -51,7 +51,7 @@ const addresses = {
 };
 
 beforeAll(async () => {
-  AdjudicatorFactory = await setupContracts(
+  AdjudicatorFactory = await setupContract(
     provider,
     AdjudicatorFactoryArtifact,
     process.env.ADJUDICATOR_FACTORY_ADDRESS
@@ -86,7 +86,7 @@ describe('transferAll (using transfer and empty indices array)', () => {
       const channelId = getChannelId(channel);
       addresses.c = channelId;
       const adjudicatorAddress = await AdjudicatorFactory.getChannelAddress(channelId);
-      const SingleChannelAdjudicator = await setupContracts(
+      const SingleChannelAdjudicator = await setupContract(
         provider,
         SingleChannelAdjudicatorArtifact,
         adjudicatorAddress

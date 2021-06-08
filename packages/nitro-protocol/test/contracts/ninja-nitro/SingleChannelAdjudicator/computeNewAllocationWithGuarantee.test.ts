@@ -3,7 +3,7 @@ import shuffle from 'lodash.shuffle';
 
 import {computeNewAllocationWithGuarantee} from '../../../../src/ninja-nitro/helpers';
 import {AllocationItem, Guarantee, randomChannelId} from '../../../../src';
-import {getTestProvider, setupContracts, randomExternalDestination} from '../../../test-helpers';
+import {getTestProvider, setupContract, randomExternalDestination} from '../../../test-helpers';
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 
 const provider = getTestProvider();
@@ -11,7 +11,7 @@ const provider = getTestProvider();
 let MasterCopy: Contract;
 
 beforeAll(async () => {
-  MasterCopy = await setupContracts(
+  MasterCopy = await setupContract(
     provider,
     SingleChannelAdjudicatorArtifact,
     process.env.SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS

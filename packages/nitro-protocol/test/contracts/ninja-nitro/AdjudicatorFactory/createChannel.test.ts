@@ -5,7 +5,7 @@ import {Channel, getChannelId} from '../../../../src/contract/channel';
 import {
   getRandomNonce,
   getTestProvider,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../../test-helpers';
 
@@ -14,7 +14,7 @@ let AdjudicatorFactory: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants: string[] = [];
 beforeAll(async () => {
-  AdjudicatorFactory = await setupContracts(
+  AdjudicatorFactory = await setupContract(
     provider,
     AdjudicatorFactoryArtifact,
     process.env.ADJUDICATOR_FACTORY_ADDRESS
