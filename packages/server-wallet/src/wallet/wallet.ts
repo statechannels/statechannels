@@ -1,4 +1,4 @@
-import {CreateChannelParams, Uint256} from '@statechannels/client-api-schema';
+import {ChannelResult, CreateChannelParams, Uint256} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
@@ -54,6 +54,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     await this.syncObjectives();
   }, this._syncOptions.pollInterval);
 
+  private _chainListener: ChainEventSubscriberInterface;
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
@@ -64,30 +65,90 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     const handler: MessageHandler = async message => {
       const result = await this._engine.pushMessage(message.data);
-      const {newObjectives, channelResults, completedObjectives} = result;
+      const {channelResults, completedObjectives} = result;
       for (const o of completedObjectives) {
         if (o.type === 'CloseChannel') {
           this._engine.logger.trace({objective: o}, 'Objective completed');
           this.emit('ObjectiveCompleted', o);
         }
       }
-      for (const o of newObjectives) {
-        // If this is a new open channel objective that means there is a new channel to be monitored in the chain service
-        if (o.type === 'OpenChannel') {
-          const listener = this.createChainListener(o.data.targetChannelId);
-          const assetHolders = _.uniq(
-            _.flatten(channelResults.map(cr => cr.allocations.map(a => a.assetHolderAddress))).map(
-              makeAddress
-            )
-          );
-          this._chainService.registerChannel(o.data.targetChannelId, assetHolders, listener);
-        }
-      }
+      await this.registerChannels(channelResults);
 
       await this.handleEngineOutput(result);
     };
 
     this._messageService = messageServiceFactory(handler);
+
+    this._chainListener = {
+      holdingUpdated: async ({channelId, amount, assetHolderAddress}) => {
+        this._engine.logger.trace({channelId, amount}, 'holdingUpdated');
+        try {
+          await this._engine.store.updateFunding(channelId, amount, assetHolderAddress);
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'holdingUpdated error');
+          throw err;
+        }
+      },
+      assetOutcomeUpdated: async ({channelId, assetHolderAddress, externalPayouts}) => {
+        try {
+          this._engine.logger.trace(
+            {channelId, assetHolderAddress, externalPayouts},
+            'assetOutcomeUpdated'
+          );
+          const transferredOut = externalPayouts.map(ai => ({
+            toAddress: makeDestination(ai.destination),
+            amount: ai.amount as Uint256,
+          }));
+
+          await this._engine.store.updateTransferredOut(
+            channelId,
+            assetHolderAddress,
+            transferredOut
+          );
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'assetOutcomeUpdated error');
+          throw err;
+        }
+      },
+      challengeRegistered: async ({channelId, finalizesAt: finalizedAt, challengeStates}) => {
+        try {
+          this._engine.logger.trace(
+            {channelId, finalizedAt, challengeStates},
+            'challengeRegistered'
+          );
+          await this._engine.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'challengeRegistered error');
+          throw err;
+        }
+      },
+      channelFinalized: async ({channelId, blockNumber, blockTimestamp, finalizedAt}) => {
+        try {
+          this._engine.logger.trace(
+            {channelId, blockNumber, blockTimestamp, finalizedAt},
+            'channelFinalized'
+          );
+
+          await this._engine.store.markAdjudicatorStatusAsFinalized(
+            channelId,
+            blockNumber,
+            blockTimestamp,
+            finalizedAt
+          );
+          const result = await this._engine.crank([channelId]);
+          await this.handleEngineOutput(result);
+        } catch (err) {
+          this._engine.logger.error(err, 'channelFinalized error');
+          throw err;
+        }
+      },
+    };
   }
   /**
    * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
@@ -149,15 +210,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
         try {
           const createResult = await this._engine.createChannel(p);
 
-          const assetHolders = createResult.channelResult.allocations.map(a =>
-            makeAddress(a.assetHolderAddress)
-          );
-          const listener = this.createChainListener(createResult.channelResult.channelId);
-          this._chainService.registerChannel(
-            createResult.channelResult.channelId,
-            assetHolders,
-            listener
-          );
+          await this.registerChannels([createResult.channelResult]);
 
           const {newObjective, channelResult} = createResult;
           const done = this.createObjectiveDoneResult(newObjective);
@@ -299,92 +352,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
     await this.waitForTransactions(this._chainService.handleChainRequests(output.chainRequests));
   }
 
-  /**
-   * Creates a listener that will be subscribed to the chain service.
-   * It creates a listener for a specific channel id.
-   * @param channelIdToListenFor The channel Id the listener is for
-   * @returns A chain event subscriber that can be passed into the chain service.
-   */
-  private createChainListener(channelIdToListenFor: string): ChainEventSubscriberInterface {
-    return {
-      holdingUpdated: async ({channelId, amount, assetHolderAddress}) => {
-        if (channelId !== channelIdToListenFor) return;
-
-        this._engine.logger.trace({channelId, amount}, 'holdingUpdated');
-        try {
-          await this._engine.store.updateFunding(channelId, amount, assetHolderAddress);
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'holdingUpdated error');
-          throw err;
-        }
-      },
-      assetOutcomeUpdated: async ({channelId, assetHolderAddress, externalPayouts}) => {
-        try {
-          if (channelId !== channelIdToListenFor) return;
-
-          this._engine.logger.trace(
-            {channelId, assetHolderAddress, externalPayouts},
-            'assetOutcomeUpdated'
-          );
-          const transferredOut = externalPayouts.map(ai => ({
-            toAddress: makeDestination(ai.destination),
-            amount: ai.amount as Uint256,
-          }));
-
-          await this._engine.store.updateTransferredOut(
-            channelId,
-            assetHolderAddress,
-            transferredOut
-          );
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'assetOutcomeUpdated error');
-          throw err;
-        }
-      },
-      challengeRegistered: async ({channelId, finalizesAt: finalizedAt, challengeStates}) => {
-        try {
-          if (channelId !== channelIdToListenFor) return;
-          this._engine.logger.trace(
-            {channelId, finalizedAt, challengeStates},
-            'challengeRegistered'
-          );
-          await this._engine.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'challengeRegistered error');
-          throw err;
-        }
-      },
-      channelFinalized: async ({channelId, blockNumber, blockTimestamp, finalizedAt}) => {
-        try {
-          if (channelId !== channelIdToListenFor) return;
-
-          this._engine.logger.trace(
-            {channelId, blockNumber, blockTimestamp, finalizedAt},
-            'channelFinalized'
-          );
-
-          await this._engine.store.markAdjudicatorStatusAsFinalized(
-            channelId,
-            blockNumber,
-            blockTimestamp,
-            finalizedAt
-          );
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'channelFinalized error');
-          throw err;
-        }
-      },
-    };
-  }
-
   public get messageService(): MessageServiceInterface {
     return this._messageService;
   }
@@ -422,22 +389,22 @@ export class Wallet extends EventEmitter<WalletEvents> {
    * @returns A promise that resolves when the channels have been successfully registered.
    */
   private async registerExistingChannelsWithChainService(): Promise<void> {
-    const channelsToRegister = (await this._engine.store.getNonFinalizedChannels())
-      .map(ChannelState.toChannelResult)
-      .map(cr => ({
-        assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
-        channelId: cr.channelId,
-      }));
-
-    for (const {channelId, assetHolderAddresses} of channelsToRegister) {
-      this._chainService.registerChannel(
-        channelId,
-        assetHolderAddresses,
-        this.createChainListener(channelId)
-      );
-    }
+    const channelsToRegister = (await this._engine.store.getNonFinalizedChannels()).map(
+      ChannelState.toChannelResult
+    );
+    await this.registerChannels(channelsToRegister);
   }
 
+  private async registerChannels(channelsToRegister: ChannelResult[]): Promise<void> {
+    const channelsWithAssetHolders = channelsToRegister.map(cr => ({
+      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+      channelId: cr.channelId,
+    }));
+
+    for (const {channelId, assetHolderAddresses} of channelsWithAssetHolders) {
+      this._chainService.registerChannel(channelId, assetHolderAddresses, this._chainListener);
+    }
+  }
   async destroy(): Promise<void> {
     await clearIntervalAsync(this._syncInterval);
     this._chainService.destructor();
