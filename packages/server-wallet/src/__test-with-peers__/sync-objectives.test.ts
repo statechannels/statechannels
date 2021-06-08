@@ -51,12 +51,7 @@ test('handles the objective being synced even if no message is lost', async () =
   const objectiveId = `OpenChannel-${channelId}`;
 
   // The initial message is received
-  await peerEngines.b.pushMessage(
-    getPayloadFor(
-      bob().participantId,
-      messageResponse.outbox.map(o => o.params)
-    )
-  );
+  await peerEngines.b.pushMessage(getPayloadFor(bob().participantId, messageResponse.outbox));
 
   // We expect both objectives to be there
   expect(await getObjective(peerEngines.a.knex, objectiveId)).toBeDefined();

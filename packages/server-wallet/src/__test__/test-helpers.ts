@@ -3,10 +3,21 @@ import {ChannelRequest, Payload, SignedState} from '@statechannels/wire-format';
 
 import {Engine} from '../engine';
 import {Outgoing} from '..';
+import {Notice} from '../protocols/actions';
 
 export const ONE_DAY = 86400;
 
-export function getPayloadFor(participantId: string, messages: Message[]): unknown {
+export function getPayloadFor(
+  participantId: string,
+  messagesOrNotices: Array<Message | Notice>
+): unknown {
+  const messages = messagesOrNotices.map(m => {
+    if ('method' in m) {
+      return m.params;
+    } else {
+      return m;
+    }
+  });
   const filteredOutbox = messages.filter(outboxItem => outboxItem.recipient === participantId);
   if (filteredOutbox.length != 1)
     throw Error(`Expected exactly one message in outbox: found ${filteredOutbox.length}`);
