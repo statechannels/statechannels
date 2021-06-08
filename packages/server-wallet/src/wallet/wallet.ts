@@ -150,9 +150,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // TODO: ApproveObjective should probably just return a MultipleChannelOuput
     const completedObjectives = objectives.filter(o => o.status === 'succeeded');
     completedObjectives.forEach(o => this.emit('ObjectiveCompleted', o));
-    const transactions = await this._chainService.handleChainRequests(chainRequests);
+    await this._chainService.handleChainRequests(chainRequests);
     await this.messageService.send(messages);
-    await Promise.all(transactions.map(tr => tr.wait()));
 
     return Promise.all(results);
   }
