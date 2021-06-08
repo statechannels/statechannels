@@ -12,7 +12,6 @@ import {EngineResponse} from '../engine/engine-response';
 export class LedgerFunder {
   constructor(
     private store: Store,
-
     private logger: Logger,
     private timingMetrics = false
   ) {}
