@@ -65,7 +65,7 @@ export class ChallengeSubmitter implements Cranker<WalletObjective<SubmitChallen
       return Nothing.ToWaitFor;
     }
 
-    await response.queueChainRequest([
+    response.queueChainRequest([
       {
         type: 'Challenge',
         challengeStates: channel.initialSupport,
