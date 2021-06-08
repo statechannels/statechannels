@@ -125,6 +125,8 @@ export class Defunder {
       ]);
       didSubmitTransaction = true;
     } else if (adjudicatorStatus.channelMode === 'Finalized' && shouldSubmitTx) {
+      // TODO: we are assuming that we submitted the challenge.
+      // This is not a valid assumption as the defunder protocol can be run no matter how the channel was finalized
       response.queueChainRequest([
         {
           type: 'PushOutcomeAndWithdraw',
