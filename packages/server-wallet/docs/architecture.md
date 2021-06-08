@@ -126,21 +126,24 @@ Here, “explicit permission” shall be implied by an API call. “Implicit per
 
 > An objective is a proposal for a goal which The App asserts that it wants to achieve.
 
-It has a _type_ and _parameters_. The parameters include a _scope_, which is a list of channelIds.
+It has a _type_ and _parameters_. 
 
 For an example, upon an appropriate request fromt the app, the wallet may create
 
 ```ts
 {
   type: 'CloseChannel',
-  scope: ['0x123']
+  params: {
+    targetChannelId: '0x123',
+    txSubmitterOrder: ['alice', 'bob'],
+  }
 }
 ```
 
-which codes for the goal of closing channel `0x123`.
+which codes for the goal of closing channel `0x123`. (In Nitro, peers may withdraw their funds over multiple transactions. This is to fairly allocate gas expenditures, and to prevent griefing. This objective indicates that Alice should withdraw first, followed by Bob. It is complicated for them to attempt to withdraw concurrently, due to the gas optimizations outlined [here](https://blog.statechannels.org/gas-optimizations/gas-optimizations/))
 
 > To approve an objective is to grant permission, enabling the wallet to use the private keys it stores as it sees fit, for the channels in its scope for the lifetime of the objective.
-
+>
 > It is _not_ to give permission to spend money, only to sign states and transactions that are overall value-neutral (up to gas fees).
 
 ## Implementation: the lifecycle of an objective
