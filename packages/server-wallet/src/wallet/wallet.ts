@@ -70,11 +70,7 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
 
         // If this is a new open channel objective that means there is a new channel to be monitored in the chain service
         if (o.type === 'OpenChannel') {
-          const listener = createChainListener(
-            this._engine,
-            this._engine.store,
-            this.messageService
-          );
+          const listener = createChainListener(this._engine, this.messageService);
           const assetHolders = _.uniq(
             _.flatten(channelResults.map(cr => cr.allocations.map(a => a.assetHolderAddress))).map(
               makeAddress
@@ -147,7 +143,7 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
           );
           const listener = createChainListener(
             this._engine,
-            this._engine.store,
+
             this.messageService
           );
           this._chainService.registerChannel(
@@ -334,7 +330,7 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
       this._chainService.registerChannel(
         channelId,
         assetHolderAddresses,
-        createChainListener(this._engine, this._engine.store, this._messageService)
+        createChainListener(this._engine, this._messageService)
       );
     }
   }
