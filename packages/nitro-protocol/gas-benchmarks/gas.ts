@@ -53,12 +53,11 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   ETHexit: {
-    // e completely liquidate the channel (paying out both parties)
+    // We completely liquidate the channel (paying out both parties)
     vanillaNitro: 146793,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    // This is cheaper than the ETHexit because storage slots are zero-ed out.
     vanillaNitro: 139148,
   },
 };
