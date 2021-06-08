@@ -19,7 +19,14 @@ import {
   MultipleChannelOutput,
   SingleChannelOutput,
 } from '../engine';
-import {ChainEventSubscriberInterface, ChainServiceInterface} from '../chain-service';
+import {
+  AssetOutcomeUpdatedArg,
+  ChainEventSubscriberInterface,
+  ChainServiceInterface,
+  ChallengeRegisteredArg,
+  ChannelFinalizedArg,
+  HoldingUpdatedArg,
+} from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
 import {SyncOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
@@ -80,74 +87,32 @@ export class Wallet extends EventEmitter<WalletEvents> {
     this._messageService = messageServiceFactory(handler);
 
     this._chainListener = {
-      holdingUpdated: async ({channelId, amount, assetHolderAddress}) => {
-        this._engine.logger.trace({channelId, amount}, 'holdingUpdated');
-        try {
-          await this._engine.store.updateFunding(channelId, amount, assetHolderAddress);
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'holdingUpdated error');
-          throw err;
-        }
-      },
-      assetOutcomeUpdated: async ({channelId, assetHolderAddress, externalPayouts}) => {
-        try {
-          this._engine.logger.trace(
-            {channelId, assetHolderAddress, externalPayouts},
-            'assetOutcomeUpdated'
-          );
-          const transferredOut = externalPayouts.map(ai => ({
-            toAddress: makeDestination(ai.destination),
-            amount: ai.amount as Uint256,
-          }));
+      holdingUpdated: this.createChainEventlistener('holdingUpdated', e =>
+        this._engine.store.updateFunding(e.channelId, e.amount, e.assetHolderAddress)
+      ),
+      assetOutcomeUpdated: this.createChainEventlistener('assetOutcomeUpdated', async e => {
+        const transferredOut = e.externalPayouts.map(ai => ({
+          toAddress: makeDestination(ai.destination),
+          amount: ai.amount as Uint256,
+        }));
 
-          await this._engine.store.updateTransferredOut(
-            channelId,
-            assetHolderAddress,
-            transferredOut
-          );
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'assetOutcomeUpdated error');
-          throw err;
-        }
-      },
-      challengeRegistered: async ({channelId, finalizesAt: finalizedAt, challengeStates}) => {
-        try {
-          this._engine.logger.trace(
-            {channelId, finalizedAt, challengeStates},
-            'challengeRegistered'
-          );
-          await this._engine.store.insertAdjudicatorStatus(channelId, finalizedAt, challengeStates);
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'challengeRegistered error');
-          throw err;
-        }
-      },
-      channelFinalized: async ({channelId, blockNumber, blockTimestamp, finalizedAt}) => {
-        try {
-          this._engine.logger.trace(
-            {channelId, blockNumber, blockTimestamp, finalizedAt},
-            'channelFinalized'
-          );
-
-          await this._engine.store.markAdjudicatorStatusAsFinalized(
-            channelId,
-            blockNumber,
-            blockTimestamp,
-            finalizedAt
-          );
-          const result = await this._engine.crank([channelId]);
-          await this.handleEngineOutput(result);
-        } catch (err) {
-          this._engine.logger.error(err, 'channelFinalized error');
-          throw err;
-        }
-      },
+        await this._engine.store.updateTransferredOut(
+          e.channelId,
+          e.assetHolderAddress,
+          transferredOut
+        );
+      }),
+      challengeRegistered: this.createChainEventlistener('challengeRegistered', e =>
+        this._engine.store.insertAdjudicatorStatus(e.channelId, e.finalizesAt, e.challengeStates)
+      ),
+      channelFinalized: this.createChainEventlistener('channelFinalized', e =>
+        this._engine.store.markAdjudicatorStatusAsFinalized(
+          e.channelId,
+          e.blockNumber,
+          e.blockTimestamp,
+          e.finalizedAt
+        )
+      ),
     };
   }
   /**
@@ -405,6 +370,30 @@ export class Wallet extends EventEmitter<WalletEvents> {
       this._chainService.registerChannel(channelId, assetHolderAddresses, this._chainListener);
     }
   }
+
+  private createChainEventlistener<
+    K extends keyof ChainEventSubscriberInterface,
+    EH extends ChainEventSubscriberInterface[K]
+  >(eventName: K, storeUpdater: EH) {
+    return async (
+      event: HoldingUpdatedArg &
+        AssetOutcomeUpdatedArg &
+        ChannelFinalizedArg &
+        ChallengeRegisteredArg
+    ) => {
+      const {channelId} = event;
+      this._engine.logger.trace({event}, `${eventName} being handled`);
+      try {
+        await storeUpdater(event);
+        const result = await this._engine.crank([channelId]);
+        await this.handleEngineOutput(result);
+      } catch (err) {
+        this._engine.logger.error({err, event}, `Error handling ${eventName}`);
+        throw err;
+      }
+    };
+  }
+
   async destroy(): Promise<void> {
     await clearIntervalAsync(this._syncInterval);
     this._chainService.destructor();
