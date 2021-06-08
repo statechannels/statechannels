@@ -94,9 +94,11 @@ expect.extend({
         pass: true,
       };
     } else {
+      const diff: BigNumber = (gasUsed as BigNumber).sub(benchmark);
+      const diffStr: string = diff.gt(0) ? '+' + diff.toString() : diff.toString();
       return {
         message: () =>
-          `expected to consume ${benchmark} gas, but actually consumed ${(gasUsed as BigNumber).toNumber()} gas. Consider updating the appropriate number in gas.ts!`,
+          `expected to consume ${benchmark} gas, but actually consumed ${(gasUsed as BigNumber).toNumber()} gas (${diffStr}). Consider updating the appropriate number in gas.ts!`,
         pass: false,
       };
     }
