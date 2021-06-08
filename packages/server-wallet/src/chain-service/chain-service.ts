@@ -138,26 +138,30 @@ export class ChainService implements ChainServiceInterface {
   ): Promise<providers.TransactionResponse[]> {
     const responses: providers.TransactionResponse[] = [];
     for (const chainRequest of chainRequests) {
+      let response;
       switch (chainRequest.type) {
         case 'Challenge':
-          responses.push(
-            await this.challenge(chainRequest.challengeStates, chainRequest.privateKey)
-          );
+          response = await this.challenge(chainRequest.challengeStates, chainRequest.privateKey);
+
           break;
         case 'ConcludeAndWithdraw':
-          responses.push(await this.concludeAndWithdraw(chainRequest.finalizationProof));
+          response = await this.concludeAndWithdraw(chainRequest.finalizationProof);
           break;
         case 'FundChannel':
-          responses.push(await this.fundChannel(chainRequest));
+          response = await this.fundChannel(chainRequest);
           break;
         case 'PushOutcomeAndWithdraw':
-          responses.push(
-            await this.pushOutcomeAndWithdraw(chainRequest.state, chainRequest.challengerAddress)
+          response = await this.pushOutcomeAndWithdraw(
+            chainRequest.state,
+            chainRequest.challengerAddress
           );
+
           break;
         default:
           unreachable(chainRequest);
       }
+
+      responses.push(response);
     }
     return responses;
   }
