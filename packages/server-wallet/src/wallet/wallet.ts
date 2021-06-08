@@ -52,7 +52,6 @@ export class Wallet extends EventEmitter<ObjectiveProposed> {
   }
 
   private _messageService: MessageServiceInterface;
-  private _destroyed = false;
 
   private constructor(
     messageServiceFactory: MessageServiceFactory,
