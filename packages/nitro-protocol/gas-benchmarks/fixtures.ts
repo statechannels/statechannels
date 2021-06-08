@@ -27,6 +27,8 @@ export const participants = [Alice.address, Bob.address];
 const channel: Channel = {chainId, channelNonce, participants};
 export const channelId = getChannelId(channel);
 
+export const someOtherChannelId = getChannelId({...channel, channelNonce: 1337});
+
 export function finalState(assetHolderAddress: string): State {
   return {
     challengeDuration: 600,

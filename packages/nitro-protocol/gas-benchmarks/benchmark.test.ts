@@ -1,4 +1,4 @@
-import {channelId, finalizationProof, finalState} from './fixtures';
+import {channelId, finalizationProof, finalState, someOtherChannelId} from './fixtures';
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
 
@@ -62,8 +62,8 @@ describe('Consumes the expected gas for deposits', () => {
 describe('Consumes the expected gas for happy-path exits', () => {
   it(`when exiting a directly funded (with ETH) channel`, async () => {
     // begin setup
-    const setupTX = ethAssetHolder.deposit(channelId, 0, 10, {value: 10});
-    await (await setupTX).wait();
+    await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
+    await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
     // end setup
     const fP = finalizationProof(finalState(ethAssetHolder.address));
     await expect(
@@ -81,6 +81,7 @@ describe('Consumes the expected gas for happy-path exits', () => {
   it(`when exiting a directly funded (with ERC20s) channel`, async () => {
     // begin setup
     await (await token.increaseAllowance(erc20AssetHolder.address, 100)).wait();
+    await (await erc20AssetHolder.deposit(someOtherChannelId, 0, 10)).wait(); // other channels are funded by this asset holder
     await (await erc20AssetHolder.deposit(channelId, 0, 10)).wait();
     // end setup
     const fP = finalizationProof(finalState(erc20AssetHolder.address));
