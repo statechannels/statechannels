@@ -34,39 +34,56 @@ A state channel wallet has the following _runtime dependencies_:
 The following diagram describes the various components in the architecture. The scope of this document is limited to the components left of the dividing line.
 
 ```
-                                                    |
-                     +-----------------+            |     +--------------+
-                     |                 |            |     |              |
-                     |  CHAIN-SERVICE  <------------------>  BLOCKCHAIN  |
-                     |                 |            |     |              |
-                     +--------^--------+            |     +--------------+
-                              |                     |
-                              |                     |
-                        +-----v----+                |     +----------+
-                        |          |                |     |          |
-                        |          |                |     |          |
-                        |          |  API Request   |     |          |
-                        |          <-----------------------          |
-                        |          |  API Response  |     |          |
-         +---------+    |          ----------------------->          |
-         |         |    |          |                |     |          |
-         |  STORE  <--->|  WALLET  |  Events        |     |   APP    |
-         |         |    |          ----------------------->          |
-         +---------+    |          |                |     |          |
-                        |          |                |     |          |
-                        |          |  pushMessage   |     |          |
-                        |          <---------------------------+     |
-                        |          |                |     |    |     |
-                        |          |                |     |    |     |
-                        +----------+                |     +----|--|--+
-                                                    |          |  | Messages in API response
-                                                    | +--------|--v------+
-                                                    | |  COUNTERPARTY    |
-                                                    | |  WALLETS         |
-                                                      +------------------+
+       +-------------------+                      |     +-------------+
+       |                   |                      |     |             |
+       |                   |                      |     |             |
+       |   CHAIN-SERVICE   <----------------------------> BLOCKCHAIN  |
+       |                   |                      |     |             |
+       |                   |                      |     |             |
+       +---------^---------+                      |     +-------------+
+                 |                                |                    
+                 |                                |                    
+                 |                                |                    
+                 |                                |                    
+                 |                                |                    
+          +------v-----+      +-------------+     |     +-------------+
+          |            |      |             |     |     |             |
+          |            |      |  MESSAGING  |     |     |    PEER     |
+          |            <------>             <----------->             |
+          |            |      |   SERVICE   |     |     |  MESSAGING  |
+          |            |      |             |     |     |             |
+          |            |      +-------------+     |     |   SERVICE   |
+          |            |                          |     |             |
+          |            |                          |     +-------------+
+          |   WALLET   |                          |                    
+          |            |                          |     +-------------+
+          |            |         API Call         |     |             |
+          |            <---------------------------------             |
+          |            |                          |     | APPLICATION |
+          |            |         API Event        |     |             |
+          |            |-------------------------------->             |
+          |            |                          |     |             |
+          |            |                          |     +-------------+
+          +------^-----+                                               
+                 |                                                     
+                 |                                                     
+                 |                                                     
+                 |                                                     
+                 |                                                     
+       +---------v--------+                                            
+       |      ENGINE      |                                            
+       |                  |                                            
+       |   +-----------+  |                                            
+       |   |           |  |                                            
+       |   |   STORE   |  |                                            
+       |   |           |  |                                            
+       |   +-----------+  |                                            
+       |                  |                                            
+       +------------------+                                            
+                                                                                 
 ```
 
-(This diagram was created at https://textik.com/)
+(This diagram can be found at https://textik.com/#9c1955331cf19320. It was created by Andrew Stewart.)
 
 # The responsibilities of a state channel wallet
 
