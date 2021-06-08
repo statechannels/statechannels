@@ -72,13 +72,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     const handler: MessageHandler = async message => {
       const result = await this._engine.pushMessage(message.data);
-      const {channelResults, completedObjectives} = result;
-      for (const o of completedObjectives) {
-        if (o.type === 'CloseChannel') {
-          this._engine.logger.trace({objective: o}, 'Objective completed');
-          this.emit('ObjectiveCompleted', o);
-        }
-      }
+      const {channelResults} = result;
+
       await this.registerChannels(channelResults);
 
       await this.handleEngineOutput(result);
