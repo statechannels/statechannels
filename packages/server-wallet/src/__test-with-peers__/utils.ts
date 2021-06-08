@@ -1,7 +1,11 @@
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, CreateChannelParams} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {Engine} from '..';
+import {PeerSetup} from '../../jest/with-peers-setup-teardown';
+import {EngineEvent} from '../engine';
+import {createChannelArgs} from '../engine/__test__/fixtures/create-channel';
+import {WalletObjective} from '../models/objective';
 
 export async function expectLatestStateToMatch(
   channelId: string,
@@ -10,4 +14,31 @@ export async function expectLatestStateToMatch(
 ): Promise<void> {
   const latest = await engine.getState({channelId});
   expect(latest.channelResult).toMatchObject(partial);
+}
+
+export function getWithPeersCreateChannelsArgs(peerSetup: PeerSetup): CreateChannelParams {
+  return createChannelArgs({
+    participants: [peerSetup.participantA, peerSetup.participantB],
+    fundingStrategy: 'Fake',
+  });
+}
+
+export function waitForObjectiveEvent(
+  objectiveIds: string[],
+  objectiveEventType: EngineEvent['type'],
+  engine: Engine
+): Promise<void> {
+  const handledObjectiveIds = new Set<string>();
+  return new Promise<void>(resolve => {
+    const listener = (o: WalletObjective) => {
+      if (objectiveIds.includes(o.objectiveId)) {
+        handledObjectiveIds.add(o.objectiveId);
+
+        if (handledObjectiveIds.size === _.uniq(objectiveIds).length) {
+          resolve();
+        }
+      }
+    };
+    engine.on(objectiveEventType, listener);
+  });
 }

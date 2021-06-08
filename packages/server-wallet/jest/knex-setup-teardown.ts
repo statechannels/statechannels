@@ -1,6 +1,8 @@
 import {configureEnvVariables} from '@statechannels/devtools';
 import Knex from 'knex';
 import _ from 'lodash';
+
+// eslint-disable-next-line import/order
 import {DBAdmin} from '../src/db-admin/db-admin';
 
 configureEnvVariables();
@@ -11,21 +13,20 @@ import {
   DatabaseConfiguration,
 } from '../src/config';
 
-const constructedKnexs: Knex[] = []
+const constructedKnexs: Knex[] = [];
 
 /**
- * 
- * @param databaseConfiguration 
- * 
+ *
+ * @param databaseConfiguration
+ *
  * returns a knex instance which is automatically destroyed after all jest tests have run
  */
-export let constructKnex = (databaseConfiguration: Partial<DatabaseConfiguration>): Knex =>
-  {
-    const knex = Knex(extractDBConfigFromEngineConfig(defaultTestConfig({databaseConfiguration})));
-    constructedKnexs.push(knex)
+export const constructKnex = (databaseConfiguration: Partial<DatabaseConfiguration>): Knex => {
+  const knex = Knex(extractDBConfigFromEngineConfig(defaultTestConfig({databaseConfiguration})));
+  constructedKnexs.push(knex);
 
-    return knex
-  }
+  return knex;
+};
 
 export let testKnex: Knex;
 
@@ -38,5 +39,5 @@ afterAll(async () => {
   // We need to close the db connection after the test suite has run.
   // Otherwise, jest will not exit within the required one second after the test
   // suite has finished
-  await Promise.all(constructedKnexs.map(async knex => knex.destroy()))
+  await Promise.all(constructedKnexs.map(async knex => knex.destroy()));
 });

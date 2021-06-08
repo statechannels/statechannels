@@ -4,11 +4,11 @@
       "name": "mainnet",
       "chainId": "1",
       "contracts": {
-        "NitroAdjudicator": {
-          "address": "0x7917b6f2C5deC4021Ed5D0ff3e5bb27A69B2eaCf"
-        },
         "ETHAssetHolder": {
           "address": "0x8504FcA6e1e73947850D66D032435AC931892116"
+        },
+        "NitroAdjudicator": {
+          "address": "0x7917b6f2C5deC4021Ed5D0ff3e5bb27A69B2eaCf"
         }
       }
     }
@@ -23,6 +23,20 @@
         },
         "NitroAdjudicator": {
           "address": "0x7917b6f2C5deC4021Ed5D0ff3e5bb27A69B2eaCf"
+        }
+      }
+    }
+  },
+  "212984383488152": {
+    "arbitrum_testnet_v4": {
+      "name": "arbitrum_testnet_v4",
+      "chainId": "212984383488152",
+      "contracts": {
+        "NitroAdjudicator": {
+          "address": "0x35d4c6CE4BB623b9B9C05E3DCfA688D80b616858"
+        },
+        "ETHAssetHolder": {
+          "address": "0xFf6C92ceA1eFB9542498dC74cb591F8CF431d202"
         }
       }
     }

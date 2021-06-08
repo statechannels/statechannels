@@ -2,7 +2,7 @@ import {Contract, Wallet, ethers} from 'ethers';
 const {arrayify, id} = ethers.utils;
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getTestProvider, setupContract} from '../../test-helpers';
 import {sign} from '../../../src/signatures';
 const provider = getTestProvider();
 let ForceMove: Contract;
@@ -17,11 +17,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 describe('_recoverSigner', () => {

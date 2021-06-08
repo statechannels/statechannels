@@ -19,7 +19,7 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   resetMultipleHoldings,
-  setupContracts,
+  setupContract,
 } from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -51,17 +51,17 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(
+  NitroAdjudicator = setupContract(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  AssetHolder1 = await setupContracts(
+  AssetHolder1 = setupContract(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER_ADDRESS
   );
-  AssetHolder2 = await setupContracts(
+  AssetHolder2 = setupContract(
     provider,
     AssetHolderArtifact,
     process.env.TEST_ASSET_HOLDER2_ADDRESS

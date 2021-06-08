@@ -1,19 +1,18 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber, utils} from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
   AssetOutcomeShortHand,
-  compileEventsFromLogs,
   getRandomNonce,
   getTestProvider,
   guaranteeToParams,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 
@@ -30,11 +29,7 @@ const addresses = {
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 const reason5 = 'h(allocation)!=assetOutcomeHash';

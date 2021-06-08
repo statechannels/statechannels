@@ -340,7 +340,7 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   get latest(): SignedStateWithHash {
-    return {...this.channelConstants, ...this.signedStates[0]};
+    return {...this.channelConstants, ...this.sortedStates[0]};
   }
 
   get latestTurnNum(): number {

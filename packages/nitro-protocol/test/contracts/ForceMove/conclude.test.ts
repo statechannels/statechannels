@@ -19,7 +19,7 @@ import {
   getRandomNonce,
   getTestProvider,
   ongoingChallengeFingerprint,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 import {signState, signStates} from '../../../src';
@@ -41,11 +41,7 @@ for (let i = 0; i < nParticipants; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
   appDefinition = getPlaceHolderContractAddress();
 });
 

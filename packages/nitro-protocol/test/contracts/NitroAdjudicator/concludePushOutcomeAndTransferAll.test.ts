@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, BigNumber, utils, constants} from 'ethers';
+import {Contract, Wallet, ethers, BigNumber} from 'ethers';
 
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
@@ -22,11 +22,13 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 import {signStates} from '../../../src';
 import {NITRO_MAX_GAS} from '../../../src/transactions';
+
+jest.setTimeout(15_000);
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -61,10 +63,9 @@ const addresses = {
 const tenPayouts = {ERC20: {}};
 const fiftyPayouts = {ERC20: {}};
 const oneHundredPayouts = {ERC20: {}};
-
 for (let i = 0; i < 100; i++) {
-  const destination = randomExternalDestination();
-  addresses[i.toString()] = destination;
+  addresses[i.toString()] =
+    '0x000000000000000000000000e0c3b40fdff77c786dd3737837887c85' + (0x2392fa22 + i).toString(16); // they need to be distinct because JS objects
   if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
   if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
   if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
@@ -76,27 +77,27 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  NitroAdjudicator = await setupContracts(
+  NitroAdjudicator = setupContract(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  EthAssetHolder1 = await setupContracts(
+  EthAssetHolder1 = setupContract(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER_ADDRESS
   );
-  EthAssetHolder2 = await setupContracts(
+  EthAssetHolder2 = setupContract(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER2_ADDRESS
   );
-  ERC20AssetHolder = await setupContracts(
+  ERC20AssetHolder = setupContract(
     provider,
     ERC20AssetHolderArtifact,
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
-  Token = await setupContracts(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
+  Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   addresses.ETH = EthAssetHolder1.address;
   addresses.ETH2 = EthAssetHolder2.address;
   addresses.ERC20 = ERC20AssetHolder.address;

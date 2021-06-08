@@ -3,16 +3,13 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress} from '@statechannels/wallet-core';
-import {BigNumber, ethers} from 'ethers';
+import {BN, makeAddress} from '@statechannels/wallet-core';
+import {ethers} from 'ethers';
 
 import {
-  peerEngines,
-  getPeersSetup,
-  participantA,
-  participantB,
-  peersTeardown,
-  messageService,
+  setupPeerEngines,
+  PeerSetup,
+  teardownPeerSetup,
 } from '../../../jest/with-peers-setup-teardown';
 import {getMessages} from '../../message-service/utils';
 import {getChannelResultFor, ONE_DAY} from '../../__test__/test-helpers';
@@ -22,21 +19,20 @@ const {AddressZero} = ethers.constants;
 jest.setTimeout(10_000);
 
 let channelId: string;
-
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await setupPeerEngines();
+});
+afterAll(async () => {
+  await teardownPeerSetup(peerSetup);
+});
 
 it('Create a directly funded channel between two engines ', async () => {
+  const {participantA, participantB, messageService, peerEngines} = peerSetup;
   const allocation: Allocation = {
     allocationItems: [
-      {
-        destination: participantA.destination,
-        amount: BigNumber.from(1).toHexString(),
-      },
-      {
-        destination: participantB.destination,
-        amount: BigNumber.from(1).toHexString(),
-      },
+      {destination: participantA.destination, amount: BN.from(1)},
+      {destination: participantB.destination, amount: BN.from(1)},
     ],
     assetHolderAddress: makeAddress(AddressZero), // must be even length
   };
@@ -54,28 +50,21 @@ it('Create a directly funded channel between two engines ', async () => {
   // PreFund0
   const resultA0 = await peerEngines.a.createChannel(createChannelParams);
   await messageService.send(getMessages(resultA0));
-  channelId = resultA0.channelResults[0].channelId;
+  channelId = resultA0.channelResult.channelId;
 
   //      PreFund0B
   const resultB1 = await peerEngines.b.joinChannel({channelId});
   await messageService.send(getMessages(resultB1));
 
-  const depositByA = {
-    channelId,
-    assetHolderAddress: makeAddress(AddressZero),
-    amount: BigNumber.from(1).toHexString(),
-  }; // A sends 1 ETH (1 total)
+  const assetHolderAddress = makeAddress(AddressZero);
+  const depositByA = {channelId, assetHolderAddress, amount: BN.from(1)}; // A sends 1 ETH (1 total)
 
   // This would have been triggered by A's Chain Service by request
-  await peerEngines.a.updateFundingForChannels([depositByA]);
-  await peerEngines.b.updateFundingForChannels([depositByA]);
+  await peerEngines.a.holdingUpdated(depositByA);
+  await peerEngines.b.holdingUpdated(depositByA);
 
   // Then, this would be triggered by B's Chain Service after observing A's deposit
-  const depositByB = {
-    channelId,
-    assetHolderAddress: makeAddress(AddressZero),
-    amount: BigNumber.from(2).toHexString(),
-  }; // B sends 1 ETH (2 total)
+  const depositByB = {channelId, assetHolderAddress, amount: BN.from(2)}; // B sends 1 ETH (2 total)
 
   // Results before funding is complete
   await expectLatestStateToMatch(channelId, peerEngines.a, {
@@ -87,8 +76,8 @@ it('Create a directly funded channel between two engines ', async () => {
     turnNum: 0,
   });
 
-  const resultA2 = await peerEngines.a.updateFundingForChannels([depositByB]);
-  const resultB2 = await peerEngines.b.updateFundingForChannels([depositByB]);
+  const resultA2 = await peerEngines.a.holdingUpdated(depositByB);
+  const resultB2 = await peerEngines.b.holdingUpdated(depositByB);
   await messageService.send(getMessages(resultA2));
   await messageService.send(getMessages(resultB2));
 
@@ -100,6 +89,7 @@ it('Create a directly funded channel between two engines ', async () => {
     status: 'running',
     turnNum: 3,
   });
+
   const closeChannelParams: CloseChannelParams = {
     channelId,
   };

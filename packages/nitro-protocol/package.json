@@ -24,6 +24,7 @@
     "@types/lodash.shuffle": "^4.2.6",
     "@types/node": "14.11.2",
     "@types/prettier": "1.19.0",
+    "@types/wait-on": "^5.3.0",
     "@types/webpack": "4.41.22",
     "@typescript-eslint/eslint-plugin": "4.13.0",
     "@typescript-eslint/parser": "4.13.0",
@@ -33,7 +34,7 @@
     "eslint-plugin-jest": "23.6.0",
     "eslint-plugin-prettier": "3.3.1",
     "etherlime-lib": "1.1.5",
-    "hardhat": "^2.0.5",
+    "hardhat": "^2.3.0",
     "hardhat-deploy": "^0.7.0-beta.38",
     "hardhat-deploy-ethers": "^0.3.0-beta.7",
     "hardhat-watcher": "^2.0.0",
@@ -46,8 +47,10 @@
     "solhint": "^3.3.2",
     "solhint-plugin-prettier": "^0.0.5",
     "solidoc": "https://github.com/statechannels/solidoc.git#3235c4f8be624a36710502c9021cfbd47a9a0f49",
+    "tree-kill": "^1.2.2",
     "ts-jest": "26.4.4",
     "typescript": "4.1.2",
+    "wait-on": "^5.3.0",
     "webpack": "4.44.2"
   },
   "directories": {
@@ -82,6 +85,7 @@
     "contract:compile:watch": "yarn hardhat watch compilation",
     "contract:deploy-rinkeby": "yarn hardhat deploy --network rinkeby --export-all addresses.json && node ./scripts/postdeploy.js",
     "contract:deploy-mainnet": "yarn hardhat deploy --network mainnet --export-all addresses.json && node ./scripts/postdeploy.js",
+    "contract:deploy-arbitrum-testnet": "yarn hardhat deploy --network arbitrum_testnet_v4 --export-all addresses.json && node ./scripts/postdeploy.js",
     "docgen": "solidoc",
     "generate-api": "yarn docgen",
     "lint:check": "eslint \"*/**/*.ts\" --cache && yarn solhint:check",
@@ -93,11 +97,13 @@
     "prettier:write": "prettier --write './contracts/**/*.sol'",
     "test": "yarn test:contracts && yarn test:app --all",
     "test:app": "jest -c ./config/jest/jest.config.js",
-    "test:ci": "yarn test:ci:app && yarn test:ci:contracts && yarn test:ninja-nitro",
+    "test:ci": "yarn test:ci:gas && yarn test:ci:app && yarn test:ci:contracts && yarn test:ninja-nitro ",
     "test:ci:app": "yarn test:app --all --ci --bail --maxWorkers=4",
+    "test:ci:gas": "yarn test:gas",
     "test:ci:contracts": "yarn test:contracts --all --ci --bail --maxWorkers=4",
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js",
-    "test:ninja-nitro": "jest -c ./config/jest/jest.ninja-nitro.config.js"
+    "test:ninja-nitro": "jest -c ./config/jest/jest.ninja-nitro.config.js",
+    "test:gas": "jest -c ./config/jest/jest.gas-benchmarks.config.js"
   },
   "types": "lib/src/index.d.ts"
 }

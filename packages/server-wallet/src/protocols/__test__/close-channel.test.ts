@@ -104,8 +104,8 @@ const setup = async (
   const objective = await store.transaction(async tx => {
     const o = await ObjectiveModel.insert(
       testChan.closeChannelObjective([participant, 1 - participant]),
-      true, // preApproved
-      tx
+      tx,
+      'approved'
     );
     return o;
   });

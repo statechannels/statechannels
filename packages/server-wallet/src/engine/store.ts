@@ -247,13 +247,19 @@ export class Store {
       .first();
   }
 
-  async getAndLockChannel(channelId: Bytes32, tx: Transaction): Promise<Channel | undefined> {
-    return Channel.query(tx)
+  async getAndLockChannel(channelId: Bytes32, tx: Transaction): Promise<Channel> {
+    const channel = await Channel.query(tx)
       .where({channelId})
       .withGraphJoined('adjudicatorStatus')
       .withGraphFetched('signingWallet')
       .forUpdate()
       .first();
+
+    if (!channel) {
+      throw new ChannelError('No channel found with id', {channelId});
+    }
+
+    return channel;
   }
 
   async getStates(
@@ -316,8 +322,8 @@ export class Store {
       const storedObjectives: WalletObjective[] = [];
       for (const o of deserializedObjectives) {
         if (isSupportedObjective(o)) {
-          const preApprove = o.type === 'CloseChannel'; // Close channel objectives do not need co-operative approval
-          storedObjectives.push(await ObjectiveModel.insert(o, preApprove, tx));
+          const status = o.type === 'CloseChannel' ? 'approved' : undefined; // Close channel objectives do not need co-operative approval
+          storedObjectives.push(await ObjectiveModel.insert(o, tx, status));
         } else this.logger.warn('Unsupported objective received');
       }
 
@@ -347,11 +353,16 @@ export class Store {
     return await ObjectiveModel.approvedObjectiveIds(channelIds, tx || this.knex);
   }
 
+  public async getApprovedObjectives(): Promise<Array<WalletObjective & {status: 'approved'}>> {
+    const results = await ObjectiveModel.query(this.knex).where({status: 'approved'});
+    return results.map(o => o.toObjective());
+  }
+
   async getLedgersWithNewRequestsIds(tx?: Transaction): Promise<string[]> {
     return LedgerRequest.ledgersWithNewRequestsIds(tx || this.knex);
   }
 
-  async approveObjective(objectiveId: string, tx?: Transaction): Promise<void> {
+  async approveObjective(objectiveId: string, tx?: Transaction): Promise<WalletObjective> {
     const objective = await ObjectiveModel.approve(objectiveId, tx || this.knex);
 
     if (objective.type === 'OpenChannel') {
@@ -373,6 +384,7 @@ export class Store {
         .where({channelId})
         .patch({fundingStrategy, fundingLedgerChannelId});
     }
+    return objective;
   }
 
   async markObjectiveStatus<O extends WalletObjective>(
@@ -614,8 +626,9 @@ export class Store {
 
       const objective = await ObjectiveModel.insert(
         o,
-        true, // preApproved
+
         tx,
+        'approved',
         OpenChannelWaitingFor.theirPreFundSetup
       );
       return {channel: await this.getChannelState(channelId, tx), firstSignedState, objective};

@@ -51,12 +51,28 @@ This repository is a monorepo, and contains the following packages maintained wi
 ### Installing dependencies
   * **yarn** - version 1.22.4, for easy management of specific Yarn versions, we recommend using [Yarn Version Manager (YVM)](https://github.com/tophat/yvm).
   * **node** - version 12.16.3, for easy management of specific versions, we recommend using [n](https://github.com/tj/n).
-  * **postgres** - we recommend [the postgres app](https://postgresapp.com/). If you choose this installation, make sure you follow [the following steps](https://postgresapp.com/documentation/install.html) to add postgres tools to you $PATH, better verify commands like 'createdb', 'dropdb' runs correctly in your terminal before proceeding.
+  * **postgres** - macOS and linux instructions follow:
+
+For **macOS**, we recommend [the postgres app](https://postgresapp.com/). If you choose this installation, make sure you execute the following script ([docs](https://postgresapp.com/documentation/install.html)) to add postgres tools to your $PATH, and verify that commands like `createdb` and `dropdb` run correctly in your terminal before proceeding.
 
 ```shell
 sudo mkdir -p /etc/paths.d &&
-echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresap
+echo /Applications/Postgres.app/Contents/Versions/latest/bin | sudo tee /etc/paths.d/postgresapp
 ```
+
+Under debian/ubuntu **linux**, installation via `apt` is recommended:
+
+```shell
+sudo apt update
+sudo apt install postgresql postgresql-contrib
+```
+
+Our testing scripts may require an edit to your default postgres role's access controls via a configuration file:
+
+- locate `pg_hba.conf` (ex, `/etc/postgresql/12/main/pg_hba.conf`)
+- open the file with administrator privileges (`sudo gedit /etc/postgresql/12/main/pg_hba.conf`)
+- under IPv4 local connections, change `md5` to `trust` in the the line `host all all 127.0.0.1/32 md5`
+- restart the postgres server with `sudo service postgresql --full-restart`
 
 The rest of the dependencies can be installed by running
 
@@ -155,9 +171,14 @@ These should adhere to the [TSDoc standard](https://github.com/Microsoft/tsdoc).
 Doc comments will appear in our documentation at https://docs.statechannels.org.
 
 ## API reports
-We use [api-extractor](https://api-extractor.com/) to help us track changes to the API of some of the packages in this repo. The tool is run via `yarn lerna run generate-api` during our continuous integration suite, and generates an [api report](https://api-extractor.com/pages/setup/configure_api_report/). If you make changes to the external API of a package, you should run this command locally and check in the reports to source control, else you will get a test failure. 
+We use [api-extractor](https://api-extractor.com/) to help us track changes to the API of some of the packages in this repo. The tool is run via `yarn lerna run generate-api` during our continuous integration suite, and generates an [api report](https://api-extractor.com/pages/setup/configure_api_report/).
 
-The checked-in report helps faciliate PR review.
+If you make changes to the external API of a package, you must switch to the `server-wallet` directory, run
+```
+yarn tsc
+yarn generate-api
+```
+and check the reports into source control. The checked-in report helps faciliate PR review.
 
 
 ## Community

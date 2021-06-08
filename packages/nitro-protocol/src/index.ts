@@ -63,7 +63,6 @@ export {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
 } from '../test/test-helpers';
 export {
   DepositedEvent,

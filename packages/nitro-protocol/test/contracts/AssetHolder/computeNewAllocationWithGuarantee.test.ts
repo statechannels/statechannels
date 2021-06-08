@@ -3,7 +3,7 @@ import shuffle from 'lodash.shuffle';
 
 import {
   getTestProvider,
-  setupContracts,
+  setupContract,
   randomExternalDestination,
   randomChannelId,
 } from '../../test-helpers';
@@ -15,11 +15,7 @@ const provider = getTestProvider();
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 import {AllocationItem, Guarantee} from '../../../src';
@@ -30,7 +26,7 @@ import {
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
-    ? [...Array(numAllocationItems)].map(e => ({
+    ? [...Array(numAllocationItems)].map(() => ({
         destination: randomExternalDestination(),
         amount: BigNumber.from(Math.ceil(Math.random() * 10)).toHexString(),
       }))

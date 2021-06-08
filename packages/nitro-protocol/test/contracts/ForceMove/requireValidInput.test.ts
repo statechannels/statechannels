@@ -1,17 +1,13 @@
-import {Contract, Wallet} from 'ethers';
+import {Contract} from 'ethers';
 
 import ForceMoveArtifact from '../../../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ForceMove: Contract;
 
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
 
 interface TestCase {

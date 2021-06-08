@@ -26,7 +26,7 @@ postgres: &postgres
 
 save_dep: &save_dep
   save_cache:
-    key: v12-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v13-dependency-cache-{{ checksum "yarn.lock" }}
     paths:
       - node_modules
       - packages/client-api-schema/node_modules
@@ -37,11 +37,11 @@ save_dep: &save_dep
       - packages/server-wallet/node_modules
       - packages/wallet-core/node_modules
       - packages/wire-format/node_modules
-      - packages/xstate-wallet/node_modules
+      - packages/browser-wallet/node_modules
 
 restore_dep: &restore_dep
   restore_cache:
-    key: v11-dependency-cache-{{ checksum "yarn.lock" }}
+    key: v13-dependency-cache-{{ checksum "yarn.lock" }}
 
 # END MACROS
 

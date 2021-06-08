@@ -28,8 +28,9 @@ describe('Objective > insert', () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
     const inserted = await ObjectiveModel.insert(
       objective,
-      false,
+
       knex,
+      undefined,
       ChannelOpenerWaitingFor.theirPreFundSetup
     );
 
@@ -39,7 +40,7 @@ describe('Objective > insert', () => {
   it('fails to insert / associate an objective when it references a channel that does not exist', async () => {
     // For some reason this does not catch the error :/
     await expect(
-      ObjectiveModel.insert(objective, false, knex, ChannelOpenerWaitingFor.theirPreFundSetup)
+      ObjectiveModel.insert(objective, knex, undefined, ChannelOpenerWaitingFor.theirPreFundSetup)
     ).rejects.toThrow();
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([]);
@@ -50,7 +51,12 @@ describe('Objective > insert', () => {
   it('inserts and associates an objective with all channels that it references (channels exist)', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ObjectiveModel.insert(objective, false, knex, ChannelOpenerWaitingFor.theirPreFundSetup);
+    await ObjectiveModel.insert(
+      objective,
+      knex,
+      undefined,
+      ChannelOpenerWaitingFor.theirPreFundSetup
+    );
 
     expect(await ObjectiveModel.query(knex).select()).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`},
@@ -66,8 +72,9 @@ describe('Objective > insert', () => {
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
     const {createdAt} = await ObjectiveModel.insert(
       objective,
-      false,
+
       knex,
+      undefined,
       ChannelOpenerWaitingFor.theirPreFundSetup
     );
     const after = Date.now() + 1000; // scroll forward 1000 ms to allow for finite precision / rounding
@@ -80,8 +87,9 @@ describe('Objective > insert', () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
     const {objectiveId} = await ObjectiveModel.insert(
       objective,
-      false,
+
       knex,
+      undefined,
       ChannelOpenerWaitingFor.theirPreFundSetup
     );
     const before = Date.now() - 1000; // scroll back 1000 ms to allow for finite precision / rounding
@@ -100,7 +108,12 @@ describe('Objective > insert', () => {
 describe('Objective > forId', () => {
   it('returns an objective with Date types for timestamps', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
-    await ObjectiveModel.insert(objective, false, knex, ChannelOpenerWaitingFor.theirPreFundSetup);
+    await ObjectiveModel.insert(
+      objective,
+      knex,
+      undefined,
+      ChannelOpenerWaitingFor.theirPreFundSetup
+    );
 
     const fetchedObjective = await ObjectiveModel.forId(`OpenChannel-${c.channelId}`, knex);
     expect(fetchedObjective.createdAt instanceof Date).toBe(true);
@@ -112,7 +125,12 @@ describe('Objective > forChannelIds', () => {
   it('retrieves objectives associated with a given channelId', async () => {
     await Channel.query(knex).withGraphFetched('signingWallet').insert(c);
 
-    await ObjectiveModel.insert(objective, false, knex, ChannelOpenerWaitingFor.theirPreFundSetup);
+    await ObjectiveModel.insert(
+      objective,
+      knex,
+      undefined,
+      ChannelOpenerWaitingFor.theirPreFundSetup
+    );
 
     expect(await ObjectiveModel.forChannelIds([c.channelId], knex)).toMatchObject([
       {objectiveId: `OpenChannel-${c.channelId}`},

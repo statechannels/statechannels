@@ -3,7 +3,7 @@ const {id, keccak256} = utils;
 
 import AssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getRandomNonce, getTestProvider, setupContracts} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 let AssetHolder: Contract;
@@ -22,11 +22,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.ETH_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.ETH_ASSET_HOLDER_ADDRESS);
   const channel: Channel = {chainId, participants, channelNonce};
   channelId = getChannelId(channel);
 });

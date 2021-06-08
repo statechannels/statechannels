@@ -16,7 +16,7 @@ import {
   getPlaceHolderContractAddress,
   getRandomNonce,
   getTestProvider,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 import {sign} from '../../../src/signatures';
@@ -39,11 +39,7 @@ for (let i = 0; i < 3; i++) {
 const nonParticipant = Wallet.createRandom();
 
 beforeAll(async () => {
-  ForceMove = await setupContracts(
-    provider,
-    ForceMoveArtifact,
-    process.env.TEST_FORCE_MOVE_ADDRESS
-  );
+  ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
   appDefinition = getPlaceHolderContractAddress();
 });
 

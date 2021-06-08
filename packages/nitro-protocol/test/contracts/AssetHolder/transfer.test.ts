@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber, utils} from 'ethers';
+import {Contract, BigNumber} from 'ethers';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {
@@ -9,7 +9,7 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
   writeGasConsumption,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
@@ -29,11 +29,7 @@ const addresses = {
 };
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 const reason0 = 'h(allocation)!=assetOutcomeHash';
@@ -61,7 +57,7 @@ describe('transfer', () => {
     ${'15. -> reverse order (see 13)'} | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[1, 0]}    | ${{C: 2, X: 1}} | ${{c: 2, X: 1}} | ${{}}           | ${reason1}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
-    async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, payouts, reason}) => {
+    async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, reason}) => {
       // Compute channelId
       const nonce = getRandomNonce(name);
       const channelId = randomChannelId(nonce);
@@ -72,7 +68,6 @@ describe('transfer', () => {
       setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
       newOutcome = replaceAddressesAndBigNumberify(newOutcome, addresses);
       heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
-      payouts = replaceAddressesAndBigNumberify(payouts, addresses);
 
       // Reset the holdings (only works on test contract)
       new Set([...Object.keys(heldAfter), ...Object.keys(heldBefore)]).forEach(async key => {

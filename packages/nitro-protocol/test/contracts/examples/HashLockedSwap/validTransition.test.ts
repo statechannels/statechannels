@@ -11,7 +11,7 @@ import {
   getTestProvider,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
 } from '../../../test-helpers';
 
 // Utilities
@@ -37,11 +37,7 @@ const addresses = {
 const provider = getTestProvider();
 
 beforeAll(async () => {
-  hashTimeLock = await setupContracts(
-    provider,
-    HashLockedSwapArtifact,
-    process.env.HASH_LOCK_ADDRESS
-  );
+  hashTimeLock = setupContract(provider, HashLockedSwapArtifact, process.env.HASH_LOCK_ADDRESS);
 });
 
 const preImage = '0xdeadbeef';

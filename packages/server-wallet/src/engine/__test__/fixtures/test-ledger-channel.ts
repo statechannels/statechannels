@@ -10,9 +10,12 @@ import {utils} from 'ethers';
 import {Payload} from '@statechannels/wire-format';
 
 import {defaultTestConfig} from '../../../config';
-import {LedgerRequest, LedgerRequestStatus} from '../../../models/ledger-request';
+import {
+  LedgerRequest,
+  LedgerRequestStatus,
+  RichLedgerRequest,
+} from '../../../models/ledger-request';
 import {WALLET_VERSION} from '../../../version';
-import {Store} from '../../store';
 
 import {TestChannel, Bals, SignedBy} from './test-channel';
 
@@ -72,48 +75,44 @@ export class TestLedgerChannel extends TestChannel {
     };
   }
 
-  public async insertFundingRequest(
-    store: Store,
-    {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
-  ): Promise<void> {
-    return store.transaction(
-      async tx =>
-        await LedgerRequest.setRequest(
-          {
-            ledgerChannelId: this.channelId,
-            type: 'fund',
-            channelToBeFunded,
-            amountA: BN.from(amtA),
-            amountB: BN.from(amtB),
-            status,
-            missedOpportunityCount: missedOps || 0,
-            lastSeenAgreedState: lastSeen || null,
-          },
-          tx
-        )
-    );
+  public fundingRequest({
+    channelToBeFunded,
+    amtA,
+    amtB,
+    status,
+    missedOps,
+    lastSeen,
+  }: RequestParams): RichLedgerRequest {
+    return LedgerRequest.fromJson({
+      ledgerChannelId: this.channelId,
+      type: 'fund',
+      channelToBeFunded,
+      amountA: BN.from(amtA),
+      amountB: BN.from(amtB),
+      status,
+      missedOpportunityCount: missedOps || 0,
+      lastSeenAgreedState: lastSeen || null,
+    });
   }
 
-  public async insertDefundingRequest(
-    store: Store,
-    {channelToBeFunded, amtA, amtB, status, missedOps, lastSeen}: RequestParams
-  ): Promise<void> {
-    return store.transaction(
-      async tx =>
-        await LedgerRequest.setRequest(
-          {
-            ledgerChannelId: this.channelId,
-            type: 'defund',
-            channelToBeFunded,
-            amountA: BN.from(amtA),
-            amountB: BN.from(amtB),
-            status,
-            missedOpportunityCount: missedOps || 0,
-            lastSeenAgreedState: lastSeen || null,
-          },
-          tx
-        )
-    );
+  public defundingRequest({
+    channelToBeFunded,
+    amtA,
+    amtB,
+    status,
+    missedOps,
+    lastSeen,
+  }: RequestParams): RichLedgerRequest {
+    return LedgerRequest.fromJson({
+      ledgerChannelId: this.channelId,
+      type: 'defund',
+      channelToBeFunded,
+      amountA: BN.from(amtA),
+      amountB: BN.from(amtB),
+      status,
+      missedOpportunityCount: missedOps || 0,
+      lastSeenAgreedState: lastSeen || null,
+    });
   }
 }
 

@@ -29,8 +29,6 @@ describe('SyncObjective', () => {
 
   it('handles being called with no objective ids', async () => {
     const syncResults = await engine.syncObjectives([]);
-    expect(syncResults.channelResults).toHaveLength(0);
-    expect(syncResults.newObjectives).toHaveLength(0);
     expect(syncResults.outbox).toHaveLength(0);
   });
 
@@ -40,24 +38,16 @@ describe('SyncObjective', () => {
       .insert(channel({vars: [stateWithHashSignedBy([alice()])()]}))
       .withGraphFetched('signingWallet')
       .withGraphFetched('funding');
-    const objective = await ObjectiveModel.insert(openChannelObjective(), false, testKnex);
+    const objective = await ObjectiveModel.insert(openChannelObjective(), testKnex);
 
     const {channelId} = targetChannel;
 
-    const {newObjectives, outbox, channelResults} = await engine.syncObjectives([
-      objective.objectiveId,
-    ]);
-
-    // There should be no new objectives
-    expect(newObjectives).toHaveLength(0);
-    // We should get the channel result for any channels we need to sync
-    expect(channelResults).toEqual([targetChannel.channelResult]);
+    const result = await engine.syncObjectives([objective.objectiveId]);
 
     // We only expect 1 outbox
-    expect(outbox).toHaveLength(1);
+    expect(result.outbox).toHaveLength(1);
 
-    // We expect the message to contain the objective as well as the sync channel payload
-    expect(outbox[0]).toMatchObject({
+    const expectedPayload = {
       method: 'MessageQueued',
       params: {
         sender: 'alice',
@@ -71,6 +61,14 @@ describe('SyncObjective', () => {
           objectives: [{type: 'OpenChannel', data: {targetChannelId: channelId}}],
         },
       },
-    });
+    };
+    // We expect the message to contain the objective as well as the sync channel payload
+    expect(result.outbox[0]).toMatchObject(expectedPayload);
+
+    // We expect the message to be correctly indexed by objective id
+    const objectiveIds = Object.keys(result.messagesByObjective);
+    expect(objectiveIds).toHaveLength(1);
+    const messagesByObjective = result.messagesByObjective[objectiveIds[0]];
+    expect(messagesByObjective).toMatchObject([expectedPayload.params]);
   });
 });

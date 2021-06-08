@@ -2,7 +2,7 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {ethers} from 'ethers';
 
-import {Outgoing, Engine} from '../..';
+import {Engine, Outgoing} from '../..';
 import {Bytes32} from '../../type-aliases';
 import {
   getChannelResultFor,
@@ -12,13 +12,11 @@ import {
 } from '../../__test__/test-helpers';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {
-  peerEngines,
-  getPeersSetup,
-  peersTeardown,
-  participantA,
-  participantB,
+  setupPeerEngines,
+  teardownPeerSetup,
   aEngineConfig,
   bEngineConfig,
+  PeerSetup,
 } from '../../../jest/with-peers-setup-teardown';
 // TODO: this is temporary. This test file is refactored in
 // https://github.com/statechannels/statechannels/pull/3287
@@ -38,15 +36,24 @@ const tablesUsingLedgerChannels = [
 
 jest.setTimeout(10_000);
 
-beforeAll(getPeersSetup());
-afterAll(peersTeardown);
-
+let peerSetup: PeerSetup;
+beforeAll(async () => {
+  peerSetup = await setupPeerEngines();
+});
+afterAll(async () => {
+  await teardownPeerSetup(peerSetup);
+});
 /**
  * Create a directly funded channel that will be used as the ledger channel.
  *
  * Note that this is just a simplification of the direct-funding test.
  */
-const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<string> => {
+const createLedgerChannel = async (
+  peerSetup: PeerSetup,
+  aDeposit: number,
+  bDeposit: number
+): Promise<string> => {
+  const {participantA, participantB, peerEngines} = peerSetup;
   const aDepositAmtETH = BN.from(aDeposit);
   const bDepositAmtETH = BN.from(bDeposit);
   const ledgerChannelArgs = {
@@ -79,15 +86,15 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     amount: aDepositAmtETH,
   };
-  await peerEngines.a.updateFundingForChannels([fundingPostADeposit]);
-  await peerEngines.b.updateFundingForChannels([fundingPostADeposit]);
+  await peerEngines.a.holdingUpdated(fundingPostADeposit);
+  await peerEngines.b.holdingUpdated(fundingPostADeposit);
   const fundingPostBDeposit = {
     channelId,
     assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
     amount: BN.add(aDepositAmtETH, bDepositAmtETH),
   };
-  const resultA2 = await peerEngines.a.updateFundingForChannels([fundingPostBDeposit]);
-  const resultB3 = await peerEngines.b.updateFundingForChannels([fundingPostBDeposit]);
+  const resultA2 = await peerEngines.a.holdingUpdated(fundingPostBDeposit);
+  const resultB3 = await peerEngines.b.holdingUpdated(fundingPostBDeposit);
   await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, resultA2.outbox));
   await peerEngines.a.pushMessage(getPayloadFor(participantA.participantId, resultB3.outbox));
 
@@ -99,34 +106,43 @@ const createLedgerChannel = async (aDeposit: number, bDeposit: number): Promise<
 };
 
 const testCreateChannelParams = (
+  peerSetup: PeerSetup,
   aAllocation: number,
   bAllocation: number,
   ledgerChannelId: string
-): CreateChannelParams => ({
-  participants: [participantA, participantB],
-  allocations: [
-    {
-      allocationItems: [
-        {
-          destination: participantA.destination,
-          amount: BN.from(aAllocation),
-        },
-        {
-          destination: participantB.destination,
-          amount: BN.from(bAllocation),
-        },
-      ],
-      assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, // must be even length
-    },
-  ],
-  appDefinition: ethers.constants.AddressZero,
-  appData: '0x00', // must be even length
-  fundingStrategy: 'Ledger',
-  fundingLedgerChannelId: ledgerChannelId,
-  challengeDuration: ONE_DAY,
-});
+): CreateChannelParams => {
+  const {participantA, participantB} = peerSetup;
+  return {
+    participants: [participantA, participantB],
+    allocations: [
+      {
+        allocationItems: [
+          {
+            destination: participantA.destination,
+            amount: BN.from(aAllocation),
+          },
+          {
+            destination: participantB.destination,
+            amount: BN.from(bAllocation),
+          },
+        ],
+        assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS, // must be even length
+      },
+    ],
+    appDefinition: ethers.constants.AddressZero,
+    appData: '0x00', // must be even length
+    fundingStrategy: 'Ledger',
+    fundingLedgerChannelId: ledgerChannelId,
+    challengeDuration: ONE_DAY,
+  };
+};
 
-async function exchangeMessagesBetweenAandB(bToA: Outgoing[][], aToB: Outgoing[][]) {
+async function exchangeMessagesBetweenAandB(
+  peerSetup: PeerSetup,
+  bToA: Outgoing[][],
+  aToB: Outgoing[][]
+) {
+  const {participantA, participantB, peerEngines} = peerSetup;
   while (aToB.length + bToA.length > 0) {
     const nextMessageFromB = bToA.shift();
     const nextMessageFromA = aToB.shift();
@@ -164,11 +180,12 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
   });
 
   it('can fund and close channel by ledger between two engines ', async () => {
-    ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(10, 10, ledgerChannelId);
+    const {participantA, participantB, peerEngines} = peerSetup;
+    ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 10, 10, ledgerChannelId);
 
     const {
-      channelResults: [{channelId}],
+      channelResult: {channelId},
       outbox,
     } = await peerEngines.a.createChannel(params);
 
@@ -176,7 +193,7 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
 
     const {outbox: join} = await peerEngines.b.joinChannel({channelId});
 
-    await exchangeMessagesBetweenAandB([join], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [join], []);
     // so the problem is that we don't end up ledger funded here
 
     const {channelResults} = await peerEngines.a.getChannels();
@@ -202,7 +219,7 @@ describe('Funding a single channel with 100% of available ledger funds', () => {
 
     const {outbox: close} = await peerEngines.a.closeChannel({channelId: appChannelId});
 
-    await exchangeMessagesBetweenAandB([], [close]);
+    await exchangeMessagesBetweenAandB(peerSetup, [], [close]);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults: channelResults2} = await peerEngines.a.getChannels();
@@ -240,11 +257,12 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   });
 
   it('can fund a channel by ledger between two engines ', async () => {
-    ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(5, 5, ledgerChannelId);
+    const {peerEngines, participantA, participantB} = peerSetup;
+    ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 5, 5, ledgerChannelId);
 
     const {
-      channelResults: [{channelId}],
+      channelResult: {channelId},
       outbox,
     } = await peerEngines.a.createChannel(params);
 
@@ -252,7 +270,7 @@ describe('Funding a single channel with 50% of ledger funds', () => {
 
     const {outbox: join} = await peerEngines.b.joinChannel({channelId});
 
-    await exchangeMessagesBetweenAandB([join], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [join], []);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
 
@@ -287,9 +305,10 @@ describe('Funding a single channel with 50% of ledger funds', () => {
   });
 
   it('closing said channel', async () => {
+    const {peerEngines, participantA, participantB} = peerSetup;
     const {outbox: close} = await peerEngines.a.closeChannel({channelId: appChannelId});
 
-    await exchangeMessagesBetweenAandB([], [close]);
+    await exchangeMessagesBetweenAandB(peerSetup, [], [close]);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();
@@ -326,18 +345,19 @@ describe('Closing a ledger channel and preventing it from being used again', () 
   });
 
   it('can close a ledger channel and fail to fund a new channel ', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
+    const {peerEngines, participantB} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
     const {outbox} = await peerEngines.a.closeChannel({channelId: ledgerChannelId});
     const {outbox: close} = await peerEngines.b.pushMessage(
       getPayloadFor(participantB.participantId, outbox)
     );
-    await exchangeMessagesBetweenAandB([close], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [close], []);
     const {channelResult: ledger} = await peerEngines.a.getState({channelId: ledgerChannelId});
     expect(ledger).toMatchObject({
       turnNum: 4,
       status: 'closed',
     });
-    const params = testCreateChannelParams(10, 10, ledgerChannelId);
+    const params = testCreateChannelParams(peerSetup, 10, 10, ledgerChannelId);
     await expect(peerEngines.a.createChannel(params)).rejects.toThrow(/closed/);
     await expect(peerEngines.a.createChannels(params, 1)).rejects.toThrow(/closed/);
   });
@@ -354,15 +374,16 @@ describe('Funding multiple channels synchronously (in bulk)', () => {
   });
 
   it(`can fund ${N} channels created in bulk by Alice`, async () => {
-    ledgerChannelId = await createLedgerChannel(4, 4);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantB} = peerSetup;
+    ledgerChannelId = await createLedgerChannel(peerSetup, 4, 4);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
     const resultA = await peerEngines.a.createChannels(params, N);
     const channelIds = resultA.channelResults.map(c => c.channelId);
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
     const resultB = await peerEngines.b.joinChannels(channelIds);
 
-    await exchangeMessagesBetweenAandB([resultB.outbox], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [resultB.outbox], []);
 
     const {channelResults} = await peerEngines.a.getChannels();
 
@@ -370,6 +391,7 @@ describe('Funding multiple channels synchronously (in bulk)', () => {
       channelResults,
       outbox: [],
       newObjectives: [],
+      messagesByObjective: {},
     });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
@@ -395,8 +417,10 @@ describe('Funding multiple channels synchronously (in bulk)', () => {
   });
 
   it('can close them all (concurrently!)', async () => {
+    const {peerEngines, participantA, participantB} = peerSetup;
     // ⚠️ This results in several messages back and forth
     await exchangeMessagesBetweenAandB(
+      peerSetup,
       [],
       await Promise.all(
         appChannelIds.map(async channelId => (await peerEngines.a.closeChannel({channelId})).outbox)
@@ -444,15 +468,16 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
   });
 
   it(`can fund ${N * 2} channels created in bulk by Alice`, async () => {
-    ledgerChannelId = await createLedgerChannel(N * 2, N * 2);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantB} = peerSetup;
+    ledgerChannelId = await createLedgerChannel(peerSetup, N * 2, N * 2);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
     const createMessageAndJoinBatch = async (): Promise<Bytes32[]> => {
       const {outbox, channelResults} = await peerEngines.a.createChannels(params, N);
       const channelIds = channelResults.map(c => c.channelId);
       await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, outbox));
       const joinResults = await peerEngines.b.joinChannels(channelIds);
-      await exchangeMessagesBetweenAandB([joinResults.outbox], []);
+      await exchangeMessagesBetweenAandB(peerSetup, [joinResults.outbox], []);
       return channelIds;
     };
 
@@ -466,6 +491,7 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
       channelResults,
       outbox: [],
       newObjectives: [],
+      messagesByObjective: {},
     });
 
     const ledger = getChannelResultFor(ledgerChannelId, channelResults);
@@ -493,8 +519,10 @@ describe('Funding multiple channels concurrently (in bulk)', () => {
   });
 
   it('can close them all (concurrently!)', async () => {
+    const {peerEngines, participantA, participantB} = peerSetup;
     // ⚠️ This results in several messages back and forth
     await exchangeMessagesBetweenAandB(
+      peerSetup,
       [],
       await Promise.all(
         appChannelIds.map(async channelId => (await peerEngines.a.closeChannel({channelId})).outbox)
@@ -537,15 +565,16 @@ describe('Funding multiple channels syncronously without enough funds', () => {
   });
 
   it(`can fund 4 channels created in bulk by Alice, rejecting 2 with no funds`, async () => {
-    const ledgerChannelId = await createLedgerChannel(2, 2);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantB} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 2, 2);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
     const resultA0 = await peerEngines.a.createChannels(params, 4); // 2 channels will be unfunded
     const channelIds = resultA0.channelResults.map(c => c.channelId);
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, resultA0.outbox));
     const resultB1 = await peerEngines.b.joinChannels(channelIds);
 
-    await exchangeMessagesBetweenAandB([resultB1.outbox], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [resultB1.outbox], []);
 
     const {channelResults} = await peerEngines.a.getChannels();
 
@@ -553,6 +582,7 @@ describe('Funding multiple channels syncronously without enough funds', () => {
       channelResults,
       outbox: [],
       newObjectives: [],
+      messagesByObjective: {},
     });
 
     const {
@@ -591,15 +621,16 @@ describe('Funding multiple channels syncronously without enough funds', () => {
     const LEDGER_HAS = 2;
     const APP_WANTS = 10000000; // > 2
 
-    const ledgerChannelId = await createLedgerChannel(LEDGER_HAS, LEDGER_HAS);
-    const params = testCreateChannelParams(APP_WANTS, APP_WANTS, ledgerChannelId);
+    const ledgerChannelId = await createLedgerChannel(peerSetup, LEDGER_HAS, LEDGER_HAS);
+    const params = testCreateChannelParams(peerSetup, APP_WANTS, APP_WANTS, ledgerChannelId);
 
+    const {peerEngines, participantB} = peerSetup;
     const resultA = await peerEngines.a.createChannel(params);
-    const channelId = resultA.channelResults[0].channelId;
+    const {channelId} = resultA.channelResult;
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, resultA.outbox));
     const resultB = await peerEngines.b.joinChannel({channelId});
 
-    await exchangeMessagesBetweenAandB([resultB.outbox], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [resultB.outbox], []);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();
@@ -627,8 +658,9 @@ describe('Funding multiple channels concurrently (one sided)', () => {
   });
 
   it('can fund 2 channels by ledger both proposed by the same wallet', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantB} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
     const create1 = await peerEngines.a.createChannel(params);
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, create1.outbox));
@@ -636,13 +668,13 @@ describe('Funding multiple channels concurrently (one sided)', () => {
     const create2 = await peerEngines.a.createChannel(params);
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, create2.outbox));
 
-    const channelId1 = create1.channelResults[0].channelId;
-    const channelId2 = create2.channelResults[0].channelId;
+    const channelId1 = create1.channelResult.channelId;
+    const channelId2 = create2.channelResult.channelId;
 
     const {outbox: join1} = await peerEngines.b.joinChannel({channelId: channelId1});
     const {outbox: join2} = await peerEngines.b.joinChannel({channelId: channelId2});
 
-    await exchangeMessagesBetweenAandB([join1, join2], []);
+    await exchangeMessagesBetweenAandB(peerSetup, [join1, join2], []);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();
@@ -665,18 +697,20 @@ describe('Funding multiple channels concurrently (one sided)', () => {
 });
 
 async function proposeMultipleChannelsToEachother(
+  peerSetup: PeerSetup,
   params: CreateChannelParams,
   N = 2 // Total number of channels = 2 * N
 ): Promise<{aToJoin: Bytes32[]; bToJoin: Bytes32[]}> {
   const aToJoin = [];
   const bToJoin = [];
   for (let i = 0; i < N; i++) {
+    const {peerEngines, participantA, participantB} = peerSetup;
     const createA = await peerEngines.a.createChannel(params);
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, createA.outbox));
     const createB = await peerEngines.b.createChannel(params);
     await peerEngines.a.pushMessage(getPayloadFor(participantA.participantId, createB.outbox));
-    aToJoin.push(createB.channelResults[0].channelId);
-    bToJoin.push(createA.channelResults[0].channelId);
+    aToJoin.push(createB.channelResult.channelId);
+    bToJoin.push(createA.channelResult.channelId);
   }
   return {aToJoin, bToJoin};
 }
@@ -688,18 +722,19 @@ describe('Funding multiple channels concurrently (two sides)', () => {
   });
 
   it('can fund 2 channels by ledger each proposed by the other', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
     const {
       bToJoin: [channelId1],
       aToJoin: [channelId2],
-    } = await proposeMultipleChannelsToEachother(params, 1);
+    } = await proposeMultipleChannelsToEachother(peerSetup, params, 1);
 
     const {outbox: joinB} = await peerEngines.b.joinChannel({channelId: channelId1});
     const {outbox: joinA} = await peerEngines.a.joinChannel({channelId: channelId2});
 
-    await exchangeMessagesBetweenAandB([joinB], [joinA]);
+    await exchangeMessagesBetweenAandB(peerSetup, [joinB], [joinA]);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();
@@ -721,16 +756,17 @@ describe('Funding multiple channels concurrently (two sides)', () => {
   });
 
   it('can fund 4 channels by ledger, 2 created concurrently at a time', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantA, participantB} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
     const {
-      channelResults: [{channelId: channelId1}],
+      channelResult: {channelId: channelId1},
       outbox: outboxA1,
     } = await peerEngines.a.createChannel(params);
 
     const {
-      channelResults: [{channelId: channelId2}],
+      channelResult: {channelId: channelId2},
       outbox: outboxA2,
     } = await peerEngines.a.createChannel(params);
 
@@ -738,12 +774,12 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     await peerEngines.b.pushMessage(getPayloadFor(participantB.participantId, outboxA2));
 
     const {
-      channelResults: [{channelId: channelId3}],
+      channelResult: {channelId: channelId3},
       outbox: outboxB3,
     } = await peerEngines.b.createChannel(params);
 
     const {
-      channelResults: [{channelId: channelId4}],
+      channelResult: {channelId: channelId4},
       outbox: outboxB4,
     } = await peerEngines.b.createChannel(params);
 
@@ -755,7 +791,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const {outbox: joinA3} = await peerEngines.a.joinChannel({channelId: channelId3});
     const {outbox: joinA4} = await peerEngines.a.joinChannel({channelId: channelId4});
 
-    await exchangeMessagesBetweenAandB([joinB1, joinB2], [joinA3, joinA4]);
+    await exchangeMessagesBetweenAandB(peerSetup, [joinB1, joinB2], [joinA3, joinA4]);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();
@@ -777,10 +813,11 @@ describe('Funding multiple channels concurrently (two sides)', () => {
   });
 
   it('can fund 4 channels by ledger, 1 created at a time, using joinChannel', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantA, participantB} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
-    const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(params);
+    const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(peerSetup, params);
 
     const joinB1 = await peerEngines.b.joinChannel({channelId: bToJoin[0]});
     const joinA2 = await peerEngines.a.joinChannel({channelId: aToJoin[0]});
@@ -790,7 +827,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const messagesAwillSendToB = [joinA2.outbox, joinA4.outbox];
     const messagesBwillSendToA = [joinB1.outbox, joinB3.outbox];
 
-    await exchangeMessagesBetweenAandB(messagesBwillSendToA, messagesAwillSendToB);
+    await exchangeMessagesBetweenAandB(peerSetup, messagesBwillSendToA, messagesAwillSendToB);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();
@@ -824,10 +861,11 @@ describe('Funding multiple channels concurrently (two sides)', () => {
   });
 
   it('can fund 4 channels by ledger, 1 created at a time, using joinChannels', async () => {
-    const ledgerChannelId = await createLedgerChannel(10, 10);
-    const params = testCreateChannelParams(1, 1, ledgerChannelId);
+    const {peerEngines, participantA, participantB} = peerSetup;
+    const ledgerChannelId = await createLedgerChannel(peerSetup, 10, 10);
+    const params = testCreateChannelParams(peerSetup, 1, 1, ledgerChannelId);
 
-    const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(params);
+    const {aToJoin, bToJoin} = await proposeMultipleChannelsToEachother(peerSetup, params);
 
     const joinB = await peerEngines.b.joinChannels(bToJoin);
     const joinA = await peerEngines.a.joinChannels(aToJoin);
@@ -835,7 +873,7 @@ describe('Funding multiple channels concurrently (two sides)', () => {
     const messagesAwillSendToB = [joinA.outbox];
     const messagesBwillSendToA = [joinB.outbox];
 
-    await exchangeMessagesBetweenAandB(messagesBwillSendToA, messagesAwillSendToB);
+    await exchangeMessagesBetweenAandB(peerSetup, messagesBwillSendToA, messagesAwillSendToB);
 
     await interParticipantChannelResultsAreEqual(peerEngines.a, peerEngines.b);
     const {channelResults} = await peerEngines.a.getChannels();

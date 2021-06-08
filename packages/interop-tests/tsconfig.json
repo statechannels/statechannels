@@ -13,7 +13,7 @@
       "path": "../server-wallet"
     },
     {
-      "path": "../xstate-wallet"
+      "path": "../browser-wallet"
     }
   ],
   "include": ["src", "jest"],

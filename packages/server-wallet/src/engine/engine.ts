@@ -7,13 +7,13 @@ import {
   GetStateParams,
   Participant as APIParticipant,
   ChannelId,
+  Message,
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
   validatePayload,
   Outcome,
   convertToParticipant,
-  BN,
   makeAddress,
   Address as CoreAddress,
   PrivateKey,
@@ -24,10 +24,11 @@ import * as Either from 'fp-ts/lib/Either';
 import Knex from 'knex';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {ethers, constants, BigNumber, utils} from 'ethers';
+import {ethers, BigNumber, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
+import {Transaction} from 'objection';
 
 import {Bytes32, Uint256} from '../type-aliases';
 import {createLogger} from '../logger';
@@ -58,15 +59,16 @@ import {ObjectiveManager} from '../objectives';
 import {SingleAppUpdater} from '../handlers/single-app-updater';
 import {LedgerManager} from '../protocols/ledger-manager';
 import {WalletObjective, ObjectiveModel} from '../models/objective';
+import {getMessages} from '../message-service/utils';
 
 import {Store, AppHandler, MissingAppHandler} from './store';
 import {
   SingleChannelOutput,
   MultipleChannelOutput,
-  Output,
   EngineInterface,
-  UpdateChannelFundingParams,
   EngineEvent,
+  hasNewObjective,
+  SyncObjectiveResult,
 } from './types';
 import {EngineResponse} from './engine-response';
 
@@ -166,6 +168,7 @@ export class SingleThreadedEngine
 
     this.ledgerManager = LedgerManager.create({store: this.store});
   }
+
   /**
    * Adds an ethereum private key to the engine's database
    *
@@ -240,23 +243,6 @@ export class SingleThreadedEngine
   }
 
   /**
-   * Streamlines engine output messsages.
-   *
-   * @remarks
-   * Helps to enable more efficient messaging. Channel results are sorted and deduplicated. Messages to the same recipient are merged.
-   *
-   * @privateRemarks
-   * TODO: Consider whether we need to make this method public (at time of writing, it is used only once in consuming code)
-   * TODO: Is this method well named? "Merge" doesn't really do justice to what is going on. "Messages" is not in harmony with "Output[]".
-   *
-   * @param output - An array of output messages and channel results.
-   * @returns A streamlined output of messages.
-   */
-  public static mergeOutputs(output: Output[]): MultipleChannelOutput {
-    return EngineResponse.mergeOutputs(output);
-  }
-
-  /**
    * Destroy this engine instance
    *
    * @remarks
@@ -288,7 +274,7 @@ export class SingleThreadedEngine
    * @param objectiveIds The ids of the objectives that should be sent to the counterparties
    * @returns A promise that resolves to an object containing the messages.
    */
-  public async syncObjectives(objectiveIds: string[]): Promise<MultipleChannelOutput> {
+  public async syncObjectives(objectiveIds: string[]): Promise<SyncObjectiveResult> {
     const response = EngineResponse.initialize();
     const objectives = await this.store.getObjectivesByIds(objectiveIds);
 
@@ -309,13 +295,13 @@ export class SingleThreadedEngine
       // This could be refactored if performance is an issue
       const channel = await this.store.getChannelState(o.data.targetChannelId);
       // This will make sure any relevant channel information is synced
-      await this._syncChannel(channel.channelId, response);
+      await this._syncChannel(channel.channelId, response, o.objectiveId);
 
       const {participants} = channel;
       response.queueSendObjective(o, channel.myIndex, participants);
     }
 
-    return response.multipleChannelOutput();
+    return response.syncObjectiveResult;
   }
 
   /**
@@ -330,14 +316,17 @@ export class SingleThreadedEngine
     return response.singleChannelOutput();
   }
 
-  private async _syncChannel(channelId: string, response: EngineResponse): Promise<void> {
+  private async _syncChannel(
+    channelId: string,
+    response: EngineResponse,
+    objectiveId?: string
+  ): Promise<void> {
     const {states, channelState} = await this.store.getStates(channelId);
 
     const {myIndex, participants} = channelState;
 
-    states.forEach(s => response.queueState(s, myIndex, channelId));
-
-    response.queueChannelRequest(channelId, myIndex, participants);
+    states.forEach(s => response.queueState(s, myIndex, channelId, objectiveId));
+    response.queueChannelRequest(channelId, myIndex, participants, objectiveId);
     response.queueChannelState(channelState);
   }
 
@@ -367,8 +356,9 @@ export class SingleThreadedEngine
           participants: [],
           data: {targetChannelId: channelId},
         },
-        true, // preApprove
-        tx
+
+        tx,
+        'approved'
       );
       this.emit('objectiveStarted', objective);
 
@@ -379,51 +369,6 @@ export class SingleThreadedEngine
     // TODO: In v0 of challenging the challengeStatus on the channel will not be updated
     // We return a single channel result anwyays in case there are messages in the outbox
     return response.singleChannelOutput();
-  }
-
-  /**
-   * Update the engine's knowledge about the funding for some channels
-   *
-   * @param args - A list of objects, each specifying the channelId, asset holder address and amount.
-   * @returns A promise that resolves to a channel output.
-   */
-  public async updateFundingForChannels(
-    args: UpdateChannelFundingParams[]
-  ): Promise<MultipleChannelOutput> {
-    const response = EngineResponse.initialize();
-
-    await Promise.all(args.map(a => this._updateChannelFunding(a, response)));
-
-    return response.multipleChannelOutput();
-  }
-
-  /**
-   * Update the engine's knowledge about the funding for a channel.
-   *
-   * @param args - An object specifying the channelId, asset holder address and amount.
-   * @returns A promise that resolves to a channel output.
-   */
-  public async updateChannelFunding(
-    args: UpdateChannelFundingParams
-  ): Promise<SingleChannelOutput> {
-    const response = EngineResponse.initialize();
-
-    await this._updateChannelFunding(args, response);
-
-    return response.singleChannelOutput();
-  }
-
-  private async _updateChannelFunding(
-    {channelId, assetHolderAddress, amount}: UpdateChannelFundingParams,
-    response: EngineResponse
-  ): Promise<void> {
-    await this.store.updateFunding(
-      channelId,
-      BN.from(amount),
-      assetHolderAddress || makeAddress(constants.AddressZero)
-    );
-
-    await this.takeActions([channelId], response);
   }
 
   /**
@@ -439,7 +384,8 @@ export class SingleThreadedEngine
    * Creates a ledger channel.
    *
    * @remarks
-   * The channel will have a null app definition and null app data. This method is otherwise identical to {@link SingleThreadedEngine.createChannel}.
+   * The channel will have a null app definition and null app data.
+   * This method is otherwise identical to {@link SingleThreadedEngine.createChannel}.
    *
    * @returns A promise that resolves to the channel output.
    */
@@ -476,14 +422,21 @@ export class SingleThreadedEngine
    * @param args - Parameters to create the channel with.
    * @returns A promise that resolves to the channel output.
    */
-  async createChannel(args: CreateChannelParams): Promise<MultipleChannelOutput> {
+  async createChannel(
+    args: CreateChannelParams
+  ): Promise<SingleChannelOutput & {newObjective: WalletObjective}> {
     const response = EngineResponse.initialize();
 
     await this._createChannel(response, args, 'app');
 
     // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
 
-    return response.multipleChannelOutput();
+    const result = response.singleChannelOutput();
+    if (!hasNewObjective(result)) {
+      throw new Error('No new objective created for create channel');
+    } else {
+      return result;
+    }
   }
   /**
    * Creates multiple channels with the same parameters. See {@link SingleThreadedEngine.createChannel}.
@@ -498,9 +451,9 @@ export class SingleThreadedEngine
   ): Promise<MultipleChannelOutput> {
     const response = EngineResponse.initialize();
 
-    await Promise.all(
-      _.range(numberOfChannels).map(() => this._createChannel(response, args, 'app'))
-    );
+    for (const _i of _.range(numberOfChannels)) {
+      await this._createChannel(response, args, 'app');
+    }
 
     // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
 
@@ -545,7 +498,7 @@ export class SingleThreadedEngine
     );
 
     this.emit('objectiveStarted', objective);
-    response.queueState(signedState, channel.myIndex, channel.channelId);
+    response.queueState(signedState, channel.myIndex, channel.channelId, objective.objectiveId);
     response.queueCreatedObjective(objective, channel.myIndex, channel.participants);
     response.queueChannelState(channel);
 
@@ -569,10 +522,9 @@ export class SingleThreadedEngine
     const objectives = await this.store.getObjectives(channelIds);
 
     await Promise.all(
-      objectives.map(
-        async ({type, objectiveId}) =>
-          type === 'OpenChannel' && (await this.store.approveObjective(objectiveId))
-      )
+      objectives
+        .filter(o => o.type === 'OpenChannel')
+        .map(async ({objectiveId}) => await this.store.approveObjective(objectiveId))
     );
 
     await this.takeActions(channelIds, response);
@@ -580,6 +532,47 @@ export class SingleThreadedEngine
     await Promise.all(channelIds.map(id => this.registerChannelWithChainService(id)));
 
     return response.multipleChannelOutput();
+  }
+
+  private async approveObjective(
+    objectiveId: string,
+    targetChannelId: string
+  ): Promise<WalletObjective> {
+    return this.store.transaction(async tx => {
+      await this.store.getAndLockChannel(targetChannelId, tx);
+
+      const objective = await this.store.getObjective(objectiveId, tx);
+
+      if (objective.status === 'pending') {
+        const approved = await this.store.approveObjective(objectiveId, tx);
+        await this.registerChannelWithChainService(approved.data.targetChannelId, tx);
+        return approved;
+      } else {
+        return objective;
+      }
+    });
+  }
+
+  async approveObjectives(
+    objectiveIds: string[]
+  ): Promise<{objectives: WalletObjective[]; messages: Message[]}> {
+    const channelIds: string[] = [];
+    const response = EngineResponse.initialize();
+    let objectives = await this.store.getObjectivesByIds(objectiveIds);
+    for (const objective of objectives) {
+      const {objectiveId, data} = objective;
+      await this.approveObjective(objectiveId, data.targetChannelId);
+      channelIds.push(data.targetChannelId);
+    }
+
+    await this.takeActions(channelIds, response);
+
+    // Some objectives may now be completed so we want to refetch them
+    // This could be handled by pulling objectives off the response
+    // But this is more straightforward for now
+    objectives = await this.store.getObjectivesByIds(objectiveIds);
+
+    return {objectives, messages: getMessages(response.multipleChannelOutput())};
   }
 
   /**
@@ -606,11 +599,19 @@ export class SingleThreadedEngine
 
     const objectives = await this.store.getObjectives([channelId]);
 
-    if (objectives.length === 0)
-      throw new Error(`Could not find objective for channel ${channelId}`);
+    if (objectives.length !== 1) {
+      const msg = 'Expecting exactly one objective';
+      this.logger.error({channelId, objectives}, msg);
+      throw new Error(msg);
+    }
 
-    if (objectives[0].type === 'OpenChannel')
-      await this.store.approveObjective(objectives[0].objectiveId);
+    const objective = objectives[0];
+
+    if (objective.type === 'OpenChannel') {
+      await this.store.approveObjective(objective.objectiveId);
+    } else {
+      // TODO: Shouldn't we do something about this??
+    }
 
     await this.takeActions([channelId], response);
 
@@ -712,15 +713,22 @@ export class SingleThreadedEngine
    * This objective continues working after this call resolves, and will attempt to defund the channel.
    *
    * @param channelId - The id of the channel to try and close.
-   * @returns A promise that resolves to the channel output.
+   * @returns A promise that resolves to the channel output. Will always return a new objective.
    */
-  async closeChannel({channelId}: CloseChannelParams): Promise<SingleChannelOutput> {
+  async closeChannel({
+    channelId,
+  }: CloseChannelParams): Promise<SingleChannelOutput & {newObjective: WalletObjective}> {
     const response = EngineResponse.initialize();
 
     await this._closeChannel(channelId, response);
     await this.takeActions([channelId], response);
 
-    return response.singleChannelOutput();
+    const result = response.singleChannelOutput();
+    if (!hasNewObjective(result)) {
+      throw new Error('No new objective created for closeChannel');
+    } else {
+      return result;
+    }
   }
 
   private async _closeChannel(channelId: Bytes32, response: EngineResponse): Promise<void> {
@@ -771,6 +779,14 @@ export class SingleThreadedEngine
    */
   async getObjective(objectiveId: string): Promise<WalletObjective> {
     return this.store.getObjective(objectiveId);
+  }
+
+  /**
+   * Gets any objectives with an approved status
+   * @returns A promise that resolves to a collection of WalletObjectives
+   */
+  async getApprovedObjectives(): Promise<WalletObjective[]> {
+    return this.store.getApprovedObjectives();
   }
 
   /**
@@ -926,14 +942,25 @@ export class SingleThreadedEngine
     response.succeededObjectives.map(o => this.emit('objectiveSucceeded', o));
   }
 
+  /**
+   * Update the engine's knowledge about the on-chain funding for a channel.
+   *
+   * @param args - An object specifying the channelId, asset holder address and amount.
+   * @returns A promise that resolves to a channel output.
+   */
   // ChainEventSubscriberInterface implementation
-  async holdingUpdated({channelId, amount, assetHolderAddress}: HoldingUpdatedArg): Promise<void> {
-    const response = EngineResponse.initialize();
-
-    await this.store.updateFunding(channelId, BN.from(amount), assetHolderAddress);
+  async holdingUpdated(
+    {channelId, amount, assetHolderAddress}: HoldingUpdatedArg,
+    response = EngineResponse.initialize()
+  ): Promise<SingleChannelOutput> {
+    await this.store.updateFunding(channelId, amount, assetHolderAddress);
     await this.takeActions([channelId], response);
 
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
+
+    // holdingUpdated may be called by updateChannelsForFunding, which therefore includes
+    // multiple channel output. So, we set strict to false
+    return response.singleChannelOutput(false);
   }
 
   async assetOutcomeUpdated({
@@ -979,8 +1006,9 @@ export class SingleThreadedEngine
           participants: [],
           data: {targetChannelId: arg.channelId},
         },
-        true, // preApproved
-        tx
+
+        tx,
+        'approved'
       );
       this.emit('objectiveStarted', objective);
     });
@@ -989,8 +1017,11 @@ export class SingleThreadedEngine
     response.channelUpdatedEvents().forEach(event => this.emit('channelUpdated', event.value));
   }
 
-  private async registerChannelWithChainService(channelId: string): Promise<void> {
-    const channel = await this.store.getChannelState(channelId);
+  private async registerChannelWithChainService(
+    channelId: string,
+    tx?: Transaction
+  ): Promise<void> {
+    const channel = await this.store.getChannelState(channelId, tx);
     const channelResult = ChannelState.toChannelResult(channel);
 
     const assetHolderAddresses = channelResult.allocations.map(a =>

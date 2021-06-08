@@ -1,7 +1,7 @@
 import {Contract, Wallet} from 'ethers';
 
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
-import {getTestProvider, setupContracts} from '../../test-helpers';
+import {getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 
@@ -17,11 +17,7 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 describe('isExternalDestination', () => {

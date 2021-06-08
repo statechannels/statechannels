@@ -18,7 +18,7 @@ import {
   getTestProvider,
   largeOutcome,
   sendTransaction,
-  setupContracts,
+  setupContract,
 } from '../../test-helpers';
 import {PushOutcomeTransactionArg} from '../../../src/contract/transaction-creators/nitro-adjudicator';
 
@@ -39,17 +39,17 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 beforeAll(async () => {
-  TestNitroAdjudicator = await setupContracts(
+  TestNitroAdjudicator = setupContract(
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  ETHAssetHolder = await setupContracts(
+  ETHAssetHolder = setupContract(
     provider,
     ETHAssetHolderArtifact,
     process.env.ETH_ASSET_HOLDER_ADDRESS
   );
-  ERC20AssetHolder = await setupContracts(
+  ERC20AssetHolder = setupContract(
     provider,
     ERC20AssetHolderArtifact,
     process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS

@@ -37,9 +37,6 @@ export class ChannelDefunder implements Cranker<WalletObjective<DefundChannel>> 
   ): Promise<WaitingFor | Nothing> {
     const {targetChannelId: channelId} = objective.data;
     const channel = await this.store.getAndLockChannel(channelId, tx);
-    if (!channel) {
-      throw new Error('Channel must exist');
-    }
 
     await channel.$fetchGraph('funding', {transaction: tx});
     await channel.$fetchGraph('chainServiceRequests', {transaction: tx});

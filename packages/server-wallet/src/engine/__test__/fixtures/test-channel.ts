@@ -306,7 +306,11 @@ export class TestChannel {
     turnNums.push(turnNum);
 
     // insert the OpenChannel objective
-    const objective = await ObjectiveModel.insert(this.openChannelObjective, true, store.knex);
+    const objective = await ObjectiveModel.insert(
+      this.openChannelObjective,
+      store.knex,
+      'approved'
+    );
 
     // make it a ledger here
     if (this.isLedger) {
@@ -351,7 +355,7 @@ export interface InsertionParams {
 
 export type SignedBy = 0 | 1 | 'both';
 
-interface StateWithBals {
+export interface StateWithBals {
   turn: number;
   bals: Bals;
   signedBy: SignedBy;

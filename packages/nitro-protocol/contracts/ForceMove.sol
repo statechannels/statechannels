@@ -943,7 +943,9 @@ contract ForceMove is IForceMove {
             (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
             'Bad |signatures|v|whoSignedWhat|'
         );
-        require(numParticipants < type(uint8).max, 'Too many participants!');
+        require(numParticipants <= type(uint8).max, 'Too many participants!'); // type(uint8).max = 2**8 - 1 = 255
+        // no more than 255 participants
+        // max index for participants is 254
         return true;
     }
 }

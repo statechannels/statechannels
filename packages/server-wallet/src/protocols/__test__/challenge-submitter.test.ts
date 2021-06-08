@@ -51,9 +51,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const walletObjective = await knex.transaction(async tx =>
-      ObjectiveModel.insert(obj, false, tx)
-    );
+    const walletObjective = await knex.transaction(async tx => ObjectiveModel.insert(obj, tx));
 
     await await crankAndAssert(walletObjective, {callsChallenge: false, completesObj: false});
   });
@@ -71,7 +69,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx => ObjectiveModel.insert(obj, false, tx));
+    const objective = await knex.transaction(tx => ObjectiveModel.insert(obj, tx));
 
     await await crankAndAssert(objective, {callsChallenge: false, completesObj: false});
   });
@@ -90,7 +88,7 @@ describe(`challenge-submitter`, () => {
       data: {targetChannelId: c.channelId},
     };
 
-    const objective = await knex.transaction(tx => ObjectiveModel.insert(obj, false, tx));
+    const objective = await knex.transaction(tx => ObjectiveModel.insert(obj, tx));
     await await crankAndAssert(objective, {
       callsChallenge: true,
       completesObj: true,

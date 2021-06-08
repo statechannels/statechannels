@@ -9,7 +9,7 @@ import {
   getTestProvider,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContracts,
+  setupContract,
 } from '../../../test-helpers';
 
 const provider = getTestProvider();
@@ -28,7 +28,7 @@ const guarantee = {
 };
 
 beforeAll(async () => {
-  singleAssetPayments = await setupContracts(
+  singleAssetPayments = setupContract(
     provider,
     SingleAssetPaymentsArtifact,
     process.env.SINGLE_ASSET_PAYMENT_ADDRESS

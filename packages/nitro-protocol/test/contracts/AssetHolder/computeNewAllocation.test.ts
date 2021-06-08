@@ -1,7 +1,7 @@
 import {Contract, BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
-import {getTestProvider, setupContracts, randomExternalDestination} from '../../test-helpers';
+import {getTestProvider, setupContract, randomExternalDestination} from '../../test-helpers';
 // eslint-disable-next-line import/order
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 
@@ -10,11 +10,7 @@ const provider = getTestProvider();
 let AssetHolder: Contract;
 
 beforeAll(async () => {
-  AssetHolder = await setupContracts(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
+  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
 });
 
 import {AllocationItem} from '../../../src';
@@ -22,7 +18,7 @@ import {computeNewAllocation} from '../../../src/contract/asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
-    ? [...Array(numAllocationItems)].map(e => ({
+    ? [...Array(numAllocationItems)].map(() => ({
         destination: randomExternalDestination(),
         amount: BigNumber.from(Math.ceil(Math.random() * 10)).toHexString(),
       }))

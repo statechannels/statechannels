@@ -64,7 +64,7 @@ describe('directly funded app', () => {
           role: 'app',
         },
       },
-      false,
+
       w.knex
     );
 
@@ -78,7 +78,7 @@ describe('directly funded app', () => {
           role: 'app',
         },
       },
-      false,
+
       w.knex
     );
 
@@ -132,7 +132,7 @@ describe('directly funded app', () => {
           role: 'app',
         },
       },
-      false,
+
       w.knex
     );
 
@@ -171,7 +171,7 @@ describe('directly funded app', () => {
           role: 'app',
         },
       },
-      false,
+
       w.knex
     );
 
@@ -251,7 +251,7 @@ describe('ledger funded app scenarios', () => {
           role: 'app',
         },
       },
-      false,
+
       w.knex
     );
 

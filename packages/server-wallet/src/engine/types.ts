@@ -7,17 +7,10 @@ import {
   ChannelId,
   ChannelResult,
 } from '@statechannels/client-api-schema';
-import {Address as CoreAddress} from '@statechannels/wallet-core';
 
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
-import {Bytes32, Uint256} from '../type-aliases';
-
-export interface UpdateChannelFundingParams {
-  channelId: ChannelId;
-  assetHolderAddress?: CoreAddress;
-  amount: Uint256;
-}
+import {Bytes32, WireMessage} from '../type-aliases';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
@@ -28,8 +21,13 @@ export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
+  messagesByObjective: Record<string, WireMessage[]>;
 };
 
+export type SyncObjectiveResult = {
+  messagesByObjective: Record<string, WireMessage[]>;
+  outbox: Outgoing[];
+};
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
 type ChannelUpdatedEvent = {
@@ -69,8 +67,13 @@ export interface EngineInterface {
 
   challenge(channelId: string): Promise<SingleChannelOutput>;
 
-  updateFundingForChannels(args: UpdateChannelFundingParams[]): Promise<MultipleChannelOutput>;
   // Engine <-> Engine communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
+}
+
+export function hasNewObjective(
+  response: SingleChannelOutput
+): response is SingleChannelOutput & {newObjective: WalletObjective} {
+  return !!response.newObjective;
 }

@@ -42,6 +42,7 @@ it('returns an outgoing message with the latest state', async () => {
     participants,
     vars: [
       stateWithHashSignedBy([alice(), bob(), charlie()])(runningState),
+      // NOTE: nextState is _not_ alice's state
       stateWithHashSignedBy([alice()])(nextState),
     ],
   });
@@ -83,7 +84,7 @@ it('returns an outgoing message with the latest state', async () => {
   });
 
   const updated = await Channel.forId(channelId, w.knex);
-  expect(updated.protocolState).toMatchObject({latest: runningState, supported: runningState});
+  expect(updated.protocolState).toMatchObject({latest: nextState, supported: runningState});
 });
 
 it('reject when the channel is not known', async () => {
