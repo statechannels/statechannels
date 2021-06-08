@@ -48,17 +48,19 @@ export class MockChainService implements ChainServiceInterface {
     for (const chainRequest of chainRequests) {
       switch (chainRequest.type) {
         case 'Challenge':
-          responses.push(this.challenge(chainRequest.challengeStates, chainRequest.privateKey));
+          responses.push(
+            await this.challenge(chainRequest.challengeStates, chainRequest.privateKey)
+          );
           break;
         case 'ConcludeAndWithdraw':
-          responses.push(this.concludeAndWithdraw(chainRequest.finalizationProof));
+          responses.push(await this.concludeAndWithdraw(chainRequest.finalizationProof));
           break;
         case 'FundChannel':
-          responses.push(this.fundChannel(chainRequest));
+          responses.push(await this.fundChannel(chainRequest));
           break;
         case 'PushOutcomeAndWithdraw':
           responses.push(
-            this.pushOutcomeAndWithdraw(chainRequest.state, chainRequest.challengerAddress)
+            await this.pushOutcomeAndWithdraw(chainRequest.state, chainRequest.challengerAddress)
           );
           break;
         default:
