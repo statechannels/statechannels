@@ -2,7 +2,7 @@ import {ChannelResult, CreateChannelParams, Uint256} from '@statechannels/client
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {providers, utils} from 'ethers';
+import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
 
 import {
@@ -295,17 +295,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   /**
-   * Waits for the transactions.wait() promise to resolve on all transaction responses.
-   * @param response
-   */
-  private async waitForTransactions(
-    response: Promise<providers.TransactionResponse[]>
-  ): Promise<void> {
-    const transactions = await response;
-    await Promise.all(transactions.map(tr => tr.wait()));
-  }
-
-  /**
    * Emits events, sends messages and requests transactions based on the output of the engine.
    * @param output
    */
@@ -314,7 +303,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   ): Promise<void> {
     this.emitObjectiveEvents(output);
     await this._messageService.send(getMessages(output));
-    await this.waitForTransactions(this._chainService.handleChainRequests(output.chainRequests));
+    await this._chainService.handleChainRequests(output.chainRequests);
   }
 
   public get messageService(): MessageServiceInterface {
