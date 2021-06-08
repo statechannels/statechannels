@@ -2,14 +2,12 @@ import {makeDestination} from '@statechannels/wallet-core';
 
 import {ChainEventSubscriberInterface} from '../chain-service';
 import {Engine} from '../engine';
-import {Store} from '../engine/store';
 import {MessageServiceInterface} from '../message-service/types';
 import {getMessages} from '../message-service/utils';
 import {Uint256} from '../type-aliases';
 
 export function createChainListener(
   engine: Engine,
-  store: Store,
   messageService: MessageServiceInterface
 ): ChainEventSubscriberInterface {
   return {
