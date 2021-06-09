@@ -1,6 +1,6 @@
 # What is a state channel wallet?
 
-A node in a state channel network. See [nitro protocol](https://docs.statechannels.org/`).
+A node in a state channel network. See [nitro protocol](https://docs.statechannels.org/).
 
 More concretely, a state channel wallet _is_:
 
