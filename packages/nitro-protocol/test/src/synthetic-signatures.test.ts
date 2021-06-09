@@ -1,5 +1,4 @@
 import {BigNumber, ethers} from 'ethers';
-import {sign} from '../../src/signatures';
 
 // ansazt 0
 function createSyntheticSignatureType0(channelId: string) {
