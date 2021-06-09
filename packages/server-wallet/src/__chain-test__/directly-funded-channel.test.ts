@@ -90,6 +90,7 @@ const mineBlocksForEvent = () => mineBlocks();
 
 function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocksForEvent);
+  contract.on('AllocationUpdated', mineBlocksForEvent);
 }
 
 beforeAll(async () => {
