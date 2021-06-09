@@ -73,8 +73,8 @@ const aEngineConfig: EngineConfig = {
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
 
-const aFunding = BN.from(1);
-const bFunding = BN.from(0);
+const aFunding = BN.from(3);
+const bFunding = BN.from(2);
 
 async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
@@ -184,7 +184,9 @@ it('Create a directly funded channel between two wallets ', async () => {
   await expect(bResponse).toBeObjectiveDoneType('Success');
 
   const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
-  expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual('0x01');
+  expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(
+    BN.add(aFunding, bFunding)
+  );
 
   const {channelId} = response[0];
   const closeResponse = await b.closeChannels([channelId]);
@@ -195,8 +197,4 @@ it('Create a directly funded channel between two wallets ', async () => {
 
   expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
   expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
-
-  // TODO: This is slightly hacky but it's a workaround for chain event listeners promises
-  // that are still executing when destroy is called.
-  await new Promise(resolve => setTimeout(resolve, 2_000));
 });
