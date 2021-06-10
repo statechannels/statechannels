@@ -88,8 +88,8 @@ function createSyntheticSignatureType5(channelId: string) {
   // TODO1: be sure that by choosing r without randomness, we are not breaking security properties
   // (The private key for this account must remain infeasible to obtain)
   // const r = '0x' + curve.keyFromPrivate(channelId.slice(4)).getPublic().getX(); // didn't work, not sure why
-  const r = '0x' + new Wallet(channelId).publicKey.slice(4, 68); // the slice gets us the X coord  -- pubKey = 0x04|| X || Y
-  const s = ethers.BigNumber.from('0x' + channelId.slice(20)).toHexString();
+  const r = '0x' + new Wallet(channelId).publicKey.slice(4, 68); // the slice gets us the X coord. pubKey = 0x04|| X || Y
+  const s = channelId;
   const v = 27;
   return {r, s, v};
 }
