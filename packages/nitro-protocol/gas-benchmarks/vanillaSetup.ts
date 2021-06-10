@@ -5,13 +5,12 @@ import {ContractFactory, Contract} from '@ethersproject/contracts';
 import {providers} from 'ethers';
 import waitOn from 'wait-on';
 import kill from 'tree-kill';
+import {BigNumber} from '@ethersproject/bignumber';
 
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/ERC20AssetHolder.sol/ERC20AssetHolder.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
-import {BigNumber, BigNumberish} from '@ethersproject/bignumber';
-import {Transaction} from 'ethers';
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -32,7 +31,7 @@ const hardHatNetworkEndpoint = 'http://localhost:9546'; // the port should be un
 
 jest.setTimeout(15_000); // give hardhat network a chance to get going
 if (existsSync(logFile)) truncateSync(logFile);
-const hardhatProcess = exec('npx hardhat node --no-deploy --port 9546', (error, stdout, stderr) => {
+const hardhatProcess = exec('npx hardhat node --no-deploy --port 9546', (error, stdout) => {
   promises.appendFile(logFile, stdout);
 });
 const hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
