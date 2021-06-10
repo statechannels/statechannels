@@ -5,6 +5,11 @@ import {ec} from 'elliptic';
 // (better do it once and reuse it)
 const curve = new ec('secp256k1');
 
+// According to the ethereum yellow paper, p24 https://ethereum.github.io/yellowpaper/paper.pdf
+// 0 < r < secp256k1n
+// 0 < s < secp256k1n / 2 + 1
+// v = 27 or 28
+
 // ansazt 0
 function createSyntheticSignatureType0(channelId: string) {
   // this naive approach won't always work, since r and s must be elements of the field Z/pZ
@@ -56,16 +61,18 @@ function createSyntheticSignatureType3(channelId: string) {
 
 // ansazt 4
 function createSyntheticSignatureType4(channelId: string) {
-  // const p = BigNumber.from('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
-  const r = ethers.BigNumber.from(channelId.slice(0, 20)).toHexString();
+  let r = ethers.BigNumber.from(channelId.slice(0, 20)).toHexString();
   const s = ethers.BigNumber.from('0x' + channelId.slice(20)).toHexString();
   const v = 27;
-  // try with
-  // try {
-  //   computeSyntheticAddress({r, s, v});
-  // } catch (error) {
-  //   s = BigNumber.from(s).add(1).toHexString();
-  // }
+  let invalid = true;
+  while (invalid) {
+    try {
+      computeSyntheticAddress({r, s, v});
+      invalid = false;
+    } catch (error) {
+      r = BigNumber.from(r).add(1).toHexString();
+    }
+  }
   return {r, s, v};
 }
 
