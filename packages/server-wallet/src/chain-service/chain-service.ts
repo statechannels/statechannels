@@ -133,6 +133,11 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
+  /**
+   * Create and send transactions for the chain requests.
+   * @param chainRequests A collection of chain requests
+   * @returns A collection of transaction responses for the submitted chain requests.
+   */
   public async handleChainRequests(
     chainRequests: ChainRequest[]
   ): Promise<providers.TransactionResponse[]> {

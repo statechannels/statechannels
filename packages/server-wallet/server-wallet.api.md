@@ -257,13 +257,13 @@ export type ObjectiveResult = {
     channelId: string;
 };
 
-// @public (undocumented)
+// @public
 export type ObjectiveSuccess = {
     channelId: string;
     type: 'Success';
 };
 
-// @public (undocumented)
+// @public
 export type ObjectiveTimedOutError = {
     lastProgressMadeAt: Date;
     objectiveId: string;
@@ -353,7 +353,6 @@ export class SingleThreadedEngine implements EngineInterface {
         newObjective: WalletObjective;
     }>;
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
-    // (undocumented)
     crank(channelIds: string[]): Promise<MultipleChannelOutput>;
     // (undocumented)
     static create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine>;
@@ -445,7 +444,7 @@ export interface WalletEvents {
 //
 // src/engine/types.ts:28:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
 // src/engine/types.ts:66:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
-// src/wallet/types.ts:54:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:60:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

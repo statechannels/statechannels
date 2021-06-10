@@ -21,6 +21,9 @@ export type SyncOptions = {
 
 export type ObjectiveError = ObjectiveTimedOutError | InternalError;
 
+/**
+ * The objective timed out without being completed.
+ */
 export type ObjectiveTimedOutError = {
   lastProgressMadeAt: Date;
   objectiveId: string;
@@ -34,6 +37,9 @@ export type InternalError = {
   error: Error;
 };
 
+/**
+ * The objective suceeded.
+ */
 export type ObjectiveSuccess = {channelId: string; type: 'Success'};
 
 export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;

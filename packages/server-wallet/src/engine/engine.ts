@@ -538,6 +538,12 @@ export class SingleThreadedEngine implements EngineInterface {
     return response.singleChannelOutput(false);
   }
 
+  /**
+   * Attempts to make progress on any open objectives for the specified channels.
+   * This is used to make progress on objectives after something has changed in the store.
+   * @param channelIds The channels that progress should be made on.
+   * @returns The channel output which contains any new messages, chain requests, or objective events.
+   */
   public async crank(channelIds: string[]): Promise<MultipleChannelOutput> {
     const response = EngineResponse.initialize();
 
