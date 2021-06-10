@@ -35,7 +35,7 @@ function createSyntheticSignatureType2(channelId: string) {
     // eips.ethereum.org/EIPS/eip-2
     // One way to construct a valid one is to just set s to 0
     s: '0x0',
-    v: 27, // this is only going to be right about 50% of the time
+    v: 27,
   };
 }
 
