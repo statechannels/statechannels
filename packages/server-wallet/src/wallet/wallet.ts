@@ -110,6 +110,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       ),
     };
   }
+
   /**
    * Pulls and stores the ForceMoveApp definition bytecode at the supplied blockchain address.
    *
@@ -127,6 +128,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       bytecode
     );
   }
+
   /**
    * Approves an objective that has been proposed by another participant.
    * Once the objective has been approved progress can be made to completing the objective.
