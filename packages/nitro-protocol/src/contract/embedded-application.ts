@@ -16,7 +16,7 @@ export enum AlreadyMoved {
   'A',
   'B',
   'AB',
-  'ABC',
+  'ABI',
 }
 export interface EmbeddedApplicationData {
   channelIdForX: Bytes32;

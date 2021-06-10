@@ -109,7 +109,7 @@ library ForceMoveAppUtilities {
 
 // Off chain teardown:
 //
-// 1. A, B, I triple sign an ABC update to J that absorbs the latest outcome of X and unembeds X.
+// 1. A, B, I triple sign an ABI update to J that absorbs the latest outcome of X and unembeds X.
 // 2a. A and I remove $G_{AI}$ and absorb the outcome of J into their ledger channel
 // 2b. B and I remove $G_{BI}$ and absorb the outcome of J into their ledger channel
 
@@ -136,7 +136,7 @@ contract EmbeddedApplication is
     }
 
     // Finite states for J
-    enum AlreadyMoved {A, B, AB, ABC}
+    enum AlreadyMoved {A, B, AB, ABI}
 
     // Application Data for J
     struct AppData {
@@ -182,13 +182,13 @@ contract EmbeddedApplication is
         // A      B
         // ^      ^
         //  \    /
-        //    ABC
+        //    ABI
 
-        if (fromAppData.alreadyMoved == AlreadyMoved.ABC) {
+        if (fromAppData.alreadyMoved == AlreadyMoved.ABI) {
             require(
                 (toAppData.alreadyMoved == AlreadyMoved.A && signedByA) ||
                     (toAppData.alreadyMoved == AlreadyMoved.B && signedByB),
-                'incorrect move from ABC'
+                'incorrect move from ABI'
             );
         } else {
             // If a support proof has already been supplied, the current support proof must be greater
@@ -207,7 +207,7 @@ contract EmbeddedApplication is
                     'incorrect move from B'
                 );
             } else {
-                revert('move from ABC,A,B only');
+                revert('move from ABI,A,B only');
             }
         }
 

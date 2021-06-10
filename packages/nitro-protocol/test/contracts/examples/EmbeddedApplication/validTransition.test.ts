@@ -18,11 +18,11 @@ type RevertReason =
   | 'destinations may not change' // tested
   | 'p2.amt !constant' // tested
   | 'total allocation changed' // tested
-  | 'incorrect move from ABC' // tested
+  | 'incorrect move from ABI' // tested
   | 'inferior support proof' // tested
   | 'incorrect move from A' // tested
   | 'incorrect move from B' // tested
-  | 'move from ABC,A,B only' //tested
+  | 'move from ABI,A,B only' //tested
   | 'X / J outcome mismatch' // tested
   | 'X.appDefinition changed' // tested
   | 'X.challengeDuration changed' // tested
@@ -47,7 +47,7 @@ async function expectRevert(fn: () => void, reason: RevertReason) {
 // A      B
 // ^      ^
 //  \    /
-//    ABC
+//    ABI
 
 // AND we want to check various ways to support a state in X
 // i.e. whoSignedWhat = [0,1], [0,0] and [1,0]
@@ -142,10 +142,10 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
   whoSignedWhat: [0, 0],
 });
 
-const ABCvariablePartForJ: VariablePart = {
+const ABIvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
   appData: encodeEmbeddedApplicationData({
-    alreadyMoved: AlreadyMoved.ABC,
+    alreadyMoved: AlreadyMoved.ABI,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(stateForX), // TODO this is awkward. We would like to use a null value here
   }),
@@ -195,9 +195,9 @@ const nParticipants = 0; // TODO this is unused
 const signedByFrom = 0b00; // TODO this is unused
 
 describe('EmbeddedApplication: named state transitions', () => {
-  it('returns true / reverts for a correct / incorrect ABC => A transition', async () => {
+  it('returns true / reverts for a correct / incorrect ABI => A transition', async () => {
     const result = await embeddedApplication.validTransition(
-      ABCvariablePartForJ,
+      ABIvariablePartForJ,
       AvariablePartForJ,
       turnNumTo,
       nParticipants,
@@ -208,19 +208,19 @@ describe('EmbeddedApplication: named state transitions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           AvariablePartForJ,
           turnNumTo,
           nParticipants,
           signedByFrom,
           0b10 // signedByTo = just Bob
         ),
-      'incorrect move from ABC'
+      'incorrect move from ABI'
     );
   });
-  it('returns true / reverts for a correct / incorrect ABC => B transition', async () => {
+  it('returns true / reverts for a correct / incorrect ABI => B transition', async () => {
     const result = await embeddedApplication.validTransition(
-      ABCvariablePartForJ,
+      ABIvariablePartForJ,
       BvariablePartForJ,
       turnNumTo,
       nParticipants,
@@ -231,14 +231,14 @@ describe('EmbeddedApplication: named state transitions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           BvariablePartForJ,
           turnNumTo,
           nParticipants,
           signedByFrom,
           0b01 // signedByTo = just Alice
         ),
-      'incorrect move from ABC'
+      'incorrect move from ABI'
     );
   });
   it('returns true / reverts for a correct / incorrect A => AB transition', async () => {
@@ -306,7 +306,7 @@ describe('EmbeddedApplication: named state transitions', () => {
           signedByFrom,
           0b10 // signedByTo = just Bob
         ),
-      'move from ABC,A,B only'
+      'move from ABI,A,B only'
     );
   });
 });
@@ -318,7 +318,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
@@ -334,7 +334,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
@@ -350,7 +350,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
@@ -386,7 +386,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           notProperlyAbsorbed,
           turnNumTo,
           nParticipants,
@@ -406,7 +406,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           appDefinitionChanged,
           turnNumTo,
           nParticipants,
@@ -426,7 +426,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           challengeDurationChanged,
           turnNumTo,
           nParticipants,
@@ -446,7 +446,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           malicious,
           turnNumTo,
           nParticipants,
@@ -466,7 +466,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           malicious,
           turnNumTo,
           nParticipants,
@@ -489,7 +489,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           malicious,
           turnNumTo,
           nParticipants,
@@ -512,7 +512,7 @@ describe('EmbeddedApplication: reversions', () => {
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
-          ABCvariablePartForJ,
+          ABIvariablePartForJ,
           malicious,
           turnNumTo,
           nParticipants,
