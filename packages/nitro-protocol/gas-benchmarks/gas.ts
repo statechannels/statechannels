@@ -10,7 +10,9 @@ type Path =
   | 'directlyFundAChannelWithETHFirst'
   | 'directlyFundAChannelWithETHSecond'
   | 'directlyFundAChannelWithERC20First'
-  | 'directlyFundAChannelWithERC20Second';
+  | 'directlyFundAChannelWithERC20Second'
+  | 'ETHexit'
+  | 'ERC20exit';
 
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
@@ -21,11 +23,11 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 47596,
+    vanillaNitro: 47608,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 30508,
+    vanillaNitro: 30520,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -37,7 +39,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 72842,
+      deposit: 72854,
     },
   },
   directlyFundAChannelWithERC20Second: {
@@ -47,7 +49,15 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 55754,
+      deposit: 55766,
     },
+  },
+  ETHexit: {
+    // We completely liquidate the channel (paying out both parties)
+    vanillaNitro: 146793,
+  },
+  ERC20exit: {
+    // We completely liquidate the channel (paying out both parties)
+    vanillaNitro: 139148,
   },
 };
