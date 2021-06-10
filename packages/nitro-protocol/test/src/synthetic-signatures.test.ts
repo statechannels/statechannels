@@ -1,4 +1,4 @@
-import {BigNumber, ethers} from 'ethers';
+import {BigNumber, ethers, Wallet} from 'ethers';
 import {ec} from 'elliptic';
 
 // Create and initialize EC context
@@ -73,6 +73,24 @@ function createSyntheticSignatureType4(channelId: string) {
       r = BigNumber.from(r).add(1).toHexString();
     }
   }
+  return {r, s, v};
+}
+
+// ansazt 5
+function createSyntheticSignatureType5(channelId: string) {
+  // we are sometimes failing to supply a valid r -- it needs to be an x coordinate
+  // for secp256k1 curve y**2 mod p == (x**3 + 7) mod p. If (r**3 + 7) mod p is not a perfect square
+  // it is not a point on the curve and recovery will fail.
+  // SOLUTION: use the generator for the curve to get to a point definitely on the curve
+  // This is exactly what happens when calculating a public key from a private one
+  // (the generator is multiplied by the private key)
+  // NOTE: this is not the private key for the synthetic address
+  // TODO1: be sure that by choosing r without randomness, we are not breaking security properties
+  // (The private key for this account must remain infeasible to obtain)
+  // const r = '0x' + curve.keyFromPrivate(channelId.slice(4)).getPublic().getX(); // didn't work, not sure why
+  const r = '0x' + new Wallet(channelId).publicKey.slice(4, 68); // the slice gets us the X coord  -- pubKey = 0x04|| X || Y
+  const s = ethers.BigNumber.from('0x' + channelId.slice(20)).toHexString();
+  const v = 27;
   return {r, s, v};
 }
 
@@ -216,6 +234,7 @@ describe('synthetic signatures', () => {
     createSyntheticSignatureType2,
     createSyntheticSignatureType3,
     createSyntheticSignatureType4,
+    createSyntheticSignatureType5,
   ].map(fn => {
     it(`generates a signature that will recover to a valid public key / address, using ${fn.name}`, () => {
       const results = randomChannelIds.map(channelId => {
