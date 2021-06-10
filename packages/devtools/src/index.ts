@@ -7,8 +7,7 @@ export {
   getWalletWithEthAndProvider
 } from './utils/network-setup';
 export {configureEnvVariables, getEnvBool} from './config/env';
-export {setupGanache, ganacheIsRunning, startSharedGanache} from './ganache';
+export {ganacheIsRunning, startSharedGanache} from './ganache';
 export {GanacheServer} from './ganache/server';
-export {GanacheDeployer} from './ganache/deployer';
 export * from './types';
 export {TEST_ACCOUNTS} from './constants';

@@ -1,10 +1,9 @@
 import {BigNumber, ethers} from 'ethers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
-import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import ganache from 'ganache-core';
 
 import {TEST_ACCOUNTS} from '../constants';
-import {Account, DeployedArtifacts, Deployment} from '../types';
+import {Account} from '../types';
 
 import {logger} from './logger';
 import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
@@ -186,28 +185,5 @@ export class GanacheServer {
 
   onClose(listener: () => void) {
     this.server.on('close', listener);
-  }
-
-  async deployContracts(deployments: (Deployment | any)[]): Promise<DeployedArtifacts> {
-    const deployer = new EtherlimeGanacheDeployer(undefined, Number(process.env.GANACHE_PORT));
-
-    const deployedArtifacts: DeployedArtifacts = {};
-    for (const deployment of deployments) {
-      const artifact = deployment.artifact || deployment;
-
-      let args: string[] = [];
-      if (deployment.arguments) {
-        args = deployment.arguments(deployedArtifacts);
-      }
-
-      const deployedArtifact = await deployer.deploy(artifact, undefined, ...args);
-
-      deployedArtifacts[artifact.contractName] = {
-        address: deployedArtifact.contractAddress,
-        abi: JSON.stringify(artifact.abi)
-      };
-    }
-    logger.info({deployedArtifacts}, 'Contracts deployed to chain');
-    return deployedArtifacts;
   }
 }

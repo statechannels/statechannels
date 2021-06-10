@@ -6,6 +6,5 @@
 /migrations/
 **/*.json
 /website/
-/.etherlime-store/
 /lib/
 /dist/
