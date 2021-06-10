@@ -1,0 +1,13 @@
+diff --git a/node_modules/@ethersproject/experimental/lib/eip1193-bridge.d.ts b/node_modules/@ethersproject/experimental/lib/eip1193-bridge.d.ts
+index 690d504..85e95dd 100644
+--- a/node_modules/@ethersproject/experimental/lib/eip1193-bridge.d.ts
++++ b/node_modules/@ethersproject/experimental/lib/eip1193-bridge.d.ts
+@@ -1,7 +1,6 @@
+ /// <reference types="node" />
+-import EventEmitter from "events";
+ import { ethers } from "ethers";
+-export declare class Eip1193Bridge extends EventEmitter {
++export declare class Eip1193Bridge {
+     readonly signer: ethers.Signer;
+     readonly provider: ethers.providers.Provider;
+     constructor(signer: ethers.Signer, provider?: ethers.providers.Provider);
