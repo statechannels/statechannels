@@ -11,7 +11,7 @@ import {ChainService} from '../chain-service';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
 import {Engine} from '../engine';
-import {TestMessageService} from '../message-service/test-message-service';
+import {LatencyOptions, TestMessageService} from '../message-service/test-message-service';
 import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
@@ -139,63 +139,84 @@ afterAll(async () => {
   provider.removeAllListeners();
 });
 
-it('Create a directly funded channel between two wallets ', async () => {
-  const participantA: Participant = {
-    signingAddress: await aEngine.getSigningAddress(),
-    participantId: 'a',
-    destination: makeDestination(aAddress),
-  };
-  const participantB: Participant = {
-    signingAddress: await bEngine.getSigningAddress(),
-    participantId: 'b',
-    destination: makeDestination(bAddress),
-  };
+const testCases: Array<LatencyOptions & {closer: 'A' | 'B'}> = [
+  {
+    dropRate: 0,
+    meanDelay: undefined,
+    closer: 'A',
+  },
+  {
+    dropRate: 0,
+    meanDelay: undefined,
+    closer: 'B',
+  },
+  {dropRate: 0.1, meanDelay: 50, closer: 'A'},
+  {dropRate: 0.1, meanDelay: 50, closer: 'B'},
+];
+test.each(testCases)(
+  `can successfully fund and defund a channel between two wallets with options %o`,
+  async options => {
+    TestMessageService.setLatencyOptions({a, b}, options);
+    const participantA: Participant = {
+      signingAddress: await aEngine.getSigningAddress(),
+      participantId: 'a',
+      destination: makeDestination(aAddress),
+    };
+    const participantB: Participant = {
+      signingAddress: await bEngine.getSigningAddress(),
+      participantId: 'b',
+      destination: makeDestination(bAddress),
+    };
 
-  const allocation: Allocation = {
-    allocationItems: [
-      {
-        destination: participantA.destination,
-        amount: aFunding,
-      },
-      {
-        destination: participantB.destination,
-        amount: bFunding,
-      },
-    ],
-    assetHolderAddress: ethAssetHolderAddress,
-  };
+    const allocation: Allocation = {
+      allocationItems: [
+        {
+          destination: participantA.destination,
+          amount: aFunding,
+        },
+        {
+          destination: participantB.destination,
+          amount: bFunding,
+        },
+      ],
+      assetHolderAddress: ethAssetHolderAddress,
+    };
 
-  const channelParams: CreateChannelParams = {
-    participants: [participantA, participantB],
-    allocations: [allocation],
-    appDefinition: ethers.constants.AddressZero,
-    appData: constants.HashZero,
-    fundingStrategy: 'Direct',
-    challengeDuration: ONE_DAY,
-  };
-  const aBalanceInit = await getBalance(aAddress);
-  const bBalanceInit = await getBalance(bAddress);
-  const assetHolderBalanceInit = await getBalance(ethAssetHolderAddress);
+    const channelParams: CreateChannelParams = {
+      participants: [participantA, participantB],
+      allocations: [allocation],
+      appDefinition: ethers.constants.AddressZero,
+      appData: constants.HashZero,
+      fundingStrategy: 'Direct',
+      challengeDuration: ONE_DAY,
+    };
+    const aBalanceInit = await getBalance(aAddress);
+    const bBalanceInit = await getBalance(bAddress);
+    const assetHolderBalanceInit = await getBalance(ethAssetHolderAddress);
 
-  const response = await a.createChannels([channelParams]);
-  await waitForObjectiveProposals([response[0].objectiveId], b);
-  const bResponse = await b.approveObjectives([response[0].objectiveId]);
+    const response = await a.createChannels([channelParams]);
+    await waitForObjectiveProposals([response[0].objectiveId], b);
+    const bResponse = await b.approveObjectives([response[0].objectiveId]);
 
-  await expect(response).toBeObjectiveDoneType('Success');
-  await expect(bResponse).toBeObjectiveDoneType('Success');
+    await expect(response).toBeObjectiveDoneType('Success');
+    await expect(bResponse).toBeObjectiveDoneType('Success');
 
-  const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
-  expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(
-    BN.add(aFunding, bFunding)
-  );
+    const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
+    expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(
+      BN.add(aFunding, bFunding)
+    );
 
-  const {channelId} = response[0];
-  const closeResponse = await b.closeChannels([channelId]);
-  await expect(closeResponse).toBeObjectiveDoneType('Success');
+    const {channelId} = response[0];
+    const closeResponse =
+      options.closer === 'A'
+        ? await a.closeChannels([channelId])
+        : await b.closeChannels([channelId]);
+    await expect(closeResponse).toBeObjectiveDoneType('Success');
 
-  const aBalanceFinal = await getBalance(aAddress);
-  const bBalanceFinal = await getBalance(bAddress);
+    const aBalanceFinal = await getBalance(aAddress);
+    const bBalanceFinal = await getBalance(bAddress);
 
-  expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
-  expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
-});
+    expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
+    expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
+  }
+);
