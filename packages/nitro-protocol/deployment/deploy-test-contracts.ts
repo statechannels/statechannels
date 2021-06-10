@@ -1,6 +1,6 @@
 // NOTE: this script manages deploying contracts for testing purposes ONLY
 // DO NOT USE THIS SCRIPT TO DEPLOY CONTRACTS TO PRODUCTION NETWORKS
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ContractFactory, providers, Wallet} from 'ethers';
 
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
@@ -67,7 +67,7 @@ export async function deploy(): Promise<Record<string, string>> {
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
 
   const TEST_TOKEN_ADDRESS = (
-    await tokenFactory.deploy(new Wallet(ETHERLIME_ACCOUNTS[0].privateKey).address)
+    await tokenFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
   ).address;
   const ETH_ASSET_HOLDER_ADDRESS = (
     await ethAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)

@@ -1,4 +1,4 @@
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {TestContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {BN, makeAddress} from '@statechannels/wallet-core';
 import {Contract, providers, Wallet} from 'ethers';
@@ -6,7 +6,7 @@ import _ from 'lodash';
 
 import {ChainService} from '../chain-service';
 
-const pk = ETHERLIME_ACCOUNTS[0].privateKey;
+const pk = TEST_ACCOUNTS[0].privateKey;
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
@@ -19,7 +19,7 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 const ethWalletWithTokens = new Wallet(pk, provider);
 
 // Try to use a different private key for every chain service instantiation to avoid nonce errors
-const privateKey = ETHERLIME_ACCOUNTS[3].privateKey;
+const privateKey = TEST_ACCOUNTS[3].privateKey;
 const ethWallet = new Wallet(privateKey, provider);
 
 let chainService: ChainService;

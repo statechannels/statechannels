@@ -1,7 +1,7 @@
 import {ContractArtifacts, TestContractArtifacts} from '@statechannels/nitro-protocol';
 import {makeAddress} from '@statechannels/wallet-core';
 import {constants, Wallet} from 'ethers';
-import {ETHERLIME_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
+import {TEST_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
 
 export async function deploy(): Promise<any> {
   // eslint-disable-next-line no-process-env
@@ -19,7 +19,7 @@ export async function deploy(): Promise<any> {
     NITRO_ADJUDICATOR_ADDRESS
   );
 
-  const ethereumPrivateKey = ETHERLIME_ACCOUNTS[0].privateKey;
+  const ethereumPrivateKey = TEST_ACCOUNTS[0].privateKey;
   const TEST_TOKEN_ADDRESS = await deployer.deploy(
     TokenArtifact as any,
     {},

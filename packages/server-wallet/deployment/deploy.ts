@@ -1,6 +1,6 @@
 import {Address} from '@statechannels/client-api-schema';
 import {ContractArtifacts, TestContractArtifacts} from '@statechannels/nitro-protocol';
-import {ETHERLIME_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
+import {TEST_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
 // NOTE: deploying contracts like this allows the onchain service package to
@@ -14,7 +14,7 @@ export type TestNetworkContext = {
 };
 
 export async function deploy(): Promise<TestNetworkContext> {
-  const ethereumPrivateKey = ETHERLIME_ACCOUNTS[0].privateKey;
+  const ethereumPrivateKey = TEST_ACCOUNTS[0].privateKey;
   const ganachePort = Number(process.env.GANACHE_PORT);
 
   // TODO: best way to configure this?

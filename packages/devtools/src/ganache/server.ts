@@ -3,7 +3,7 @@ import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import {EtherlimeGanacheDeployer} from 'etherlime-lib';
 import ganache from 'ganache-core';
 
-import {ETHERLIME_ACCOUNTS} from '../constants';
+import {TEST_ACCOUNTS} from '../constants';
 import {Account, DeployedArtifacts, Deployment} from '../types';
 
 import {logger} from './logger';
@@ -127,7 +127,7 @@ export class GanacheServer {
   constructor(
     public readonly port: number = 8545,
     public readonly chainId: number = 9001,
-    accounts: Account[] = ETHERLIME_ACCOUNTS,
+    accounts: Account[] = TEST_ACCOUNTS,
     public readonly timeout: number = 10_000,
     gasLimit = 1_000_000_000,
     gasPrice = 1

@@ -5,7 +5,7 @@ import chalk from 'chalk';
 import writeJsonFile = require('write-json-file');
 import {ethers} from 'ethers';
 
-import {ETHERLIME_ACCOUNTS} from '../constants';
+import {TEST_ACCOUNTS} from '../constants';
 import {Account} from '../types';
 
 import {GanacheDeployer} from './deployer';
@@ -39,7 +39,7 @@ interface IndividualReturnType {
 async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> {
   const port = Number(p.port || process.env.GANACHE_PORT || 8545);
   const chainId = Number(p.chainId || process.env.CHAIN_NETWORK_ID || 9001);
-  const accounts = p.accounts || ETHERLIME_ACCOUNTS;
+  const accounts = p.accounts || TEST_ACCOUNTS;
   const timeout = Number(p.timeout || process.env.GANACHE_TIMEOUT || 5000);
   const gasLimit = Number(p.gasLimit || process.env.GANACHE_GAS_LIMIT || 1000000000);
   const gasPrice = Number(p.gasPrice || process.env.GANACHE_GAS_PRICE || 1);
@@ -115,12 +115,12 @@ export const setupGanache = async (
     deployerAccountIndex = Number(deployerAccountIndex);
     if (!Number.isFinite(deployerAccountIndex))
       throw new Error(`Invalid deployerAccountIndex ${deployerAccountIndex}`);
-    if (deployerAccountIndex < 0 || deployerAccountIndex >= ETHERLIME_ACCOUNTS.length)
+    if (deployerAccountIndex < 0 || deployerAccountIndex >= TEST_ACCOUNTS.length)
       throw new Error(
-        `deployerAccountIndex ${deployerAccountIndex} out of range [0,${ETHERLIME_ACCOUNTS.length}]`
+        `deployerAccountIndex ${deployerAccountIndex} out of range [0,${TEST_ACCOUNTS.length}]`
       );
 
-    const deployerAccountKey = ETHERLIME_ACCOUNTS[deployerAccountIndex].privateKey;
+    const deployerAccountKey = TEST_ACCOUNTS[deployerAccountIndex].privateKey;
 
     type = 'shared';
     deployer = new GanacheNCacheDeployer(port, deploymentsFile, deployerAccountKey);
