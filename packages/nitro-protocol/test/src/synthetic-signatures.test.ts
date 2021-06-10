@@ -23,7 +23,9 @@ function createSyntheticSignatureType1(channelId: string) {
 function createSyntheticSignatureType2(channelId: string) {
   const p = BigNumber.from('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
   return {
-    r: ethers.BigNumber.from(channelId).mod(p).toHexString(),
+    r: ethers.BigNumber.from('0x' + channelId.slice(20))
+      .mod(p)
+      .toHexString(),
     // The Homestead hardfork invalidates signatures with r larger than a certain value
     // eips.ethereum.org/EIPS/eip-2
     // One way to construct a valid one is to just set s to 0
@@ -36,7 +38,7 @@ function createSyntheticSignatureType2(channelId: string) {
 function createSyntheticSignatureType3(channelId: string) {
   const p = BigNumber.from('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
   const r = ethers.BigNumber.from(channelId).mod(p).toHexString();
-  const s = '0x0';
+  const s = '0x1ee1c6261f6dc02274587193398a0575c82608edc75665e458a45290016e0494';
   let v = 27;
   // try with
   try {
@@ -44,6 +46,21 @@ function createSyntheticSignatureType3(channelId: string) {
   } catch (error) {
     v = 28;
   }
+  return {r, s, v};
+}
+
+// ansazt 4
+function createSyntheticSignatureType4(channelId: string) {
+  // const p = BigNumber.from('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
+  const r = ethers.BigNumber.from(channelId.slice(0, 20)).toHexString();
+  const s = ethers.BigNumber.from('0x' + channelId.slice(20)).toHexString();
+  const v = 27;
+  // try with
+  // try {
+  //   computeSyntheticAddress({r, s, v});
+  // } catch (error) {
+  //   s = BigNumber.from(s).add(1).toHexString();
+  // }
   return {r, s, v};
 }
 
@@ -182,6 +199,7 @@ describe('synthetic signatures', () => {
     createSyntheticSignatureType1,
     createSyntheticSignatureType2,
     createSyntheticSignatureType3,
+    createSyntheticSignatureType4,
   ].map(fn => {
     it(`generates a signature that will recover to a valid public key / address, using ${fn.name}`, () => {
       const results = randomChannelIds.map(channelId => {
@@ -192,3 +210,5 @@ describe('synthetic signatures', () => {
     });
   });
 });
+
+('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF');
