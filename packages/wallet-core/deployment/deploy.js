@@ -3,31 +3,39 @@ const {
   NitroAdjudicatorArtifact,
   EthAssetHolderArtifact,
   Erc20AssetHolderArtifact,
-  TrivialAppArtifact,
   TokenArtifact
 } = require('@statechannels/nitro-protocol').ContractArtifacts;
 
-const {GanacheDeployer} = require('@statechannels/devtools');
 
-const deploy = async deployer => {
-  deployer = deployer || new GanacheDeployer(Number(process.env.GANACHE_PORT));
+const [
+  ethAssetHolderFactory,
+  erc20AssetHolderFactory,
+  nitroAdjudicatorFactory,
+  tokenFactory
+] = [
+  EthAssetHolderArtifact,
+  Erc20AssetHolderArtifact,
+  NitroAdjudicatorArtifact,
+  TokenArtifact
+].map(artifact =>
+  new ContractFactory(artifact.abi, artifact.bytecode).connect(provider.getSigner(0))
+);
 
-  const TRIVIAL_APP_ADDRESS = await deployer.deploy(TrivialAppArtifact);
+const deploy = async () => {
+  const TRIVIAL_APP_ADDRESS = makeAddress(constants.AddressZero);
 
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(NitroAdjudicatorArtifact);
-  const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    EthAssetHolderArtifact,
-    {},
-    NITRO_ADJUDICATOR_ADDRESS
-  );
+  const TRIVIAL_APP_ADDRESS = makeAddress(constants.AddressZero);
 
-  const TEST_TOKEN_ADDRESS = await deployer.deploy(TokenArtifact, {}, 0);
-  const TEST_TOKEN_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    Erc20AssetHolderArtifact,
-    {},
-    NITRO_ADJUDICATOR_ADDRESS,
-    TEST_TOKEN_ADDRESS
-  );
+  const NITRO_ADJUDICATOR_ADDRESS = (await nitroAdjudicatorFactory.deploy()).address;
+  const ETH_ASSET_HOLDER_ADDRESS = (await ethAssetHolderFactory.deploy(NITRO_ADJUDICATOR_ADDRESS))
+    .address;
+
+  const TEST_TOKEN_ADDRESS = (
+    await tokenFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
+  ).address;
+  const TEST_TOKEN_ASSET_HOLDER_ADDRESS = (
+    await erc20AssetHolderFactory.deploy(NITRO_ADJUDICATOR_ADDRESS, TEST_TOKEN_ADDRESS)
+  ).address;
 
   return {
     TRIVIAL_APP_ADDRESS,
