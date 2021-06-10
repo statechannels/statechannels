@@ -5,6 +5,7 @@
 ```ts
 
 import { Address } from '@statechannels/wallet-core';
+import { Allocation } from '@statechannels/client-api-schema';
 import { AllocationItem } from '@statechannels/wallet-core';
 import { AllocationItem as AllocationItem_2 } from '@statechannels/nitro-protocol';
 import { AssetOutcome } from '@statechannels/nitro-protocol';
@@ -427,7 +428,9 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // (undocumented)
     get messageService(): MessageServiceInterface;
     registerAppDefinition(appDefinition: string): Promise<void>;
-    }
+    // (undocumented)
+    updateChannel(channelId: string, allocations: Allocation[], appData: string): Promise<ChannelResult>;
+}
 
 // @public (undocumented)
 export interface WalletEvents {
