@@ -1,4 +1,9 @@
 import {BigNumber, ethers} from 'ethers';
+import {ec} from 'elliptic';
+
+// Create and initialize EC context
+// (better do it once and reuse it)
+const curve = new ec('secp256k1');
 
 // ansazt 0
 function createSyntheticSignatureType0(channelId: string) {
@@ -75,7 +80,11 @@ function computeDigest(invokerAddress: string) {
 }
 
 function computeSyntheticAddress(signature) {
-  return ethers.utils.recoverPublicKey(digest, signature);
+  return curve.recoverPubKey(
+    digest,
+    {r: signature.r.slice(2), s: signature.s.slice(2)},
+    signature.v == 27 ? 0 : 1
+  );
 }
 
 function validSignature(signature) {
