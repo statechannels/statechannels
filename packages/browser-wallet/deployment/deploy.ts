@@ -1,36 +1,42 @@
 import {ContractArtifacts, TestContractArtifacts} from '@statechannels/nitro-protocol';
 import {makeAddress} from '@statechannels/wallet-core';
-import {constants, Wallet} from 'ethers';
-import {TEST_ACCOUNTS, GanacheDeployer} from '@statechannels/devtools';
+import {constants, ContractFactory, providers, Wallet} from 'ethers';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
+
+// eslint-disable-next-line no-process-env
+const rpcEndPoint = 'http://localhost:' + process.env.GANACHE_PORT;
+const provider = new providers.JsonRpcProvider(rpcEndPoint);
+
+const {EthAssetHolderArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
+const {TestNitroAdjudicatorArtifact, TokenArtifact} = TestContractArtifacts;
+
+const [
+  ethAssetHolderFactory,
+  erc20AssetHolderFactory,
+  testNitroAdjudicatorFactory,
+  tokenFactory
+] = [
+  EthAssetHolderArtifact,
+  Erc20AssetHolderArtifact,
+  TestNitroAdjudicatorArtifact,
+  TokenArtifact
+].map(artifact =>
+  new ContractFactory(artifact.abi, artifact.bytecode).connect(provider.getSigner(0))
+);
 
 export async function deploy(): Promise<any> {
-  // eslint-disable-next-line no-process-env
-  const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
-
-  const {EthAssetHolderArtifact, Erc20AssetHolderArtifact} = ContractArtifacts;
-  const {TestNitroAdjudicatorArtifact, TokenArtifact} = TestContractArtifacts;
-
   const TRIVIAL_APP_ADDRESS = makeAddress(constants.AddressZero);
 
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(TestNitroAdjudicatorArtifact as any);
-  const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    EthAssetHolderArtifact as any,
-    {},
-    NITRO_ADJUDICATOR_ADDRESS
-  );
+  const NITRO_ADJUDICATOR_ADDRESS = (await testNitroAdjudicatorFactory.deploy()).address;
+  const ETH_ASSET_HOLDER_ADDRESS = (await ethAssetHolderFactory.deploy(NITRO_ADJUDICATOR_ADDRESS))
+    .address;
 
-  const ethereumPrivateKey = TEST_ACCOUNTS[0].privateKey;
-  const TEST_TOKEN_ADDRESS = await deployer.deploy(
-    TokenArtifact as any,
-    {},
-    new Wallet(ethereumPrivateKey).address
-  );
-  const TEST_TOKEN_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    Erc20AssetHolderArtifact as any,
-    {},
-    NITRO_ADJUDICATOR_ADDRESS,
-    TEST_TOKEN_ADDRESS
-  );
+  const TEST_TOKEN_ADDRESS = (
+    await tokenFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
+  ).address;
+  const TEST_TOKEN_ASSET_HOLDER_ADDRESS = (
+    await erc20AssetHolderFactory.deploy(NITRO_ADJUDICATOR_ADDRESS, TEST_TOKEN_ADDRESS)
+  ).address;
 
   return {
     TRIVIAL_APP_ADDRESS,
