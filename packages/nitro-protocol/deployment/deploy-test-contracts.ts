@@ -3,7 +3,6 @@
 import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
 import {Wallet} from 'ethers';
 
-import {writeGasConsumption} from '../test/test-helpers';
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import ethAssetHolderArtifact from '../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
@@ -22,7 +21,6 @@ export async function deploy(): Promise<Record<string, string>> {
   const nitroAdjudicatorDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
     nitroAdjudicatorArtifact as any
   );
-  writeGasConsumption('NitroAdjudicator.gas.md', 'deployment', nitroAdjudicatorDeploymentGas);
   console.log(
     `\nDeploying NitroAdjudicator... (cost estimated to be ${nitroAdjudicatorDeploymentGas})\n`
   );

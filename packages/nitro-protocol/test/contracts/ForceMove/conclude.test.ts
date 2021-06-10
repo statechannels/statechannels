@@ -20,7 +20,6 @@ import {
   getTestProvider,
   ongoingChallengeFingerprint,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {signState, signStates} from '../../../src';
 
@@ -130,7 +129,6 @@ describe('conclude', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('./conclude.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
         const finalizesAt = (await provider.getBlock(receipt.blockNumber)).timestamp;
         expect(event.args).toMatchObject({channelId, finalizesAt});

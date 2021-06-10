@@ -29,7 +29,6 @@ import {
   nonParticipant,
   ongoingChallengeFingerprint,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {createChallengeTransaction, NITRO_MAX_GAS} from '../../../src/transactions';
 import {hashChallengeMessage} from '../../../src/contract/challenge';
@@ -210,7 +209,6 @@ describe('challenge', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('challenge.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         // Catch ChallengeRegistered event
