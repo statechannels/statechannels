@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import {
   Contract,
   ethers,

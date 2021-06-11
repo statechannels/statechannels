@@ -138,7 +138,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
-      description,
       outcomeShortHand,
       heldBefore,
       heldAfter,

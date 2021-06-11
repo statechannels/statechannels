@@ -102,7 +102,7 @@ describe('transfer', () => {
           },
         ];
 
-        const {events: eventsFromTx, gasUsed} = await (await tx).wait();
+        const {events: eventsFromTx} = await (await tx).wait();
         // NOTE: _transferAsset is a NOOP in TESTAssetHolder, so gas costs will be much lower than for a real Asset Holder
         expect(eventsFromTx).toMatchObject(expectedEvents);
         // Check new holdings
