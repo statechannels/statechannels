@@ -58,7 +58,7 @@ export class DirectFunder {
     // otherwise, deposit
     const amountToDeposit = BN.sub(targetAfter, currentAmount); // previous checks imply this is >0
     await ChainServiceRequest.insertOrUpdate(channel.channelId, 'fund', tx);
-    await response.queueChainRequest([
+    response.queueChainRequest([
       {
         type: 'FundChannel',
         channelId: channel.channelId,
