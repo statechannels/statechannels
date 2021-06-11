@@ -238,12 +238,12 @@ const randomChannelIds = [
 
 describe('synthetic signatures', () => {
   [
-    // createSyntheticSignatureType0,
-    // createSyntheticSignatureType1,
-    // createSyntheticSignatureType2,
-    // createSyntheticSignatureType3,
-    // createSyntheticSignatureType4,
-    // createSyntheticSignatureType5,
+    createSyntheticSignatureType0,
+    createSyntheticSignatureType1,
+    createSyntheticSignatureType2,
+    createSyntheticSignatureType3,
+    createSyntheticSignatureType4,
+    createSyntheticSignatureType5,
     createSyntheticSignatureType6,
   ].map(fn => {
     it(`generates a signature that will recover to a valid public key / address, using ${fn.name}`, () => {
