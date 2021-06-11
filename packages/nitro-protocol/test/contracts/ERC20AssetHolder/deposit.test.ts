@@ -49,7 +49,7 @@ describe('deposit', () => {
     ${description2} | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
     ${description3} | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
     ${description4} | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
-  `('$description', async ({description, held, expectedHeld, amount, reasonString, heldAfter}) => {
+  `('$description', async ({held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = BigNumber.from(held);
     expectedHeld = BigNumber.from(expectedHeld);
     amount = BigNumber.from(amount);
@@ -85,7 +85,7 @@ describe('deposit', () => {
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
     } else {
-      const {gasUsed, events} = await (await tx).wait();
+      const {events} = await (await tx).wait();
 
       const depositedEvent = getDepositedEvent(events);
       expect(depositedEvent).toMatchObject({

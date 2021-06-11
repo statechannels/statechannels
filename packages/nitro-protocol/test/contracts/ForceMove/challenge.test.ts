@@ -147,7 +147,7 @@ describe('challenge', () => {
     ${reverts6}  | ${finalizedAtFive}           | ${fourStates}  | ${'correct'}           | ${INVALID_NUMBER_OF_STATES}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({description, initialFingerprint, stateData, challengeSignatureType, reasonString}) => {
+    async ({initialFingerprint, stateData, challengeSignatureType, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
