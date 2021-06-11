@@ -85,59 +85,6 @@ const destinationA = makeDestination(
 const destinationB = makeDestination(
   '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
 );
-/**
- * This destroys the peerEngine(s) and the message service and then re-instantiates them.
- * This mimics a crash and restart
- * @param enginesToRestart Specifies the peerEngines that will be restarted
- */
-export async function crashAndRestart(
-  oldPeerSetup: PeerSetup,
-  enginesToRestart: 'A' | 'B' | 'Both'
-): Promise<PeerSetup> {
-  try {
-    await oldPeerSetup.messageService.destroy();
-
-    const restartA = enginesToRestart === 'A' || enginesToRestart === 'Both';
-    const restartB = enginesToRestart === 'B' || enginesToRestart === 'Both';
-
-    if (restartA) {
-      await oldPeerSetup.peerEngines.a.destroy();
-    }
-    if (restartB) {
-      await oldPeerSetup.peerEngines.b.destroy();
-    }
-    const a = restartA ? await Engine.create(aEngineConfig) : oldPeerSetup.peerEngines.a;
-
-    const b = restartB ? await Engine.create(bEngineConfig) : oldPeerSetup.peerEngines.b;
-
-    const participantA = {
-      signingAddress: await a.getSigningAddress(),
-      participantId: participantIdA,
-      destination: destinationA,
-    };
-    const participantB = {
-      signingAddress: await b.getSigningAddress(),
-      participantId: participantIdB,
-      destination: destinationB,
-    };
-
-    const participantEngines = [
-      {participantId: participantIdA, engine: a},
-      {participantId: participantIdB, engine: b},
-    ];
-
-    return {
-      peerEngines: {a, b},
-
-      messageService: new LegacyTestMessageHandler(participantEngines),
-      participantA,
-      participantB,
-    };
-  } catch (error) {
-    logger.error(error, 'CrashAndRestart failed');
-    throw error;
-  }
-}
 
 export async function setupPeerWallets(withWalletsSeeding = false): Promise<PeerSetupWithWallets> {
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
