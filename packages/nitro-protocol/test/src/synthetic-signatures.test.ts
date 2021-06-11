@@ -94,6 +94,14 @@ function createSyntheticSignatureType5(channelId: string) {
   return {r, s, v};
 }
 
+// ansazt 6
+function createSyntheticSignatureType6(channelId: string) {
+  const r = '0x4fe3e35437197d331ab44a90afd24052540e02c129b7e2083344b8e4684c2153'; // x coord of a fixed, known point(s) on the elliptic curve
+  const s = channelId;
+  const v = 27;
+  return {r, s, v};
+}
+
 function computeDigest(invokerAddress: string) {
   return ethers.utils.keccak256(
     '0x' +
@@ -117,6 +125,7 @@ function validSignature(signature) {
     computeSyntheticAddress(signature);
     return true;
   } catch (error) {
+    console.log(error);
     return false;
   }
 }
@@ -229,12 +238,13 @@ const randomChannelIds = [
 
 describe('synthetic signatures', () => {
   [
-    createSyntheticSignatureType0,
-    createSyntheticSignatureType1,
-    createSyntheticSignatureType2,
-    createSyntheticSignatureType3,
-    createSyntheticSignatureType4,
-    createSyntheticSignatureType5,
+    // createSyntheticSignatureType0,
+    // createSyntheticSignatureType1,
+    // createSyntheticSignatureType2,
+    // createSyntheticSignatureType3,
+    // createSyntheticSignatureType4,
+    // createSyntheticSignatureType5,
+    createSyntheticSignatureType6,
   ].map(fn => {
     it(`generates a signature that will recover to a valid public key / address, using ${fn.name}`, () => {
       const results = randomChannelIds.map(channelId => {
