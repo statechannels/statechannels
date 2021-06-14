@@ -1,4 +1,4 @@
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {
   channelDataToStatus,
   ContractArtifacts,
@@ -83,7 +83,7 @@ beforeAll(async () => {
   /* eslint-disable no-process-env */
   chainService = new ChainService({
     provider: rpcEndpoint,
-    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[0].privateKey,
+    pk: process.env.CHAIN_SERVICE_PK ?? TEST_ACCOUNTS[0].privateKey,
     allowanceMode: 'MaxUint',
   });
   /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */

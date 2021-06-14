@@ -1,5 +1,5 @@
 import {CreateChannelParams, Participant, Allocation} from '@statechannels/client-api-schema';
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
@@ -38,7 +38,7 @@ const bEngineConfig: EngineConfig = {
     attachChainService: true,
     provider: rpcEndpoint,
     /* eslint-disable-next-line no-process-env */
-    pk: process.env.CHAIN_SERVICE_PK ?? ETHERLIME_ACCOUNTS[1].privateKey,
+    pk: process.env.CHAIN_SERVICE_PK ?? TEST_ACCOUNTS[1].privateKey,
     allowanceMode: 'MaxUint',
   },
 };
@@ -48,7 +48,7 @@ const aEngineConfig: EngineConfig = {
     attachChainService: true,
     provider: rpcEndpoint,
     /* eslint-disable-next-line no-process-env */
-    pk: process.env.CHAIN_SERVICE_PK2 ?? ETHERLIME_ACCOUNTS[2].privateKey,
+    pk: process.env.CHAIN_SERVICE_PK2 ?? TEST_ACCOUNTS[2].privateKey,
     allowanceMode: 'MaxUint',
   },
 };

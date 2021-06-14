@@ -20,7 +20,6 @@ import {
   getTestProvider,
   ongoingChallengeFingerprint,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {signState, signStates} from '../../../src';
 
@@ -99,7 +98,7 @@ describe('conclude', () => {
     ${reverts3} | ${finalized}        | ${turnNumRecord + 1}             | ${oneState}    | ${CHANNEL_FINALIZED}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({description, initialFingerprint, largestTurnNum, support, reasonString}) => {
+    async ({initialFingerprint, largestTurnNum, support, reasonString}) => {
       const channel: Channel = {chainId, participants, channelNonce};
       const channelId = getChannelId(channel);
       const {appData, whoSignedWhat} = support;
@@ -130,7 +129,6 @@ describe('conclude', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('./conclude.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
         const finalizesAt = (await provider.getBlock(receipt.blockNumber)).timestamp;
         expect(event.args).toMatchObject({channelId, finalizesAt});

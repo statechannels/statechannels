@@ -23,10 +23,11 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {signStates} from '../../../src';
 import {NITRO_MAX_GAS} from '../../../src/transactions';
+
+jest.setTimeout(15_000);
 
 const provider = getTestProvider();
 let NitroAdjudicator: Contract;
@@ -137,7 +138,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
-      description,
       outcomeShortHand,
       heldBefore,
       heldAfter,
@@ -230,12 +230,6 @@ describe('concludePushOutcomeAndTransferAll', () => {
         const receipt = await (await tx).wait();
 
         expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
-
-        await writeGasConsumption(
-          './concludePushOutcomeAndTransferAll.gas.md',
-          description,
-          receipt.gasUsed
-        );
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;

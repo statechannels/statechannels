@@ -1,5 +1,3 @@
-import fs from 'fs';
-
 import {
   Contract,
   ethers,
@@ -332,23 +330,6 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): 
     });
   });
   return events;
-}
-
-export async function writeGasConsumption(
-  filename: string,
-  description: string,
-  gas: BigNumberish
-): Promise<void> {
-  const dir = './gas-artifacts';
-
-  if (!fs.existsSync(dir)) {
-    fs.mkdirSync(dir);
-  }
-
-  const path = dir + '/' + filename;
-  await fs.appendFile(path, description + ':\n' + gas.toString() + ' gas\n\n', err => {
-    if (err) throw err;
-  });
 }
 
 export function getRandomNonce(seed: string): number {

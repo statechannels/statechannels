@@ -1,6 +1,6 @@
 # What is a state channel wallet?
 
-A node in a state channel network. See [nitro protocol](https://docs.statechannels.org/`).
+A node in a state channel network. See [nitro protocol](https://docs.statechannels.org/).
 
 More concretely, a state channel wallet _is_:
 
@@ -33,40 +33,59 @@ A state channel wallet has the following _runtime dependencies_:
 
 The following diagram describes the various components in the architecture. The scope of this document is limited to the components left of the dividing line.
 
-```
-                                                    |
-                     +-----------------+            |     +--------------+
-                     |                 |            |     |              |
-                     |  CHAIN-SERVICE  <------------------>  BLOCKCHAIN  |
-                     |                 |            |     |              |
-                     +--------^--------+            |     +--------------+
-                              |                     |
-                              |                     |
-                        +-----v----+                |     +----------+
-                        |          |                |     |          |
-                        |          |                |     |          |
-                        |          |  API Request   |     |          |
-                        |          <-----------------------          |
-                        |          |  API Response  |     |          |
-         +---------+    |          ----------------------->          |
-         |         |    |          |                |     |          |
-         |  STORE  <--->|  WALLET  |  Events        |     |   APP    |
-         |         |    |          ----------------------->          |
-         +---------+    |          |                |     |          |
-                        |          |                |     |          |
-                        |          |  pushMessage   |     |          |
-                        |          <---------------------------+     |
-                        |          |                |     |    |     |
-                        |          |                |     |    |     |
-                        +----------+                |     +----|--|--+
-                                                    |          |  | Messages in API response
-                                                    | +--------|--v------+
-                                                    | |  COUNTERPARTY    |
-                                                    | |  WALLETS         |
-                                                      +------------------+
+```                                                             |                    
+                                                             |                    
+                                                             |                    
+                                                             |                    
+                  +-------------------+                      |     +-------------+
+                  |                   |                      |     |             |
+                  |                   |                      |     |             |
+                  |   CHAIN-SERVICE   <----------------------------> BLOCKCHAIN  |
+                  |                   |                      |     |             |
+                  |                   |                      |     |             |
+                  +---------^---------+                      |     +-------------+
+                            |                                |                    
+                            |                                |                    
+                            |                                |                    
+                            |                                |                    
+                            |                                |                    
+                     +------v-----+      +-------------+     |     +-------------+
+                     |            |      |             |     |     |             |
+                     |            |      |  MESSAGING  |     |     |    PEER     |
+                     |            |<----->             <----------->             |
+                     |            |      |   SERVICE   |     |     |  MESSAGING  |
+                     |            |      |             |     |     |             |
+                     |            |      +-------------+     |     |   SERVICE   |
+                     |            |                          |     |             |
+                     |            |                          |     +-------------+
+                     |   WALLET   |                          |                    
+                     |            |                          |     +-------------+
+                     | +-------+  |         API Call         |     |             |
+                     | |       |  <---------------------------------             |
+                     | | STORE |  |                          |     | APPLICATION |
+                     | |       |  |         API Event        |     |             |
+                     | +-------+  |-------------------------------->             |
+                     |            |                          |     |             |
+                     |            |                          |     +-------------+
+                     +------^-----+                                               
+                            |                                                     
+                            |                                                     
+                            |                                                     
+                            |                                                     
+                            |                                                     
+                  +---------v--------+                                            
+                  |      ENGINE      |                                            
+                  |                  |                                            
+                  |   +-----------+  |                                            
+                  |   |           |  |                                            
+                  |   |   STORE   |  |                                            
+                  |   |           |  |                                            
+                  |   +-----------+  |                                            
+                  |                  |                                            
+                  +------------------+                                                                                                
 ```
 
-(This diagram was created at https://textik.com/)
+(This diagram can be found at https://textik.com/#9c1955331cf19320. It was created by Andrew Stewart.)
 
 # The responsibilities of a state channel wallet
 
@@ -109,21 +128,24 @@ Here, “explicit permission” shall be implied by an API call. “Implicit per
 
 > An objective is a proposal for a goal which The App asserts that it wants to achieve.
 
-It has a _type_ and _parameters_. The parameters include a _scope_, which is a list of channelIds.
+It has a _type_ and _parameters_. 
 
 For an example, upon an appropriate request fromt the app, the wallet may create
 
 ```ts
 {
   type: 'CloseChannel',
-  scope: ['0x123']
+  params: {
+    targetChannelId: '0x123',
+    txSubmitterOrder: ['alice', 'bob'],
+  }
 }
 ```
 
-which codes for the goal of closing channel `0x123`.
+which codes for the goal of closing channel `0x123`. (In Nitro, peers may withdraw their funds over multiple transactions. This is to fairly allocate gas expenditures, and to prevent griefing. This objective indicates that Alice should withdraw first, followed by Bob. It is complicated for them to attempt to withdraw concurrently, due to the gas optimizations outlined [here](https://blog.statechannels.org/gas-optimizations/gas-optimizations/))
 
 > To approve an objective is to grant permission, enabling the wallet to use the private keys it stores as it sees fit, for the channels in its scope for the lifetime of the objective.
-
+>
 > It is _not_ to give permission to spend money, only to sign states and transactions that are overall value-neutral (up to gas fees).
 
 ## Implementation: the lifecycle of an objective
