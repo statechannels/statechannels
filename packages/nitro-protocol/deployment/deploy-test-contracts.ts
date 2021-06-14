@@ -1,7 +1,7 @@
 // NOTE: this script manages deploying contracts for testing purposes ONLY
 // DO NOT USE THIS SCRIPT TO DEPLOY CONTRACTS TO PRODUCTION NETWORKS
-import {GanacheDeployer, ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
-import {Wallet} from 'ethers';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
+import {ContractFactory, providers, Wallet} from 'ethers';
 
 import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/CountingApp.json';
 import erc20AssetHolderArtifact from '../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
@@ -15,57 +15,69 @@ import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroA
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
 
+const rpcEndPoint = 'http://localhost:' + process.env.GANACHE_PORT;
+const provider = new providers.JsonRpcProvider(rpcEndPoint);
+
+// Factories
+
+const [
+  countingAppFactory,
+  erc20AssetHolderFactory,
+  ethAssetHolderFactory,
+  nitroAdjudicatorFactory,
+  singleAssetPaymentsFactory,
+  hashLockedSwapFactory,
+  testAssetHolderFactory,
+  testForceMoveFactory,
+  testNitroAdjudicatorFactory,
+  tokenFactory,
+  trivialAppFactory,
+] = [
+  countingAppArtifact,
+  erc20AssetHolderArtifact,
+  ethAssetHolderArtifact,
+  nitroAdjudicatorArtifact,
+  singleAssetPaymentsArtifact,
+  hashLockedSwapArtifact,
+  testAssetHolderArtifact,
+  testForceMoveArtifact,
+  testNitroAdjudicatorArtifact,
+  tokenArtifact,
+  trivialAppArtifact,
+].map(artifact =>
+  new ContractFactory(artifact.abi, artifact.bytecode).connect(provider.getSigner(0))
+);
+
 export async function deploy(): Promise<Record<string, string>> {
-  const deployer = new GanacheDeployer(Number(process.env.GANACHE_PORT));
+  const NITRO_ADJUDICATOR_ADDRESS = (await nitroAdjudicatorFactory.deploy()).address;
+  const COUNTING_APP_ADDRESS = (await countingAppFactory.deploy()).address;
 
-  const nitroAdjudicatorDeploymentGas = await deployer.etherlimeDeployer.estimateGas(
-    nitroAdjudicatorArtifact as any
-  );
-  console.log(
-    `\nDeploying NitroAdjudicator... (cost estimated to be ${nitroAdjudicatorDeploymentGas})\n`
-  );
-  const NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(nitroAdjudicatorArtifact as any);
-
-  const COUNTING_APP_ADDRESS = await deployer.deploy(countingAppArtifact as any);
-  const HASH_LOCK_ADDRESS = await deployer.deploy(hashLockedSwapArtifact as any);
-  const SINGLE_ASSET_PAYMENT_ADDRESS = await deployer.deploy(singleAssetPaymentsArtifact as any);
-  const TEST_NITRO_ADJUDICATOR_ADDRESS = await deployer.deploy(testNitroAdjudicatorArtifact as any);
-  const TRIVIAL_APP_ADDRESS = await deployer.deploy(trivialAppArtifact as any);
-  const TEST_FORCE_MOVE_ADDRESS = await deployer.deploy(testForceMoveArtifact as any);
-  const TEST_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    testAssetHolderArtifact as any,
-    {},
-    TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
-  const TEST_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
-    testAssetHolderArtifact as any,
-    {},
-    TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
+  const HASH_LOCK_ADDRESS = (await hashLockedSwapFactory.deploy()).address;
+  const SINGLE_ASSET_PAYMENT_ADDRESS = (await singleAssetPaymentsFactory.deploy()).address;
+  const TEST_NITRO_ADJUDICATOR_ADDRESS = (await testNitroAdjudicatorFactory.deploy()).address;
+  const TRIVIAL_APP_ADDRESS = (await trivialAppFactory.deploy()).address;
+  const TEST_FORCE_MOVE_ADDRESS = (await testForceMoveFactory.deploy()).address;
+  const TEST_ASSET_HOLDER_ADDRESS = (
+    await testAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)
+  ).address;
+  const TEST_ASSET_HOLDER2_ADDRESS = (
+    await testAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)
+  ).address;
 
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
 
-  const TEST_TOKEN_ADDRESS = await deployer.deploy(
-    tokenArtifact as any,
-    {},
-    new Wallet(ETHERLIME_ACCOUNTS[0].privateKey).address
-  );
-  const ETH_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    ethAssetHolderArtifact as any,
-    {},
-    TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
-  const ETH_ASSET_HOLDER2_ADDRESS = await deployer.deploy(
-    ethAssetHolderArtifact as any,
-    {},
-    TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
-  const TEST_TOKEN_ASSET_HOLDER_ADDRESS = await deployer.deploy(
-    erc20AssetHolderArtifact as any,
-    {},
-    TEST_NITRO_ADJUDICATOR_ADDRESS,
-    TEST_TOKEN_ADDRESS
-  );
+  const TEST_TOKEN_ADDRESS = (
+    await tokenFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
+  ).address;
+  const ETH_ASSET_HOLDER_ADDRESS = (
+    await ethAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)
+  ).address;
+  const ETH_ASSET_HOLDER2_ADDRESS = (
+    await ethAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)
+  ).address;
+  const TEST_TOKEN_ASSET_HOLDER_ADDRESS = (
+    await erc20AssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS, TEST_TOKEN_ADDRESS)
+  ).address;
   return {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,

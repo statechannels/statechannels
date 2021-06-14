@@ -5,7 +5,7 @@ import {
   SingleChannelOutput,
   SingleThreadedEngine
 } from '@statechannels/server-wallet';
-import {ETHERLIME_ACCOUNTS} from '@statechannels/devtools';
+import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ChannelWallet} from '@statechannels/browser-wallet';
 import {constants, Contract, providers, Wallet} from 'ethers';
 import {
@@ -55,7 +55,7 @@ const serverConfig = defaultTestConfig({
   chainServiceConfiguration: {
     attachChainService: true,
     provider: rpcEndpoint,
-    pk: ETHERLIME_ACCOUNTS[0].privateKey
+    pk: TEST_ACCOUNTS[0].privateKey
   }
 });
 
@@ -84,7 +84,7 @@ beforeEach(async () => {
 
   serverWallet = await SingleThreadedEngine.create(serverConfig);
   browserWallet = await ChannelWallet.create(
-    makeAddress(new Wallet(ETHERLIME_ACCOUNTS[1].privateKey).address)
+    makeAddress(new Wallet(TEST_ACCOUNTS[1].privateKey).address)
   );
 
   serverAddress = await serverWallet.getSigningAddress();

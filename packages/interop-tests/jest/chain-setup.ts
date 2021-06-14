@@ -1,5 +1,5 @@
 /* eslint-disable no-process-env */
-import {ETHERLIME_ACCOUNTS, GanacheServer} from '@statechannels/devtools';
+import {TEST_ACCOUNTS, GanacheServer} from '@statechannels/devtools';
 import {utils} from 'ethers';
 import {deploy as deployNitro} from '@statechannels/server-wallet/lib/deployment/deploy';
 
@@ -18,7 +18,7 @@ export default async function setup(): Promise<void> {
     'RPC_ENDPOINT'
   ] = `http://${process.env['GANACHE_HOST']}:${process.env['GANACHE_PORT']}`;
 
-  const accounts = ETHERLIME_ACCOUNTS.map(account => ({
+  const accounts = TEST_ACCOUNTS.map(account => ({
     ...account,
     amount: utils.parseEther('100').toString()
   }));
