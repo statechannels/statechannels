@@ -405,6 +405,23 @@ export type SyncOptions = {
     staleThreshold: number;
 };
 
+// @public
+export type UpdateChannelError = {
+    type: 'InternalError';
+    channelId: string;
+    error: Error;
+};
+
+// @public (undocumented)
+export type UpdateChannelResult = UpdateChannelSuccess | UpdateChannelError;
+
+// @public
+export type UpdateChannelSuccess = {
+    type: 'Success';
+    channelId: string;
+    result: ChannelResult;
+};
+
 // @public (undocumented)
 export function validateEngineConfig(config: Record<string, any>): {
     valid: boolean;
@@ -428,8 +445,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // (undocumented)
     get messageService(): MessageServiceInterface;
     registerAppDefinition(appDefinition: string): Promise<void>;
-    // (undocumented)
-    updateChannel(channelId: string, allocations: Allocation[], appData: string): Promise<ChannelResult>;
+    updateChannel(channelId: string, allocations: Allocation[], appData: string): Promise<UpdateChannelResult>;
 }
 
 // @public (undocumented)
@@ -447,7 +463,7 @@ export interface WalletEvents {
 //
 // src/engine/types.ts:28:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
 // src/engine/types.ts:66:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
-// src/wallet/types.ts:60:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:61:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

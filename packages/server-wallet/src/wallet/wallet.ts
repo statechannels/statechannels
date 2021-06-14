@@ -208,6 +208,14 @@ export class Wallet extends EventEmitter<WalletEvents> {
     );
   }
 
+  /**
+   * Updates a channel with the given allocations and app data.
+   * @param channelId The id of the channel to update.
+   * @param allocations The updated allocations for the channel.
+   * @param appData The updated appData for the channel.
+   * @returns A promise that resolves to either a sucess result (which includes the updated channel) or
+   * an error type that contains more information about the error.
+   */
   public async updateChannel(
     channelId: string,
     allocations: Allocation[],
