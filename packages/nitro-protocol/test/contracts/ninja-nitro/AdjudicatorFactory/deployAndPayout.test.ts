@@ -1,11 +1,10 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, BigNumber, utils, constants, ContractFactory} from 'ethers';
+import {Contract, Wallet, ethers, BigNumber, constants} from 'ethers';
 
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import TokenArtifact from '../../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../../src/contract/channel';
-import {channelDataToStatus} from '../../../../src/contract/channel-storage';
 import {AllocationAssetOutcome} from '../../../../src/contract/outcome';
 import {State} from '../../../../src/contract/state';
 import {concludePushOutcomeAndTransferAllArgs} from '../../../../src/contract/transaction-creators/nitro-adjudicator';
@@ -83,14 +82,7 @@ beforeAll(async () => {
 });
 
 const accepts1 = '{ETH: {A: 1}}';
-const accepts2 = '{ETH: {A: 1}, ETH2: {A: 2}}';
-const accepts3 = '{ETH2: {A: 1, B: 1}}';
 const accepts4 = '{ERC20: {A: 1}}';
-const accepts4a = '{ERC20: {A: 1}}';
-const accepts5 = '{ERC20: {At: 1, Bt: 1}} (At and Bt already have some TOK)';
-const accepts6 = '10 TOK payouts';
-const accepts7 = '50 TOK payouts';
-const accepts8 = '100 TOK payouts';
 
 const oneState = {
   whoSignedWhat: [0, 0, 0],
@@ -107,7 +99,6 @@ describe('deployAndPayout', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
-      description,
       outcomeShortHand,
       heldBefore,
       heldAfter,
@@ -139,7 +130,6 @@ describe('deployAndPayout', () => {
       const {appData, whoSignedWhat} = support;
       const numStates = appData.length;
       const largestTurnNum = turnNumRecord + 1;
-      const initialFingerprint = ethers.constants.HashZero;
 
       // Transfer some tokens into the relevant AssetHolder
       // Do this step before transforming input data (easier)
@@ -247,12 +237,6 @@ describe('deployAndPayout', () => {
         }
 
         // Compute expected ChannelDataHash
-        const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedFingerprint = channelDataToStatus({
-          turnNumRecord: 0,
-          finalizesAt: blockTimestamp,
-          outcome,
-        });
 
         // Extract logs
         const {logs} = await (await tx).wait();

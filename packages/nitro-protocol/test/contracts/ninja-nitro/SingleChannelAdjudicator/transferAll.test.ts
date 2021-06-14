@@ -1,11 +1,9 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, BigNumber, utils, constants, Wallet} from 'ethers';
-import {defaultAbiCoder} from 'ethers/lib/utils';
+import {Contract, BigNumber, constants, Wallet} from 'ethers';
 
 import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ninja-nitro/SingleChannelAdjudicator.sol/SingleChannelAdjudicator.json';
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import {
-  allocationToParams,
   getRandomNonce,
   getTestProvider,
   randomChannelId,
@@ -13,7 +11,7 @@ import {
   replaceAddressesAndBigNumberify,
   setupContract,
 } from '../../../test-helpers';
-import {encodeAllocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {encodeOutcome} from '../../../../src/contract/outcome';
 import {
   Channel,
   channelDataToStatus,
@@ -178,7 +176,7 @@ describe('transferAll (using transfer and empty indices array)', () => {
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
-        const {events: eventsFromLogs, gasUsed} = await (await tx).wait();
+        await (await tx).wait();
         // TODO expect an 'OutcomeHashUpdated' event
         // const expectedEvents = [
         //   {

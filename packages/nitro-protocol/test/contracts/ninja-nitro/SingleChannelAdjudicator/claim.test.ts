@@ -6,7 +6,6 @@ import SingleChannelAdjudicatorArtifact from '../../../../artifacts/contracts/ni
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import {
   AssetOutcomeShortHand,
-  finalizedFingerprint,
   getRandomNonce,
   getTestProvider,
   randomExternalDestination,
@@ -123,10 +122,9 @@ describe('claim (ETH only)', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
       // Fund the guarantor channel
-      let gasUsed: BigNumber;
-      gasUsed = await guarantor.depositETH(heldBefore[guarantor.id]);
+      await guarantor.depositETH(heldBefore[guarantor.id]);
       // DEPLOY GUARANTOR CHANNEL
-      gasUsed = await guarantor.deploy();
+      await guarantor.deploy();
 
       // Compute an appropriate guarantee for the guarantor (using only ETH)
       const guarantee = {
@@ -136,7 +134,7 @@ describe('claim (ETH only)', () => {
       const guarantorOutcome: Outcome = [{assetHolderAddress: constants.AddressZero, guarantee}];
       if (guaranteeDestinations.length > 0) {
         // CONCLUDE GUARANTOR CHANNEL
-        gasUsed = await guarantor.conclude(guarantorOutcome);
+        await guarantor.conclude(guarantorOutcome);
       } else {
         // Set this so that the claim tx should revert in the way we expect
         guarantor.outcome = guarantorOutcome;
@@ -151,10 +149,10 @@ describe('claim (ETH only)', () => {
       ];
 
       // DEPLOY TARGET CHANNEL
-      gasUsed = await target.deploy();
+      await target.deploy();
       // CONCLUDE TARGET CHANNEL
       if (Object.keys(tOutcomeBefore).length > 0) {
-        gasUsed = await target.conclude(targetOutcome);
+        await target.conclude(targetOutcome);
       }
 
       const tx = target.claimTx(guarantor, indices);

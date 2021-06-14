@@ -21,7 +21,7 @@ describe('deposit ETH', () => {
   it('before contract deployed', async () => {
     const channelId = randomChannelId();
     const channelAddress = await AdjudicatorFactory.getChannelAddress(channelId);
-    const {gasUsed} = await (
+    await (
       await provider.getSigner().sendTransaction({
         to: channelAddress,
         value: 5,

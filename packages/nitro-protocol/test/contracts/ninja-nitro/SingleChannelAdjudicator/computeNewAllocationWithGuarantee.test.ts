@@ -20,7 +20,7 @@ beforeAll(async () => {
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
-    ? [...Array(numAllocationItems)].map(e => ({
+    ? [...Array(numAllocationItems)].map(() => ({
         destination: randomExternalDestination(),
         amount: BigNumber.from(Math.ceil(Math.random() * 10)).toHexString(),
       }))
