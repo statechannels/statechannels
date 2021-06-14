@@ -1,4 +1,11 @@
-import {channelId, counterSignedSupportProof, finalState, someOtherChannelId} from './fixtures';
+import {
+  channelId,
+  counterSignedSupportProof,
+  finalizationProof,
+  finalState,
+  someOtherChannelId,
+  someState,
+} from './fixtures';
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
 
@@ -65,7 +72,7 @@ describe('Consumes the expected gas for happy-path exits', () => {
     await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
     await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
     // end setup
-    const fP = counterSignedSupportProof(finalState(ethAssetHolder.address));
+    const fP = finalizationProof(finalState(ethAssetHolder.address));
     await expect(
       await nitroAdjudicator.concludePushOutcomeAndTransferAll(
         fP.largestTurnNum,
@@ -84,7 +91,7 @@ describe('Consumes the expected gas for happy-path exits', () => {
     await (await erc20AssetHolder.deposit(someOtherChannelId, 0, 10)).wait(); // other channels are funded by this asset holder
     await (await erc20AssetHolder.deposit(channelId, 0, 10)).wait();
     // end setup
-    const fP = counterSignedSupportProof(finalState(erc20AssetHolder.address));
+    const fP = finalizationProof(finalState(erc20AssetHolder.address));
     await expect(
       await nitroAdjudicator.concludePushOutcomeAndTransferAll(
         fP.largestTurnNum,
@@ -96,5 +103,25 @@ describe('Consumes the expected gas for happy-path exits', () => {
         fP.sigs
       )
     ).toConsumeGas(gasRequiredTo.ERC20exit.vanillaNitro);
+  });
+});
+describe('Consumes the expected gas for sad-path exits', () => {
+  it.only(`when exiting a directly funded (with ETH) channel`, async () => {
+    // begin setup
+    await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
+    await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
+    // end setup
+    const fP = counterSignedSupportProof(someState(ethAssetHolder.address)); // TODO use a nontrivial app with a state transition
+    await expect(
+      await nitroAdjudicator.challenge(
+        fP.fixedPart,
+        fP.largestTurnNum,
+        fP.variableParts,
+        fP.isFinalCount,
+        fP.signatures,
+        fP.whoSignedWhat,
+        fP.challengeSignature
+      )
+    ).toConsumeGas(gasRequiredTo.ETHexitSad.vanillaNitro.challenge);
   });
 });
