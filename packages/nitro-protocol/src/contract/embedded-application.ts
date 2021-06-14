@@ -13,10 +13,10 @@ export interface SupportProof {
 }
 
 export enum AlreadyMoved {
+  'None',
   'A',
   'B',
   'AB',
-  'ABI',
 }
 export interface EmbeddedApplicationData {
   channelIdForX: Bytes32;

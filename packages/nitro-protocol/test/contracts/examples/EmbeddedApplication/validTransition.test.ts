@@ -145,7 +145,7 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
 const ABIvariablePartForJ: VariablePart = {
   outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
   appData: encodeEmbeddedApplicationData({
-    alreadyMoved: AlreadyMoved.ABI,
+    alreadyMoved: AlreadyMoved.None,
     channelIdForX: getChannelId(stateForX.channel),
     supportProofForX: supportProofForX(stateForX), // TODO this is awkward. We would like to use a null value here
   }),

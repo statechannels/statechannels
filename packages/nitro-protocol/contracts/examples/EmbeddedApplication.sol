@@ -136,7 +136,7 @@ contract EmbeddedApplication is
     }
 
     // Finite states for J
-    enum AlreadyMoved {A, B, AB, ABI}
+    enum AlreadyMoved {None, A, B, AB}
 
     // Application Data for J
     struct AppData {
