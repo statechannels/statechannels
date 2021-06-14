@@ -33,7 +33,13 @@ import {
 } from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
-import {SyncOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
+import {
+  SyncOptions,
+  ObjectiveResult,
+  WalletEvents,
+  ObjectiveDoneResult,
+  UpdateChannelResult,
+} from './types';
 
 const DEFAULTS: SyncOptions = {pollInterval: 100, timeOutThreshold: 60_000, staleThreshold: 1_000};
 export class Wallet extends EventEmitter<WalletEvents> {
@@ -206,10 +212,14 @@ export class Wallet extends EventEmitter<WalletEvents> {
     channelId: string,
     allocations: Allocation[],
     appData: string
-  ): Promise<ChannelResult> {
-    const result = await this._engine.updateChannel({channelId, allocations, appData});
-    await this.handleEngineOutput(result);
-    return result.channelResult;
+  ): Promise<UpdateChannelResult> {
+    try {
+      const updateResponse = await this._engine.updateChannel({channelId, allocations, appData});
+      await this.handleEngineOutput(updateResponse);
+      return {type: 'Success', channelId, result: updateResponse.channelResult};
+    } catch (error) {
+      return {type: 'InternalError', error, channelId};
+    }
   }
 
   private async syncObjectives() {

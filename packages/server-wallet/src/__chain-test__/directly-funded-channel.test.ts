@@ -199,8 +199,11 @@ test.each(testCases)(
     );
 
     expect(updated).toMatchObject({
-      turnNum: 4,
-      allocations: [createAllocation(1, 4)],
+      type: 'Success',
+      result: {
+        turnNum: 4,
+        allocations: [createAllocation(1, 4)],
+      },
     });
 
     const closeResponse =
