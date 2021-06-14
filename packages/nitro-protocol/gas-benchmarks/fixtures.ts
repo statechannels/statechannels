@@ -1,6 +1,5 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
-import {once} from 'process';
 
 import {
   Bytes32,
