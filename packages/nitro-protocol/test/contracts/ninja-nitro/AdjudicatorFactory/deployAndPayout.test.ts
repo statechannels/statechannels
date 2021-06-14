@@ -20,7 +20,6 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../../test-helpers';
 import {convertBytes32ToAddress, signStates} from '../../../../src';
 import {NITRO_MAX_GAS} from '../../../../src/transactions';
@@ -227,12 +226,6 @@ describe('deployAndPayout', () => {
 
         console.log('gas used: ' + receipt.gasUsed);
         expect(BigNumber.from(receipt.gasUsed).lt(BigNumber.from(NITRO_MAX_GAS))).toBe(true);
-
-        await writeGasConsumption(
-          'ChannelFactory.deployAndPayout.gas.md',
-          description,
-          receipt.gasUsed
-        );
 
         // Check that the EOAs have the right balance
         for (const asset in payouts) {

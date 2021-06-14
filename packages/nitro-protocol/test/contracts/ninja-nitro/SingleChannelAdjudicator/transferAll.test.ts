@@ -12,7 +12,6 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../../test-helpers';
 import {encodeAllocation, encodeOutcome} from '../../../../src/contract/outcome';
 import {
@@ -180,7 +179,6 @@ describe('transferAll (using transfer and empty indices array)', () => {
         await expectRevert(() => tx, reason);
       } else {
         const {events: eventsFromLogs, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('SingleChannelAdjudicator.transferAll.gas.md', name, gasUsed);
         // TODO expect an 'OutcomeHashUpdated' event
         // const expectedEvents = [
         //   {

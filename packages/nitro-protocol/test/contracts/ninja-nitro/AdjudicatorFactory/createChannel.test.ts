@@ -2,12 +2,7 @@ import {Contract} from 'ethers';
 
 import AdjudicatorFactoryArtifact from '../../../../artifacts/contracts/ninja-nitro/AdjudicatorFactory.sol/AdjudicatorFactory.json';
 import {Channel, getChannelId} from '../../../../src/contract/channel';
-import {
-  getRandomNonce,
-  getTestProvider,
-  setupContract,
-  writeGasConsumption,
-} from '../../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContract} from '../../../test-helpers';
 
 const provider = getTestProvider();
 let AdjudicatorFactory: Contract;
@@ -40,11 +35,6 @@ describe('deployAndPayout', () => {
 
     console.log('gas used: ' + receipt.gasUsed);
 
-    await writeGasConsumption(
-      'ChannelFactory.createChannel.gas.md',
-      'createChannel',
-      receipt.gasUsed
-    );
     const channelAddress = await AdjudicatorFactory.getChannelAddress(channelId);
     const byteCode = await provider.getCode(channelAddress);
     // e.g. 0x363d3d373d3d3d363d73655341aabd39a5ee0939796df610ad685a984c535af43d82803e903d91602b57fd5bf3

@@ -10,7 +10,6 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../../test-helpers';
 import {
   Channel,
@@ -204,7 +203,6 @@ describe('transfer', () => {
 
         const {events: eventsFromTx, gasUsed} = await (await tx).wait();
         // NOTE: _transferAsset is a NOOP in TESTAssetHolder, so gas costs will be much lower than for a real Asset Holder
-        await writeGasConsumption('SingleChannelAdjudicator.transfer.gas.md', name, gasUsed);
         // expect(eventsFromTx).toMatchObject(expectedEvents);
         // Check that EOAs have the right balance
         await Promise.all(

@@ -12,7 +12,6 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../../test-helpers';
 import {
   Channel,
@@ -126,18 +125,9 @@ describe('claim (ETH only)', () => {
       // Fund the guarantor channel
       let gasUsed: BigNumber;
       gasUsed = await guarantor.depositETH(heldBefore[guarantor.id]);
-      await writeGasConsumption(
-        'SingleChannelAdjudicator.claim.gas.md',
-        name + ': send ETH to Guarantor',
-        gasUsed
-      );
       // DEPLOY GUARANTOR CHANNEL
       gasUsed = await guarantor.deploy();
-      await writeGasConsumption(
-        'SingleChannelAdjudicator.claim.gas.md',
-        name + ': deploy Guarantor',
-        gasUsed
-      );
+
       // Compute an appropriate guarantee for the guarantor (using only ETH)
       const guarantee = {
         destinations: guaranteeDestinations,
@@ -147,11 +137,6 @@ describe('claim (ETH only)', () => {
       if (guaranteeDestinations.length > 0) {
         // CONCLUDE GUARANTOR CHANNEL
         gasUsed = await guarantor.conclude(guarantorOutcome);
-        await writeGasConsumption(
-          'SingleChannelAdjudicator.claim.gas.md',
-          name + ': conclude Guarantor',
-          gasUsed
-        );
       } else {
         // Set this so that the claim tx should revert in the way we expect
         guarantor.outcome = guarantorOutcome;
@@ -167,19 +152,9 @@ describe('claim (ETH only)', () => {
 
       // DEPLOY TARGET CHANNEL
       gasUsed = await target.deploy();
-      await writeGasConsumption(
-        'SingleChannelAdjudicator.claim.gas.md',
-        name + ': deploy Target',
-        gasUsed
-      );
       // CONCLUDE TARGET CHANNEL
       if (Object.keys(tOutcomeBefore).length > 0) {
         gasUsed = await target.conclude(targetOutcome);
-        await writeGasConsumption(
-          'SingleChannelAdjudicator.claim.gas.md',
-          name + ': conclude Target',
-          gasUsed
-        );
       }
 
       const tx = target.claimTx(guarantor, indices);
@@ -189,12 +164,7 @@ describe('claim (ETH only)', () => {
       } else {
         const balancesBefore = await getBalances(payouts);
         // Extract logs
-        const {gasUsed} = await (await tx).wait();
-        await writeGasConsumption(
-          'SingleChannelAdjudicator.claim.gas.md',
-          name + ': Target. claim ',
-          gasUsed
-        );
+        await (await tx).wait();
 
         // Check new outcomeHash
         const newAllocation = [];
