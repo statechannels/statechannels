@@ -29,7 +29,6 @@ import {
   nonParticipant,
   ongoingChallengeFingerprint,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {createChallengeTransaction, NITRO_MAX_GAS} from '../../../src/transactions';
 import {hashChallengeMessage} from '../../../src/contract/challenge';
@@ -148,7 +147,7 @@ describe('challenge', () => {
     ${reverts6}  | ${finalizedAtFive}           | ${fourStates}  | ${'correct'}           | ${INVALID_NUMBER_OF_STATES}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
-    async ({description, initialFingerprint, stateData, challengeSignatureType, reasonString}) => {
+    async ({initialFingerprint, stateData, challengeSignatureType, reasonString}) => {
       const {appDatas, whoSignedWhat} = stateData;
       const channel: Channel = {
         chainId,
@@ -210,7 +209,6 @@ describe('challenge', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('challenge.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         // Catch ChallengeRegistered event

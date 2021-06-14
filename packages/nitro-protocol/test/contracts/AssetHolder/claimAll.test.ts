@@ -13,7 +13,6 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 
 jest.setTimeout(10_000);
@@ -143,8 +142,7 @@ describe('claimAll (by passing [] as indices to claim)', () => {
         ];
 
         // Extract logs
-        const {events: eventsFromTx, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('claimAll.gas.md', name, gasUsed);
+        const {events: eventsFromTx} = await (await tx).wait();
 
         // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(eventsFromTx).toMatchObject(expectedEvents);

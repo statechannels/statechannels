@@ -1,15 +1,12 @@
 import * as fs from 'fs';
-import * as path from 'path';
 
 import chalk from 'chalk';
 import writeJsonFile = require('write-json-file');
 import {ethers} from 'ethers';
 
-import {ETHERLIME_ACCOUNTS} from '../constants';
+import {TEST_ACCOUNTS} from '../constants';
 import {Account} from '../types';
 
-import {GanacheDeployer} from './deployer';
-import {GanacheNCacheDeployer} from './deployer-with-cache';
 import {GanacheServer} from './server';
 
 export const ganacheIsRunning = async (port: number): Promise<boolean> => {
@@ -23,23 +20,11 @@ export const ganacheIsRunning = async (port: number): Promise<boolean> => {
 };
 
 const say = (msg: string) => console.log(chalk.cyan(msg));
-const sayError = (msg: string) => console.log(chalk.red(msg));
-
-interface SharedReturnType {
-  deployer: GanacheNCacheDeployer;
-  type: 'shared';
-}
-
-interface IndividualReturnType {
-  deployer: GanacheDeployer;
-  server: GanacheServer;
-  type: 'individual';
-}
 
 async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> {
   const port = Number(p.port || process.env.GANACHE_PORT || 8545);
   const chainId = Number(p.chainId || process.env.CHAIN_NETWORK_ID || 9001);
-  const accounts = p.accounts || ETHERLIME_ACCOUNTS;
+  const accounts = p.accounts || TEST_ACCOUNTS;
   const timeout = Number(p.timeout || process.env.GANACHE_TIMEOUT || 5000);
   const gasLimit = Number(p.gasLimit || process.env.GANACHE_GAS_LIMIT || 1000000000);
   const gasPrice = Number(p.gasPrice || process.env.GANACHE_GAS_PRICE || 1);
@@ -60,87 +45,6 @@ async function startOwnGanache(p: Partial<Params> = {}): Promise<GanacheServer> 
   await server.ready();
   return server;
 }
-
-export const setupGanache = async (
-  deployerAccountIndex: number | string
-): Promise<SharedReturnType | IndividualReturnType> => {
-  const useShared = process.env.USE_GANACHE_DEPLOYMENT_CACHE === 'true';
-  const port = Number(process.env.GANACHE_PORT || 8545);
-
-  let server;
-  let deployer;
-  let type: 'shared' | 'individual';
-  if (useShared) {
-    say(
-      `The USE_GANACHE_DEPLOYMENT_CACHE option is set. Using ganache in shared mode with cached deployments. Port = ${port}.`
-    );
-    const cacheFolder = process.env.GANACHE_CACHE_FOLDER;
-    if (!cacheFolder) {
-      sayError(
-        "Didn't find a GANACHE_CACHE_FOLDER in the env. Without this you can't use a shared ganache instance with cache."
-      );
-      throw Error('Missing GANACHE_CACHE_FOLDER in env.');
-    }
-
-    const foundGanache = await ganacheIsRunning(port);
-    if (!foundGanache) {
-      sayError(
-        `Didn't find a ganache instance at http://localhost:${port}. To use the deployments cache you must start ganache separately. Did you run 'yarn start:shared-ganache'?`
-      );
-      throw Error(`Ganache not running on port ${port}`);
-    }
-
-    say(`Found shared ganache instance running on http://localhost:${port}.`);
-
-    const deploymentsFile = path.join(
-      process.cwd(),
-      cacheFolder,
-      `ganache-deployments-${port}.json`
-    );
-    if (!fs.existsSync(deploymentsFile)) {
-      sayError(`Didn't find the deployments cache at ${deploymentsFile}.`);
-      say(
-        'This probably means that another package is running a regular ganache instance (without deployment cache) on this port.'
-      );
-      say(
-        'This is bad because it will lead to confusing behaviour from an invalid deployment cache, if this regular ganache instance is restarted.'
-      );
-      say(
-        'Please change the GANACHE_PORT environment variable in one of these packages, or run them both with USE_GANACHE_DEPLOYMENT_CACHE set.'
-      );
-      throw Error(`Deployments cache doesn't exist`);
-    }
-    say(`Using the deployments cache at ${deploymentsFile}.`);
-
-    deployerAccountIndex = Number(deployerAccountIndex);
-    if (!Number.isFinite(deployerAccountIndex))
-      throw new Error(`Invalid deployerAccountIndex ${deployerAccountIndex}`);
-    if (deployerAccountIndex < 0 || deployerAccountIndex >= ETHERLIME_ACCOUNTS.length)
-      throw new Error(
-        `deployerAccountIndex ${deployerAccountIndex} out of range [0,${ETHERLIME_ACCOUNTS.length}]`
-      );
-
-    const deployerAccountKey = ETHERLIME_ACCOUNTS[deployerAccountIndex].privateKey;
-
-    type = 'shared';
-    deployer = new GanacheNCacheDeployer(port, deploymentsFile, deployerAccountKey);
-  } else {
-    say(
-      'The USE_GANACHE_DEPLOYMENT_CACHE option is not set, so starting an individual ganache instance.'
-    );
-    const foundGanache = await ganacheIsRunning(port);
-    if (foundGanache) {
-      sayError(
-        `Found a ganache instance already running at http://localhost:${port}. Try changing your GANACHE_PORT env variable!`
-      );
-      throw Error(`Ganache already running on port ${port}`);
-    }
-    server = await startOwnGanache();
-    deployer = new GanacheDeployer(server.port);
-    type = 'individual';
-  }
-  return {server, deployer, type};
-};
 
 interface Params {
   port: number;

@@ -6,12 +6,7 @@ const {AddressZero} = ethers.constants;
 import ERC20AssetHolderArtifact from '../../../artifacts/contracts//test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {
-  getRandomNonce,
-  getTestProvider,
-  setupContract,
-  writeGasConsumption,
-} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 const signer0 = provider.getSigner(0); // Convention matches setupContract function
@@ -54,7 +49,7 @@ describe('deposit', () => {
     ${description2} | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
     ${description3} | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
     ${description4} | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
-  `('$description', async ({description, held, expectedHeld, amount, reasonString, heldAfter}) => {
+  `('$description', async ({held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = BigNumber.from(held);
     expectedHeld = BigNumber.from(expectedHeld);
     amount = BigNumber.from(amount);
@@ -68,17 +63,7 @@ describe('deposit', () => {
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance
-    const {gasUsed: increaseAllowanceGasUsed} = await (
-      await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))
-    ).wait(); // Approve enough for setup and main test
-
-    if (!reasonString) {
-      await writeGasConsumption(
-        'erc20-deposit.gas.md',
-        'Token.increaseAllowance',
-        increaseAllowanceGasUsed
-      );
-    }
+    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
     // Check allowance updated
     const allowance = BigNumber.from(
@@ -100,8 +85,7 @@ describe('deposit', () => {
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
     } else {
-      const {gasUsed, events} = await (await tx).wait();
-      await writeGasConsumption('erc20-deposit.gas.md', description, gasUsed);
+      const {events} = await (await tx).wait();
 
       const depositedEvent = getDepositedEvent(events);
       expect(depositedEvent).toMatchObject({

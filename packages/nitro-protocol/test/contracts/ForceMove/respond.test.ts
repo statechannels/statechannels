@@ -17,7 +17,6 @@ import {
   getRandomNonce,
   getTestProvider,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {sign} from '../../../src/signatures';
 
@@ -73,7 +72,6 @@ describe('respond', () => {
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
-      description,
       isFinalAB,
       turnNumRecord,
       appDatas,
@@ -132,7 +130,6 @@ describe('respond', () => {
         await expectRevert(() => tx, reasonString);
       } else {
         const receipt = await (await tx).wait();
-        await writeGasConsumption('respond.gas.md', description, receipt.gasUsed);
         const event = receipt.events.pop();
 
         expect(event.args).toMatchObject({

@@ -10,7 +10,6 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  writeGasConsumption,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
 
@@ -93,8 +92,7 @@ describe('transferAll (using transfer and empty indices array)', () => {
       if (reason) {
         await expectRevert(() => tx, reason);
       } else {
-        const {events: eventsFromLogs, gasUsed} = await (await tx).wait();
-        await writeGasConsumption('transferAll.gas.md', name, gasUsed);
+        const {events: eventsFromLogs} = await (await tx).wait();
         const expectedEvents = [
           {
             event: 'AllocationUpdated',

@@ -4,12 +4,7 @@ const {parseUnits} = ethers.utils;
 
 import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {
-  getRandomNonce,
-  getTestProvider,
-  setupContract,
-  writeGasConsumption,
-} from '../../test-helpers';
+import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 let ETHAssetHolder: Contract;
@@ -49,7 +44,7 @@ describe('deposit', () => {
     ${description3} | ${'3'} | ${'2'}       | ${'2'} | ${'2'}   | ${'4'}          | ${undefined}
   `(
     '$description',
-    async ({description, held, expectedHeld, amount, msgValue, reasonString, heldAfterString}) => {
+    async ({held, expectedHeld, amount, msgValue, reasonString, heldAfterString}) => {
       held = parseUnits(held, 'wei');
       expectedHeld = parseUnits(expectedHeld, 'wei');
       amount = parseUnits(amount, 'wei');
@@ -81,8 +76,7 @@ describe('deposit', () => {
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
       } else {
-        const {gasUsed, events} = await (await tx).wait();
-        await writeGasConsumption('deposit.gas.md', description, gasUsed);
+        const {events} = await (await tx).wait();
         const event = getDepositedEvent(events);
         expect(event).toMatchObject({
           destination,

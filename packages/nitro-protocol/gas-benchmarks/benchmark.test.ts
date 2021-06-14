@@ -1,29 +1,31 @@
-import {channelId} from './fixtures';
+import {channelId, finalizationProof, finalState, someOtherChannelId} from './fixtures';
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
 
-describe('Consumes the expected gas', () => {
-  it(`when deploying the NitroAdjudicator >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator} gas`, async () => {
+describe('Consumes the expected gas for deployments', () => {
+  it(`when deploying the NitroAdjudicator`, async () => {
     await expect(await nitroAdjudicator.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator
     );
   });
-  it(`when deploying the ETHAssetHolder >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ETHAssetHolder} gas`, async () => {
+  it(`when deploying the ETHAssetHolder`, async () => {
     await expect(await ethAssetHolder.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ETHAssetHolder
     );
   });
-  it(`when deploying the ERC20AssetHolder >>>>>  ${gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ERC20AssetHolder} gas`, async () => {
+  it(`when deploying the ERC20AssetHolder`, async () => {
     await expect(await erc20AssetHolder.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ERC20AssetHolder
     );
   });
-  it(`when directly funding a channel with ETH (first deposit) >>>>>  ${gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro} gas`, async () => {
+});
+describe('Consumes the expected gas for deposits', () => {
+  it(`when directly funding a channel with ETH (first deposit)`, async () => {
     await expect(await ethAssetHolder.deposit(channelId, 0, 5, {value: 5})).toConsumeGas(
       gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro
     );
   });
-  it(`when directly funding a channel with ETH (second deposit) >>>>> ${gasRequiredTo.directlyFundAChannelWithETHSecond.vanillaNitro} gas`, async () => {
+  it(`when directly funding a channel with ETH (second deposit)`, async () => {
     // begin setup
     const setupTX = ethAssetHolder.deposit(channelId, 0, 5, {value: 5});
     await (await setupTX).wait();
@@ -55,5 +57,44 @@ describe('Consumes the expected gas', () => {
     await expect(await erc20AssetHolder.deposit(channelId, 5, 5)).toConsumeGas(
       gasRequiredTo.directlyFundAChannelWithERC20Second.vanillaNitro.deposit
     );
+  });
+});
+describe('Consumes the expected gas for happy-path exits', () => {
+  it(`when exiting a directly funded (with ETH) channel`, async () => {
+    // begin setup
+    await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
+    await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
+    // end setup
+    const fP = finalizationProof(finalState(ethAssetHolder.address));
+    await expect(
+      await nitroAdjudicator.concludePushOutcomeAndTransferAll(
+        fP.largestTurnNum,
+        fP.fixedPart,
+        fP.appPartHash,
+        fP.outcomeBytes,
+        fP.numStates,
+        fP.whoSignedWhat,
+        fP.sigs
+      )
+    ).toConsumeGas(gasRequiredTo.ETHexit.vanillaNitro);
+  });
+  it(`when exiting a directly funded (with ERC20s) channel`, async () => {
+    // begin setup
+    await (await token.increaseAllowance(erc20AssetHolder.address, 100)).wait();
+    await (await erc20AssetHolder.deposit(someOtherChannelId, 0, 10)).wait(); // other channels are funded by this asset holder
+    await (await erc20AssetHolder.deposit(channelId, 0, 10)).wait();
+    // end setup
+    const fP = finalizationProof(finalState(erc20AssetHolder.address));
+    await expect(
+      await nitroAdjudicator.concludePushOutcomeAndTransferAll(
+        fP.largestTurnNum,
+        fP.fixedPart,
+        fP.appPartHash,
+        fP.outcomeBytes,
+        fP.numStates,
+        fP.whoSignedWhat,
+        fP.sigs
+      )
+    ).toConsumeGas(gasRequiredTo.ERC20exit.vanillaNitro);
   });
 });
