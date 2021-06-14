@@ -18,9 +18,9 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 12.16.3
+          node-version: 16.3.0
       
-      - name: Configure CI Git User
+    - name: Configure CI Git User
         run: |
           git config --global user.name "github-actions"
           git config --global user.email "github-actions@users.noreply.github.com"

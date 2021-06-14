@@ -50,7 +50,7 @@ This repository is a monorepo, and contains the following packages maintained wi
 
 ### Installing dependencies
   * **yarn** - version 1.22.4, for easy management of specific Yarn versions, we recommend using [Yarn Version Manager (YVM)](https://github.com/tophat/yvm).
-  * **node** - version 12.16.3, for easy management of specific versions, we recommend using [n](https://github.com/tj/n).
+  * **node** - version 16.3.0, for easy management of specific versions, we recommend using [n](https://github.com/tj/n).
   * **postgres** - macOS and linux instructions follow:
 
 For **macOS**, we recommend [the postgres app](https://postgresapp.com/). If you choose this installation, make sure you execute the following script ([docs](https://postgresapp.com/documentation/install.html)) to add postgres tools to your $PATH, and verify that commands like `createdb` and `dropdb` run correctly in your terminal before proceeding.

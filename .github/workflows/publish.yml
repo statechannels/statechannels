@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/setup-node@v1
         with:
-          node-version: 12.16.3
+          node-version: 16.3.0
 
       - name: yarn install
         # skip the prepare step here, as lerna publish will run prepare before publishing
