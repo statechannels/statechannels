@@ -24,12 +24,10 @@ export async function deploy(): Promise<Record<string, string>> {
     await tokenFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
   ).address;
 
-  const ADJUDICATOR_FACTORY_ADDRESS = (
-    await adjudicatorFactoryFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
-  ).address;
+  const ADJUDICATOR_FACTORY_ADDRESS = (await adjudicatorFactoryFactory.deploy()).address;
 
   const SINGLE_CHANNEL_ADJUDICATOR_MASTERCOPY_ADDRESS = (
-    await await singleChannelAdjudicatorFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey))
+    await singleChannelAdjudicatorFactory.deploy(ADJUDICATOR_FACTORY_ADDRESS)
   ).address; // The mastercopy requires the adjudicator factory address as a constructor arg
   // It will be "baked into" the bytecode of the Mastercopy
 
