@@ -38,6 +38,7 @@ save_dep: &save_dep
       - packages/wallet-core/node_modules
       - packages/wire-format/node_modules
       - packages/browser-wallet/node_modules
+      - packages/interop-tests/node_modules
 
 restore_dep: &restore_dep
   restore_cache:
