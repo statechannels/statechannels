@@ -4,7 +4,7 @@ import {CreateChannelParams, Participant, Allocation} from '@statechannels/clien
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, BigNumberish, constants, Contract, ethers, providers} from 'ethers';
+import {BigNumber, BigNumberish, Contract, providers, utils} from 'ethers';
 import _ from 'lodash';
 import {hexZeroPad} from '@ethersproject/bytes';
 
@@ -17,6 +17,7 @@ import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
+import {COUNTING_APP_DEFINITION} from '../models/__test__/fixtures/app-bytecode';
 
 jest.setTimeout(60_000);
 
@@ -171,8 +172,8 @@ test.each(testCases)(
     const channelParams: CreateChannelParams = {
       participants: [participantA, participantB],
       allocations: [createAllocation(3, 2)],
-      appDefinition: ethers.constants.AddressZero,
-      appData: constants.HashZero,
+      appDefinition: COUNTING_APP_DEFINITION,
+      appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
       fundingStrategy: 'Direct',
       challengeDuration: ONE_DAY,
     };
@@ -191,7 +192,11 @@ test.each(testCases)(
     expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(BN.add(2, 3));
 
     const {channelId} = response[0];
-    const updated = await a.updateChannel(channelId, [createAllocation(1, 4)], constants.HashZero);
+    const updated = await a.updateChannel(
+      channelId,
+      [createAllocation(1, 4)],
+      utils.defaultAbiCoder.encode(['uint256'], [2])
+    );
 
     expect(updated).toMatchObject({
       turnNum: 4,
