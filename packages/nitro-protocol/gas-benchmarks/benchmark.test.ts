@@ -1,4 +1,4 @@
-import {channelId, finalizationProof, finalState, someOtherChannelId} from './fixtures';
+import {channelId, counterSignedSupportProof, finalState, someOtherChannelId} from './fixtures';
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
 
@@ -65,7 +65,7 @@ describe('Consumes the expected gas for happy-path exits', () => {
     await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
     await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
     // end setup
-    const fP = finalizationProof(finalState(ethAssetHolder.address));
+    const fP = counterSignedSupportProof(finalState(ethAssetHolder.address));
     await expect(
       await nitroAdjudicator.concludePushOutcomeAndTransferAll(
         fP.largestTurnNum,
@@ -84,7 +84,7 @@ describe('Consumes the expected gas for happy-path exits', () => {
     await (await erc20AssetHolder.deposit(someOtherChannelId, 0, 10)).wait(); // other channels are funded by this asset holder
     await (await erc20AssetHolder.deposit(channelId, 0, 10)).wait();
     // end setup
-    const fP = finalizationProof(finalState(erc20AssetHolder.address));
+    const fP = counterSignedSupportProof(finalState(erc20AssetHolder.address));
     await expect(
       await nitroAdjudicator.concludePushOutcomeAndTransferAll(
         fP.largestTurnNum,

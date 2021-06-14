@@ -29,13 +29,13 @@ export const channelId = getChannelId(channel);
 
 export const someOtherChannelId = getChannelId({...channel, channelNonce: 1337});
 
-export function finalState(assetHolderAddress: string): State {
+export function someState(assetHolderAddress: string): State {
   return {
     challengeDuration: 600,
     appDefinition: '0x8504FcA6e1e73947850D66D032435AC931892116',
     channel,
     turnNum: 6,
-    isFinal: true,
+    isFinal: false,
     outcome: [
       {
         assetHolderAddress,
@@ -49,7 +49,14 @@ export function finalState(assetHolderAddress: string): State {
   };
 }
 
-export function finalizationProof(
+export function finalState(assetHolderAddress: string): State {
+  return {
+    ...someState(assetHolderAddress),
+    isFinal: true,
+  };
+}
+
+export function counterSignedSupportProof(
   state: State
 ): {
   largestTurnNum: number;
