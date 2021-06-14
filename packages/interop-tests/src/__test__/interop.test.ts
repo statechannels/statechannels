@@ -1,9 +1,9 @@
 import {
   DBAdmin,
   defaultTestConfig,
-  Output,
-  SingleChannelOutput,
-  SingleThreadedEngine
+  SingleThreadedEngine,
+  SyncOptions,
+  Wallet as ServerWallet
 } from '@statechannels/server-wallet';
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ChannelWallet} from '@statechannels/browser-wallet';
@@ -11,24 +11,18 @@ import {constants, Contract, providers, Wallet} from 'ethers';
 import {
   Address,
   BN,
-  deserializeMessage,
   Destination,
   formatAmount,
   makeAddress,
   makeDestination,
   Uint256
 } from '@statechannels/wallet-core';
-import {fromEvent} from 'rxjs';
-import {first} from 'rxjs/operators';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
-import {
-  CreateChannelParams,
-  isJsonRpcNotification,
-  Message,
-  PushMessageRequest
-} from '@statechannels/client-api-schema';
-import {Message as WireMessage} from '@statechannels/wire-format';
+import {CreateChannelParams} from '@statechannels/client-api-schema';
+import {ChainService} from '@statechannels/server-wallet/src/chain-service';
+
+import {BrowserServerMessageService} from '../message-service';
 
 jest.setTimeout(60_000);
 
@@ -60,13 +54,12 @@ const serverConfig = defaultTestConfig({
 
 let provider: providers.JsonRpcProvider;
 let assetHolderContract: Contract;
-let serverWallet: SingleThreadedEngine;
+let serverWallet: ServerWallet;
 let browserWallet: ChannelWallet;
 let serverAddress: Address;
 let serverDestination: Destination;
 let browserAddress: Address;
 let browserDestination: Destination;
-let objectiveSuccededPromise: Promise<void>;
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
@@ -79,39 +72,28 @@ beforeAll(async () => {
   // TODO: The onSendMessage listener can still be executing
   // so we can't properly restart the engine
   await DBAdmin.truncateDatabase(serverConfig);
-  serverWallet = await SingleThreadedEngine.create(serverConfig);
-});
 
-beforeEach(async () => {
   browserWallet = await ChannelWallet.create(
     makeAddress(new Wallet(TEST_ACCOUNTS[1].privateKey).address)
   );
+  const engine = await SingleThreadedEngine.create(serverConfig);
+  const chainService = new ChainService(serverConfig.chainServiceConfiguration);
+  const factory = BrowserServerMessageService.createFactory(browserWallet);
+  // Currently the browser wallet crashes if it receives the same objective again
+  // To avoid this we prevent the wallet from retrying objectives by using
+  // a really large poll value (one hour)
+  const syncOptions: Partial<SyncOptions> = {pollInterval: 3_600_000};
+  serverWallet = await ServerWallet.create(engine, chainService, factory, syncOptions);
 
-  serverAddress = await serverWallet.getSigningAddress();
+  serverAddress = await engine.getSigningAddress();
   serverDestination = makeDestination(serverAddress);
 
   browserAddress = makeAddress(await browserWallet.getAddress());
   browserDestination = makeDestination(browserAddress);
-
-  browserWallet.onSendMessage(message => {
-    if (isJsonRpcNotification(message)) {
-      // TODO: Since we're not awaiting this it can execute while knex is being destroyed
-      serverWallet.pushMessage((message.params as Message).data);
-    }
-  });
-
-  // objectiveSuccededPromise = new Promise<void>(r => {
-  //   serverWallet.on('objectiveSucceeded', (o: WalletObjective) => {
-  //     if (o.type === 'OpenChannel' && o.status === 'succeeded') r();
-  //   });
-  // });
-});
-
-afterEach(async () => {
-  browserWallet.destroy();
 });
 
 afterAll(async () => {
+  browserWallet.destroy();
   await serverWallet.destroy();
   provider.polling = false;
   provider.removeAllListeners();
@@ -128,85 +110,57 @@ function mineOnEvent(contract: Contract) {
   contract.on('Deposited', mineBlocksForEvent);
 }
 
-function serverMessageToBrowserMessage(serverOutput: Output): PushMessageRequest {
-  return generatePushMessage(serverOutput.outbox[0].params);
-}
+it('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
+  const [createResult] = await serverWallet.createChannels([
+    {
+      appData: '0x',
+      appDefinition: constants.AddressZero,
+      fundingStrategy: 'Direct',
+      challengeDuration: 86400, // one day
+      participants: [
+        {
+          participantId: 'server',
+          signingAddress: serverAddress,
+          destination: serverDestination
+        },
+        {
+          participantId: browserAddress,
+          signingAddress: browserAddress,
+          destination: browserDestination
+        }
+      ],
+      allocations: [
+        {
+          assetHolderAddress: ethAssetHolderAddress,
+          allocationItems: [
+            {
+              amount: BN.from(3),
+              destination: serverDestination
+            },
+            {amount: BN.from(5), destination: browserDestination}
+          ]
+        }
+      ]
+    }
+  ]);
 
-function generatePushMessage(messageParams: Message): PushMessageRequest {
-  return {
-    jsonrpc: '2.0',
-    id: 111111111,
-    method: 'PushMessage',
-    params: messageParams
-  };
-}
-
-// In theory, we should be able to check the channelResult. In practice, the channelResult seems to have an incorrect turn number
-function containsPostfundState(singleChannelOutput: SingleChannelOutput): boolean {
-  if (!singleChannelOutput.outbox.length) return false;
-
-  const signedStates = deserializeMessage(singleChannelOutput.outbox[0].params as WireMessage)
-    .signedStates;
-  return signedStates ? signedStates?.some(ss => ss.turnNum === 3) : false;
-}
-// TODO: To get this working it must be updated to use a server wallet instead of an engine.
-it.skip('server wallet creates channel + cooperates with browser wallet to fund channel', async () => {
-  const output1 = await serverWallet.createChannel({
-    appData: '0x',
-    appDefinition: constants.AddressZero,
-    fundingStrategy: 'Direct',
-    challengeDuration: 86400, // one day
-    participants: [
-      {
-        participantId: 'server',
-        signingAddress: serverAddress,
-        destination: serverDestination
-      },
-      {
-        participantId: browserAddress,
-        signingAddress: browserAddress,
-        destination: browserDestination
-      }
-    ],
-    allocations: [
-      {
-        assetHolderAddress: ethAssetHolderAddress,
-        allocationItems: [
-          {
-            amount: BN.from(3),
-            destination: serverDestination
-          },
-          {amount: BN.from(5), destination: browserDestination}
-        ]
-      }
-    ]
-  });
-
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(output1), 'dummyDomain');
-
+  const {channelId} = createResult;
   // TODO: the proper way to do this is to wait for a ChannelProposed or some sort of new objective notification
   await browserWallet.pushMessage(
     {
       jsonrpc: '2.0',
       id: 2,
       method: 'JoinChannel',
-      params: {channelId: output1.channelResult.channelId}
+      params: {channelId}
     },
     'dummyDomain'
   );
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(containsPostfundState))
-    .toPromise();
-
-  // serverWallet.on('channelUpdated', e => console.log(JSON.stringify(e)));
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(await postFundA), 'dummyDomain');
-
-  await objectiveSuccededPromise;
+  const result = await createResult.done;
+  expect(result.type).toBe('Success');
 });
 
-it.skip('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
+it('browser wallet creates channel + cooperates with server wallet to fund channel', async () => {
   const createChannelParams: CreateChannelParams = {
     participants: [
       {
@@ -252,16 +206,9 @@ it.skip('browser wallet creates channel + cooperates with server wallet to fund 
   );
   const channelId = Object.keys(browserWallet.getRichObjectives())[0];
   await browserWallet.approveRichObjective(channelId);
+  const objectiveId = `OpenChannel-${channelId}`;
+  const [approveResult] = await serverWallet.approveObjectives([objectiveId]);
 
-  const serverOutput1 = await serverWallet.joinChannel({channelId});
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(serverOutput1), 'dummyDomain');
-
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const postFundA = await fromEvent<SingleChannelOutput>(serverWallet as any, 'channelUpdated')
-    .pipe(first(containsPostfundState))
-    .toPromise();
-
-  await browserWallet.pushMessage(serverMessageToBrowserMessage(postFundA), 'dummyDomain');
-
-  await objectiveSuccededPromise;
+  const result = await approveResult.done;
+  expect(result.type).toBe('Success');
 });
