@@ -64,9 +64,9 @@ export const gasRequiredTo: GasRequiredTo = {
   ETHexitSad: {
     vanillaNitro: {
       challenge: 93404,
-      pushOutcome: 2,
-      transfer: 3,
-      total: 6,
+      pushOutcomeAndTransferAll: 107742,
+      total: 201146, // An alternative would be to 1. pushOutcome then 2. transfer(indices)
+      // ...but we assume that costs more gas overall
     },
   },
 };

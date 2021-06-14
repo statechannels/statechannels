@@ -7,7 +7,7 @@ import {
   someState,
 } from './fixtures';
 import {gasRequiredTo} from './gas';
-import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token} from './vanillaSetup';
+import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token, provider} from './vanillaSetup';
 
 describe('Consumes the expected gas for deployments', () => {
   it(`when deploying the NitroAdjudicator`, async () => {
@@ -106,10 +106,19 @@ describe('Consumes the expected gas for happy-path exits', () => {
   });
 });
 describe('Consumes the expected gas for sad-path exits', () => {
-  it.only(`when exiting a directly funded (with ETH) channel`, async () => {
+  it(`when exiting a directly funded (with ETH) channel`, async () => {
     // begin setup
     await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
     await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
+    const finalizesAtPromise = new Promise(resolve =>
+      nitroAdjudicator.once('ChallengeRegistered', (...event) => {
+        resolve(event[2]); // 2 is the position of finalizesAt
+      })
+    );
+    async function waitForChallengeToTimeOut(finalizesAt) {
+      await provider.send('evm_setNextBlockTimestamp', [finalizesAt + 1]);
+      await provider.send('evm_mine', []);
+    }
     // end setup
     const fP = counterSignedSupportProof(someState(ethAssetHolder.address)); // TODO use a nontrivial app with a state transition
     await expect(
@@ -123,5 +132,23 @@ describe('Consumes the expected gas for sad-path exits', () => {
         fP.challengeSignature
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSad.vanillaNitro.challenge);
+    const finalizesAt = (await finalizesAtPromise) as number;
+    // begin wait
+    await waitForChallengeToTimeOut(finalizesAt);
+    // end wait
+    await expect(
+      await nitroAdjudicator.pushOutcomeAndTransferAll(
+        channelId,
+        fP.largestTurnNum,
+        finalizesAt, // finalizesAt
+        fP.stateHash, // stateHash
+        fP.challengerAddress, // challengerAddress
+        fP.outcomeBytes // outcomeBytes
+      )
+    ).toConsumeGas(gasRequiredTo.ETHexitSad.vanillaNitro.pushOutcomeAndTransferAll);
+    expect(
+      gasRequiredTo.ETHexitSad.vanillaNitro.challenge +
+        gasRequiredTo.ETHexitSad.vanillaNitro.pushOutcomeAndTransferAll
+    ).toEqual(gasRequiredTo.ETHexitSad.vanillaNitro.total);
   });
 });

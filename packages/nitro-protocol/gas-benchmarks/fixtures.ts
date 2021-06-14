@@ -1,5 +1,6 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
+import {once} from 'process';
 
 import {
   Bytes32,
@@ -14,7 +15,7 @@ import {
   signState,
   State,
 } from '../src';
-import {FixedPart, getVariablePart, VariablePart} from '../src/contract/state';
+import {FixedPart, getVariablePart, hashState, VariablePart} from '../src/contract/state';
 import {Bytes} from '../src/contract/types';
 
 export const chainId = '0x7a69'; // 31337 in hex (hardhat network default)
@@ -58,7 +59,7 @@ export function finalState(assetHolderAddress: string): State {
   };
 }
 
-export function counterSignedSupportProof( // for challenging
+export function counterSignedSupportProof( // for challenging and outcome pushing
   state: State
 ): {
   largestTurnNum: number;
@@ -68,6 +69,9 @@ export function counterSignedSupportProof( // for challenging
   whoSignedWhat: [0, 0];
   signatures: [Signature, Signature];
   challengeSignature: Signature;
+  outcomeBytes: string;
+  stateHash: string;
+  challengerAddress: string;
 } {
   return {
     largestTurnNum: state.turnNum,
@@ -80,6 +84,9 @@ export function counterSignedSupportProof( // for challenging
       signState(state, Bob.privateKey).signature,
     ],
     challengeSignature: signChallengeMessage([{state} as SignedState], Alice.privateKey),
+    outcomeBytes: encodeOutcome(state.outcome),
+    stateHash: hashState(state),
+    challengerAddress: Alice.address,
   };
 }
 
