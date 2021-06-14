@@ -58,7 +58,30 @@ interface ChainEventEmitterInterface {
   destructor(): void;
 }
 
+export type FundChannelRequest = {type: 'FundChannel'} & FundChannelArg;
+export type ConcludeAndWithdrawRequest = {
+  type: 'ConcludeAndWithdraw';
+  finalizationProof: SignedState[];
+};
+export type PushOutcomeAndWithdrawRequest = {
+  type: 'PushOutcomeAndWithdraw';
+  state: State;
+  challengerAddress: Address;
+};
+
+export type ChallengeRequest = {
+  type: 'Challenge';
+  challengeStates: SignedState[];
+  privateKey: PrivateKey;
+};
+
+export type ChainRequest =
+  | FundChannelRequest
+  | ConcludeAndWithdrawRequest
+  | PushOutcomeAndWithdrawRequest
+  | ChallengeRequest;
 interface ChainModifierInterface {
+  handleChainRequests(chainRequests: ChainRequest[]): Promise<providers.TransactionResponse[]>;
   // TODO: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
   fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
   concludeAndWithdraw(

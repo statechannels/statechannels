@@ -1,30 +1,34 @@
 import _ from 'lodash';
 
-import {ObjectiveStatus} from '../models/objective';
+import {ObjectiveStatus, WalletObjective} from '../models/objective';
 
-export type RetryOptions = {
-  /**
-   * The number of attempts to make.
-   */
-  numberOfAttempts: number;
-  /**
-   * The initial delay to use in milliseconds
-   */
-  initialDelay: number;
+export type SyncOptions = {
+  // How often we check for stale or timed out objectives in milliseconds.
+  pollInterval: number;
 
   /**
-   * The multiple that the delay is multiplied by each time
+   * The amount of time (in milliseconds) that we wait for until we consider an objective timed out.
+   * When an objective is timed out we give up trying to complete it and return an error.
    */
-  multiple: number;
+  timeOutThreshold: number;
+
+  /**
+   * The amount of time (in milliseconds) that we wait for until we consider an objective "stale"
+   * If an objective is stale we attempt to sync the objectives with the other participants.
+   */
+  staleThreshold: number;
 };
 
-export type ObjectiveError = EnsureObjectiveFailed | InternalError;
+export type ObjectiveError = ObjectiveTimedOutError | InternalError;
 
-export type EnsureObjectiveFailed = {
-  type: 'EnsureObjectiveFailed';
-  numberOfAttempts: number;
+/**
+ * The objective timed out without being completed.
+ */
+export type ObjectiveTimedOutError = {
+  lastProgressMadeAt: Date;
+  objectiveId: string;
+  type: 'ObjectiveTimedOutError';
 };
-
 /**
  * This is the catch-all error that will be returned if some error is thrown and not handled.
  */
@@ -33,6 +37,9 @@ export type InternalError = {
   error: Error;
 };
 
+/**
+ * The objective suceeded.
+ */
 export type ObjectiveSuccess = {channelId: string; type: 'Success'};
 
 export type ObjectiveDoneResult = ObjectiveSuccess | ObjectiveError;
@@ -59,3 +66,9 @@ export type ObjectiveResult = {
   // The channelId for the objective
   channelId: string;
 };
+
+export interface WalletEvents {
+  ObjectiveCompleted: (o: WalletObjective) => void;
+  ObjectiveProposed: (o: WalletObjective) => void;
+  ObjectiveTimedOut: (o: WalletObjective) => void;
+}

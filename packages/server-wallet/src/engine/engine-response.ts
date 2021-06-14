@@ -1,20 +1,20 @@
 import _ from 'lodash';
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, Message} from '@statechannels/client-api-schema';
 import {Participant, serializeMessage, SignedState} from '@statechannels/wallet-core';
-import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
+import {
+  Message as WireMessage,
+  Payload,
+  SignedState as WireState,
+} from '@statechannels/wire-format';
 
 import {Notice, Outgoing} from '../protocols/actions';
 import {Channel} from '../models/channel';
 import {WalletObjective, isSharedObjective, toWireObjective} from '../models/objective';
 import {WALLET_VERSION} from '../version';
 import {ChannelState, toChannelResult} from '../protocols/state';
+import {ChainRequest} from '../chain-service';
 
-import {
-  EngineEvent,
-  MultipleChannelOutput,
-  SingleChannelOutput,
-  SyncObjectiveResult,
-} from './types';
+import {MultipleChannelOutput, SingleChannelOutput} from './types';
 
 /**
  * Used internally for constructing the SingleChannelOutput or MultipleChannelOutput
@@ -22,15 +22,21 @@ import {
  */
 export class EngineResponse {
   _channelResults: Record<string, ChannelResult> = {};
-  private queuedMessages: Record<string, WireMessage[]> = {};
+  private _messages: Message[] = [];
 
   objectivesToApprove: WalletObjective[] = [];
   createdObjectives: WalletObjective[] = [];
   succeededObjectives: WalletObjective[] = [];
   requests: string[] = [];
 
+  chainRequests: ChainRequest[] = [];
+
   static initialize(): EngineResponse {
     return new this();
+  }
+
+  queueChainRequest(chainRequest: ChainRequest[]): void {
+    this.chainRequests.push(...chainRequest);
   }
 
   /**
@@ -61,11 +67,11 @@ export class EngineResponse {
   /**
    * Queues state for sending to opponent
    */
-  queueState(state: SignedState, myIndex: number, channelId: string, objectiveId?: string): void {
+  queueState(state: SignedState, myIndex: number, channelId: string): void {
     const myParticipantId = state.participants[myIndex].participantId;
     state.participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.addMessage(
+        this._messages.push(
           serializeMessage(
             WALLET_VERSION,
             {
@@ -75,25 +81,10 @@ export class EngineResponse {
             p.participantId,
             myParticipantId,
             channelId
-          ),
-          objectiveId
+          )
         );
       }
     });
-  }
-
-  /**
-   * Adds a message to the current collection of messages.
-   * If no objective id is provided a placeholder of NO_OBJECTIVE_ID is used.
-   * @param message The message to add.
-   * @param objectiveId The optional objective id to associate the message with.
-   */
-  private addMessage(message: WireMessage, objectiveId?: string): void {
-    const id = objectiveId ?? 'NO_OBJECTIVE_ID';
-    const previousValue = this.queuedMessages[id] ?? [];
-    const mergedMessages = mergeMessages(previousValue.concat(message));
-
-    this.queuedMessages[id] = mergedMessages;
   }
 
   /**
@@ -108,7 +99,7 @@ export class EngineResponse {
     if (isSharedObjective(objective)) {
       participants.forEach((p, i) => {
         if (i !== myIndex) {
-          this.addMessage(
+          this._messages.push(
             serializeMessage(
               WALLET_VERSION,
               {
@@ -117,8 +108,7 @@ export class EngineResponse {
               },
               p.participantId,
               myParticipantId
-            ),
-            objective.objectiveId
+            )
           );
         }
       });
@@ -150,17 +140,12 @@ export class EngineResponse {
   /**
    * Add a GetChannelRequest to outbox for given channelId
    */
-  queueChannelRequest(
-    channelId: string,
-    myIndex: number,
-    participants: Participant[],
-    objectiveId?: string
-  ): void {
+  queueChannelRequest(channelId: string, myIndex: number, participants: Participant[]): void {
     const myParticipantId = participants[myIndex].participantId;
 
     participants.forEach((p, i) => {
       if (i !== myIndex) {
-        this.addMessage(
+        this._messages.push(
           serializeMessage(
             WALLET_VERSION,
             {
@@ -170,8 +155,7 @@ export class EngineResponse {
             p.participantId,
             myParticipantId,
             channelId
-          ),
-          objectiveId
+          )
         );
       }
     });
@@ -182,7 +166,9 @@ export class EngineResponse {
       outbox: mergeOutgoing(this.outbox),
       channelResults: mergeChannelResults(this.channelResults),
       newObjectives: this.createdObjectives,
-      messagesByObjective: this.queuedMessages,
+
+      chainRequests: this.chainRequests,
+      completedObjectives: this.succeededObjectives,
     };
   }
 
@@ -207,6 +193,7 @@ export class EngineResponse {
       outbox: mergeOutgoing(this.outbox),
       channelResult: this.channelResults[0],
       newObjective: this.createdObjectives[0],
+      chainRequests: this.chainRequests,
     };
   }
 
@@ -214,30 +201,20 @@ export class EngineResponse {
     return this.channelResults;
   }
 
-  channelUpdatedEvents(): EngineEvent[] {
-    return this.channelResults.map(channelResult => ({
-      type: 'channelUpdated' as const,
-      value: {
-        channelResult,
-        outbox: this.outbox, // TODO: doesn't seem like this should be on this event?
-        newObjective: this.createdObjectives[0], // TODO: This one neither?
-      },
-    }));
-  }
-
-  public get syncObjectiveResult(): SyncObjectiveResult {
-    return {outbox: this.outbox, messagesByObjective: this.queuedMessages};
-  }
-
   public get channelResults(): ChannelResult[] {
     return Object.values(this._channelResults);
   }
 
-  private get allMessages(): WireMessage[] {
-    return _.flatten(Object.values(this.queuedMessages));
+  public get allMessages(): Message[] {
+    return mergeOutgoing(
+      this._messages.map(m => ({
+        method: 'MessageQueued' as const,
+        params: m,
+      }))
+    ).map(o => o.params);
   }
 
-  private get outbox(): Outgoing[] {
+  public get outbox(): Outgoing[] {
     return mergeOutgoing(
       this.allMessages.map(m => ({
         method: 'MessageQueued' as const,
@@ -255,7 +232,7 @@ export class EngineResponse {
   // -------------------------------
 
   public get _signedStates(): WireState[] {
-    return this.allMessages.flatMap(wireMessage => wireMessage.data.signedStates || []);
+    return this._messages.flatMap(m => (m.data as Payload).signedStates || []);
   }
 }
 

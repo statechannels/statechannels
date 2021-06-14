@@ -6,17 +6,10 @@ import {createLogger} from '../../logger';
 import {timerFactory} from '../../metrics';
 import {EngineConfig} from '../../config';
 import {SingleThreadedEngine} from '..';
-import {EngineEvent} from '../types';
 
 import {isStateChannelWorkerData} from './worker-data';
 
 startWorker();
-
-function relayEngineEvents<E extends EngineEvent>(name: E['type']) {
-  return (value: E['value']): void => {
-    parentPort?.postMessage({type: 'EngineEventEmitted', name, value});
-  };
-}
 
 async function startWorker() {
   // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
@@ -33,9 +26,6 @@ async function startWorker() {
 
   logger.debug(`Worker %o starting`, threadId);
   const engine = await SingleThreadedEngine.create(engineConfig);
-
-  const events = ['channelUpdated', 'objectiveStarted', 'objectiveSucceeded'] as const;
-  events.forEach(name => engine.on(name, relayEngineEvents(name)));
 
   parentPort?.on('message', async (message: any) => {
     if (isMainThread) {

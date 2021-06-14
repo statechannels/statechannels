@@ -1,16 +1,27 @@
-import {ChannelResult} from '@statechannels/client-api-schema';
+import {ChannelResult, Message} from '@statechannels/client-api-schema';
 import {ChannelRequest, Payload, SignedState} from '@statechannels/wire-format';
 
 import {Engine} from '../engine';
 import {Outgoing} from '..';
+import {Notice} from '../protocols/actions';
 
 export const ONE_DAY = 86400;
 
-export function getPayloadFor(participantId: string, outbox: Outgoing[]): unknown {
-  const filteredOutbox = outbox.filter(outboxItem => outboxItem.params.recipient === participantId);
+export function getPayloadFor(
+  participantId: string,
+  messagesOrNotices: Array<Message | Notice>
+): unknown {
+  const messages = messagesOrNotices.map(m => {
+    if ('method' in m) {
+      return m.params;
+    } else {
+      return m;
+    }
+  });
+  const filteredOutbox = messages.filter(outboxItem => outboxItem.recipient === participantId);
   if (filteredOutbox.length != 1)
     throw Error(`Expected exactly one message in outbox: found ${filteredOutbox.length}`);
-  return filteredOutbox[0].params.data;
+  return filteredOutbox[0].data;
 }
 
 export function getChannelResultFor(

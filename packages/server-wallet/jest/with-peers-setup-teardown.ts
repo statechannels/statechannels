@@ -6,7 +6,13 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 
 import {Engine} from '../src/engine';
-import {DBAdmin, defaultTestConfig, overwriteConfigWithDatabaseConnection, Wallet} from '../src';
+import {
+  DBAdmin,
+  defaultTestConfig,
+  overwriteConfigWithDatabaseConnection,
+  SyncOptions,
+  Wallet,
+} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
@@ -14,6 +20,7 @@ import {
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
 import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
+import {MockChainService} from '../src/chain-service';
 
 interface TestPeerEngines {
   a: Engine;
@@ -24,7 +31,11 @@ export interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
-const DEFAULT__RETRY_OPTIONS = {numberOfAttempts: 20, initialDelay: 500, multiple: 1.1};
+const DEFAULT_SYNC_OPTIONS: SyncOptions = {
+  pollInterval: 50,
+  staleThreshold: 1_000,
+  timeOutThreshold: 45_000,
+};
 
 const aDatabase = 'server_wallet_test_a';
 const bDatabase = 'server_wallet_test_b';
@@ -44,9 +55,14 @@ const baseConfig = defaultTestConfig({
 export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: aDatabase,
 });
+
 export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: bDatabase,
 });
+
+const chainServiceA = new MockChainService();
+
+const chainServiceB = new MockChainService();
 
 const logger: Logger = createLogger(baseConfig);
 
@@ -69,72 +85,22 @@ const destinationA = makeDestination(
 const destinationB = makeDestination(
   '0x00000000000000000000000000000000000000000000000000000000000bbbb2'
 );
-/**
- * This destroys the peerEngine(s) and the message service and then re-instantiates them.
- * This mimics a crash and restart
- * @param enginesToRestart Specifies the peerEngines that will be restarted
- */
-export async function crashAndRestart(
-  oldPeerSetup: PeerSetup,
-  enginesToRestart: 'A' | 'B' | 'Both'
-): Promise<PeerSetup> {
-  try {
-    await oldPeerSetup.messageService.destroy();
-
-    const restartA = enginesToRestart === 'A' || enginesToRestart === 'Both';
-    const restartB = enginesToRestart === 'B' || enginesToRestart === 'Both';
-
-    if (restartA) {
-      await oldPeerSetup.peerEngines.a.destroy();
-    }
-    if (restartB) {
-      await oldPeerSetup.peerEngines.b.destroy();
-    }
-    const a = restartA ? await Engine.create(aEngineConfig) : oldPeerSetup.peerEngines.a;
-
-    const b = restartB ? await Engine.create(bEngineConfig) : oldPeerSetup.peerEngines.b;
-
-    const participantA = {
-      signingAddress: await a.getSigningAddress(),
-      participantId: participantIdA,
-      destination: destinationA,
-    };
-    const participantB = {
-      signingAddress: await b.getSigningAddress(),
-      participantId: participantIdB,
-      destination: destinationB,
-    };
-
-    const participantEngines = [
-      {participantId: participantIdA, engine: a},
-      {participantId: participantIdB, engine: b},
-    ];
-
-    return {
-      peerEngines: {a, b},
-
-      messageService: new LegacyTestMessageHandler(participantEngines),
-      participantA,
-      participantB,
-    };
-  } catch (error) {
-    logger.error(error, 'CrashAndRestart failed');
-    throw error;
-  }
-}
 
 export async function setupPeerWallets(withWalletsSeeding = false): Promise<PeerSetupWithWallets> {
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
+
   const peerWallets = {
     a: await Wallet.create(
       peerSetup.peerEngines.a,
+      chainServiceA,
       TestMessageService.create,
-      DEFAULT__RETRY_OPTIONS
+      DEFAULT_SYNC_OPTIONS
     ),
     b: await Wallet.create(
       peerSetup.peerEngines.b,
+      chainServiceB,
       TestMessageService.create,
-      DEFAULT__RETRY_OPTIONS
+      DEFAULT_SYNC_OPTIONS
     ),
   };
   TestMessageService.linkMessageServices(

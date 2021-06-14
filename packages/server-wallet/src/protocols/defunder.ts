@@ -9,13 +9,13 @@ import {
 import {Transaction} from 'objection';
 import {Logger} from 'pino';
 
-import {ChainServiceInterface} from '../chain-service';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {Channel} from '../models/channel';
 import {LedgerRequest} from '../models/ledger-request';
 import {WalletObjective} from '../models/objective';
 import {Store} from '../engine/store';
+import {EngineResponse} from '../engine/engine-response';
 
 /**
  * DefunderResult type is the return value of the crank method. The return value of the crank method
@@ -38,23 +38,24 @@ type Objective = WalletObjective<CloseChannel> | WalletObjective<DefundChannel>;
 export class Defunder {
   constructor(
     private store: Store,
-    private chainService: ChainServiceInterface,
+
     private logger: Logger,
     private timingMetrics = false
   ) {}
 
   public static create(
     store: Store,
-    chainService: ChainServiceInterface,
+
     logger: Logger,
     timingMetrics = false
   ): Defunder {
-    return new Defunder(store, chainService, logger, timingMetrics);
+    return new Defunder(store, logger, timingMetrics);
   }
 
   public async crank(
     channel: Channel,
     objective: Objective,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<DefunderResult> {
     const {protocolState: ps} = channel;
@@ -63,9 +64,9 @@ export class Defunder {
 
     switch (ps.fundingStrategy) {
       case 'Direct':
-        return this.directDefunder(channel, objective, tx);
+        return this.directDefunder(channel, objective, response, tx);
       case 'Ledger':
-        return this.ledgerDefunder(channel, objective, tx);
+        return this.ledgerDefunder(channel, objective, response, tx);
       case 'Unknown':
       case 'Fake':
         return {isChannelDefunded: true, didSubmitTransaction: false};
@@ -79,6 +80,7 @@ export class Defunder {
   private async directDefunder(
     channel: Channel,
     objective: Objective,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<DefunderResult> {
     if (!channel.isPartlyDirectFunded) {
@@ -117,17 +119,22 @@ export class Defunder {
       if (!channel.supported) {
         throw new Error('channel.supported should be defined in directDefunder');
       }
-      // Note, we are not awaiting transaction submission
-      await this.chainService.concludeAndWithdraw([channel.supported]);
+
+      response.queueChainRequest([
+        {type: 'ConcludeAndWithdraw', finalizationProof: channel.support},
+      ]);
       didSubmitTransaction = true;
     } else if (adjudicatorStatus.channelMode === 'Finalized' && shouldSubmitTx) {
-      await ChainServiceRequest.insertOrUpdate(channel.channelId, 'pushOutcome', tx);
-      await this.chainService.pushOutcomeAndWithdraw(
-        adjudicatorStatus.states[0],
-        // TODO: we are assuming that we submitted the challenge.
-        // This is not a valid assumption as the defunder protocol can be run no matter how the channel was finalized
-        channel.myAddress
-      );
+      // TODO: we are assuming that we submitted the challenge.
+      // This is not a valid assumption as the defunder protocol can be run no matter how the channel was finalized
+      response.queueChainRequest([
+        {
+          type: 'PushOutcomeAndWithdraw',
+          state: adjudicatorStatus.states[0],
+          challengerAddress: channel.myAddress,
+        },
+      ]);
+
       didSubmitTransaction = true;
     }
 
@@ -137,6 +144,7 @@ export class Defunder {
   private async ledgerDefunder(
     channel: Channel,
     objective: Objective,
+    response: EngineResponse,
     tx: Transaction
   ): Promise<DefunderResult> {
     const didSubmitTransaction = false;

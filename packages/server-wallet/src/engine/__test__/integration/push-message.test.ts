@@ -350,42 +350,6 @@ describe('when the application protocol returns an action', () => {
     });
   });
 
-  it.each(['with', 'without'] as const)(
-    'emits objectiveStarted when a engine %s worker threads receives a new objective',
-    async withOrWithout => {
-      const _engine: Engine = withOrWithout === 'with' ? engine : multiThreadedEngine;
-      const turnNum = 6;
-      const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});
-
-      const c = channel({vars: [addHash(state)]});
-      await Channel.query(_engine.knex).insert(c);
-
-      const {channelId} = c;
-      const finalState = {...state, isFinal: true, turnNum: turnNum + 1};
-
-      const callback = jest.fn();
-      _engine.once('objectiveStarted', callback);
-
-      const result = await _engine.pushMessage({
-        walletVersion: WALLET_VERSION,
-        signedStates: [serializeState(stateSignedBy([bob()])(finalState))],
-        objectives: [
-          {
-            type: 'CloseChannel',
-            participants: [],
-            data: {
-              targetChannelId: channelId,
-              fundingStrategy: 'Direct',
-              txSubmitterOrder: [1, 0],
-            },
-          },
-        ],
-      });
-      expect(result.newObjectives).toHaveLength(1);
-      expect(callback).toHaveBeenCalledWith(expect.objectContaining({type: 'CloseChannel'}));
-    }
-  );
-
   it('forms a conclusion proof when the peer wishes to close the channel', async () => {
     const turnNum = 6;
     const state = stateSignedBy()({outcome: simpleEthAllocation([]), turnNum});

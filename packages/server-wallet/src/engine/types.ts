@@ -8,48 +8,29 @@ import {
   ChannelResult,
 } from '@statechannels/client-api-schema';
 
+import {ChainRequest} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
-import {Bytes32, WireMessage} from '../type-aliases';
+import {Bytes32} from '../type-aliases';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
   channelResult: ChannelResult;
   newObjective: WalletObjective | undefined;
+  chainRequests: ChainRequest[];
 };
 export type MultipleChannelOutput = {
   outbox: Outgoing[];
   channelResults: ChannelResult[];
   newObjectives: WalletObjective[];
-  messagesByObjective: Record<string, WireMessage[]>;
+  completedObjectives: WalletObjective[];
+
+  chainRequests: ChainRequest[];
 };
 
-export type SyncObjectiveResult = {
-  messagesByObjective: Record<string, WireMessage[]>;
-  outbox: Outgoing[];
-};
 export type Output = SingleChannelOutput | MultipleChannelOutput;
 
-type ChannelUpdatedEvent = {
-  type: 'channelUpdated';
-  value: SingleChannelOutput;
-};
-
-type ObjectiveStarted = {
-  type: 'objectiveStarted';
-  value: WalletObjective;
-};
-type ObjectiveSucceeded = {
-  type: 'objectiveSucceeded';
-  value: WalletObjective;
-};
-
-export type EngineEvent = ChannelUpdatedEvent | ObjectiveStarted | ObjectiveSucceeded;
-
 export interface EngineInterface {
-  // App utilities
-  registerAppDefinition(appDefinition: string): Promise<void>;
-  registerAppBytecode(appDefinition: string, bytecode: string): Promise<void>;
   // App channel management
   createChannels(
     args: CreateChannelParams,
@@ -70,6 +51,14 @@ export interface EngineInterface {
   // Engine <-> Engine communication
   pushMessage(m: unknown): Promise<MultipleChannelOutput>;
   pushUpdate(m: unknown): Promise<SingleChannelOutput>;
+
+  crank(channelIds: string[]): Promise<MultipleChannelOutput>;
+}
+
+export function isMultipleChannelOutput(
+  output: SingleChannelOutput | MultipleChannelOutput
+): output is MultipleChannelOutput {
+  return 'newObjectives' in output;
 }
 
 export function hasNewObjective(

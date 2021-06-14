@@ -17,6 +17,7 @@ import {
   State,
   toNitroSignedState,
   toNitroState,
+  unreachable,
 } from '@statechannels/wallet-core';
 import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
 import {NonceManager} from '@ethersproject/experimental';
@@ -33,6 +34,7 @@ import {
   AllowanceMode,
   AssetOutcomeUpdatedArg,
   ChainEventSubscriberInterface,
+  ChainRequest,
   ChainServiceArgs,
   ChainServiceInterface,
   FundChannelArg,
@@ -131,6 +133,46 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
+  /**
+   * Create and send transactions for the chain requests.
+   * @param chainRequests A collection of chain requests
+   * @returns A collection of transaction responses for the submitted chain requests.
+   */
+  public async handleChainRequests(
+    chainRequests: ChainRequest[]
+  ): Promise<providers.TransactionResponse[]> {
+    const responses: providers.TransactionResponse[] = [];
+
+    this.logger.trace({chainRequests}, 'Handling chain requests');
+    for (const chainRequest of chainRequests) {
+      let response;
+      switch (chainRequest.type) {
+        case 'Challenge':
+          response = await this.challenge(chainRequest.challengeStates, chainRequest.privateKey);
+
+          break;
+        case 'ConcludeAndWithdraw':
+          response = await this.concludeAndWithdraw(chainRequest.finalizationProof);
+          break;
+        case 'FundChannel':
+          response = await this.fundChannel(chainRequest);
+          break;
+        case 'PushOutcomeAndWithdraw':
+          response = await this.pushOutcomeAndWithdraw(
+            chainRequest.state,
+            chainRequest.challengerAddress
+          );
+
+          break;
+        default:
+          unreachable(chainRequest);
+      }
+
+      responses.push(response);
+    }
+    return responses;
+  }
+
   public async checkChainId(networkChainId: number): Promise<void> {
     const rpcChainId = (await this.provider.getNetwork()).chainId;
     if (rpcChainId !== networkChainId)
@@ -141,9 +183,14 @@ export class ChainService implements ChainServiceInterface {
 
   // Only used for unit tests
   destructor(): void {
+    this.logger.trace('Starting destroy');
+    this.channelToEventTrackers.clear();
     this.provider.polling = false;
     this.provider.removeAllListeners();
+
     this.addressToContract.forEach(contract => contract.removeAllListeners());
+
+    this.logger.trace('Completed destroy');
   }
 
   private addContractMapping(
@@ -221,7 +268,7 @@ export class ChainService implements ChainServiceInterface {
 
   async concludeAndWithdraw(
     finalizationProof: SignedState[]
-  ): Promise<providers.TransactionResponse | void> {
+  ): Promise<providers.TransactionResponse> {
     if (!finalizationProof.length)
       throw new Error('ChainService: concludeAndWithdraw was called with an empty array?');
 
@@ -245,7 +292,7 @@ export class ChainService implements ChainServiceInterface {
           {channelId, determinedBy: 'Revert reason'},
           'Transaction to conclude channel failed: channel is already finalized'
         );
-        return;
+        throw new Error('Conclude failed');
       }
 
       const [, finalizesAt] = await this.nitroAdjudicator.unpackStatus(channelId);
@@ -260,7 +307,7 @@ export class ChainService implements ChainServiceInterface {
           {channelId, determinedBy: 'Javascript check'},
           'Transaction to conclude channel failed: channel is already finalized'
         );
-        return;
+        throw new Error('Conclude failed');
       }
 
       throw reason;
@@ -420,6 +467,9 @@ export class ChainService implements ChainServiceInterface {
     channelId: string,
     eventTracker: EventTracker
   ): Promise<void> {
+    // If the destructor has been called we want to abort right away
+    // We use this.provider.polling since we know the destructor sets that to false
+    if (!this.provider.polling) return;
     const currentBlock = await this.provider.getBlockNumber();
     const confirmedBlock = currentBlock - this.blockConfirmations;
     const currentHolding = BN.from(await contract.holdings(channelId));
@@ -503,6 +553,10 @@ export class ChainService implements ChainServiceInterface {
   private listenForContractEvents(assetHolderContract: Contract): void {
     // Listen to all contract events
     assetHolderContract.on({}, async (ethersEvent: Event) => {
+      this.logger.trace(
+        {address: assetHolderContract.address, event: ethersEvent},
+        'AssetHolder event being handled'
+      );
       await this.waitForConfirmations(ethersEvent);
       this.onAssetHolderEvent(assetHolderContract, ethersEvent);
     });

@@ -1,9 +1,14 @@
 import {providers, constants} from 'ethers';
-import {Address, PrivateKey, SignedState, State} from '@statechannels/wallet-core';
+import {Address, PrivateKey, SignedState, State, unreachable} from '@statechannels/wallet-core';
 
 import {Bytes32} from '../type-aliases';
 
-import {ChainEventSubscriberInterface, ChainServiceInterface, FundChannelArg} from './';
+import {
+  ChainEventSubscriberInterface,
+  ChainRequest,
+  ChainServiceInterface,
+  FundChannelArg,
+} from './';
 
 const mockTransactionReceipt: providers.TransactionReceipt = {
   to: '',
@@ -36,6 +41,34 @@ const mockTransactoinResponse: providers.TransactionResponse = {
 };
 
 export class MockChainService implements ChainServiceInterface {
+  public async handleChainRequests(
+    chainRequests: ChainRequest[]
+  ): Promise<providers.TransactionResponse[]> {
+    const responses = Array(chainRequests.length);
+    for (const chainRequest of chainRequests) {
+      switch (chainRequest.type) {
+        case 'Challenge':
+          responses.push(
+            await this.challenge(chainRequest.challengeStates, chainRequest.privateKey)
+          );
+          break;
+        case 'ConcludeAndWithdraw':
+          responses.push(await this.concludeAndWithdraw(chainRequest.finalizationProof));
+          break;
+        case 'FundChannel':
+          responses.push(await this.fundChannel(chainRequest));
+          break;
+        case 'PushOutcomeAndWithdraw':
+          responses.push(
+            await this.pushOutcomeAndWithdraw(chainRequest.state, chainRequest.challengerAddress)
+          );
+          break;
+        default:
+          unreachable(chainRequest);
+      }
+    }
+    return responses;
+  }
   async checkChainId(_networkChainId: number): Promise<void> {
     // noop, a mock chain service will have the "correct" chain id
   }

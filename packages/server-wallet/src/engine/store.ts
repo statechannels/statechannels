@@ -357,6 +357,11 @@ export class Store {
     const results = await ObjectiveModel.query(this.knex).where({status: 'approved'});
     return results.map(o => o.toObjective());
   }
+  public async updateObjectiveProgressDate(objectiveIds: string[]): Promise<WalletObjective[]> {
+    return this.knex.transaction(async tx =>
+      Promise.all(objectiveIds.map(oId => ObjectiveModel.updateProgressDate(oId, tx)))
+    );
+  }
 
   async getLedgersWithNewRequestsIds(tx?: Transaction): Promise<string[]> {
     return LedgerRequest.ledgersWithNewRequestsIds(tx || this.knex);
@@ -665,13 +670,17 @@ export class Store {
     blockTimestamp: number,
     finalizedAt: number
   ): Promise<void> {
-    await AdjudicatorStatusModel.setFinalized(
-      this.knex,
-      channelId,
-      blockNumber,
-      blockTimestamp,
-      finalizedAt
-    );
+    this.knex.transaction(async tx => {
+      await this.getAndLockChannel(channelId, tx);
+
+      await AdjudicatorStatusModel.setFinalized(
+        tx,
+        channelId,
+        blockNumber,
+        blockTimestamp,
+        finalizedAt
+      );
+    });
   }
 
   async updateTransferredOut(

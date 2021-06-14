@@ -1,22 +1,10 @@
-import {Worker} from 'worker_threads';
-
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 
 import {IncomingEngineConfig} from '../../config';
-import {MultipleChannelOutput, SingleChannelOutput, EngineEvent} from '../types';
+import {MultipleChannelOutput, SingleChannelOutput} from '../types';
 import {SingleThreadedEngine} from '../engine';
 
 import {WorkerManager} from './manager';
-
-export type EngineEventEmitted<E extends EngineEvent = EngineEvent> = {
-  type: 'EngineEventEmitted';
-  name: E['type'];
-  value: E['value'];
-};
-
-function isEventEmitted<E extends EngineEvent>(msg: any): msg is EngineEventEmitted<E> {
-  return 'type' in msg && msg.type === 'EngineEventEmitted';
-}
 
 /**
  * A multi-threaded Nitro engine
@@ -30,11 +18,7 @@ export class MultiThreadedEngine extends SingleThreadedEngine {
 
   protected constructor(engineConfig: IncomingEngineConfig) {
     super(engineConfig);
-    this.workerManager = new WorkerManager(this.engineConfig, (worker: Worker) =>
-      worker.on('message', (msg: any) => {
-        if (isEventEmitted(msg)) this.emit(msg.name, msg.value);
-      })
-    );
+    this.workerManager = new WorkerManager(this.engineConfig);
   }
 
   async updateChannel(args: UpdateChannelParams): Promise<SingleChannelOutput> {

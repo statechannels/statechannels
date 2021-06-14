@@ -26,7 +26,7 @@ export class WorkerManager {
    * @param engineConfig engine config to be passed to the worker engine
    * @param onNewWorker callback that is executed when a new worker is created
    */
-  constructor(engineConfig: EngineConfig, onNewWorker: (worker: Worker) => void) {
+  constructor(engineConfig: EngineConfig) {
     this.logger = createLogger(engineConfig).child({module: 'Worker-Manager'});
     this.threadAmount = engineConfig.workerThreadAmount;
     if (this.threadAmount === 0) {
@@ -44,7 +44,7 @@ export class WorkerManager {
         worker.on('error', err => {
           throw err;
         });
-        onNewWorker(worker);
+
         this.logger.trace('Started worker %o', worker.threadId);
         return worker;
       },
