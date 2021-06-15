@@ -4,8 +4,7 @@ import {left, right} from 'fp-ts/lib/Either';
 import P from 'pino';
 
 import {timerFactory} from '../../metrics';
-import {SingleThreadedEngine} from '..';
-import {IncomingEngineConfigV2} from '../engine';
+import {IncomingEngineConfigV2, SingleThreadedEngine} from '..';
 
 import {isStateChannelWorkerData} from './worker-data';
 

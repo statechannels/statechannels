@@ -1,13 +1,13 @@
 import _ from 'lodash';
 
 import {Channel} from '../../../models/channel';
-import {Engine} from '../..';
+import {defaultTestEngineConfig, Engine} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
-import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {channel} from '../../../models/__test__/fixtures/channel';
 import {createLogger} from '../../../logger';

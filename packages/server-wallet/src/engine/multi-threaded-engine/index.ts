@@ -1,8 +1,8 @@
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import P from 'pino';
 
-import {MultipleChannelOutput, SingleChannelOutput} from '../types';
-import {IncomingEngineConfigV2, SingleThreadedEngine} from '../engine';
+import {IncomingEngineConfigV2, MultipleChannelOutput, SingleChannelOutput} from '../types';
+import {SingleThreadedEngine} from '../engine';
 
 import {WorkerManager} from './manager';
 
