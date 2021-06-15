@@ -67,12 +67,12 @@ const baseEngineConfig = {
   chainNetworkID: utils.hexlify(baseConfig.networkConfiguration.chainNetworkID),
   workerThreadAmount: 0,
 };
-export const aRealEngineConfig: EngineConfig = {
+export const aEngineConfig: EngineConfig = {
   ...baseEngineConfig,
   dbConfig: extractDBConfigFromWalletConfig(aWalletConfig),
 };
 
-export const bRealEngineConfig: EngineConfig = {
+export const bEngineConfig: EngineConfig = {
   ...baseEngineConfig,
   dbConfig: extractDBConfigFromWalletConfig(bWalletConfig),
 };
@@ -131,8 +131,8 @@ export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerS
     ]);
 
     const peerEngines = {
-      a: await Engine.create(aRealEngineConfig, createLogger(aWalletConfig)),
-      b: await Engine.create(bRealEngineConfig, createLogger(bWalletConfig)),
+      a: await Engine.create(aEngineConfig, createLogger(aWalletConfig)),
+      b: await Engine.create(bEngineConfig, createLogger(bWalletConfig)),
     };
 
     if (withWalletSeeding) {
