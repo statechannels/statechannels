@@ -13,7 +13,6 @@ import {
   WalletConfig,
 } from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Engine} from '../engine';
 import {LatencyOptions, TestMessageService} from '../message-service/test-message-service';
 import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
@@ -42,8 +41,6 @@ const config = {
 let provider: providers.JsonRpcProvider;
 let a: Wallet;
 let b: Wallet;
-let aEngine: Engine;
-let bEngine: Engine;
 
 const bWalletConfig: WalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
@@ -152,12 +149,12 @@ test.each(testCases)(
   async options => {
     TestMessageService.setLatencyOptions({a, b}, options);
     const participantA: Participant = {
-      signingAddress: await aEngine.getSigningAddress(),
+      signingAddress: await a.getSigningAddress(),
       participantId: 'a',
       destination: makeDestination(aAddress),
     };
     const participantB: Participant = {
-      signingAddress: await bEngine.getSigningAddress(),
+      signingAddress: await b.getSigningAddress(),
       participantId: 'b',
       destination: makeDestination(bAddress),
     };
