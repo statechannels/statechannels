@@ -1,7 +1,6 @@
 import {
   DBAdmin,
-  defaultTestConfig,
-  SingleThreadedEngine,
+  defaultTestWalletConfig,
   SyncOptions,
   Wallet as ServerWallet
 } from '@statechannels/server-wallet';
@@ -20,7 +19,6 @@ import {
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import _ from 'lodash';
 import {CreateChannelParams} from '@statechannels/client-api-schema';
-import {ChainService} from '@statechannels/server-wallet/src/chain-service';
 
 import {BrowserServerMessageService} from '../message-service';
 
@@ -34,7 +32,7 @@ const chainId = process.env.CHAIN_ID;
 
 if (!rpcEndpoint) throw new Error('RPC_ENDPOINT must be defined');
 
-const serverConfig = defaultTestConfig({
+const serverConfig = defaultTestWalletConfig({
   databaseConfiguration: {
     connection: {
       database: 'interop_test'
@@ -43,7 +41,7 @@ const serverConfig = defaultTestConfig({
   networkConfiguration: {
     chainNetworkID: chainId
       ? parseInt(chainId)
-      : defaultTestConfig().networkConfiguration.chainNetworkID
+      : defaultTestWalletConfig().networkConfiguration.chainNetworkID
   },
   chainServiceConfiguration: {
     attachChainService: true,
@@ -76,16 +74,15 @@ beforeAll(async () => {
   browserWallet = await ChannelWallet.create(
     makeAddress(new Wallet(TEST_ACCOUNTS[1].privateKey).address)
   );
-  const engine = await SingleThreadedEngine.create(serverConfig);
-  const chainService = new ChainService(serverConfig.chainServiceConfiguration);
+
   const factory = BrowserServerMessageService.createFactory(browserWallet);
   // Currently the browser wallet crashes if it receives the same objective again
   // To avoid this we prevent the wallet from retrying objectives by using
   // a really large poll value (one hour)
   const syncOptions: Partial<SyncOptions> = {pollInterval: 3_600_000};
-  serverWallet = await ServerWallet.create(engine, chainService, factory, syncOptions);
+  serverWallet = await ServerWallet.create(serverConfig, factory, syncOptions);
 
-  serverAddress = await engine.getSigningAddress();
+  serverAddress = await serverWallet.getSigningAddress();
   serverDestination = makeDestination(serverAddress);
 
   browserAddress = makeAddress(await browserWallet.getAddress());
