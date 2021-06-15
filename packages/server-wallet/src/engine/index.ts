@@ -1,8 +1,12 @@
 import P from 'pino';
+import _ from 'lodash';
+import {utils} from 'ethers';
+
+import {extractDBConfigFromWalletConfig, defaultTestWalletConfig} from '..';
 
 import {MultiThreadedEngine} from './multi-threaded-engine';
-import {EngineInterface} from './types';
-import {IncomingEngineConfigV2, SingleThreadedEngine} from './engine';
+import {EngineInterface, IncomingEngineConfigV2} from './types';
+import {SingleThreadedEngine} from './engine';
 
 /**
  * A single- or multi-threaded Nitro Engine
@@ -26,3 +30,17 @@ export abstract class Engine extends SingleThreadedEngine implements EngineInter
 export * from '../config';
 export * from './types';
 export {SingleThreadedEngine, MultiThreadedEngine};
+
+export const defaultTestEngineConfig = (
+  partialConfig?: Partial<IncomingEngineConfigV2>
+): IncomingEngineConfigV2 => {
+  const defaultEngineConfig: IncomingEngineConfigV2 = {
+    skipEvmValidation: true,
+    metrics: {timingMetrics: false},
+    workerThreadAmount: 0,
+    // eslint-disable-next-line no-process-env
+    chainNetworkID: utils.hexlify(parseInt(process.env.CHAIN_NETWORK_ID ?? '0')),
+    dbConfig: extractDBConfigFromWalletConfig(defaultTestWalletConfig()),
+  };
+  return _.assign({}, defaultEngineConfig, partialConfig);
+};

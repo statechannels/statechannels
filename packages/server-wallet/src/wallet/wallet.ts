@@ -22,6 +22,7 @@ import {
   Engine,
   extractDBConfigFromWalletConfig,
   hasNewObjective,
+  IncomingEngineConfigV2,
   IncomingWalletConfig,
   isMultipleChannelOutput,
   MultipleChannelOutput,
@@ -39,11 +40,7 @@ import {
 } from '../chain-service';
 import * as ChannelState from '../protocols/state';
 import {createLogger} from '../logger';
-import {
-  ConfigValidationError,
-  IncomingEngineConfigV2,
-  SingleThreadedEngine,
-} from '../engine/engine';
+import {ConfigValidationError, SingleThreadedEngine} from '../engine/engine';
 
 import {
   SyncOptions,

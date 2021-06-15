@@ -6,7 +6,7 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 import {utils} from 'ethers';
 
-import {Engine, extractDBConfigFromWalletConfig} from '../src/engine';
+import {Engine, extractDBConfigFromWalletConfig, IncomingEngineConfigV2} from '../src/engine';
 import {
   DBAdmin,
   defaultTestWalletConfig,
@@ -21,7 +21,6 @@ import {
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
 import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
-import {IncomingEngineConfigV2} from '../src/engine/engine';
 
 interface TestPeerEngines {
   a: Engine;

@@ -9,13 +9,13 @@ import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/confi
 import Objection from 'objection';
 
 import {Channel} from '../../../models/channel';
-import {Engine} from '../..';
+import {defaultTestEngineConfig, Engine} from '../..';
 import {seedBobsSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob, alice} from '../fixtures/signing-wallets';
 import {bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {ObjectiveModel} from '../../../models/objective';
