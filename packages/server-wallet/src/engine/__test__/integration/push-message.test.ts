@@ -18,11 +18,11 @@ import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
-import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/engine-error';
-import {MultiThreadedEngine, Engine} from '../..';
+import {MultiThreadedEngine, Engine, defaultTestEngineConfig} from '../..';
 import {createLogger} from '../../../logger';
 
 const dropNonVariables = (s: SignedState): any =>

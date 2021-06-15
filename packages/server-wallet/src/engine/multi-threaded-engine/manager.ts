@@ -8,8 +8,7 @@ import {isLeft, isRight} from 'fp-ts/lib/These';
 import _ from 'lodash';
 import P, {Logger} from 'pino';
 
-import {MultipleChannelOutput, SingleChannelOutput} from '../types';
-import {IncomingEngineConfigV2} from '../engine';
+import {IncomingEngineConfigV2, MultipleChannelOutput, SingleChannelOutput} from '../types';
 
 import {StateChannelWorkerData} from './worker-data';
 

@@ -1,8 +1,8 @@
 import _ from 'lodash';
 
-import {Engine} from '..';
+import {defaultTestEngineConfig, Engine} from '..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
-import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {createLogger} from '../../logger';
 import {Channel} from '../../models/channel';

@@ -1,10 +1,10 @@
 import {OpenChannel} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
-import {Engine} from '../..';
+import {defaultTestEngineConfig, Engine} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {WalletObjective} from '../../../models/objective';
 import {WaitingFor} from '../../../protocols/channel-opener';

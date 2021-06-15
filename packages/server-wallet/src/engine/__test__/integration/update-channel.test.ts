@@ -1,13 +1,13 @@
 import {utils} from 'ethers';
 
 import {Channel} from '../../../models/channel';
-import {Engine} from '../..';
+import {defaultTestEngineConfig, Engine} from '../..';
 import {updateChannelArgs} from '../fixtures/update-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {AppBytecode} from '../../../models/app-bytecode';
 import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';

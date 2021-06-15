@@ -20,7 +20,7 @@ import {
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
-import Knex, {Config} from 'knex';
+import Knex from 'knex';
 import _ from 'lodash';
 import {ethers, utils} from 'ethers';
 import {Logger} from 'pino';
@@ -32,7 +32,6 @@ import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import {PushMessageError} from '../errors/engine-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {MetricsConfiguration} from '../config';
 import {ChainRequest} from '../chain-service';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
@@ -47,6 +46,7 @@ import {
   MultipleChannelOutput,
   EngineInterface,
   hasNewObjective,
+  IncomingEngineConfigV2,
 } from './types';
 import {EngineResponse} from './engine-response';
 
@@ -59,14 +59,6 @@ export class ConfigValidationError extends Error {
     super('Engine configuration validation failed');
   }
 }
-
-export type IncomingEngineConfigV2 = {
-  skipEvmValidation: boolean;
-  metrics: MetricsConfiguration;
-  dbConfig: Config;
-  chainNetworkID: string;
-  workerThreadAmount: number;
-};
 
 /**
  * A single-threaded Nitro engine
