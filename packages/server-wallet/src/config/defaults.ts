@@ -64,9 +64,9 @@ export const defaultTestNetworkConfiguration: NetworkConfiguration = {
   chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID ?? '0'),
 };
 
-export const defaultTestWalletConfig = (
+export function defaultTestWalletConfig(
   partialConfig: DeepPartial<WalletConfig & HasDatabaseConnectionConfigObject> = {}
-): WalletConfig & HasDatabaseConnectionConfigObject => {
+): WalletConfig & HasDatabaseConnectionConfigObject {
   const fullDefaultConfig = {
     ...defaultConfig,
     networkConfiguration: defaultTestNetworkConfiguration,
@@ -86,4 +86,4 @@ export const defaultTestWalletConfig = (
     },
   };
   return _.merge({}, fullDefaultConfig, partialConfig);
-};
+}
