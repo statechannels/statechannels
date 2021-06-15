@@ -7,15 +7,17 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob, charlie} from '../fixtures/signing-wallets';
 import * as participantFixtures from '../fixtures/participants';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {channel} from '../../../models/__test__/fixtures/channel';
+import {createLogger} from '../../../logger';
 
 let w: Engine;
 beforeEach(async () => {
   await DBAdmin.truncateDataBaseFromKnex(knex);
 
-  w = await Engine.create(defaultTestConfig());
+  const logger = createLogger(defaultTestConfig());
+  w = await Engine.create(defaultTestEngineConfig(), logger);
 });
 
 afterEach(async () => {

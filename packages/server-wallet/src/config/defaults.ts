@@ -1,4 +1,7 @@
+import {utils} from 'ethers';
 import _ from 'lodash';
+
+import {IncomingEngineConfigV2} from '../engine/engine';
 
 import {
   ChainServiceConfiguration,
@@ -9,6 +12,8 @@ import {
   OptionalEngineConfig,
   EngineConfig,
 } from './types';
+
+import {extractDBConfigFromEngineConfig} from '.';
 
 export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
   connection: {host: string; port: number; user: string};
@@ -58,9 +63,23 @@ export const DEFAULT_DB_USER = 'postgres';
 type HasDatabaseConnectionConfigObject = {
   databaseConfiguration: {connection: {host: string; port: number; database: string}};
 };
+
 export const defaultTestNetworkConfiguration: NetworkConfiguration = {
   // eslint-disable-next-line no-process-env
   chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID ?? '0'),
+};
+export const defaultTestEngineConfig = (
+  partialConfig?: Partial<IncomingEngineConfigV2>
+): IncomingEngineConfigV2 => {
+  const defaultEngineConfig: IncomingEngineConfigV2 = {
+    skipEvmValidation: true,
+    metrics: {timingMetrics: false},
+    workerThreadAmount: 0,
+    // eslint-disable-next-line no-process-env
+    chainNetworkID: utils.hexlify(parseInt(process.env.CHAIN_NETWORK_ID ?? '0')),
+    dbConfig: extractDBConfigFromEngineConfig(defaultTestConfig()),
+  };
+  return _.assign({}, defaultEngineConfig, partialConfig);
 };
 
 export const defaultTestConfig = (
