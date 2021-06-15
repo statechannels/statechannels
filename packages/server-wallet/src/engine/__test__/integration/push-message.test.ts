@@ -18,11 +18,12 @@ import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/engine-error';
 import {MultiThreadedEngine, Engine} from '../..';
+import {createLogger} from '../../../logger';
 
 const dropNonVariables = (s: SignedState): any =>
   _.pick(s, 'appData', 'outcome', 'isFinal', 'turnNum', 'stateHash', 'signatures');
@@ -33,11 +34,13 @@ let engine: Engine;
 let multiThreadedEngine: MultiThreadedEngine;
 
 beforeAll(async () => {
+  const logger = createLogger(defaultTestConfig());
   await DBAdmin.migrateDatabase(defaultTestConfig());
-  engine = await Engine.create(defaultTestConfig());
+  engine = await Engine.create(defaultTestEngineConfig(), logger);
 
   multiThreadedEngine = await MultiThreadedEngine.create(
-    defaultTestConfig({workerThreadAmount: 2})
+    defaultTestEngineConfig({workerThreadAmount: 2}),
+    logger
   );
 });
 

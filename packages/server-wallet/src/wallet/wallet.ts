@@ -4,6 +4,7 @@ import EventEmitter from 'eventemitter3';
 import {makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
+import P from 'pino';
 
 import {
   MessageHandler,
@@ -13,21 +14,32 @@ import {
 import {getMessages} from '../message-service/utils';
 import {WalletObjective} from '../models/objective';
 import {
+  defaultConfig,
   Engine,
+  extractDBConfigFromEngineConfig,
   hasNewObjective,
+  IncomingEngineConfig,
   isMultipleChannelOutput,
   MultipleChannelOutput,
   SingleChannelOutput,
+  validateEngineConfig,
 } from '../engine';
 import {
   AssetOutcomeUpdatedArg,
   ChainEventSubscriberInterface,
+  ChainService,
   ChainServiceInterface,
   ChallengeRegisteredArg,
   ChannelFinalizedArg,
   HoldingUpdatedArg,
 } from '../chain-service';
 import * as ChannelState from '../protocols/state';
+import {createLogger} from '../logger';
+import {
+  ConfigValidationError,
+  IncomingEngineConfigV2,
+  SingleThreadedEngine,
+} from '../engine/engine';
 
 import {SyncOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
 
@@ -37,19 +49,46 @@ export class Wallet extends EventEmitter<WalletEvents> {
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
    * @param engine The engine to use.
    * @param messageService  The message service to use.
-   * @param retryOptions How often and for how long the channel manager should retry objectives.
+   * @param syncOptions How often and for how long the channel manager should retry objectives.
    * @returns A channel manager.
    */
   public static async create(
-    engine: Engine,
-    chainService: ChainServiceInterface,
+    incomingConfig: IncomingEngineConfig,
     messageServiceFactory: MessageServiceFactory,
-    retryOptions: Partial<SyncOptions> = DEFAULTS
+
+    syncOptions: Partial<SyncOptions> = DEFAULTS
   ): Promise<Wallet> {
-    await chainService.checkChainId(engine.engineConfig.networkConfiguration.chainNetworkID);
-    const wallet = new Wallet(messageServiceFactory, engine, chainService, {
+    const populatedConfig = _.assign({}, defaultConfig, incomingConfig);
+    // Even though the config hasn't been validated we attempt to create a logger
+    // This allows us to log out any config validation errors
+    const logger = createLogger(populatedConfig);
+
+    logger.trace({engineConfig: populatedConfig}, 'Wallet initializing');
+
+    const {errors, valid} = validateEngineConfig(populatedConfig);
+
+    if (!valid) {
+      errors.forEach(error => logger.error({error}, `Validation error occurred ${error.message}`));
+      throw new ConfigValidationError(errors);
+    }
+    const {skipEvmValidation, metricsConfiguration} = populatedConfig;
+    const engineConfig: IncomingEngineConfigV2 = {
+      skipEvmValidation,
+      dbConfig: extractDBConfigFromEngineConfig(populatedConfig),
+      metrics: metricsConfiguration,
+      chainNetworkID: utils.hexlify(populatedConfig.networkConfiguration.chainNetworkID),
+      workerThreadAmount: 0, // Disable threading for now
+    };
+    const engine = await SingleThreadedEngine.create(engineConfig, logger);
+    const chainService = new ChainService({
+      ...populatedConfig.chainServiceConfiguration,
+      logger,
+    });
+    await chainService.checkChainId(populatedConfig.networkConfiguration.chainNetworkID);
+    const networkId = utils.hexlify(populatedConfig.networkConfiguration.chainNetworkID);
+    const wallet = new Wallet(messageServiceFactory, engine, chainService, networkId, logger, {
       ...DEFAULTS,
-      ...retryOptions,
+      ...syncOptions,
     });
     await wallet.registerExistingChannelsWithChainService();
     return wallet;
@@ -62,10 +101,13 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }, this._syncOptions.pollInterval);
 
   private _chainListener: ChainEventSubscriberInterface;
+
   private constructor(
     messageServiceFactory: MessageServiceFactory,
     private _engine: Engine,
     private _chainService: ChainServiceInterface,
+    private _chainNetworkId: string,
+    private _logger: P.Logger,
     private _syncOptions: SyncOptions
   ) {
     super();
@@ -123,7 +165,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   public async registerAppDefinition(appDefinition: string): Promise<void> {
     const bytecode = await this._chainService.fetchBytecode(appDefinition);
     await this._engine.store.upsertBytecode(
-      utils.hexlify(this._engine.engineConfig.networkConfiguration.chainNetworkID),
+      utils.hexlify(this._chainNetworkId),
       makeAddress(appDefinition),
       bytecode
     );
@@ -183,7 +225,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
             done,
           };
         } catch (error) {
-          this._engine.logger.error({err: error}, 'Uncaught InternalError in CreateChannel');
+          this._logger.error({err: error}, 'Uncaught InternalError in CreateChannel');
           // TODO: This is slightly hacky but it's less painful then having to narrow the type down every time
           // you get a result back from the createChannels method
           // This should be looked at in https://github.com/statechannels/statechannels/issues/3461
@@ -313,7 +355,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return new Promise<ObjectiveDoneResult>(resolve => {
       this.on('ObjectiveTimedOut', o => {
         if (o.objectiveId === objective.objectiveId) {
-          this._engine.logger.trace({objective: o}, 'Objective Timed out');
+          this._logger.trace({objective: o}, 'Objective Timed out');
 
           resolve({
             type: 'ObjectiveTimedOutError',
@@ -324,7 +366,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       });
       this.on('ObjectiveCompleted', o => {
         if (o.objectiveId === objective.objectiveId) {
-          this._engine.logger.trace({objective: o}, 'Objective Suceeded');
+          this._logger.trace({objective: o}, 'Objective Suceeded');
           resolve({type: 'Success', channelId: o.data.targetChannelId});
         }
       });
@@ -368,13 +410,13 @@ export class Wallet extends EventEmitter<WalletEvents> {
         ChallengeRegisteredArg
     ) => {
       const {channelId} = event;
-      this._engine.logger.trace({event}, `${eventName} being handled`);
+      this._logger.trace({event}, `${eventName} being handled`);
       try {
         await storeUpdater(event);
         const result = await this._engine.crank([channelId]);
         await this.handleEngineOutput(result);
       } catch (err) {
-        this._engine.logger.error({err, event}, `Error handling ${eventName}`);
+        this._logger.error({err, event}, `Error handling ${eventName}`);
         throw err;
       }
     };

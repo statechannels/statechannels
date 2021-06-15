@@ -1,31 +1,26 @@
 import {parentPort, isMainThread, workerData, threadId} from 'worker_threads';
 
 import {left, right} from 'fp-ts/lib/Either';
+import P from 'pino';
 
-import {createLogger} from '../../logger';
 import {timerFactory} from '../../metrics';
-import {EngineConfig} from '../../config';
 import {SingleThreadedEngine} from '..';
+import {IncomingEngineConfigV2} from '../engine';
 
 import {isStateChannelWorkerData} from './worker-data';
 
 startWorker();
 
 async function startWorker() {
-  // We only expect a worker thread to use one postgres connection but we enforce it just to make sure
-  const engineConfig: EngineConfig = {
-    ...(workerData as EngineConfig),
-    databaseConfiguration: {
-      connection: workerData.databaseConfiguration.connection,
-      pool: {min: 0, max: 1},
-    },
-    workerThreadAmount: 0, // don't want workers to start more workers
+  const {engineConfig, parentLogger} = workerData as {
+    engineConfig: IncomingEngineConfigV2;
+    parentLogger: P.Logger;
   };
 
-  const logger = createLogger(engineConfig).child({threadId});
+  const logger = parentLogger.child({threadId});
 
   logger.debug(`Worker %o starting`, threadId);
-  const engine = await SingleThreadedEngine.create(engineConfig);
+  const engine = await SingleThreadedEngine.create(engineConfig, logger);
 
   parentPort?.on('message', async (message: any) => {
     if (isMainThread) {
@@ -38,10 +33,7 @@ async function startWorker() {
       parentPort?.postMessage(left(new Error('Incorrect worker data')));
     }
 
-    const timer = timerFactory(
-      engineConfig.metricsConfiguration?.timingMetrics || false,
-      `Thread ${threadId}`
-    );
+    const timer = timerFactory(engineConfig.metrics?.timingMetrics || false, `Thread ${threadId}`);
     try {
       switch (message.operation) {
         case 'UpdateChannel':
