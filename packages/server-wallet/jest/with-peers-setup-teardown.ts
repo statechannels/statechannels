@@ -6,7 +6,7 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 import {utils} from 'ethers';
 
-import {Engine, extractDBConfigFromWalletConfig, IncomingEngineConfigV2} from '../src/engine';
+import {Engine, extractDBConfigFromWalletConfig, EngineConfig} from '../src/engine';
 import {
   DBAdmin,
   defaultTestWalletConfig,
@@ -67,12 +67,12 @@ const baseEngineConfig = {
   chainNetworkID: utils.hexlify(baseConfig.networkConfiguration.chainNetworkID),
   workerThreadAmount: 0,
 };
-export const aRealEngineConfig: IncomingEngineConfigV2 = {
+export const aRealEngineConfig: EngineConfig = {
   ...baseEngineConfig,
   dbConfig: {connection: extractDBConfigFromWalletConfig(aWalletConfig)},
 };
 
-export const bRealEngineConfig: IncomingEngineConfigV2 = {
+export const bRealEngineConfig: EngineConfig = {
   ...baseEngineConfig,
   dbConfig: {connection: extractDBConfigFromWalletConfig(bWalletConfig)},
 };

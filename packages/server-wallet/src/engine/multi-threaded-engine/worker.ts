@@ -4,7 +4,7 @@ import {left, right} from 'fp-ts/lib/Either';
 import P from 'pino';
 
 import {timerFactory} from '../../metrics';
-import {IncomingEngineConfigV2, SingleThreadedEngine} from '..';
+import {EngineConfig, SingleThreadedEngine} from '..';
 
 import {isStateChannelWorkerData} from './worker-data';
 
@@ -12,7 +12,7 @@ startWorker();
 
 async function startWorker() {
   const {engineConfig, parentLogger} = workerData as {
-    engineConfig: IncomingEngineConfigV2;
+    engineConfig: EngineConfig;
     parentLogger: P.Logger;
   };
 
