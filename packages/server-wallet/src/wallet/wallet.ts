@@ -6,7 +6,12 @@ import {
 } from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {calculateObjectiveId, makeAddress, makeDestination} from '@statechannels/wallet-core';
+import {
+  calculateObjectiveId,
+  makeAddress,
+  makeDestination,
+  Address,
+} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
 import P from 'pino';
@@ -450,6 +455,10 @@ export class Wallet extends EventEmitter<WalletEvents> {
         throw err;
       }
     };
+  }
+
+  public async getSigningAddress(): Promise<Address> {
+    return this._engine.getSigningAddress();
   }
 
   async destroy(): Promise<void> {
