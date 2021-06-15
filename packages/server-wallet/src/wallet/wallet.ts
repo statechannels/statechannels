@@ -42,6 +42,7 @@ import {
   ChallengeRegisteredArg,
   ChannelFinalizedArg,
   HoldingUpdatedArg,
+  MockChainService,
 } from '../chain-service';
 import * as ChannelState from '../protocols/state';
 import {createLogger} from '../logger';
@@ -92,10 +93,12 @@ export class Wallet extends EventEmitter<WalletEvents> {
       workerThreadAmount: 0, // Disable threading for now
     };
     const engine = await SingleThreadedEngine.create(engineConfig, logger);
-    const chainService = new ChainService({
-      ...populatedConfig.chainServiceConfiguration,
-      logger,
-    });
+    const chainService = populatedConfig.chainServiceConfiguration.attachChainService
+      ? new ChainService({
+          ...populatedConfig.chainServiceConfiguration,
+          logger,
+        })
+      : new MockChainService();
     await chainService.checkChainId(populatedConfig.networkConfiguration.chainNetworkID);
     const networkId = utils.hexlify(populatedConfig.networkConfiguration.chainNetworkID);
     const wallet = new Wallet(messageServiceFactory, engine, chainService, networkId, logger, {

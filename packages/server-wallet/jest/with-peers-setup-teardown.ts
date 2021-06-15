@@ -6,14 +6,14 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 import {utils} from 'ethers';
 
-import {Engine, extractDBConfigFromWalletConfig, EngineConfig} from '../src/engine';
 import {
-  DBAdmin,
+  Engine,
+  extractDBConfigFromWalletConfig,
+  EngineConfig,
   defaultTestWalletConfig,
   overwriteConfigWithDatabaseConnection,
-  SyncOptions,
-  Wallet,
-} from '../src';
+} from '../src/engine';
+import {DBAdmin, SyncOptions, Wallet} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
@@ -69,12 +69,12 @@ const baseEngineConfig = {
 };
 export const aRealEngineConfig: EngineConfig = {
   ...baseEngineConfig,
-  dbConfig: {connection: extractDBConfigFromWalletConfig(aWalletConfig)},
+  dbConfig: extractDBConfigFromWalletConfig(aWalletConfig),
 };
 
 export const bRealEngineConfig: EngineConfig = {
   ...baseEngineConfig,
-  dbConfig: {connection: extractDBConfigFromWalletConfig(bWalletConfig)},
+  dbConfig: extractDBConfigFromWalletConfig(bWalletConfig),
 };
 
 const logger: Logger = createLogger(baseConfig);
