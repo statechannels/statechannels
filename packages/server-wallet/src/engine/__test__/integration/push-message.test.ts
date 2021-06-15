@@ -18,7 +18,7 @@ import {stateSignedBy, stateWithHashSignedBy} from '../fixtures/states';
 import {channel, withSupportedState} from '../../../models/__test__/fixtures/channel';
 import {stateVars} from '../fixtures/state-vars';
 import {ObjectiveModel} from '../../../models/objective';
-import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {WALLET_VERSION} from '../../../version';
 import {PushMessageError} from '../../../errors/engine-error';
@@ -34,8 +34,8 @@ let engine: Engine;
 let multiThreadedEngine: MultiThreadedEngine;
 
 beforeAll(async () => {
-  const logger = createLogger(defaultTestConfig());
-  await DBAdmin.migrateDatabase(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
+  await DBAdmin.migrateDatabase(defaultTestWalletConfig());
   engine = await Engine.create(defaultTestEngineConfig(), logger);
 
   multiThreadedEngine = await MultiThreadedEngine.create(

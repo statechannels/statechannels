@@ -43,13 +43,13 @@ import {ObjectiveModel, WalletObjective, isSupportedObjective} from '../models/o
 import {AppBytecode} from '../models/app-bytecode';
 import {LedgerRequest} from '../models/ledger-request';
 import {shouldValidateTransition, validateTransition} from '../utilities/validate-transition';
-import {defaultTestConfig} from '../config';
+import {defaultTestWalletConfig} from '../config';
 import {createLogger} from '../logger';
 import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 
-const defaultLogger = createLogger(defaultTestConfig());
+const defaultLogger = createLogger(defaultTestWalletConfig());
 
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;

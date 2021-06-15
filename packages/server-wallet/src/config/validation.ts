@@ -1,7 +1,7 @@
 import joi, {ValidationErrorItem} from 'joi';
 import {parse} from 'pg-connection-string';
 
-import {EngineConfig} from './types';
+import {WalletConfig} from './types';
 
 const validateConnectionString = (connection: string) => {
   const parsed = parse(connection);
@@ -79,11 +79,11 @@ const engine = joi.object({
 
 export function validateEngineConfig(
   config: Record<string, any>
-): {valid: boolean; value: EngineConfig | undefined; errors: ValidationErrorItem[]} {
+): {valid: boolean; value: WalletConfig | undefined; errors: ValidationErrorItem[]} {
   const results = engine.validate(config);
   return {
     valid: !results.error,
-    value: results.value ? (results.value as EngineConfig) : undefined,
+    value: results.value ? (results.value as WalletConfig) : undefined,
     errors: results.error?.details || [],
   };
 }

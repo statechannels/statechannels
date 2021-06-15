@@ -5,7 +5,7 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {Channel} from '../../models/channel';
 import {constructKnex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {signState} from '../../utilities/signatures';
 
 import {stateWithHashSignedBy} from './fixtures/states';
@@ -19,8 +19,8 @@ let store: Store;
 beforeAll(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 });
