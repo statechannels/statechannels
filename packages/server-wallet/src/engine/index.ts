@@ -5,7 +5,7 @@ import {utils} from 'ethers';
 import {extractDBConfigFromWalletConfig, defaultTestWalletConfig} from '..';
 
 import {MultiThreadedEngine} from './multi-threaded-engine';
-import {EngineInterface, IncomingEngineConfigV2} from './types';
+import {EngineInterface, EngineConfig} from './types';
 import {SingleThreadedEngine} from './engine';
 
 /**
@@ -16,7 +16,7 @@ import {SingleThreadedEngine} from './engine';
  */
 export abstract class Engine extends SingleThreadedEngine implements EngineInterface {
   static async create(
-    engineConfig: IncomingEngineConfigV2,
+    engineConfig: EngineConfig,
     logger: P.Logger
   ): Promise<SingleThreadedEngine | MultiThreadedEngine> {
     if (engineConfig?.workerThreadAmount && engineConfig.workerThreadAmount > 0) {
@@ -31,10 +31,8 @@ export * from '../config';
 export * from './types';
 export {SingleThreadedEngine, MultiThreadedEngine};
 
-export const defaultTestEngineConfig = (
-  partialConfig?: Partial<IncomingEngineConfigV2>
-): IncomingEngineConfigV2 => {
-  const defaultEngineConfig: IncomingEngineConfigV2 = {
+export const defaultTestEngineConfig = (partialConfig?: Partial<EngineConfig>): EngineConfig => {
+  const defaultEngineConfig: EngineConfig = {
     skipEvmValidation: true,
     metrics: {timingMetrics: false},
     workerThreadAmount: 0,

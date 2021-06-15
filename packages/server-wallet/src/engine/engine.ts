@@ -46,7 +46,7 @@ import {
   MultipleChannelOutput,
   EngineInterface,
   hasNewObjective,
-  IncomingEngineConfigV2,
+  EngineConfig,
 } from './types';
 import {EngineResponse} from './engine-response';
 
@@ -71,7 +71,7 @@ export class SingleThreadedEngine implements EngineInterface {
   ledgerManager: LedgerManager;
 
   public static async create(
-    engineConfig: IncomingEngineConfigV2,
+    engineConfig: EngineConfig,
     logger: Logger
   ): Promise<SingleThreadedEngine> {
     return new SingleThreadedEngine(engineConfig, logger);
@@ -81,7 +81,7 @@ export class SingleThreadedEngine implements EngineInterface {
    * Protected method. Initialize engine via Engine.create(..)
    * @readonly
    */
-  protected constructor(private config: IncomingEngineConfigV2, protected logger: Logger) {
+  protected constructor(private config: EngineConfig, protected logger: Logger) {
     this.knex = Knex(config.dbConfig);
     this.chainNetworkId = utils.hexlify(this.config.chainNetworkID);
     this.store = new Store(

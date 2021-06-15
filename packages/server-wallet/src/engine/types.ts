@@ -70,7 +70,7 @@ export function hasNewObjective(
   return !!response.newObjective;
 }
 
-export type IncomingEngineConfigV2 = {
+export type EngineConfig = {
   skipEvmValidation: boolean;
   metrics: MetricsConfiguration;
   dbConfig: Config;
