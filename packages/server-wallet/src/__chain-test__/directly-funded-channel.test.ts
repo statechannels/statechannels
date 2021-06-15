@@ -7,7 +7,11 @@ import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
 import _ from 'lodash';
 
-import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
+import {
+  defaultTestWalletConfig,
+  overwriteConfigWithDatabaseConnection,
+  WalletConfig,
+} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
 import {Engine} from '../engine';
 import {LatencyOptions, TestMessageService} from '../message-service/test-message-service';
@@ -27,9 +31,9 @@ if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 
 const config = {
-  ...defaultTestConfig(),
+  ...defaultTestWalletConfig(),
   networkConfiguration: {
-    ...defaultTestConfig().networkConfiguration,
+    ...defaultTestWalletConfig().networkConfiguration,
     // eslint-disable-next-line no-process-env
     chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID || '0'),
   },
@@ -41,7 +45,7 @@ let b: Wallet;
 let aEngine: Engine;
 let bEngine: Engine;
 
-const bEngineConfig: EngineConfig = {
+const bWalletConfig: WalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
   loggingConfiguration: {
     logDestination: path.join(ARTIFACTS_DIR, 'direct-funding.log'),
@@ -55,7 +59,7 @@ const bEngineConfig: EngineConfig = {
     allowanceMode: 'MaxUint',
   },
 };
-const aEngineConfig: EngineConfig = {
+const aWalletConfig: WalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_a'}),
   loggingConfiguration: {
     logDestination: path.join(ARTIFACTS_DIR, 'direct-funding.log'),
@@ -97,7 +101,7 @@ beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
 
   await Promise.all(
-    [aEngineConfig, bEngineConfig].map(async config => {
+    [aWalletConfig, bWalletConfig].map(async config => {
       await DBAdmin.dropDatabase(config);
       await DBAdmin.createDatabase(config);
       await DBAdmin.migrateDatabase(config);
@@ -109,9 +113,9 @@ beforeAll(async () => {
     timeOutThreshold: 60_000,
     staleThreshold: 10_000,
   };
-  a = await Wallet.create(aEngineConfig, TestMessageService.create, syncOptions);
-  b = await Wallet.create(bEngineConfig, TestMessageService.create, syncOptions);
-  const logger = createLogger(defaultTestConfig());
+  a = await Wallet.create(aWalletConfig, TestMessageService.create, syncOptions);
+  b = await Wallet.create(bWalletConfig, TestMessageService.create, syncOptions);
+  const logger = createLogger(defaultTestWalletConfig());
 
   TestMessageService.linkMessageServices(a.messageService, b.messageService, logger);
   const assetHolder = new Contract(
@@ -124,7 +128,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
   provider.polling = false;
   provider.removeAllListeners();
 });

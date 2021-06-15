@@ -16,9 +16,9 @@ import {WalletObjective} from '../models/objective';
 import {
   defaultConfig,
   Engine,
-  extractDBConfigFromEngineConfig,
+  extractDBConfigFromWalletConfig,
   hasNewObjective,
-  IncomingEngineConfig,
+  IncomingWalletConfig,
   isMultipleChannelOutput,
   MultipleChannelOutput,
   SingleChannelOutput,
@@ -53,7 +53,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
    * @returns A channel manager.
    */
   public static async create(
-    incomingConfig: IncomingEngineConfig,
+    incomingConfig: IncomingWalletConfig,
     messageServiceFactory: MessageServiceFactory,
 
     syncOptions: Partial<SyncOptions> = DEFAULTS
@@ -74,7 +74,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     const {skipEvmValidation, metricsConfiguration} = populatedConfig;
     const engineConfig: IncomingEngineConfigV2 = {
       skipEvmValidation,
-      dbConfig: extractDBConfigFromEngineConfig(populatedConfig),
+      dbConfig: extractDBConfigFromWalletConfig(populatedConfig),
       metrics: metricsConfiguration,
       chainNetworkID: utils.hexlify(populatedConfig.networkConfiguration.chainNetworkID),
       workerThreadAmount: 0, // Disable threading for now

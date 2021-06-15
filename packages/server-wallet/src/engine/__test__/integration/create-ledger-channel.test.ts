@@ -5,18 +5,18 @@ import {Channel} from '../../../models/channel';
 import {Engine} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {createLogger} from '../../../logger';
 
 let w: Engine;
 
 beforeAll(async () => {
-  await DBAdmin.migrateDatabase(defaultTestConfig());
+  await DBAdmin.migrateDatabase(defaultTestWalletConfig());
 });
 
 beforeEach(async () => {
-  const logger = createLogger(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
   w = await Engine.create(defaultTestEngineConfig(), logger);
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });

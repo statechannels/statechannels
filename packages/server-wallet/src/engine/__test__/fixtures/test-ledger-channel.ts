@@ -9,7 +9,7 @@ import {
 import {utils} from 'ethers';
 import {Payload} from '@statechannels/wire-format';
 
-import {defaultTestConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {
   LedgerRequest,
   LedgerRequestStatus,
@@ -60,7 +60,7 @@ export class TestLedgerChannel extends TestChannel {
       appDefinition: makeAddress('0x0000000000000000000000000000000000000000'),
       participants: this.participants,
       channelNonce: this.channelNonce,
-      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
+      chainId: utils.hexlify(defaultTestWalletConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
     };
   }

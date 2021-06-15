@@ -6,10 +6,10 @@ import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
 import {utils} from 'ethers';
 
-import {Engine, extractDBConfigFromEngineConfig} from '../src/engine';
+import {Engine, extractDBConfigFromWalletConfig} from '../src/engine';
 import {
   DBAdmin,
-  defaultTestConfig,
+  defaultTestWalletConfig,
   overwriteConfigWithDatabaseConnection,
   SyncOptions,
   Wallet,
@@ -47,17 +47,17 @@ try {
 } catch (err) {
   if (err.message !== `EEXIST: file already exists, mkdir '${ARTIFACTS_DIR}'`) throw err;
 }
-const baseConfig = defaultTestConfig({
+const baseConfig = defaultTestWalletConfig({
   loggingConfiguration: {
     logLevel: 'trace',
     logDestination: path.join(ARTIFACTS_DIR, 'with-peers.log'),
   },
 });
-export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
+export const aWalletConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: aDatabase,
 });
 
-export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
+export const bWalletConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: bDatabase,
 });
 
@@ -70,12 +70,12 @@ const baseEngineConfig = {
 };
 export const aRealEngineConfig: IncomingEngineConfigV2 = {
   ...baseEngineConfig,
-  dbConfig: {connection: extractDBConfigFromEngineConfig(aEngineConfig)},
+  dbConfig: {connection: extractDBConfigFromWalletConfig(aWalletConfig)},
 };
 
 export const bRealEngineConfig: IncomingEngineConfigV2 = {
   ...baseEngineConfig,
-  dbConfig: {connection: extractDBConfigFromEngineConfig(bEngineConfig)},
+  dbConfig: {connection: extractDBConfigFromWalletConfig(bWalletConfig)},
 };
 
 const logger: Logger = createLogger(baseConfig);
@@ -104,8 +104,8 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
 
   const peerWallets = {
-    a: await Wallet.create(aEngineConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
-    b: await Wallet.create(bEngineConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
+    a: await Wallet.create(aWalletConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
+    b: await Wallet.create(bWalletConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
   };
   TestMessageService.linkMessageServices(
     peerWallets.a.messageService,
@@ -117,23 +117,23 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
 export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerSetup> {
   try {
     await Promise.all([
-      DBAdmin.truncateDatabase(aEngineConfig),
-      DBAdmin.truncateDatabase(bEngineConfig),
+      DBAdmin.truncateDatabase(aWalletConfig),
+      DBAdmin.truncateDatabase(bWalletConfig),
     ]);
 
     await Promise.all([
-      DBAdmin.createDatabase(aEngineConfig),
-      DBAdmin.createDatabase(bEngineConfig),
+      DBAdmin.createDatabase(aWalletConfig),
+      DBAdmin.createDatabase(bWalletConfig),
     ]);
 
     await Promise.all([
-      DBAdmin.migrateDatabase(aEngineConfig),
-      DBAdmin.migrateDatabase(bEngineConfig),
+      DBAdmin.migrateDatabase(aWalletConfig),
+      DBAdmin.migrateDatabase(bWalletConfig),
     ]);
 
     const peerEngines = {
-      a: await Engine.create(aRealEngineConfig, createLogger(aEngineConfig)),
-      b: await Engine.create(bRealEngineConfig, createLogger(bEngineConfig)),
+      a: await Engine.create(aRealEngineConfig, createLogger(aWalletConfig)),
+      b: await Engine.create(bRealEngineConfig, createLogger(bWalletConfig)),
     };
 
     if (withWalletSeeding) {
@@ -190,8 +190,8 @@ export const teardownPeerSetup = async (
       await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
     }
     await Promise.all([
-      DBAdmin.truncateDatabase(aEngineConfig),
-      DBAdmin.truncateDatabase(bEngineConfig),
+      DBAdmin.truncateDatabase(aWalletConfig),
+      DBAdmin.truncateDatabase(bWalletConfig),
     ]);
   } catch (error) {
     logger.error(error, 'peersTeardown failed');

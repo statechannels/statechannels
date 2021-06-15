@@ -14,7 +14,7 @@ import {utils} from 'ethers';
 
 import {SigningWallet} from '../../../models/signing-wallet';
 import {addHash} from '../../../state-utils';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 
 import {Fixture, fixture, overwriteOutcome} from './utils';
 import {alice, bob} from './participants';
@@ -31,7 +31,7 @@ const defaultState: State = {
   ]),
   participants: [alice(), bob()],
   channelNonce: 1,
-  chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
+  chainId: utils.hexlify(defaultTestWalletConfig().networkConfiguration.chainNetworkID),
   challengeDuration: 9001,
 };
 

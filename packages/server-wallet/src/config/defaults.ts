@@ -9,11 +9,11 @@ import {
   LoggingConfiguration,
   NetworkConfiguration,
   OptionalDatabaseConfiguration,
-  OptionalEngineConfig,
-  EngineConfig,
+  OptionalWalletConfig,
+  WalletConfig,
 } from './types';
 
-import {extractDBConfigFromEngineConfig} from '.';
+import {extractDBConfigFromWalletConfig} from '.';
 
 export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
   connection: {host: string; port: number; user: string};
@@ -49,7 +49,7 @@ export const defaultChainServiceConfiguration: ChainServiceConfiguration = {
  * These are the default values that will be used by the server wallet
  * if not overidden in the provided config
  */
-export const defaultConfig: OptionalEngineConfig = {
+export const defaultConfig: OptionalWalletConfig = {
   databaseConfiguration: defaultDatabaseConfiguration,
   loggingConfiguration: defaultLoggingConfiguration,
   metricsConfiguration: defaultMetricsConfiguration,
@@ -77,14 +77,14 @@ export const defaultTestEngineConfig = (
     workerThreadAmount: 0,
     // eslint-disable-next-line no-process-env
     chainNetworkID: utils.hexlify(parseInt(process.env.CHAIN_NETWORK_ID ?? '0')),
-    dbConfig: extractDBConfigFromEngineConfig(defaultTestConfig()),
+    dbConfig: extractDBConfigFromWalletConfig(defaultTestWalletConfig()),
   };
   return _.assign({}, defaultEngineConfig, partialConfig);
 };
 
-export const defaultTestConfig = (
-  partialConfig: DeepPartial<EngineConfig & HasDatabaseConnectionConfigObject> = {}
-): EngineConfig & HasDatabaseConnectionConfigObject => {
+export const defaultTestWalletConfig = (
+  partialConfig: DeepPartial<WalletConfig & HasDatabaseConnectionConfigObject> = {}
+): WalletConfig & HasDatabaseConnectionConfigObject => {
   const fullDefaultConfig = {
     ...defaultConfig,
     networkConfiguration: defaultTestNetworkConfiguration,

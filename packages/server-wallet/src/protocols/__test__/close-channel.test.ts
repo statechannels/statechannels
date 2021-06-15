@@ -2,7 +2,7 @@ import {CloseChannel} from '@statechannels/wallet-core';
 
 import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {createLogger} from '../../logger';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
@@ -19,8 +19,8 @@ let store: Store;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
   await DBAdmin.truncateDataBaseFromKnex(knex);
@@ -126,7 +126,7 @@ const crankAndAssert = async (
   const withdraws = args.withdraws || false;
   const completesObj = args.completesObj || false;
 
-  const logger = createLogger(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
   const timingMetrics = false;
   const channelCloser = ChannelCloser.create(store, logger, timingMetrics);
   const response = EngineResponse.initialize();

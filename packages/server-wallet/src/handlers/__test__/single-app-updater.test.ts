@@ -2,7 +2,7 @@ import {BN} from '@statechannels/wallet-core';
 
 import {DBAdmin} from '../../db-admin/db-admin';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {Store} from '../../engine/store';
 import {EngineResponse} from '../../engine/engine-response';
 import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
@@ -20,8 +20,8 @@ let response: EngineResponse;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
   await DBAdmin.truncateDataBaseFromKnex(knex);
