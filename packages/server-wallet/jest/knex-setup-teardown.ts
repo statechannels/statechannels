@@ -8,8 +8,8 @@ import {DBAdmin} from '../src/db-admin/db-admin';
 configureEnvVariables();
 
 import {
-  extractDBConfigFromEngineConfig,
-  defaultTestConfig,
+  extractDBConfigFromWalletConfig,
+  defaultTestWalletConfig,
   DatabaseConfiguration,
 } from '../src/config';
 
@@ -22,7 +22,9 @@ const constructedKnexs: Knex[] = [];
  * returns a knex instance which is automatically destroyed after all jest tests have run
  */
 export const constructKnex = (databaseConfiguration: Partial<DatabaseConfiguration>): Knex => {
-  const knex = Knex(extractDBConfigFromEngineConfig(defaultTestConfig({databaseConfiguration})));
+  const knex = Knex(
+    extractDBConfigFromWalletConfig(defaultTestWalletConfig({databaseConfiguration}))
+  );
   constructedKnexs.push(knex);
 
   return knex;

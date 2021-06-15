@@ -15,7 +15,7 @@ import {stateWithHashSignedBy} from '../fixtures/states';
 import {bob, alice} from '../fixtures/signing-wallets';
 import {bob as bobP} from '../fixtures/participants';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
 import {getChannelResultFor, getSignedStateFor} from '../../../__test__/test-helpers';
 import {ObjectiveModel} from '../../../models/objective';
@@ -23,7 +23,7 @@ import {createLogger} from '../../../logger';
 
 let w: Engine;
 beforeEach(async () => {
-  const logger = createLogger(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
   w = await Engine.create(defaultTestEngineConfig(), logger);
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
   await seedBobsSigningWallet(w.knex);

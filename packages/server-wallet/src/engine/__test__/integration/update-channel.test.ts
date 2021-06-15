@@ -7,7 +7,7 @@ import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds'
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
+import {defaultTestWalletConfig, defaultTestEngineConfig} from '../../../config';
 import {testKnex as knex} from '../../../../jest/knex-setup-teardown';
 import {AppBytecode} from '../../../models/app-bytecode';
 import {appBytecode, COUNTING_APP_DEFINITION} from '../../../models/__test__/fixtures/app-bytecode';
@@ -23,7 +23,7 @@ afterEach(async () => {
 const appData1 = utils.defaultAbiCoder.encode(['uint256'], [1]);
 const appData2 = utils.defaultAbiCoder.encode(['uint256'], [2]);
 beforeEach(async () => {
-  const logger = createLogger(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
   w = await Engine.create(defaultTestEngineConfig({skipEvmValidation: false}), logger);
 
   await DBAdmin.truncateDataBaseFromKnex(knex);

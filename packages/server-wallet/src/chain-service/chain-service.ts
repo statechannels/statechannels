@@ -28,7 +28,7 @@ import {computeNewAssetOutcome} from '@statechannels/nitro-protocol/lib/src/cont
 
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
-import {defaultTestConfig} from '../config';
+import {defaultTestWalletConfig} from '../config';
 
 import {
   AllowanceMode,
@@ -96,7 +96,7 @@ export class ChainService implements ChainServiceInterface {
     this.blockConfirmations = blockConfirmations ?? 5;
     this.logger = logger
       ? logger.child({module: 'ChainService'})
-      : createLogger(defaultTestConfig());
+      : createLogger(defaultTestWalletConfig());
 
     this.allowanceMode = allowanceMode || 'MaxUint';
     if (provider && (provider.includes('0.0.0.0') || provider.includes('localhost'))) {

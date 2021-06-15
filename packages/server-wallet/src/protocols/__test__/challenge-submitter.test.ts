@@ -3,7 +3,7 @@ import {SubmitChallenge} from '@statechannels/wallet-core';
 
 import {Store} from '../../engine/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {EngineResponse} from '../../engine/engine-response';
 import {createLogger} from '../../logger';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
@@ -17,15 +17,15 @@ import {alice, bob} from '../../engine/__test__/fixtures/signing-wallets';
 import {ChainServiceRequest} from '../../models/chain-service-request';
 import {DBAdmin} from '../../db-admin/db-admin';
 
-const logger = createLogger(defaultTestConfig());
+const logger = createLogger(defaultTestWalletConfig());
 const timingMetrics = false;
 
 let store: Store;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 

@@ -8,7 +8,7 @@ import {testKnex as knex} from '../../../jest/knex-setup-teardown';
 import {dropNonVariables} from '../../state-utils';
 import {Funding} from '../funding';
 import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {Store} from '../../engine/store';
 import {DBAdmin} from '../../db-admin/db-admin';
 
@@ -89,8 +89,8 @@ describe('Channel funding', () => {
 
     store = new Store(
       knex,
-      defaultTestConfig().metricsConfiguration.timingMetrics,
-      defaultTestConfig().skipEvmValidation,
+      defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+      defaultTestWalletConfig().skipEvmValidation,
       '0'
     );
   });

@@ -1,7 +1,7 @@
 import {CloseChannel, DefundChannel} from '@statechannels/wallet-core';
 import {Transaction} from 'objection';
 
-import {defaultTestConfig} from '../..';
+import {defaultTestWalletConfig} from '../..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
 import {DBAdmin} from '../../db-admin/db-admin';
 import {createLogger} from '../../logger';
@@ -66,8 +66,8 @@ beforeEach(async () => {
 
   store = new Store(
     testKnex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 });
@@ -140,7 +140,7 @@ describe('Direct channel defunding', () => {
 
     const response = new EngineResponse();
 
-    const logger = createLogger(defaultTestConfig());
+    const logger = createLogger(defaultTestWalletConfig());
 
     let channel = await Channel.forId(testChannel.channelId, testKnex);
     const defunder = new Defunder(store, logger);
@@ -206,7 +206,7 @@ describe('Direct channel defunding', () => {
 
     const response = new EngineResponse();
 
-    const logger = createLogger(defaultTestConfig());
+    const logger = createLogger(defaultTestWalletConfig());
 
     const channel = await Channel.forId(testChannel.channelId, testKnex);
     const defunder = new Defunder(store, logger);
@@ -263,7 +263,7 @@ describe('Ledger funded channel defunding', () => {
     });
 
     const engineResponse = new EngineResponse();
-    const logger = createLogger(defaultTestConfig());
+    const logger = createLogger(defaultTestWalletConfig());
     const defunder = new Defunder(store, logger);
 
     let channel = await Channel.forId(testLedgerFundedChannel.channelId, testKnex);
