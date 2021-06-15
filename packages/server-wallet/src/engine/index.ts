@@ -2,7 +2,7 @@ import P from 'pino';
 import _ from 'lodash';
 import {utils} from 'ethers';
 
-import {extractDBConfigFromWalletConfig, defaultTestWalletConfig} from '..';
+import {defaultTestWalletConfig, extractDBConfigFromWalletConfig} from '../config';
 
 import {MultiThreadedEngine} from './multi-threaded-engine';
 import {EngineInterface, EngineConfig} from './types';
@@ -31,7 +31,7 @@ export * from '../config';
 export * from './types';
 export {SingleThreadedEngine, MultiThreadedEngine};
 
-export const defaultTestEngineConfig = (partialConfig?: Partial<EngineConfig>): EngineConfig => {
+export function defaultTestEngineConfig(partialConfig?: Partial<EngineConfig>): EngineConfig {
   const defaultEngineConfig: EngineConfig = {
     skipEvmValidation: true,
     metrics: {timingMetrics: false},
@@ -41,4 +41,4 @@ export const defaultTestEngineConfig = (partialConfig?: Partial<EngineConfig>): 
     dbConfig: extractDBConfigFromWalletConfig(defaultTestWalletConfig()),
   };
   return _.assign({}, defaultEngineConfig, partialConfig);
-};
+}
