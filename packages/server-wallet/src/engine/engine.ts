@@ -20,26 +20,19 @@ import {
   NULL_APP_DATA,
 } from '@statechannels/wallet-core';
 import * as Either from 'fp-ts/lib/Either';
-import Knex from 'knex';
+import Knex, {Config} from 'knex';
 import _ from 'lodash';
-import {ethers, BigNumber, utils} from 'ethers';
+import {ethers, utils} from 'ethers';
 import {Logger} from 'pino';
 import {Payload as WirePayload} from '@statechannels/wire-format';
 import {ValidationErrorItem} from 'joi';
 
 import {Bytes32} from '../type-aliases';
-import {createLogger} from '../logger';
 import * as UpdateChannel from '../handlers/update-channel';
 import * as JoinChannel from '../handlers/join-channel';
 import {PushMessageError} from '../errors/engine-error';
 import {timerFactory, recordFunctionMetrics, setupMetrics} from '../metrics';
-import {
-  EngineConfig,
-  extractDBConfigFromEngineConfig,
-  defaultConfig,
-  IncomingEngineConfig,
-  validateEngineConfig,
-} from '../config';
+import {MetricsConfiguration} from '../config';
 import {ChainRequest} from '../chain-service';
 import {WALLET_VERSION} from '../version';
 import {ObjectiveManager} from '../objectives';
@@ -67,6 +60,13 @@ export class ConfigValidationError extends Error {
   }
 }
 
+export type IncomingEngineConfigV2 = {
+  skipEvmValidation: boolean;
+  metrics: MetricsConfiguration;
+  dbConfig: Config;
+  chainNetworkID: string;
+};
+
 /**
  * A single-threaded Nitro engine
  */
@@ -76,57 +76,40 @@ export class SingleThreadedEngine implements EngineInterface {
 
   objectiveManager: ObjectiveManager;
   ledgerManager: LedgerManager;
-  logger: Logger;
 
-  readonly engineConfig: EngineConfig;
-
-  public static async create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine> {
-    return new SingleThreadedEngine(engineConfig);
+  public static async create(
+    engineConfig: IncomingEngineConfigV2,
+    logger: Logger
+  ): Promise<SingleThreadedEngine> {
+    return new SingleThreadedEngine(engineConfig, logger);
   }
 
   /**
    * Protected method. Initialize engine via Engine.create(..)
    * @readonly
    */
-  protected constructor(engineConfig: IncomingEngineConfig) {
-    const populatedConfig = _.assign({}, defaultConfig, engineConfig);
-    // Even though the config hasn't been validated we attempt to create a logger
-    // This allows us to log out any config validation errors
-    this.logger = createLogger(populatedConfig);
-
-    this.logger.trace({engineConfig: populatedConfig}, 'Engine initializing');
-
-    const {errors, valid} = validateEngineConfig(populatedConfig);
-
-    if (!valid) {
-      errors.forEach(error =>
-        this.logger.error({error}, `Validation error occurred ${error.message}`)
-      );
-      throw new ConfigValidationError(errors);
-    }
-    this.engineConfig = populatedConfig;
-
-    this.knex = Knex(extractDBConfigFromEngineConfig(this.engineConfig));
+  protected constructor(private config: IncomingEngineConfigV2, private logger: Logger) {
+    this.knex = Knex(config.dbConfig);
 
     this.store = new Store(
       this.knex,
-      this.engineConfig.metricsConfiguration.timingMetrics,
-      this.engineConfig.skipEvmValidation,
-      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
+      this.config.metrics.timingMetrics,
+      this.config.skipEvmValidation,
+      utils.hexlify(this.config.chainNetworkID),
       this.logger
     );
 
     // set up timing metrics
-    if (this.engineConfig.metricsConfiguration.timingMetrics) {
+    if (this.config.metrics.timingMetrics) {
       // Validation ensures that the metricsOutputFile will be defined
-      setupMetrics(this.engineConfig.metricsConfiguration.metricsOutputFile as string);
+      setupMetrics(this.config.metrics.metricsOutputFile as string);
     }
 
     this.objectiveManager = ObjectiveManager.create({
       store: this.store,
 
       logger: this.logger,
-      timingMetrics: this.engineConfig.metricsConfiguration.timingMetrics,
+      timingMetrics: this.config.metrics.timingMetrics,
     });
 
     this.ledgerManager = LedgerManager.create({store: this.store});
@@ -401,7 +384,7 @@ export class SingleThreadedEngine implements EngineInterface {
 
     const constants = {
       appDefinition: makeAddress(appDefinition),
-      chainId: BigNumber.from(this.engineConfig.networkConfiguration.chainNetworkID).toHexString(),
+      chainId: this.config.chainNetworkID,
       challengeDuration,
       channelNonce,
       participants,
@@ -570,10 +553,7 @@ export class SingleThreadedEngine implements EngineInterface {
     allocations,
     appData,
   }: UpdateChannelParams): Promise<SingleChannelOutput> {
-    const timer = timerFactory(
-      this.engineConfig.metricsConfiguration.timingMetrics,
-      `updateChannel ${channelId}`
-    );
+    const timer = timerFactory(this.config.metrics.timingMetrics, `updateChannel ${channelId}`);
     const handleMissingChannel: MissingAppHandler<Promise<SingleChannelOutput>> = () => {
       throw new UpdateChannel.UpdateChannelError(
         UpdateChannel.UpdateChannelError.reasons.channelNotFound,
@@ -586,13 +566,13 @@ export class SingleThreadedEngine implements EngineInterface {
 
       const outcome = recordFunctionMetrics(
         deserializeAllocations(allocations),
-        this.engineConfig.metricsConfiguration.timingMetrics
+        this.config.metrics.timingMetrics
       );
 
       const nextState = getOrThrow(
         recordFunctionMetrics(
           UpdateChannel.updateChannel({channelId, appData, outcome}, channel.protocolState),
-          this.engineConfig.metricsConfiguration.timingMetrics
+          this.config.metrics.timingMetrics
         )
       );
       const signedState = await timer('signing state', async () => {
