@@ -464,6 +464,11 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return this._engine.getSigningAddress();
   }
 
+  public async getChannels(): Promise<ChannelResult[]> {
+    const {channelResults} = await this._engine.getChannels();
+    return channelResults;
+  }
+
   async destroy(): Promise<void> {
     await clearIntervalAsync(this._syncInterval);
     this._chainService.destructor();

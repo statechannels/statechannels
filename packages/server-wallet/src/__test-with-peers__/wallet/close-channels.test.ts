@@ -39,7 +39,7 @@ describe('CloseChannels', () => {
   test.each(testCases)(
     'can successfully create and close channel with the latency options: %o',
     async options => {
-      const {peerEngines, peerWallets} = peerSetup;
+      const {peerWallets} = peerSetup;
       // Always reset the latency options back to no drop / delay
       // This prevents the next test from using delay/dropping when doing setup
       TestMessageService.setLatencyOptions(peerWallets, {dropRate: 0, meanDelay: undefined});
@@ -83,12 +83,12 @@ describe('CloseChannels', () => {
       await expect(secondCloseResponse).toBeObjectiveDoneType('Success');
 
       // Ensure that A has all closed channels
-      const {channelResults: aChannels} = await peerEngines.a.getChannels();
+      const aChannels = await peerWallets.a.getChannels();
       for (const a of aChannels) {
         expect(a.status).toEqual('closed');
       }
       // Ensure that B has all closed channels
-      const {channelResults: bChannels} = await peerEngines.b.getChannels();
+      const bChannels = await peerWallets.b.getChannels();
       for (const b of bChannels) {
         expect(b.status).toEqual('closed');
       }
