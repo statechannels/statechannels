@@ -65,6 +65,7 @@ export type IncomingEngineConfigV2 = {
   metrics: MetricsConfiguration;
   dbConfig: Config;
   chainNetworkID: string;
+  workerThreadAmount: number;
 };
 
 /**
@@ -73,7 +74,7 @@ export type IncomingEngineConfigV2 = {
 export class SingleThreadedEngine implements EngineInterface {
   knex: Knex;
   store: Store;
-
+  chainNetworkId: string;
   objectiveManager: ObjectiveManager;
   ledgerManager: LedgerManager;
 
@@ -88,14 +89,14 @@ export class SingleThreadedEngine implements EngineInterface {
    * Protected method. Initialize engine via Engine.create(..)
    * @readonly
    */
-  protected constructor(private config: IncomingEngineConfigV2, private logger: Logger) {
+  protected constructor(private config: IncomingEngineConfigV2, protected logger: Logger) {
     this.knex = Knex(config.dbConfig);
-
+    this.chainNetworkId = utils.hexlify(this.config.chainNetworkID);
     this.store = new Store(
       this.knex,
       this.config.metrics.timingMetrics,
       this.config.skipEvmValidation,
-      utils.hexlify(this.config.chainNetworkID),
+      this.chainNetworkId,
       this.logger
     );
 
@@ -143,7 +144,7 @@ export class SingleThreadedEngine implements EngineInterface {
    */
   public async registerAppBytecode(appDefinition: string, bytecode: string): Promise<void> {
     return this.store.upsertBytecode(
-      utils.hexlify(this.engineConfig.networkConfiguration.chainNetworkID),
+      utils.hexlify(this.chainNetworkId),
       makeAddress(appDefinition),
       bytecode
     );

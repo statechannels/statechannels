@@ -7,7 +7,6 @@ import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
 import _ from 'lodash';
 
-import {ChainService} from '../chain-service';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
 import {Engine} from '../engine';
@@ -16,6 +15,7 @@ import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
+import {createLogger} from '../logger';
 
 jest.setTimeout(60_000);
 
@@ -104,26 +104,16 @@ beforeAll(async () => {
     })
   );
 
-  aEngine = await Engine.create(aEngineConfig);
-  bEngine = await Engine.create(bEngineConfig);
-  const aChainService = new ChainService({
-    ...aEngineConfig.chainServiceConfiguration,
-    logger: aEngine.logger,
-  });
-  const bChainService = new ChainService({
-    ...bEngineConfig.chainServiceConfiguration,
-    logger: bEngine.logger,
-  });
-
   const syncOptions: SyncOptions = {
     pollInterval: 1_000,
     timeOutThreshold: 60_000,
     staleThreshold: 10_000,
   };
-  a = await Wallet.create(aEngine, aChainService, TestMessageService.create, syncOptions);
-  b = await Wallet.create(bEngine, bChainService, TestMessageService.create, syncOptions);
+  a = await Wallet.create(aEngineConfig, TestMessageService.create, syncOptions);
+  b = await Wallet.create(bEngineConfig, TestMessageService.create, syncOptions);
+  const logger = createLogger(defaultTestConfig());
 
-  TestMessageService.linkMessageServices(a.messageService, b.messageService, aEngine.logger);
+  TestMessageService.linkMessageServices(a.messageService, b.messageService, logger);
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,

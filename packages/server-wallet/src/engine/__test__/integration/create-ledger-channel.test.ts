@@ -5,8 +5,9 @@ import {Channel} from '../../../models/channel';
 import {Engine} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestConfig, defaultTestEngineConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {createLogger} from '../../../logger';
 
 let w: Engine;
 
@@ -15,7 +16,8 @@ beforeAll(async () => {
 });
 
 beforeEach(async () => {
-  w = await Engine.create(defaultTestConfig());
+  const logger = createLogger(defaultTestConfig());
+  w = await Engine.create(defaultTestEngineConfig(), logger);
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });
 

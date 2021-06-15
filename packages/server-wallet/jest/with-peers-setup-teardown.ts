@@ -4,8 +4,9 @@ import * as fs from 'fs';
 import {Participant} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
+import {utils} from 'ethers';
 
-import {Engine} from '../src/engine';
+import {Engine, extractDBConfigFromEngineConfig} from '../src/engine';
 import {
   DBAdmin,
   defaultTestConfig,
@@ -20,7 +21,7 @@ import {
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
 import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
-import {MockChainService} from '../src/chain-service';
+import {IncomingEngineConfigV2} from '../src/engine/engine';
 
 interface TestPeerEngines {
   a: Engine;
@@ -60,9 +61,22 @@ export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: bDatabase,
 });
 
-const chainServiceA = new MockChainService();
+const {skipEvmValidation, metricsConfiguration: metrics} = baseConfig;
+const baseEngineConfig = {
+  skipEvmValidation,
+  metrics,
+  chainNetworkID: utils.hexlify(baseConfig.networkConfiguration.chainNetworkID),
+  workerThreadAmount: 0,
+};
+export const aRealEngineConfig: IncomingEngineConfigV2 = {
+  ...baseEngineConfig,
+  dbConfig: {connection: extractDBConfigFromEngineConfig(aEngineConfig)},
+};
 
-const chainServiceB = new MockChainService();
+export const bRealEngineConfig: IncomingEngineConfigV2 = {
+  ...baseEngineConfig,
+  dbConfig: {connection: extractDBConfigFromEngineConfig(bEngineConfig)},
+};
 
 const logger: Logger = createLogger(baseConfig);
 
@@ -90,18 +104,8 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
 
   const peerWallets = {
-    a: await Wallet.create(
-      peerSetup.peerEngines.a,
-      chainServiceA,
-      TestMessageService.create,
-      DEFAULT_SYNC_OPTIONS
-    ),
-    b: await Wallet.create(
-      peerSetup.peerEngines.b,
-      chainServiceB,
-      TestMessageService.create,
-      DEFAULT_SYNC_OPTIONS
-    ),
+    a: await Wallet.create(aEngineConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
+    b: await Wallet.create(bEngineConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
   };
   TestMessageService.linkMessageServices(
     peerWallets.a.messageService,
@@ -128,8 +132,8 @@ export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerS
     ]);
 
     const peerEngines = {
-      a: await Engine.create(aEngineConfig),
-      b: await Engine.create(bEngineConfig),
+      a: await Engine.create(aRealEngineConfig, createLogger(aEngineConfig)),
+      b: await Engine.create(bRealEngineConfig, createLogger(bEngineConfig)),
     };
 
     if (withWalletSeeding) {

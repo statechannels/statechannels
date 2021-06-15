@@ -1,8 +1,8 @@
-import {IncomingEngineConfig} from '../config';
+import P from 'pino';
 
 import {MultiThreadedEngine} from './multi-threaded-engine';
 import {EngineInterface} from './types';
-import {SingleThreadedEngine} from './engine';
+import {IncomingEngineConfigV2, SingleThreadedEngine} from './engine';
 
 /**
  * A single- or multi-threaded Nitro Engine
@@ -12,12 +12,13 @@ import {SingleThreadedEngine} from './engine';
  */
 export abstract class Engine extends SingleThreadedEngine implements EngineInterface {
   static async create(
-    engineConfig: IncomingEngineConfig
+    engineConfig: IncomingEngineConfigV2,
+    logger: P.Logger
   ): Promise<SingleThreadedEngine | MultiThreadedEngine> {
     if (engineConfig?.workerThreadAmount && engineConfig.workerThreadAmount > 0) {
-      return MultiThreadedEngine.create(engineConfig);
+      return MultiThreadedEngine.create(engineConfig, logger);
     } else {
-      return SingleThreadedEngine.create(engineConfig);
+      return SingleThreadedEngine.create(engineConfig, logger);
     }
   }
 }
