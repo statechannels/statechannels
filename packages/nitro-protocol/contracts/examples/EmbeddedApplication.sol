@@ -274,6 +274,12 @@ contract EmbeddedApplication is
         );
 
         // hash the greatest state first (either the later of a pair, or the only state provided)
+
+        uint256 finalIndex = toAppData.supportProofForX.variableParts.length - 1;
+
+        bytes memory greaterStateOutcome = toAppData.supportProofForX.variableParts[finalIndex]
+            .outcome;
+
         bytes32 greaterStateHash = keccak256(
             abi.encode(
                 IForceMove.State(
@@ -281,13 +287,7 @@ contract EmbeddedApplication is
                     false, // Assume isFinal is false
                     toAppData.channelIdForX,
                     appPartHash,
-                    keccak256(
-                        toAppData.supportProofForX.variableParts[toAppData
-                            .supportProofForX
-                            .variableParts
-                            .length - 1]
-                            .outcome
-                    )
+                    keccak256(greaterStateOutcome)
                 )
             )
         );
