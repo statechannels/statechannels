@@ -145,6 +145,10 @@ contract EmbeddedApplication is
         AlreadyMoved alreadyMoved;
     }
 
+    uint256 internal constant AIndex = 0;
+    uint256 internal constant BIndex = 1;
+    uint256 internal constant IIndex = 2;
+
     function validTransition(
         VariablePart memory from,
         VariablePart memory to,
@@ -162,16 +166,20 @@ contract EmbeddedApplication is
         Outcome.AllocationItem[] memory toAllocation = decode3PartyAllocation(to.outcome);
 
         require(
-            fromAllocation[0].destination == toAllocation[0].destination &&
-                fromAllocation[1].destination == toAllocation[1].destination &&
-                fromAllocation[2].destination == toAllocation[2].destination,
+            fromAllocation[AIndex].destination == toAllocation[AIndex].destination &&
+                fromAllocation[BIndex].destination == toAllocation[BIndex].destination &&
+                fromAllocation[IIndex].destination == toAllocation[IIndex].destination,
             'destinations may not change'
         );
 
-        require(fromAllocation[2].amount == toAllocation[2].amount, 'p2.amt !constant');
+        require(fromAllocation[IIndex].amount == toAllocation[IIndex].amount, 'p2.amt !constant');
         require(
-            fromAllocation[0].amount + fromAllocation[1].amount + fromAllocation[2].amount ==
-                toAllocation[0].amount + toAllocation[1].amount + toAllocation[2].amount,
+            fromAllocation[AIndex].amount +
+                fromAllocation[BIndex].amount +
+                fromAllocation[IIndex].amount ==
+                toAllocation[AIndex].amount +
+                    toAllocation[BIndex].amount +
+                    toAllocation[IIndex].amount,
             'total allocation changed'
         );
 
@@ -220,10 +228,10 @@ contract EmbeddedApplication is
 
         // ensure A,B part of the outcome of X has been absorbed into the outcome of J
         require(
-            Xallocation[0].amount == toAllocation[0].amount &&
-                Xallocation[1].amount == toAllocation[1].amount &&
-                Xallocation[0].destination == toAllocation[0].destination &&
-                Xallocation[1].destination == toAllocation[1].destination,
+            Xallocation[AIndex].amount == toAllocation[AIndex].amount &&
+                Xallocation[BIndex].amount == toAllocation[BIndex].amount &&
+                Xallocation[AIndex].destination == toAllocation[AIndex].destination &&
+                Xallocation[BIndex].destination == toAllocation[BIndex].destination,
             'X / J outcome mismatch'
         );
         return true;
