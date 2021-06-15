@@ -1,7 +1,7 @@
 import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import P from 'pino';
 
-import {IncomingEngineConfigV2, MultipleChannelOutput, SingleChannelOutput} from '../types';
+import {EngineConfig, MultipleChannelOutput, SingleChannelOutput} from '../types';
 import {SingleThreadedEngine} from '../engine';
 
 import {WorkerManager} from './manager';
@@ -13,13 +13,13 @@ export class MultiThreadedEngine extends SingleThreadedEngine {
   private workerManager: WorkerManager;
 
   public static async create(
-    engineConfig: IncomingEngineConfigV2,
+    engineConfig: EngineConfig,
     logger: P.Logger
   ): Promise<MultiThreadedEngine> {
     return new this(engineConfig, logger);
   }
 
-  protected constructor(private engineConfig: IncomingEngineConfigV2, logger: P.Logger) {
+  protected constructor(private engineConfig: EngineConfig, logger: P.Logger) {
     super(engineConfig, logger);
     this.workerManager = new WorkerManager(this.engineConfig, this.logger);
   }

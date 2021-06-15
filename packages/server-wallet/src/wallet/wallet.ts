@@ -18,7 +18,7 @@ import {
   Engine,
   extractDBConfigFromWalletConfig,
   hasNewObjective,
-  IncomingEngineConfigV2,
+  EngineConfig,
   IncomingWalletConfig,
   isMultipleChannelOutput,
   MultipleChannelOutput,
@@ -69,7 +69,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       throw new ConfigValidationError(errors);
     }
     const {skipEvmValidation, metricsConfiguration} = populatedConfig;
-    const engineConfig: IncomingEngineConfigV2 = {
+    const engineConfig: EngineConfig = {
       skipEvmValidation,
       dbConfig: extractDBConfigFromWalletConfig(populatedConfig),
       metrics: metricsConfiguration,

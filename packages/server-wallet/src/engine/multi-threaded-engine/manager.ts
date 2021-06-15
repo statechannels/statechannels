@@ -8,7 +8,7 @@ import {isLeft, isRight} from 'fp-ts/lib/These';
 import _ from 'lodash';
 import P, {Logger} from 'pino';
 
-import {IncomingEngineConfigV2, MultipleChannelOutput, SingleChannelOutput} from '../types';
+import {EngineConfig, MultipleChannelOutput, SingleChannelOutput} from '../types';
 
 import {StateChannelWorkerData} from './worker-data';
 
@@ -24,7 +24,7 @@ export class WorkerManager {
    * @param engineConfig engine config to be passed to the worker engine
    * @param onNewWorker callback that is executed when a new worker is created
    */
-  constructor(engineConfig: IncomingEngineConfigV2, logger: P.Logger) {
+  constructor(engineConfig: EngineConfig, logger: P.Logger) {
     this.logger = logger.child({module: 'Worker-Manager'});
     this.threadAmount = engineConfig.workerThreadAmount;
     if (this.threadAmount === 0) {
