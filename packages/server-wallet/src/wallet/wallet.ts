@@ -33,6 +33,7 @@ import {
   MultipleChannelOutput,
   SingleChannelOutput,
   validateEngineConfig,
+  SyncConfiguration,
 } from '../engine';
 import {
   AssetOutcomeUpdatedArg,
@@ -48,15 +49,8 @@ import * as ChannelState from '../protocols/state';
 import {createLogger} from '../logger';
 import {ConfigValidationError, SingleThreadedEngine} from '../engine/engine';
 
-import {
-  SyncOptions,
-  ObjectiveResult,
-  WalletEvents,
-  ObjectiveDoneResult,
-  UpdateChannelResult,
-} from './types';
+import {ObjectiveResult, WalletEvents, ObjectiveDoneResult, UpdateChannelResult} from './types';
 
-const DEFAULTS: SyncOptions = {pollInterval: 100, timeOutThreshold: 60_000, staleThreshold: 1_000};
 export class Wallet extends EventEmitter<WalletEvents> {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
@@ -67,9 +61,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
    */
   public static async create(
     incomingConfig: IncomingWalletConfig,
-    messageServiceFactory: MessageServiceFactory,
-
-    syncOptions: Partial<SyncOptions> = DEFAULTS
+    messageServiceFactory: MessageServiceFactory
   ): Promise<Wallet> {
     const populatedConfig = _.assign({}, defaultConfig, incomingConfig);
     // Even though the config hasn't been validated we attempt to create a logger
@@ -101,10 +93,14 @@ export class Wallet extends EventEmitter<WalletEvents> {
       : new MockChainService();
     await chainService.checkChainId(populatedConfig.networkConfiguration.chainNetworkID);
     const networkId = utils.hexlify(populatedConfig.networkConfiguration.chainNetworkID);
-    const wallet = new Wallet(messageServiceFactory, engine, chainService, networkId, logger, {
-      ...DEFAULTS,
-      ...syncOptions,
-    });
+    const wallet = new Wallet(
+      messageServiceFactory,
+      engine,
+      chainService,
+      networkId,
+      logger,
+      populatedConfig.syncConfiguration
+    );
     await wallet.registerExistingChannelsWithChainService();
     return wallet;
   }
@@ -123,7 +119,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     private _chainService: ChainServiceInterface,
     private _chainNetworkId: string,
     private _logger: P.Logger,
-    private _syncOptions: SyncOptions
+    private _syncOptions: SyncConfiguration
   ) {
     super();
 
