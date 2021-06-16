@@ -14,7 +14,7 @@ import {
 } from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
 import {LatencyOptions, TestMessageService} from '../message-service/test-message-service';
-import {SyncOptions, Wallet} from '../wallet';
+import {Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
@@ -105,13 +105,8 @@ beforeAll(async () => {
     })
   );
 
-  const syncOptions: SyncOptions = {
-    pollInterval: 1_000,
-    timeOutThreshold: 60_000,
-    staleThreshold: 10_000,
-  };
-  a = await Wallet.create(aWalletConfig, TestMessageService.create, syncOptions);
-  b = await Wallet.create(bWalletConfig, TestMessageService.create, syncOptions);
+  a = await Wallet.create(aWalletConfig, TestMessageService.create);
+  b = await Wallet.create(bWalletConfig, TestMessageService.create);
   const logger = createLogger(defaultTestWalletConfig());
 
   TestMessageService.linkMessageServices(a.messageService, b.messageService, logger);

@@ -1,7 +1,6 @@
 import {
   DBAdmin,
   defaultTestWalletConfig,
-  SyncOptions,
   Wallet as ServerWallet
 } from '@statechannels/server-wallet';
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
@@ -47,7 +46,11 @@ const serverConfig = defaultTestWalletConfig({
     attachChainService: true,
     provider: rpcEndpoint,
     pk: TEST_ACCOUNTS[0].privateKey
-  }
+  },
+  // Currently the browser wallet crashes if it receives the same objective again
+  // To avoid this we prevent the wallet from retrying objectives by using
+  // a really large poll value (one hour)
+  syncConfiguration: {pollInterval: 3_600_000}
 });
 
 let provider: providers.JsonRpcProvider;
@@ -76,11 +79,7 @@ beforeAll(async () => {
   );
 
   const factory = BrowserServerMessageService.createFactory(browserWallet);
-  // Currently the browser wallet crashes if it receives the same objective again
-  // To avoid this we prevent the wallet from retrying objectives by using
-  // a really large poll value (one hour)
-  const syncOptions: Partial<SyncOptions> = {pollInterval: 3_600_000};
-  serverWallet = await ServerWallet.create(serverConfig, factory, syncOptions);
+  serverWallet = await ServerWallet.create(serverConfig, factory);
 
   serverAddress = await serverWallet.getSigningAddress();
   serverDestination = makeDestination(serverAddress);
