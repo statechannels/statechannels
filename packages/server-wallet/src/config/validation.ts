@@ -29,6 +29,12 @@ const databasePoolConfigurationSchema = joi.object({
   min: joi.number().integer().min(0).optional(),
 });
 
+const syncConfigurationSchema = joi.object({
+  pollInterval: joi.number().min(1).optional(),
+  timeOutThreshold: joi.number().min(1).optional(),
+  staleThreshold: joi.number().min(1).optional(),
+});
+
 const databaseConfigurationSchema = joi.object({
   connection: databaseConnectionConfigurationSchema.required(),
   debug: joi.boolean().optional(),
@@ -75,6 +81,7 @@ const engine = joi.object({
   skipEvmValidation: joi.boolean().optional(),
   loggingConfiguration: loggingConfigurationSchema.optional(),
   metricsConfiguration: metricsConfigurationSchema.optional(),
+  syncConfiguration: syncConfigurationSchema.optional(),
 });
 
 export function validateEngineConfig(

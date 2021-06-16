@@ -7,6 +7,7 @@ import {
   NetworkConfiguration,
   OptionalDatabaseConfiguration,
   OptionalWalletConfig,
+  SyncConfiguration,
   WalletConfig,
 } from './types';
 
@@ -36,6 +37,12 @@ export const defaultChainServiceConfiguration: ChainServiceConfiguration = {
   attachChainService: false,
 };
 
+export const defaultSyncConfiguration: SyncConfiguration = {
+  pollInterval: 100,
+  timeOutThreshold: 60_000,
+  staleThreshold: 1_000,
+};
+
 /**
  * Server Wallet config
  */
@@ -51,6 +58,7 @@ export const defaultConfig: OptionalWalletConfig = {
   chainServiceConfiguration: defaultChainServiceConfiguration,
   skipEvmValidation: false,
   workerThreadAmount: 0,
+  syncConfiguration: defaultSyncConfiguration,
 };
 
 export const DEFAULT_DB_NAME = 'server_wallet_test';

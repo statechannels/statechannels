@@ -2,6 +2,23 @@ import {Level} from 'pino';
 
 import {ChainServiceArgs} from '../chain-service';
 
+export type SyncConfiguration = {
+  // How often we check for stale or timed out objectives in milliseconds.
+  pollInterval: number;
+
+  /**
+   * The amount of time (in milliseconds) that we wait for until we consider an objective timed out.
+   * When an objective is timed out we give up trying to complete it and return an error.
+   */
+  timeOutThreshold: number;
+
+  /**
+   * The amount of time (in milliseconds) that we wait for until we consider an objective "stale"
+   * If an objective is stale we attempt to sync the objectives with the other participants.
+   */
+  staleThreshold: number;
+};
+
 /**
  * Either a connection string or a config object with the dbName specified
  */
@@ -76,6 +93,7 @@ export interface OptionalWalletConfig {
   chainServiceConfiguration: ChainServiceConfiguration;
   loggingConfiguration: LoggingConfiguration;
   metricsConfiguration: MetricsConfiguration;
+  syncConfiguration: SyncConfiguration;
 }
 
 /**

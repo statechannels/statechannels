@@ -13,7 +13,7 @@ import {
   defaultTestWalletConfig,
   overwriteConfigWithDatabaseConnection,
 } from '../src/engine';
-import {DBAdmin, SyncOptions, Wallet} from '../src';
+import {DBAdmin, Wallet} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
@@ -31,11 +31,6 @@ export interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
-const DEFAULT_SYNC_OPTIONS: SyncOptions = {
-  pollInterval: 50,
-  staleThreshold: 1_000,
-  timeOutThreshold: 45_000,
-};
 
 const aDatabase = 'server_wallet_test_a';
 const bDatabase = 'server_wallet_test_b';
@@ -51,6 +46,7 @@ const baseConfig = defaultTestWalletConfig({
     logLevel: 'trace',
     logDestination: path.join(ARTIFACTS_DIR, 'with-peers.log'),
   },
+  syncConfiguration: {pollInterval: 50, staleThreshold: 1_000, timeOutThreshold: 45_000},
 });
 export const aWalletConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: aDatabase,
@@ -103,8 +99,8 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
 
   const peerWallets = {
-    a: await Wallet.create(aWalletConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
-    b: await Wallet.create(bWalletConfig, TestMessageService.create, DEFAULT_SYNC_OPTIONS),
+    a: await Wallet.create(aWalletConfig, TestMessageService.create),
+    b: await Wallet.create(bWalletConfig, TestMessageService.create),
   };
   TestMessageService.linkMessageServices(
     peerWallets.a.messageService,
