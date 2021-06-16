@@ -17,7 +17,12 @@ type Path =
   | 'ETHexitSadLedgerFunded';
 
 // The channel being benchmarked is a 2 party null app funded with 5 wei / tokens each.
-
+// KEY
+// ---
+// ⬛ -> funding on chain
+//  C    channel not yet on chain
+// (C)   channel finalized on chain
+// 🧑‍🤝‍🧑    external destinations
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
@@ -66,22 +71,28 @@ export const gasRequiredTo: GasRequiredTo = {
   },
   ETHexitSad: {
     // Scenario: counterparty goes offline
+    // initially                 ⬛ ->  X  -> 🧑‍🤝‍🧑
+    // challenge + timeout       ⬛ -> (X) -> 🧑‍🤝‍🧑
+    // pushOutcomeAndTransferAll ⬛ -> 🧑‍🤝‍🧑
     vanillaNitro: {
       challenge: 93404,
       pushOutcomeAndTransferAll: 107742,
-      total: 201146, // An alternative would be to 1. pushOutcome then 2. transfer(indices)
-      // ...but we assume that costs more gas overall
+      total: 201146,
     },
   },
   ETHexitSadLedgerFunded: {
     // Scenario: counterparty goes offline
     vanillaNitro: {
+      // initially                   ⬛ ->  L  ->  X  -> 🧑‍🤝‍🧑
+      // challenge X and timeout     ⬛ ->  L  -> (X) -> 🧑‍🤝‍🧑
+      // challenge L and timeout     ⬛ -> (L) -> (X) -> 🧑‍🤝‍🧑
+      // pushOutcomeAndTransferAllL  ⬛ -> (X) -> 🧑‍🤝‍🧑
+      // pushOutcomeAndTransferAllX  ⬛ -> 🧑‍🤝‍🧑
       challengeX: 93404,
       challengeL: 92122,
       pushOutcomeAndTransferAllL: 58640,
       pushOutcomeAndTransferAllX: 107742,
-      total: 351908, // An alternative would be to 1. pushOutcome then 2. transfer(indices)
-      // ...but we assume that costs more gas overall
+      total: 351908,
     },
   },
 };
