@@ -12,7 +12,8 @@ type Path =
   | 'directlyFundAChannelWithERC20First'
   | 'directlyFundAChannelWithERC20Second'
   | 'ETHexit'
-  | 'ERC20exit';
+  | 'ERC20exit'
+  | 'ETHexitSad';
 
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
@@ -59,5 +60,13 @@ export const gasRequiredTo: GasRequiredTo = {
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
     vanillaNitro: 139148,
+  },
+  ETHexitSad: {
+    vanillaNitro: {
+      challenge: 93404,
+      pushOutcomeAndTransferAll: 107742,
+      total: 201146, // An alternative would be to 1. pushOutcome then 2. transfer(indices)
+      // ...but we assume that costs more gas overall
+    },
   },
 };

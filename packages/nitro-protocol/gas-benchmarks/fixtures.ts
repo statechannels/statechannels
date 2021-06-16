@@ -9,10 +9,12 @@ import {
   getChannelId,
   getFixedPart,
   hashAppPart,
+  signChallengeMessage,
+  SignedState,
   signState,
   State,
 } from '../src';
-import {FixedPart} from '../src/contract/state';
+import {FixedPart, getVariablePart, hashState, VariablePart} from '../src/contract/state';
 import {Bytes} from '../src/contract/types';
 
 export const chainId = '0x7a69'; // 31337 in hex (hardhat network default)
@@ -29,13 +31,13 @@ export const channelId = getChannelId(channel);
 
 export const someOtherChannelId = getChannelId({...channel, channelNonce: 1337});
 
-export function finalState(assetHolderAddress: string): State {
+export function someState(assetHolderAddress: string): State {
   return {
     challengeDuration: 600,
     appDefinition: '0x8504FcA6e1e73947850D66D032435AC931892116',
     channel,
     turnNum: 6,
-    isFinal: true,
+    isFinal: false,
     outcome: [
       {
         assetHolderAddress,
@@ -49,7 +51,45 @@ export function finalState(assetHolderAddress: string): State {
   };
 }
 
-export function finalizationProof(
+export function finalState(assetHolderAddress: string): State {
+  return {
+    ...someState(assetHolderAddress),
+    isFinal: true,
+  };
+}
+
+export function counterSignedSupportProof( // for challenging and outcome pushing
+  state: State
+): {
+  largestTurnNum: number;
+  fixedPart: FixedPart;
+  variableParts: VariablePart[];
+  isFinalCount: number;
+  whoSignedWhat: [0, 0];
+  signatures: [Signature, Signature];
+  challengeSignature: Signature;
+  outcomeBytes: string;
+  stateHash: string;
+  challengerAddress: string;
+} {
+  return {
+    largestTurnNum: state.turnNum,
+    fixedPart: getFixedPart(state),
+    variableParts: [getVariablePart(state)],
+    isFinalCount: 0,
+    whoSignedWhat: [0, 0],
+    signatures: [
+      signState(state, Alice.privateKey).signature,
+      signState(state, Bob.privateKey).signature,
+    ],
+    challengeSignature: signChallengeMessage([{state} as SignedState], Alice.privateKey),
+    outcomeBytes: encodeOutcome(state.outcome),
+    stateHash: hashState(state),
+    challengerAddress: Alice.address,
+  };
+}
+
+export function finalizationProof( // for concluding
   state: State
 ): {
   largestTurnNum: number;

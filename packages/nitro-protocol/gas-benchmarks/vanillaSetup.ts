@@ -37,7 +37,7 @@ const hardhatProcess = exec('npx hardhat node --no-deploy --port 9546', (error, 
 const hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
 const hardhatProcessClosed = new Promise(resolve => hardhatProcess.on('close', resolve));
 
-const provider = new providers.JsonRpcProvider(hardHatNetworkEndpoint);
+export const provider = new providers.JsonRpcProvider(hardHatNetworkEndpoint);
 
 let snapshotId = 0;
 
