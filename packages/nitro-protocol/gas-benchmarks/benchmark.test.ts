@@ -9,6 +9,21 @@ import {
 import {gasRequiredTo} from './gas';
 import {erc20AssetHolder, ethAssetHolder, nitroAdjudicator, token, provider} from './vanillaSetup';
 
+/**
+ * Ensures the supplied asset holder always has a nonzero token balance.
+ */
+async function addResidualTokenBalanceToAssetHolder(assetHolder: typeof erc20AssetHolder) {
+  /**
+   * Funding someOtherChannel with tokens, as well as the channel in question
+   * makes the benchmark more realistic. In practice many other
+   * channels are funded by this asset holder. If we didn't reflect
+   * that, our benchmark might reflect a gas refund for clearing storage
+   * in the token contract (setting the token balance of the asset holder to 0)
+   * which we would only expect in rare cases.
+   */
+  await (await assetHolder.deposit(someOtherChannelId, 0, 1)).wait(); // other channels are funded by this asset holder
+}
+
 describe('Consumes the expected gas for deployments', () => {
   it(`when deploying the NitroAdjudicator`, async () => {
     await expect(await nitroAdjudicator.deployTransaction).toConsumeGas(
@@ -69,7 +84,6 @@ describe('Consumes the expected gas for deposits', () => {
 describe('Consumes the expected gas for happy-path exits', () => {
   it(`when exiting a directly funded (with ETH) channel`, async () => {
     // begin setup
-    await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
     await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
     // end setup
     const fP = finalizationProof(finalState(ethAssetHolder.address));
@@ -88,8 +102,9 @@ describe('Consumes the expected gas for happy-path exits', () => {
   it(`when exiting a directly funded (with ERC20s) channel`, async () => {
     // begin setup
     await (await token.increaseAllowance(erc20AssetHolder.address, 100)).wait();
-    await (await erc20AssetHolder.deposit(someOtherChannelId, 0, 10)).wait(); // other channels are funded by this asset holder
     await (await erc20AssetHolder.deposit(channelId, 0, 10)).wait();
+    await addResidualTokenBalanceToAssetHolder(erc20AssetHolder);
+
     // end setup
     const fP = finalizationProof(finalState(erc20AssetHolder.address));
     await expect(
@@ -108,7 +123,6 @@ describe('Consumes the expected gas for happy-path exits', () => {
 describe('Consumes the expected gas for sad-path exits', () => {
   it(`when exiting a directly funded (with ETH) channel`, async () => {
     // begin setup
-    await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
     await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
     const finalizesAtPromise = new Promise(resolve =>
       nitroAdjudicator.once('ChallengeRegistered', (...event) => {
