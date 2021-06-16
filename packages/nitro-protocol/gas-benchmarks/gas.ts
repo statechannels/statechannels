@@ -13,7 +13,10 @@ type Path =
   | 'directlyFundAChannelWithERC20Second'
   | 'ETHexit'
   | 'ERC20exit'
-  | 'ETHexitSad';
+  | 'ETHexitSad'
+  | 'ETHexitSadLedgerFunded';
+
+// The channel being benchmarked is a 2 party null app funded with 5 wei / tokens each.
 
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
@@ -62,10 +65,22 @@ export const gasRequiredTo: GasRequiredTo = {
     vanillaNitro: 139148,
   },
   ETHexitSad: {
+    // Scenario: counterparty goes offline
     vanillaNitro: {
       challenge: 93404,
       pushOutcomeAndTransferAll: 107742,
       total: 201146, // An alternative would be to 1. pushOutcome then 2. transfer(indices)
+      // ...but we assume that costs more gas overall
+    },
+  },
+  ETHexitSadLedgerFunded: {
+    // Scenario: counterparty goes offline
+    vanillaNitro: {
+      challengeX: 93404,
+      challengeL: 92122,
+      pushOutcomeAndTransferAllL: 58640,
+      pushOutcomeAndTransferAllX: 107742,
+      total: 351908, // An alternative would be to 1. pushOutcome then 2. transfer(indices)
       // ...but we assume that costs more gas overall
     },
   },
