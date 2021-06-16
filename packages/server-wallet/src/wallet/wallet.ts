@@ -54,9 +54,8 @@ import {ObjectiveResult, WalletEvents, ObjectiveDoneResult, UpdateChannelResult}
 export class Wallet extends EventEmitter<WalletEvents> {
   /**
    * Constructs a channel manager that will ensure objectives get accomplished by resending messages if needed.
-   * @param engine The engine to use.
-   * @param messageService  The message service to use.
-   * @param syncOptions How often and for how long the channel manager should retry objectives.
+   * @param incomingConfig The configuration object that specifies various options.
+   * @param messageServiceFactory  A function that returns a message service when passed in a handler.
    * @returns A channel manager.
    */
   public static async create(
