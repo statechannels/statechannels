@@ -21,11 +21,13 @@ describe('Consumes the expected gas for deployments', () => {
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.NitroAdjudicator
     );
   });
+
   it(`when deploying the ETHAssetHolder`, async () => {
     await expect(await ethAssetHolder.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ETHAssetHolder
     );
   });
+
   it(`when deploying the ERC20AssetHolder`, async () => {
     await expect(await erc20AssetHolder.deployTransaction).toConsumeGas(
       gasRequiredTo.deployInfrastructureContracts.vanillaNitro.ERC20AssetHolder
@@ -38,6 +40,7 @@ describe('Consumes the expected gas for deposits', () => {
       gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro
     );
   });
+
   it(`when directly funding a channel with ETH (second deposit)`, async () => {
     // begin setup
     const setupTX = ethAssetHolder.deposit(channelId, 0, 5, {value: 5});
@@ -47,6 +50,7 @@ describe('Consumes the expected gas for deposits', () => {
       gasRequiredTo.directlyFundAChannelWithETHSecond.vanillaNitro
     );
   });
+
   it(`when directly funding a channel with an ERC20 (first deposit)`, async () => {
     // begin setup
     await (await token.transfer(erc20AssetHolder.address, 1)).wait(); // The asset holder already has some tokens (for other channels)
@@ -58,6 +62,7 @@ describe('Consumes the expected gas for deposits', () => {
       gasRequiredTo.directlyFundAChannelWithERC20First.vanillaNitro.deposit
     );
   });
+
   it(`when directly funding a channel with an ERC20 (second deposit)`, async () => {
     // begin setup
     await (await token.increaseAllowance(erc20AssetHolder.address, 100)).wait();
@@ -91,6 +96,7 @@ describe('Consumes the expected gas for happy-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexit.vanillaNitro);
   });
+
   it(`when exiting a directly funded (with ERC20s) channel`, async () => {
     // begin setup
     await (await token.increaseAllowance(erc20AssetHolder.address, 100)).wait();
@@ -148,6 +154,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         gasRequiredTo.ETHexitSad.vanillaNitro.pushOutcomeAndTransferAll
     ).toEqual(gasRequiredTo.ETHexitSad.vanillaNitro.total);
   });
+
   it(`when exiting a ledger funded (with ETH) channel`, async () => {
     // begin setup
     await (await ethAssetHolder.deposit(ledgerChannelId, 0, 10, {value: 10})).wait();
