@@ -270,7 +270,6 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.pushOutcomeJ);
     // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
-    console.log(G.guaranteeOrAllocation, J.guaranteeOrAllocation);
     await expect(
       await ethAssetHolder.claim(
         G.channelId,
