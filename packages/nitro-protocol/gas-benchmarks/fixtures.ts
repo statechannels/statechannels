@@ -7,7 +7,6 @@ import {
   Bytes32,
   Channel,
   convertAddressToBytes32,
-  encodeGuarantee,
   encodeOutcome,
   getChannelId,
   getFixedPart,
@@ -138,7 +137,7 @@ class TestChannel {
   }
 
   async challengeTx(assetHolderAddress: string) {
-    const proof = this.counterSignedSupportProof(this.someState(assetHolderAddress)); // TODO use a nontrivial app with a state transition
+    const proof = this.counterSignedSupportProof(this.someState(assetHolderAddress));
     return await nitroAdjudicator.challenge(
       proof.fixedPart,
       proof.largestTurnNum,
