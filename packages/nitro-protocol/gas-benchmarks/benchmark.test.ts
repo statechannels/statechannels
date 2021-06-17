@@ -146,6 +146,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     // begin setup
     await (await ethAssetHolder.deposit(channelId, 0, 10, {value: 10})).wait();
     // end setup
+    // initially                 ⬛ ->  X  -> 👩
     const fP = counterSignedSupportProof(someState(ethAssetHolder.address)); // TODO use a nontrivial app with a state transition
     const challengeTx = await nitroAdjudicator.challenge(
       fP.fixedPart,
@@ -161,6 +162,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     // begin wait
     await waitForChallengesToTimeOut([finalizesAt]);
     // end wait
+    // challenge + timeout       ⬛ -> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcomeAndTransferAll(
         channelId,
@@ -171,6 +173,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         fP.outcomeBytes // outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSad.vanillaNitro.pushOutcomeAndTransferAll);
+    // pushOutcomeAndTransferAll ⬛ --------> 👩
     expect(
       gasRequiredTo.ETHexitSad.vanillaNitro.challenge +
         gasRequiredTo.ETHexitSad.vanillaNitro.pushOutcomeAndTransferAll
@@ -181,6 +184,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     // begin setup
     await (await ethAssetHolder.deposit(ledgerChannelId, 0, 10, {value: 10})).wait();
     // end setup
+    // initially                   ⬛ ->  L  ->  X  -> 👩
     const ledgerProof = counterSignedSupportProof(someLedgerStateFundingX(ethAssetHolder.address));
     const challengeLedgerTx = await nitroAdjudicator.challenge(
       ledgerProof.fixedPart,
@@ -212,6 +216,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     // begin wait
     await waitForChallengesToTimeOut([ledgerFinalizesAt, finalizesAt]); // just go to the max one
     // end wait
+    // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcomeAndTransferAll(
         ledgerChannelId,
@@ -222,6 +227,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         ledgerProof.outcomeBytes // outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.pushOutcomeAndTransferAllL);
+    // pushOutcomeAndTransferAllL  ⬛ --------> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcomeAndTransferAll(
         channelId,
@@ -232,6 +238,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         proof.outcomeBytes // outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.pushOutcomeAndTransferAllX);
+    // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
     expect(
       gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.challengeL +
         gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.pushOutcomeAndTransferAllL +
@@ -245,6 +252,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     await (await ethAssetHolder.deposit(someOtherChannelId, 0, 10, {value: 10})).wait(); // other channels are funded by this asset holder
     await (await ethAssetHolder.deposit(ledgerChannelId, 0, 10, {value: 10})).wait();
     // end setup
+    // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
     // challenge L
     const ledgerProof = counterSignedSupportProof(someLedgerStateFundingG(ethAssetHolder.address));
     const challengeLedgerTx = await nitroAdjudicator.challenge(
@@ -313,8 +321,9 @@ describe('Consumes the expected gas for sad-path exits', () => {
       guarantorFinalizesAt,
       jointChannelFinalizesAt,
       finalizesAt,
-    ]); // just go to the max one
+    ]);
     // end wait
+    // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcomeAndTransferAll(
         ledgerChannelId,
@@ -325,7 +334,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         ledgerProof.outcomeBytes // outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.pushOutcomeAndTransferAllL);
-    // pushOutcome G
+    // pushOutcomeAndTransferAllL  ⬛ --------> (G) -> (J) -> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcome(
         guarantorChannelId,
@@ -336,7 +345,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         guarantorProof.outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.pushOutcomeG);
-    // pushOutcome J
+    // pushOutcomeG                ⬛ --------> (G) -> (J) -> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcome(
         jointChannelId,
@@ -347,7 +356,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         jointProof.outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.pushOutcomeJ);
-    // claim G
+    // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
     await expect(
       await ethAssetHolder.claim(
         guarantorChannelId,
@@ -356,7 +365,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         [] // meaning "all"
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimG);
-    // pushOutcomeAndTransferAll X
+    // claimG                      ⬛ ----------------------> (X) -> 👩
     await expect(
       await nitroAdjudicator.pushOutcomeAndTransferAll(
         channelId,
@@ -367,6 +376,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         proof.outcomeBytes // outcomeBytes
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.pushOutcomeAndTransferAllX);
+    // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
     expect(
       (Object.values(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro) as number[]).reduce(
         (a, b) => a + b

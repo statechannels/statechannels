@@ -85,8 +85,7 @@ export const gasRequiredTo: GasRequiredTo = {
   ETHexitSadLedgerFunded: {
     vanillaNitro: {
       // initially                   ⬛ ->  L  ->  X  -> 👩
-      // challenge X and timeout     ⬛ ->  L  -> (X) -> 👩
-      // challenge L and timeout     ⬛ -> (L) -> (X) -> 👩
+      // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
       // pushOutcomeAndTransferAllL  ⬛ --------> (X) -> 👩
       // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
       challengeX: 93404,
@@ -99,10 +98,7 @@ export const gasRequiredTo: GasRequiredTo = {
   ETHexitSadVirtualFunded: {
     vanillaNitro: {
       // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
-      // challenge L and timeout     ⬛ -> (L) ->  G  ->  J  ->  X  -> 👩
-      // challenge G and timeout     ⬛ -> (L) -> (G) ->  J  ->  X  -> 👩
-      // challenge J and timeout     ⬛ -> (L) -> (G) -> (J) ->  X  -> 👩
-      // challenge X and timeout     ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
+      // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
       // pushOutcomeAndTransferAllL  ⬛ --------> (G) -> (J) -> (X) -> 👩
       // pushOutcomeG                ⬛ --------> (G) -> (J) -> (X) -> 👩
       // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
