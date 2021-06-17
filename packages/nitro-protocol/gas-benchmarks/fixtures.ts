@@ -241,3 +241,30 @@ export async function waitForChallengesToTimeOut(finalizesAtArray: number[]): Pr
   await provider.send('evm_setNextBlockTimestamp', [finalizesAt + 1]);
   await provider.send('evm_mine', []);
 }
+
+/**
+ * Constructs a support proof from the supplied state; calls challenge, asserts the expected gas and returns the proof and finalizesAt
+ * @param state
+ * @param expectedGas
+ * @returns
+ */
+export async function challengeChannelAndExpectGas(
+  state: State,
+  expectedGas: number
+): Promise<{proof: ReturnType<typeof counterSignedSupportProof>; finalizesAt: number}> {
+  const proof = counterSignedSupportProof(state); // TODO use a nontrivial app with a state transition
+
+  const challengeTx = await nitroAdjudicator.challenge(
+    proof.fixedPart,
+    proof.largestTurnNum,
+    proof.variableParts,
+    proof.isFinalCount,
+    proof.signatures,
+    proof.whoSignedWhat,
+    proof.challengeSignature
+  );
+  await expect(challengeTx).toConsumeGas(expectedGas);
+
+  const finalizesAt = await getFinalizesAtFromTransactionHash(challengeTx.hash);
+  return {proof, finalizesAt};
+}
