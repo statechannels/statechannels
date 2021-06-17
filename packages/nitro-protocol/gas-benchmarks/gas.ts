@@ -14,15 +14,17 @@ type Path =
   | 'ETHexit'
   | 'ERC20exit'
   | 'ETHexitSad'
+  | 'ETHexitSadLedgerFunded'
+  | 'ETHexitSadVirtualFunded'
   | 'ETHexitSadLedgerFunded';
 
 // The channel being benchmarked is a 2 party null app funded with 5 wei / tokens each.
 // KEY
 // ---
-// ⬛ -> funding on chain
+// ⬛ -> funding on chain (from Alice)
 //  C    channel not yet on chain
 // (C)   channel finalized on chain
-// 🧑‍🤝‍🧑    external destinations
+// 👩    Alice's external destination (e.g. her EOA)
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
@@ -71,9 +73,9 @@ export const gasRequiredTo: GasRequiredTo = {
   },
   ETHexitSad: {
     // Scenario: counterparty goes offline
-    // initially                 ⬛ ->  X  -> 🧑‍🤝‍🧑
-    // challenge + timeout       ⬛ -> (X) -> 🧑‍🤝‍🧑
-    // pushOutcomeAndTransferAll ⬛ -> 🧑‍🤝‍🧑
+    // initially                 ⬛ ->  X  -> 👩
+    // challenge + timeout       ⬛ -> (X) -> 👩
+    // pushOutcomeAndTransferAll ⬛ --------> 👩
     vanillaNitro: {
       challenge: 93404,
       pushOutcomeAndTransferAll: 107742,
@@ -81,18 +83,41 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   ETHexitSadLedgerFunded: {
-    // Scenario: counterparty goes offline
     vanillaNitro: {
-      // initially                   ⬛ ->  L  ->  X  -> 🧑‍🤝‍🧑
-      // challenge X and timeout     ⬛ ->  L  -> (X) -> 🧑‍🤝‍🧑
-      // challenge L and timeout     ⬛ -> (L) -> (X) -> 🧑‍🤝‍🧑
-      // pushOutcomeAndTransferAllL  ⬛ -> (X) -> 🧑‍🤝‍🧑
-      // pushOutcomeAndTransferAllX  ⬛ -> 🧑‍🤝‍🧑
+      // initially                   ⬛ ->  L  ->  X  -> 👩
+      // challenge X and timeout     ⬛ ->  L  -> (X) -> 👩
+      // challenge L and timeout     ⬛ -> (L) -> (X) -> 👩
+      // pushOutcomeAndTransferAllL  ⬛ --------> (X) -> 👩
+      // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
       challengeX: 93404,
       challengeL: 92122,
       pushOutcomeAndTransferAllL: 58640,
       pushOutcomeAndTransferAllX: 107742,
       total: 351908,
+    },
+  },
+  ETHexitSadVirtualFunded: {
+    vanillaNitro: {
+      // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
+      // challenge L and timeout     ⬛ -> (L) ->  G  ->  J  ->  X  -> 👩
+      // challenge G and timeout     ⬛ -> (L) -> (G) ->  J  ->  X  -> 👩
+      // challenge J and timeout     ⬛ -> (L) -> (G) -> (J) ->  X  -> 👩
+      // challenge X and timeout     ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
+      // pushOutcomeAndTransferAllL  ⬛ --------> (G) -> (J) -> (X) -> 👩
+      // pushOutcomeG                ⬛ --------> (G) -> (J) -> (X) -> 👩
+      // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
+      // claimG                      ⬛ ----------------------> (X) -> 👩
+      // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
+      challengeL: 92110,
+      challengeG: 94417,
+      challengeJ: 94417,
+      challengeX: 93404,
+      pushOutcomeAndTransferAllL: 58640,
+      pushOutcomeG: 61410,
+      pushOutcomeJ: 60558,
+      claimG: 58432,
+      pushOutcomeAndTransferAllX: 107742,
+      total: 721130,
     },
   },
 };
