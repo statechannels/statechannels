@@ -7,6 +7,7 @@ import {
   Bytes32,
   Channel,
   convertAddressToBytes32,
+  encodeGuarantee,
   encodeOutcome,
   getChannelId,
   getFixedPart,
@@ -91,7 +92,7 @@ class TestChannel {
       fixedPart: getFixedPart(state),
       variableParts: [getVariablePart(state)],
       isFinalCount: 0,
-      whoSignedWhat: state.channel.participants.length == 2 ? [0, 0] : [0, 0, 0],
+      whoSignedWhat: this.wallets.map(() => 0),
       signatures: this.wallets.map(w => signState(state, w.privateKey).signature),
       challengeSignature: signChallengeMessage([{state} as SignedState], Alice.privateKey),
       outcomeBytes: encodeOutcome(state.outcome),
@@ -100,7 +101,7 @@ class TestChannel {
     };
   }
 
-  finalizationProof(
+  supportProof(
     // for concluding
     state: State
   ): {
@@ -109,7 +110,7 @@ class TestChannel {
     appPartHash: Bytes32;
     outcomeBytes: Bytes;
     numStates: 1;
-    whoSignedWhat: [0, 0] | [0, 0, 0];
+    whoSignedWhat: number[];
     sigs: Signature[];
   } {
     return {
@@ -118,9 +119,35 @@ class TestChannel {
       appPartHash: hashAppPart(state),
       outcomeBytes: encodeOutcome(state.outcome),
       numStates: 1,
-      whoSignedWhat: state.channel.participants.length == 2 ? [0, 0] : [0, 0, 0],
+      whoSignedWhat: this.wallets.map(() => 0),
       sigs: this.wallets.map(w => signState(state, w.privateKey).signature),
     };
+  }
+
+  async concludePushOutcomeAndTransferAllTx(assetHolderAddress: string) {
+    const fP = this.supportProof(this.finalState(assetHolderAddress));
+    return await nitroAdjudicator.concludePushOutcomeAndTransferAll(
+      fP.largestTurnNum,
+      fP.fixedPart,
+      fP.appPartHash,
+      fP.outcomeBytes,
+      fP.numStates,
+      fP.whoSignedWhat,
+      fP.sigs
+    );
+  }
+
+  async challengeTx(assetHolderAddress: string) {
+    const proof = this.counterSignedSupportProof(this.someState(assetHolderAddress)); // TODO use a nontrivial app with a state transition
+    return await nitroAdjudicator.challenge(
+      proof.fixedPart,
+      proof.largestTurnNum,
+      proof.variableParts,
+      proof.isFinalCount,
+      proof.signatures,
+      proof.whoSignedWhat,
+      proof.challengeSignature
+    );
   }
 }
 
@@ -133,18 +160,36 @@ export const X = new TestChannel(
     {destination: convertAddressToBytes32(Bob.address), amount: '0x5'},
   ]
 );
+export const Y = new TestChannel(
+  3,
+  [Alice, Bob],
+  [
+    {destination: convertAddressToBytes32(Alice.address), amount: '0x5'},
+    {destination: convertAddressToBytes32(Bob.address), amount: '0x5'},
+  ]
+);
 
 // Ledger funding
-export const LforX = new TestChannel(3, [Alice, Bob], [{destination: X.channelId, amount: '0xa'}]);
+export const LforX = new TestChannel(4, [Alice, Bob], [{destination: X.channelId, amount: '0xa'}]);
 
 // Virtual funding
 export const J = new TestChannel(
-  4,
+  5,
   [Alice, Bob, Ingrid],
-  [{destination: X.channelId, amount: '0xa'}]
+  [
+    {destination: X.channelId, amount: '0xa'},
+    {destination: convertAddressToBytes32(Ingrid.address), amount: '0xa'},
+  ]
 );
-export const G = new TestChannel(5, [Alice, Ingrid], [{destination: J.channelId, amount: '0xa'}]);
-export const LforG = new TestChannel(6, [Alice, Bob], [{destination: G.channelId, amount: '0xa'}]);
+export const G = new TestChannel(6, [Alice, Ingrid], {
+  targetChannelId: J.channelId,
+  destinations: [
+    convertAddressToBytes32(Alice.address),
+    convertAddressToBytes32(Bob.address),
+    X.channelId,
+  ],
+});
+export const LforG = new TestChannel(7, [Alice, Bob], [{destination: G.channelId, amount: '0xa'}]);
 
 // Utils
 export async function getFinalizesAtFromTransactionHash(hash: string): Promise<number> {
@@ -164,7 +209,7 @@ export async function waitForChallengesToTimeOut(finalizesAtArray: number[]): Pr
  * @returns
  */
 export async function challengeChannelAndExpectGas(
-  channel: X,
+  channel: TestChannel,
   assetHolderAddress: string,
   expectedGas: number
 ): Promise<{proof: ReturnType<typeof channel.counterSignedSupportProof>; finalizesAt: number}> {
