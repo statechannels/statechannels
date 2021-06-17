@@ -1,5 +1,6 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
+import {constants, ContractReceipt} from 'ethers';
 
 import {
   Bytes32,
@@ -17,6 +18,8 @@ import {
 import {FixedPart, getVariablePart, hashState, VariablePart} from '../src/contract/state';
 import {Bytes} from '../src/contract/types';
 
+import {nitroAdjudicator, provider} from './vanillaSetup';
+
 export const chainId = '0x7a69'; // 31337 in hex (hardhat network default)
 export const channelNonce = 2;
 
@@ -26,7 +29,7 @@ export const Alice = new Wallet(
 export const Bob = new Wallet('0xc8774aa98410b3e3281ff1ec40ea2637d2b9280328c4d1ff00d06cd95dd42cbd');
 export const participants = [Alice.address, Bob.address];
 
-const channel: Channel = {chainId, channelNonce, participants};
+export const channel: Channel = {chainId, channelNonce, participants};
 export const channelId = getChannelId(channel);
 
 export const someOtherChannelId = getChannelId({...channel, channelNonce: 1337});
@@ -48,6 +51,23 @@ export function someState(assetHolderAddress: string): State {
       },
     ],
     appData: '0x', // TODO choose a more representative example
+  };
+}
+
+export function someLedgerState(assetHolderAddress: string): State {
+  return {
+    challengeDuration: 600,
+    appDefinition: constants.AddressZero,
+    channel: ledgerChannel,
+    turnNum: 6,
+    isFinal: false,
+    outcome: [
+      {
+        assetHolderAddress,
+        allocationItems: [{destination: channelId, amount: '0xa'}],
+      },
+    ],
+    appData: '0x',
   };
 }
 
@@ -113,3 +133,17 @@ export function finalizationProof( // for concluding
     ],
   };
 }
+
+export async function getFinalizesAtFromTransactionHash(hash: string): Promise<number> {
+  const receipt = (await provider.getTransactionReceipt(hash)) as ContractReceipt;
+  return nitroAdjudicator.interface.decodeEventLog('ChallengeRegistered', receipt.logs[0].data)[2];
+}
+
+export async function waitForChallengesToTimeOut(finalizesAtArray: number[]): Promise<void> {
+  const finalizesAt = Math.max(...finalizesAtArray);
+  await provider.send('evm_setNextBlockTimestamp', [finalizesAt + 1]);
+  await provider.send('evm_mine', []);
+}
+
+export const ledgerChannel: Channel = {chainId, channelNonce: channelNonce + 10000, participants};
+export const ledgerChannelId = getChannelId(ledgerChannel);
