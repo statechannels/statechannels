@@ -87,6 +87,7 @@ library ForceMoveAppUtilities {
     }
 }
 
+// NOTE: This contract should be treated as prototype code. It has not been carefully scrutinized from a security point of view.
 // The EmbeddedApplication allows a 2-party subchannel X to be *embedded* in the current 3-party channel J.
 // This is in contrast to having the application channel X being *funded* by the current channel J.
 // J references X in its AppData. Each state for J contains a support proof for X. Initially, this can be the PreFundSetup of X.
