@@ -89,10 +89,10 @@ export const gasRequiredTo: GasRequiredTo = {
       // pushOutcomeAndTransferAllL  ⬛ --------> (X) -> 👩
       // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
       challengeX: 93404,
-      challengeL: 92122,
+      challengeL: 92338,
       pushOutcomeAndTransferAllL: 58640,
       pushOutcomeAndTransferAllX: 107742,
-      total: 351908,
+      total: 352124,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -104,16 +104,16 @@ export const gasRequiredTo: GasRequiredTo = {
       // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
       // claimG                      ⬛ ----------------------> (X) -> 👩
       // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
-      challengeL: 92110,
-      challengeG: 94417,
-      challengeJ: 94417,
+      challengeL: 92350,
+      challengeG: 94645,
+      challengeJ: 101748,
       challengeX: 93404,
-      pushOutcomeAndTransferAllL: 58640,
-      pushOutcomeG: 61410,
+      pushOutcomeAndTransferAllL: 58652,
+      pushOutcomeG: 61422,
       pushOutcomeJ: 60558,
-      claimG: 58432,
+      claimG: 58856,
       pushOutcomeAndTransferAllX: 107742,
-      total: 721130,
+      total: 729377,
     },
   },
 };
