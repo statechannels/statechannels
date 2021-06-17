@@ -14,6 +14,7 @@ import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import trivialAppArtifact from '../artifacts/contracts/TrivialApp.sol/TrivialApp.json';
+import embeddedApplicationArtifact from '../artifacts/contracts/examples/EmbeddedApplication.sol/EmbeddedApplication.json';
 
 const rpcEndPoint = 'http://localhost:' + process.env.GANACHE_PORT;
 const provider = new providers.JsonRpcProvider(rpcEndPoint);
@@ -32,6 +33,7 @@ const [
   testNitroAdjudicatorFactory,
   tokenFactory,
   trivialAppFactory,
+  embeddedApplicationFactory,
 ] = [
   countingAppArtifact,
   erc20AssetHolderArtifact,
@@ -44,6 +46,7 @@ const [
   testNitroAdjudicatorArtifact,
   tokenArtifact,
   trivialAppArtifact,
+  embeddedApplicationArtifact,
 ].map(artifact =>
   new ContractFactory(artifact.abi, artifact.bytecode).connect(provider.getSigner(0))
 );
@@ -63,6 +66,7 @@ export async function deploy(): Promise<Record<string, string>> {
   const TEST_ASSET_HOLDER2_ADDRESS = (
     await testAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)
   ).address;
+  const EMBEDDED_APPLICATION_ADDRESS = (await embeddedApplicationFactory.deploy()).address;
 
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
 
@@ -82,6 +86,7 @@ export async function deploy(): Promise<Record<string, string>> {
     NITRO_ADJUDICATOR_ADDRESS,
     COUNTING_APP_ADDRESS,
     HASH_LOCK_ADDRESS,
+    EMBEDDED_APPLICATION_ADDRESS,
     SINGLE_ASSET_PAYMENT_ADDRESS,
     TRIVIAL_APP_ADDRESS,
     TEST_FORCE_MOVE_ADDRESS,
