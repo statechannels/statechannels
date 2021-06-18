@@ -185,6 +185,9 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.pushOutcomeAndTransferAllX);
     // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
+
+    // meta-test here to confirm the total recorded in gas.ts is up to date
+    // with the recorded costs of each step
     expect(
       gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.challengeL +
         gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.pushOutcomeAndTransferAllL +

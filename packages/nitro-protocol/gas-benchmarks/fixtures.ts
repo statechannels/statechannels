@@ -182,11 +182,13 @@ export const J = new TestChannel(
     {destination: convertAddressToBytes32(Ingrid.address), amount: '0xa'},
   ]
 );
+
+/** Guarantor channel between Alice and Ingid, targeting joint channel J */
 export const G = new TestChannel(6, [Alice, Ingrid], {
   targetChannelId: J.channelId,
   destinations: [
     convertAddressToBytes32(Alice.address),
-    convertAddressToBytes32(Bob.address),
+    convertAddressToBytes32(Ingrid.address),
     X.channelId,
   ],
 });

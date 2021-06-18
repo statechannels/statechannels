@@ -105,15 +105,15 @@ export const gasRequiredTo: GasRequiredTo = {
       // claimG                      ⬛ ----------------------> (X) -> 👩
       // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
       challengeL: 92350,
-      challengeG: 94645,
+      challengeG: 94621,
       challengeJ: 101748,
       challengeX: 93404,
       pushOutcomeAndTransferAllL: 58652,
-      pushOutcomeG: 61422,
+      pushOutcomeG: 61410,
       pushOutcomeJ: 60558,
-      claimG: 58856,
+      claimG: 58432,
       pushOutcomeAndTransferAllX: 107742,
-      total: 729377,
+      total: 728917,
     },
   },
 };
