@@ -150,7 +150,7 @@ class TestChannel {
   }
 }
 
-// An application channel
+/** An application channel between Alice and Bob */
 export const X = new TestChannel(
   2,
   [Alice, Bob],
@@ -159,6 +159,8 @@ export const X = new TestChannel(
     {destination: convertAddressToBytes32(Bob.address), amount: '0x5'},
   ]
 );
+
+/** Another application channel between Alice and Bob */
 export const Y = new TestChannel(
   3,
   [Alice, Bob],
@@ -168,10 +170,10 @@ export const Y = new TestChannel(
   ]
 );
 
-// Ledger funding
+/** Ledger channel between Alice and Bob, providing funds to channel X */
 export const LforX = new TestChannel(4, [Alice, Bob], [{destination: X.channelId, amount: '0xa'}]);
 
-// Virtual funding
+/** Joint channel between Alice, Bob, and Ingrid, funding application channel X */
 export const J = new TestChannel(
   5,
   [Alice, Bob, Ingrid],
@@ -202,10 +204,9 @@ export async function waitForChallengesToTimeOut(finalizesAtArray: number[]): Pr
 }
 
 /**
- * Constructs a support proof from the supplied state; calls challenge, asserts the expected gas and returns the proof and finalizesAt
- * @param state
- * @param expectedGas
- * @returns
+ * Constructs a support proof for the supplied channel, calls challenge,
+ * and asserts the expected gas
+ * @returns The proof and finalizesAt
  */
 export async function challengeChannelAndExpectGas(
   channel: TestChannel,

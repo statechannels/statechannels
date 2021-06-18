@@ -290,6 +290,9 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.pushOutcomeAndTransferAllX);
     // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
+
+    // meta-test here to confirm the total recorded in gas.ts is up to date
+    // with the recorded costs of each step
     expect(
       (Object.values(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro) as number[]).reduce(
         (a, b) => a + b
