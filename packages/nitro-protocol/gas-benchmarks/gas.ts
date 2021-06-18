@@ -72,7 +72,7 @@ export const gasRequiredTo: GasRequiredTo = {
     vanillaNitro: 139148,
   },
   ETHexitSad: {
-    // Scenario: counterparty goes offline
+    // Scenario: Counterparty Bob goes offline
     // initially                 ⬛ ->  X  -> 👩
     // challenge + timeout       ⬛ -> (X) -> 👩
     // pushOutcomeAndTransferAll ⬛ --------> 👩
@@ -83,6 +83,7 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   ETHexitSadLedgerFunded: {
+    // Scenario: Counterparty Bob goes offline
     vanillaNitro: {
       // initially                   ⬛ ->  L  ->  X  -> 👩
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
@@ -96,6 +97,7 @@ export const gasRequiredTo: GasRequiredTo = {
     },
   },
   ETHexitSadVirtualFunded: {
+    // Scenario: Intermediary Ingrid goes offline
     vanillaNitro: {
       // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
       // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
