@@ -11,8 +11,8 @@ export class SocketIOMessageService implements MessageServiceInterface {
     this.server = new Server();
     this.server.listen(port);
   }
-  public async registerPeer(hostName: string, port: number): Promise<void> {
-    const socket = io(`http://${hostName}:${port}`);
+  public async registerPeer(url: string): Promise<void> {
+    const socket = io(url);
     socket.on('message', async (messages: Message[]) => {
       for (const m of messages) {
         await this.handler(m);
