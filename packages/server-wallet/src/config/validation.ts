@@ -30,9 +30,9 @@ const databasePoolConfigurationSchema = joi.object({
 });
 
 const syncConfigurationSchema = joi.object({
-  pollInterval: joi.number().min(1).optional(),
-  timeOutThreshold: joi.number().min(1).optional(),
-  staleThreshold: joi.number().min(1).optional(),
+  pollInterval: joi.number().integer().min(1).optional(),
+  timeOutThreshold: joi.number().integer().min(1).optional(),
+  staleThreshold: joi.number().integer().min(1).optional(),
 });
 
 const databaseConfigurationSchema = joi.object({
