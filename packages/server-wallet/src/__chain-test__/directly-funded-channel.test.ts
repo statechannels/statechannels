@@ -169,14 +169,18 @@ test.each(testCases)(
   async options => {
     TestMessageService.setLatencyOptions({a, b}, options);
 
+    const startBalance = {aAmount: 3, bAmount: 2};
+    const updatedBalance = {aAmount: 1, bAmount: 4};
+
     const channelParams: CreateChannelParams = {
       participants: [participantA, participantB],
-      allocations: [createAllocation(3, 2)],
+      allocations: [createAllocation(startBalance)],
       appDefinition: COUNTING_APP_DEFINITION,
       appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
       fundingStrategy: 'Direct',
       challengeDuration: ONE_DAY,
     };
+
     const aBalanceInit = await getBalance(aAddress);
     const bBalanceInit = await getBalance(bAddress);
     const assetHolderBalanceInit = await getBalance(ethAssetHolderAddress);
@@ -189,12 +193,14 @@ test.each(testCases)(
     await expect(bResponse).toBeObjectiveDoneType('Success');
 
     const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
-    expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(BN.add(2, 3));
+
+    const totalDepositAmount = BN.add(startBalance.aAmount, startBalance.bAmount);
+    expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(totalDepositAmount);
 
     const {channelId} = response[0];
     const updated = await a.updateChannel(
       channelId,
-      [createAllocation(1, 4)],
+      [createAllocation(updatedBalance)],
       utils.defaultAbiCoder.encode(['uint256'], [2])
     );
 
@@ -202,7 +208,7 @@ test.each(testCases)(
       type: 'Success',
       result: {
         turnNum: 4,
-        allocations: [createAllocation(1, 4)],
+        allocations: [createAllocation(updatedBalance)],
       },
     });
 
@@ -215,12 +221,18 @@ test.each(testCases)(
     const aBalanceFinal = await getBalance(aAddress);
     const bBalanceFinal = await getBalance(bAddress);
 
-    expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(BN.from(1));
-    expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(BN.from(4));
+    expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(BN.from(updatedBalance.aAmount));
+    expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(BN.from(updatedBalance.bAmount));
   }
 );
 
-const createAllocation = (aAmount: BigNumberish, bAmount: BigNumberish): Allocation => ({
+const createAllocation = ({
+  aAmount,
+  bAmount,
+}: {
+  aAmount: BigNumberish;
+  bAmount: BigNumberish;
+}): Allocation => ({
   allocationItems: [
     {
       destination: participantA.destination,
