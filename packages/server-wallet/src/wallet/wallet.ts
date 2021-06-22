@@ -6,7 +6,7 @@ import {
 } from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
+import {calculateObjectiveId, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
 
@@ -256,7 +256,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   public async closeChannels(channelIds: string[]): Promise<ObjectiveResult[]> {
     return Promise.all(
       channelIds.map(async channelId => {
-        const objectiveId = ['CloseChannel', channelId].join('-');
+        const objectiveId = calculateObjectiveId('CloseChannel', channelId);
         const done = this.createObjectiveDoneResult(objectiveId);
         const closeResult = await this._engine.closeChannel({channelId});
         const {newObjective, channelResult} = closeResult;
