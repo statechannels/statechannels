@@ -1,3 +1,4 @@
+import {ChannelResult} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 
 import {ObjectiveStatus, WalletObjective} from '../models/objective';
@@ -66,6 +67,22 @@ export type ObjectiveResult = {
   // The channelId for the objective
   channelId: string;
 };
+
+/**
+ * This is returned when an unhandled error occurs when trying to update a channel
+ */
+export type UpdateChannelError = {type: 'InternalError'; channelId: string; error: Error};
+
+/**
+ * This is returned when a channel is sucessfully updated
+ */
+export type UpdateChannelSuccess = {
+  type: 'Success';
+  channelId: string;
+  result: ChannelResult;
+};
+
+export type UpdateChannelResult = UpdateChannelSuccess | UpdateChannelError;
 
 export interface WalletEvents {
   ObjectiveCompleted: (o: WalletObjective) => void;

@@ -5,6 +5,7 @@
 ```ts
 
 import { Address } from '@statechannels/wallet-core';
+import { Allocation } from '@statechannels/client-api-schema';
 import { AllocationItem } from '@statechannels/wallet-core';
 import { AllocationItem as AllocationItem_2 } from '@statechannels/nitro-protocol';
 import { AssetOutcome } from '@statechannels/nitro-protocol';
@@ -404,6 +405,23 @@ export type SyncOptions = {
     staleThreshold: number;
 };
 
+// @public
+export type UpdateChannelError = {
+    type: 'InternalError';
+    channelId: string;
+    error: Error;
+};
+
+// @public (undocumented)
+export type UpdateChannelResult = UpdateChannelSuccess | UpdateChannelError;
+
+// @public
+export type UpdateChannelSuccess = {
+    type: 'Success';
+    channelId: string;
+    result: ChannelResult;
+};
+
 // @public (undocumented)
 export function validateEngineConfig(config: Record<string, any>): {
     valid: boolean;
@@ -427,7 +445,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // (undocumented)
     get messageService(): MessageServiceInterface;
     registerAppDefinition(appDefinition: string): Promise<void>;
-    }
+    updateChannel(channelId: string, allocations: Allocation[], appData: string): Promise<UpdateChannelResult>;
+}
 
 // @public (undocumented)
 export interface WalletEvents {
@@ -444,7 +463,7 @@ export interface WalletEvents {
 //
 // src/engine/types.ts:28:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
 // src/engine/types.ts:66:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
-// src/wallet/types.ts:60:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:61:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

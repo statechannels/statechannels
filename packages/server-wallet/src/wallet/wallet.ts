@@ -1,7 +1,12 @@
-import {ChannelResult, CreateChannelParams, Uint256} from '@statechannels/client-api-schema';
+import {
+  Allocation,
+  ChannelResult,
+  CreateChannelParams,
+  Uint256,
+} from '@statechannels/client-api-schema';
 import _ from 'lodash';
 import EventEmitter from 'eventemitter3';
-import {makeAddress, makeDestination} from '@statechannels/wallet-core';
+import {calculateObjectiveId, makeAddress, makeDestination} from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
 
@@ -11,7 +16,6 @@ import {
   MessageServiceInterface,
 } from '../message-service/types';
 import {getMessages} from '../message-service/utils';
-import {WalletObjective} from '../models/objective';
 import {
   Engine,
   hasNewObjective,
@@ -29,7 +33,13 @@ import {
 } from '../chain-service';
 import * as ChannelState from '../protocols/state';
 
-import {SyncOptions, ObjectiveResult, WalletEvents, ObjectiveDoneResult} from './types';
+import {
+  SyncOptions,
+  ObjectiveResult,
+  WalletEvents,
+  ObjectiveDoneResult,
+  UpdateChannelResult,
+} from './types';
 
 const DEFAULTS: SyncOptions = {pollInterval: 100, timeOutThreshold: 60_000, staleThreshold: 1_000};
 export class Wallet extends EventEmitter<WalletEvents> {
@@ -146,7 +156,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       objectiveId: o.objectiveId,
       currentStatus: o.status,
       channelId: o.data.targetChannelId,
-      done: this.createObjectiveDoneResult(o),
+      done: this.createObjectiveDoneResult(o.objectiveId),
     }));
 
     // TODO: ApproveObjective should probably just return a MultipleChannelOuput
@@ -174,7 +184,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
           await this.registerChannels([createResult.channelResult]);
 
           const {newObjective, channelResult} = createResult;
-          const done = this.createObjectiveDoneResult(newObjective);
+          const done = this.createObjectiveDoneResult(newObjective.objectiveId);
           await this.handleEngineOutput(createResult);
           return {
             channelId: channelResult.channelId,
@@ -196,6 +206,28 @@ export class Wallet extends EventEmitter<WalletEvents> {
         }
       })
     );
+  }
+
+  /**
+   * Updates a channel with the given allocations and app data.
+   * @param channelId The id of the channel to update.
+   * @param allocations The updated allocations for the channel.
+   * @param appData The updated appData for the channel.
+   * @returns A promise that resolves to either a sucess result (which includes the updated channel) or
+   * an error type that contains more information about the error.
+   */
+  public async updateChannel(
+    channelId: string,
+    allocations: Allocation[],
+    appData: string
+  ): Promise<UpdateChannelResult> {
+    try {
+      const updateResponse = await this._engine.updateChannel({channelId, allocations, appData});
+      await this.handleEngineOutput(updateResponse);
+      return {type: 'Success', channelId, result: updateResponse.channelResult};
+    } catch (error) {
+      return {type: 'InternalError', error, channelId};
+    }
   }
 
   private async syncObjectives() {
@@ -224,13 +256,16 @@ export class Wallet extends EventEmitter<WalletEvents> {
   public async closeChannels(channelIds: string[]): Promise<ObjectiveResult[]> {
     return Promise.all(
       channelIds.map(async channelId => {
+        const objectiveId = calculateObjectiveId('CloseChannel', channelId);
+        const done = this.createObjectiveDoneResult(objectiveId);
         const closeResult = await this._engine.closeChannel({channelId});
         const {newObjective, channelResult} = closeResult;
         // create the promise before we send anything out
-        const done = this.createObjectiveDoneResult(newObjective);
+
         // TODO: We just refetch to get the latest status
         // Long term we should make sure the engine returns the latest objectives
         const latest = await this._engine.getObjective(newObjective.objectiveId);
+
         await this.handleEngineOutput(closeResult);
 
         return {
@@ -256,7 +291,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     const syncMessages = await this._engine.syncObjectives(objectiveIds);
 
     const results = objectives.map(async o => {
-      const done = this.createObjectiveDoneResult(o);
+      const done = this.createObjectiveDoneResult(o.objectiveId);
       return {
         objectiveId: o.objectiveId,
         currentStatus: o.status,
@@ -307,12 +342,10 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return this._messageService;
   }
 
-  private async createObjectiveDoneResult(
-    objective: WalletObjective
-  ): Promise<ObjectiveDoneResult> {
+  private async createObjectiveDoneResult(objectiveId: string): Promise<ObjectiveDoneResult> {
     return new Promise<ObjectiveDoneResult>(resolve => {
       this.on('ObjectiveTimedOut', o => {
-        if (o.objectiveId === objective.objectiveId) {
+        if (o.objectiveId === objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Timed out');
 
           resolve({
@@ -323,7 +356,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
         }
       });
       this.on('ObjectiveCompleted', o => {
-        if (o.objectiveId === objective.objectiveId) {
+        if (o.objectiveId === objectiveId) {
           this._engine.logger.trace({objective: o}, 'Objective Suceeded');
           resolve({type: 'Success', channelId: o.data.targetChannelId});
         }

@@ -4,8 +4,9 @@ import {CreateChannelParams, Participant, Allocation} from '@statechannels/clien
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ContractArtifacts} from '@statechannels/nitro-protocol';
 import {BN, makeAddress, makeDestination} from '@statechannels/wallet-core';
-import {BigNumber, constants, Contract, ethers, providers} from 'ethers';
+import {BigNumber, BigNumberish, Contract, providers, utils} from 'ethers';
 import _ from 'lodash';
+import {hexZeroPad} from '@ethersproject/bytes';
 
 import {ChainService} from '../chain-service';
 import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
@@ -16,6 +17,7 @@ import {SyncOptions, Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
+import {COUNTING_APP_DEFINITION} from '../models/__test__/fixtures/app-bytecode';
 
 jest.setTimeout(60_000);
 
@@ -73,9 +75,6 @@ const aEngineConfig: EngineConfig = {
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
 const bAddress = '0x632d0b05c78A83cEd439D3bd6C710c4814D3a6db';
 
-const aFunding = BN.from(3);
-const bFunding = BN.from(2);
-
 async function getBalance(address: string): Promise<BigNumber> {
   return await provider.getBalance(address);
 }
@@ -106,6 +105,7 @@ beforeAll(async () => {
 
   aEngine = await Engine.create(aEngineConfig);
   bEngine = await Engine.create(bEngineConfig);
+
   const aChainService = new ChainService({
     ...aEngineConfig.chainServiceConfiguration,
     logger: aEngine.logger,
@@ -157,39 +157,30 @@ test.each(testCases)(
   `can successfully fund and defund a channel between two wallets with options %o`,
   async options => {
     TestMessageService.setLatencyOptions({a, b}, options);
-    const participantA: Participant = {
+
+    const participantA = {
       signingAddress: await aEngine.getSigningAddress(),
       participantId: 'a',
       destination: makeDestination(aAddress),
     };
-    const participantB: Participant = {
+    const participantB = {
       signingAddress: await bEngine.getSigningAddress(),
       participantId: 'b',
       destination: makeDestination(bAddress),
     };
 
-    const allocation: Allocation = {
-      allocationItems: [
-        {
-          destination: participantA.destination,
-          amount: aFunding,
-        },
-        {
-          destination: participantB.destination,
-          amount: bFunding,
-        },
-      ],
-      assetHolderAddress: ethAssetHolderAddress,
-    };
+    const startBalance = {aAmount: 3, bAmount: 2, participantA, participantB};
+    const updatedBalance = {aAmount: 1, bAmount: 4, participantA, participantB};
 
     const channelParams: CreateChannelParams = {
       participants: [participantA, participantB],
-      allocations: [allocation],
-      appDefinition: ethers.constants.AddressZero,
-      appData: constants.HashZero,
+      allocations: [createAllocation(startBalance)],
+      appDefinition: COUNTING_APP_DEFINITION,
+      appData: utils.defaultAbiCoder.encode(['uint256'], [1]),
       fundingStrategy: 'Direct',
       challengeDuration: ONE_DAY,
     };
+
     const aBalanceInit = await getBalance(aAddress);
     const bBalanceInit = await getBalance(bAddress);
     const assetHolderBalanceInit = await getBalance(ethAssetHolderAddress);
@@ -202,11 +193,25 @@ test.each(testCases)(
     await expect(bResponse).toBeObjectiveDoneType('Success');
 
     const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
-    expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(
-      BN.add(aFunding, bFunding)
-    );
+
+    const totalDepositAmount = BN.add(startBalance.aAmount, startBalance.bAmount);
+    expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(totalDepositAmount);
 
     const {channelId} = response[0];
+    const updated = await a.updateChannel(
+      channelId,
+      [createAllocation(updatedBalance)],
+      utils.defaultAbiCoder.encode(['uint256'], [2])
+    );
+
+    expect(updated).toMatchObject({
+      type: 'Success',
+      result: {
+        turnNum: 4,
+        allocations: [createAllocation(updatedBalance)],
+      },
+    });
+
     const closeResponse =
       options.closer === 'A'
         ? await a.closeChannels([channelId])
@@ -216,7 +221,31 @@ test.each(testCases)(
     const aBalanceFinal = await getBalance(aAddress);
     const bBalanceFinal = await getBalance(bAddress);
 
-    expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(aFunding);
-    expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(bFunding);
+    expect(BN.sub(aBalanceFinal, aBalanceInit)).toEqual(BN.from(updatedBalance.aAmount));
+    expect(BN.sub(bBalanceFinal, bBalanceInit)).toEqual(BN.from(updatedBalance.bAmount));
   }
 );
+
+const createAllocation = ({
+  aAmount,
+  bAmount,
+  participantA,
+  participantB,
+}: {
+  aAmount: BigNumberish;
+  bAmount: BigNumberish;
+  participantA: Participant;
+  participantB: Participant;
+}): Allocation => ({
+  allocationItems: [
+    {
+      destination: participantA.destination,
+      amount: hexZeroPad(BigNumber.from(aAmount).toHexString(), 32),
+    },
+    {
+      destination: participantB.destination,
+      amount: hexZeroPad(BigNumber.from(bAmount).toHexString(), 32),
+    },
+  ],
+  assetHolderAddress: ethAssetHolderAddress,
+});

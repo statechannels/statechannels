@@ -189,6 +189,10 @@ export const isCloseLedger = guard<CloseLedger>('CloseLedger');
 export const isSubmitChallenge = guard<SubmitChallenge>('SubmitChallenge');
 export const isDefundChannel = guard<DefundChannel>('DefundChannel');
 
+export function calculateObjectiveId(objectiveType: Objective['type'], channelId: string): string {
+  return `${objectiveType}-${channelId}`;
+}
+
 export function objectiveId(objective: Objective): string {
   switch (objective.type) {
     case 'OpenChannel':
@@ -196,12 +200,12 @@ export function objectiveId(objective: Objective): string {
     case 'VirtuallyFund':
     case 'SubmitChallenge':
     case 'DefundChannel':
-      return [objective.type, objective.data.targetChannelId].join('-');
+      return calculateObjectiveId(objective.type, objective.data.targetChannelId);
     case 'FundGuarantor':
-      return [objective.type, objective.data.guarantorId].join('-');
+      return calculateObjectiveId(objective.type, objective.data.guarantorId);
     case 'FundLedger':
     case 'CloseLedger':
-      return [objective.type, objective.data.ledgerId].join('-');
+      return calculateObjectiveId(objective.type, objective.data.ledgerId);
   }
 }
 
