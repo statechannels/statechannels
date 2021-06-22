@@ -42,8 +42,6 @@ let a: Wallet;
 let b: Wallet;
 let aEngine: Engine;
 let bEngine: Engine;
-let participantA: Participant;
-let participantB: Participant;
 
 const bEngineConfig: EngineConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
@@ -107,16 +105,7 @@ beforeAll(async () => {
 
   aEngine = await Engine.create(aEngineConfig);
   bEngine = await Engine.create(bEngineConfig);
-  participantA = {
-    signingAddress: await aEngine.getSigningAddress(),
-    participantId: 'a',
-    destination: makeDestination(aAddress),
-  };
-  participantB = {
-    signingAddress: await bEngine.getSigningAddress(),
-    participantId: 'b',
-    destination: makeDestination(bAddress),
-  };
+
   const aChainService = new ChainService({
     ...aEngineConfig.chainServiceConfiguration,
     logger: aEngine.logger,
@@ -169,8 +158,19 @@ test.each(testCases)(
   async options => {
     TestMessageService.setLatencyOptions({a, b}, options);
 
-    const startBalance = {aAmount: 3, bAmount: 2};
-    const updatedBalance = {aAmount: 1, bAmount: 4};
+    const participantA = {
+      signingAddress: await aEngine.getSigningAddress(),
+      participantId: 'a',
+      destination: makeDestination(aAddress),
+    };
+    const participantB = {
+      signingAddress: await bEngine.getSigningAddress(),
+      participantId: 'b',
+      destination: makeDestination(bAddress),
+    };
+
+    const startBalance = {aAmount: 3, bAmount: 2, participantA, participantB};
+    const updatedBalance = {aAmount: 1, bAmount: 4, participantA, participantB};
 
     const channelParams: CreateChannelParams = {
       participants: [participantA, participantB],
@@ -229,9 +229,13 @@ test.each(testCases)(
 const createAllocation = ({
   aAmount,
   bAmount,
+  participantA,
+  participantB,
 }: {
   aAmount: BigNumberish;
   bAmount: BigNumberish;
+  participantA: Participant;
+  participantB: Participant;
 }): Allocation => ({
   allocationItems: [
     {
