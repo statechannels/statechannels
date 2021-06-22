@@ -116,9 +116,9 @@ beforeAll(async () => {
     bWalletConfig,
     await SocketIOMessageService.createFactory('localhost', B_PORT)
   );
-  // TODO: There should be a cleaner way of doing this
-  await (a.messageService as SocketIOMessageService).registerPeer('localhost', B_PORT);
-  await (a.messageService as SocketIOMessageService).registerPeer('localhost', A_PORT);
+
+  await a.registerPeerMessageService(`http://localhost:${B_PORT}`);
+  await b.registerPeerMessageService(`http://localhost:${A_PORT}`);
 
   const assetHolder = new Contract(
     ethAssetHolderAddress,

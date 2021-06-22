@@ -432,6 +432,14 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return channelResults;
   }
 
+  /**
+   * Registers a peer with the message service so messages can be sent to the peer.
+   * @param peerUrl The endpoint for the peer.
+   */
+  public async registerPeerMessageService(peerUrl: string): Promise<void> {
+    await this.messageService.registerPeer(peerUrl);
+  }
+
   async destroy(): Promise<void> {
     await clearIntervalAsync(this._syncInterval);
     this._chainService.destructor();

@@ -134,6 +134,12 @@ export class TestMessageService implements MessageServiceInterface {
   public setLatencyOptions(incomingOptions: Partial<LatencyOptions>): void {
     this._options = _.merge(this._options, incomingOptions);
   }
+
+  public async registerPeer(_peerId: string): Promise<void> {
+    throw new Error(
+      'The TestMessageService does not support register peer. Use TestMessageService.LinkMessageServices instead'
+    );
+  }
   async send(messages: Message[]): Promise<void> {
     if (this._frozen) {
       this._messageQueue.push(...messages);
