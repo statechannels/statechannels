@@ -3,7 +3,7 @@ import {Level} from 'pino';
 import {ChainServiceArgs} from '../chain-service';
 
 export type SyncConfiguration = {
-  // How often we check for stale or timed out objectives in milliseconds.
+  /** How often we check for stale or timed out objectives in milliseconds. */
   pollInterval: number;
 
   /**
