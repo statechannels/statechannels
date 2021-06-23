@@ -4,12 +4,12 @@ pragma experimental ABIEncoderV2;
 import './Outcome.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
-import './interfaces/IAssetHolder.sol';
+import './interfaces/IMultiAssetHolder.sol';
 
 /**
  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
  */
-contract MultiAssetHolder {
+contract MultiAssetHolder is IMultiAssetHolder {
     using SafeMath for uint256;
 
     // TODO dedupe this (it is copied from IForceMove.sol)
@@ -21,16 +21,70 @@ contract MultiAssetHolder {
         bytes32 outcomeHash;
     }
 
-    address public AdjudicatorAddress;
-
     /**
      * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
      */
     mapping(address => mapping(bytes32 => uint256)) public holdings;
 
+
+
     // **************
     // External methods
     // **************
+
+        /**
+     * @notice Deposit ETH against a given destination.
+     * @dev Deposit ETH against a given destination.
+     * @param asset erc20 token address, or zero address to indicate ETH
+     * @param destination ChannelId to be credited.
+     * @param expectedHeld The number of wei the depositor believes are _already_ escrowed against the channelId.
+     * @param amount The intended number of wei to be deposited.
+     */
+    function deposit(
+        address asset,
+        bytes32 destination,
+        uint256 expectedHeld,
+        uint256 amount
+    ) external override payable {
+        require(!_isExternalDestination(destination), 'Deposit to external destination');
+        uint256 amountDeposited;
+        // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
+        // 1. Participant A deposits
+        // 2. Participant B sees A's deposit, which means it is now safe for them to deposit
+        // 3. Participant B submits their deposit
+        // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
+        require(holdings[asset][destination] >= expectedHeld, 'holdings < expectedHeld');
+        require(
+            holdings[asset][destination] < expectedHeld.add(amount),
+            'holdings already sufficient'
+        );
+
+        // The depositor wishes to increase the holdings against channelId to amount + expectedHeld
+        // The depositor need only deposit (at most) amount + (expectedHeld - holdings) (the term in parentheses is non-positive)
+
+        amountDeposited = expectedHeld.add(amount).sub(holdings[asset][destination]); // strictly positive
+        // require successful deposit before updating holdings (protect against reentrancy)
+        if (asset == address(0)) {
+            require(msg.value == amount, 'Incorrect msg.value for deposit');
+        } else {
+            // require successful deposit before updating holdings (protect against reentrancy)
+            require(
+                IERC20(asset).transferFrom(msg.sender, address(this), amountDeposited),
+                'Could not deposit ERC20s'
+            );
+        }
+
+        holdings[asset][destination] = holdings[asset][destination].add(amountDeposited);
+        emit Deposited(destination, asset, amountDeposited, holdings[asset][destination]);
+
+        if (asset == address(0)) {
+            // refund whatever wasn't deposited.
+            uint256 refund = amount.sub(amountDeposited);
+            (bool success, ) = msg.sender.call{value: refund}(''); //solhint-disable-line avoid-low-level-calls
+            require(success, 'Could not refund excess funds');
+        }
+    }
+
 
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
@@ -46,7 +100,7 @@ contract MultiAssetHolder {
         bytes32 stateHash,
         address challengerAddress,
         uint256[] memory indices
-    ) external {
+    ) external override {
         // checks
         _requireIncreasingIndices(indices);
         _requireChannelFinalized(fromChannelId);
@@ -87,7 +141,7 @@ contract MultiAssetHolder {
         bytes32 targetStateHash,
         address targetChallengerAddress,
         uint256[] memory indices
-    ) public {
+    ) public override {
         // checks
         Outcome.Guarantee memory guarantee;
         address asset;
