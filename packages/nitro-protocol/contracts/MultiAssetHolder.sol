@@ -3,19 +3,31 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 import './Outcome.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
+import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './interfaces/IAssetHolder.sol';
 
 /**
  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
  */
-contract AssetHolder is IAssetHolder {
+contract MultiAssetHolder {
     using SafeMath for uint256;
+
+// TODO dedupe this (it is copied from IForceMove.sol)
+        struct ChannelData {
+        uint48 turnNumRecord;
+        uint48 finalizesAt;
+        bytes32 stateHash; // keccak256(abi.encode(State))
+        address challengerAddress;
+        bytes32 outcomeHash;
+    }
+
 
     address public AdjudicatorAddress;
 
-    mapping(bytes32 => uint256) public holdings;
-
-    mapping(bytes32 => bytes32) public assetOutcomeHashes;
+    /**
+    * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
+    */
+    mapping(address => mapping(bytes32 => uint256)) public holdings;
 
     // **************
     // External methods
@@ -25,82 +37,87 @@ contract AssetHolder is IAssetHolder {
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     * @param outcomeBytes The encoded Outcome of this state channel
      * @param indices Array with each entry denoting the index of a destination to transfer funds to. An empty array indicates "all".
      */
     function transfer(
+        uint256 assetIndex, // TODO consider a uint48?
         bytes32 fromChannelId,
-        bytes calldata allocationBytes,
+        bytes calldata outcomeBytes,
+        bytes32 stateHash,
+        address challengerAddress,
         uint256[] memory indices
-    ) external override {
+    ) external  {
         // checks
         _requireIncreasingIndices(indices);
-        _requireCorrectAllocationHash(fromChannelId, allocationBytes);
+        _requireChannelFinalized(fromChannelId);
+        _requireMatchingFingerprint(stateHash, challengerAddress, keccak256(outcomeBytes), fromChannelId);
+
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes,(Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[assetIndex].assetOutcomeBytes, (Outcome.AssetOutcome));
+        require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
+        Outcome.AllocationItem[] memory allocation = abi.decode(
+            assetOutcome.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+        address asset = outcome[assetIndex].assetHolderAddress;
+
         // effects and interactions
-        _transfer(fromChannelId, allocationBytes, indices);
+        _transfer(asset, fromChannelId, allocation, indices);
     }
 
     /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-     * @param guarantorChannelId Unique identifier for a guarantor state channel.
-     * @param guaranteeBytes The abi.encode of Outcome.Guarantee
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
      */
     function claim(
+        uint256 assetIndex, // TODO consider a uint48?
         bytes32 guarantorChannelId,
-        bytes calldata guaranteeBytes,
-        bytes calldata allocationBytes,
+        bytes memory guarantorOutcomeBytes,
+        bytes32 guarantorStateHash,
+        address guarantorChallengerAddress,
+        bytes memory targetOutcomeBytes,
+        bytes32 targetStateHash,
+        address targetChallengerAddress,
         uint256[] memory indices
-    ) external override {
+    ) public {
         // checks
+        Outcome.Guarantee memory guarantee;
+        Outcome.AllocationItem[] memory allocation;
+        address asset;
+    {
         _requireIncreasingIndices(indices);
-        _requireCorrectGuaranteeHash(guarantorChannelId, guaranteeBytes);
-        Outcome.Guarantee memory guarantee = abi.decode(guaranteeBytes, (Outcome.Guarantee));
-        _requireCorrectAllocationHash(guarantee.targetChannelId, allocationBytes);
+        _requireChannelFinalized(guarantorChannelId);
+    }
+        {
+        bytes32 guarantorOutcomeHash = keccak256(guarantorOutcomeBytes);
+        _requireMatchingFingerprint(guarantorStateHash, guarantorChallengerAddress, guarantorOutcomeHash, guarantorChannelId);
+        }
+
+{
+        Outcome.OutcomeItem[] memory outcome = abi.decode(guarantorOutcomeBytes,(Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[assetIndex].assetOutcomeBytes, (Outcome.AssetOutcome));
+        require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee));
+        guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
+        asset = outcome[assetIndex].assetHolderAddress;
+}
+     {   
+        _requireChannelFinalized(guarantee.targetChannelId);
+        _requireMatchingFingerprint(targetStateHash, targetChallengerAddress, keccak256(targetOutcomeBytes), guarantee.targetChannelId);
+     }  
+{
+        Outcome.OutcomeItem[] memory outcome = abi.decode(targetOutcomeBytes,(Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[assetIndex].assetOutcomeBytes, (Outcome.AssetOutcome));
+        require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
+        allocation = abi.decode(
+            assetOutcome.allocationOrGuaranteeBytes,
+            (Outcome.AllocationItem[])
+        );
+    }
         // effects and interactions
-        _claim(guarantorChannelId, guarantee, allocationBytes, indices);
+        _claim(asset, guarantorChannelId, guarantee, allocation, indices);
     }
 
-    // **************
-    // Permissioned methods
-    // **************
-
-    modifier AdjudicatorOnly {
-        require(msg.sender == AdjudicatorAddress, 'Only NitroAdjudicator authorized');
-        _;
-    }
-
-    /**
-     * @notice Transfers the funds escrowed against `channelId` to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
-     * @dev Transfers the funds escrowed against `channelId` and transfers them to the beneficiaries of that channel. No checks performed against storage in this contract. Permissioned.
-     * @param channelId Unique identifier for a state channel.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
-     */
-    function transferAllAdjudicatorOnly(bytes32 channelId, bytes calldata allocationBytes)
-        external
-        virtual
-        AdjudicatorOnly
-    {
-        // no checks
-        //
-        // effects and interactions
-        _transfer(channelId, allocationBytes, new uint256[](0));
-    }
-
-    /**
-     * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
-     * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping.
-     * @param channelId Unique identifier for a state channel.
-     * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
-     */
-    function setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash)
-        external
-        AdjudicatorOnly
-    {
-        _setAssetOutcomeHash(channelId, assetOutcomeHash);
-    }
 
     // **************
     // Internal methods
@@ -221,19 +238,16 @@ contract AssetHolder is IAssetHolder {
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation
+     * @param allocation An AssetOutcome.AllocationItem[]
      * @param indices Array with each entry denoting the index of a destination to transfer funds to. Should be in increasing order. An empty array indicates "all".
      */
     function _transfer(
+        address asset,
         bytes32 fromChannelId,
-        bytes memory allocationBytes,
+        Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
     ) internal {
-        Outcome.AllocationItem[] memory allocation = abi.decode(
-            allocationBytes,
-            (Outcome.AllocationItem[])
-        );
-        uint256 initialHoldings = holdings[fromChannelId];
+        uint256 initialHoldings = holdings[asset][fromChannelId];
 
         (
             Outcome.AllocationItem[] memory newAllocation,
@@ -246,19 +260,13 @@ contract AssetHolder is IAssetHolder {
         // EFFECTS
         // *******
 
-        holdings[fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+        holdings[asset][fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
         if (safeToDelete) {
-            delete assetOutcomeHashes[fromChannelId];
+            // TODO possibly delete the entire status for this channel, but only if safe
+            // the motivation is a gas refund
         } else {
-            assetOutcomeHashes[fromChannelId] = keccak256(
-                abi.encode(
-                    Outcome.AssetOutcome(
-                        uint8(Outcome.AssetOutcomeType.Allocation),
-                        abi.encode(newAllocation)
-                    )
-                )
-            );
+// TODO updateFingerpint
         }
 
         // *******
@@ -270,34 +278,27 @@ contract AssetHolder is IAssetHolder {
                 bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
-                    _transferAsset(_bytes32ToAddress(destination), payouts[j]);
+                    _transferAsset(asset,_bytes32ToAddress(destination), payouts[j]);
                 } else {
-                    holdings[destination] += payouts[j];
+                    holdings[asset][destination] += payouts[j];
                 }
             }
         }
-        emit AllocationUpdated(fromChannelId, initialHoldings);
+        // TODO emit OutcomeUpdated(fromChannelId, initialHoldings); 
     }
 
     /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
      * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
-     * @param guarantorChannelId Unique identifier for a guarantor state channel.
-     * @param guarantee The guarantee
-     * @param allocationBytes The abi.encode of AssetOutcome.Allocation for the __target__
-     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. An empty array indicates "all".
      */
     function _claim(
+        address asset,
         bytes32 guarantorChannelId,
         Outcome.Guarantee memory guarantee,
-        bytes memory allocationBytes,
+        Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
     ) internal {
-        Outcome.AllocationItem[] memory allocation = abi.decode(
-            allocationBytes,
-            (Outcome.AllocationItem[])
-        );
-        uint256 initialHoldings = holdings[guarantorChannelId];
+        uint256 initialHoldings = holdings[asset][guarantorChannelId];
 
         (
             Outcome.AllocationItem[] memory newAllocation,
@@ -310,20 +311,17 @@ contract AssetHolder is IAssetHolder {
         // EFFECTS
         // *******
 
-        holdings[guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+        holdings[asset][guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+
 
         if (safeToDelete) {
-            delete assetOutcomeHashes[guarantorChannelId];
-            delete assetOutcomeHashes[guarantee.targetChannelId];
+            // TODO possibly
+            //  delete the entire status for the guarantor, but only if safe
+            //  delete the entire status for the target, but only if safe
+            // the motivation is a gas refund
         } else {
-            assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
-                abi.encode(
-                    Outcome.AssetOutcome(
-                        uint8(Outcome.AssetOutcomeType.Allocation),
-                        abi.encode(newAllocation)
-                    )
-                )
-            );
+// TODO updateFingerpint for guarantor
+// TODO updateFingerpint for target
         }
 
         // *******
@@ -335,24 +333,13 @@ contract AssetHolder is IAssetHolder {
                 bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
-                    _transferAsset(_bytes32ToAddress(destination), payouts[j]);
+                    _transferAsset(asset,_bytes32ToAddress(destination), payouts[j]);
                 } else {
-                    holdings[destination] += payouts[j];
+                    holdings[asset][destination] += payouts[j];
                 }
             }
         }
-        emit AllocationUpdated(guarantorChannelId, initialHoldings);
-    }
-
-    /**
-     * @notice Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
-     * @dev Sets the given assetOutcomeHash for the given channelId in the assetOutcomeHashes storage mapping
-     * @param channelId Unique identifier for a state channel.
-     * @param assetOutcomeHash The keccak256 of the abi.encode of the Outcome.
-     */
-    function _setAssetOutcomeHash(bytes32 channelId, bytes32 assetOutcomeHash) internal {
-        require(assetOutcomeHashes[channelId] == bytes32(0), 'Outcome hash already exists');
-        assetOutcomeHashes[channelId] = assetOutcomeHash;
+        // TODO emit OutcomeUpdated(guarantorChannelId, initialHoldings); 
     }
 
     /**
@@ -361,7 +348,16 @@ contract AssetHolder is IAssetHolder {
      * @param destination ethereum address to be credited.
      * @param amount Quantity of assets to be transferred.
      */
-    function _transferAsset(address payable destination, uint256 amount) internal virtual {} // solhint-disable-line no-empty-blocks
+    function _transferAsset(address asset, address payable destination, uint256 amount) internal {
+
+if (asset == address(0)) {
+                    destination.transfer(amount);
+                } else {
+                    IERC20(asset).transfer(destination, amount);
+                }
+
+
+    }
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
@@ -397,40 +393,51 @@ contract AssetHolder is IAssetHolder {
     // Requirers
     // **************
 
-    function _requireCorrectAllocationHash(bytes32 channelId, bytes memory allocationBytes)
-        internal
-        view
-    {
-        require(
-            assetOutcomeHashes[channelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
-                            allocationBytes
-                        )
-                    )
-                ),
-            'h(allocation)!=assetOutcomeHash'
-        );
+
+    /**
+     * @notice Checks that a given channel is in the Finalized mode.
+     * @dev Checks that a given channel is in the Challenge mode.
+     * @param channelId Unique identifier for a channel.
+     */
+    function _requireChannelFinalized(bytes32 channelId) internal view virtual {
     }
 
-    function _requireCorrectGuaranteeHash(bytes32 guarantorChannelId, bytes memory guaranteeBytes)
+    /**
+     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
+     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
+     * @param channelId Unique identifier for a state channel.
+     * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
+     * @return finalizesAt The unix timestamp when `channelId` will finalize.
+     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
+     */
+    function _unpackStatus(bytes32 channelId)
         internal
         view
+        virtual
+        returns (
+            uint48 turnNumRecord,
+            uint48 finalizesAt,
+            uint160 fingerprint
+        )
     {
-        require(
-            assetOutcomeHashes[guarantorChannelId] ==
-                keccak256(
-                    abi.encode(
-                        Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Guarantee),
-                            guaranteeBytes
-                        )
-                    )
-                ),
-            'h(guarantee)!=assetOutcomeHash'
-        );
+    }
+
+
+    function _generateFingerpint(bytes32 stateHash, address challengerAddress, bytes32 outcomeHash) internal pure virtual returns (uint160){
+    }
+
+
+    /**
+     * @notice Checks that a given variables hash to the data stored on chain.
+     * @dev Checks that a given variables hash to the data stored on chain.
+     */
+    function _requireMatchingFingerprint(bytes32 stateHash, 
+        address challengerAddress,
+        bytes32 outcomeHash, bytes32 channelId) internal view {
+            (,,
+            uint160 fingerprint
+        ) = _unpackStatus(channelId);
+        require(fingerprint == _generateFingerpint(stateHash, challengerAddress, outcomeHash));
     }
 
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
