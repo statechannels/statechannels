@@ -12,8 +12,8 @@ import './interfaces/IAssetHolder.sol';
 contract MultiAssetHolder {
     using SafeMath for uint256;
 
-// TODO dedupe this (it is copied from IForceMove.sol)
-        struct ChannelData {
+    // TODO dedupe this (it is copied from IForceMove.sol)
+    struct ChannelData {
         uint48 turnNumRecord;
         uint48 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))
@@ -21,12 +21,11 @@ contract MultiAssetHolder {
         bytes32 outcomeHash;
     }
 
-
     address public AdjudicatorAddress;
 
     /**
-    * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
-    */
+     * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
+     */
     mapping(address => mapping(bytes32 => uint256)) public holdings;
 
     // **************
@@ -47,14 +46,22 @@ contract MultiAssetHolder {
         bytes32 stateHash,
         address challengerAddress,
         uint256[] memory indices
-    ) external  {
+    ) external {
         // checks
         _requireIncreasingIndices(indices);
         _requireChannelFinalized(fromChannelId);
-        _requireMatchingFingerprint(stateHash, challengerAddress, keccak256(outcomeBytes), fromChannelId);
+        _requireMatchingFingerprint(
+            stateHash,
+            challengerAddress,
+            keccak256(outcomeBytes),
+            fromChannelId
+        );
 
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes,(Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[assetIndex].assetOutcomeBytes, (Outcome.AssetOutcome));
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+        Outcome.AssetOutcome memory assetOutcome = abi.decode(
+            outcome[assetIndex].assetOutcomeBytes,
+            (Outcome.AssetOutcome)
+        );
         require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
         Outcome.AllocationItem[] memory allocation = abi.decode(
             assetOutcome.allocationOrGuaranteeBytes,
@@ -83,41 +90,62 @@ contract MultiAssetHolder {
     ) public {
         // checks
         Outcome.Guarantee memory guarantee;
-        Outcome.AllocationItem[] memory allocation;
         address asset;
-    {
-        _requireIncreasingIndices(indices);
-        _requireChannelFinalized(guarantorChannelId);
-    }
         {
-        bytes32 guarantorOutcomeHash = keccak256(guarantorOutcomeBytes);
-        _requireMatchingFingerprint(guarantorStateHash, guarantorChallengerAddress, guarantorOutcomeHash, guarantorChannelId);
+            _requireIncreasingIndices(indices);
+            _requireChannelFinalized(guarantorChannelId);
+        }
+        {
+            bytes32 guarantorOutcomeHash = keccak256(guarantorOutcomeBytes);
+            _requireMatchingFingerprint(
+                guarantorStateHash,
+                guarantorChallengerAddress,
+                guarantorOutcomeHash,
+                guarantorChannelId
+            );
         }
 
-{
-        Outcome.OutcomeItem[] memory outcome = abi.decode(guarantorOutcomeBytes,(Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[assetIndex].assetOutcomeBytes, (Outcome.AssetOutcome));
-        require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee));
-        guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
-        asset = outcome[assetIndex].assetHolderAddress;
-}
-     {   
-        _requireChannelFinalized(guarantee.targetChannelId);
-        _requireMatchingFingerprint(targetStateHash, targetChallengerAddress, keccak256(targetOutcomeBytes), guarantee.targetChannelId);
-     }  
-{
-        Outcome.OutcomeItem[] memory outcome = abi.decode(targetOutcomeBytes,(Outcome.OutcomeItem[]));
-        Outcome.AssetOutcome memory assetOutcome = abi.decode(outcome[assetIndex].assetOutcomeBytes, (Outcome.AssetOutcome));
-        require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
-        allocation = abi.decode(
-            assetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-    }
+        {
+            Outcome.OutcomeItem[] memory outcome = abi.decode(
+                guarantorOutcomeBytes,
+                (Outcome.OutcomeItem[])
+            );
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                outcome[assetIndex].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
+            require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee));
+            guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
+            asset = outcome[assetIndex].assetHolderAddress;
+        }
+        {
+            _requireChannelFinalized(guarantee.targetChannelId);
+            _requireMatchingFingerprint(
+                targetStateHash,
+                targetChallengerAddress,
+                keccak256(targetOutcomeBytes),
+                guarantee.targetChannelId
+            );
+        }
+        Outcome.AllocationItem[] memory allocation;
+        {
+            Outcome.OutcomeItem[] memory outcome = abi.decode(
+                targetOutcomeBytes,
+                (Outcome.OutcomeItem[])
+            );
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                outcome[assetIndex].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
+            require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
+            allocation = abi.decode(
+                assetOutcome.allocationOrGuaranteeBytes,
+                (Outcome.AllocationItem[])
+            );
+        }
         // effects and interactions
         _claim(asset, guarantorChannelId, guarantee, allocation, indices);
     }
-
 
     // **************
     // Internal methods
@@ -266,7 +294,7 @@ contract MultiAssetHolder {
             // TODO possibly delete the entire status for this channel, but only if safe
             // the motivation is a gas refund
         } else {
-// TODO updateFingerpint
+            // TODO updateFingerpint
         }
 
         // *******
@@ -278,13 +306,13 @@ contract MultiAssetHolder {
                 bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
-                    _transferAsset(asset,_bytes32ToAddress(destination), payouts[j]);
+                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
                 } else {
                     holdings[asset][destination] += payouts[j];
                 }
             }
         }
-        // TODO emit OutcomeUpdated(fromChannelId, initialHoldings); 
+        // TODO emit OutcomeUpdated(fromChannelId, initialHoldings);
     }
 
     /**
@@ -313,15 +341,14 @@ contract MultiAssetHolder {
 
         holdings[asset][guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
-
         if (safeToDelete) {
             // TODO possibly
             //  delete the entire status for the guarantor, but only if safe
             //  delete the entire status for the target, but only if safe
             // the motivation is a gas refund
         } else {
-// TODO updateFingerpint for guarantor
-// TODO updateFingerpint for target
+            // TODO updateFingerpint for guarantor
+            // TODO updateFingerpint for target
         }
 
         // *******
@@ -333,13 +360,13 @@ contract MultiAssetHolder {
                 bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
-                    _transferAsset(asset,_bytes32ToAddress(destination), payouts[j]);
+                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
                 } else {
                     holdings[asset][destination] += payouts[j];
                 }
             }
         }
-        // TODO emit OutcomeUpdated(guarantorChannelId, initialHoldings); 
+        // TODO emit OutcomeUpdated(guarantorChannelId, initialHoldings);
     }
 
     /**
@@ -348,15 +375,16 @@ contract MultiAssetHolder {
      * @param destination ethereum address to be credited.
      * @param amount Quantity of assets to be transferred.
      */
-    function _transferAsset(address asset, address payable destination, uint256 amount) internal {
-
-if (asset == address(0)) {
-                    destination.transfer(amount);
-                } else {
-                    IERC20(asset).transfer(destination, amount);
-                }
-
-
+    function _transferAsset(
+        address asset,
+        address payable destination,
+        uint256 amount
+    ) internal {
+        if (asset == address(0)) {
+            destination.transfer(amount);
+        } else {
+            IERC20(asset).transfer(destination, amount);
+        }
     }
 
     /**
@@ -393,14 +421,12 @@ if (asset == address(0)) {
     // Requirers
     // **************
 
-
     /**
      * @notice Checks that a given channel is in the Finalized mode.
      * @dev Checks that a given channel is in the Challenge mode.
      * @param channelId Unique identifier for a channel.
      */
-    function _requireChannelFinalized(bytes32 channelId) internal view virtual {
-    }
+    function _requireChannelFinalized(bytes32 channelId) internal virtual view {}
 
     /**
      * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
@@ -412,31 +438,32 @@ if (asset == address(0)) {
      */
     function _unpackStatus(bytes32 channelId)
         internal
-        view
         virtual
+        view
         returns (
             uint48 turnNumRecord,
             uint48 finalizesAt,
             uint160 fingerprint
         )
-    {
-    }
+    {}
 
-
-    function _generateFingerpint(bytes32 stateHash, address challengerAddress, bytes32 outcomeHash) internal pure virtual returns (uint160){
-    }
-
+    function _generateFingerpint(
+        bytes32 stateHash,
+        address challengerAddress,
+        bytes32 outcomeHash
+    ) internal virtual pure returns (uint160) {}
 
     /**
      * @notice Checks that a given variables hash to the data stored on chain.
      * @dev Checks that a given variables hash to the data stored on chain.
      */
-    function _requireMatchingFingerprint(bytes32 stateHash, 
+    function _requireMatchingFingerprint(
+        bytes32 stateHash,
         address challengerAddress,
-        bytes32 outcomeHash, bytes32 channelId) internal view {
-            (,,
-            uint160 fingerprint
-        ) = _unpackStatus(channelId);
+        bytes32 outcomeHash,
+        bytes32 channelId
+    ) internal view {
+        (, , uint160 fingerprint) = _unpackStatus(channelId);
         require(fingerprint == _generateFingerpint(stateHash, challengerAddress, outcomeHash));
     }
 
