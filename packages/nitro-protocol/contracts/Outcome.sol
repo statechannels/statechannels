@@ -20,7 +20,7 @@ library Outcome {
     enum AssetOutcomeType {Allocation, Guarantee}
 
     struct AssetOutcome {
-        uint8 assetOutcomeType; // AssetOutcomeType.Allocation or AssetOutcomeType.Guarantee
+        AssetOutcomeType assetOutcomeType;
         bytes allocationOrGuaranteeBytes; // abi.encode(AllocationItem[]) or abi.encode(Guarantee), depending on OutcomeType
     }
 
