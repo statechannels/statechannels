@@ -1,11 +1,12 @@
 import {BigNumber, ethers} from 'ethers';
 import {waitUntilFree, waitUntilUsed} from 'tcp-port-used';
 import ganache from 'ganache-core';
+import P from 'pino';
 
 import {TEST_ACCOUNTS} from '../constants';
 import {Account} from '../types';
 
-import {logger} from './logger';
+import {logger as defaultLogger} from './logger';
 import {SHOW_VERBOSE_GANACHE_OUTPUT} from './config';
 
 function findClosingPosition(data: string) {
@@ -27,7 +28,11 @@ function clean(newData: string): string {
   return newData;
 }
 
-function extractLogsFromVerboseGanacheOutput(buffer: string, newData = ''): string {
+function extractLogsFromVerboseGanacheOutput(
+  buffer: string,
+  newData = '',
+  logger: P.Logger
+): string {
   logger.trace({buffer, newData}, 'Extracting logs');
   /*
    * Here's what newData can look like:
@@ -114,7 +119,7 @@ function extractLogsFromVerboseGanacheOutput(buffer: string, newData = ''): stri
     logger.error(logLine, 'Log line is not a JSON-RPC message');
   }
 
-  return extractLogsFromVerboseGanacheOutput(buffer.slice(logLineEnd));
+  return extractLogsFromVerboseGanacheOutput(buffer.slice(logLineEnd), '', logger);
 }
 
 export class GanacheServer {
@@ -122,18 +127,20 @@ export class GanacheServer {
   fundedPrivateKey: string;
   server: any;
   private buffer = '';
-
+  private logger: P.Logger;
   constructor(
     public readonly port: number = 8545,
     public readonly chainId: number = 9001,
+
     accounts: Account[] = TEST_ACCOUNTS,
     public readonly timeout: number = 10_000,
     gasLimit = 1_000_000_000,
-    gasPrice = 1
+    gasPrice = 1,
+    logger?: P.Logger
   ) {
-    logger.info(`Starting ganache on port ${this.port} with network ID ${this.chainId}`);
+    this.logger = logger ?? defaultLogger;
     this.fundedPrivateKey = accounts[0].privateKey;
-
+    this.logger.info('sanity');
     const oneMillion = ethers.utils.parseEther('1000000').toHexString();
 
     // ganache core exports a very permissive object[] type for accounts
@@ -147,8 +154,8 @@ export class GanacheServer {
       logger: {
         log: x => {
           SHOW_VERBOSE_GANACHE_OUTPUT
-            ? extractLogsFromVerboseGanacheOutput(this.buffer, x)
-            : logger.info(x);
+            ? extractLogsFromVerboseGanacheOutput(this.buffer, x, this.logger)
+            : this.logger.info(x);
         }
       }
     };
