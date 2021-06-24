@@ -121,8 +121,14 @@ contract MultiAssetHolder is IMultiAssetHolder {
         address asset = outcome[assetIndex].assetHolderAddress;
 
         // effects and interactions
-        _transfer(asset, fromChannelId, allocation, indices);
+        allocation = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
+        outcome[assetIndex].assetOutcomeBytes = abi.encode(Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation)));
+        bytes32 outcomeHash = keccak256(abi.encode(
+            outcome
+        ));
+        _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
     }
+
 
     /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
@@ -193,9 +199,15 @@ contract MultiAssetHolder is IMultiAssetHolder {
                 assetOutcome.allocationOrGuaranteeBytes,
                 (Outcome.AllocationItem[])
             );
-        }
+        
         // effects and interactions
-        _claim(asset, guarantorChannelId, guarantee, allocation, indices);
+        allocation = _claim(asset, guarantorChannelId, guarantee, allocation, indices);
+                outcome[assetIndex].assetOutcomeBytes = abi.encode(Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation)));
+        bytes32 outcomeHash = keccak256(abi.encode(
+            outcome
+        ));
+        _updateFingerprint(guarantee.targetChannelId, targetStateHash, targetChallengerAddress, outcomeHash);
+        }
     }
 
     // **************
@@ -325,7 +337,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
         bytes32 fromChannelId,
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
-    ) internal {
+    ) internal returns (Outcome.AllocationItem[] memory) {
         uint256 initialHoldings = holdings[asset][fromChannelId];
 
         (
@@ -341,13 +353,6 @@ contract MultiAssetHolder is IMultiAssetHolder {
 
         holdings[asset][fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
-        if (safeToDelete) {
-            // TODO possibly delete the entire status for this channel, but only if safe
-            // the motivation is a gas refund
-        } else {
-            // TODO updateFingerpint
-        }
-
         // *******
         // INTERACTIONS
         // *******
@@ -363,6 +368,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
                 }
             }
         }
+        return newAllocation; 
         // TODO emit OutcomeUpdated(fromChannelId, initialHoldings);
     }
 
@@ -376,7 +382,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
         Outcome.Guarantee memory guarantee,
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
-    ) internal {
+    ) internal returns (Outcome.AllocationItem[] memory){
         uint256 initialHoldings = holdings[asset][guarantorChannelId];
 
         (
@@ -392,16 +398,6 @@ contract MultiAssetHolder is IMultiAssetHolder {
 
         holdings[asset][guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
-        if (safeToDelete) {
-            // TODO possibly
-            //  delete the entire status for the guarantor, but only if safe
-            //  delete the entire status for the target, but only if safe
-            // the motivation is a gas refund
-        } else {
-            // TODO updateFingerpint for guarantor
-            // TODO updateFingerpint for target
-        }
-
         // *******
         // INTERACTIONS
         // *******
@@ -417,6 +413,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
                 }
             }
         }
+        return newAllocation;
         // TODO emit OutcomeUpdated(guarantorChannelId, initialHoldings);
     }
 
