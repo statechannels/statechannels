@@ -26,13 +26,11 @@ contract MultiAssetHolder is IMultiAssetHolder {
      */
     mapping(address => mapping(bytes32 => uint256)) public holdings;
 
-
-
     // **************
     // External methods
     // **************
 
-        /**
+    /**
      * @notice Deposit ETH against a given destination.
      * @dev Deposit ETH against a given destination.
      * @param asset erc20 token address, or zero address to indicate ETH
@@ -84,7 +82,6 @@ contract MultiAssetHolder is IMultiAssetHolder {
             require(success, 'Could not refund excess funds');
         }
     }
-
 
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
@@ -501,11 +498,18 @@ contract MultiAssetHolder is IMultiAssetHolder {
         )
     {}
 
-    function _generateFingerpint(
+    function _generateFingerprint(
         bytes32 stateHash,
         address challengerAddress,
         bytes32 outcomeHash
     ) internal virtual pure returns (uint160) {}
+
+    function _updateFingerprint(
+        bytes32 channelId,
+        bytes32 stateHash,
+        address challengerAddress,
+        bytes32 outcomeHash
+    ) internal virtual {}
 
     /**
      * @notice Checks that a given variables hash to the data stored on chain.
@@ -518,7 +522,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
         bytes32 channelId
     ) internal view {
         (, , uint160 fingerprint) = _unpackStatus(channelId);
-        require(fingerprint == _generateFingerpint(stateHash, challengerAddress, outcomeHash));
+        require(fingerprint == _generateFingerprint(stateHash, challengerAddress, outcomeHash));
     }
 
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {

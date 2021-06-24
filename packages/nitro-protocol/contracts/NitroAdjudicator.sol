@@ -9,8 +9,7 @@ import './Outcome.sol';
  * @dev The NitroAdjudicator contract extends ForceMove and hence inherits all ForceMove methods, and also extends and implements the Adjudicator interface, allowing for a finalized outcome to be pushed to an asset holder.
  */
 contract NitroAdjudicator is ForceMove {
-
-   // TODO concludeAndTransferAll method
+    // TODO concludeAndTransferAll method
 
     /**
     * @notice Check that the submitted pair of states form a valid transition (public wrapper for internal function _requireValidTransition)
@@ -33,4 +32,3 @@ contract NitroAdjudicator is ForceMove {
         return _requireValidTransition(nParticipants, isFinalAB, ab, turnNumB, appDefinition);
     }
 }
- 
