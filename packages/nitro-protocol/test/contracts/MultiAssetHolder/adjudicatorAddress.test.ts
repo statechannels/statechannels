@@ -1,14 +1,9 @@
 import {Contract} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
 let AssetHolder: Contract;
-
-beforeAll(async () => {
-  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
-});
 
 describe('AdjudicatorAddress', () => {
   it('Exposes the address to a call', async () => {

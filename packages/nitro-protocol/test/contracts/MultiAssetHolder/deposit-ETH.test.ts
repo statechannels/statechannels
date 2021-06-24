@@ -2,7 +2,6 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, BigNumber, ethers} from 'ethers';
 const {parseUnits} = ethers.utils;
 
-import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
 
@@ -15,14 +14,6 @@ const participants = [];
 for (let i = 0; i < 3; i++) {
   participants[i] = Wallet.createRandom().address;
 }
-
-beforeAll(async () => {
-  ETHAssetHolder = setupContract(
-    provider,
-    ETHAssetHolderArtifact,
-    process.env.ETH_ASSET_HOLDER_ADDRESS
-  );
-});
 
 const description0 = 'Deposits ETH (msg.value = amount , expectedHeld = 0)';
 const description1 = 'Reverts deposit of ETH (msg.value = amount, expectedHeld > holdings)';

@@ -3,7 +3,6 @@ import {ethers, Contract, Wallet, BigNumber, utils} from 'ethers';
 
 const {AddressZero} = ethers.constants;
 
-import ERC20AssetHolderArtifact from '../../../artifacts/contracts//test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
@@ -22,11 +21,6 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ERC20AssetHolder = setupContract(
-    provider,
-    ERC20AssetHolderArtifact,
-    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
-  );
   Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   signer0Address = await signer0.getAddress();
 });

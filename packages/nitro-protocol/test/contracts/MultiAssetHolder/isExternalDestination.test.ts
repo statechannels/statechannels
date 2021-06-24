@@ -1,6 +1,5 @@
 import {Contract, Wallet} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {getTestProvider, setupContract} from '../../test-helpers';
 
 const provider = getTestProvider();
@@ -15,10 +14,6 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-
-beforeAll(async () => {
-  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
-});
 
 describe('isExternalDestination', () => {
   it('verifies an external destination', async () => {

@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-holder';
 import {
   allocationToParams,
@@ -26,10 +25,6 @@ const addresses = {
   B: randomExternalDestination(),
 };
 let AssetHolder: Contract;
-
-beforeAll(async () => {
-  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
-});
 
 const reason5 = 'h(allocation)!=assetOutcomeHash';
 const reason6 = 'h(guarantee)!=assetOutcomeHash';

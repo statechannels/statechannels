@@ -1,8 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers, BigNumber} from 'ethers';
 
-import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
-import ERC20AssetHolderArtifact from '../../../artifacts/contracts/test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
@@ -80,21 +78,6 @@ beforeAll(async () => {
     provider,
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
-  EthAssetHolder1 = setupContract(
-    provider,
-    ETHAssetHolderArtifact,
-    process.env.ETH_ASSET_HOLDER_ADDRESS
-  );
-  EthAssetHolder2 = setupContract(
-    provider,
-    ETHAssetHolderArtifact,
-    process.env.ETH_ASSET_HOLDER2_ADDRESS
-  );
-  ERC20AssetHolder = setupContract(
-    provider,
-    ERC20AssetHolderArtifact,
-    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
   );
   Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   addresses.ETH = EthAssetHolder1.address;

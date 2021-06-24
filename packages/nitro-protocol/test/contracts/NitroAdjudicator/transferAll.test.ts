@@ -1,7 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
@@ -56,18 +55,6 @@ beforeAll(async () => {
     NitroAdjudicatorArtifact,
     process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
   );
-  AssetHolder1 = setupContract(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
-  AssetHolder2 = setupContract(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER2_ADDRESS
-  );
-  addresses.ETH = AssetHolder1.address;
-  addresses.ETH2 = AssetHolder2.address;
 });
 
 // Scenarios are synonymous with channelNonce:

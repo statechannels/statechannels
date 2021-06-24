@@ -1,19 +1,14 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, BigNumber} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {
   allocationToParams,
   getRandomNonce,
-  getTestProvider,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  setupContract,
 } from '../../test-helpers';
 import {encodeAllocation} from '../../../src/contract/outcome';
-
-const provider = getTestProvider();
 
 let AssetHolder: Contract;
 
@@ -26,10 +21,6 @@ const addresses = {
   A: randomExternalDestination(),
   B: randomExternalDestination(),
 };
-
-beforeAll(async () => {
-  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
-});
 
 const reason0 = 'h(allocation)!=assetOutcomeHash';
 
