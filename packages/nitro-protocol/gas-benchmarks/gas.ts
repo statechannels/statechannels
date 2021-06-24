@@ -28,9 +28,9 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 2421830, // Singleton
-      ETHAssetHolder: 1634011, // Singleton (could be more in principle)
-      ERC20AssetHolder: 1657410, // Per Token (could be more in principle)
+      NitroAdjudicator: 2416171, // Singleton
+      ETHAssetHolder: 1636603, // Singleton (could be more in principle)
+      ERC20AssetHolder: 1659990, // Per Token (could be more in principle)
     },
   },
   directlyFundAChannelWithETHFirst: {
@@ -65,11 +65,11 @@ export const gasRequiredTo: GasRequiredTo = {
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 146793,
+    vanillaNitro: 146769,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 139148,
+    vanillaNitro: 139124,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
@@ -77,9 +77,9 @@ export const gasRequiredTo: GasRequiredTo = {
     // challenge + timeout       ⬛ -> (X) -> 👩
     // pushOutcomeAndTransferAll ⬛ --------> 👩
     vanillaNitro: {
-      challenge: 93404,
-      pushOutcomeAndTransferAll: 107742,
-      total: 201146,
+      challenge: 93390,
+      pushOutcomeAndTransferAll: 107733,
+      total: 201123,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -89,11 +89,11 @@ export const gasRequiredTo: GasRequiredTo = {
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
       // pushOutcomeAndTransferAllL  ⬛ --------> (X) -> 👩
       // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
-      challengeX: 93404,
-      challengeL: 92338,
-      pushOutcomeAndTransferAllL: 58640,
-      pushOutcomeAndTransferAllX: 107742,
-      total: 352124,
+      challengeX: 93390,
+      challengeL: 92324,
+      pushOutcomeAndTransferAllL: 58631,
+      pushOutcomeAndTransferAllX: 107733,
+      total: 352078,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -106,16 +106,16 @@ export const gasRequiredTo: GasRequiredTo = {
       // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
       // claimG                      ⬛ ----------------------> (X) -> 👩
       // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
-      challengeL: 92350,
-      challengeG: 94621,
-      challengeJ: 101748,
-      challengeX: 93404,
-      pushOutcomeAndTransferAllL: 58652,
+      challengeL: 92336,
+      challengeG: 94607,
+      challengeJ: 101741,
+      challengeX: 93390,
+      pushOutcomeAndTransferAllL: 58643,
       pushOutcomeG: 61410,
       pushOutcomeJ: 60558,
-      claimG: 58432,
-      pushOutcomeAndTransferAllX: 107742,
-      total: 728917,
+      claimG: 58492,
+      pushOutcomeAndTransferAllX: 107733,
+      total: 728910,
     },
   },
 };
