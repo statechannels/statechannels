@@ -4,11 +4,12 @@ pragma experimental ABIEncoderV2;
 
 import './ForceMove.sol';
 import './Outcome.sol';
+import './MultiAssetHolder.sol';
 
 /**
  * @dev The NitroAdjudicator contract extends ForceMove and hence inherits all ForceMove methods, and also extends and implements the Adjudicator interface, allowing for a finalized outcome to be pushed to an asset holder.
  */
-contract NitroAdjudicator is ForceMove {
+contract NitroAdjudicator is MultiAssetHolder {
     // TODO concludeAndTransferAll method
 
     /**

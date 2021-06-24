@@ -2,6 +2,7 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 import './Outcome.sol';
+import './ForceMove.sol';
 import '@openzeppelin/contracts/math/SafeMath.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './interfaces/IMultiAssetHolder.sol';
@@ -9,17 +10,8 @@ import './interfaces/IMultiAssetHolder.sol';
 /**
  * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
  */
-contract MultiAssetHolder is IMultiAssetHolder {
+contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     using SafeMath for uint256;
-
-    // TODO dedupe this (it is copied from IForceMove.sol)
-    struct ChannelData {
-        uint48 turnNumRecord;
-        uint48 finalizesAt;
-        bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
-        bytes32 outcomeHash;
-    }
 
     /**
      * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
@@ -475,45 +467,6 @@ contract MultiAssetHolder is IMultiAssetHolder {
     // **************
     // Requirers
     // **************
-
-    /**
-     * @notice Checks that a given channel is in the Finalized mode.
-     * @dev Checks that a given channel is in the Challenge mode.
-     * @param channelId Unique identifier for a channel.
-     */
-    function _requireChannelFinalized(bytes32 channelId) internal virtual view {}
-
-    /**
-     * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
-     * @dev Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
-     * @param channelId Unique identifier for a state channel.
-     * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
-     * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
-     */
-    function _unpackStatus(bytes32 channelId)
-        internal
-        virtual
-        view
-        returns (
-            uint48 turnNumRecord,
-            uint48 finalizesAt,
-            uint160 fingerprint
-        )
-    {}
-
-    function _generateFingerprint(
-        bytes32 stateHash,
-        address challengerAddress,
-        bytes32 outcomeHash
-    ) internal virtual pure returns (uint160) {}
-
-    function _updateFingerprint(
-        bytes32 channelId,
-        bytes32 stateHash,
-        address challengerAddress,
-        bytes32 outcomeHash
-    ) internal virtual {}
 
     /**
      * @notice Checks that a given variables hash to the data stored on chain.
