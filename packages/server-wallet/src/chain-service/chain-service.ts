@@ -52,20 +52,6 @@ type AllocationUpdatedEvent = {
   ethersEvent: Event;
 } & AssetOutcomeUpdatedArg;
 
-// TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
-/* eslint-disable no-process-env, */
-const ethAssetHolderAddress = makeAddress(
-  process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
-);
-const nitroAdjudicatorAddress = makeAddress(
-  process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
-);
-/* eslint-enable no-process-env */
-
-function isEthAssetHolder(address: Address): boolean {
-  return address === ethAssetHolderAddress;
-}
-
 export class ChainService implements ChainServiceInterface {
   private logger: Logger;
   private readonly ethWallet: NonceManager;
@@ -81,6 +67,12 @@ export class ChainService implements ChainServiceInterface {
   private transactionQueue = new PQueue({concurrency: 1});
 
   private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
+  // TODO: is it reasonable to assume that the ethAssetHolder address is defined as runtime configuration?
+  /* eslint-disable no-process-env, */
+  private ethAssetHolderAddress: Address;
+
+  private nitroAdjudicatorAddress: Address;
+  /* eslint-enable no-process-env */
 
   constructor({
     provider,
@@ -104,8 +96,19 @@ export class ChainService implements ChainServiceInterface {
     }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
 
+    this.ethAssetHolderAddress = makeAddress(
+      // eslint-disable-next-line no-process-env
+      process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
+    );
+
+    this.nitroAdjudicatorAddress = makeAddress(
+      // eslint-disable-next-line no-process-env
+      process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
+    );
+
+    console.log(this.nitroAdjudicatorAddress);
     this.nitroAdjudicator = this.getOrAddContractMapping(
-      nitroAdjudicatorAddress,
+      this.nitroAdjudicatorAddress,
       ContractArtifacts.NitroAdjudicatorArtifact.abi
     );
 
@@ -199,7 +202,7 @@ export class ChainService implements ChainServiceInterface {
   ): Contract {
     const abi =
       contractInterface ??
-      (isEthAssetHolder(assetHolderAddress)
+      (assetHolderAddress === this.ethAssetHolderAddress
         ? ContractArtifacts.EthAssetHolderArtifact.abi
         : ContractArtifacts.Erc20AssetHolderArtifact.abi);
     const contract: Contract = new Contract(assetHolderAddress, abi, this.ethWallet);
@@ -237,7 +240,7 @@ export class ChainService implements ChainServiceInterface {
     this.logger.info({...arg}, 'fundChannel: entry');
 
     const assetHolderAddress = arg.assetHolderAddress;
-    const isEthFunding = isEthAssetHolder(assetHolderAddress);
+    const isEthFunding = assetHolderAddress === this.ethAssetHolderAddress;
 
     if (!isEthFunding) {
       await this.increaseAllowance(assetHolderAddress, arg.amount);
@@ -283,7 +286,7 @@ export class ChainService implements ChainServiceInterface {
       ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
-      to: nitroAdjudicatorAddress,
+      to: this.nitroAdjudicatorAddress,
     };
 
     const captureExpectedErrors = async (reason: any) => {
@@ -341,7 +344,7 @@ export class ChainService implements ChainServiceInterface {
         challengeStates.flatMap(toNitroSignedState),
         privateKey
       ),
-      to: nitroAdjudicatorAddress,
+      to: this.nitroAdjudicatorAddress,
     };
     return this.sendTransaction(challengeTransactionRequest);
   }
@@ -365,7 +368,7 @@ export class ChainService implements ChainServiceInterface {
         outcome: lastState.outcome,
         challengerAddress,
       }),
-      to: nitroAdjudicatorAddress,
+      to: this.nitroAdjudicatorAddress,
     };
     return this.sendTransaction(pushTransactionRequest);
   }
@@ -684,7 +687,7 @@ export class ChainService implements ChainServiceInterface {
 
     const {newAssetOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewAssetOutcome(
       contract.address,
-      nitroAdjudicatorAddress,
+      this.nitroAdjudicatorAddress,
       {channelId, initialHoldings},
       tx
     );
