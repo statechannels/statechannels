@@ -1,15 +1,17 @@
 import {Channel} from '../../../models/channel';
-import {Engine} from '../..';
+import {defaultTestEngineConfig, Engine} from '../..';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
 import {stateWithHashSignedBy} from '../fixtures/states';
 import {alice, bob} from '../fixtures/signing-wallets';
 import {channel} from '../../../models/__test__/fixtures/channel';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {Bytes32} from '../../../type-aliases';
+import {createLogger} from '../../../logger';
 
 let w: Engine;
 beforeAll(async () => {
-  w = await Engine.create(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
+  w = await Engine.create(defaultTestEngineConfig(), logger);
   await seedAlicesSigningWallet(w.knex);
 });
 

@@ -7,11 +7,14 @@ import {
   ChannelId,
   ChannelResult,
 } from '@statechannels/client-api-schema';
+import {Config} from 'knex';
 
 import {ChainRequest} from '../chain-service';
 import {WalletObjective} from '../models/objective';
 import {Outgoing} from '../protocols/actions';
 import {Bytes32} from '../type-aliases';
+
+import {MetricsConfiguration} from '.';
 
 export type SingleChannelOutput = {
   outbox: Outgoing[];
@@ -66,3 +69,11 @@ export function hasNewObjective(
 ): response is SingleChannelOutput & {newObjective: WalletObjective} {
   return !!response.newObjective;
 }
+
+export type EngineConfig = {
+  skipEvmValidation: boolean;
+  metrics: MetricsConfiguration;
+  dbConfig: Config;
+  chainNetworkID: string;
+  workerThreadAmount: number;
+};

@@ -2,20 +2,22 @@ import {constants} from 'ethers';
 import {NULL_APP_DATA} from '@statechannels/wallet-core';
 
 import {Channel} from '../../../models/channel';
-import {Engine} from '../..';
+import {defaultTestEngineConfig, Engine} from '../..';
 import {createChannelArgs} from '../fixtures/create-channel';
 import {seedAlicesSigningWallet} from '../../../db/seeds/1_signing_wallet_seeds';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {DBAdmin} from '../../../db-admin/db-admin';
+import {createLogger} from '../../../logger';
 
 let w: Engine;
 
 beforeAll(async () => {
-  await DBAdmin.migrateDatabase(defaultTestConfig());
+  await DBAdmin.migrateDatabase(defaultTestWalletConfig());
 });
 
 beforeEach(async () => {
-  w = await Engine.create(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
+  w = await Engine.create(defaultTestEngineConfig(), logger);
   await DBAdmin.truncateDataBaseFromKnex(w.knex);
 });
 

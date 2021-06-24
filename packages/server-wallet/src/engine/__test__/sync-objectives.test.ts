@@ -1,9 +1,10 @@
 import _ from 'lodash';
 
-import {Engine} from '..';
+import {defaultTestEngineConfig, Engine} from '..';
 import {testKnex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
+import {createLogger} from '../../logger';
 import {Channel} from '../../models/channel';
 import {ObjectiveModel} from '../../models/objective';
 import {channel} from '../../models/__test__/fixtures/channel';
@@ -16,7 +17,8 @@ let engine: Engine;
 
 beforeAll(async () => {
   await seedAlicesSigningWallet(testKnex);
-  engine = await Engine.create(defaultTestConfig());
+  const logger = createLogger(defaultTestWalletConfig());
+  engine = await Engine.create(defaultTestEngineConfig(), logger);
 });
 
 afterAll(async () => {

@@ -1,7 +1,11 @@
-import {IncomingEngineConfig} from '../config';
+import P from 'pino';
+import _ from 'lodash';
+import {utils} from 'ethers';
+
+import {defaultTestWalletConfig, extractDBConfigFromWalletConfig} from '../config';
 
 import {MultiThreadedEngine} from './multi-threaded-engine';
-import {EngineInterface} from './types';
+import {EngineInterface, EngineConfig} from './types';
 import {SingleThreadedEngine} from './engine';
 
 /**
@@ -12,12 +16,13 @@ import {SingleThreadedEngine} from './engine';
  */
 export abstract class Engine extends SingleThreadedEngine implements EngineInterface {
   static async create(
-    engineConfig: IncomingEngineConfig
+    engineConfig: EngineConfig,
+    logger: P.Logger
   ): Promise<SingleThreadedEngine | MultiThreadedEngine> {
     if (engineConfig?.workerThreadAmount && engineConfig.workerThreadAmount > 0) {
-      return MultiThreadedEngine.create(engineConfig);
+      return MultiThreadedEngine.create(engineConfig, logger);
     } else {
-      return SingleThreadedEngine.create(engineConfig);
+      return SingleThreadedEngine.create(engineConfig, logger);
     }
   }
 }
@@ -25,3 +30,15 @@ export abstract class Engine extends SingleThreadedEngine implements EngineInter
 export * from '../config';
 export * from './types';
 export {SingleThreadedEngine, MultiThreadedEngine};
+
+export function defaultTestEngineConfig(partialConfig?: Partial<EngineConfig>): EngineConfig {
+  const defaultEngineConfig: EngineConfig = {
+    skipEvmValidation: true,
+    metrics: {timingMetrics: false},
+    workerThreadAmount: 0,
+    // eslint-disable-next-line no-process-env
+    chainNetworkID: utils.hexlify(parseInt(process.env.CHAIN_NETWORK_ID ?? '0')),
+    dbConfig: extractDBConfigFromWalletConfig(defaultTestWalletConfig()),
+  };
+  return _.assign({}, defaultEngineConfig, partialConfig);
+}

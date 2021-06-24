@@ -5,14 +5,14 @@ import {utils} from 'ethers';
 import {Store} from '../store';
 import {Channel} from '../../models/channel';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 let store: Store;
 
 beforeAll(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 });
@@ -47,7 +47,7 @@ describe('addSignedState', () => {
       participants: [],
       channelNonce: 1,
       channelId,
-      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
+      chainId: utils.hexlify(defaultTestWalletConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
       signatures: [BOB_SIGNATURE],
     };

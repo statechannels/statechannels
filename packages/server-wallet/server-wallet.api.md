@@ -7,8 +7,6 @@
 import { Address } from '@statechannels/wallet-core';
 import { Allocation } from '@statechannels/client-api-schema';
 import { AllocationItem } from '@statechannels/wallet-core';
-import { AllocationItem as AllocationItem_2 } from '@statechannels/nitro-protocol';
-import { AssetOutcome } from '@statechannels/nitro-protocol';
 import { ChannelConstants } from '@statechannels/wallet-core';
 import { ChannelId } from '@statechannels/client-api-schema';
 import { ChannelResult } from '@statechannels/client-api-schema';
@@ -35,12 +33,12 @@ import { Model } from 'objection';
 import { ModelOptions } from 'objection';
 import { OpenChannel } from '@statechannels/wallet-core';
 import { Outcome } from '@statechannels/wallet-core';
+import P from 'pino';
 import { Participant } from '@statechannels/wallet-core';
 import { Participant as Participant_2 } from '@statechannels/client-api-schema';
 import { Payload } from '@statechannels/wire-format';
 import { Pojo } from 'objection';
 import { PrivateKey } from '@statechannels/wallet-core';
-import { providers } from 'ethers';
 import { QueryContext } from 'objection';
 import { SignatureEntry } from '@statechannels/wallet-core';
 import { SignedState } from '@statechannels/wallet-core';
@@ -80,13 +78,13 @@ export type DatabasePoolConfiguration = {
 
 // @public
 export class DBAdmin {
-    static createDatabase(config: IncomingEngineConfig): Promise<void>;
+    static createDatabase(config: IncomingWalletConfig): Promise<void>;
     static createDatabaseFromKnex(knex: Knex): Promise<void>;
-    static dropDatabase(config: IncomingEngineConfig): Promise<void>;
+    static dropDatabase(config: IncomingWalletConfig): Promise<void>;
     static dropDatabaseFromKnex(knex: Knex): Promise<void>;
-    static migrateDatabase(config: IncomingEngineConfig): Promise<void>;
+    static migrateDatabase(config: IncomingWalletConfig): Promise<void>;
     static migrateDatabaseFromKnex(knex: Knex): Promise<void>;
-    static truncateDatabase(config: IncomingEngineConfig, tables?: string[]): Promise<void>;
+    static truncateDatabase(config: IncomingWalletConfig, tables?: string[]): Promise<void>;
     static truncateDataBaseFromKnex(knex: Knex, tables?: string[]): Promise<void>;
 }
 
@@ -105,7 +103,7 @@ export const DEFAULT_DB_USER = "postgres";
 export const defaultChainServiceConfiguration: ChainServiceConfiguration;
 
 // @public
-export const defaultConfig: OptionalEngineConfig;
+export const defaultConfig: OptionalWalletConfig;
 
 // @public (undocumented)
 export const defaultDatabaseConfiguration: OptionalDatabaseConfiguration & {
@@ -124,22 +122,34 @@ export const defaultMetricsConfiguration: {
     timingMetrics: boolean;
 };
 
-// Warning: (ae-forgotten-export) The symbol "HasDatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
-//
 // @public (undocumented)
-export const defaultTestConfig: (partialConfig?: DeepPartial<EngineConfig & HasDatabaseConnectionConfigObject>) => EngineConfig & HasDatabaseConnectionConfigObject;
+export const defaultSyncConfiguration: SyncConfiguration;
+
+// @public (undocumented)
+export function defaultTestEngineConfig(partialConfig?: Partial<EngineConfig>): EngineConfig;
 
 // @public (undocumented)
 export const defaultTestNetworkConfiguration: NetworkConfiguration;
 
+// Warning: (ae-forgotten-export) The symbol "HasDatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
+//
+// @public (undocumented)
+export function defaultTestWalletConfig(partialConfig?: DeepPartial<WalletConfig & HasDatabaseConnectionConfigObject>): WalletConfig & HasDatabaseConnectionConfigObject;
+
 // @public
 export abstract class Engine extends SingleThreadedEngine implements EngineInterface {
     // (undocumented)
-    static create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine | MultiThreadedEngine>;
+    static create(engineConfig: EngineConfig, logger: P.Logger): Promise<SingleThreadedEngine | MultiThreadedEngine>;
 }
 
-// @public
-export type EngineConfig = RequiredEngineConfig & OptionalEngineConfig;
+// @public (undocumented)
+export type EngineConfig = {
+    skipEvmValidation: boolean;
+    metrics: MetricsConfiguration;
+    dbConfig: Config;
+    chainNetworkID: string;
+    workerThreadAmount: number;
+};
 
 // @public (undocumented)
 export interface EngineInterface {
@@ -172,12 +182,12 @@ export interface EngineInterface {
 }
 
 // @public (undocumented)
-export function extractDBConfigFromEngineConfig(engineConfig: EngineConfig): Config;
+export function extractDBConfigFromWalletConfig(walletConfig: WalletConfig): Config;
 
 // Warning: (ae-forgotten-export) The symbol "DatabaseConnectionConfigObject" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export function getDatabaseConnectionConfig(config: EngineConfig): DatabaseConnectionConfigObject & {
+export function getDatabaseConnectionConfig(config: WalletConfig): DatabaseConnectionConfigObject & {
     host: string;
     port: number;
 };
@@ -188,7 +198,7 @@ export function hasNewObjective(response: SingleChannelOutput): response is Sing
 };
 
 // @public
-export type IncomingEngineConfig = RequiredEngineConfig & Partial<OptionalEngineConfig>;
+export type IncomingWalletConfig = RequiredWalletConfig & Partial<OptionalWalletConfig>;
 
 // @public
 export type InternalError = {
@@ -224,9 +234,9 @@ export type MultipleChannelOutput = {
 
 // @public
 export class MultiThreadedEngine extends SingleThreadedEngine {
-    protected constructor(engineConfig: IncomingEngineConfig);
+    protected constructor(engineConfig: EngineConfig, logger: P.Logger);
     // (undocumented)
-    static create(engineConfig: IncomingEngineConfig): Promise<MultiThreadedEngine>;
+    static create(engineConfig: EngineConfig, logger: P.Logger): Promise<MultiThreadedEngine>;
     // (undocumented)
     destroy(): Promise<void>;
     // (undocumented)
@@ -284,7 +294,7 @@ export type OptionalDatabaseConfiguration = {
 };
 
 // @public
-export interface OptionalEngineConfig {
+export interface OptionalWalletConfig {
     // (undocumented)
     chainServiceConfiguration: ChainServiceConfiguration;
     // (undocumented)
@@ -295,6 +305,8 @@ export interface OptionalEngineConfig {
     metricsConfiguration: MetricsConfiguration;
     // (undocumented)
     skipEvmValidation: boolean;
+    // (undocumented)
+    syncConfiguration: SyncConfiguration;
     // (undocumented)
     workerThreadAmount: number;
 }
@@ -310,7 +322,7 @@ export type Output = SingleChannelOutput | MultipleChannelOutput;
 // Warning: (ae-forgotten-export) The symbol "PartialConfigObject" needs to be exported by the entry point index.d.ts
 //
 // @public (undocumented)
-export function overwriteConfigWithDatabaseConnection(config: EngineConfig, databaseConnectionConfig: PartialConfigObject | string): EngineConfig;
+export function overwriteConfigWithDatabaseConnection(config: WalletConfig, databaseConnectionConfig: PartialConfigObject | string): WalletConfig;
 
 // @public
 export type RequiredConnectionConfiguration = {
@@ -326,7 +338,7 @@ export type RequiredDatabaseConfiguration = {
 };
 
 // @public
-export type RequiredEngineConfig = {
+export type RequiredWalletConfig = {
     databaseConfiguration: RequiredDatabaseConfiguration;
     networkConfiguration: NetworkConfiguration;
 };
@@ -341,7 +353,7 @@ export type SingleChannelOutput = {
 
 // @public
 export class SingleThreadedEngine implements EngineInterface {
-    protected constructor(engineConfig: IncomingEngineConfig);
+    protected constructor(config: EngineConfig, logger: Logger);
     addSigningKey(privateKey: PrivateKey): Promise<void>;
     // (undocumented)
     approveObjectives(objectiveIds: string[]): Promise<{
@@ -349,6 +361,8 @@ export class SingleThreadedEngine implements EngineInterface {
         messages: Message_2[];
         chainRequests: ChainRequest[];
     }>;
+    // (undocumented)
+    chainNetworkId: string;
     challenge(channelId: string): Promise<SingleChannelOutput>;
     closeChannel({ channelId, }: CloseChannelParams): Promise<SingleChannelOutput & {
         newObjective: WalletObjective;
@@ -356,15 +370,13 @@ export class SingleThreadedEngine implements EngineInterface {
     closeChannels(channelIds: Bytes32[]): Promise<MultipleChannelOutput>;
     crank(channelIds: string[]): Promise<MultipleChannelOutput>;
     // (undocumented)
-    static create(engineConfig: IncomingEngineConfig): Promise<SingleThreadedEngine>;
+    static create(engineConfig: EngineConfig, logger: Logger): Promise<SingleThreadedEngine>;
     createChannel(args: CreateChannelParams): Promise<SingleChannelOutput & {
         newObjective: WalletObjective;
     }>;
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
     createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
     destroy(): Promise<void>;
-    // (undocumented)
-    readonly engineConfig: EngineConfig;
     getApprovedObjectives(): Promise<WalletObjective[]>;
     getChannels(): Promise<MultipleChannelOutput>;
     getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
@@ -380,7 +392,7 @@ export class SingleThreadedEngine implements EngineInterface {
     // (undocumented)
     ledgerManager: LedgerManager;
     // (undocumented)
-    logger: Logger;
+    protected logger: Logger;
     // Warning: (ae-forgotten-export) The symbol "ObjectiveManager" needs to be exported by the entry point index.d.ts
     //
     // (undocumented)
@@ -399,7 +411,7 @@ export class SingleThreadedEngine implements EngineInterface {
 }
 
 // @public (undocumented)
-export type SyncOptions = {
+export type SyncConfiguration = {
     pollInterval: number;
     timeOutThreshold: number;
     staleThreshold: number;
@@ -425,7 +437,7 @@ export type UpdateChannelSuccess = {
 // @public (undocumented)
 export function validateEngineConfig(config: Record<string, any>): {
     valid: boolean;
-    value: EngineConfig | undefined;
+    value: WalletConfig | undefined;
     errors: ValidationErrorItem[];
 };
 
@@ -433,12 +445,15 @@ export function validateEngineConfig(config: Record<string, any>): {
 export class Wallet extends EventEmitter<WalletEvents> {
     approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]>;
     closeChannels(channelIds: string[]): Promise<ObjectiveResult[]>;
-    // Warning: (ae-forgotten-export) The symbol "ChainServiceInterface" needs to be exported by the entry point index.d.ts
     // Warning: (ae-forgotten-export) The symbol "MessageServiceFactory" needs to be exported by the entry point index.d.ts
-    static create(engine: Engine, chainService: ChainServiceInterface, messageServiceFactory: MessageServiceFactory, retryOptions?: Partial<SyncOptions>): Promise<Wallet>;
+    static create(incomingConfig: IncomingWalletConfig, messageServiceFactory: MessageServiceFactory): Promise<Wallet>;
     createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
     // (undocumented)
     destroy(): Promise<void>;
+    // (undocumented)
+    getChannels(): Promise<ChannelResult[]>;
+    // (undocumented)
+    getSigningAddress(): Promise<Address>;
     jumpStartObjectives(): Promise<ObjectiveResult[]>;
     // Warning: (ae-forgotten-export) The symbol "MessageServiceInterface" needs to be exported by the entry point index.d.ts
     //
@@ -447,6 +462,9 @@ export class Wallet extends EventEmitter<WalletEvents> {
     registerAppDefinition(appDefinition: string): Promise<void>;
     updateChannel(channelId: string, allocations: Allocation[], appData: string): Promise<UpdateChannelResult>;
 }
+
+// @public
+export type WalletConfig = RequiredWalletConfig & OptionalWalletConfig;
 
 // @public (undocumented)
 export interface WalletEvents {
@@ -461,9 +479,9 @@ export interface WalletEvents {
 
 // Warnings were encountered during analysis:
 //
-// src/engine/types.ts:28:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
-// src/engine/types.ts:66:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
-// src/wallet/types.ts:61:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:31:3 - (ae-forgotten-export) The symbol "ChainRequest" needs to be exported by the entry point index.d.ts
+// src/engine/types.ts:69:39 - (ae-forgotten-export) The symbol "WalletObjective" needs to be exported by the entry point index.d.ts
+// src/wallet/types.ts:44:3 - (ae-forgotten-export) The symbol "ObjectiveStatus" needs to be exported by the entry point index.d.ts
 
 // (No @packageDocumentation comment for this package)
 

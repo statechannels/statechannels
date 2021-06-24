@@ -4,15 +4,16 @@ import * as fs from 'fs';
 import {Participant} from '@statechannels/client-api-schema';
 import {makeDestination} from '@statechannels/wallet-core';
 import {Logger} from 'pino';
+import {utils} from 'ethers';
 
-import {Engine} from '../src/engine';
 import {
-  DBAdmin,
-  defaultTestConfig,
+  Engine,
+  extractDBConfigFromWalletConfig,
+  EngineConfig,
+  defaultTestWalletConfig,
   overwriteConfigWithDatabaseConnection,
-  SyncOptions,
-  Wallet,
-} from '../src';
+} from '../src/engine';
+import {DBAdmin, Wallet} from '../src';
 import {
   seedAlicesSigningWallet,
   seedBobsSigningWallet,
@@ -20,7 +21,6 @@ import {
 import {TestMessageService} from '../src/message-service/test-message-service';
 import {createLogger} from '../src/logger';
 import {LegacyTestMessageHandler} from '../src/message-service/legacy-test-message-service';
-import {MockChainService} from '../src/chain-service';
 
 interface TestPeerEngines {
   a: Engine;
@@ -31,11 +31,6 @@ export interface TestPeerWallets {
   a: Wallet;
   b: Wallet;
 }
-const DEFAULT_SYNC_OPTIONS: SyncOptions = {
-  pollInterval: 50,
-  staleThreshold: 1_000,
-  timeOutThreshold: 45_000,
-};
 
 const aDatabase = 'server_wallet_test_a';
 const bDatabase = 'server_wallet_test_b';
@@ -46,23 +41,37 @@ try {
 } catch (err) {
   if (err.message !== `EEXIST: file already exists, mkdir '${ARTIFACTS_DIR}'`) throw err;
 }
-const baseConfig = defaultTestConfig({
+const baseConfig = defaultTestWalletConfig({
   loggingConfiguration: {
     logLevel: 'trace',
     logDestination: path.join(ARTIFACTS_DIR, 'with-peers.log'),
   },
+  syncConfiguration: {pollInterval: 50, staleThreshold: 1_000, timeOutThreshold: 45_000},
 });
-export const aEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
+export const aWalletConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: aDatabase,
 });
 
-export const bEngineConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
+export const bWalletConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: bDatabase,
 });
 
-const chainServiceA = new MockChainService();
+const {skipEvmValidation, metricsConfiguration: metrics} = baseConfig;
+const baseEngineConfig = {
+  skipEvmValidation,
+  metrics,
+  chainNetworkID: utils.hexlify(baseConfig.networkConfiguration.chainNetworkID),
+  workerThreadAmount: 0,
+};
+export const aEngineConfig: EngineConfig = {
+  ...baseEngineConfig,
+  dbConfig: extractDBConfigFromWalletConfig(aWalletConfig),
+};
 
-const chainServiceB = new MockChainService();
+export const bEngineConfig: EngineConfig = {
+  ...baseEngineConfig,
+  dbConfig: extractDBConfigFromWalletConfig(bWalletConfig),
+};
 
 const logger: Logger = createLogger(baseConfig);
 
@@ -90,18 +99,8 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
   const peerSetup = await setupPeerEngines(withWalletsSeeding);
 
   const peerWallets = {
-    a: await Wallet.create(
-      peerSetup.peerEngines.a,
-      chainServiceA,
-      TestMessageService.create,
-      DEFAULT_SYNC_OPTIONS
-    ),
-    b: await Wallet.create(
-      peerSetup.peerEngines.b,
-      chainServiceB,
-      TestMessageService.create,
-      DEFAULT_SYNC_OPTIONS
-    ),
+    a: await Wallet.create(aWalletConfig, TestMessageService.create),
+    b: await Wallet.create(bWalletConfig, TestMessageService.create),
   };
   TestMessageService.linkMessageServices(
     peerWallets.a.messageService,
@@ -113,23 +112,23 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
 export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerSetup> {
   try {
     await Promise.all([
-      DBAdmin.truncateDatabase(aEngineConfig),
-      DBAdmin.truncateDatabase(bEngineConfig),
+      DBAdmin.truncateDatabase(aWalletConfig),
+      DBAdmin.truncateDatabase(bWalletConfig),
     ]);
 
     await Promise.all([
-      DBAdmin.createDatabase(aEngineConfig),
-      DBAdmin.createDatabase(bEngineConfig),
+      DBAdmin.createDatabase(aWalletConfig),
+      DBAdmin.createDatabase(bWalletConfig),
     ]);
 
     await Promise.all([
-      DBAdmin.migrateDatabase(aEngineConfig),
-      DBAdmin.migrateDatabase(bEngineConfig),
+      DBAdmin.migrateDatabase(aWalletConfig),
+      DBAdmin.migrateDatabase(bWalletConfig),
     ]);
 
     const peerEngines = {
-      a: await Engine.create(aEngineConfig),
-      b: await Engine.create(bEngineConfig),
+      a: await Engine.create(aEngineConfig, createLogger(aWalletConfig)),
+      b: await Engine.create(bEngineConfig, createLogger(bWalletConfig)),
     };
 
     if (withWalletSeeding) {
@@ -186,8 +185,8 @@ export const teardownPeerSetup = async (
       await Promise.all([peerEngines.a.destroy(), peerEngines.b.destroy()]);
     }
     await Promise.all([
-      DBAdmin.truncateDatabase(aEngineConfig),
-      DBAdmin.truncateDatabase(bEngineConfig),
+      DBAdmin.truncateDatabase(aWalletConfig),
+      DBAdmin.truncateDatabase(bWalletConfig),
     ]);
   } catch (error) {
     logger.error(error, 'peersTeardown failed');

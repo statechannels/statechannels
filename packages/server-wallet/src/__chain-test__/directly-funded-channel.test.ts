@@ -8,16 +8,19 @@ import {BigNumber, BigNumberish, Contract, providers, utils} from 'ethers';
 import _ from 'lodash';
 import {hexZeroPad} from '@ethersproject/bytes';
 
-import {ChainService} from '../chain-service';
-import {defaultTestConfig, overwriteConfigWithDatabaseConnection, EngineConfig} from '../config';
+import {
+  defaultTestWalletConfig,
+  overwriteConfigWithDatabaseConnection,
+  WalletConfig,
+} from '../config';
 import {DBAdmin} from '../db-admin/db-admin';
-import {Engine} from '../engine';
 import {LatencyOptions, TestMessageService} from '../message-service/test-message-service';
-import {SyncOptions, Wallet} from '../wallet';
+import {Wallet} from '../wallet';
 import {ONE_DAY} from '../__test__/test-helpers';
 import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 import {COUNTING_APP_DEFINITION} from '../models/__test__/fixtures/app-bytecode';
+import {createLogger} from '../logger';
 
 jest.setTimeout(60_000);
 
@@ -29,9 +32,9 @@ if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 
 const config = {
-  ...defaultTestConfig(),
+  ...defaultTestWalletConfig(),
   networkConfiguration: {
-    ...defaultTestConfig().networkConfiguration,
+    ...defaultTestWalletConfig().networkConfiguration,
     // eslint-disable-next-line no-process-env
     chainNetworkID: parseInt(process.env.CHAIN_NETWORK_ID || '0'),
   },
@@ -40,10 +43,8 @@ const config = {
 let provider: providers.JsonRpcProvider;
 let a: Wallet;
 let b: Wallet;
-let aEngine: Engine;
-let bEngine: Engine;
 
-const bEngineConfig: EngineConfig = {
+const bWalletConfig: WalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_b'}),
   loggingConfiguration: {
     logDestination: path.join(ARTIFACTS_DIR, 'direct-funding.log'),
@@ -56,8 +57,9 @@ const bEngineConfig: EngineConfig = {
     pk: process.env.CHAIN_SERVICE_PK ?? TEST_ACCOUNTS[1].privateKey,
     allowanceMode: 'MaxUint',
   },
+  syncConfiguration: {pollInterval: 1_000, timeOutThreshold: 60_000, staleThreshold: 10_000},
 };
-const aEngineConfig: EngineConfig = {
+const aWalletConfig: WalletConfig = {
   ...overwriteConfigWithDatabaseConnection(config, {database: 'server_wallet_test_a'}),
   loggingConfiguration: {
     logDestination: path.join(ARTIFACTS_DIR, 'direct-funding.log'),
@@ -70,6 +72,7 @@ const aEngineConfig: EngineConfig = {
     pk: process.env.CHAIN_SERVICE_PK2 ?? TEST_ACCOUNTS[2].privateKey,
     allowanceMode: 'MaxUint',
   },
+  syncConfiguration: {pollInterval: 1_000, timeOutThreshold: 60_000, staleThreshold: 10_000},
 };
 
 const aAddress = '0x50Bcf60D1d63B7DD3DAF6331a688749dCBD65d96';
@@ -96,34 +99,18 @@ beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
 
   await Promise.all(
-    [aEngineConfig, bEngineConfig].map(async config => {
+    [aWalletConfig, bWalletConfig].map(async config => {
       await DBAdmin.dropDatabase(config);
       await DBAdmin.createDatabase(config);
       await DBAdmin.migrateDatabase(config);
     })
   );
 
-  aEngine = await Engine.create(aEngineConfig);
-  bEngine = await Engine.create(bEngineConfig);
+  a = await Wallet.create(aWalletConfig, TestMessageService.create);
+  b = await Wallet.create(bWalletConfig, TestMessageService.create);
+  const logger = createLogger(defaultTestWalletConfig());
 
-  const aChainService = new ChainService({
-    ...aEngineConfig.chainServiceConfiguration,
-    logger: aEngine.logger,
-  });
-  const bChainService = new ChainService({
-    ...bEngineConfig.chainServiceConfiguration,
-    logger: bEngine.logger,
-  });
-
-  const syncOptions: SyncOptions = {
-    pollInterval: 1_000,
-    timeOutThreshold: 60_000,
-    staleThreshold: 10_000,
-  };
-  a = await Wallet.create(aEngine, aChainService, TestMessageService.create, syncOptions);
-  b = await Wallet.create(bEngine, bChainService, TestMessageService.create, syncOptions);
-
-  TestMessageService.linkMessageServices(a.messageService, b.messageService, aEngine.logger);
+  TestMessageService.linkMessageServices(a.messageService, b.messageService, logger);
   const assetHolder = new Contract(
     ethAssetHolderAddress,
     ContractArtifacts.EthAssetHolderArtifact.abi,
@@ -134,7 +121,7 @@ beforeAll(async () => {
 
 afterAll(async () => {
   await Promise.all([a.destroy(), b.destroy()]);
-  await Promise.all([DBAdmin.dropDatabase(aEngineConfig), DBAdmin.dropDatabase(bEngineConfig)]);
+  await Promise.all([DBAdmin.dropDatabase(aWalletConfig), DBAdmin.dropDatabase(bWalletConfig)]);
   provider.polling = false;
   provider.removeAllListeners();
 });
@@ -157,14 +144,13 @@ test.each(testCases)(
   `can successfully fund and defund a channel between two wallets with options %o`,
   async options => {
     TestMessageService.setLatencyOptions({a, b}, options);
-
-    const participantA = {
-      signingAddress: await aEngine.getSigningAddress(),
+    const participantA: Participant = {
+      signingAddress: await a.getSigningAddress(),
       participantId: 'a',
       destination: makeDestination(aAddress),
     };
-    const participantB = {
-      signingAddress: await bEngine.getSigningAddress(),
+    const participantB: Participant = {
+      signingAddress: await b.getSigningAddress(),
       participantId: 'b',
       destination: makeDestination(bAddress),
     };

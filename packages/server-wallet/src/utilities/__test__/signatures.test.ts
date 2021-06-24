@@ -13,9 +13,9 @@ import {participant} from '../../engine/__test__/fixtures/participants';
 import {recoverAddress, signState as wasmSignState} from '../signatures';
 import {addHash} from '../../state-utils';
 import {createLogger} from '../../logger';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 
-const logger = createLogger(defaultTestConfig());
+const logger = createLogger(defaultTestWalletConfig());
 it('sign vs wasmSign', async () => {
   const promises = _.range(5).map(async channelNonce => {
     const {address: ethAddress, privateKey} = Wallet.createRandom();

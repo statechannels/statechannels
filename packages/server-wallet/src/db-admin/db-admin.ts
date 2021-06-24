@@ -17,9 +17,9 @@ import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {
   defaultConfig,
-  extractDBConfigFromEngineConfig,
+  extractDBConfigFromWalletConfig,
   getDatabaseConnectionConfig,
-  IncomingEngineConfig,
+  IncomingWalletConfig,
 } from '../config';
 
 type DBConnectionConfig = {database: string; user: string};
@@ -32,7 +32,7 @@ export class DBAdmin {
    * Creates a database based on the database specified in the wallet configuration
    * @param config The wallet configuration object with a database specified
    */
-  static async createDatabase(config: IncomingEngineConfig): Promise<void> {
+  static async createDatabase(config: IncomingWalletConfig): Promise<void> {
     await createDbIfDoesntExist(getDbConnectionConfigFromConfig(config));
   }
 
@@ -48,7 +48,7 @@ export class DBAdmin {
    * Drops the database based on the database specified in the wallet configuration
    * @param config The wallet configuration object containing the database configuration to use
    */
-  static async dropDatabase(config: IncomingEngineConfig): Promise<void> {
+  static async dropDatabase(config: IncomingWalletConfig): Promise<void> {
     await dropDbIfExists(getDbConnectionConfigFromConfig(config));
   }
 
@@ -64,7 +64,7 @@ export class DBAdmin {
    * Performs wallet database migrations against the database specified in the config
    * @param config The wallet configuration object containing the database configuration to use
    */
-  static async migrateDatabase(config: IncomingEngineConfig): Promise<void> {
+  static async migrateDatabase(config: IncomingWalletConfig): Promise<void> {
     const knex = getKnexFromConfig(config);
     await DBAdmin.migrateDatabaseFromKnex(knex);
     await knex.destroy();
@@ -88,7 +88,7 @@ export class DBAdmin {
    * @param tables A list of table names to truncate. Defaults to ALL tables
    */
   static async truncateDatabase(
-    config: IncomingEngineConfig,
+    config: IncomingWalletConfig,
     tables = defaultTables
   ): Promise<void> {
     const knex = getKnexFromConfig(config);
@@ -118,16 +118,16 @@ export class DBAdmin {
   }
 }
 
-function getKnexFromConfig(config: IncomingEngineConfig): Knex {
+function getKnexFromConfig(config: IncomingWalletConfig): Knex {
   const populatedConfig = _.assign({}, defaultConfig, config);
-  return Knex(extractDBConfigFromEngineConfig(populatedConfig));
+  return Knex(extractDBConfigFromWalletConfig(populatedConfig));
 }
 function getDbConnectionConfigFromKnex(knex: Knex): DBConnectionConfig {
   const {database, user} = knex.client.config.connection;
   return {database, user};
 }
 
-function getDbConnectionConfigFromConfig(config: IncomingEngineConfig): DBConnectionConfig {
+function getDbConnectionConfigFromConfig(config: IncomingWalletConfig): DBConnectionConfig {
   const populatedConfig = _.assign({}, defaultConfig, config);
   const {database, user} = getDatabaseConnectionConfig(populatedConfig);
   return {database, user};

@@ -1,6 +1,6 @@
 import {DefundChannel, makeAddress, State} from '@statechannels/wallet-core';
 
-import {defaultTestConfig} from '../..';
+import {defaultTestWalletConfig} from '../..';
 import {createLogger} from '../../logger';
 import {WalletObjective, ObjectiveModel} from '../../models/objective';
 import {Store} from '../../engine/store';
@@ -15,7 +15,7 @@ import {alice} from '../../engine/__test__/fixtures/signing-wallets';
 import {Funding} from '../../models/funding';
 import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 
-const logger = createLogger(defaultTestConfig());
+const logger = createLogger(defaultTestWalletConfig());
 const timingMetrics = false;
 
 let store: Store;
@@ -32,8 +32,8 @@ let objective2: WalletObjective<DefundChannel>;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 
