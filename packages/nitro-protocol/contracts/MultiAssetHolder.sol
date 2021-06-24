@@ -122,13 +122,12 @@ contract MultiAssetHolder is IMultiAssetHolder {
 
         // effects and interactions
         allocation = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
-        outcome[assetIndex].assetOutcomeBytes = abi.encode(Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation)));
-        bytes32 outcomeHash = keccak256(abi.encode(
-            outcome
-        ));
+        outcome[assetIndex].assetOutcomeBytes = abi.encode(
+            Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation))
+        );
+        bytes32 outcomeHash = keccak256(abi.encode(outcome));
         _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
     }
-
 
     /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
@@ -199,14 +198,22 @@ contract MultiAssetHolder is IMultiAssetHolder {
                 assetOutcome.allocationOrGuaranteeBytes,
                 (Outcome.AllocationItem[])
             );
-        
-        // effects and interactions
-        allocation = _claim(asset, guarantorChannelId, guarantee, allocation, indices);
-                outcome[assetIndex].assetOutcomeBytes = abi.encode(Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation)));
-        bytes32 outcomeHash = keccak256(abi.encode(
-            outcome
-        ));
-        _updateFingerprint(guarantee.targetChannelId, targetStateHash, targetChallengerAddress, outcomeHash);
+
+            // effects and interactions
+            allocation = _claim(asset, guarantorChannelId, guarantee, allocation, indices);
+            outcome[assetIndex].assetOutcomeBytes = abi.encode(
+                Outcome.AssetOutcome(
+                    uint8(Outcome.AssetOutcomeType.Allocation),
+                    abi.encode(allocation)
+                )
+            );
+            bytes32 outcomeHash = keccak256(abi.encode(outcome));
+            _updateFingerprint(
+                guarantee.targetChannelId,
+                targetStateHash,
+                targetChallengerAddress,
+                outcomeHash
+            );
         }
     }
 
@@ -368,7 +375,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
                 }
             }
         }
-        return newAllocation; 
+        return newAllocation;
         // TODO emit OutcomeUpdated(fromChannelId, initialHoldings);
     }
 
@@ -382,7 +389,7 @@ contract MultiAssetHolder is IMultiAssetHolder {
         Outcome.Guarantee memory guarantee,
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
-    ) internal returns (Outcome.AllocationItem[] memory){
+    ) internal returns (Outcome.AllocationItem[] memory) {
         uint256 initialHoldings = holdings[asset][guarantorChannelId];
 
         (
