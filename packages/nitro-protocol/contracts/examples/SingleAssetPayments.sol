@@ -41,11 +41,11 @@ contract SingleAssetPayments is IForceMoveApp {
             (Outcome.AssetOutcome)
         );
         require(
-            assetOutcomeA.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            assetOutcomeA.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
             'AssetOutcomeA must be Allocation'
         );
         require(
-            assetOutcomeB.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            assetOutcomeB.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
             'AssetOutcomeB must be Allocation'
         );
 

@@ -129,7 +129,7 @@ contract NitroAdjudicator is IAdjudicator, ForceMove {
                 outcome[i].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
-            if (assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation)) {
+            if (assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation) {
                 AssetHolder(outcome[i].assetHolderAddress).transferAllAdjudicatorOnly(
                     channelId,
                     assetOutcome.allocationOrGuaranteeBytes

@@ -254,7 +254,7 @@ contract AssetHolder is IAssetHolder {
             assetOutcomeHashes[fromChannelId] = keccak256(
                 abi.encode(
                     Outcome.AssetOutcome(
-                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        Outcome.AssetOutcomeType.Allocation,
                         abi.encode(newAllocation)
                     )
                 )
@@ -319,7 +319,7 @@ contract AssetHolder is IAssetHolder {
             assetOutcomeHashes[guarantee.targetChannelId] = keccak256(
                 abi.encode(
                     Outcome.AssetOutcome(
-                        uint8(Outcome.AssetOutcomeType.Allocation),
+                        Outcome.AssetOutcomeType.Allocation,
                         abi.encode(newAllocation)
                     )
                 )
@@ -406,7 +406,7 @@ contract AssetHolder is IAssetHolder {
                 keccak256(
                     abi.encode(
                         Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Allocation),
+                            Outcome.AssetOutcomeType.Allocation,
                             allocationBytes
                         )
                     )
@@ -424,7 +424,7 @@ contract AssetHolder is IAssetHolder {
                 keccak256(
                     abi.encode(
                         Outcome.AssetOutcome(
-                            uint8(Outcome.AssetOutcomeType.Guarantee),
+                            Outcome.AssetOutcomeType.Guarantee,
                             guaranteeBytes
                         )
                     )

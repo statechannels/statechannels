@@ -76,7 +76,7 @@ contract HashLockedSwap is IForceMoveApp {
 
         // Throws unless the assetoutcome is an allocation
         require(
-            assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
             'AssetOutcome must be Allocation'
         );
 
