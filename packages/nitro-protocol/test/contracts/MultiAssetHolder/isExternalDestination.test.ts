@@ -1,10 +1,15 @@
-import {Contract, Wallet} from 'ethers';
+import {Wallet} from 'ethers';
 
 import {getTestProvider, setupContract} from '../../test-helpers';
-
+import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
 const provider = getTestProvider();
 
-let AssetHolder: Contract;
+const testMultiAssetHolder = (setupContract(
+  provider,
+  TESTMultiAssetHolderArtifact,
+  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
+) as unknown) as TESTMultiAssetHolder;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -19,11 +24,15 @@ describe('isExternalDestination', () => {
   it('verifies an external destination', async () => {
     const zerosPaddedExternalDestination =
       '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padStart(64, '0');
-    expect(await AssetHolder.isExternalDestination(zerosPaddedExternalDestination)).toBe(true);
+    expect(await testMultiAssetHolder.isExternalDestination(zerosPaddedExternalDestination)).toBe(
+      true
+    );
   });
   it('rejects a non-external-address', async () => {
     const onesPaddedExternalDestination =
       '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padStart(64, '1');
-    expect(await AssetHolder.isExternalDestination(onesPaddedExternalDestination)).toBe(false);
+    expect(await testMultiAssetHolder.isExternalDestination(onesPaddedExternalDestination)).toBe(
+      false
+    );
   });
 });
