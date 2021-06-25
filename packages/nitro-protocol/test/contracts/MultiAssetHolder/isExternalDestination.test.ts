@@ -3,10 +3,9 @@ import {Wallet} from 'ethers';
 import {getTestProvider, setupContract} from '../../test-helpers';
 import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
 import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
-const provider = getTestProvider();
 
 const testMultiAssetHolder = (setupContract(
-  provider,
+  getTestProvider(),
   TESTMultiAssetHolderArtifact,
   process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
 ) as unknown) as TESTMultiAssetHolder;

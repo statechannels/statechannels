@@ -1,4 +1,4 @@
-import {Contract, BigNumber} from 'ethers';
+import {BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
 import {
@@ -7,11 +7,15 @@ import {
   randomExternalDestination,
   randomChannelId,
 } from '../../test-helpers';
+import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
 // eslint-disable-next-line import/order
+import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
 
-const provider = getTestProvider();
-
-let AssetHolder: Contract;
+const testMultiAssetHolder = (setupContract(
+  getTestProvider(),
+  TESTMultiAssetHolderArtifact,
+  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
+) as unknown) as TESTMultiAssetHolder;
 
 import {AllocationItem, Guarantee} from '../../../src';
 import {
@@ -54,12 +58,12 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
       guarantee
     );
 
-    const result = (await AssetHolder._computeNewAllocationWithGuarantee(
+    const result = await testMultiAssetHolder._computeNewAllocationWithGuarantee(
       BigNumber.from(heldBefore),
       allocation,
       indices,
       guarantee
-    )) as ReturnType<typeof computeNewAllocation>;
+    );
 
     expect(result).toBeDefined();
     expect(result.newAllocation).toMatchObject(

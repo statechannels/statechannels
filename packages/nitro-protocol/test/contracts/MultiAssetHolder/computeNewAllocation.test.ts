@@ -1,11 +1,16 @@
-import {Contract, BigNumber} from 'ethers';
+import {BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
-import {getTestProvider, setupContract, randomExternalDestination} from '../../test-helpers';
+import {getTestProvider, randomExternalDestination, setupContract} from '../../test-helpers';
+import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+// eslint-disable-next-line import/order
+import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
 
-const provider = getTestProvider();
-
-let AssetHolder: Contract;
+const testMultiAssetHolder = (setupContract(
+  getTestProvider(),
+  TESTMultiAssetHolderArtifact,
+  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
+) as unknown) as TESTMultiAssetHolder;
 
 import {AllocationItem} from '../../../src';
 import {computeNewAllocation} from '../../../src/contract/asset-holder';
@@ -32,11 +37,11 @@ describe('AssetHolder._computeNewAllocation', () => {
     // check local function works as expected
     const locallyComputedNewAllocation = computeNewAllocation(heldBefore, allocation, indices);
 
-    const result = (await AssetHolder._computeNewAllocation(
+    const result = await testMultiAssetHolder._computeNewAllocation(
       heldBefore,
       allocation,
       indices
-    )) as ReturnType<typeof computeNewAllocation>;
+    );
     expect(result).toBeDefined();
     expect(result.newAllocation).toMatchObject(
       locallyComputedNewAllocation.newAllocation.map(a => ({
