@@ -6,12 +6,25 @@ const {AddressZero} = ethers.constants;
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
-
+import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import {Token} from '../../../typechain/Token';
+// eslint-disable-next-line import/order
+import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
 const provider = getTestProvider();
-const signer0 = provider.getSigner(0); // Convention matches setupContract function
+const testMultiAssetHolder = (setupContract(
+  provider,
+  TESTMultiAssetHolderArtifact,
+  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
+) as unknown) as TESTMultiAssetHolder & Contract;
+
+const token = (setupContract(
+  provider,
+  TokenArtifact,
+  process.env.TEST_TOKEN_ADDRESS
+) as unknown) as Token & Contract;
+
+const signer0 = getTestProvider().getSigner(0); // Convention matches setupContract function
 let signer0Address;
-let ERC20AssetHolder: Contract;
-let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
@@ -21,7 +34,6 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   signer0Address = await signer0.getAddress();
 });
 
@@ -53,28 +65,30 @@ describe('deposit', () => {
     const destination = getChannelId(destinationChannel);
 
     // Check msg.sender has enough tokens
-    const balance = await Token.balanceOf(signer0Address);
+    const balance = await token.balanceOf(signer0Address);
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance
-    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
+    await (await token.increaseAllowance(testMultiAssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
     // Check allowance updated
     const allowance = BigNumber.from(
-      await Token.allowance(signer0Address, ERC20AssetHolder.address)
+      await token.allowance(signer0Address, testMultiAssetHolder.address)
     );
     expect(allowance.sub(amount).sub(held).gte(0)).toBe(true);
 
     if (held > 0) {
       // Set holdings by depositing in the 'safest' way
-      const {events} = await (await ERC20AssetHolder.deposit(destination, 0, held)).wait();
-      expect(await ERC20AssetHolder.holdings(destination)).toEqual(held);
+      const {events} = await (
+        await testMultiAssetHolder.deposit(token.address, destination, 0, held)
+      ).wait();
+      expect(await testMultiAssetHolder.holdings(token.address, destination)).toEqual(held);
       const {data: amountTransferred} = getTransferEvent(events);
       expect(held.eq(amountTransferred)).toBe(true);
     }
 
-    const balanceBefore = BigNumber.from(await Token.balanceOf(signer0Address));
-    const tx = ERC20AssetHolder.deposit(destination, expectedHeld, amount);
+    const balanceBefore = BigNumber.from(await token.balanceOf(signer0Address));
+    const tx = testMultiAssetHolder.deposit(token.address, destination, expectedHeld, amount);
 
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
@@ -91,11 +105,11 @@ describe('deposit', () => {
       const amountTransferred = BigNumber.from(getTransferEvent(events).data);
       expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
 
-      const allocatedAmount = await ERC20AssetHolder.holdings(destination);
+      const allocatedAmount = await testMultiAssetHolder.holdings(token.address, destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // Check that the correct number of Tokens were deducted
-      const balanceAfter = BigNumber.from(await Token.balanceOf(signer0Address));
+      const balanceAfter = BigNumber.from(await token.balanceOf(signer0Address));
       expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
     }
   });
@@ -103,4 +117,4 @@ describe('deposit', () => {
 
 const getDepositedEvent = events => events.find(({event}) => event === 'Deposited').args;
 const getTransferEvent = events =>
-  events.find(({topics}) => topics[0] === Token.filters.Transfer(AddressZero).topics[0]);
+  events.find(({topics}) => topics[0] === token.filters.Transfer(AddressZero).topics[0]);
