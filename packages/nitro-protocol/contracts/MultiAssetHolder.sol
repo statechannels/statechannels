@@ -119,6 +119,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         );
         bytes32 outcomeHash = keccak256(abi.encode(outcome));
         _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
+        emit FingerprintUpdated(fromChannelId, outcome);
     }
 
     /**
@@ -368,7 +369,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             }
         }
         return newAllocation;
-        // TODO emit OutcomeUpdated(fromChannelId, initialHoldings);
     }
 
     /**

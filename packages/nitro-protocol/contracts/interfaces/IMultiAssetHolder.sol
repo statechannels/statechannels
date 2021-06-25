@@ -2,6 +2,8 @@
 pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
+import '../Outcome.sol';
+
 /**
  * @dev The IMultiAssetHolder interface calls for functions that allow assets to be transferred from one channel to other channel and/or external destinations, as well as for guarantees to be claimed.
  */
@@ -79,12 +81,15 @@ interface IMultiAssetHolder {
     );
 
     /**
-     * @dev Indicates the assetOutcomeHash for this channelId has changed due to a transfer or claim. Includes sufficient data to compute:
+     * @dev Indicates the fingerprint for this channelId has changed due to a transfer or claim. Includes sufficient data to compute:
      * - the preimage of this hash as well as
      * - the new holdings for this channelId and any others that were transferred to
      * - the payouts to external destinations
      * @param channelId The channelId of the funds being withdrawn.
-     * @param initialHoldings holdings[channelId] **before** the allocations were updated
+     * @param outcome The new outcome hashed into the fingerprint
      */
-    event AllocationUpdated(bytes32 indexed channelId, uint256 initialHoldings);
+    event FingerprintUpdated(
+        bytes32 indexed channelId,
+        Outcome.OutcomeItem[] outcome
+    );
 }
