@@ -41,21 +41,23 @@ contract NitroAdjudicator is MultiAssetHolder {
             sigs
         );
 
-        _transferAllAssets(channelId, outcomeBytes, bytes32(0), address(0));
+        transferAllAssets(channelId, outcomeBytes, bytes32(0), address(0));
     }
 
     /**
-     * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
-     * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
+     * @notice Liquidates all assets for the channel
+     * @dev Liquidates all assets for the channel
      * @param channelId Unique identifier for a state channel
      * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
+     * @param stateHash stored state hash for the channel
+     * @param challengerAddress stored challenger address for the channel
      */
-    function _transferAllAssets(
+    function transferAllAssets(
         bytes32 channelId,
         bytes memory outcomeBytes,
         bytes32 stateHash,
         address challengerAddress
-    ) internal {
+    ) public {
         // is there a smarter way of getting the length of the outcome?
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
