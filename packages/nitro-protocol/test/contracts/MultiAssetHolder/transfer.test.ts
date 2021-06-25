@@ -63,6 +63,7 @@ describe('transfer', () => {
       // Compute channelId
       const nonce = getRandomNonce(name);
       addresses.c = randomChannelId(nonce);
+      const channelId = addresses.c;
       addresses.C = randomChannelId(nonce + 1);
       addresses.X = randomChannelId(nonce + 2);
       // Transform input data (unpack addresses and BigNumberify amounts)
@@ -111,8 +112,8 @@ describe('transfer', () => {
           await testMultiAssetHolder.setStatusFromChannelData(channelId, {
             turnNumRecord,
             finalizesAt,
-            stateHash: constants.HashZero,
-            challengerAddress: constants.AddressZero,
+            stateHash,
+            challengerAddress,
             outcomeHash,
           })
         ).wait();
