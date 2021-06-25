@@ -86,7 +86,7 @@ interface IMultiAssetHolder {
      * - the new holdings for this channelId and any others that were transferred to
      * - the payouts to external destinations
      * @param channelId The channelId of the funds being withdrawn.
-     * @param outcome The new outcome hashed into the fingerprint
+     * @param outcomeBytes The (encoded) new outcome hashed into the fingerprint
      */
-    event FingerprintUpdated(bytes32 indexed channelId, Outcome.OutcomeItem[] outcome);
+    event FingerprintUpdated(bytes32 indexed channelId, bytes outcomeBytes);
 }
