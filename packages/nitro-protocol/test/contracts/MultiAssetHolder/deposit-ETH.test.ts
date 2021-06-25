@@ -1,14 +1,22 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, BigNumber, ethers} from 'ethers';
+import {Wallet, BigNumber, ethers, constants} from 'ethers';
 const {parseUnits} = ethers.utils;
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
+import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+// eslint-disable-next-line import/order
+import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
+const testMultiAssetHolder = (setupContract(
+  getTestProvider(),
+  TESTMultiAssetHolderArtifact,
+  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
+) as unknown) as TESTMultiAssetHolder;
 
-const provider = getTestProvider();
-let ETHAssetHolder: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
+
+const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
 
 // Populate destinations array
 for (let i = 0; i < 3; i++) {
@@ -47,22 +55,36 @@ describe('deposit', () => {
 
       if (held > 0) {
         // Set holdings by depositing in the 'safest' way
-        const tx0 = ETHAssetHolder.deposit(destination, '0x00', held, {
-          value: held,
-        });
+        const tx0 = testMultiAssetHolder.deposit(
+          MAGIC_ADDRESS_INDICATING_ETH,
+          destination,
+          '0x00',
+          held,
+          {
+            value: held,
+          }
+        );
         const {events} = await (await tx0).wait();
         const depositedEvent = getDepositedEvent(events);
 
-        expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
+        expect(
+          await testMultiAssetHolder.holdings(MAGIC_ADDRESS_INDICATING_ETH, destination)
+        ).toEqual(held);
         expect(depositedEvent).toMatchObject({
           destination,
           amountDeposited: BigNumber.from(held),
           destinationHoldings: BigNumber.from(held),
         });
       }
-      const tx = ETHAssetHolder.deposit(destination, expectedHeld, amount, {
-        value: msgValue,
-      });
+      const tx = testMultiAssetHolder.deposit(
+        MAGIC_ADDRESS_INDICATING_ETH,
+        destination,
+        expectedHeld,
+        amount,
+        {
+          value: msgValue,
+        }
+      );
 
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
@@ -75,7 +97,10 @@ describe('deposit', () => {
           destinationHoldings: heldAfter,
         });
 
-        const allocatedAmount = await ETHAssetHolder.holdings(destination);
+        const allocatedAmount = await testMultiAssetHolder.holdings(
+          MAGIC_ADDRESS_INDICATING_ETH,
+          destination
+        );
         await expect(allocatedAmount).toEqual(heldAfter);
       }
     }
