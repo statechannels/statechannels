@@ -62,8 +62,7 @@ describe('transfer', () => {
     async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, reason}) => {
       // Compute channelId
       const nonce = getRandomNonce(name);
-      const channelId = randomChannelId(nonce);
-      addresses.c = channelId;
+      addresses.c = randomChannelId(nonce);
       addresses.C = randomChannelId(nonce + 1);
       addresses.X = randomChannelId(nonce + 2);
       // Transform input data (unpack addresses and BigNumberify amounts)
@@ -71,8 +70,6 @@ describe('transfer', () => {
       setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
       newOutcome = replaceAddressesAndBigNumberify(newOutcome, addresses);
       heldAfter = replaceAddressesAndBigNumberify(heldAfter, addresses);
-
-      // pay some ETH to the contract
 
       // Deposit into channels
 
