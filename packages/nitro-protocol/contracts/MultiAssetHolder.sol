@@ -360,7 +360,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         for (uint256 j = 0; j < payouts.length; j++) {
             if (payouts[j] > 0) {
                 bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
-                // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
                     _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
                 } else {
@@ -428,7 +427,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 amount
     ) internal {
         if (asset == address(0)) {
-            destination.transfer(amount);
+            (bool success, ) = destination.call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
+            require(success, 'Could not transfer ETH');
         } else {
             IERC20(asset).transfer(destination, amount);
         }
@@ -479,7 +479,10 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 channelId
     ) internal view {
         (, , uint160 fingerprint) = _unpackStatus(channelId);
-        require(fingerprint == _generateFingerprint(stateHash, challengerAddress, outcomeHash));
+        require(
+            fingerprint == _generateFingerprint(stateHash, challengerAddress, outcomeHash),
+            'incorrect fingerprint'
+        );
     }
 
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
