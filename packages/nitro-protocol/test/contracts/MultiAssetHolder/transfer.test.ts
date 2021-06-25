@@ -64,7 +64,8 @@ describe('transfer', () => {
       const nonce = getRandomNonce(name);
       const channelId = randomChannelId(nonce);
       addresses.c = channelId;
-
+      addresses.C = randomChannelId(nonce + 1);
+      addresses.X = randomChannelId(nonce + 2);
       // Transform input data (unpack addresses and BigNumberify amounts)
       heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
       setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
@@ -172,6 +173,8 @@ describe('transfer', () => {
         ];
 
         expect(eventsFromTx).toMatchObject(expectedEvents);
+
+        // TODO check payouts are executed properly
       }
     }
   );
