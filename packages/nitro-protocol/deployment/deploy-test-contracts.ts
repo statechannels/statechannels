@@ -54,9 +54,7 @@ export async function deploy(): Promise<Record<string, string>> {
   const TEST_NITRO_ADJUDICATOR_ADDRESS = (await testNitroAdjudicatorFactory.deploy()).address;
   const TRIVIAL_APP_ADDRESS = (await trivialAppFactory.deploy()).address;
   const TEST_FORCE_MOVE_ADDRESS = (await testForceMoveFactory.deploy()).address;
-  const TEST_MULTI_ASSET_HOLDER_ADDRESS = (
-    await testMultiAssetHolderFactory.deploy(TEST_NITRO_ADJUDICATOR_ADDRESS)
-  ).address;
+  const TEST_MULTI_ASSET_HOLDER_ADDRESS = (await testMultiAssetHolderFactory.deploy()).address;
   const EMBEDDED_APPLICATION_ADDRESS = (await embeddedApplicationFactory.deploy()).address;
 
   // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
