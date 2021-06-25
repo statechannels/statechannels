@@ -10,7 +10,67 @@ import './MultiAssetHolder.sol';
  * @dev The NitroAdjudicator contract extends ForceMove and hence inherits all ForceMove methods, and also extends and implements the Adjudicator interface, allowing for a finalized outcome to be pushed to an asset holder.
  */
 contract NitroAdjudicator is MultiAssetHolder {
-    // TODO concludeAndTransferAll method
+    /**
+     * @notice Finalizes a channel by providing a finalization proof, and liquidates all assets for the channel.
+     * @dev Finalizes a channel by providing a finalization proof, and liquidates all assets for the channel.
+     * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
+     * @param fixedPart Data describing properties of the state channel that do not change with state updates.
+     * @param appPartHash The keccak256 of the abi.encode of `(challengeDuration, appDefinition, appData)`. Applies to all states in the finalization proof.
+     * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
+     * @param numStates The number of states in the finalization proof.
+     * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     */
+    function concludeAndTransferAll(
+        uint48 largestTurnNum,
+        FixedPart memory fixedPart,
+        bytes32 appPartHash,
+        bytes memory outcomeBytes,
+        uint8 numStates,
+        uint8[] memory whoSignedWhat,
+        Signature[] memory sigs
+    ) public {
+        bytes32 outcomeHash = keccak256(outcomeBytes);
+        bytes32 channelId = _conclude(
+            largestTurnNum,
+            fixedPart,
+            appPartHash,
+            outcomeHash,
+            numStates,
+            whoSignedWhat,
+            sigs
+        );
+
+        _transferAllAssets(channelId, outcomeBytes, bytes32(0), address(0));
+    }
+
+    /**
+     * @notice Triggers transferAll in all external Asset Holder contracts specified in a given outcome for a given channelId.
+     * @dev Triggers transferAll in  all external Asset Holder contracts specified in a given outcome for a given channelId.
+     * @param channelId Unique identifier for a state channel
+     * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
+     */
+    function _transferAllAssets(
+        bytes32 channelId,
+        bytes memory outcomeBytes,
+        bytes32 stateHash,
+        address challengerAddress
+    ) internal {
+        // is there a smarter way of getting the length of the outcome?
+        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+
+        for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
+            // TODO there is a lot of scope for gas savings here
+            transfer(
+                assetIndex,
+                channelId,
+                outcomeBytes,
+                stateHash,
+                challengerAddress,
+                new uint256[](0) // meaning "all"
+            );
+        }
+    }
 
     /**
     * @notice Check that the submitted pair of states form a valid transition (public wrapper for internal function _requireValidTransition)

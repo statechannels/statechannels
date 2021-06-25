@@ -85,11 +85,11 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     function transfer(
         uint256 assetIndex, // TODO consider a uint48?
         bytes32 fromChannelId,
-        bytes calldata outcomeBytes,
+        bytes memory outcomeBytes,
         bytes32 stateHash,
         address challengerAddress,
         uint256[] memory indices
-    ) external override {
+    ) public override {
         // checks
         _requireIncreasingIndices(indices);
         _requireChannelFinalized(fromChannelId);
