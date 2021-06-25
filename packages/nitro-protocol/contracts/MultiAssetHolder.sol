@@ -207,6 +207,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 targetChallengerAddress,
                 outcomeHash
             );
+            emit FingerprintUpdated(guarantee.targetChannelId, abi.encode(outcome));
         }
     }
 
