@@ -3,7 +3,12 @@ import {Wallet, BigNumber, ethers, constants} from 'ethers';
 const {parseUnits} = ethers.utils;
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
+import {
+  getRandomNonce,
+  getTestProvider,
+  MAGIC_ADDRESS_INDICATING_ETH,
+  setupContract,
+} from '../../test-helpers';
 import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
 // eslint-disable-next-line import/order
 import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
@@ -15,8 +20,6 @@ const testMultiAssetHolder = (setupContract(
 
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
-
-const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
 
 // Populate destinations array
 for (let i = 0; i < 3; i++) {

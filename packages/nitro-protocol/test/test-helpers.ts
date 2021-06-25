@@ -24,6 +24,8 @@ import {
 } from '../src/contract/outcome';
 import {Bytes32} from '../src';
 
+export const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
+
 // Interfaces
 
 // E.g. {ALICE:2, BOB:3}
@@ -204,6 +206,7 @@ export async function sendTransaction(
   return await response.wait();
 }
 
+// TODO deprecate
 export function allocationToParams(allocation: AllocationItem[]): [Bytes, Bytes32] {
   const allocationBytes = encodeAllocation(allocation);
   let assetOutcomeHash;
@@ -214,7 +217,7 @@ export function allocationToParams(allocation: AllocationItem[]): [Bytes, Bytes3
   }
   return [allocationBytes, assetOutcomeHash];
 }
-
+// TODO deprecate
 export function guaranteeToParams(guarantee: Guarantee): [Bytes, Bytes32] {
   const guaranteeBytes = encodeGuarantee(guarantee);
 
