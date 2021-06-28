@@ -62,18 +62,14 @@ for (let i = 0; i < 3; i++) {
   participants[i] = wallets[i].address;
 }
 
-// Scenarios are synonymous with channelNonce:
-
-// Const description1 =
-//   'testNitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 1x Asset types transferred';
-const description2 =
+const description =
   'testNitroAdjudicator accepts a transferAllAssets tx for a finalized channel, and 2x Asset types transferred';
 const channelNonce = getRandomNonce('transferAllAssets');
 
 describe('transferAllAssets', () => {
   it.each`
-    description     | setOutcome                      | heldBefore                      | newOutcome                      | heldAfter                       | payouts                         | reasonString
-    ${description2} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${{ETH: {c: 1}, ERC20: {c: 2}}} | ${{ETH: {A: 0}, ERC20: {A: 0}}} | ${{ETH: {c: 0}, ERC20: {c: 0}}} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${undefined}
+    description    | setOutcome                      | heldBefore                      | newOutcome                      | heldAfter                       | payouts                         | reasonString
+    ${description} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${{ETH: {c: 1}, ERC20: {c: 2}}} | ${{ETH: {A: 0}, ERC20: {A: 0}}} | ${{ETH: {c: 0}, ERC20: {c: 0}}} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
