@@ -386,6 +386,9 @@ export class ChainService implements ChainServiceInterface {
     assetHolders: Address[],
     subscriber: ChainEventSubscriberInterface
   ): void {
+    if (this.channelToEventTrackers.has(channelId)) {
+      return;
+    }
     this.logger.info({channelId, assetHolders}, 'registerChannel: entry');
 
     const eventTracker = new EventTracker(subscriber, this.logger);
