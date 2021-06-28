@@ -106,7 +106,6 @@ export class ChainService implements ChainServiceInterface {
       process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
     );
 
-    console.log(this.nitroAdjudicatorAddress);
     this.nitroAdjudicator = this.getOrAddContractMapping(
       this.nitroAdjudicatorAddress,
       ContractArtifacts.NitroAdjudicatorArtifact.abi
@@ -144,6 +143,7 @@ export class ChainService implements ChainServiceInterface {
   public async handleChainRequests(
     chainRequests: ChainRequest[]
   ): Promise<providers.TransactionResponse[]> {
+    if (chainRequests.length === 0) return [];
     const responses: providers.TransactionResponse[] = [];
 
     this.logger.trace({chainRequests}, 'Handling chain requests');
