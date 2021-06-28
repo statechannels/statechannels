@@ -10,8 +10,6 @@ import {BigNumber} from '@ethersproject/bignumber';
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import {NitroAdjudicator} from '../typechain/NitroAdjudicator';
-import {ETHAssetHolder} from '../typechain/ETHAssetHolder';
-import {ERC20AssetHolder} from '../typechain/ERC20AssetHolder';
 import {Token} from '../typechain/Token';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -22,8 +20,6 @@ declare global {
   }
 }
 
-export let ethAssetHolder: ETHAssetHolder & Contract;
-export let erc20AssetHolder: ERC20AssetHolder & Contract;
 export let nitroAdjudicator: NitroAdjudicator & Contract;
 export let token: Token & Contract;
 

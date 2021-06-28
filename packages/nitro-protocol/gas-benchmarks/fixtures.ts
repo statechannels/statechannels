@@ -45,7 +45,12 @@ class TestChannel {
   }
   wallets: ethers.Wallet[];
   channel: Channel;
-  guaranteeOrAllocation: Guarantee | Allocation;
+  private guaranteeOrAllocation: Guarantee | Allocation;
+  outcome(assetHolderAddress: string) {
+    return 'targetChannelId' in this.guaranteeOrAllocation
+      ? [{assetHolderAddress, guarantee: this.guaranteeOrAllocation}]
+      : [{assetHolderAddress, allocationItems: this.guaranteeOrAllocation}];
+  }
   get channelId() {
     return getChannelId(this.channel);
   }
@@ -56,10 +61,7 @@ class TestChannel {
       channel: this.channel,
       turnNum: 6,
       isFinal: false,
-      outcome:
-        'targetChannelId' in this.guaranteeOrAllocation
-          ? [{assetHolderAddress, guarantee: this.guaranteeOrAllocation}]
-          : [{assetHolderAddress, allocationItems: this.guaranteeOrAllocation}],
+      outcome: this.outcome(assetHolderAddress),
       appData: '0x', // TODO choose a more representative example
     };
   }
@@ -123,9 +125,9 @@ class TestChannel {
     };
   }
 
-  async concludePushOutcomeAndTransferAllTx(assetHolderAddress: string) {
+  async concludeAndTransferAllAssetsTx(assetHolderAddress: string) {
     const fP = this.supportProof(this.finalState(assetHolderAddress));
-    return await nitroAdjudicator.concludePushOutcomeAndTransferAll(
+    return await nitroAdjudicator.concludeAndTransferAllAssets(
       fP.largestTurnNum,
       fP.fixedPart,
       fP.appPartHash,
