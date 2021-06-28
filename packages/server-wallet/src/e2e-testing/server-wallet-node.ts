@@ -2,8 +2,9 @@ import {CreateChannelParams} from '@statechannels/client-api-schema';
 import express, {Express} from 'express';
 
 import {WalletConfig} from '../config';
-import {Wallet} from '../wallet';
+import {ObjectiveDoneResult, Wallet} from '../wallet';
 import {SocketIOMessageService} from '../message-service/socket-io-message-service';
+import {WalletObjective} from '../models/objective';
 
 type CreateChannelRequest = {
   type: 'CreateChannel';
@@ -17,13 +18,17 @@ type CloseChannelRequest = {
 };
 export type ServerOperationRequest = CreateChannelRequest | CloseChannelRequest;
 export class ServerWalletNode {
+  private approvedObjectives = new Map<string, WalletObjective>();
   private jobChannelMap = new Map<string, string>();
-  private async handleWalletRequest(request: ServerOperationRequest): Promise<void> {
-    const handlers: Record<ServerOperationRequest['type'], any> = {
+  private async handleWalletRequest(request: ServerOperationRequest): Promise<ObjectiveDoneResult> {
+    const handlers: Record<
+      ServerOperationRequest['type'],
+      (req: any) => Promise<ObjectiveDoneResult>
+    > = {
       CreateChannel: async (request: CreateChannelRequest) => {
         const [result] = await this.serverWallet.createChannels([request.channelParams]);
-        console.log(JSON.stringify(result));
         this.jobChannelMap.set(request.jobId, result.channelId);
+        return result.done;
       },
       CloseChannel: async (request: CloseChannelRequest) => {
         const channelId = this.jobChannelMap.get(request.jobId);
@@ -31,10 +36,11 @@ export class ServerWalletNode {
         const [result] = await this.serverWallet.closeChannels([channelId]);
 
         this.jobChannelMap.set(request.jobId, result.channelId);
+        return result.done;
       },
     };
 
-    await handlers[request.type](request);
+    return handlers[request.type](request);
   }
 
   public async destroy(): Promise<void> {
@@ -43,18 +49,31 @@ export class ServerWalletNode {
   }
   private server: Express;
   private constructor(private serverWallet: Wallet, private port: number) {
-    this.serverWallet.on('ObjectiveProposed', console.log);
     this.serverWallet.on('ObjectiveProposed', async o => {
-      await this.serverWallet.approveObjectives([o.objectiveId]);
-      console.log(`Auto approving ${o.objectiveId}`);
+      // TODO: The wallet should not be emitting proposed objectives multiple times
+      if (!this.approvedObjectives.has(o.objectiveId)) {
+        this.approvedObjectives.set(o.objectiveId, o);
+        await this.serverWallet.approveObjectives([o.objectiveId]);
+      }
     });
     this.server = express();
     this.server.use(express.json());
     this.server.post('/', async (req, res) => {
       const requests: ServerOperationRequest[] = req.body;
       for (const serverRequest of requests) {
-        await this.handleWalletRequest(serverRequest);
+        const result = await this.handleWalletRequest(serverRequest);
+        if (result.type !== 'Success') {
+          res
+            .status(500)
+            .send(
+              `ServerOperationRequest failed ${JSON.stringify(
+                serverRequest
+              )} with wallet response ${JSON.stringify(result)}`
+            )
+            .end();
+        }
       }
+
       res.end();
     });
   }
@@ -64,7 +83,9 @@ export class ServerWalletNode {
   }
 
   public async registerPeer(port: number): Promise<void> {
-    (this.serverWallet.messageService as SocketIOMessageService).registerPeer('localhost', port);
+    (this.serverWallet.messageService as SocketIOMessageService).registerPeer(
+      `http://localhost:${port}`
+    );
   }
   public static async create(
     walletConfig: WalletConfig,
