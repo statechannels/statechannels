@@ -1,20 +1,8 @@
-import {utils, BigNumber, ethers} from 'ethers';
+import {utils, BigNumber} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
-import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 
-import {
-  AllocationAssetOutcome,
-  AllocationItem,
-  decodeAllocation,
-  decodeGuarantee,
-  decodeOutcome,
-  Guarantee,
-  isAllocationOutcome,
-} from './outcome';
-import {Address, Bytes32} from './types';
-import {isExternalDestination} from './channel';
-
+import {AllocationItem, Guarantee} from './outcome';
 export interface DepositedEvent {
   destination: string;
   amountDeposited: BigNumber;
@@ -170,140 +158,7 @@ export function computeNewAllocation(
     totalPayouts: totalPayouts.toHexString(),
   };
 }
-// TODO fix this or remove
-// /**
-//  *
-//  * Takes an AllocationUpdatedEvent and the transaction that emittted it, and returns updated information in a convenient format.
-//  * Requires both an adjudicator and asset holder address.
-//  * @param assetHolderAddress
-//  * @param nitroAdjudicatorAddress
-//  * @param allocationUpdatedEvent
-//  * @param tx Transaction which gave rise to the event
-//  */
-// export function computeNewAssetOutcome(
-//   assetHolderAddress: Address,
-//   nitroAdjudicatorAddress: Address,
-//   allocationUpdatedEvent: {channelId: Bytes32; initialHoldings: string},
-//   tx: ethers.Transaction
-// ): {
-//   newAssetOutcome: AllocationAssetOutcome | '0x00'; // '0x00' if the outcome was deleted on chain
-//   newHoldings: BigNumber;
-//   externalPayouts: AllocationItem[];
-//   internalPayouts: AllocationItem[];
-// } {
-//   // Extract the calldata that we need
-//   const {oldAllocation, indices, guarantee} = extractOldAllocationAndIndices(
-//     assetHolderAddress,
-//     nitroAdjudicatorAddress,
-//     tx
-//   );
 
-//   // Use the emulated, pure solidity functions to figure out what the chain will have done
-//   const {newAllocation, deleted, payouts, totalPayouts} = guarantee
-//     ? computeNewAllocationWithGuarantee(
-//         allocationUpdatedEvent.initialHoldings,
-//         oldAllocation,
-//         indices,
-//         guarantee
-//       ) // if guarantee is defined, then we know that claim was called
-//     : computeNewAllocation(allocationUpdatedEvent.initialHoldings, oldAllocation, indices);
-
-//   // Massage the output for convenience
-//   const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
-//   const newAssetOutcome: AllocationAssetOutcome | '0x00' = deleted
-//     ? '0x00'
-//     : {
-//         assetHolderAddress: assetHolderAddress,
-//         allocationItems: newAllocation,
-//       };
-
-//   const longHandIndices =
-//     indices.length === 0
-//       ? Array.from(Array(payouts.length).keys()) // [0,1,2,...] all indices up to payouts.length
-//       : indices;
-
-//   const hydratedPayouts: AllocationItem[] = payouts.map((v, i) => ({
-//     destination: oldAllocation[longHandIndices[i]].destination,
-//     amount: v,
-//   }));
-
-//   const externalPayouts = hydratedPayouts.filter(payout =>
-//     isExternalDestination(payout.destination)
-//   );
-
-//   const internalPayouts = hydratedPayouts.filter(
-//     payout => !isExternalDestination(payout.destination)
-//   );
-//   return {newAssetOutcome, newHoldings, externalPayouts, internalPayouts};
-// }
-
-// TODO fix this or remove
-// /**
-//  *
-//  * Extracts the allocation and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator or AssetHolder giving rise to an AllocationUpdated event.
-//  * The address of the relevant contract must be passed in the correct position in the parameters list of this function.
-//  * Requires both an adjudicator and asset holder address.
-//  * @param assetHolderAddress
-//  * @param nitroAdjudicatorAddress
-//  * @param tx Transaction which contained the allocation and indices
-//  */
-// function extractOldAllocationAndIndices(
-//   assetHolderAddress: Address,
-//   nitroAdjudicatorAddress: Address,
-//   tx: ethers.Transaction
-// ): {
-//   oldAllocation: AllocationItem[];
-//   indices: number[];
-//   guarantee: Guarantee | undefined;
-// } {
-//   let oldAllocation;
-//   let indices = [];
-//   let guarantee: Guarantee | undefined = undefined;
-//   // First, deduce which contract the tx targeted:
-
-//   if (tx.to === assetHolderAddress) {
-//     // If the originating tx targeted the supplied AssetHolder...
-
-//     const txDescription = new ethers.Contract(
-//       assetHolderAddress,
-//       AssetHolderArtifact.abi
-//     ).interface.parseTransaction(tx);
-
-//     // all methods (transfer, transferAll, claim, claimAll)
-//     // have a parameter allocationBytes:
-//     oldAllocation = decodeAllocation(txDescription.args.allocationBytes);
-//     if (txDescription.name === 'claim') {
-//       guarantee = decodeGuarantee(txDescription.args.guarantee);
-//     }
-//     indices =
-//       txDescription.name === 'transfer' || txDescription.name == 'claim'
-//         ? txDescription.args.indices
-//         : [];
-//   } else if (tx.to === nitroAdjudicatorAddress) {
-//     // If the originating tx targeted the supplied NitroAdjudicator...
-
-//     indices = []; // all the adjudicator methods use 'all'.
-
-//     const txDescription = new ethers.Contract(
-//       nitroAdjudicatorAddress,
-//       NitroAdjudicatorArtifact.abi
-//     ).interface.parseTransaction(tx);
-
-//     // all methods (pushOutcomeAndTransferAll, concludePushOutcomeAndTransferAll) have a parameter outcomeByte:
-//     const oldOutcome = decodeOutcome(txDescription.args.outcomeBytes);
-//     // We have the entire outcome here: we need to extract the relevant AssetOutcome
-//     const assetOutcome = oldOutcome.find(
-//       outcome => outcome.assetHolderAddress === assetHolderAddress
-//     );
-
-//     if (isAllocationOutcome(assetOutcome)) {
-//       oldAllocation = assetOutcome.allocationItems;
-//     } else throw Error('No allocation for this asset holder');
-//   } else
-//     throw Error('transaction did not originate from either of the supplied contract addresses');
-
-//   return {oldAllocation, indices, guarantee};
-// }
 function min(a: BigNumber, b: BigNumber) {
   return a.gt(b) ? b : a;
 }
