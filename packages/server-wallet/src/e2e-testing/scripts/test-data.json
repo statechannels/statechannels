@@ -1,0 +1,37 @@
+[{
+    "type": "CreateChannel",
+    "jobId": "abc",
+    "channelParams": {
+        "participants": [
+            {
+                "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+                "participantId": "a",
+                "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96"
+            },
+            {
+                "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+                "participantId": "b",
+                "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db"
+            }
+        ],
+        "allocations": [
+            {
+                "allocationItems": [
+                    {
+                        "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+                        "amount": "0x03"
+                    },
+                    {
+                        "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+                        "amount": "0x02"
+                    }
+                ],
+                "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+            }
+        ],
+        "appDefinition": "0x0000000000000000000000000000000000000000",
+        "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+        "fundingStrategy": "Direct",
+        "challengeDuration": 86400
+    }
+}]
