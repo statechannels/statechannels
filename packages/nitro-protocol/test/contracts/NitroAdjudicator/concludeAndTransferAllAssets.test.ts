@@ -234,7 +234,7 @@ describe('concludeAndTransferAllAssets', () => {
         expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedFingerprint);
 
         // Extract logs
-        const {logs} = await (await tx).wait();
+        await (await tx).wait();
 
         // Check new holdings
         await Promise.all(

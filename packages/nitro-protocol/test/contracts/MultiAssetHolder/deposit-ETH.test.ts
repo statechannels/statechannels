@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Wallet, BigNumber, ethers, constants} from 'ethers';
+import {Wallet, BigNumber, ethers} from 'ethers';
 const {parseUnits} = ethers.utils;
 
 import {Channel, getChannelId} from '../../../src/contract/channel';

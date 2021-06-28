@@ -105,7 +105,10 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             outcome[assetIndex].assetOutcomeBytes,
             (Outcome.AssetOutcome)
         );
-        require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
+        require(
+            assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            '!allocation'
+        );
         Outcome.AllocationItem[] memory allocation = abi.decode(
             assetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
@@ -164,7 +167,10 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 outcome[assetIndex].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
-            require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee));
+            require(
+                assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee),
+                '!guarantee'
+            );
             guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
             asset = outcome[assetIndex].assetHolderAddress;
         }
@@ -187,7 +193,10 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 outcome[assetIndex].assetOutcomeBytes,
                 (Outcome.AssetOutcome)
             );
-            require(assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation));
+            require(
+                assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+                '!allocation'
+            );
             allocation = abi.decode(
                 assetOutcome.allocationOrGuaranteeBytes,
                 (Outcome.AllocationItem[])
@@ -343,8 +352,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 initialHoldings = holdings[asset][fromChannelId];
 
         (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete,
+            Outcome.AllocationItem[] memory newAllocation, // safeToDelete
+            ,
             uint256[] memory payouts,
             uint256 totalPayouts
         ) = _computeNewAllocation(initialHoldings, allocation, indices);
@@ -386,8 +395,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 initialHoldings = holdings[asset][guarantorChannelId];
 
         (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete,
+            Outcome.AllocationItem[] memory newAllocation, // safeToDelete
+            ,
             uint256[] memory payouts,
             uint256 totalPayouts
         ) = _computeNewAllocationWithGuarantee(initialHoldings, allocation, indices, guarantee);

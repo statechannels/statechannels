@@ -18,10 +18,7 @@ const testNitroAdjudicator = (setupContract(
 ) as unknown) as TESTNitroAdjudicator;
 
 import {AllocationItem, Guarantee} from '../../../src';
-import {
-  computeNewAllocation,
-  computeNewAllocationWithGuarantee,
-} from '../../../src/contract/asset-holder';
+import {computeNewAllocationWithGuarantee} from '../../../src/contract/multi-asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0

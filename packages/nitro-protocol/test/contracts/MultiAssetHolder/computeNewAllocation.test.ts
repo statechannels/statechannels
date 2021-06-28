@@ -13,7 +13,7 @@ const testNitroAdjudicator = (setupContract(
 ) as unknown) as TESTNitroAdjudicator;
 
 import {AllocationItem} from '../../../src';
-import {computeNewAllocation} from '../../../src/contract/asset-holder';
+import {computeNewAllocation} from '../../../src/contract/multi-asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0

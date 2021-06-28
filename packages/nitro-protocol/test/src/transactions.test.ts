@@ -11,7 +11,6 @@ import {
   createRespondTransaction,
   createSignatureArguments,
   MAX_TX_DATA_SIZE,
-  createPushOutcomeTransaction,
 } from '../../src/transactions';
 import {getRandomNonce, largeOutcome} from '../test-helpers';
 
@@ -47,7 +46,6 @@ const state: State = {
 };
 let signedStateA: SignedState;
 let signedStateB: SignedState;
-const largestOutcome = largeOutcome(MAX_OUTCOME_ITEMS);
 const stateWithLargeOutcome = {...state, outcome: largeOutcome(MAX_OUTCOME_ITEMS)};
 
 beforeAll(async () => {
