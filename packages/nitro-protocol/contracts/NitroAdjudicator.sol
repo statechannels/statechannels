@@ -21,7 +21,7 @@ contract NitroAdjudicator is MultiAssetHolder {
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      * @param sigs An array of signatures that support the state with the `largestTurnNum`.
      */
-    function concludeAndTransferAll(
+    function concludeAndTransferAllAssets(
         uint48 largestTurnNum,
         FixedPart memory fixedPart,
         bytes32 appPartHash,
