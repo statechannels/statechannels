@@ -63,3 +63,5 @@ ganache-deployments*.json
 
 # publishing workflow
 .npmrc
+
+packages/server-wallet/contract_artifacts.json
