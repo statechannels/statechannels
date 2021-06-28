@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, constants} from 'ethers';
+import {Contract, Wallet, constants} from 'ethers';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {
@@ -8,13 +8,8 @@ import {
   hashOutcome,
   Outcome,
 } from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
 import {
-  checkMultipleAssetOutcomeHashes,
-  checkMultipleHoldings,
-  compileEventsFromLogs,
   computeOutcome,
-  finalizedFingerprint,
   getRandomNonce,
   getTestProvider,
   MAGIC_ADDRESS_INDICATING_ETH,
@@ -22,16 +17,14 @@ import {
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  resetMultipleHoldings,
   setupContract,
 } from '../../test-helpers';
 import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 import {Token} from '../../../typechain/Token';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
-
 // eslint-disable-next-line import/order
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
-import {channelDataToStatus} from '../../../src';
+import {channelDataToStatus, convertBytes32ToAddress} from '../../../src';
 
 const testNitroAdjudicator = (setupContract(
   getTestProvider(),
@@ -76,8 +69,6 @@ for (let i = 0; i < 3; i++) {
 const description2 =
   'testNitroAdjudicator accepts a transferAllAssets tx for a finalized channel, and 2x Asset types transferred';
 const channelNonce = getRandomNonce('transferAllAssets');
-const storedTurnNumRecord = 5;
-const declaredTurnNumRecord = storedTurnNumRecord;
 
 describe('transferAllAssets', () => {
   it.each`
@@ -173,22 +164,10 @@ describe('transferAllAssets', () => {
       } else {
         const {events: eventsFromTx} = await (await tx1).wait();
 
-        // Build up event expectations
-        const expectedEvents = [];
-
-        // Add an AllocationUpdated event to expectations
-        Object.keys(heldBefore).forEach(key => {
-          expectedEvents.push({
-            event: 'FingerprintUpdated',
-            args: [
-              channelId,
-              expect.any(String), // for each asset, we expect one event. This may change under future gas optimizations.
-            ],
-          });
-        });
-
-        // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
-        // TODO decode events // expect(eventsFromTx).toContain(expectedEvents);
+        // we expect a FingerprintUpdated event for each asset. This may change under future optimizations
+        expect(eventsFromTx[0].event).toEqual('FingerprintUpdated');
+        // expect(eventsFromTx[1].event).toEqual('Transfer'); // TODO I do not know why the "event" property does not exist on this one
+        expect(eventsFromTx[2].event).toEqual('FingerprintUpdated');
 
         // Check new status
         const outcomeAfter: Outcome = computeOutcome(newOutcome);
@@ -202,7 +181,40 @@ describe('transferAllAssets', () => {
         });
         expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedStatusAfter);
 
+        // Check payouts
+        await Promise.all(
+          // For each asset
+          Object.keys(payouts).map(async asset => {
+            await Promise.all(
+              Object.keys(payouts[asset]).map(async destination => {
+                const address = convertBytes32ToAddress(destination);
+                // for each channel
+                const amount = payouts[asset][destination];
+                if (asset != MAGIC_ADDRESS_INDICATING_ETH) {
+                  expect((await token.balanceOf(address)).eq(amount)).toBe(true);
+                } else {
+                  expect((await getTestProvider().getBalance(address)).eq(amount)).toBe(true);
+                }
+              })
+            );
+          })
+        );
+
         // Check new holdings
+        await Promise.all(
+          // For each asset
+          Object.keys(heldAfter).map(async asset => {
+            await Promise.all(
+              Object.keys(heldAfter[asset]).map(async destination => {
+                // for each channel
+                const amount = heldAfter[asset][destination];
+                expect((await testNitroAdjudicator.holdings(asset, destination)).eq(amount)).toBe(
+                  true
+                );
+              })
+            );
+          })
+        );
       }
     }
   );
