@@ -1,14 +1,14 @@
 import {Wallet} from 'ethers';
 
 import {getTestProvider, setupContract} from '../../test-helpers';
-import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
-import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 
-const testMultiAssetHolder = (setupContract(
+const testNitroAdjudicator = (setupContract(
   getTestProvider(),
-  TESTMultiAssetHolderArtifact,
-  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
-) as unknown) as TESTMultiAssetHolder;
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator;
 
 const participants = ['', '', ''];
 const wallets = new Array(3);
@@ -23,14 +23,14 @@ describe('isExternalDestination', () => {
   it('verifies an external destination', async () => {
     const zerosPaddedExternalDestination =
       '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padStart(64, '0');
-    expect(await testMultiAssetHolder.isExternalDestination(zerosPaddedExternalDestination)).toBe(
+    expect(await testNitroAdjudicator.isExternalDestination(zerosPaddedExternalDestination)).toBe(
       true
     );
   });
   it('rejects a non-external-address', async () => {
     const onesPaddedExternalDestination =
       '0x' + 'eb89373c708B40fAeFA76e46cda92f801FAFa288'.padStart(64, '1');
-    expect(await testMultiAssetHolder.isExternalDestination(onesPaddedExternalDestination)).toBe(
+    expect(await testNitroAdjudicator.isExternalDestination(onesPaddedExternalDestination)).toBe(
       false
     );
   });

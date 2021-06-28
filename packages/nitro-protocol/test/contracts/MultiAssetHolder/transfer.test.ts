@@ -11,16 +11,16 @@ import {
   setupContract,
 } from '../../test-helpers';
 import {encodeOutcome, hashOutcome, Outcome} from '../../../src/contract/outcome';
-import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
-import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {channelDataToStatus} from '../../../src';
 
-const testMultiAssetHolder = (setupContract(
+const testNitroAdjudicator = (setupContract(
   getTestProvider(),
-  TESTMultiAssetHolderArtifact,
-  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
-) as unknown) as TESTMultiAssetHolder & Contract;
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator & Contract;
 
 const addresses = {
   // Channels
@@ -79,12 +79,12 @@ describe('transfer', () => {
           // Key must be either in heldBefore or heldAfter or both
           const amount = heldBefore[key];
           await (
-            await testMultiAssetHolder.deposit(MAGIC_ADDRESS_INDICATING_ETH, key, 0, amount, {
+            await testNitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, key, 0, amount, {
               value: amount,
             })
           ).wait();
           expect(
-            (await testMultiAssetHolder.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).eq(amount)
+            (await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).eq(amount)
           ).toBe(true);
         })
       );
@@ -109,7 +109,7 @@ describe('transfer', () => {
 
       if (reason != 'Channel not finalized') {
         await (
-          await testMultiAssetHolder.setStatusFromChannelData(channelId, {
+          await testNitroAdjudicator.setStatusFromChannelData(channelId, {
             turnNumRecord,
             finalizesAt,
             stateHash,
@@ -119,7 +119,7 @@ describe('transfer', () => {
         ).wait();
       }
 
-      const tx = testMultiAssetHolder.transfer(
+      const tx = testNitroAdjudicator.transfer(
         MAGIC_ADDRESS_INDICATING_ETH,
         channelId,
         reason == 'incorrect fingerprint' ? '0xdeadbeef' : outcomeBytes,
@@ -136,7 +136,7 @@ describe('transfer', () => {
         // Check new holdings
         await Promise.all(
           Object.keys(heldAfter).map(async key =>
-            expect(await testMultiAssetHolder.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).toEqual(
+            expect(await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).toEqual(
               heldAfter[key]
             )
           )
@@ -158,7 +158,7 @@ describe('transfer', () => {
           challengerAddress,
           outcome: outcomeAfter,
         });
-        expect(await testMultiAssetHolder.statusOf(channelId)).toEqual(expectedStatusAfter);
+        expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedStatusAfter);
 
         const expectedEvents = [
           {

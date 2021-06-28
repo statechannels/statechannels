@@ -7,7 +7,6 @@ import countingAppArtifact from '../artifacts/contracts/CountingApp.sol/Counting
 import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 import singleAssetPaymentsArtifact from '../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
 import hashLockedSwapArtifact from '../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
-import testMultiAssetHolderArtifact from '../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
 import testForceMoveArtifact from '../artifacts/contracts/test/TESTForceMove.sol/TESTForceMove.json';
 import testNitroAdjudicatorArtifact from '../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
@@ -24,7 +23,6 @@ const [
   nitroAdjudicatorFactory,
   singleAssetPaymentsFactory,
   hashLockedSwapFactory,
-  testMultiAssetHolderFactory,
   testForceMoveFactory,
   testNitroAdjudicatorFactory,
   tokenFactory,
@@ -35,7 +33,6 @@ const [
   nitroAdjudicatorArtifact,
   singleAssetPaymentsArtifact,
   hashLockedSwapArtifact,
-  testMultiAssetHolderArtifact,
   testForceMoveArtifact,
   testNitroAdjudicatorArtifact,
   tokenArtifact,
@@ -54,10 +51,7 @@ export async function deploy(): Promise<Record<string, string>> {
   const TEST_NITRO_ADJUDICATOR_ADDRESS = (await testNitroAdjudicatorFactory.deploy()).address;
   const TRIVIAL_APP_ADDRESS = (await trivialAppFactory.deploy()).address;
   const TEST_FORCE_MOVE_ADDRESS = (await testForceMoveFactory.deploy()).address;
-  const TEST_MULTI_ASSET_HOLDER_ADDRESS = (await testMultiAssetHolderFactory.deploy()).address;
   const EMBEDDED_APPLICATION_ADDRESS = (await embeddedApplicationFactory.deploy()).address;
-
-  // for test purposes in this package, wire up the assetholders with the testNitroAdjudicator
 
   const TEST_TOKEN_ADDRESS = (
     await tokenFactory.deploy(new Wallet(TEST_ACCOUNTS[0].privateKey).address)
@@ -72,6 +66,5 @@ export async function deploy(): Promise<Record<string, string>> {
     TEST_FORCE_MOVE_ADDRESS,
     TEST_NITRO_ADJUDICATOR_ADDRESS,
     TEST_TOKEN_ADDRESS,
-    TEST_MULTI_ASSET_HOLDER_ADDRESS,
   };
 }

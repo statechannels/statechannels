@@ -1,7 +1,7 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, ethers} from 'ethers';
 
-import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+import testNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTtestNitroAdjudicator.sol/TESTtestNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
 import {hashState, State} from '../../../src/contract/state';
@@ -20,11 +20,16 @@ import {
   resetMultipleHoldings,
   setupContract,
 } from '../../test-helpers';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
+// eslint-disable-next-line import/order
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+import {channelDataToStatus} from '../../../src';
 
-const provider = getTestProvider();
-let NitroAdjudicator: Contract;
-let AssetHolder1: Contract;
-let AssetHolder2: Contract;
+const testNitroAdjudicator = (setupContract(
+  getTestProvider(),
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator & Contract;
 
 const addresses = {
   // Channels
@@ -49,20 +54,13 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-beforeAll(async () => {
-  NitroAdjudicator = setupContract(
-    provider,
-    NitroAdjudicatorArtifact,
-    process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
-});
 
 // Scenarios are synonymous with channelNonce:
 
 // Const description1 =
-//   'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 1x Asset types transferred';
+//   'testNitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 1x Asset types transferred';
 const description2 =
-  'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 2x Asset types transferred';
+  'testNitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 2x Asset types transferred';
 const channelNonce = getRandomNonce('pushOutcomeAndTransferAll');
 const storedTurnNumRecord = 5;
 const declaredTurnNumRecord = storedTurnNumRecord;
@@ -104,7 +102,7 @@ describe('pushOutcomeAndTransferAll', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Set holdings on multiple asset holders
-      resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
+      // resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
 
       // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(setOutcome);
@@ -131,14 +129,14 @@ describe('pushOutcomeAndTransferAll', () => {
       );
 
       // Call public wrapper to set state (only works on test contract)
-      const tx0 = await NitroAdjudicator.setStatus(channelId, initialFingerprint);
+      const tx0 = await testNitroAdjudicator.setStatus(channelId, initialFingerprint);
       await tx0.wait();
-      expect(await NitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
+      expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
 
       const stateHash = hashState(state);
       const encodedOutcome = encodeOutcome(outcome);
 
-      const tx1 = NitroAdjudicator.pushOutcomeAndTransferAll(
+      const tx1 = testNitroAdjudicator.pushOutcomeAndTransferAll(
         channelId,
         declaredTurnNumRecord,
         finalizesAt,
@@ -158,7 +156,11 @@ describe('pushOutcomeAndTransferAll', () => {
         const {logs} = await (await tx1).wait();
 
         // Compile events from logs
-        const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
+        const events = compileEventsFromLogs(logs, [
+          AssetHolder1,
+          AssetHolder2,
+          testNitroAdjudicator,
+        ]);
 
         // Build up event expectations
         const expectedEvents = [];

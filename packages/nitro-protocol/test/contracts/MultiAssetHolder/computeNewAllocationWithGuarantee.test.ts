@@ -7,15 +7,15 @@ import {
   randomExternalDestination,
   randomChannelId,
 } from '../../test-helpers';
-import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
-import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 
-const testMultiAssetHolder = (setupContract(
+const testNitroAdjudicator = (setupContract(
   getTestProvider(),
-  TESTMultiAssetHolderArtifact,
-  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
-) as unknown) as TESTMultiAssetHolder;
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator;
 
 import {AllocationItem, Guarantee} from '../../../src';
 import {
@@ -58,7 +58,7 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
       guarantee
     );
 
-    const result = await testMultiAssetHolder._computeNewAllocationWithGuarantee(
+    const result = await testNitroAdjudicator._computeNewAllocationWithGuarantee(
       BigNumber.from(heldBefore),
       allocation,
       indices,

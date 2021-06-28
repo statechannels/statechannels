@@ -6,16 +6,16 @@ const {AddressZero} = ethers.constants;
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
-import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 import {Token} from '../../../typechain/Token';
 // eslint-disable-next-line import/order
-import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 const provider = getTestProvider();
-const testMultiAssetHolder = (setupContract(
+const testNitroAdjudicator = (setupContract(
   provider,
-  TESTMultiAssetHolderArtifact,
-  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
-) as unknown) as TESTMultiAssetHolder & Contract;
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator & Contract;
 
 const token = (setupContract(
   provider,
@@ -69,26 +69,26 @@ describe('deposit', () => {
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance
-    await (await token.increaseAllowance(testMultiAssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
+    await (await token.increaseAllowance(testNitroAdjudicator.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
     // Check allowance updated
     const allowance = BigNumber.from(
-      await token.allowance(signer0Address, testMultiAssetHolder.address)
+      await token.allowance(signer0Address, testNitroAdjudicator.address)
     );
     expect(allowance.sub(amount).sub(held).gte(0)).toBe(true);
 
     if (held > 0) {
       // Set holdings by depositing in the 'safest' way
       const {events} = await (
-        await testMultiAssetHolder.deposit(token.address, destination, 0, held)
+        await testNitroAdjudicator.deposit(token.address, destination, 0, held)
       ).wait();
-      expect(await testMultiAssetHolder.holdings(token.address, destination)).toEqual(held);
+      expect(await testNitroAdjudicator.holdings(token.address, destination)).toEqual(held);
       const {data: amountTransferred} = getTransferEvent(events);
       expect(held.eq(amountTransferred)).toBe(true);
     }
 
     const balanceBefore = BigNumber.from(await token.balanceOf(signer0Address));
-    const tx = testMultiAssetHolder.deposit(token.address, destination, expectedHeld, amount);
+    const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount);
 
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
@@ -105,7 +105,7 @@ describe('deposit', () => {
       const amountTransferred = BigNumber.from(getTransferEvent(events).data);
       expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
 
-      const allocatedAmount = await testMultiAssetHolder.holdings(token.address, destination);
+      const allocatedAmount = await testNitroAdjudicator.holdings(token.address, destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // Check that the correct number of Tokens were deducted

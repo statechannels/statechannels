@@ -9,14 +9,14 @@ import {
   MAGIC_ADDRESS_INDICATING_ETH,
   setupContract,
 } from '../../test-helpers';
-import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
-import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
-const testMultiAssetHolder = (setupContract(
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+const testNitroAdjudicator = (setupContract(
   getTestProvider(),
-  TESTMultiAssetHolderArtifact,
-  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
-) as unknown) as TESTMultiAssetHolder;
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator;
 
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
@@ -58,7 +58,7 @@ describe('deposit', () => {
 
       if (held > 0) {
         // Set holdings by depositing in the 'safest' way
-        const tx0 = testMultiAssetHolder.deposit(
+        const tx0 = testNitroAdjudicator.deposit(
           MAGIC_ADDRESS_INDICATING_ETH,
           destination,
           '0x00',
@@ -71,7 +71,7 @@ describe('deposit', () => {
         const depositedEvent = getDepositedEvent(events);
 
         expect(
-          await testMultiAssetHolder.holdings(MAGIC_ADDRESS_INDICATING_ETH, destination)
+          await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, destination)
         ).toEqual(held);
         expect(depositedEvent).toMatchObject({
           destination,
@@ -79,7 +79,7 @@ describe('deposit', () => {
           destinationHoldings: BigNumber.from(held),
         });
       }
-      const tx = testMultiAssetHolder.deposit(
+      const tx = testNitroAdjudicator.deposit(
         MAGIC_ADDRESS_INDICATING_ETH,
         destination,
         expectedHeld,
@@ -100,7 +100,7 @@ describe('deposit', () => {
           destinationHoldings: heldAfter,
         });
 
-        const allocatedAmount = await testMultiAssetHolder.holdings(
+        const allocatedAmount = await testNitroAdjudicator.holdings(
           MAGIC_ADDRESS_INDICATING_ETH,
           destination
         );

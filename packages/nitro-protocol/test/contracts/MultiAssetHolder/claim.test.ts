@@ -11,15 +11,15 @@ import {
   MAGIC_ADDRESS_INDICATING_ETH,
   AssetOutcomeShortHand,
 } from '../../test-helpers';
-import {TESTMultiAssetHolder} from '../../../typechain/TESTMultiAssetHolder';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
-import TESTMultiAssetHolderArtifact from '../../../artifacts/contracts/test/TESTMultiAssetHolder.sol/TESTMultiAssetHolder.json';
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {channelDataToStatus, encodeOutcome, hashOutcome, Outcome} from '../../../src';
-const testMultiAssetHolder: TESTMultiAssetHolder & Contract = (setupContract(
+const testNitroAdjudicator: TESTNitroAdjudicator & Contract = (setupContract(
   getTestProvider(),
-  TESTMultiAssetHolderArtifact,
-  process.env.TEST_MULTI_ASSET_HOLDER_ADDRESS
-) as unknown) as TESTMultiAssetHolder & Contract;
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator & Contract;
 const addresses = {
   // Channels
   t: undefined, // Target
@@ -97,12 +97,12 @@ describe('claim', () => {
           // Key must be either in heldBefore or heldAfter or both
           const amount = heldBefore[key];
           await (
-            await testMultiAssetHolder.deposit(MAGIC_ADDRESS_INDICATING_ETH, key, 0, amount, {
+            await testNitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, key, 0, amount, {
               value: amount,
             })
           ).wait();
           expect(
-            (await testMultiAssetHolder.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).eq(amount)
+            (await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).eq(amount)
           ).toBe(true);
         })
       );
@@ -127,7 +127,7 @@ describe('claim', () => {
 
       if (reason != reason5) {
         await (
-          await testMultiAssetHolder.setStatusFromChannelData(targetId, {
+          await testNitroAdjudicator.setStatusFromChannelData(targetId, {
             turnNumRecord,
             finalizesAt,
             stateHash,
@@ -153,7 +153,7 @@ describe('claim', () => {
       // Set status for guarantor
       if (guaranteeDestinations.length > 0) {
         await (
-          await testMultiAssetHolder.setStatusFromChannelData(guarantorId, {
+          await testNitroAdjudicator.setStatusFromChannelData(guarantorId, {
             turnNumRecord,
             finalizesAt,
             stateHash,
@@ -163,7 +163,7 @@ describe('claim', () => {
         ).wait();
       }
 
-      const tx = testMultiAssetHolder.claim(
+      const tx = testNitroAdjudicator.claim(
         0,
         guarantorId,
         guarantorOutcomeBytes,
@@ -184,7 +184,7 @@ describe('claim', () => {
 
         // Check new holdings
         Object.keys(heldAfter).forEach(async key =>
-          expect(await testMultiAssetHolder.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).toEqual(
+          expect(await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).toEqual(
             heldAfter[key]
           )
         );
@@ -205,7 +205,7 @@ describe('claim', () => {
           challengerAddress,
           outcome: outcomeAfter,
         });
-        expect(await testMultiAssetHolder.statusOf(targetId)).toEqual(expectedStatusAfter);
+        expect(await testNitroAdjudicator.statusOf(targetId)).toEqual(expectedStatusAfter);
 
         // Compile event expectations
         const expectedEvents = [
