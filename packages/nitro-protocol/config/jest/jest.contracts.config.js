@@ -1,6 +1,7 @@
 var config = require('./jest.config');
 config.testMatch = ['<rootDir>/test/contracts/**/*.test.ts'];
 config.reporters = ['default'];
+config.testTimeout = 10_000;
 config.globalSetup = '<rootDir>/jest/contract-test-setup.ts';
 config.globalTeardown = '<rootDir>/jest/contract-test-teardown.ts';
 module.exports = config;
