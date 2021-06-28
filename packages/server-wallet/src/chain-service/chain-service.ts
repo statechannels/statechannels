@@ -243,11 +243,16 @@ export class ChainService implements ChainServiceInterface {
       await this.increaseAllowance(assetHolderAddress, arg.amount);
     }
 
-    const createDepositTransaction = isEthFunding
-      ? createETHDepositTransaction
-      : createERC20DepositTransaction;
+    const depositTransaction = isEthFunding
+      ? createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount)
+      : createERC20DepositTransaction(
+          assetHolderAddress, // note temporary use of assetHolderAddress field to store tokenAddress (aka asset)
+          arg.channelId,
+          arg.expectedHeld,
+          arg.amount
+        );
     const depositRequest = {
-      ...createDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
+      ...depositTransaction,
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
     };
