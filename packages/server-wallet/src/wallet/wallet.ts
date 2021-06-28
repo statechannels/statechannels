@@ -11,6 +11,7 @@ import {
   makeAddress,
   makeDestination,
   Address,
+  makePrivateKey,
 } from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
@@ -84,6 +85,11 @@ export class Wallet extends EventEmitter<WalletEvents> {
       workerThreadAmount: 0, // Disable threading for now
     };
     const engine = await SingleThreadedEngine.create(engineConfig, logger);
+
+    if (populatedConfig.privateKey) {
+      await engine.addSigningKey(makePrivateKey(populatedConfig.privateKey));
+    }
+
     const chainService = populatedConfig.chainServiceConfiguration.attachChainService
       ? new ChainService({
           ...populatedConfig.chainServiceConfiguration,
