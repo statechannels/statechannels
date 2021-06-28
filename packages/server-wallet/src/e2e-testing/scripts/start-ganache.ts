@@ -28,9 +28,9 @@ async function setupGanache() {
     commandArguments.port,
     commandArguments.chainId,
     TEST_ACCOUNTS,
-    10_000,
-    1_000_000_000,
-    1,
+    10_000, // timeout
+    10_00_000_000, // gasLimit
+    1, // gasPrice
     logger
   );
 
