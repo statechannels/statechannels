@@ -106,6 +106,10 @@ export {
 
 import * as Signatures from './signatures';
 import * as Transactions from './transactions';
+export {
+  createERC20DepositTransaction,
+  createETHDepositTransaction,
+} from './contract/transaction-creators/multi-asset-holder';
 export {Signatures, Transactions};
 
 // types
