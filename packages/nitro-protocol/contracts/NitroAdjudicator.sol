@@ -63,7 +63,7 @@ contract NitroAdjudicator is MultiAssetHolder {
 
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
             // TODO there is a lot of scope for gas savings here
-            transfer(
+            outcomeBytes = transfer(
                 assetIndex,
                 channelId,
                 outcomeBytes,
