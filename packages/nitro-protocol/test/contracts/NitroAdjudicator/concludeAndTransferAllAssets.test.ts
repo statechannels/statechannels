@@ -17,7 +17,7 @@ import {
   replaceAddressesAndBigNumberify,
   setupContract,
 } from '../../test-helpers';
-import {signStates, channelDataToStatus, convertBytes32ToAddress} from '../../../src';
+import {signStates, channelDataToStatus} from '../../../src';
 import {NITRO_MAX_GAS} from '../../../src/transactions';
 import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 import {Token} from '../../../typechain/Token';
