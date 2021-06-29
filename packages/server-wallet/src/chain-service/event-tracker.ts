@@ -3,7 +3,7 @@ import {Logger} from 'pino';
 
 import {
   HoldingUpdatedArg,
-  AssetOutcomeUpdatedArg,
+  OutcomeUpdatedArg,
   ChannelFinalizedArg,
   ChallengeRegisteredArg,
   ChainEventSubscriberInterface,
@@ -11,9 +11,9 @@ import {
 
 /**
  * This class is a wrapper of ChainEventSubscriberInterface.
- * Purpose - 2 functions can trigger AssetHolder events to be played to ChainEventSubscriberInterface
+ * Purpose - 2 functions can trigger MultiAssetHolder events to be played to ChainEventSubscriberInterface
  *    1. chainservice.getInitialHoldings
- *    2. chainservice.addAssetHolderObservable
+ *    2. chainservice.addMultiAssetHolderObservable
  * Some events can be played twice by both functions, order not predictable,
  * this class ensures each event is played once and in the right order
  */
@@ -72,9 +72,9 @@ export class EventTracker {
   }
 
   // Pass event to managed subscriber only if new
-  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg, blockNumber: number, logIndex: number): void {
+  outcomeUpdated(arg: OutcomeUpdatedArg, blockNumber: number, logIndex: number): void {
     if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
-      this.managedSubscriber.assetOutcomeUpdated(arg);
+      this.managedSubscriber.outcomeUpdated(arg);
     }
   }
 
