@@ -149,7 +149,6 @@ export class ChainService implements ChainServiceInterface {
       switch (chainRequest.type) {
         case 'Challenge':
           response = await this.challenge(chainRequest.challengeStates, chainRequest.privateKey);
-
           break;
         case 'ConcludeAndWithdraw':
           response = await this.concludeAndWithdraw(chainRequest.finalizationProof);
@@ -157,11 +156,6 @@ export class ChainService implements ChainServiceInterface {
         case 'FundChannel':
           response = await this.fundChannel(chainRequest);
           break;
-        case 'PushOutcomeAndWithdraw':
-          response = await this.pushOutcomeAndWithdraw(
-            chainRequest.state,
-            chainRequest.challengerAddress
-          );
 
           break;
         default:
@@ -285,7 +279,7 @@ export class ChainService implements ChainServiceInterface {
     this.logger.info({channelId}, 'concludeAndWithdraw: entry');
 
     const transactionRequest = {
-      ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
+      ...Transactions.createConcludeAndTransferAllAssetsTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
       to: nitroAdjudicatorAddress,
@@ -349,30 +343,6 @@ export class ChainService implements ChainServiceInterface {
       to: nitroAdjudicatorAddress,
     };
     return this.sendTransaction(challengeTransactionRequest);
-  }
-
-  async pushOutcomeAndWithdraw(
-    state: State,
-    challengerAddress: Address
-  ): Promise<providers.TransactionResponse> {
-    this.logger.info('pushOutcomeAndWithdraw: entry');
-    const lastState = toNitroState(state);
-    const channelId = getChannelId(lastState.channel);
-    const [turnNumRecord, finalizesAt, _Status] = await this.nitroAdjudicator.unpackStatus(
-      channelId
-    );
-
-    const pushTransactionRequest = {
-      ...Transactions.createPushOutcomeAndTransferAllTransaction({
-        turnNumRecord,
-        finalizesAt,
-        state: lastState,
-        outcome: lastState.outcome,
-        challengerAddress,
-      }),
-      to: nitroAdjudicatorAddress,
-    };
-    return this.sendTransaction(pushTransactionRequest);
   }
 
   // TODO add another public method for transferring from an channel that has already been concluded *and* pushed

@@ -63,11 +63,6 @@ export type ConcludeAndWithdrawRequest = {
   type: 'ConcludeAndWithdraw';
   finalizationProof: SignedState[];
 };
-export type PushOutcomeAndWithdrawRequest = {
-  type: 'PushOutcomeAndWithdraw';
-  state: State;
-  challengerAddress: Address;
-};
 
 export type ChallengeRequest = {
   type: 'Challenge';
@@ -75,11 +70,7 @@ export type ChallengeRequest = {
   privateKey: PrivateKey;
 };
 
-export type ChainRequest =
-  | FundChannelRequest
-  | ConcludeAndWithdrawRequest
-  | PushOutcomeAndWithdrawRequest
-  | ChallengeRequest;
+export type ChainRequest = FundChannelRequest | ConcludeAndWithdrawRequest | ChallengeRequest;
 interface ChainModifierInterface {
   handleChainRequests(chainRequests: ChainRequest[]): Promise<providers.TransactionResponse[]>;
   // TODO: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
@@ -87,10 +78,6 @@ interface ChainModifierInterface {
   concludeAndWithdraw(
     finalizationProof: SignedState[]
   ): Promise<providers.TransactionResponse | void>;
-  pushOutcomeAndWithdraw(
-    state: State,
-    challengerAddress: Address
-  ): Promise<providers.TransactionResponse>;
   challenge(
     challengeStates: SignedState[],
     privateKey: PrivateKey
