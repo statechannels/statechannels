@@ -106,7 +106,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             (Outcome.AssetOutcome)
         );
         require(
-            assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
             '!allocation'
         );
         Outcome.AllocationItem[] memory allocation = abi.decode(
@@ -118,7 +118,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // effects and interactions
         allocation = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
-            Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation))
+            Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
         bytes32 outcomeHash = keccak256(abi.encode(outcome));
         _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
@@ -168,7 +168,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 (Outcome.AssetOutcome)
             );
             require(
-                assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee),
+                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Guarantee,
                 '!guarantee'
             );
             guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
@@ -194,7 +194,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 (Outcome.AssetOutcome)
             );
             require(
-                assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
                 '!allocation'
             );
             allocation = abi.decode(
@@ -205,10 +205,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             // effects and interactions
             allocation = _claim(asset, guarantorChannelId, guarantee, allocation, indices);
             outcome[assetIndex].assetOutcomeBytes = abi.encode(
-                Outcome.AssetOutcome(
-                    uint8(Outcome.AssetOutcomeType.Allocation),
-                    abi.encode(allocation)
-                )
+                Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
             );
             bytes32 outcomeHash = keccak256(abi.encode(outcome));
             _updateFingerprint(
