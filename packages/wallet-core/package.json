@@ -6,7 +6,7 @@
   "dependencies": {
     "@statechannels/nitro-protocol": "0.17.0",
     "@statechannels/wire-format": "0.9.1",
-    "ethers": "5.3.1",
+    "ethers": "5.4.0",
     "lodash": "4.17.21"
   },
   "devDependencies": {

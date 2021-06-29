@@ -38,7 +38,7 @@
     "case-sensitive-paths-webpack-plugin": "2.3.0",
     "css-loader": "3.4.2",
     "dexie": "3.0.0",
-    "ethers": "5.3.1",
+    "ethers": "5.4.0",
     "eventemitter3": "4.0.7",
     "file-loader": "5.0.2",
     "filter-async-rxjs-pipe": "0.1.5",
