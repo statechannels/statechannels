@@ -1,8 +1,19 @@
-import {utils, BigNumber} from 'ethers';
+import {utils, BigNumber, ethers} from 'ethers';
 
 import {parseEventResult} from '../ethers-utils';
+import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 
-import {AllocationItem, Guarantee} from './outcome';
+import {isExternalDestination} from './channel';
+import {
+  AllocationAssetOutcome,
+  AllocationItem,
+  decodeGuarantee,
+  decodeOutcome,
+  Guarantee,
+  Outcome,
+} from './outcome';
+import {Address, Bytes32} from './types';
+
 export interface DepositedEvent {
   destination: string;
   amountDeposited: BigNumber;
@@ -157,6 +168,113 @@ export function computeNewAllocation(
     payouts,
     totalPayouts: totalPayouts.toHexString(),
   };
+}
+
+/**
+ *
+ * Takes a FingerprintUpdated Event and the transaction that emittted it, and returns updated information in a convenient format.
+ * @param nitroAdjudicatorAddress
+ * @param allocationUpdatedEvent
+ * @param tx Transaction which gave rise to the event
+ */
+export function computeNewOutcome(
+  nitroAdjudicatorAddress: Address,
+  allocationUpdatedEvent: {channelId: Bytes32; initialHoldings: string},
+  tx: ethers.Transaction
+): {
+  newOutcome: Outcome;
+  newHoldings: BigNumber;
+  externalPayouts: AllocationItem[];
+  internalPayouts: AllocationItem[];
+} {
+  // Extract the calldata that we need
+  const {oldOutcome, assetIndex, indices, guarantee} = extractOldOutcomeAndIndices(
+    nitroAdjudicatorAddress,
+    tx
+  );
+
+  const oldAllocation = (oldOutcome[assetIndex] as AllocationAssetOutcome).allocationItems;
+
+  // Use the emulated, pure solidity functions to figure out what the chain will have done
+  const {newAllocation, payouts, totalPayouts} = guarantee
+    ? computeNewAllocationWithGuarantee(
+        allocationUpdatedEvent.initialHoldings,
+        oldAllocation,
+        indices,
+        guarantee
+      ) // if guarantee is defined, then we know that claim was called
+    : computeNewAllocation(allocationUpdatedEvent.initialHoldings, oldAllocation, indices);
+
+  // Massage the output for convenience
+  const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
+  const newAssetOutcome: AllocationAssetOutcome = {
+    assetHolderAddress: oldOutcome[assetIndex].assetHolderAddress,
+    allocationItems: newAllocation,
+  };
+
+  const longHandIndices =
+    indices.length === 0
+      ? Array.from(Array(payouts.length).keys()) // [0,1,2,...] all indices up to payouts.length
+      : indices;
+
+  const hydratedPayouts: AllocationItem[] = payouts.map((v, i) => ({
+    destination: oldAllocation[longHandIndices[i]].destination,
+    amount: v,
+  }));
+
+  const externalPayouts = hydratedPayouts.filter(payout =>
+    isExternalDestination(payout.destination)
+  );
+
+  const internalPayouts = hydratedPayouts.filter(
+    payout => !isExternalDestination(payout.destination)
+  );
+
+  const newOutcome = {...oldOutcome};
+  newOutcome[assetIndex] = newAssetOutcome;
+  return {newOutcome, newHoldings, externalPayouts, internalPayouts};
+}
+
+/**
+ * Extracts the outcome, assetIndex and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator giving rise to a FingerprintUpdated event.
+ * @param nitroAdjudicatorAddress
+ * @param tx Transaction which contained the allocation and indices
+ */
+function extractOldOutcomeAndIndices(
+  nitroAdjudicatorAddress: Address,
+  tx: ethers.Transaction
+): {
+  oldOutcome: Outcome;
+  assetIndex: number | undefined; // undefined meaning "all assets"
+  indices: number[];
+  guarantee: Guarantee | undefined;
+} {
+  let indices = [];
+  let guarantee: Guarantee | undefined = undefined;
+
+  const txDescription = new ethers.Contract(
+    nitroAdjudicatorAddress,
+    NitroAdjudicatorArtifact.abi
+  ).interface.parseTransaction(tx);
+
+  // all methods (transfer, transferAll, claim, claimAll)
+  // have a parameter outcomeBytes:
+  const oldOutcome = decodeOutcome(txDescription.args.outcomeBytes);
+
+  if (txDescription.name === 'claim') {
+    guarantee = decodeGuarantee(txDescription.args.guarantee);
+  }
+  indices =
+    txDescription.name === 'transfer' || txDescription.name == 'claim'
+      ? txDescription.args.indices
+      : [];
+
+  const assetIndex =
+    txDescription.name === 'transfer' || txDescription.name == 'claim'
+      ? txDescription.args.assetIndex
+      : undefined;
+
+  return {oldOutcome, assetIndex, indices, guarantee};
 }
 
 function min(a: BigNumber, b: BigNumber) {
