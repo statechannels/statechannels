@@ -5,7 +5,7 @@ import '../NitroAdjudicator.sol';
 import './TESTForceMove.sol';
 
 /**
- * @dev This contract extends the MultiAssetHolder contract to enable it to be more easily unit-tested. It exposes public or external functions that set storage variables or wrap otherwise internal functions. It should not be deployed in a production environment.
+ * @dev This contract extends the NitroAdjudicator contract to enable it to be more easily unit-tested. It exposes public or external functions that set storage variables or wrap otherwise internal functions. It should not be deployed in a production environment.
  */
 contract TESTNitroAdjudicator is NitroAdjudicator, TESTForceMove {
     /**
