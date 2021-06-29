@@ -2,6 +2,7 @@ import {providers, Signature} from 'ethers';
 
 import {State} from './contract/state';
 import * as forceMoveTrans from './contract/transaction-creators/force-move';
+import * as nitroAdjudicatorTrans from './contract/transaction-creators/nitro-adjudicator';
 import {getStateSignerAddress, SignedState} from './signatures';
 
 // CONSTANTS
@@ -50,6 +51,17 @@ export function createCheckpointTransaction(
     signatures,
     whoSignedWhat,
   });
+}
+
+export function createConcludeAndTransferAllAssetsTransaction(
+  signedStates: SignedState[]
+): providers.TransactionRequest {
+  const {states, signatures, whoSignedWhat} = createSignatureArguments(signedStates);
+  return nitroAdjudicatorTrans.createConcludeAndTransferAllAssetsTransaction(
+    states,
+    signatures,
+    whoSignedWhat
+  );
 }
 
 export function createConcludeTransaction(
