@@ -1,5 +1,3 @@
-import {constants} from 'ethers';
-
 import {encodeOutcome} from '../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../src/transactions';
 
@@ -41,17 +39,19 @@ describe('Consumes the expected gas for deployments', () => {
 describe('Consumes the expected gas for deposits', () => {
   it(`when directly funding a channel with ETH (first deposit)`, async () => {
     await expect(
-      await nitroAdjudicator.deposit(constants.AddressZero, X.channelId, 0, 5, {value: 5})
+      await nitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, X.channelId, 0, 5, {value: 5})
     ).toConsumeGas(gasRequiredTo.directlyFundAChannelWithETHFirst.vanillaNitro);
   });
 
   it(`when directly funding a channel with ETH (second deposit)`, async () => {
     // begin setup
-    const setupTX = nitroAdjudicator.deposit(constants.AddressZero, X.channelId, 0, 5, {value: 5});
+    const setupTX = nitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, X.channelId, 0, 5, {
+      value: 5,
+    });
     await (await setupTX).wait();
     // end setup
     await expect(
-      await nitroAdjudicator.deposit(constants.AddressZero, X.channelId, 5, 5, {value: 5})
+      await nitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, X.channelId, 5, 5, {value: 5})
     ).toConsumeGas(gasRequiredTo.directlyFundAChannelWithETHSecond.vanillaNitro);
   });
 
@@ -250,10 +250,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
       await nitroAdjudicator.claim(
         0,
         G.channelId,
-        encodeOutcome(G.outcome(constants.AddressZero)),
+        encodeOutcome(G.outcome(MAGIC_ADDRESS_INDICATING_ETH)),
         guarantorProof.stateHash,
         guarantorProof.challengerAddress,
-        encodeOutcome(J.outcome(constants.AddressZero)),
+        encodeOutcome(J.outcome(MAGIC_ADDRESS_INDICATING_ETH)),
         jointProof.stateHash,
         jointProof.challengerAddress,
         [] // meaning "all"
