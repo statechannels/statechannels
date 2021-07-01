@@ -250,7 +250,7 @@ export class ChainService implements ChainServiceInterface {
       ...createDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
       to: assetHolderAddress,
       value: isEthFunding ? arg.amount : undefined,
-    };
+    } as providers.TransactionRequest; // this type assertion added to silence TS2345 (due to nitro-protocol using a newer version of ethers-js)
 
     const tx = await this.sendTransaction(depositRequest);
 
@@ -284,7 +284,7 @@ export class ChainService implements ChainServiceInterface {
         finalizationProof.flatMap(toNitroSignedState)
       ),
       to: nitroAdjudicatorAddress,
-    };
+    } as providers.TransactionRequest; // this type assertion added to silence TS2345 (due to nitro-protocol using a newer version of ethers-js)
 
     const captureExpectedErrors = async (reason: any) => {
       if (reason.error?.message.includes('Channel finalized')) {
@@ -342,7 +342,7 @@ export class ChainService implements ChainServiceInterface {
         privateKey
       ),
       to: nitroAdjudicatorAddress,
-    };
+    } as providers.TransactionRequest; // this type assertion added to silence TS2345 (due to nitro-protocol using a newer version of ethers-js)
     return this.sendTransaction(challengeTransactionRequest);
   }
 
@@ -366,7 +366,7 @@ export class ChainService implements ChainServiceInterface {
         challengerAddress,
       }),
       to: nitroAdjudicatorAddress,
-    };
+    } as providers.TransactionRequest; // this type assertion added to silence TS2345 (due to nitro-protocol using a newer version of ethers-js)
     return this.sendTransaction(pushTransactionRequest);
   }
 
@@ -680,7 +680,7 @@ export class ChainService implements ChainServiceInterface {
       throw new Error('Allocation event must have args');
     }
     const [channelId, initialHoldings] = event.args;
-    const tx = await this.provider.getTransaction(event.transactionHash);
+    const tx = (await this.provider.getTransaction(event.transactionHash)) as any; // this type assertion added to silence TS2345 (due to nitro-protocol using a newer version of ethers-js)
 
     const {newAssetOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewAssetOutcome(
       contract.address,
