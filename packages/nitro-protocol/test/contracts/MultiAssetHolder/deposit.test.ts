@@ -25,12 +25,13 @@ const token = (setupContract(
 ) as unknown) as Token & Contract;
 
 const signer0 = getTestProvider().getSigner(0); // Convention matches setupContract function
-let signer0Address;
+let signer0Address: string;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
 const ETH = MAGIC_ADDRESS_INDICATING_ETH;
 const ERC20 = token.address;
+
 // Populate destinations array
 for (let i = 0; i < 3; i++) {
   participants[i] = Wallet.createRandom({extraEntropy: utils.id('erc20-deposit-test')}).address;
@@ -103,10 +104,7 @@ describe('deposit', () => {
       expect(held.eq(amountTransferred)).toBe(true);
     }
 
-    const balanceBefore =
-      asset === ETH
-        ? BigNumber.from(await provider.getBalance(signer0Address))
-        : BigNumber.from(await token.balanceOf(signer0Address));
+    const balanceBefore = await getBalance(asset, signer0Address);
 
     const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount, {
       value: asset === ETH ? amount : 0,
@@ -131,10 +129,8 @@ describe('deposit', () => {
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // Check that the correct number of Tokens were deducted
-      const balanceAfter =
-        asset === ETH
-          ? BigNumber.from(await provider.getBalance(signer0Address))
-          : BigNumber.from(await token.balanceOf(signer0Address));
+      const balanceAfter = await getBalance(asset, signer0Address);
+
       expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
     }
   });
@@ -143,3 +139,9 @@ describe('deposit', () => {
 const getDepositedEvent = events => events.find(({event}) => event === 'Deposited').args;
 const getTransferEvent = events =>
   events.find(({topics}) => topics[0] === token.filters.Transfer(AddressZero).topics[0]);
+
+async function getBalance(asset: string, address: string) {
+  return asset === ETH
+    ? BigNumber.from(await provider.getBalance(address))
+    : BigNumber.from(await token.balanceOf(address));
+}
