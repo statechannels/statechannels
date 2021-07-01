@@ -1,13 +1,11 @@
 import {expectRevert} from '@statechannels/devtools';
 import {ethers, Contract, Wallet, BigNumber, utils} from 'ethers';
-
 const {AddressZero} = ethers.constants;
 
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
-import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
-import {Token} from '../../../typechain/Token';
+import {Token, TESTNitroAdjudicator} from '../../../typechain';
 // eslint-disable-next-line import/order
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../lib/src/transactions';
@@ -132,7 +130,7 @@ describe('deposit', () => {
 
       const balanceAfter = await getBalance(asset, signer0Address);
 
-      expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
+      expect(balanceAfter.eq(balanceBefore.sub(heldAfter.sub(held)))).toBe(true);
     }
   });
 });
