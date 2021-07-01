@@ -1,7 +1,7 @@
 import joi, {ValidationErrorItem} from 'joi';
 import {parse} from 'pg-connection-string';
 
-import {EngineConfig} from './types';
+import {WalletConfig} from './types';
 
 const validateConnectionString = (connection: string) => {
   const parsed = parse(connection);
@@ -27,6 +27,12 @@ const databaseConnectionConfigurationSchema = joi.alternatives().conditional('.'
 const databasePoolConfigurationSchema = joi.object({
   max: joi.number().integer().min(0).optional(),
   min: joi.number().integer().min(0).optional(),
+});
+
+const syncConfigurationSchema = joi.object({
+  pollInterval: joi.number().integer().min(1).optional(),
+  timeOutThreshold: joi.number().integer().min(1).optional(),
+  staleThreshold: joi.number().integer().min(1).optional(),
 });
 
 const databaseConfigurationSchema = joi.object({
@@ -75,15 +81,16 @@ const engine = joi.object({
   skipEvmValidation: joi.boolean().optional(),
   loggingConfiguration: loggingConfigurationSchema.optional(),
   metricsConfiguration: metricsConfigurationSchema.optional(),
+  syncConfiguration: syncConfigurationSchema.optional(),
 });
 
 export function validateEngineConfig(
   config: Record<string, any>
-): {valid: boolean; value: EngineConfig | undefined; errors: ValidationErrorItem[]} {
+): {valid: boolean; value: WalletConfig | undefined; errors: ValidationErrorItem[]} {
   const results = engine.validate(config);
   return {
     valid: !results.error,
-    value: results.value ? (results.value as EngineConfig) : undefined,
+    value: results.value ? (results.value as WalletConfig) : undefined,
     errors: results.error?.details || [],
   };
 }

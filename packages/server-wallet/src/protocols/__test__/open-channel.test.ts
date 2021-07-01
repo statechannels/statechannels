@@ -3,7 +3,7 @@ import {BN, OpenChannel} from '@statechannels/wallet-core';
 import {ChannelOpener} from '../channel-opener';
 import {Store} from '../../engine/store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {EngineResponse} from '../../engine/engine-response';
 import {TestChannel} from '../../engine/__test__/fixtures/test-channel';
 import {createLogger} from '../../logger';
@@ -11,7 +11,7 @@ import {WalletObjective} from '../../models/objective';
 import {ChainServiceRequest, requestTimeout} from '../../models/chain-service-request';
 import {DBAdmin} from '../..';
 
-const logger = createLogger(defaultTestConfig());
+const logger = createLogger(defaultTestWalletConfig());
 const timingMetrics = false;
 const testChan = TestChannel.create({aBal: 5, bBal: 5});
 
@@ -20,15 +20,15 @@ let store: Store;
 beforeEach(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
-  await DBAdmin.truncateDatabase(defaultTestConfig());
+  await DBAdmin.truncateDatabase(defaultTestWalletConfig());
 });
 
 afterEach(async () => {
-  await DBAdmin.truncateDatabase(defaultTestConfig());
+  await DBAdmin.truncateDatabase(defaultTestWalletConfig());
 });
 
 describe(`pre-fund-setup phase`, () => {

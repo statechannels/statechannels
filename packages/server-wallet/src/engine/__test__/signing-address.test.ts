@@ -3,7 +3,7 @@ import {ethers} from 'ethers';
 import {Store} from '../store';
 import {seedAlicesSigningWallet} from '../../db/seeds/1_signing_wallet_seeds';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {DBAdmin} from '../../db-admin/db-admin';
 
 import {alice} from './fixtures/participants';
@@ -13,8 +13,8 @@ let store: Store;
 beforeAll(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 });

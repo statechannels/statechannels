@@ -1,6 +1,6 @@
 import {Store} from '../store';
 import {testKnex as knex} from '../../../jest/knex-setup-teardown';
-import {defaultTestConfig} from '../../config';
+import {defaultTestWalletConfig} from '../../config';
 import {channel} from '../../models/__test__/fixtures/channel';
 
 import {stateWithHashSignedBy} from './fixtures/states';
@@ -11,8 +11,8 @@ let store: Store;
 beforeAll(async () => {
   store = new Store(
     knex,
-    defaultTestConfig().metricsConfiguration.timingMetrics,
-    defaultTestConfig().skipEvmValidation,
+    defaultTestWalletConfig().metricsConfiguration.timingMetrics,
+    defaultTestWalletConfig().skipEvmValidation,
     '0'
   );
 });

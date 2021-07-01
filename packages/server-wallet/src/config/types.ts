@@ -2,6 +2,23 @@ import {Level} from 'pino';
 
 import {ChainServiceArgs} from '../chain-service';
 
+export type SyncConfiguration = {
+  /** How often we check for stale or timed out objectives in milliseconds. */
+  pollInterval: number;
+
+  /**
+   * The amount of time (in milliseconds) that we wait for until we consider an objective timed out.
+   * When an objective is timed out we give up trying to complete it and return an error.
+   */
+  timeOutThreshold: number;
+
+  /**
+   * The amount of time (in milliseconds) that we wait for until we consider an objective "stale"
+   * If an objective is stale we attempt to sync the objectives with the other participants.
+   */
+  staleThreshold: number;
+};
+
 /**
  * Either a connection string or a config object with the dbName specified
  */
@@ -59,35 +76,36 @@ export type ChainServiceConfiguration = {
 } & Partial<Exclude<ChainServiceArgs, 'logger'>>;
 
 /**
- * The minimum required configuration to use the engine.
+ * The minimum required configuration to use the wallet.
  */
-export type RequiredEngineConfig = {
+export type RequiredWalletConfig = {
   databaseConfiguration: RequiredDatabaseConfiguration;
   networkConfiguration: NetworkConfiguration;
 };
 
 /**
- * Additional configuration options for the engine that are not required.
+ * Additional configuration options for the wallet that are not required.
  */
-export interface OptionalEngineConfig {
+export interface OptionalWalletConfig {
   databaseConfiguration: OptionalDatabaseConfiguration;
   workerThreadAmount: number;
   skipEvmValidation: boolean;
   chainServiceConfiguration: ChainServiceConfiguration;
   loggingConfiguration: LoggingConfiguration;
   metricsConfiguration: MetricsConfiguration;
+  syncConfiguration: SyncConfiguration;
 }
 
 /**
  * This is a fully filled out config. All Required and Optional fields are defined.
  */
-export type EngineConfig = RequiredEngineConfig & OptionalEngineConfig;
+export type WalletConfig = RequiredWalletConfig & OptionalWalletConfig;
 
 /**
  * This is the config accepted by the engine create method.
  * It is the required config properties plus additional optional properties
  */
-export type IncomingEngineConfig = RequiredEngineConfig & Partial<OptionalEngineConfig>;
+export type IncomingWalletConfig = RequiredWalletConfig & Partial<OptionalWalletConfig>;
 
 /**
  * Various network configuration options

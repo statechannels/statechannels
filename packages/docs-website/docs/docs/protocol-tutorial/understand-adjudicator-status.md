@@ -9,7 +9,6 @@ The adjudicator contract stores certain information about any channel that it kn
 
 - `uint48 turnNumRecord`
 - `uint48 finalizesAt`
-- `uint160 thumbprint`
 - `bytes32 stateHash // keccak256(abi.encode(State))`
 - `address challengerAddress`
 - `bytes32 outcomeHash`

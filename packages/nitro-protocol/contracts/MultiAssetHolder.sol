@@ -14,7 +14,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     using SafeMath for uint256;
 
     /**
-     * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
+     * holdings[asset][channelId] is the amount of asset held against channel channelId. 0 address implies ETH
      */
     mapping(address => mapping(bytes32 => uint256)) public holdings;
 
@@ -23,8 +23,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     // **************
 
     /**
-     * @notice Deposit ETH against a given destination.
-     * @dev Deposit ETH against a given destination.
+     * @notice Deposit a token/eth amount against a given destination.
+     * @dev Deposit a token/eth amount against a given destination.
      * @param asset erc20 token address, or zero address to indicate ETH
      * @param destination ChannelId to be credited.
      * @param expectedHeld The number of wei the depositor believes are _already_ escrowed against the channelId.
@@ -106,7 +106,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             (Outcome.AssetOutcome)
         );
         require(
-            assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+            assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
             '!allocation'
         );
         Outcome.AllocationItem[] memory allocation = abi.decode(
@@ -118,7 +118,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // effects and interactions
         allocation = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
-            Outcome.AssetOutcome(uint8(Outcome.AssetOutcomeType.Allocation), abi.encode(allocation))
+            Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
         bytes32 outcomeHash = keccak256(abi.encode(outcome));
         _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
@@ -168,7 +168,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 (Outcome.AssetOutcome)
             );
             require(
-                assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Guarantee),
+                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Guarantee,
                 '!guarantee'
             );
             guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
@@ -194,7 +194,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 (Outcome.AssetOutcome)
             );
             require(
-                assetOutcome.assetOutcomeType == uint8(Outcome.AssetOutcomeType.Allocation),
+                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
                 '!allocation'
             );
             allocation = abi.decode(
@@ -205,10 +205,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             // effects and interactions
             allocation = _claim(asset, guarantorChannelId, guarantee, allocation, indices);
             outcome[assetIndex].assetOutcomeBytes = abi.encode(
-                Outcome.AssetOutcome(
-                    uint8(Outcome.AssetOutcomeType.Allocation),
-                    abi.encode(allocation)
-                )
+                Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
             );
             bytes32 outcomeHash = keccak256(abi.encode(outcome));
             _updateFingerprint(
@@ -352,7 +349,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 initialHoldings = holdings[asset][fromChannelId];
 
         (
-            Outcome.AllocationItem[] memory newAllocation, // safeToDelete
+            Outcome.AllocationItem[] memory newAllocation,
             ,
             uint256[] memory payouts,
             uint256 totalPayouts
@@ -395,7 +392,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 initialHoldings = holdings[asset][guarantorChannelId];
 
         (
-            Outcome.AllocationItem[] memory newAllocation, // safeToDelete
+            Outcome.AllocationItem[] memory newAllocation,
             ,
             uint256[] memory payouts,
             uint256 totalPayouts

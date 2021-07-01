@@ -7,7 +7,7 @@ import './Outcome.sol';
 import './MultiAssetHolder.sol';
 
 /**
- * @dev The NitroAdjudicator contract extends ForceMove and hence inherits all ForceMove methods, and also extends and implements the Adjudicator interface, allowing for a finalized outcome to be pushed to an asset holder.
+ * @dev The NitroAdjudicator contract extends MultiAssetHolder and hence inherits all MultiAssetHolder methods.
  */
 contract NitroAdjudicator is MultiAssetHolder {
     /**

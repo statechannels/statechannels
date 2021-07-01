@@ -6,11 +6,9 @@ import {UpdateChannelParams} from '@statechannels/client-api-schema';
 import {Either} from 'fp-ts/lib/Either';
 import {isLeft, isRight} from 'fp-ts/lib/These';
 import _ from 'lodash';
-import {Logger} from 'pino';
+import P, {Logger} from 'pino';
 
-import {EngineConfig} from '../../config';
-import {createLogger} from '../../logger';
-import {MultipleChannelOutput, SingleChannelOutput} from '../types';
+import {EngineConfig, MultipleChannelOutput, SingleChannelOutput} from '../types';
 
 import {StateChannelWorkerData} from './worker-data';
 
@@ -26,8 +24,8 @@ export class WorkerManager {
    * @param engineConfig engine config to be passed to the worker engine
    * @param onNewWorker callback that is executed when a new worker is created
    */
-  constructor(engineConfig: EngineConfig) {
-    this.logger = createLogger(engineConfig).child({module: 'Worker-Manager'});
+  constructor(engineConfig: EngineConfig, logger: P.Logger) {
+    this.logger = logger.child({module: 'Worker-Manager'});
     this.threadAmount = engineConfig.workerThreadAmount;
     if (this.threadAmount === 0) {
       throw new Error('Invalid engineConfig: threadAmount should not be 0');
@@ -38,7 +36,7 @@ export class WorkerManager {
         this.logger.trace('Starting worker');
 
         const worker = new Worker(path.resolve(__dirname, './loader.js'), {
-          workerData: engineConfig,
+          workerData: {engineConfig, parentLogger: logger},
         });
 
         worker.on('error', err => {

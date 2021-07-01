@@ -26,7 +26,7 @@ import {SignedState as WireState, Payload} from '@statechannels/wire-format';
 import {utils} from 'ethers';
 
 import {Channel} from '../../../models/channel';
-import {defaultTestConfig} from '../../../config';
+import {defaultTestWalletConfig} from '../../../config';
 import {WalletObjective, ObjectiveModel} from '../../../models/objective';
 import {SigningWallet} from '../../../models/signing-wallet';
 import {WALLET_VERSION} from '../../../version';
@@ -189,7 +189,7 @@ export class TestChannel {
       appDefinition: makeAddress('0x000000000000000000000000000000000000adef'),
       participants: this.participants,
       channelNonce: this.channelNonce,
-      chainId: utils.hexlify(defaultTestConfig().networkConfiguration.chainNetworkID),
+      chainId: utils.hexlify(defaultTestWalletConfig().networkConfiguration.chainNetworkID),
       challengeDuration: 9001,
     };
   }
