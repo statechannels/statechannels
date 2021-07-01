@@ -3,16 +3,28 @@ import {ethers, Contract, Wallet, BigNumber, utils} from 'ethers';
 
 const {AddressZero} = ethers.constants;
 
-import ERC20AssetHolderArtifact from '../../../artifacts/contracts//test/TestErc20AssetHolder.sol/TestErc20AssetHolder.json';
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
 import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
-
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
+import {Token} from '../../../typechain/Token';
+// eslint-disable-next-line import/order
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 const provider = getTestProvider();
-const signer0 = provider.getSigner(0); // Convention matches setupContract function
+const testNitroAdjudicator = (setupContract(
+  provider,
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator & Contract;
+
+const token = (setupContract(
+  provider,
+  TokenArtifact,
+  process.env.TEST_TOKEN_ADDRESS
+) as unknown) as Token & Contract;
+
+const signer0 = getTestProvider().getSigner(0); // Convention matches setupContract function
 let signer0Address;
-let ERC20AssetHolder: Contract;
-let Token: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
@@ -22,12 +34,6 @@ for (let i = 0; i < 3; i++) {
 }
 
 beforeAll(async () => {
-  ERC20AssetHolder = setupContract(
-    provider,
-    ERC20AssetHolderArtifact,
-    process.env.TEST_TOKEN_ASSET_HOLDER_ADDRESS
-  );
-  Token = setupContract(provider, TokenArtifact, process.env.TEST_TOKEN_ADDRESS);
   signer0Address = await signer0.getAddress();
 });
 
@@ -59,28 +65,30 @@ describe('deposit', () => {
     const destination = getChannelId(destinationChannel);
 
     // Check msg.sender has enough tokens
-    const balance = await Token.balanceOf(signer0Address);
+    const balance = await token.balanceOf(signer0Address);
     await expect(balance.gte(held.add(amount))).toBe(true);
 
     // Increase allowance
-    await (await Token.increaseAllowance(ERC20AssetHolder.address, held.add(amount))).wait(); // Approve enough for setup and main test
+    await (await token.increaseAllowance(testNitroAdjudicator.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
     // Check allowance updated
     const allowance = BigNumber.from(
-      await Token.allowance(signer0Address, ERC20AssetHolder.address)
+      await token.allowance(signer0Address, testNitroAdjudicator.address)
     );
     expect(allowance.sub(amount).sub(held).gte(0)).toBe(true);
 
     if (held > 0) {
       // Set holdings by depositing in the 'safest' way
-      const {events} = await (await ERC20AssetHolder.deposit(destination, 0, held)).wait();
-      expect(await ERC20AssetHolder.holdings(destination)).toEqual(held);
+      const {events} = await (
+        await testNitroAdjudicator.deposit(token.address, destination, 0, held)
+      ).wait();
+      expect(await testNitroAdjudicator.holdings(token.address, destination)).toEqual(held);
       const {data: amountTransferred} = getTransferEvent(events);
       expect(held.eq(amountTransferred)).toBe(true);
     }
 
-    const balanceBefore = BigNumber.from(await Token.balanceOf(signer0Address));
-    const tx = ERC20AssetHolder.deposit(destination, expectedHeld, amount);
+    const balanceBefore = BigNumber.from(await token.balanceOf(signer0Address));
+    const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount);
 
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
@@ -97,11 +105,11 @@ describe('deposit', () => {
       const amountTransferred = BigNumber.from(getTransferEvent(events).data);
       expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
 
-      const allocatedAmount = await ERC20AssetHolder.holdings(destination);
+      const allocatedAmount = await testNitroAdjudicator.holdings(token.address, destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // Check that the correct number of Tokens were deducted
-      const balanceAfter = BigNumber.from(await Token.balanceOf(signer0Address));
+      const balanceAfter = BigNumber.from(await token.balanceOf(signer0Address));
       expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
     }
   });
@@ -109,4 +117,4 @@ describe('deposit', () => {
 
 const getDepositedEvent = events => events.find(({event}) => event === 'Deposited').args;
 const getTransferEvent = events =>
-  events.find(({topics}) => topics[0] === Token.filters.Transfer(AddressZero).topics[0]);
+  events.find(({topics}) => topics[0] === token.filters.Transfer(AddressZero).topics[0]);

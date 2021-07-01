@@ -1,13 +1,23 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, BigNumber, ethers} from 'ethers';
+import {Wallet, BigNumber, ethers} from 'ethers';
 const {parseUnits} = ethers.utils;
 
-import ETHAssetHolderArtifact from '../../../artifacts/contracts/ETHAssetHolder.sol/ETHAssetHolder.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {getRandomNonce, getTestProvider, setupContract} from '../../test-helpers';
+import {
+  getRandomNonce,
+  getTestProvider,
+  MAGIC_ADDRESS_INDICATING_ETH,
+  setupContract,
+} from '../../test-helpers';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
+// eslint-disable-next-line import/order
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+const testNitroAdjudicator = (setupContract(
+  getTestProvider(),
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator;
 
-const provider = getTestProvider();
-let ETHAssetHolder: Contract;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
@@ -15,14 +25,6 @@ const participants = [];
 for (let i = 0; i < 3; i++) {
   participants[i] = Wallet.createRandom().address;
 }
-
-beforeAll(async () => {
-  ETHAssetHolder = setupContract(
-    provider,
-    ETHAssetHolderArtifact,
-    process.env.ETH_ASSET_HOLDER_ADDRESS
-  );
-});
 
 const description0 = 'Deposits ETH (msg.value = amount , expectedHeld = 0)';
 const description1 = 'Reverts deposit of ETH (msg.value = amount, expectedHeld > holdings)';
@@ -56,22 +58,36 @@ describe('deposit', () => {
 
       if (held > 0) {
         // Set holdings by depositing in the 'safest' way
-        const tx0 = ETHAssetHolder.deposit(destination, '0x00', held, {
-          value: held,
-        });
+        const tx0 = testNitroAdjudicator.deposit(
+          MAGIC_ADDRESS_INDICATING_ETH,
+          destination,
+          '0x00',
+          held,
+          {
+            value: held,
+          }
+        );
         const {events} = await (await tx0).wait();
         const depositedEvent = getDepositedEvent(events);
 
-        expect(await ETHAssetHolder.holdings(destination)).toEqual(held);
+        expect(
+          await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, destination)
+        ).toEqual(held);
         expect(depositedEvent).toMatchObject({
           destination,
           amountDeposited: BigNumber.from(held),
           destinationHoldings: BigNumber.from(held),
         });
       }
-      const tx = ETHAssetHolder.deposit(destination, expectedHeld, amount, {
-        value: msgValue,
-      });
+      const tx = testNitroAdjudicator.deposit(
+        MAGIC_ADDRESS_INDICATING_ETH,
+        destination,
+        expectedHeld,
+        amount,
+        {
+          value: msgValue,
+        }
+      );
 
       if (reasonString) {
         await expectRevert(() => tx, reasonString);
@@ -84,7 +100,10 @@ describe('deposit', () => {
           destinationHoldings: heldAfter,
         });
 
-        const allocatedAmount = await ETHAssetHolder.holdings(destination);
+        const allocatedAmount = await testNitroAdjudicator.holdings(
+          MAGIC_ADDRESS_INDICATING_ETH,
+          destination
+        );
         await expect(allocatedAmount).toEqual(heldAfter);
       }
     }
