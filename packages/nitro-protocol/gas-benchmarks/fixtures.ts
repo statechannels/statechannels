@@ -1,6 +1,6 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
-import {ContractReceipt, ethers} from 'ethers';
+import {constants, ContractReceipt, ethers} from 'ethers';
 
 import {
   Allocation,
@@ -32,7 +32,6 @@ export const Ingrid = new Wallet(
   '0x558789345da13a7ac1d6d6ac9275ba66836eb4a088efc1920db0f5d092d6ee71'
 );
 export const participants = [Alice.address, Bob.address];
-
 class TestChannel {
   constructor(
     channelNonce: number,
@@ -45,7 +44,12 @@ class TestChannel {
   }
   wallets: ethers.Wallet[];
   channel: Channel;
-  guaranteeOrAllocation: Guarantee | Allocation;
+  private guaranteeOrAllocation: Guarantee | Allocation;
+  outcome(assetHolderAddress: string) {
+    return 'targetChannelId' in this.guaranteeOrAllocation
+      ? [{assetHolderAddress, guarantee: this.guaranteeOrAllocation}]
+      : [{assetHolderAddress, allocationItems: this.guaranteeOrAllocation}];
+  }
   get channelId() {
     return getChannelId(this.channel);
   }
@@ -56,10 +60,7 @@ class TestChannel {
       channel: this.channel,
       turnNum: 6,
       isFinal: false,
-      outcome:
-        'targetChannelId' in this.guaranteeOrAllocation
-          ? [{assetHolderAddress, guarantee: this.guaranteeOrAllocation}]
-          : [{assetHolderAddress, allocationItems: this.guaranteeOrAllocation}],
+      outcome: this.outcome(assetHolderAddress),
       appData: '0x', // TODO choose a more representative example
     };
   }
@@ -123,9 +124,9 @@ class TestChannel {
     };
   }
 
-  async concludePushOutcomeAndTransferAllTx(assetHolderAddress: string) {
+  async concludeAndTransferAllAssetsTx(assetHolderAddress: string) {
     const fP = this.supportProof(this.finalState(assetHolderAddress));
-    return await nitroAdjudicator.concludePushOutcomeAndTransferAll(
+    return await nitroAdjudicator.concludeAndTransferAllAssets(
       fP.largestTurnNum,
       fP.fixedPart,
       fP.appPartHash,
