@@ -349,7 +349,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 initialHoldings = holdings[asset][fromChannelId];
 
         (
-            Outcome.AllocationItem[] memory newAllocation, // safeToDelete
+            Outcome.AllocationItem[] memory newAllocation,
             ,
             uint256[] memory payouts,
             uint256 totalPayouts
@@ -392,7 +392,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256 initialHoldings = holdings[asset][guarantorChannelId];
 
         (
-            Outcome.AllocationItem[] memory newAllocation, // safeToDelete
+            Outcome.AllocationItem[] memory newAllocation,
             ,
             uint256[] memory payouts,
             uint256 totalPayouts
