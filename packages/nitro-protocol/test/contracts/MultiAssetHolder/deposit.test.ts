@@ -10,6 +10,7 @@ import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 import {Token} from '../../../typechain/Token';
 // eslint-disable-next-line import/order
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../lib/src/transactions';
 const provider = getTestProvider();
 const testNitroAdjudicator = (setupContract(
   provider,
@@ -28,6 +29,8 @@ let signer0Address;
 const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = [];
 
+const ETH = MAGIC_ADDRESS_INDICATING_ETH;
+const ERC20 = token.address;
 // Populate destinations array
 for (let i = 0; i < 3; i++) {
   participants[i] = Wallet.createRandom({extraEntropy: utils.id('erc20-deposit-test')}).address;
@@ -49,13 +52,13 @@ describe('deposit', () => {
     channelNonce++;
   });
   it.each`
-    description     | held | expectedHeld | amount | heldAfter | reasonString
-    ${description0} | ${0} | ${0}         | ${1}   | ${1}      | ${undefined}
-    ${description1} | ${1} | ${1}         | ${1}   | ${2}      | ${undefined}
-    ${description2} | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
-    ${description3} | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
-    ${description4} | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
-  `('$description', async ({held, expectedHeld, amount, reasonString, heldAfter}) => {
+    description     | asset    | held | expectedHeld | amount | heldAfter | reasonString
+    ${description0} | ${ERC20} | ${0} | ${0}         | ${1}   | ${1}      | ${undefined}
+    ${description1} | ${ERC20} | ${1} | ${1}         | ${1}   | ${2}      | ${undefined}
+    ${description2} | ${ERC20} | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
+    ${description3} | ${ERC20} | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
+    ${description4} | ${ERC20} | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
+  `('$description', async ({asset, held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = BigNumber.from(held);
     expectedHeld = BigNumber.from(expectedHeld);
     amount = BigNumber.from(amount);
@@ -80,14 +83,17 @@ describe('deposit', () => {
     if (held > 0) {
       // Set holdings by depositing in the 'safest' way
       const {events} = await (
-        await testNitroAdjudicator.deposit(token.address, destination, 0, held)
+        await testNitroAdjudicator.deposit(asset, destination, 0, held)
       ).wait();
-      expect(await testNitroAdjudicator.holdings(token.address, destination)).toEqual(held);
+      expect(await testNitroAdjudicator.holdings(asset, destination)).toEqual(held);
       const {data: amountTransferred} = getTransferEvent(events);
       expect(held.eq(amountTransferred)).toBe(true);
     }
 
-    const balanceBefore = BigNumber.from(await token.balanceOf(signer0Address));
+    const balanceBefore =
+      asset === ETH
+        ? BigNumber.from(await provider.getBalance(signer0Address))
+        : BigNumber.from(await token.balanceOf(signer0Address));
     const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount);
 
     if (reasonString) {
@@ -109,7 +115,10 @@ describe('deposit', () => {
       await expect(allocatedAmount).toEqual(heldAfter);
 
       // Check that the correct number of Tokens were deducted
-      const balanceAfter = BigNumber.from(await token.balanceOf(signer0Address));
+      const balanceAfter =
+        asset === ETH
+          ? BigNumber.from(await provider.getBalance(signer0Address))
+          : BigNumber.from(await token.balanceOf(signer0Address));
       expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
     }
   });
