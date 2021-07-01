@@ -14,7 +14,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     using SafeMath for uint256;
 
     /**
-     * holdings[asset][channelId] is the amount of asset asset held against channel channelId. 0 implies ETH
+     * holdings[asset][channelId] is the amount of asset held against channel channelId. 0 address implies ETH
      */
     mapping(address => mapping(bytes32 => uint256)) public holdings;
 
@@ -23,8 +23,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     // **************
 
     /**
-     * @notice Deposit ETH against a given destination.
-     * @dev Deposit ETH against a given destination.
+     * @notice Deposit a token/eth amount against a given destination.
+     * @dev Deposit a token/eth amount against a given destination.
      * @param asset erc20 token address, or zero address to indicate ETH
      * @param destination ChannelId to be credited.
      * @param expectedHeld The number of wei the depositor believes are _already_ escrowed against the channelId.
