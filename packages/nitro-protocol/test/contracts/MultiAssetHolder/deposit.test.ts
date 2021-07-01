@@ -45,6 +45,11 @@ const description1 = 'Deposits Tokens (expectedHeld = 1)';
 const description2 = 'Reverts deposit of Tokens (expectedHeld > holdings)';
 const description3 = 'Reverts deposit of Tokens (expectedHeld + amount < holdings)';
 const description4 = 'Deposits Tokens (amount < holdings < amount + expectedHeld)';
+const description5 = 'Deposits ETH (msg.value = amount , expectedHeld = 0)';
+const description6 = 'Reverts deposit of ETH (msg.value = amount, expectedHeld > holdings)';
+const description7 = 'Deposits ETH (msg.value = amount, expectedHeld + amount < holdings)';
+const description8 =
+  'Deposits ETH (msg.value = amount,  amount < holdings < amount + expectedHeld)';
 
 describe('deposit', () => {
   let channelNonce = getRandomNonce('deposit');
@@ -58,6 +63,10 @@ describe('deposit', () => {
     ${description2} | ${ERC20} | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
     ${description3} | ${ERC20} | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
     ${description4} | ${ERC20} | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
+    ${description5} | ${ETH}   | ${0} | ${0}         | ${1}   | ${1}      | ${undefined}
+    ${description6} | ${ETH}   | ${0} | ${1}         | ${2}   | ${0}      | ${'holdings < expectedHeld'}
+    ${description7} | ${ETH}   | ${3} | ${1}         | ${1}   | ${3}      | ${'holdings already sufficient'}
+    ${description8} | ${ETH}   | ${3} | ${2}         | ${2}   | ${4}      | ${undefined}
   `('$description', async ({asset, held, expectedHeld, amount, reasonString, heldAfter}) => {
     held = BigNumber.from(held);
     expectedHeld = BigNumber.from(expectedHeld);
@@ -67,23 +76,27 @@ describe('deposit', () => {
     const destinationChannel: Channel = {chainId, channelNonce, participants};
     const destination = getChannelId(destinationChannel);
 
-    // Check msg.sender has enough tokens
-    const balance = await token.balanceOf(signer0Address);
-    await expect(balance.gte(held.add(amount))).toBe(true);
+    if ((asset = ERC20)) {
+      // Check msg.sender has enough tokens
+      const balance = await token.balanceOf(signer0Address);
+      await expect(balance.gte(held.add(amount))).toBe(true);
 
-    // Increase allowance
-    await (await token.increaseAllowance(testNitroAdjudicator.address, held.add(amount))).wait(); // Approve enough for setup and main test
+      // Increase allowance
+      await (await token.increaseAllowance(testNitroAdjudicator.address, held.add(amount))).wait(); // Approve enough for setup and main test
 
-    // Check allowance updated
-    const allowance = BigNumber.from(
-      await token.allowance(signer0Address, testNitroAdjudicator.address)
-    );
-    expect(allowance.sub(amount).sub(held).gte(0)).toBe(true);
+      // Check allowance updated
+      const allowance = BigNumber.from(
+        await token.allowance(signer0Address, testNitroAdjudicator.address)
+      );
+      expect(allowance.sub(amount).sub(held).gte(0)).toBe(true);
+    }
 
     if (held > 0) {
       // Set holdings by depositing in the 'safest' way
       const {events} = await (
-        await testNitroAdjudicator.deposit(asset, destination, 0, held)
+        await testNitroAdjudicator.deposit(asset, destination, 0, held, {
+          value: asset === ETH ? amount : 0,
+        })
       ).wait();
       expect(await testNitroAdjudicator.holdings(asset, destination)).toEqual(held);
       const {data: amountTransferred} = getTransferEvent(events);
@@ -94,7 +107,10 @@ describe('deposit', () => {
       asset === ETH
         ? BigNumber.from(await provider.getBalance(signer0Address))
         : BigNumber.from(await token.balanceOf(signer0Address));
-    const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount);
+
+    const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount, {
+      value: asset === ETH ? amount : 0,
+    });
 
     if (reasonString) {
       await expectRevert(() => tx, reasonString);
