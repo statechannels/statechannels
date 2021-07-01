@@ -122,13 +122,14 @@ describe('deposit', () => {
         destinationHoldings: heldAfter,
       });
 
-      const amountTransferred = BigNumber.from(getTransferEvent(events).data);
-      expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
+      if (asset == ERC20) {
+        const amountTransferred = BigNumber.from(getTransferEvent(events).data);
+        expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
+      }
 
       const allocatedAmount = await testNitroAdjudicator.holdings(token.address, destination);
       await expect(allocatedAmount).toEqual(heldAfter);
 
-      // Check that the correct number of Tokens were deducted
       const balanceAfter = await getBalance(asset, signer0Address);
 
       expect(balanceAfter.eq(balanceBefore.sub(amountTransferred))).toBe(true);
