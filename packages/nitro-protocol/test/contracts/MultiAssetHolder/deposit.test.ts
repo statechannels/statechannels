@@ -75,7 +75,7 @@ describe('deposit', () => {
     const destinationChannel: Channel = {chainId, channelNonce, participants};
     const destination = getChannelId(destinationChannel);
 
-    if ((asset = ERC20)) {
+    if (asset === ERC20) {
       // Check msg.sender has enough tokens
       const balance = await token.balanceOf(signer0Address);
       await expect(balance.gte(held.add(amount))).toBe(true);
