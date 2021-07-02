@@ -121,10 +121,10 @@ describe('claim', () => {
         allocation.push({destination: key, amount: tOutcomeBefore[key]})
       );
       const outcomeHash = hashOutcome([
-        {assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
       ]);
       const targetOutcomeBytes = encodeOutcome([
-        {assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
       ]);
 
       // Set adjudicator status
@@ -152,9 +152,7 @@ describe('claim', () => {
         targetChannelId: targetId,
       };
 
-      const guaranteeOutcome: Outcome = [
-        {assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH, guarantee},
-      ];
+      const guaranteeOutcome: Outcome = [{asset: MAGIC_ADDRESS_INDICATING_ETH, guarantee}];
       const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
       const guarantorOutcomeHash = hashOutcome(guaranteeOutcome);
 
@@ -203,7 +201,7 @@ describe('claim', () => {
           allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
         });
         const outcomeAfter: Outcome = [
-          {assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocationAfter},
+          {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocationAfter},
         ];
         const expectedStatusAfter = channelDataToStatus({
           turnNumRecord,

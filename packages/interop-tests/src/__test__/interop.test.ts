@@ -24,7 +24,6 @@ import {BrowserServerMessageService} from '../message-service';
 jest.setTimeout(60_000);
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const chainId = process.env.CHAIN_ID;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -127,7 +126,7 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
       ],
       allocations: [
         {
-          assetHolderAddress: ethAssetHolderAddress,
+          asset: ethAssetHolderAddress,
           allocationItems: [
             {
               amount: BN.from(3),
@@ -172,7 +171,7 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
     ],
     allocations: [
       {
-        assetHolderAddress: ethAssetHolderAddress,
+        asset: ethAssetHolderAddress,
         allocationItems: [
           {
             amount: formatAmount('0x5' as Uint256),

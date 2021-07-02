@@ -20,11 +20,11 @@ const EOA = ethers.Wallet.createRandom().address;
 const destination = hexZeroPad(EOA, 32);
 
 const assetOutcome: AllocationAssetOutcome = {
-  assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH,
+  asset: MAGIC_ADDRESS_INDICATING_ETH,
   allocationItems: [{destination, amount}]
 };
 const outcomeBytes = encodeOutcome([
-  {assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+  {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
 ]);
 
 // Following earlier tutorials ...
@@ -78,7 +78,7 @@ const destination1 = hexZeroPad(EOA1, 32);
 const destination2 = hexZeroPad(EOA2, 32);
 
 const assetOutcomeForTheTargetChannel: AllocationAssetOutcome = {
-  assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH,
+  asset: MAGIC_ADDRESS_INDICATING_ETH,
   allocationItems: [
     {destination: destination1, amount},
     {destination: destination2, amount}
@@ -86,7 +86,7 @@ const assetOutcomeForTheTargetChannel: AllocationAssetOutcome = {
 };
 
 const assetOutcomeForTheGuarantorChannel: GuaranteeAssetOutcome = {
-  assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH,
+  asset: MAGIC_ADDRESS_INDICATING_ETH,
   guarantee: {
     targetChannelId: targetChannelId,
     destinations: [

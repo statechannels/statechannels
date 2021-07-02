@@ -213,7 +213,7 @@ export class ChainService implements ChainServiceInterface {
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     this.logger.info({...arg}, 'fundChannel: entry');
 
-    const assetHolderAddress = arg.assetHolderAddress;
+    const assetHolderAddress = arg.asset;
     const isEthFunding = assetHolderAddress == constants.AddressZero;
 
     if (!isEthFunding) {
@@ -474,7 +474,7 @@ export class ChainService implements ChainServiceInterface {
     eventTracker.holdingUpdated(
       {
         channelId: channelId,
-        assetHolderAddress: makeAddress(contract.address),
+        asset: makeAddress(contract.address),
         amount: confirmedHolding,
       },
       confirmedBlock
@@ -500,7 +500,7 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
-  private setUpAssetHolderListener(assetHolderAddress: Address): void {
+  private setUpAssetHolderListener(asset: Address): void {
     if (!this.registeredContracts.has(assetHolderAddress)) {
       const contract = this.getOrAddContractMapping(assetHolderAddress);
       this.listenForContractEvents(contract);
@@ -557,7 +557,7 @@ export class ChainService implements ChainServiceInterface {
     }
   }
 
-  private async increaseAllowance(assetHolderAddress: Address, amount: string): Promise<void> {
+  private async increaseAllowance(asset: Address, amount: string): Promise<void> {
     const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
     const tokenAddress = await assetHolderContract.Token();
     const tokenContract = this.getOrAddContractMapping(
@@ -622,7 +622,7 @@ export class ChainService implements ChainServiceInterface {
     return {
       type: Deposited,
       channelId: destination,
-      assetHolderAddress: makeAddress(contract.address),
+      asset: makeAddress(contract.address),
       amount: BN.from(destinationHoldings),
       ethersEvent: event,
     };
@@ -647,7 +647,7 @@ export class ChainService implements ChainServiceInterface {
     return {
       type: FingerprintUpdated,
       channelId: channelId,
-      assetHolderAddress: makeAddress(contract.address),
+      asset: makeAddress(contract.address),
       newHoldings: BN.from(newHoldings),
       externalPayouts: externalPayouts,
       internalPayouts: internalPayouts,

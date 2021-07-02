@@ -7,13 +7,13 @@ import {Bytes32} from '../type-aliases';
 
 export type HoldingUpdatedArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   amount: Uint256;
 };
 
 export type OutcomeUpdatedArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   newHoldings: Uint256;
   externalPayouts: AllocationItem[];
   internalPayouts: AllocationItem[];
@@ -22,7 +22,7 @@ export type OutcomeUpdatedArg = {
 
 export type FundChannelArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   expectedHeld: Uint256;
   amount: Uint256;
 };

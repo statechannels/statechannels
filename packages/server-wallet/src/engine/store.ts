@@ -292,7 +292,7 @@ export class Store {
   }
 
   async getLedgerChannels(
-    assetHolderAddress: string,
+    asset: string,
     participants: Participant[]
   ): Promise<ChannelState[]> {
     const ledgers = await Channel.getLedgerChannels(assetHolderAddress, participants, this.knex);
@@ -380,7 +380,7 @@ export class Store {
         const channel = await this.getChannelState(channelId, tx);
         await Channel.setLedger(
           channelId,
-          checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
+          checkThat(channel.latest.outcome, isSimpleAllocation).asset,
           tx || this.knex
         );
       }
@@ -614,7 +614,7 @@ export class Store {
       if (role === 'ledger')
         await Channel.setLedger(
           channelId,
-          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
+          checkThat(outcome, isSimpleAllocation).asset,
           tx
         );
 
@@ -651,7 +651,7 @@ export class Store {
   async updateFunding(
     channelId: string,
     fromAmount: Uint256,
-    assetHolderAddress: Address
+    asset: Address
   ): Promise<void> {
     await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
   }
@@ -767,7 +767,7 @@ async function createChannel(
     pick(
       {
         ...constants,
-        assetHolderAddress: undefined,
+        asset: undefined,
         channelId: calculateChannelId(constants),
         fundingLedgerChannelId,
         fundingStrategy,

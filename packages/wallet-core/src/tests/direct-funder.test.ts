@@ -41,14 +41,14 @@ const deposits = {
   B: BN.from(5),
   total: BN.from(8)
 };
-const assetHolderAddress = makeAddress(AddressZero); // must be even length
+const asset = makeAddress(AddressZero); // must be even length
 const outcome: SimpleAllocation = {
   type: 'SimpleAllocation',
   allocationItems: [
     {destination: participantA.destination, amount: deposits.A},
     {destination: participantB.destination, amount: deposits.B}
   ],
-  assetHolderAddress
+  asset
 };
 
 const openingState: State = {
@@ -139,7 +139,7 @@ describe('initialization', () => {
 
     const outcome = {
       type: 'SimpleAllocation' as const,
-      assetHolderAddress: ethers.constants.AddressZero as any,
+      asset: ethers.constants.AddressZero as any,
       allocationItems: []
     };
     expect(() => initialize({...openingState, outcome}, 0)).toThrow('unexpected outcome');
@@ -165,7 +165,7 @@ describe('cranking', () => {
       ...openingState,
       outcome: {
         type: 'SimpleAllocation',
-        assetHolderAddress,
+        asset,
         allocationItems: [
           {destination: participants.A.destination, amount: BN.from(0)},
           {destination: participants.B.destination, amount: BN.from(0)}

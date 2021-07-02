@@ -25,8 +25,6 @@ import {createLogger} from '../logger';
 jest.setTimeout(60_000);
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-// eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 const rpcEndpoint = process.env.RPC_ENDPOINT;
@@ -111,11 +109,6 @@ beforeAll(async () => {
   const logger = createLogger(defaultTestWalletConfig());
 
   TestMessageService.linkMessageServices(a.messageService, b.messageService, logger);
-  const assetHolder = new Contract(
-    ethAssetHolderAddress,
-    ContractArtifacts.EthAssetHolderArtifact.abi,
-    provider
-  );
   mineOnEvent(assetHolder);
 });
 
@@ -233,5 +226,5 @@ const createAllocation = ({
       amount: hexZeroPad(BigNumber.from(bAmount).toHexString(), 32),
     },
   ],
-  assetHolderAddress: ethAssetHolderAddress,
+  asset: ethAssetHolderAddress,
 });

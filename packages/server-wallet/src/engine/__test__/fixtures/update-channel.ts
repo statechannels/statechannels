@@ -12,7 +12,7 @@ const defaultVars: UpdateChannelParams = {
   channelId: channel().channelId,
   allocations: [
     {
-      assetHolderAddress: makeAddress(constants.AddressZero),
+      asset: makeAddress(constants.AddressZero),
       allocationItems: [
         {destination: alice().destination, amount: BN.from(1)},
         {destination: bob().destination, amount: BN.from(3)},

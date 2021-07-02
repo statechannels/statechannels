@@ -175,7 +175,7 @@ export class Channel extends Model implements ChannelColumns {
 
   static async setLedger(
     channelId: Bytes32,
-    assetHolderAddress: Address,
+    asset: Address,
     txOrKnex: TransactionOrKnex
   ): Promise<void> {
     await Channel.query(txOrKnex).findOne({channelId}).patch({assetHolderAddress});
@@ -188,7 +188,7 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   static getLedgerChannels(
-    assetHolderAddress: string,
+    asset: string,
     participants: Participant[],
     txOrKnex: TransactionOrKnex
   ): Promise<Channel[]> {
@@ -394,7 +394,7 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   public get isLedger(): boolean {
-    return !!this.assetHolderAddress;
+    return !!this.asset;
   }
   public get isNullApp(): boolean {
     return BigNumber.from(this.channelConstants.appDefinition).isZero();

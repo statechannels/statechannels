@@ -4,9 +4,10 @@ import {
   serializeState,
   serializeAllocation,
   serializeOutcome,
+  makeAddress,
 } from '@statechannels/wallet-core';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import Objection from 'objection';
+import {ethers} from 'ethers';
 
 import {Channel} from '../../../models/channel';
 import {defaultTestEngineConfig, Engine} from '../..';
@@ -230,7 +231,7 @@ describe('ledger funded app scenarios', () => {
       })
     );
 
-    await Channel.setLedger(ledger.channelId, ETH_ASSET_HOLDER_ADDRESS, w.knex);
+    await Channel.setLedger(ledger.channelId, makeAddress(ethers.constants.AddressZero), w.knex);
 
     // Generate application channel
     app = channel({

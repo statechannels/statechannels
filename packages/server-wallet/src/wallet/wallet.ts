@@ -135,7 +135,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     this._chainListener = {
       holdingUpdated: this.createChainEventlistener('holdingUpdated', e =>
-        this._engine.store.updateFunding(e.channelId, e.amount, e.assetHolderAddress)
+        this._engine.store.updateFunding(e.channelId, e.amount, e.asset)
       ),
       assetOutcomeUpdated: this.createChainEventlistener('assetOutcomeUpdated', async e => {
         const transferredOut = e.externalPayouts.map(ai => ({
@@ -145,7 +145,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
         await this._engine.store.updateTransferredOut(
           e.channelId,
-          e.assetHolderAddress,
+          e.asset,
           transferredOut
         );
       }),
@@ -423,7 +423,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
   private async registerChannels(channelsToRegister: ChannelResult[]): Promise<void> {
     const channelsWithAssetHolders = channelsToRegister.map(cr => ({
-      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.asset)),
       channelId: cr.channelId,
     }));
 

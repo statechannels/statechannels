@@ -646,7 +646,7 @@ export class SingleThreadedEngine implements EngineInterface {
    * @returns A promise that resolves to the channel output.
    */
   async getLedgerChannels(
-    assetHolderAddress: string,
+    asset: string,
     participants: APIParticipant[]
   ): Promise<MultipleChannelOutput> {
     const response = EngineResponse.initialize();

@@ -117,7 +117,7 @@ describe('when the channel is finalized on chain', () => {
       knex,
       testChan.channelId,
       '0x05',
-      makeAddress(testChan.assetHolderAddress)
+      makeAddress(testChan.asset)
     );
 
     const challengeState = stateSignedBy([alice()])();

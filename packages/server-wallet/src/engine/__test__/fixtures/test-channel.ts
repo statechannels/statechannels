@@ -21,9 +21,9 @@ import {
   OpenChannel,
   Destination,
 } from '@statechannels/wallet-core';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
 import {utils} from 'ethers';
+import {NITRO_ADJUDICATOR_ADDRESS} from '@statechannels/wallet-core/src/config';
 
 import {Channel} from '../../../models/channel';
 import {defaultTestWalletConfig} from '../../../config';
@@ -241,7 +241,7 @@ export class TestChannel {
   }
 
   public get assetHolderAddress(): Address {
-    return ETH_ASSET_HOLDER_ADDRESS;
+    return makeAddress(NITRO_ADJUDICATOR_ADDRESS);
   }
 
   public get getChannelRequest(): Payload {
@@ -314,7 +314,7 @@ export class TestChannel {
 
     // make it a ledger here
     if (this.isLedger) {
-      await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
+      await Channel.setLedger(this.channelId, this.startOutcome.asset, store.knex);
     }
 
     const {fundingStrategy, fundingLedgerChannelId} = objective.data;
@@ -334,7 +334,7 @@ export class TestChannel {
 
     // set the funds as specified
     if (funds > 0) {
-      await store.updateFunding(this.channelId, BN.from(funds), this.assetHolderAddress);
+      await store.updateFunding(this.channelId, BN.from(funds), this.asset);
     }
 
     // patch the funding strategy

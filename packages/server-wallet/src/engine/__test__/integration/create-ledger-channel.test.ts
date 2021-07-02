@@ -77,7 +77,7 @@ describe('happy path', () => {
     });
 
     await expect(
-      w.getLedgerChannels(allocations[0].assetHolderAddress, participants)
+      w.getLedgerChannels(allocations[0].asset, participants)
     ).resolves.toMatchObject({
       channelResults: [
         {

@@ -19,7 +19,7 @@ export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
       amount: formatAmount(BN.from(assetBudget.channels[channelId].amount))
     }));
     return {
-      assetHolderAddress: assetHolderAddress || constants.AddressZero,
+      asset: assetHolderAddress || constants.AddressZero,
       availableReceiveCapacity: formatAmount(assetBudget.availableReceiveCapacity),
       availableSendCapacity: formatAmount(assetBudget.availableSendCapacity),
       channels
@@ -45,7 +45,7 @@ export function serializeAllocation(allocation: Allocation): AppAllocations {
 function serializeSimpleAllocation(allocation: SimpleAllocation): AppAllocation {
   return {
     allocationItems: allocation.allocationItems.map(serializeAllocationItem),
-    assetHolderAddress: allocation.assetHolderAddress
+    asset: allocation.asset
   };
 }
 

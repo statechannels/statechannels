@@ -62,7 +62,7 @@ export class DirectFunder {
       {
         type: 'FundChannel',
         channelId: channel.channelId,
-        assetHolderAddress: assetHolderAddress,
+        asset: assetHolderAddress,
         expectedHeld: BN.from(currentAmount),
         amount: BN.from(amountToDeposit),
       },

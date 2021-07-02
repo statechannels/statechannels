@@ -94,7 +94,7 @@ function fundChannel(
   expectedHeld: number,
   amount: number,
   channelId: string = randomChannelId(),
-  assetHolderAddress: Address = erc20Address
+  asset: Address = erc20Address
 ): {
   channelId: string;
   request: Promise<providers.TransactionResponse>;
@@ -112,7 +112,7 @@ function fundChannelAndMineBlocks(
   expectedHeld: number,
   amount: number,
   channelId: string = randomChannelId(),
-  assetHolderAddress: Address = erc20Address
+  asset: Address = erc20Address
 ): {
   channelId: string;
   request: Promise<providers.TransactionResponse>;
@@ -129,7 +129,7 @@ async function waitForChannelFunding(
   expectedHeld: number,
   amount: number,
   channelId: string = randomChannelId(),
-  assetHolderAddress: Address = erc20Address
+  asset: Address = erc20Address
 ): Promise<string> {
   const request = await fundChannel(expectedHeld, amount, channelId, assetHolderAddress).request;
   await request.wait();
@@ -252,7 +252,7 @@ describe('registerChannel', () => {
         case 0:
           expect(arg).toMatchObject({
             channelId,
-            assetHolderAddress: makeAddress(constants.AddressZero),
+            asset: makeAddress(constants.AddressZero),
             amount: BN.from(0),
           });
           counter++;
@@ -265,7 +265,7 @@ describe('registerChannel', () => {
         case 1:
           expect(arg).toMatchObject({
             channelId,
-            assetHolderAddress: makeAddress(constants.AddressZero),
+            asset: makeAddress(constants.AddressZero),
             amount: BN.from(5),
           });
           counter++;
@@ -295,7 +295,7 @@ describe('registerChannel', () => {
         holdingUpdated: arg => {
           expect(arg).toMatchObject({
             channelId,
-            assetHolderAddress: ethAssetHolderAddress,
+            asset: ethAssetHolderAddress,
             amount: BN.from(5),
           });
           resolve(true);
@@ -323,7 +323,7 @@ describe('registerChannel', () => {
         predicate =>
           predicate.channelId === arg.channelId &&
           predicate.amount === arg.amount &&
-          predicate.assetHolderAddress === arg.assetHolderAddress
+          predicate.asset === arg.asset
       );
       expect(index).toBeGreaterThan(-1);
       // Note, splice mutates the array on which it is called
@@ -410,7 +410,7 @@ describe('concludeAndWithdraw', () => {
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
-      assetHolderAddress: makeAddress(constants.AddressZero),
+      asset: makeAddress(constants.AddressZero),
       newHoldings: '0x00' as Uint256,
       externalPayouts: [
         {
@@ -451,7 +451,7 @@ describe('concludeAndWithdraw', () => {
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
-      assetHolderAddress: erc20Address,
+      asset: erc20Address,
       newHoldings: '0x00' as Uint256,
       externalPayouts: [
         {
@@ -498,7 +498,7 @@ describe('concludeAndWithdraw', () => {
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
-      assetHolderAddress: erc20Address,
+      asset: erc20Address,
       newHoldings: '0x00' as Uint256,
       externalPayouts: [
         {

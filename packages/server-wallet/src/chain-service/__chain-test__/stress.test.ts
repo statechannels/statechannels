@@ -52,7 +52,7 @@ describe('fundChannel', () => {
       chainService
         .fundChannel({
           channelId: randomChannelId(),
-          assetHolderAddress: erc20AssetHolderAddress,
+          asset: erc20AssetHolderAddress,
           expectedHeld: BN.from(0),
           amount: BN.from(depositAmount),
         })

@@ -29,7 +29,7 @@ export class EventTracker {
     this.assetHolderMap = new Map<string, {blockNumber: number; logIndex: number}>();
   }
 
-  private isNewEvent(assetHolderAddress: Address, blockNumber: number, logIndex: number): boolean {
+  private isNewEvent(asset: Address, blockNumber: number, logIndex: number): boolean {
     const eventRecord = this.assetHolderMap.get(assetHolderAddress);
     this.logger.debug(
       `EventTracker.isNewEvent: ${assetHolderAddress}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
@@ -66,14 +66,14 @@ export class EventTracker {
     logIndex: number = Number.MAX_SAFE_INTEGER // Why default to max: getInitialHoldings can call this without logIndex,
     // in which case should be considered the latest balance in block
   ): void {
-    if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
+    if (this.isNewEvent(arg.asset, blockNumber, logIndex)) {
       this.managedSubscriber.holdingUpdated(arg);
     }
   }
 
   // Pass event to managed subscriber only if new
   outcomeUpdated(arg: OutcomeUpdatedArg, blockNumber: number, logIndex: number): void {
-    if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
+    if (this.isNewEvent(arg.asset, blockNumber, logIndex)) {
       this.managedSubscriber.outcomeUpdated(arg);
     }
   }
