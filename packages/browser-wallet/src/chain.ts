@@ -287,14 +287,6 @@ export class ChainWatcher implements Chain {
   private configureContracts() {
     if (!this.ethereumIsEnabled) return;
 
-    this._assetHolders = [
-      new Contract(
-        ETH_ASSET_HOLDER_ADDRESS,
-        ContractArtifacts.EthAssetHolderArtifact.abi,
-        this.signer
-      )
-    ];
-
     // Log all contract events (for now)
     this._assetHolders[0].on('*', event => chainLogger.trace({event}, 'assetHolder[0] event'));
 
@@ -355,7 +347,7 @@ export class ChainWatcher implements Chain {
 
   public async finalizeAndWithdraw(finalizationProof: SignedState[]): Promise<string | undefined> {
     const transactionRequest = {
-      ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
+      ...Transactions.createConcludeAndTransferAllAssetsTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
       to: NITRO_ADJUDICATOR_ADDRESS
