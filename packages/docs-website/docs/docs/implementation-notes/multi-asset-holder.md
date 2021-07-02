@@ -17,8 +17,6 @@ ForceMove specifies that a state should have a default `outcome` but does not sp
 
 Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being held in the same channel.
 
-The outcome is stored in two places: first, as a single hash in the adjudicator contract; second, in multiple hashes across multiple asset holder contracts.
-
 The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain a pointer to the asset contract in question, as well as some `bytes` that encode a `AssetOutcome`. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
 
 In `Outcome.sol`:

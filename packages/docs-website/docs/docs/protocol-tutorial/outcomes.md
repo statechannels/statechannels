@@ -65,7 +65,7 @@ expect(decodeOutcome(encodedOutcome)).toEqual(outcome);
 
 ## Outcomes that guarantee
 
-Guarantee Asset Outcomes are similar to Allocation Asset Outcomes, only they not have any amounts. Their purpose is to simply express an ordering of destinations for a given asset holder (say, a given token).
+Guarantee Asset Outcomes are similar to Allocation Asset Outcomes, only they not have any amounts. Their purpose is to simply express an ordering of destinations for a given asset (say, a given token).
 
 A channel that has a guarantee outcome is said to be a guarantor channel.
 
