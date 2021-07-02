@@ -8,7 +8,7 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './interfaces/IMultiAssetHolder.sol';
 
 /**
- * @dev An implementation of the IAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed. Note there is no deposit function and the _transferAsset function is unimplemented; inheriting contracts should implement these functions in a manner appropriate to the asset type (e.g. ETH or ERC20 tokens).
+@dev An implementation of the IMultiAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed.
  */
 contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     using SafeMath for uint256;
@@ -23,12 +23,12 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     // **************
 
     /**
-     * @notice Deposit a token/eth amount against a given destination.
-     * @dev Deposit a token/eth amount against a given destination.
+     * @notice Deposit ETH or erc20 tokens against a given destination.
+     * @dev Deposit ETH or erc20 tokens against a given destination.
      * @param asset erc20 token address, or zero address to indicate ETH
      * @param destination ChannelId to be credited.
-     * @param expectedHeld The number of wei the depositor believes are _already_ escrowed against the channelId.
-     * @param amount The intended number of wei to be deposited.
+     * @param expectedHeld The number of wei/tokens the depositor believes are _already_ escrowed against the channelId.
+     * @param amount The intended number of wei/tokens to be deposited.
      */
     function deposit(
         address asset,
