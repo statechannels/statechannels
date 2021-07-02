@@ -8,13 +8,13 @@ import {
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
   setupContract,
-  MAGIC_ADDRESS_INDICATING_ETH,
   AssetOutcomeShortHand,
 } from '../../test-helpers';
 import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {channelDataToStatus, encodeOutcome, hashOutcome, Outcome} from '../../../src';
+import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../src/transactions';
 const testNitroAdjudicator: TESTNitroAdjudicator & Contract = (setupContract(
   getTestProvider(),
   TESTNitroAdjudicatorArtifact,
