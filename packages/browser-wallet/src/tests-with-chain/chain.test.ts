@@ -19,11 +19,11 @@ jest.setTimeout(10_000);
 const chain = new ChainWatcher();
 const store = new Store(chain);
 
-let ETHAssetHolder: Contract;
+let NitroAdjudicator: Contract;
 
 beforeAll(async () => {
   (window as any).ethereum = {enable: () => ['0xfec44e15328B7d1d8885a8226b0858964358F1D6']};
-  chain.ethereumEnable();
+  await chain.ethereumEnable();
 });
 
 //eslint-disable-next-line jest/no-disabled-tests
@@ -34,7 +34,7 @@ it.skip('subscribes to chainUpdateFeed via a subscribeDepositEvent Observable, a
     .pipe(first(info => BN.eq(info.amount, 1)))
     .toPromise();
 
-  ETHAssetHolder.deposit(
+  NitroAdjudicator.deposit(
     channelId, // destination
     utils.parseUnits('0', 'wei'), // expectedHeld
     utils.parseUnits('1', 'wei'), // amount
