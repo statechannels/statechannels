@@ -16,8 +16,12 @@ Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being
 
 An Allocation outcome specifies
 
-- at least one asset holder (which in turn is tied to a specific asset type such as ETH or an ERC20 token)
-- for each asset holder, an array of (destination, amount) pairs known as an `Allocation`, and indicating a payout of amount tokens to destination.
+- at least one asset (such as ETH or an ERC20 token).
+- for each asset, an array of (destination, amount) pairs known as an `Allocation`, and indicating a payout of amount tokens to destination.
+
+:::tip
+`assetHolderAddress` is used to store to the address of the ERC20 token contract. It can also be set to the zero address, and this implies the native token ETH.
+:::
 
 The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId. In the code snippet below, we import `convertAddressToBytes32` to convert an ethereum address to an external destination.
 
