@@ -20,7 +20,7 @@ const EOA = ethers.Wallet.createRandom().address;
 const destination = hexZeroPad(EOA, 32);
 
 const assetOutcome: AllocationAssetOutcome = {
-  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH,
   allocationItems: [{destination, amount}]
 };
 const outcomeBytes = encodeOutcome([
@@ -37,7 +37,7 @@ const stateHash = constants.HashZero; // if the channel was concluded on the hap
 const challengerAddress = constants.AddressZero; // if the channel was concluded on the happy path, we can use this default value
 const indices = []; // this magic value (a zero length array) implies we want to pay out all of the allocationItems (in this case there is only one)
 
-const tx2 = ETHAssetHolder.transfer(assetIndex, channelId, outcomeBytes, stateHash, challengerAddress, indices);
+const tx2 = NitroAdjudicator.transfer(assetIndex, channelId, outcomeBytes, stateHash, challengerAddress, indices);
 
 /*
   Check that an AllocationUpdated event was emitted.
@@ -78,7 +78,7 @@ const destination1 = hexZeroPad(EOA1, 32);
 const destination2 = hexZeroPad(EOA2, 32);
 
 const assetOutcomeForTheTargetChannel: AllocationAssetOutcome = {
-  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH,
   allocationItems: [
     {destination: destination1, amount},
     {destination: destination2, amount}
@@ -86,7 +86,7 @@ const assetOutcomeForTheTargetChannel: AllocationAssetOutcome = {
 };
 
 const assetOutcomeForTheGuarantorChannel: GuaranteeAssetOutcome = {
-  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  assetHolderAddress: MAGIC_ADDRESS_INDICATING_ETH,
   guarantee: {
     targetChannelId: targetChannelId,
     destinations: [
@@ -117,7 +117,7 @@ const stateHash = (targetStateHash = constants.HashZero); // if the channels wer
 const challengerAddress = (targetChallengerAddress = constants.AddressZero); // if the channels were concluded on the happy path, we can use this default value
 const indices = []; // this magic value (a zero length array) implies we want to pay out all of the allocationItems (in this case there is only one)
 
-const tx3 = ETHAssetHolder.claim(
+const tx3 = NitroAdjudicator.claim(
   assetIndex,
   guarantorId,
   guarantorOutcomeBytes,
