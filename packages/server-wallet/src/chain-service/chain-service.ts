@@ -145,8 +145,6 @@ export class ChainService implements ChainServiceInterface {
         case 'FundChannel':
           response = await this.fundChannel(chainRequest);
           break;
-
-          break;
         default:
           unreachable(chainRequest);
       }

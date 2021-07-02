@@ -58,11 +58,6 @@ export class MockChainService implements ChainServiceInterface {
         case 'FundChannel':
           responses.push(await this.fundChannel(chainRequest));
           break;
-        case 'PushOutcomeAndWithdraw':
-          responses.push(
-            await this.pushOutcomeAndWithdraw(chainRequest.state, chainRequest.challengerAddress)
-          );
-          break;
         default:
           unreachable(chainRequest);
       }
