@@ -1,5 +1,5 @@
-import {Contract, utils} from 'ethers';
-import {randomChannelId} from '@statechannels/nitro-protocol';
+import {Contract, utils, providers} from 'ethers';
+import {ContractArtifacts, randomChannelId} from '@statechannels/nitro-protocol';
 import {first} from 'rxjs/operators';
 import {
   simpleEthAllocation,
@@ -12,9 +12,16 @@ import {
 import {Store} from '../store';
 import {ChainWatcher, FakeChain} from '../chain';
 import {Player} from '../integration-tests/helpers';
-import {CHAIN_NETWORK_ID, CHALLENGE_DURATION, TRIVIAL_APP_ADDRESS} from '../config';
+import {
+  CHAIN_NETWORK_ID,
+  CHALLENGE_DURATION,
+  NITRO_ADJUDICATOR_ADDRESS,
+  TRIVIAL_APP_ADDRESS
+} from '../config';
 
 jest.setTimeout(10_000);
+
+const provider = new providers.JsonRpcProvider(`http://localhost:${process.env.GANACHE_PORT}`);
 
 const chain = new ChainWatcher();
 const store = new Store(chain);
@@ -24,6 +31,12 @@ let NitroAdjudicator: Contract;
 beforeAll(async () => {
   (window as any).ethereum = {enable: () => ['0xfec44e15328B7d1d8885a8226b0858964358F1D6']};
   await chain.ethereumEnable();
+  const signer = await provider.getSigner('0x28bF45680cA598708E5cDACc1414FCAc04a3F1ed');
+  NitroAdjudicator = new Contract(
+    NITRO_ADJUDICATOR_ADDRESS,
+    ContractArtifacts.NitroAdjudicatorArtifact.abi,
+    signer
+  );
 });
 
 //eslint-disable-next-line jest/no-disabled-tests
