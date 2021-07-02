@@ -1,31 +1,42 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers} from 'ethers';
+import {Contract, Wallet, constants} from 'ethers';
 
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
-import NitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
-import {hashState, State} from '../../../src/contract/state';
 import {
-  checkMultipleAssetOutcomeHashes,
-  checkMultipleHoldings,
-  compileEventsFromLogs,
+  AllocationAssetOutcome,
+  encodeOutcome,
+  hashOutcome,
+  Outcome,
+} from '../../../src/contract/outcome';
+import {
   computeOutcome,
-  finalizedFingerprint,
   getRandomNonce,
   getTestProvider,
   OutcomeShortHand,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
-  resetMultipleHoldings,
   setupContract,
 } from '../../test-helpers';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
+import {Token} from '../../../typechain/Token';
+import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
+// eslint-disable-next-line import/order
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
+import {channelDataToStatus, convertBytes32ToAddress} from '../../../src';
+import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../src/transactions';
 
-const provider = getTestProvider();
-let NitroAdjudicator: Contract;
-let AssetHolder1: Contract;
-let AssetHolder2: Contract;
+const testNitroAdjudicator = (setupContract(
+  getTestProvider(),
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator & Contract;
+
+const token = (setupContract(
+  getTestProvider(),
+  TokenArtifact,
+  process.env.TEST_TOKEN_ADDRESS
+) as unknown) as Token & Contract;
 
 const addresses = {
   // Channels
@@ -35,8 +46,8 @@ const addresses = {
   // Externals
   A: randomExternalDestination(),
   B: randomExternalDestination(),
-  ETH: undefined,
-  ETH2: undefined,
+  ETH: MAGIC_ADDRESS_INDICATING_ETH,
+  ERC20: token.address,
 };
 
 // Constants for this test suite
@@ -50,41 +61,15 @@ for (let i = 0; i < 3; i++) {
   wallets[i] = Wallet.createRandom();
   participants[i] = wallets[i].address;
 }
-beforeAll(async () => {
-  NitroAdjudicator = setupContract(
-    provider,
-    NitroAdjudicatorArtifact,
-    process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
-  );
-  AssetHolder1 = setupContract(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER_ADDRESS
-  );
-  AssetHolder2 = setupContract(
-    provider,
-    AssetHolderArtifact,
-    process.env.TEST_ASSET_HOLDER2_ADDRESS
-  );
-  addresses.ETH = AssetHolder1.address;
-  addresses.ETH2 = AssetHolder2.address;
-});
 
-// Scenarios are synonymous with channelNonce:
+const description =
+  'testNitroAdjudicator accepts a transferAllAssets tx for a finalized channel, and 2x Asset types transferred';
+const channelNonce = getRandomNonce('transferAllAssets');
 
-// Const description1 =
-//   'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 1x Asset types transferred';
-const description2 =
-  'NitroAdjudicator accepts a pushOutcomeAndTransferAll tx for a finalized channel, and 2x Asset types transferred';
-const channelNonce = getRandomNonce('pushOutcomeAndTransferAll');
-const storedTurnNumRecord = 5;
-const declaredTurnNumRecord = storedTurnNumRecord;
-const finalized = true;
-
-describe('pushOutcomeAndTransferAll', () => {
+describe('transferAllAssets', () => {
   it.each`
-    description     | setOutcome                     | heldBefore                     | newOutcome | heldAfter                      | payouts                        | reasonString
-    ${description2} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${{ETH: {c: 1}, ETH2: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, ETH2: {c: 0}}} | ${{ETH: {A: 1}, ETH2: {A: 2}}} | ${undefined}
+    description    | setOutcome                      | heldBefore                      | newOutcome                      | heldAfter                       | payouts                         | reasonString
+    ${description} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${{ETH: {c: 1}, ERC20: {c: 2}}} | ${{ETH: {A: 0}, ERC20: {A: 0}}} | ${{ETH: {c: 0}, ERC20: {c: 0}}} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -105,7 +90,6 @@ describe('pushOutcomeAndTransferAll', () => {
       const channel: Channel = {chainId, channelNonce, participants};
       const channelId = getChannelId(channel);
       addresses.c = channelId;
-      const finalizesAt = finalized ? 1 : 1e12; // Either 1 second after unix epoch, or ~ 31000 years after
 
       // Transform input data (unpack addresses and BigNumberify amounts)
       [heldBefore, setOutcome, newOutcome, heldAfter, payouts] = [
@@ -116,49 +100,55 @@ describe('pushOutcomeAndTransferAll', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
-      // Set holdings on multiple asset holders
-      resetMultipleHoldings(heldBefore, [AssetHolder1, AssetHolder2]);
+      // Deposit into channels
+      await Promise.all(
+        // For each asset
+        Object.keys(heldBefore).map(async asset => {
+          await Promise.all(
+            Object.keys(heldBefore[asset]).map(async destination => {
+              // for each channel
+              const amount = heldBefore[asset][destination];
+              if (asset != MAGIC_ADDRESS_INDICATING_ETH) {
+                // Increase allowance
+                await (await token.increaseAllowance(testNitroAdjudicator.address, amount)).wait(); // Approve enough for setup and main test
+              }
+              await (
+                await testNitroAdjudicator.deposit(asset, destination, 0, amount, {
+                  value: asset == MAGIC_ADDRESS_INDICATING_ETH ? amount : 0,
+                })
+              ).wait();
+              expect((await testNitroAdjudicator.holdings(asset, destination)).eq(amount)).toBe(
+                true
+              );
+            })
+          );
+        })
+      );
 
       // Compute the outcome.
       const outcome: AllocationAssetOutcome[] = computeOutcome(setOutcome);
-
-      // We don't care about the actual values in the state
-      const state: State = {
-        turnNum: 0,
-        isFinal: false,
-        channel,
-        outcome,
-        appDefinition: ethers.constants.AddressZero,
-        appData: '0x00',
-        challengeDuration: 0x1,
-      };
-
-      const challengerAddress = participants[state.turnNum % participants.length];
-
-      const initialFingerprint = finalizedFingerprint(
-        storedTurnNumRecord,
-        finalizesAt,
-        outcome,
-        state,
-        challengerAddress
-      );
-
+      const outcomeHash = hashOutcome(outcome);
       // Call public wrapper to set state (only works on test contract)
-      const tx0 = await NitroAdjudicator.setStatus(channelId, initialFingerprint);
-      await tx0.wait();
-      expect(await NitroAdjudicator.statusOf(channelId)).toEqual(initialFingerprint);
-
-      const stateHash = hashState(state);
+      const stateHash = constants.HashZero;
+      const challengerAddress = constants.AddressZero;
+      const finalizesAt = 42;
+      const turnNumRecord = 7;
+      await (
+        await testNitroAdjudicator.setStatusFromChannelData(channelId, {
+          turnNumRecord,
+          finalizesAt,
+          stateHash,
+          challengerAddress,
+          outcomeHash,
+        })
+      ).wait();
       const encodedOutcome = encodeOutcome(outcome);
 
-      const tx1 = NitroAdjudicator.pushOutcomeAndTransferAll(
+      const tx1 = testNitroAdjudicator.transferAllAssets(
         channelId,
-        declaredTurnNumRecord,
-        finalizesAt,
-        stateHash,
-        challengerAddress,
         encodedOutcome,
-        {gasLimit: 300000}
+        stateHash,
+        challengerAddress
       );
 
       // Call method in a slightly different way if expecting a revert
@@ -168,34 +158,59 @@ describe('pushOutcomeAndTransferAll', () => {
         );
         await expectRevert(() => tx1, regex);
       } else {
-        const {logs} = await (await tx1).wait();
+        const {events: eventsFromTx} = await (await tx1).wait();
 
-        // Compile events from logs
-        const events = compileEventsFromLogs(logs, [AssetHolder1, AssetHolder2, NitroAdjudicator]);
+        // we expect a FingerprintUpdated event for each asset. This may change under future optimizations
+        expect(eventsFromTx[0].event).toEqual('FingerprintUpdated');
+        // expect(eventsFromTx[1].event).toEqual('Transfer'); // TODO I do not know why the "event" property does not exist on this one
+        expect(eventsFromTx[2].event).toEqual('FingerprintUpdated');
 
-        // Build up event expectations
-        const expectedEvents = [];
-
-        // Add an AllocationUpdated event to expectations
-        Object.keys(heldBefore).forEach(key => {
-          expectedEvents.push({
-            name: 'AllocationUpdated',
-            contract: key,
-            args: {
-              channelId,
-              initialHoldings: heldBefore[key][channelId], // initialHoldings
-            },
-          });
+        // Check new status
+        const outcomeAfter: Outcome = computeOutcome(newOutcome);
+        const expectedStatusAfter = channelDataToStatus({
+          turnNumRecord,
+          finalizesAt,
+          // stateHash will be set to HashZero by this helper fn
+          // if state property of this object is undefined
+          challengerAddress,
+          outcome: outcomeAfter,
         });
+        expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedStatusAfter);
 
-        // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
-        expect(events).toMatchObject(expectedEvents);
+        // Check payouts
+        await Promise.all(
+          // For each asset
+          Object.keys(payouts).map(async asset => {
+            await Promise.all(
+              Object.keys(payouts[asset]).map(async destination => {
+                const address = convertBytes32ToAddress(destination);
+                // for each channel
+                const amount = payouts[asset][destination];
+                if (asset != MAGIC_ADDRESS_INDICATING_ETH) {
+                  expect((await token.balanceOf(address)).eq(amount)).toBe(true);
+                } else {
+                  expect((await getTestProvider().getBalance(address)).eq(amount)).toBe(true);
+                }
+              })
+            );
+          })
+        );
 
-        // Check new holdings on each AssetHolder
-        checkMultipleHoldings(heldAfter, [AssetHolder1, AssetHolder2]);
-
-        // Check new assetOutcomeHash on each AssetHolder
-        checkMultipleAssetOutcomeHashes(channelId, newOutcome, [AssetHolder1, AssetHolder2]);
+        // Check new holdings
+        await Promise.all(
+          // For each asset
+          Object.keys(heldAfter).map(async asset => {
+            await Promise.all(
+              Object.keys(heldAfter[asset]).map(async destination => {
+                // for each channel
+                const amount = heldAfter[asset][destination];
+                expect((await testNitroAdjudicator.holdings(asset, destination)).eq(amount)).toBe(
+                  true
+                );
+              })
+            );
+          })
+        );
       }
     }
   );
