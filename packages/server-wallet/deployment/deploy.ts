@@ -1,5 +1,5 @@
 import {Address} from '@statechannels/client-api-schema';
-import {ContractArtifacts, TestContractArtifacts} from '@statechannels/nitro-protocol';
+import {TestContractArtifacts} from '@statechannels/nitro-protocol';
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {ContractFactory, providers, Wallet} from 'ethers';
 
