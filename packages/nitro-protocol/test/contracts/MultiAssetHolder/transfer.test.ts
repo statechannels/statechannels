@@ -4,7 +4,6 @@ import {constants, Contract} from 'ethers';
 import {
   getRandomNonce,
   getTestProvider,
-  MAGIC_ADDRESS_INDICATING_ETH,
   randomChannelId,
   randomExternalDestination,
   replaceAddressesAndBigNumberify,
@@ -15,6 +14,7 @@ import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {channelDataToStatus} from '../../../src';
+import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../src/transactions';
 
 const testNitroAdjudicator = (setupContract(
   getTestProvider(),
