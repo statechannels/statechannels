@@ -3,7 +3,7 @@ id: release-assets
 title: Release assets
 ---
 
-If a channel has been finalized on chain, the adjudicator contract knows about the final outcome. This tutorial section covers pushing that outcome to the asset holder contract(s), which is a necessary step to releasing the assets.
+If a channel has been finalized on chain, the adjudicator contract knows about the final outcome. This tutorial section covers releasing the assets.
 
 ## Using `transfer`
 
@@ -53,7 +53,7 @@ expect(BigNumber.from(await provider.getBalance(EOA)).eq(BigNumber.from(amount))
 ```
 
 :::tip
-If the destination specified in the outcome is external, the asset holder pays out the funds (as in the example above). Otherwise the destination is a channel id, and the contract updates its internal accounting such that this channel has its direct funding increased.
+If the destination specified in the outcome is external, the assets are paid out (as in the example above). Otherwise the destination is a channel id, and the contract updates its internal accounting such that this channel has its direct funding increased.
 :::
 
 :::tip
