@@ -318,7 +318,6 @@ export class ChainWatcher implements Chain {
       } catch (error) {
         // TODO: Handle error. Likely the user rejected the login
         chainLogger.error(error);
-        console.log(error);
         return Promise.reject('user rejected in metamask');
       }
     } else {
