@@ -1,5 +1,5 @@
-import {AllocationItem, AssetOutcome, Outcome} from '@statechannels/nitro-protocol';
-import {Address, PrivateKey, SignedState, State, Uint256} from '@statechannels/wallet-core';
+import {AllocationItem, Outcome} from '@statechannels/nitro-protocol';
+import {Address, PrivateKey, SignedState, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {Logger} from 'pino';
 

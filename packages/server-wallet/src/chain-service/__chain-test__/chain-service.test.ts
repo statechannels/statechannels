@@ -1,7 +1,6 @@
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {
   channelDataToStatus,
-  ContractArtifacts,
   getChannelId,
   randomChannelId,
   TestContractArtifacts,
@@ -28,11 +27,9 @@ import {
 import {alice as aWallet, bob as bWallet} from '../../engine/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../engine/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
-import {AssetOutcomeUpdatedArg, ChallengeRegisteredArg, HoldingUpdatedArg} from '../types';
+import {ChallengeRegisteredArg, HoldingUpdatedArg} from '../types';
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
-const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 
@@ -69,12 +66,6 @@ const testAdjudicator = new Contract(
   new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)
 );
 
-const erc20Holder = new Contract(
-  erc20AssetHolderAddress,
-  ContractArtifacts.Erc20AssetHolderArtifact.abi,
-  provider
-);
-
 beforeAll(async () => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
@@ -103,7 +94,7 @@ function fundChannel(
   expectedHeld: number,
   amount: number,
   channelId: string = randomChannelId(),
-  assetHolderAddress: Address = ethAssetHolderAddress
+  assetHolderAddress: Address = erc20Address
 ): {
   channelId: string;
   request: Promise<providers.TransactionResponse>;
@@ -121,7 +112,7 @@ function fundChannelAndMineBlocks(
   expectedHeld: number,
   amount: number,
   channelId: string = randomChannelId(),
-  assetHolderAddress: Address = ethAssetHolderAddress
+  assetHolderAddress: Address = erc20Address
 ): {
   channelId: string;
   request: Promise<providers.TransactionResponse>;
@@ -138,7 +129,7 @@ async function waitForChannelFunding(
   expectedHeld: number,
   amount: number,
   channelId: string = randomChannelId(),
-  assetHolderAddress: Address = ethAssetHolderAddress
+  assetHolderAddress: Address = erc20Address
 ): Promise<string> {
   const request = await fundChannel(expectedHeld, amount, channelId, assetHolderAddress).request;
   await request.wait();
@@ -156,7 +147,7 @@ async function setUpConclude(isEth = true) {
         {destination: alice.destination, amount: BN.from(1)},
         {destination: bob.destination, amount: BN.from(3)},
       ])
-    : simpleTokenAllocation(erc20AssetHolderAddress, [
+    : simpleTokenAllocation(erc20Address, [
         {destination: alice.destination, amount: BN.from(1)},
         {destination: bob.destination, amount: BN.from(3)},
       ]);
@@ -182,7 +173,7 @@ async function setUpConclude(isEth = true) {
     0,
     4,
     channelId,
-    isEth ? ethAssetHolderAddress : erc20AssetHolderAddress
+    isEth ? makeAddress(constants.AddressZero) : erc20Address
   );
   return {
     channelId,
@@ -213,8 +204,8 @@ describe('fundChannel', () => {
   it('Fund erc20', async () => {
     const channelId = randomChannelId();
 
-    await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
-    expect(await erc20Holder.holdings(channelId)).toEqual(BigNumber.from(5));
+    await waitForChannelFunding(0, 5, channelId, erc20Address);
+    expect(await testAdjudicator.holdings(erc20Address, channelId)).toEqual(BigNumber.from(5));
   });
 });
 
@@ -234,7 +225,7 @@ describe('registerChannel', () => {
 
     const channelFinalizedHandler = jest.fn();
     const channelFinalizedPromise = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         channelFinalized: arg => {
           channelFinalizedHandler(arg);
@@ -261,7 +252,7 @@ describe('registerChannel', () => {
         case 0:
           expect(arg).toMatchObject({
             channelId,
-            assetHolderAddress: ethAssetHolderAddress,
+            assetHolderAddress: makeAddress(constants.AddressZero),
             amount: BN.from(0),
           });
           counter++;
@@ -274,7 +265,7 @@ describe('registerChannel', () => {
         case 1:
           expect(arg).toMatchObject({
             channelId,
-            assetHolderAddress: ethAssetHolderAddress,
+            assetHolderAddress: makeAddress(constants.AddressZero),
             amount: BN.from(5),
           });
           counter++;
@@ -286,7 +277,7 @@ describe('registerChannel', () => {
       }
     };
 
-    chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+    chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
       ...defaultNoopListeners,
       holdingUpdated,
     });
@@ -299,7 +290,7 @@ describe('registerChannel', () => {
     await mineBlocks(); // wait for deposit to be confirmed then register channel
 
     await new Promise(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         holdingUpdated: arg => {
           expect(arg).toMatchObject({
@@ -344,8 +335,8 @@ describe('registerChannel', () => {
       holdingUpdated,
     });
 
-    await waitForChannelFunding(0, 5, channelId, ethAssetHolderAddress);
-    await waitForChannelFunding(0, 5, channelId, erc20AssetHolderAddress);
+    await waitForChannelFunding(0, 5, channelId, makeAddress(constants.AddressZero));
+    await waitForChannelFunding(0, 5, channelId, erc20Address);
     // No need to wait for block mining. The promise below will not resolve until after the 5th block is mined
     mineBlocks();
     await p;
@@ -364,7 +355,7 @@ describe('unconfirmedEvents', () => {
     let lastObservedAmount = -1;
     let numberOfEventsObserved = 0;
     const p = new Promise(resolve => {
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         holdingUpdated: arg => {
           const received = parseInt(arg.amount);
@@ -397,7 +388,7 @@ describe('concludeAndWithdraw', () => {
     const {channelId, state, signatures} = await setUpConclude();
 
     const p = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         channelFinalized: arg => {
           expect(arg.channelId).toEqual(channelId);
@@ -419,7 +410,7 @@ describe('concludeAndWithdraw', () => {
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
-      assetHolderAddress: ethAssetHolderAddress,
+      assetHolderAddress: makeAddress(constants.AddressZero),
       newHoldings: '0x00' as Uint256,
       externalPayouts: [
         {
@@ -436,7 +427,7 @@ describe('concludeAndWithdraw', () => {
     };
 
     const p = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
           expect(arg).toMatchObject(assetOutcomeUpdated);
@@ -460,7 +451,7 @@ describe('concludeAndWithdraw', () => {
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
-      assetHolderAddress: erc20AssetHolderAddress,
+      assetHolderAddress: erc20Address,
       newHoldings: '0x00' as Uint256,
       externalPayouts: [
         {
@@ -477,7 +468,7 @@ describe('concludeAndWithdraw', () => {
     };
 
     const p = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
           expect(arg).toMatchObject(assetOutcomeUpdated);
@@ -507,7 +498,7 @@ describe('concludeAndWithdraw', () => {
 
     const assetOutcomeUpdated: AssetOutcomeUpdatedArg = {
       channelId,
-      assetHolderAddress: erc20AssetHolderAddress,
+      assetHolderAddress: erc20Address,
       newHoldings: '0x00' as Uint256,
       externalPayouts: [
         {
@@ -527,7 +518,7 @@ describe('concludeAndWithdraw', () => {
     if (!transactionResponse) throw 'Expected transaction response';
     await transactionResponse.wait();
     const p = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [erc20AssetHolderAddress], {
+      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
         ...defaultNoopListeners,
         assetOutcomeUpdated: arg => {
           expect(arg).toMatchObject(assetOutcomeUpdated);
@@ -595,14 +586,14 @@ describe('challenge', () => {
     const channelsFinalized = channelIds.map(
       channelId =>
         new Promise(resolve =>
-          chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+          chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
             ...defaultNoopListeners,
             channelFinalized: resolve,
           })
         )
     );
     await Promise.all(
-      channelIds.map(channelId => waitForChannelFunding(0, 4, channelId, ethAssetHolderAddress))
+      channelIds.map(channelId => waitForChannelFunding(0, 4, channelId, nitroAdjudicatorAddress))
     );
 
     await (await chainService.challenge([state0s[0], state1s[0]], aWallet().privateKey)).wait();
@@ -666,7 +657,7 @@ describe('challenge', () => {
       participants: [alice(), bob()].map(p => p.signingAddress),
     });
     const challengeRegistered: Promise<ChallengeRegisteredArg> = new Promise(challengeRegistered =>
-      chainService.registerChannel(channelId, [ethAssetHolderAddress], {
+      chainService.registerChannel(channelId, [testAdjudicator], {
         ...defaultNoopListeners,
         challengeRegistered,
       })
@@ -694,7 +685,7 @@ describe('challenge', () => {
 
 describe('getBytecode', () => {
   it('returns the bytecode for an app definition', async () => {
-    const bytecode = await chainService.fetchBytecode(ethAssetHolderAddress);
+    const bytecode = await chainService.fetchBytecode(testAdjudicator.address);
     expect(bytecode).toMatch(/^0x[A-Fa-f0-9]{64,}$/);
   });
 
