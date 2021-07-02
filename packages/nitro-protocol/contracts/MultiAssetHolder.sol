@@ -113,7 +113,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             assetOutcome.allocationOrGuaranteeBytes,
             (Outcome.AllocationItem[])
         );
-        address asset = outcome[assetIndex].assetHolderAddress;
+        address asset = outcome[assetIndex].asset;
 
         // effects and interactions
         allocation = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
@@ -172,7 +172,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 '!guarantee'
             );
             guarantee = abi.decode(assetOutcome.allocationOrGuaranteeBytes, (Outcome.Guarantee));
-            asset = outcome[assetIndex].assetHolderAddress;
+            asset = outcome[assetIndex].asset;
         }
         {
             _requireChannelFinalized(guarantee.targetChannelId);
