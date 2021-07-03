@@ -17,7 +17,7 @@ ForceMove specifies that a state should have a default `outcome` but does not sp
 
 Nitro supports multiple different assets (e.g. ETH and one or more ERC20s) being held in the same channel.
 
-The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain a pointer to the asset contract in question, as well as some `bytes` that encode a `AssetOutcome`. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
+The adjudicator stores (the hash of) an encoded `outcome` for each finalized channel. A decoded `outcome` is an array of `OutcomeItems`. These individual `OutcomeItems` contain the address of the asset contract in question (or `0x0` to indicate ETH), as well as some `bytes` that encode an `AssetOutcome`. This data structure contains some more `bytes` encoding either an allocation or a guarantee, as well as the `AssetOutcomeType`: an integer which indicates which.
 
 In `Outcome.sol`:
 
@@ -63,7 +63,7 @@ library Outcome {
 
 ### Destinations
 
-A `Destination` is a `bytes32` and either:
+A `Destination` is a `bytes32` and represents either:
 
 1. A `ChannelId` (see the section on [channelId](./force-move#channelid)), or
 2. An `ExternalDestination`, which is an ethereum address left-padded with zeros.
@@ -86,7 +86,7 @@ The deposit method allows ETH or ERC20 tokens to be escrowed against a channel.
 Call signature:
 
 ```solidity
-function deposit(address asset, bytes32 destination, uint256 expectedHeld, uint256 amount) public payable
+function deposit(address asset, bytes32 destination, uint256 expectedHeld, uint256 amount) external payable
 ```
 
 Checks:
@@ -128,5 +128,5 @@ You may only deposit to a channel address. This is currently enforced at the con
 :::
 
 :::caution
-Depositing ahead of those with higher precedence is not safe (they can steal your funds). Always ensure that the channel is funded up to and including all players with higher precedence, before making a deposit.
+Depositing ahead of other participants who have higher precedence in the initial outcome is not safe (they can steal your funds). Always ensure that the channel is funded, up to and including all participants with higher precedence, before making a deposit.
 :::
