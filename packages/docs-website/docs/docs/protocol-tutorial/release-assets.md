@@ -40,7 +40,7 @@ const indices = []; // this magic value (a zero length array) implies we want to
 const tx2 = NitroAdjudicator.transfer(assetIndex, channelId, outcomeBytes, stateHash, challengerAddress, indices);
 
 /*
-  Check that an AllocationUpdated event was emitted.
+  Check that a FingerprintUpdated event was emitted.
 */
 const {events} = await(await tx3).wait();
 expect(events).toMatchObject(
