@@ -208,7 +208,7 @@ export function computeNewOutcome(
   // Massage the output for convenience
   const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
   const newAssetOutcome: AllocationAssetOutcome = {
-    assetHolderAddress: oldOutcome[assetIndex].assetHolderAddress,
+    asset: oldOutcome[assetIndex].asset,
     allocationItems: newAllocation,
   };
 

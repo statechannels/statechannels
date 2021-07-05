@@ -24,7 +24,7 @@ import EventEmitter from 'eventemitter3';
 import _ from 'lodash';
 
 import {getProvider} from './utils/contract-utils';
-import {ETH_ASSET_HOLDER_ADDRESS, NITRO_ADJUDICATOR_ADDRESS} from './config';
+import {NITRO_ADJUDICATOR_ADDRESS} from './config';
 import {logger} from './logger';
 
 export interface ChannelChainInfo {
@@ -383,7 +383,7 @@ export class ChainWatcher implements Chain {
   ): Promise<string | undefined> {
     const transactionRequest = {
       ...createETHDepositTransaction(channelId, expectedHeld, amount),
-      to: ETH_ASSET_HOLDER_ADDRESS,
+      to: NITRO_ADJUDICATOR_ADDRESS,
       value: amount
     };
     const response = await this.signer.sendTransaction({

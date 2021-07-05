@@ -28,7 +28,7 @@ pragma experimental ABIEncoderV2;
 library Outcome {
   // An outcome is an array of OutcomeItems
   // Outcome = OutcomeItem[]
-  // OutcomeItem = (AssetHolderAddress, AssetOutcome)
+  // OutcomeItem = (asset, AssetOutcome)
   // AssetOutcome = (AssetOutcomeType, Allocation | Guarantee)
   // Allocation = AllocationItem[]
   // AllocationItem = (Destination, Amount)
@@ -36,7 +36,7 @@ library Outcome {
   // Destination = ChannelId | ExternalDestination
 
   struct OutcomeItem {
-    address assetHolderAddress;
+    address asset;
     bytes assetOutcomeBytes; // abi.encode(AssetOutcome)
   }
 
