@@ -24,7 +24,7 @@ export interface MessageServiceInterface {
 
   // TODO: Is a url/string too restrictive for addressing a peer?
   /**
-   * Registers a peer so messages can be sent ot that peer
+   * Registers a peer so messages can be sent to that peer
    * @param peerUrl The url for the peer
    */
   registerPeer(peerUrl: string): Promise<void>;
