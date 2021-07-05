@@ -116,7 +116,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         address asset = outcome[assetIndex].asset;
 
         // effects and interactions
-        allocation = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
+        (allocation, ) = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
             Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
@@ -232,7 +232,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         pure
         returns (
             Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete,
+            bool allocatesOnlyZeros,
             uint256[] memory payouts,
             uint256 totalPayouts
         )
@@ -242,7 +242,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
-        safeToDelete = true; // switched to false if there is an item remaining with amount > 0
+        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
 
@@ -280,7 +280,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
 
         for (uint256 i = 0; i < allocation.length; i++) {
             if (newAllocation[i].amount != 0) {
-                safeToDelete = false;
+                allocatesOnlyZeros = false;
                 break;
             }
         }
@@ -295,7 +295,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         pure
         returns (
             Outcome.AllocationItem[] memory newAllocation,
-            bool safeToDelete,
+            bool allocatesOnlyZeros,
             uint256[] memory payouts,
             uint256 totalPayouts
         )
@@ -305,7 +305,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
         totalPayouts = 0;
         newAllocation = new Outcome.AllocationItem[](allocation.length);
-        safeToDelete = true; // switched to false if there is an item remaining with amount > 0
+        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
 
@@ -327,7 +327,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             } else {
                 newAllocation[i].amount = allocation[i].amount;
             }
-            if (newAllocation[i].amount != 0) safeToDelete = false;
+            if (newAllocation[i].amount != 0) allocatesOnlyZeros = false;
             // decrease surplus by the current amount if possible, else surplus goes to zero
             surplus -= affordsForDestination;
         }
@@ -345,12 +345,12 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 fromChannelId,
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
-    ) internal returns (Outcome.AllocationItem[] memory) {
+    ) internal returns (Outcome.AllocationItem[] memory, bool) {
         uint256 initialHoldings = holdings[asset][fromChannelId];
 
         (
             Outcome.AllocationItem[] memory newAllocation,
-            ,
+            bool allocatesOnlyZeros,
             uint256[] memory payouts,
             uint256 totalPayouts
         ) = _computeNewAllocation(initialHoldings, allocation, indices);
@@ -375,7 +375,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 }
             }
         }
-        return newAllocation;
+        return (newAllocation, allocatesOnlyZeros);
     }
 
     /**
