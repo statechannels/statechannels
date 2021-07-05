@@ -45,29 +45,29 @@ class TestChannel {
   wallets: ethers.Wallet[];
   channel: Channel;
   private guaranteeOrAllocation: Guarantee | Allocation;
-  outcome(assetHolderAddress: string) {
+  outcome(asset: string) {
     return 'targetChannelId' in this.guaranteeOrAllocation
-      ? [{assetHolderAddress, guarantee: this.guaranteeOrAllocation}]
-      : [{assetHolderAddress, allocationItems: this.guaranteeOrAllocation}];
+      ? [{asset, guarantee: this.guaranteeOrAllocation}]
+      : [{asset, allocationItems: this.guaranteeOrAllocation}];
   }
   get channelId() {
     return getChannelId(this.channel);
   }
-  someState(assetHolderAddress: string): State {
+  someState(asset: string): State {
     return {
       challengeDuration: 600,
       appDefinition: '0x8504FcA6e1e73947850D66D032435AC931892116',
       channel: this.channel,
       turnNum: 6,
       isFinal: false,
-      outcome: this.outcome(assetHolderAddress),
+      outcome: this.outcome(asset),
       appData: '0x', // TODO choose a more representative example
     };
   }
 
-  finalState(assetHolderAddress: string): State {
+  finalState(asset: string): State {
     return {
-      ...this.someState(assetHolderAddress),
+      ...this.someState(asset),
       isFinal: true,
     };
   }
@@ -124,8 +124,8 @@ class TestChannel {
     };
   }
 
-  async concludeAndTransferAllAssetsTx(assetHolderAddress: string) {
-    const fP = this.supportProof(this.finalState(assetHolderAddress));
+  async concludeAndTransferAllAssetsTx(asset: string) {
+    const fP = this.supportProof(this.finalState(asset));
     return await nitroAdjudicator.concludeAndTransferAllAssets(
       fP.largestTurnNum,
       fP.fixedPart,
@@ -137,8 +137,8 @@ class TestChannel {
     );
   }
 
-  async challengeTx(assetHolderAddress: string) {
-    const proof = this.counterSignedSupportProof(this.someState(assetHolderAddress));
+  async challengeTx(asset: string) {
+    const proof = this.counterSignedSupportProof(this.someState(asset));
     return await nitroAdjudicator.challenge(
       proof.fixedPart,
       proof.largestTurnNum,
@@ -213,10 +213,10 @@ export async function waitForChallengesToTimeOut(finalizesAtArray: number[]): Pr
  */
 export async function challengeChannelAndExpectGas(
   channel: TestChannel,
-  assetHolderAddress: string,
+  asset: string,
   expectedGas: number
 ): Promise<{proof: ReturnType<typeof channel.counterSignedSupportProof>; finalizesAt: number}> {
-  const proof = channel.counterSignedSupportProof(channel.someState(assetHolderAddress)); // TODO use a nontrivial app with a state transition
+  const proof = channel.counterSignedSupportProof(channel.someState(asset)); // TODO use a nontrivial app with a state transition
 
   const challengeTx = await nitroAdjudicator.challenge(
     proof.fixedPart,
