@@ -460,6 +460,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // (undocumented)
     get messageService(): MessageServiceInterface;
     registerAppDefinition(appDefinition: string): Promise<void>;
+    registerPeerMessageService(peerUrl: string): Promise<void>;
     updateChannel(channelId: string, allocations: Allocation[], appData: string): Promise<UpdateChannelResult>;
 }
 

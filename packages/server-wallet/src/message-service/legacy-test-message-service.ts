@@ -30,6 +30,10 @@ export class LegacyTestMessageHandler implements MessageServiceInterface {
     }
   }
 
+  public async registerPeer(_peerUrl: string): Promise<void> {
+    throw new Error('Not supported');
+  }
+
   public async destroy(): Promise<void> {
     this._destroyed = true;
   }
