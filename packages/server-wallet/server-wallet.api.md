@@ -379,7 +379,7 @@ export class SingleThreadedEngine implements EngineInterface {
     destroy(): Promise<void>;
     getApprovedObjectives(): Promise<WalletObjective[]>;
     getChannels(): Promise<MultipleChannelOutput>;
-    getLedgerChannels(assetHolderAddress: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
+    getLedgerChannels(asset: string, participants: Participant_2[]): Promise<MultipleChannelOutput>;
     getObjective(objectiveId: string): Promise<WalletObjective>;
     getSigningAddress(): Promise<Address>;
     getState({ channelId }: GetStateParams): Promise<SingleChannelOutput>;

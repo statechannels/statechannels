@@ -45,7 +45,7 @@ import {
 
 
 const assetOutcome: AllocationAssetOutcome = {
-  assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS
+  asset: ethers.constants.AddressZero
   allocationItems: [
     {destination: HashZero, amount: '0x03'}, // 3 wei
     // other payouts go here,
@@ -83,7 +83,7 @@ Constructing the right kind of object in typescript is straightforward:
 import {GuaranteeAssetOutcome} from '@statechannels/nitro-protocol';
 
 const assetOutcome: GuaranteeAssetOutcome = {
-  assetHolderAddress: process.env.ETH_ASSET_HOLDER_ADDRESS,
+  asset: ethers.constants.AddressZero,
   guarantee: {
     targetChannelId: HashZero,
     destinations: [
