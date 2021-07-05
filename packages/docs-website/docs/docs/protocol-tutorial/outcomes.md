@@ -20,7 +20,7 @@ An Allocation outcome specifies
 - for each asset, an array of (destination, amount) pairs known as an `Allocation`, and indicating a payout of amount tokens to destination.
 
 :::tip
-`assetHolderAddress` is used to store to the address of the ERC20 token contract. It can also be set to the zero address, and this implies the native token ETH.
+`asset` is used to store to the address of the ERC20 token contract. It can also be set to the zero address, and this implies the native token ETH.
 :::
 
 The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId. In the code snippet below, we import `convertAddressToBytes32` to convert an ethereum address to an external destination.
