@@ -49,8 +49,6 @@ import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 
-const defaultLogger = createLogger(defaultTestWalletConfig());
-
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
 
@@ -59,8 +57,7 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export class Store {
-  readonly logger: Logger = defaultLogger;
-
+  readonly logger: Logger;
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
@@ -68,6 +65,7 @@ export class Store {
     readonly chainNetworkID: string,
     logger?: Logger
   ) {
+    this.logger = logger ?? createLogger(defaultTestWalletConfig());
     if (timingMetrics) {
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
       this.lockApp = recordFunctionMetrics(this.lockApp);
@@ -79,7 +77,6 @@ export class Store {
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
 
       setupDBMetrics(this.knex);
-      if (logger) this.logger = logger;
     }
   }
 
