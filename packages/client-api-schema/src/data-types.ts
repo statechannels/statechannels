@@ -68,7 +68,7 @@ export interface AllocationItem {
  */
 export interface Allocation {
   /**
-   * The asset holder contract address
+   * The contract address of the asset
    */
   asset: Address;
   /**
