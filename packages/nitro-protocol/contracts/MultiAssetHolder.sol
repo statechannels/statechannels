@@ -89,7 +89,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 stateHash,
         address challengerAddress,
         uint256[] memory indices
-    ) public override {
+    ) external override {
         // checks
         _requireIncreasingIndices(indices);
         _requireChannelFinalized(fromChannelId);
@@ -140,7 +140,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 targetStateHash,
         address targetChallengerAddress,
         uint256[] memory indices
-    ) public override {
+    ) external override {
         // checks
         Outcome.Guarantee memory guarantee;
         address asset;
