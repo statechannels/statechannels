@@ -160,10 +160,8 @@ describe('transferAllAssets', () => {
       } else {
         const {events: eventsFromTx} = await (await tx1).wait();
 
-        // we expect a FingerprintUpdated event for each asset. This may change under future optimizations
+        // we expect a single FingerprintUpdated event.
         expect(eventsFromTx[0].event).toEqual('FingerprintUpdated');
-        // expect(eventsFromTx[1].event).toEqual('Transfer'); // TODO I do not know why the "event" property does not exist on this one
-        expect(eventsFromTx[2].event).toEqual('FingerprintUpdated');
 
         // Check new status
         const outcomeAfter: Outcome = computeOutcome(newOutcome);

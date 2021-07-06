@@ -58,20 +58,39 @@ contract NitroAdjudicator is MultiAssetHolder {
         bytes32 stateHash,
         address challengerAddress
     ) public {
-        // is there a smarter way of getting the length of the outcome?
+        // checks
+        _requireChannelFinalized(channelId);
+        _requireMatchingFingerprint(
+            stateHash,
+            challengerAddress,
+            keccak256(outcomeBytes),
+            channelId
+        );
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
-            // TODO there is a lot of scope for gas savings here
-            outcomeBytes = transfer(
-                assetIndex,
-                channelId,
-                outcomeBytes,
-                stateHash,
-                challengerAddress,
-                new uint256[](0) // meaning "all"
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                outcome[assetIndex].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
+            require(
+                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
+                '!allocation'
+            );
+            Outcome.AllocationItem[] memory allocation = abi.decode(
+                assetOutcome.allocationOrGuaranteeBytes,
+                (Outcome.AllocationItem[])
+            );
+            address asset = outcome[assetIndex].asset;
+            (allocation, ) = _transfer(asset, channelId, allocation, new uint256[](0)); // update in place to newAllocation
+            outcome[assetIndex].assetOutcomeBytes = abi.encode(
+                Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
             );
         }
+        outcomeBytes = abi.encode(outcome);
+        bytes32 outcomeHash = keccak256(outcomeBytes);
+        _updateFingerprint(channelId, stateHash, challengerAddress, outcomeHash);
+        emit FingerprintUpdated(channelId, outcomeBytes);
     }
 
     /**
