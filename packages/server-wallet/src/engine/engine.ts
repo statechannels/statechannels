@@ -641,18 +641,13 @@ export class SingleThreadedEngine implements EngineInterface {
   /**
    * Gets the latest state for each ledger channel in the engine's store.
    *
-   * @param assetHolderAddress - The on chain address of an asset holder contract funding the ledger channels (filters the query).
    * @param participants - The list of participants in the ledger channel (filters the query).
    * @returns A promise that resolves to the channel output.
    */
-  async getLedgerChannels(
-    assetHolderAddress: string,
-    participants: APIParticipant[]
-  ): Promise<MultipleChannelOutput> {
+  async getLedgerChannels(participants: APIParticipant[]): Promise<MultipleChannelOutput> {
     const response = EngineResponse.initialize();
 
     const channelStates = await this.store.getLedgerChannels(
-      assetHolderAddress,
       participants.map(convertToParticipant)
     );
 

@@ -314,7 +314,7 @@ export class TestChannel {
 
     // make it a ledger here
     if (this.isLedger) {
-      await Channel.setLedger(this.channelId, this.startOutcome.assetHolderAddress, store.knex);
+      await Channel.setLedger(this.channelId, store.knex);
     }
 
     const {fundingStrategy, fundingLedgerChannelId} = objective.data;
