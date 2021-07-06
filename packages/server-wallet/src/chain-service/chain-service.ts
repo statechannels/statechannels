@@ -94,7 +94,8 @@ export class ChainService implements ChainServiceInterface {
 
     this.nitroAdjudicator = new Contract(
       nitroAdjudicatorAddress,
-      ContractArtifacts.NitroAdjudicatorArtifact.abi
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
+      this.ethWallet
     );
 
     this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
