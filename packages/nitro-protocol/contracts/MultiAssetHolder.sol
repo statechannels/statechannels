@@ -89,7 +89,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 stateHash,
         address challengerAddress,
         uint256[] memory indices
-    ) public override returns (bytes memory) {
+    ) public override {
         // checks
         _requireIncreasingIndices(indices);
         _requireChannelFinalized(fromChannelId);
@@ -124,7 +124,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 outcomeHash = keccak256(outcomeBytes);
         _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
         emit FingerprintUpdated(fromChannelId, outcomeBytes);
-        return outcomeBytes;
     }
 
     /**
