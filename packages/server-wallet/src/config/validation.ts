@@ -82,6 +82,10 @@ const engine = joi.object({
   loggingConfiguration: loggingConfigurationSchema.optional(),
   metricsConfiguration: metricsConfigurationSchema.optional(),
   syncConfiguration: syncConfigurationSchema.optional(),
+  privateKey: joi
+    .string()
+    .regex(/^0x[a-fA-F0-9]{64}$/)
+    .optional(),
 });
 
 export function validateEngineConfig(
