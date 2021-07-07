@@ -19,7 +19,7 @@
         },
         "asset": {
           "$ref": "#/definitions/Address",
-          "description": "The asset holder contract address"
+          "description": "The contract address of the asset"
         }
       },
       "required": [
