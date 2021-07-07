@@ -140,6 +140,10 @@ export class ChainService implements ChainServiceInterface {
   public async handleChainRequests(
     chainRequests: ChainRequest[]
   ): Promise<providers.TransactionResponse[]> {
+    // Bail early so we don't add chatter to the logs
+    if (chainRequests.length === 0) {
+      return [];
+    }
     const responses: providers.TransactionResponse[] = [];
 
     this.logger.trace({chainRequests}, 'Handling chain requests');
