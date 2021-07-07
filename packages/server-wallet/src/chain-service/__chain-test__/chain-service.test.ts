@@ -237,7 +237,7 @@ describe('registerChannel', () => {
     expect(channelFinalizedHandler).toHaveBeenCalledWith(expect.objectContaining({channelId}));
   });
 
-  it.only('Successfully registers channel and receives follow on funding event', async () => {
+  it('Successfully registers channel and receives follow on funding event', async () => {
     const channelId = randomChannelId();
     const wrongChannelId = randomChannelId();
     let counter = 0;
@@ -301,13 +301,13 @@ describe('registerChannel', () => {
     );
   });
 
-  it('Channel with multiple asset holders', async () => {
+  it('Channel with multiple assets', async () => {
     const channelId = randomChannelId();
     let resolve: (value: unknown) => void;
     const p = new Promise(r => (resolve = r));
     const objectsToMatch = _.flatten(
       [0, 5].map(amount =>
-        [erc20Address, zeroAddress].map(address => ({
+        [zeroAddress, erc20Address].map(address => ({
           channelId,
           asset: address,
           amount: BN.from(amount),
@@ -327,7 +327,7 @@ describe('registerChannel', () => {
       objectsToMatch.splice(index, 1);
       if (!objectsToMatch.length) resolve(true);
     };
-    chainService.registerChannel(channelId, [zeroAddress, erc20Address], {
+    chainService.registerChannel(channelId, [erc20Address, zeroAddress], {
       ...defaultNoopListeners,
       holdingUpdated,
     });
@@ -347,7 +347,7 @@ describe('unconfirmedEvents', () => {
       await waitForChannelFunding(expectedHeld, 1, channelId);
     }
 
-    // Some depositied events are unconfirmed when we register channel,
+    // Some deposited events are unconfirmed when we register channel,
     // make sure they're not missed
     let lastObservedAmount = -1;
     let numberOfEventsObserved = 0;
