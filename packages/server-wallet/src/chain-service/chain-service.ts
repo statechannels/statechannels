@@ -209,7 +209,7 @@ export class ChainService implements ChainServiceInterface {
         ...createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
       };
     } else {
-      await this.increaseAllowance(makeAddress(this.nitroAdjudicator.address), arg.amount);
+      await this.increaseAllowance(arg.asset, arg.amount);
       depositRequest = {
         to: this.nitroAdjudicator.address,
         ...createERC20DepositTransaction(arg.asset, arg.channelId, arg.expectedHeld, arg.amount),
@@ -550,7 +550,11 @@ export class ChainService implements ChainServiceInterface {
   }
 
   private async increaseAllowance(tokenAddress: Address, amount: string): Promise<void> {
-    const tokenContract = new Contract(tokenAddress, TestContractArtifacts.TokenArtifact.abi);
+    const tokenContract = new Contract(
+      tokenAddress,
+      TestContractArtifacts.TokenArtifact.abi,
+      this.ethWallet
+    );
     switch (this.allowanceMode) {
       case 'PerDeposit': {
         const increaseAllowance = tokenContract.interface.encodeFunctionData('increaseAllowance', [
