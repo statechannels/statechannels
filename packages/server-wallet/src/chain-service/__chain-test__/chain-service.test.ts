@@ -33,7 +33,7 @@ import {AssetOutcomeUpdatedArg, ChallengeRegisteredArg, HoldingUpdatedArg} from 
 const zeroAddress = makeAddress(constants.AddressZero);
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
-const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
+const testAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
@@ -62,18 +62,13 @@ async function mineBlocks() {
 jest.setTimeout(20_000);
 // The test nitro adjudicator allows us to set channel storage
 const testAdjudicator = new Contract(
-  nitroAdjudicatorAddress,
+  testAdjudicatorAddress,
   TestContractArtifacts.TestNitroAdjudicatorArtifact.abi,
   // We use a separate signer address to avoid nonce issues
   new providers.JsonRpcProvider(rpcEndpoint).getSigner(1)
 );
 
-const nitroAdjudicator = new Contract(
-  nitroAdjudicatorAddress,
-  ContractArtifacts.NitroAdjudicatorArtifact.abi,
-  provider
-);
-beforeAll(async () => {
+beforeAll(() => {
   // Try to use a different private key for every chain service instantiation to avoid nonce errors
   // Using the first account here as that is the one that:
   // - Deploys the token contract.
@@ -104,15 +99,15 @@ function fundChannel(
   asset: Address = zeroAddress
 ): {
   channelId: string;
-  request: Promise<providers.TransactionResponse>;
+  requestPromise: Promise<providers.TransactionResponse>;
 } {
-  const request = chainService.fundChannel({
+  const requestPromise = chainService.fundChannel({
     channelId,
     asset,
     expectedHeld: BN.from(expectedHeld),
     amount: BN.from(amount),
   });
-  return {channelId, request};
+  return {channelId, requestPromise};
 }
 
 function fundChannelAndMineBlocks(
@@ -122,10 +117,10 @@ function fundChannelAndMineBlocks(
   asset: Address = zeroAddress
 ): {
   channelId: string;
-  request: Promise<providers.TransactionResponse>;
+  requestPromise: Promise<providers.TransactionResponse>;
 } {
   const retVal = fundChannel(expectedHeld, amount, channelId, asset);
-  retVal.request.then(async response => {
+  retVal.requestPromise.then(async response => {
     await response.wait();
     mineBlocks();
   });
@@ -138,7 +133,7 @@ async function waitForChannelFunding(
   channelId: string = randomChannelId(),
   asset: Address = zeroAddress
 ): Promise<string> {
-  const request = await fundChannel(expectedHeld, amount, channelId, asset).request;
+  const request = await fundChannel(expectedHeld, amount, channelId, asset).requestPromise;
   await request.wait();
   return channelId;
 }
@@ -197,7 +192,7 @@ describe('fundChannel', () => {
     const channelId = await waitForChannelFunding(0, 5);
     await waitForChannelFunding(5, 5, channelId);
 
-    const {request: fundChannelPromise} = fundChannel(5, 5, channelId);
+    const {requestPromise: fundChannelPromise} = fundChannel(5, 5, channelId);
     await expect(fundChannelPromise).rejects.toThrow(
       'cannot estimate gas; transaction may fail or may require manual gas limit'
     );
@@ -207,7 +202,7 @@ describe('fundChannel', () => {
     const channelId = randomChannelId();
 
     await waitForChannelFunding(0, 5, channelId, erc20Address);
-    expect(await nitroAdjudicator.holdings(erc20Address, channelId)).toEqual(BigNumber.from(5));
+    expect(await testAdjudicator.holdings(erc20Address, channelId)).toEqual(BigNumber.from(5));
   });
 });
 
@@ -227,7 +222,7 @@ describe('registerChannel', () => {
 
     const channelFinalizedHandler = jest.fn();
     const channelFinalizedPromise = new Promise<void>(resolve =>
-      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
+      chainService.registerChannel(channelId, [testAdjudicatorAddress], {
         ...defaultNoopListeners,
         channelFinalized: arg => {
           channelFinalizedHandler(arg);
@@ -242,7 +237,7 @@ describe('registerChannel', () => {
     expect(channelFinalizedHandler).toHaveBeenCalledWith(expect.objectContaining({channelId}));
   });
 
-  it('Successfully registers channel and receives follow on funding event', async () => {
+  it.only('Successfully registers channel and receives follow on funding event', async () => {
     const channelId = randomChannelId();
     const wrongChannelId = randomChannelId();
     let counter = 0;
@@ -261,7 +256,7 @@ describe('registerChannel', () => {
           // wait for the transaction to be mined.
           // Otherwise, it is possible for the correct channel funding transaction to be mined first.
           // In which case, this test might pass even if the holdingUpdated callback is fired for the wrongChannelId.
-          await (await fundChannel(0, 5, wrongChannelId).request).wait();
+          await (await fundChannel(0, 5, wrongChannelId).requestPromise).wait();
           fundChannelAndMineBlocks(0, 5, channelId);
           break;
         case 1:
@@ -279,7 +274,7 @@ describe('registerChannel', () => {
       }
     };
 
-    chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
+    chainService.registerChannel(channelId, [zeroAddress], {
       ...defaultNoopListeners,
       holdingUpdated,
     });
@@ -292,7 +287,7 @@ describe('registerChannel', () => {
     await mineBlocks(); // wait for deposit to be confirmed then register channel
 
     await new Promise(resolve =>
-      chainService.registerChannel(channelId, [nitroAdjudicatorAddress], {
+      chainService.registerChannel(channelId, [zeroAddress], {
         ...defaultNoopListeners,
         holdingUpdated: arg => {
           expect(arg).toMatchObject({
@@ -688,7 +683,7 @@ describe('challenge', () => {
 
 describe('getBytecode', () => {
   it('returns the bytecode for an app definition', async () => {
-    const bytecode = await chainService.fetchBytecode(nitroAdjudicatorAddress);
+    const bytecode = await chainService.fetchBytecode(testAdjudicatorAddress);
     expect(bytecode).toMatch(/^0x[A-Fa-f0-9]{64,}$/);
   });
 
