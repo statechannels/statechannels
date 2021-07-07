@@ -63,8 +63,8 @@ export type ConcludeAndWithdrawRequest = {
   type: 'ConcludeAndWithdraw';
   finalizationProof: SignedState[];
 };
-export type PushOutcomeAndWithdrawRequest = {
-  type: 'PushOutcomeAndWithdraw';
+export type WithdrawRequest = {
+  type: 'Withdraw';
   state: State;
   challengerAddress: Address;
 };
@@ -78,11 +78,10 @@ export type ChallengeRequest = {
 export type ChainRequest =
   | FundChannelRequest
   | ConcludeAndWithdrawRequest
-  | PushOutcomeAndWithdrawRequest
+  | WithdrawRequest
   | ChallengeRequest;
 interface ChainModifierInterface {
   handleChainRequests(chainRequests: ChainRequest[]): Promise<providers.TransactionResponse[]>;
-
   fetchBytecode(address: string): Promise<string>;
 }
 
