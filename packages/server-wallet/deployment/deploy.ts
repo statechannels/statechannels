@@ -15,10 +15,10 @@ export type TestNetworkContext = {
 
 // NOTE: deploying contracts like this allows the onchain service package to
 // be easily extracted
-
-export async function deploy(): Promise<TestNetworkContext> {
-  // eslint-disable-next-line no-process-env
-  const rpcEndPoint = 'http://localhost:' + process.env.GANACHE_PORT;
+// eslint-disable-next-line no-process-env
+export async function deploy(
+  rpcEndPoint = 'http://localhost:' + process.env.GANACHE_PORT
+): Promise<TestNetworkContext> {
   const provider = new providers.JsonRpcProvider(rpcEndPoint);
 
   const [
