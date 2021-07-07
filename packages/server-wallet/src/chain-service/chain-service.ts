@@ -432,7 +432,7 @@ export class ChainService implements ChainServiceInterface {
         blockTag: confirmedBlock,
       };
 
-      confirmedHolding = BN.from(await this.nitroAdjudicator.holdings(channelId, overrides));
+      confirmedHolding = BN.from(await this.nitroAdjudicator.holdings(asset, channelId, overrides));
       this.logger.debug(
         `Successfully read confirmedHoldings (${confirmedHolding}), from block ${confirmedBlock}.`
       );
