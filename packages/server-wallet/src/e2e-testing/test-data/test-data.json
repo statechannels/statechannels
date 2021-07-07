@@ -1,0 +1,569 @@
+[
+  {
+    "type": "CreateChannel",
+    "jobId": "C1",
+    "serverId": "A",
+    "step":1,
+    "channelParams": {
+      "participants": [
+        {
+          "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+          "participantId": "a",
+          "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96"
+        },
+        {
+          "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+          "participantId": "b",
+          "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db"
+        }
+      ],
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x03"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x02"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appDefinition": "0x0000000000000000000000000000000000000001",
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fundingStrategy": "Direct",
+      "challengeDuration": 86400
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C1",
+    "step":2,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x04"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x01"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C1",
+    "step":3,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C1",
+    "step":4,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+    {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C1",
+    "step":5,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C1",
+    "step":6,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+    {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C1",
+    "step":7,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "CloseChannel",
+    "step":8,
+    "serverId": "B",
+    "jobId": "C1"
+  },
+  {
+    "type": "CreateChannel",
+    "jobId": "C2",
+    "serverId": "A",
+    "step":1,
+    "channelParams": {
+      "participants": [
+        {
+          "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+          "participantId": "a",
+          "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96"
+        },
+        {
+          "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+          "participantId": "b",
+          "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db"
+        }
+      ],
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x03"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x02"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appDefinition": "0x0000000000000000000000000000000000000001",
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fundingStrategy": "Direct",
+      "challengeDuration": 86400
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C2",
+    "step":2,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x04"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x01"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C2",
+    "step":3,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C2",
+    "step":4,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+    {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C2",
+    "step":5,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C2",
+    "step":6,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+    {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C2",
+    "step":7,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "CloseChannel",
+    "step":8,
+    "serverId": "B",
+    "jobId": "C2"
+  },
+  {
+    "type": "CreateChannel",
+    "jobId": "C3",
+    "serverId": "A",
+    "step":1,
+    "channelParams": {
+      "participants": [
+        {
+          "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+          "participantId": "a",
+          "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96"
+        },
+        {
+          "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+          "participantId": "b",
+          "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db"
+        }
+      ],
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x03"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x02"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appDefinition": "0x0000000000000000000000000000000000000001",
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+      "fundingStrategy": "Direct",
+      "challengeDuration": 86400
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C3",
+    "step":2,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x04"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x01"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000001"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C3",
+    "step":3,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C3",
+    "step":4,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+    {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C3",
+    "step":5,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "UpdateChannel",
+    "serverId": "A",
+    "jobId": "C3",
+    "step":6,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+    {
+    "type": "UpdateChannel",
+    "serverId": "B",
+    "jobId": "C3",
+    "step":7,
+    "updateParams": {
+      "allocations": [
+        {
+          "allocationItems": [
+            {
+              "destination": "0x00000000000000000000000050Bcf60D1d63B7DD3DAF6331a688749dCBD65d96",
+              "amount": "0x01"
+            },
+            {
+              "destination": "0x000000000000000000000000632d0b05c78A83cEd439D3bd6C710c4814D3a6db",
+              "amount": "0x04"
+            }
+          ],
+          "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+        }
+      ],
+      "appData": "0x0000000000000000000000000000000000000000000000000000000000000002"
+    }
+  },
+  {
+    "type": "CloseChannel",
+    "step":8,
+    "serverId": "B",
+    "jobId": "C3"
+  }
+]
