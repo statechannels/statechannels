@@ -22,7 +22,7 @@ export type AssetOutcomeUpdatedArg = {
 
 export type FundChannelArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   expectedHeld: Uint256;
   amount: Uint256;
 };

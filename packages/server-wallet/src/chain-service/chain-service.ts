@@ -25,6 +25,7 @@ import PQueue from 'p-queue';
 import {Logger} from 'pino';
 import _ from 'lodash';
 import {computeNewAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/asset-holder';
+import {MAGIC_ADDRESS_INDICATING_ETH} from '@statechannels/nitro-protocol/src/transactions';
 
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
@@ -160,11 +161,8 @@ export class ChainService implements ChainServiceInterface {
         case 'FundChannel':
           response = await this.fundChannel(chainRequest);
           break;
-        case 'PushOutcomeAndWithdraw':
-          response = await this.pushOutcomeAndWithdraw(
-            chainRequest.state,
-            chainRequest.challengerAddress
-          );
+        case 'Withdraw':
+          response = await this.withdraw(chainRequest.state, chainRequest.challengerAddress);
 
           break;
         default:
@@ -239,28 +237,28 @@ export class ChainService implements ChainServiceInterface {
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     this.logger.info({...arg}, 'fundChannel: entry');
 
-    const assetHolderAddress = arg.assetHolderAddress;
-    const isEthFunding = assetHolderAddress === this.ethAssetHolderAddress;
+    let depositRequest;
 
-    if (!isEthFunding) {
-      await this.increaseAllowance(assetHolderAddress, arg.amount);
+    if (arg.asset === MAGIC_ADDRESS_INDICATING_ETH) {
+      depositRequest = {
+        to: this.nitroAdjudicatorAddress,
+        value: arg.amount,
+        ...createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
+      };
+    } else {
+      await this.increaseAllowance(this.nitroAdjudicatorAddress, arg.amount);
+      depositRequest = {
+        to: this.nitroAdjudicatorAddress,
+        ...createERC20DepositTransaction(arg.asset, arg.channelId, arg.expectedHeld, arg.amount),
+      };
     }
-
-    const createDepositTransaction = isEthFunding
-      ? createETHDepositTransaction
-      : createERC20DepositTransaction;
-    const depositRequest = {
-      ...createDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
-      to: assetHolderAddress,
-      value: isEthFunding ? arg.amount : undefined,
-    };
 
     const tx = await this.sendTransaction(depositRequest);
 
     this.logger.info(
       {
         channelId: arg.channelId,
-        assetHolderAddress,
+        nitroAdjudicatorAddress: this.nitroAdjudicatorAddress,
         tx: tx.hash,
       },
       'Finished funding channel'
@@ -283,7 +281,7 @@ export class ChainService implements ChainServiceInterface {
     this.logger.info({channelId}, 'concludeAndWithdraw: entry');
 
     const transactionRequest = {
-      ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
+      ...Transactions.createConcludeAndTransferAllAssetsTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
       to: this.nitroAdjudicatorAddress,
@@ -349,28 +347,15 @@ export class ChainService implements ChainServiceInterface {
     return this.sendTransaction(challengeTransactionRequest);
   }
 
-  async pushOutcomeAndWithdraw(
-    state: State,
-    challengerAddress: Address
-  ): Promise<providers.TransactionResponse> {
-    this.logger.info('pushOutcomeAndWithdraw: entry');
+  async withdraw(state: State, challengerAddress: Address): Promise<providers.TransactionResponse> {
+    this.logger.info('withdraw: entry');
     const lastState = toNitroState(state);
-    const channelId = getChannelId(lastState.channel);
-    const [turnNumRecord, finalizesAt, _Status] = await this.nitroAdjudicator.unpackStatus(
-      channelId
-    );
 
-    const pushTransactionRequest = {
-      ...Transactions.createPushOutcomeAndTransferAllTransaction({
-        turnNumRecord,
-        finalizesAt,
-        state: lastState,
-        outcome: lastState.outcome,
-        challengerAddress,
-      }),
+    const transactionRequest = {
+      ...Transactions.createTransferAllAssetsTransaction(lastState, challengerAddress),
       to: this.nitroAdjudicatorAddress,
     };
-    return this.sendTransaction(pushTransactionRequest);
+    return this.sendTransaction(transactionRequest);
   }
 
   // TODO add another public method for transferring from an channel that has already been concluded *and* pushed
