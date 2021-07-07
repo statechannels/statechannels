@@ -23,7 +23,9 @@ export class SocketIOMessageService implements MessageServiceInterface {
   }
 
   public async send(messages: Message[]): Promise<void> {
-    this.server.emit('message', messages);
+    if (messages.length > 0) {
+      this.server.emit('message', messages);
+    }
   }
 
   public async destroy(): Promise<void> {
