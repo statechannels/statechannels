@@ -120,10 +120,11 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
             Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
-        bytes32 outcomeHash = keccak256(abi.encode(outcome));
+        outcomeBytes = abi.encode(outcome);
+        bytes32 outcomeHash = keccak256(outcomeBytes);
         _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
-        emit FingerprintUpdated(fromChannelId, abi.encode(outcome));
-        return abi.encode(outcome);
+        emit FingerprintUpdated(fromChannelId, outcomeBytes);
+        return outcomeBytes;
     }
 
     /**
