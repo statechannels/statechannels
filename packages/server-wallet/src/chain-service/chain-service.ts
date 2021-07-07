@@ -117,6 +117,9 @@ export class ChainService implements ChainServiceInterface {
       this.addFinalizingChannel({channelId, finalizesAtS});
     });
 
+    // this sets up listeners for the "asset holding part" of the nitro adjudicator
+    this.listenForAssetEvents(this.nitroAdjudicator);
+
     this.provider.on('block', async (blockTag: providers.BlockTag) =>
       this.checkFinalizingChannels(await this.provider.getBlock(blockTag))
     );
@@ -342,7 +345,6 @@ export class ChainService implements ChainServiceInterface {
       eventTracker,
     ]);
 
-    this.setUpAssetHolderListener();
     // Fetch the current contract holding, and emit as an event
     for (const asset of assets) {
       this.getInitialHoldings(asset, channelId, eventTracker);
@@ -479,7 +481,7 @@ export class ChainService implements ChainServiceInterface {
     );
     for (const ethersEvent of ethersEvents) {
       await this.waitForConfirmations(ethersEvent);
-      this.onAssetHolderEvent(ethersEvent);
+      this.onAssetEvent(ethersEvent);
     }
   }
 
@@ -493,35 +495,29 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
-  private setUpAssetHolderListener(): void {
-    this.listenForContractEvents(this.nitroAdjudicator);
-  }
-
-  private listenForContractEvents(assetHolderContract: Contract): void {
+  private listenForAssetEvents(assetHolderContract: Contract): void {
     // Listen to all contract events
     assetHolderContract.on({}, async (ethersEvent: Event) => {
       this.logger.trace(
         {address: assetHolderContract.address, event: ethersEvent},
-        'AssetHolder event being handled'
+        'Asset event being handled'
       );
       await this.waitForConfirmations(ethersEvent);
-      this.onAssetHolderEvent(ethersEvent);
+      this.onAssetEvent(ethersEvent);
     });
   }
 
-  private async onAssetHolderEvent(
-    // the nitroAdjudicator contract is the (multi) asset holder
-    ethersEvent: Event
-  ): Promise<void> {
+  private async onAssetEvent(ethersEvent: Event): Promise<void> {
     switch (ethersEvent.event) {
       case Deposited:
         {
-          const depostedEvent = await this.getDepositedEvent(ethersEvent);
-          this.channelToEventTrackers.get(depostedEvent.channelId)?.forEach(eventTracker => {
+          const depositedEvent = await this.getDepositedEvent(ethersEvent);
+          console.log(`got deposited event for ${depositedEvent.channelId}`);
+          this.channelToEventTrackers.get(depositedEvent.channelId)?.forEach(eventTracker => {
             eventTracker.holdingUpdated(
-              depostedEvent,
-              depostedEvent.ethersEvent.blockNumber,
-              depostedEvent.ethersEvent.logIndex
+              depositedEvent,
+              depositedEvent.ethersEvent.blockNumber,
+              depositedEvent.ethersEvent.logIndex
             );
           });
         }
@@ -608,7 +604,7 @@ export class ChainService implements ChainServiceInterface {
     if (!event.args) {
       throw new Error('Deposited event must have args');
     }
-    const [asset, destination, _amountDeposited, destinationHoldings] = event.args;
+    const [destination, asset, _amountDeposited, destinationHoldings] = event.args;
     return {
       type: Deposited,
       channelId: destination,
