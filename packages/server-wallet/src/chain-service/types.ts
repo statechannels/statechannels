@@ -7,7 +7,7 @@ import {Bytes32} from '../type-aliases';
 
 export type HoldingUpdatedArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   amount: Uint256;
 };
 
@@ -51,7 +51,7 @@ interface ChainEventEmitterInterface {
   checkChainId(networkChainId: number): Promise<void>;
   registerChannel(
     channelId: Bytes32,
-    assetHolders: Address[],
+    assets: Address[],
     listener: ChainEventSubscriberInterface
   ): void;
   unregisterChannel(channelId: Bytes32): void;
