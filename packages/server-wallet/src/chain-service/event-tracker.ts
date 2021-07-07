@@ -46,6 +46,8 @@ export class EventTracker {
 
     if (isNew) {
       // Save latest event ever seen
+      this.blockNumber = blockNumber;
+      this.logIndex = logIndex;
       this.logger.debug('Event is new');
       return true;
     } else {
