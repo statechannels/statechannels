@@ -512,7 +512,6 @@ export class ChainService implements ChainServiceInterface {
       case Deposited:
         {
           const depositedEvent = await this.getDepositedEvent(ethersEvent);
-          console.log(`got deposited event for ${depositedEvent.channelId}`);
           this.channelToEventTrackers.get(depositedEvent.channelId)?.forEach(eventTracker => {
             eventTracker.holdingUpdated(
               depositedEvent,
