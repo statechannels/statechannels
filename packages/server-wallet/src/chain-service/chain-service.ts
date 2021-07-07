@@ -24,8 +24,8 @@ import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
 import _ from 'lodash';
-import {MAGIC_ADDRESS_INDICATING_ETH} from '@statechannels/nitro-protocol/src/transactions';
 
+const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import {defaultTestWalletConfig} from '../config';
