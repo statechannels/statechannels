@@ -361,6 +361,7 @@ export class SingleThreadedEngine implements EngineInterface {
         objectives: WalletObjective[];
         messages: Message_2[];
         chainRequests: ChainRequest[];
+        channelResults: ChannelResult[];
     }>;
     // (undocumented)
     chainNetworkId: string;
