@@ -21,6 +21,7 @@ import {waitForObjectiveProposals} from '../__test-with-peers__/utils';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 import {COUNTING_APP_DEFINITION} from '../models/__test__/fixtures/app-bytecode';
 import {createLogger} from '../logger';
+import {WalletObjective} from '../models/objective';
 
 jest.setTimeout(60_000);
 
@@ -198,11 +199,20 @@ test.each(testCases)(
       },
     });
 
-    const closeResponse =
-      options.closer === 'A'
-        ? await a.closeChannels([channelId])
-        : await b.closeChannels([channelId]);
+    const closerWallet = options.closer === 'A' ? a : b;
+    const closeeWallet = options.closer === 'A' ? b : a;
+
+    const closeeCompletedObjectivePromise = new Promise<WalletObjective>(resolve =>
+      closeeWallet.on('ObjectiveCompleted', o => {
+        if (o.type === 'CloseChannel' && o.data.targetChannelId === channelId) {
+          resolve(o);
+        }
+      })
+    );
+    const closeResponse = await closerWallet.closeChannels([channelId]);
     await expect(closeResponse).toBeObjectiveDoneType('Success');
+    const closeeObjective = await closeeCompletedObjectivePromise;
+    expect(closeeObjective.status).toBe('succeeded');
 
     const aBalanceFinal = await getBalance(aAddress);
     const bBalanceFinal = await getBalance(bAddress);
