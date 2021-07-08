@@ -90,7 +90,6 @@ contract NitroAdjudicator is MultiAssetHolder {
         outcomeBytes = abi.encode(outcome);
         bytes32 outcomeHash = keccak256(outcomeBytes);
         _updateFingerprint(channelId, stateHash, challengerAddress, outcomeHash);
-        emit FingerprintUpdated(channelId, outcomeBytes);
     }
 
     /**
