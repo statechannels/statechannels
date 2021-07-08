@@ -3,7 +3,7 @@ import {Logger} from 'pino';
 
 import {
   HoldingUpdatedArg,
-  AssetOutcomeUpdatedArg,
+  FingerprintUpdatedArg,
   ChannelFinalizedArg,
   ChallengeRegisteredArg,
   ChainEventSubscriberInterface,
@@ -72,9 +72,15 @@ export class EventTracker {
   }
 
   // Pass event to managed subscriber only if new
-  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg, blockNumber: number, logIndex: number): void {
-    if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
-      this.managedSubscriber.assetOutcomeUpdated(arg);
+  fingerprintUpdated(arg: FingerprintUpdatedArg, blockNumber: number, logIndex: number): void {
+    if (
+      this.isNewEvent(
+        arg.channelId, // TODO does this make sense to put here?
+        blockNumber,
+        logIndex
+      )
+    ) {
+      this.managedSubscriber.fingerprintUpdated(arg);
     }
   }
 

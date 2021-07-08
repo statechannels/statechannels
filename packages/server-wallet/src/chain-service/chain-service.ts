@@ -32,7 +32,7 @@ import {defaultTestWalletConfig} from '../config';
 
 import {
   AllowanceMode,
-  AssetOutcomeUpdatedArg,
+  FingerprintUpdatedArg,
   ChainEventSubscriberInterface,
   ChainRequest,
   ChainServiceArgs,
@@ -43,14 +43,14 @@ import {
 import {EventTracker} from './event-tracker';
 
 const Deposited = 'Deposited' as const;
-const AllocationUpdated = 'AllocationUpdated' as const;
+const FingerprintUpdated = 'FingerprintUpdated' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 const Concluded = 'Concluded' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
-type AllocationUpdatedEvent = {
-  type: 'AllocationUpdated';
+type FingerprintUpdatedEvent = {
+  type: typeof FingerprintUpdated;
   ethersEvent: Event;
-} & AssetOutcomeUpdatedArg;
+} & FingerprintUpdatedArg;
 
 /* eslint-disable no-process-env, */
 const nitroAdjudicatorAddress = makeAddress(
@@ -521,23 +521,19 @@ export class ChainService implements ChainServiceInterface {
           });
         }
         break;
-      case AllocationUpdated:
-        // TODO
-        // {
-        //   const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(
-        //     assetHolderContract,
-        //     ethersEvent
-        //   );
-        //   this.channelToEventTrackers
-        //     .get(allocationUpdatedEvent.channelId)
-        //     ?.forEach(eventTracker => {
-        //       eventTracker.assetOutcomeUpdated(
-        //         allocationUpdatedEvent,
-        //         allocationUpdatedEvent.ethersEvent.blockNumber,
-        //         allocationUpdatedEvent.ethersEvent.logIndex
-        //       );
-        //     });
-        // }
+      case FingerprintUpdated:
+        {
+          const fingerprintUpdatedEvent = await this.getFingerprintUpdatedEvent(ethersEvent);
+          this.channelToEventTrackers
+            .get(fingerprintUpdatedEvent.channelId)
+            ?.forEach(eventTracker => {
+              eventTracker.fingerprintUpdated(
+                fingerprintUpdatedEvent,
+                fingerprintUpdatedEvent.ethersEvent.blockNumber,
+                fingerprintUpdatedEvent.ethersEvent.logIndex
+              );
+            });
+        }
         break;
       default:
         this.logger.error(`Unexpected event ${ethersEvent}`);
@@ -614,31 +610,21 @@ export class ChainService implements ChainServiceInterface {
   }
 
   // TODO replace with FingerprintUpdate Event
-  // private async getAllocationUpdatedEvent(event: Event): Promise<AllocationUpdatedEvent> {
-  //   if (!event.args) {
-  //     throw new Error('Allocation event must have args');
-  //   }
-  //   const [channelId, initialHoldings] = event.args;
-  //   const tx = await this.provider.getTransaction(event.transactionHash);
+  private async getFingerprintUpdatedEvent(event: Event): Promise<FingerprintUpdatedEvent> {
+    if (!event.args) {
+      throw new Error('FingerprintUpdated event must have args');
+    }
+    const [channelId, outcomeBytes] = event.args;
+    // future optimizations of this event may require clients to parse the calldata of the transaction generating the event
+    // in order to have sufficient information to compute the new outcome corresponding to the new fingerprint.
 
-  //   const {newAssetOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewAssetOutcome(
-  //     contract.address,
-  //     nitroAdjudicatorAddress,
-  //     {channelId, initialHoldings},
-  //     tx
-  //   );
-
-  //   return {
-  //     type: AllocationUpdated,
-  //     channelId: channelId,
-  //     assetHolderAddress: makeAddress(contract.address),
-  //     newHoldings: BN.from(newHoldings),
-  //     externalPayouts: externalPayouts,
-  //     internalPayouts: internalPayouts,
-  //     newAssetOutcome: newAssetOutcome,
-  //     ethersEvent: event,
-  //   };
-  // }
+    return {
+      type: FingerprintUpdated,
+      channelId,
+      outcomeBytes,
+      ethersEvent: event,
+    };
+  }
 
   /**
    *
