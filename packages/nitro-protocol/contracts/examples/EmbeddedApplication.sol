@@ -154,9 +154,9 @@ contract EmbeddedApplication is
         AlreadyMoved alreadyMoved;
     }
 
-    uint256 internal constant AIndex = 0;
-    uint256 internal constant BIndex = 1;
-    uint256 internal constant IIndex = 2;
+    uint8 internal constant AIndex = 0;
+    uint8 internal constant BIndex = 1;
+    uint8 internal constant IIndex = 2;
 
     function validTransition(
         VariablePart memory from,
@@ -167,8 +167,8 @@ contract EmbeddedApplication is
         uint256 signedByTo // Bitmap of who has signed the "to" state?
     ) public override pure returns (bool) {
         // parameter wrangling
-        bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, 0);
-        bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, 1);
+        bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, AIndex);
+        bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, BIndex);
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
         Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
