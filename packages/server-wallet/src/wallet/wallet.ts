@@ -130,9 +130,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     const handler: MessageHandler = async message => {
       const result = await this._engine.pushMessage(message.data);
-      const {channelResults} = result;
-
-      await this.registerChannels(channelResults);
 
       await this.handleEngineOutput(result);
     };
@@ -198,10 +195,14 @@ export class Wallet extends EventEmitter<WalletEvents> {
    * @returns A promise that resolves to a collection of ObjectiveResult.
    */
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
-    const {objectives, messages, chainRequests} = await this._engine.approveObjectives(
-      objectiveIds
-    );
+    const {
+      objectives,
+      messages,
+      chainRequests,
+      channelResults,
+    } = await this._engine.approveObjectives(objectiveIds);
 
+    await this.registerChannels(channelResults);
     const results = objectives.map(async o => ({
       objectiveId: o.objectiveId,
       currentStatus: o.status,
