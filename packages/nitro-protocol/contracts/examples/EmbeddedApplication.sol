@@ -47,6 +47,14 @@ interface IForceMoveApp2 {
 }
 
 library ForceMoveAppUtilities {
+
+    /**
+     * @notice Given a "signedBy" bitmap and a participant index, indicate whether the participant has provided a signature
+     * @dev Given a "signedBy" bitmap and a participant index, indicate whether the participant has provided a signature
+     * @param signedBy uint256 bitmap of which participants has provided a signature
+     * @param participantIndex index of participant in channel's participants array
+     * @return whether the participantIndex-th bit of signedBy is 1 or 0
+     */
     function isSignedBy(uint256 signedBy, uint8 participantIndex) internal pure returns (bool) {
         return ((signedBy >> participantIndex) % 2 == 1);
     }
@@ -155,8 +163,8 @@ contract EmbeddedApplication is
         VariablePart memory to,
         uint48, // turnNumTo (unused)
         uint256, // nParticipants (unused)
-        uint256, // signedByFrom (unused) - Who has signed the "from" state?
-        uint256 signedByTo // Who has signed the "to" state?
+        uint256, // signedByFrom - Bitmap of who has signed the "from" state?
+        uint256 signedByTo // Bitmap of who has signed the "to" state?
     ) public override pure returns (bool) {
         // parameter wrangling
         bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, 0);
