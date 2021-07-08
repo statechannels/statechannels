@@ -145,13 +145,12 @@ export class Wallet extends EventEmitter<WalletEvents> {
           toAddress: makeDestination(ai.destination),
           amount: ai.amount as Uint256,
         }));
-        // holdingUpdated only fires for the deposit event
-        // so we also need to update the funding in this event
-        await this._engine.store.updateFunding(e.channelId, e.newHoldings, e.assetHolderAddress);
+
         await this._engine.store.updateTransferredOut(
           e.channelId,
           e.assetHolderAddress,
-          transferredOut
+          transferredOut,
+          e.newHoldings
         );
       }),
       challengeRegistered: this.createChainEventlistener('challengeRegistered', e =>
