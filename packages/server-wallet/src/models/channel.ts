@@ -48,8 +48,9 @@ export const REQUIRED_COLUMNS = [
   'participants',
   'vars',
   'fundingStrategy',
+  'isLedgerChannel',
 ] as const;
-export const OPTIONAL_COLUMNS = ['assetHolderAddress', 'fundingLedgerChannelId'] as const;
+export const OPTIONAL_COLUMNS = ['fundingLedgerChannelId'] as const;
 export const COMPUTED_COLUMNS = ['channelId', 'signingAddress'] as const;
 
 export const CHANNEL_COLUMNS = [...REQUIRED_COLUMNS, ...COMPUTED_COLUMNS, ...OPTIONAL_COLUMNS];
@@ -63,6 +64,7 @@ export interface RequiredColumns {
   readonly vars: SignedStateVarsWithHash[];
   readonly signingAddress: Address;
   readonly fundingStrategy: FundingStrategy;
+  readonly isLedgerChannel: boolean;
 }
 
 export type ComputedColumns = {
@@ -90,7 +92,7 @@ export class Channel extends Model implements ChannelColumns {
   readonly chainServiceRequests!: ChainServiceRequest[];
   readonly fundingStrategy!: FundingStrategy;
 
-  readonly assetHolderAddress!: string; // only Ledger channels have this
+  readonly isLedgerChannel!: boolean;
   readonly fundingLedgerChannelId!: Bytes32; // only App channels funded by Ledger have this
 
   readonly initialSupport!: SignedState[];
@@ -173,28 +175,21 @@ export class Channel extends Model implements ChannelColumns {
     await Channel.query(txOrKnex).findOne({channelId}).patch({initialSupport: support});
   }
 
-  static async setLedger(
-    channelId: Bytes32,
-    assetHolderAddress: Address,
-    txOrKnex: TransactionOrKnex
-  ): Promise<void> {
-    await Channel.query(txOrKnex).findOne({channelId}).patch({assetHolderAddress});
+  static async setLedger(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<void> {
+    await Channel.query(txOrKnex).findOne({channelId}).patch({isLedgerChannel: true});
   }
 
   static async isLedger(channelId: Bytes32, txOrKnex: TransactionOrKnex): Promise<boolean> {
-    return !!(await Channel.query(txOrKnex)
-      .whereNotNull('assetHolderAddress')
-      .findOne({channelId}));
+    return (await this.forId(channelId, txOrKnex)).isLedgerChannel;
   }
 
   static getLedgerChannels(
-    assetHolderAddress: string,
     participants: Participant[],
     txOrKnex: TransactionOrKnex
   ): Promise<Channel[]> {
     return Channel.query(txOrKnex)
       .select()
-      .where({assetHolderAddress, participants: JSON.stringify(participants)});
+      .where({isLedgerChannel: true, participants: JSON.stringify(participants)});
   }
 
   $beforeValidate(jsonSchema: JSONSchema, json: Pojo, _opt: ModelOptions): JSONSchema {
@@ -394,7 +389,7 @@ export class Channel extends Model implements ChannelColumns {
   }
 
   public get isLedger(): boolean {
-    return !!this.assetHolderAddress;
+    return this.isLedgerChannel;
   }
   public get isNullApp(): boolean {
     return BigNumber.from(this.channelConstants.appDefinition).isZero();

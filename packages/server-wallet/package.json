@@ -25,6 +25,8 @@
     "pino": "6.2.0",
     "rxjs": "6.6.3",
     "set-interval-async": "^2.0.3",
+    "socket.io": "^4.1.2",
+    "socket.io-client": "^4.1.2",
     "tarn": "3.0.0"
   },
   "devDependencies": {
@@ -35,7 +37,7 @@
     "@types/eslint-plugin-prettier": "2.2.0",
     "@types/jest": "26.0.21",
     "@types/lodash": "4.14.161",
-    "@types/node": "14.11.2",
+    "@types/node": "14.11.8",
     "@types/pg": "7.14.0",
     "@types/pino": "6.0.0",
     "@types/prettier": "1.19.0",

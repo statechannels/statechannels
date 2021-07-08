@@ -11,8 +11,6 @@ import {
   isOpenChannel,
   isCloseChannel,
   SignedState,
-  isSimpleAllocation,
-  checkThat,
   OpenChannel,
   makePrivateKey,
   makeAddress,
@@ -49,8 +47,6 @@ import {ChainServiceRequest} from '../models/chain-service-request';
 import {AdjudicatorStatusModel} from '../models/adjudicator-status';
 import {WaitingFor as OpenChannelWaitingFor} from '../protocols/channel-opener';
 
-const defaultLogger = createLogger(defaultTestWalletConfig());
-
 export type AppHandler<T> = (tx: Transaction, channelRecord: Channel) => T;
 export type MissingAppHandler<T> = (channelId: string) => T;
 
@@ -59,8 +55,7 @@ const throwMissingChannel: MissingAppHandler<any> = (channelId: string) => {
 };
 
 export class Store {
-  readonly logger: Logger = defaultLogger;
-
+  readonly logger: Logger;
   constructor(
     public readonly knex: Knex,
     readonly timingMetrics: boolean,
@@ -68,6 +63,7 @@ export class Store {
     readonly chainNetworkID: string,
     logger?: Logger
   ) {
+    this.logger = logger ?? createLogger(defaultTestWalletConfig());
     if (timingMetrics) {
       this.getOrCreateSigningAddress = recordFunctionMetrics(this.getOrCreateSigningAddress);
       this.lockApp = recordFunctionMetrics(this.lockApp);
@@ -79,7 +75,6 @@ export class Store {
       this.addSignedState = recordFunctionMetrics(this.addSignedState);
 
       setupDBMetrics(this.knex);
-      if (logger) this.logger = logger;
     }
   }
 
@@ -291,11 +286,8 @@ export class Store {
       .map(channel => channel.protocolState);
   }
 
-  async getLedgerChannels(
-    assetHolderAddress: string,
-    participants: Participant[]
-  ): Promise<ChannelState[]> {
-    const ledgers = await Channel.getLedgerChannels(assetHolderAddress, participants, this.knex);
+  async getLedgerChannels(participants: Participant[]): Promise<ChannelState[]> {
+    const ledgers = await Channel.getLedgerChannels(participants, this.knex);
     return ledgers.map(c => c.protocolState);
   }
 
@@ -377,12 +369,7 @@ export class Store {
       // This code should probably live elsewhere
       const channelId = objective.data.targetChannelId;
       if (objective.data.role === 'ledger') {
-        const channel = await this.getChannelState(channelId, tx);
-        await Channel.setLedger(
-          channelId,
-          checkThat(channel.latest.outcome, isSimpleAllocation).assetHolderAddress,
-          tx || this.knex
-        );
+        await Channel.setLedger(channelId, tx || this.knex);
       }
       const {fundingStrategy, fundingLedgerChannelId} = objective.data;
       await Channel.query(tx || this.knex)
@@ -487,7 +474,7 @@ export class Store {
   ): Promise<Bytes32[]> {
     const query = await Channel.query(tx || this.knex)
       .whereIn('channelId', maybeLedgerChannelIds)
-      .whereNotNull('assetHolderAddress')
+      .where({isLedgerChannel: true})
       .select('channelId');
 
     return _.map(query, 'channelId');
@@ -611,12 +598,7 @@ export class Store {
         tx
       );
 
-      if (role === 'ledger')
-        await Channel.setLedger(
-          channelId,
-          checkThat(outcome, isSimpleAllocation).assetHolderAddress,
-          tx
-        );
+      if (role === 'ledger') await Channel.setLedger(channelId, tx);
 
       const o: OpenChannel = {
         type: 'OpenChannel' as const,
@@ -767,7 +749,7 @@ async function createChannel(
     pick(
       {
         ...constants,
-        assetHolderAddress: undefined,
+        isLedgerChannel: false,
         channelId: calculateChannelId(constants),
         fundingLedgerChannelId,
         fundingStrategy,

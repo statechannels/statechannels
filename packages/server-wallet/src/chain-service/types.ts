@@ -82,19 +82,7 @@ export type ChainRequest =
   | ChallengeRequest;
 interface ChainModifierInterface {
   handleChainRequests(chainRequests: ChainRequest[]): Promise<providers.TransactionResponse[]>;
-  // TODO: should these APIs return ethers TransactionResponses? Or is that too detailed for API consumers
-  fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse>;
-  concludeAndWithdraw(
-    finalizationProof: SignedState[]
-  ): Promise<providers.TransactionResponse | void>;
-  pushOutcomeAndWithdraw(
-    state: State,
-    challengerAddress: Address
-  ): Promise<providers.TransactionResponse>;
-  challenge(
-    challengeStates: SignedState[],
-    privateKey: PrivateKey
-  ): Promise<providers.TransactionResponse>;
+
   fetchBytecode(address: string): Promise<string>;
 }
 

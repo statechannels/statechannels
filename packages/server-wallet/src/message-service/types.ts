@@ -22,6 +22,12 @@ export interface MessageServiceInterface {
    */
   send(message: Message[]): Promise<void>;
 
+  // TODO: Is a url/string too restrictive for addressing a peer?
+  /**
+   * Registers a peer so messages can be sent to that peer
+   * @param peerUrl The url for the peer
+   */
+  registerPeer(peerUrl: string): Promise<void>;
   /**
    * This is called when the message service is no longer needed
    */

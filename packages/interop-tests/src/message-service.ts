@@ -13,7 +13,9 @@ export class BrowserServerMessageService implements MessageServiceInterface {
     const convertedMessages = message.map(generatePushMessage);
     await Promise.all(convertedMessages.map(m => this.browserWallet.pushMessage(m, 'dummyDomain')));
   }
-
+  public registerPeer(_peerUrl: string): Promise<void> {
+    throw new Error('Not Implemented');
+  }
   public async destroy(): Promise<void> {
     this.browserWallet.destroy();
   }
