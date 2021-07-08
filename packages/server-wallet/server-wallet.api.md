@@ -303,6 +303,7 @@ export interface OptionalWalletConfig {
     loggingConfiguration: LoggingConfiguration;
     // (undocumented)
     metricsConfiguration: MetricsConfiguration;
+    privateKey?: string;
     // (undocumented)
     skipEvmValidation: boolean;
     // (undocumented)
@@ -360,6 +361,7 @@ export class SingleThreadedEngine implements EngineInterface {
         objectives: WalletObjective[];
         messages: Message_2[];
         chainRequests: ChainRequest[];
+        channelResults: ChannelResult[];
     }>;
     // (undocumented)
     chainNetworkId: string;
@@ -469,6 +471,8 @@ export type WalletConfig = RequiredWalletConfig & OptionalWalletConfig;
 
 // @public (undocumented)
 export interface WalletEvents {
+    // (undocumented)
+    ChannelUpdated: (c: ChannelResult) => void;
     // (undocumented)
     ObjectiveCompleted: (o: WalletObjective) => void;
     // (undocumented)

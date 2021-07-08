@@ -8,6 +8,7 @@ import {
   Participant as APIParticipant,
   ChannelId,
   Message,
+  ChannelResult,
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
@@ -445,7 +446,12 @@ export class SingleThreadedEngine implements EngineInterface {
 
   async approveObjectives(
     objectiveIds: string[]
-  ): Promise<{objectives: WalletObjective[]; messages: Message[]; chainRequests: ChainRequest[]}> {
+  ): Promise<{
+    objectives: WalletObjective[];
+    messages: Message[];
+    chainRequests: ChainRequest[];
+    channelResults: ChannelResult[];
+  }> {
     const channelIds: string[] = [];
     const response = EngineResponse.initialize();
     let objectives = await this.store.getObjectivesByIds(objectiveIds);
@@ -466,6 +472,7 @@ export class SingleThreadedEngine implements EngineInterface {
       objectives,
       messages: getMessages(response.multipleChannelOutput()),
       chainRequests: response.chainRequests,
+      channelResults: response.channelResults,
     };
   }
 

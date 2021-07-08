@@ -11,6 +11,7 @@ import {
   makeAddress,
   makeDestination,
   Address,
+  makePrivateKey,
 } from '@statechannels/wallet-core';
 import {utils} from 'ethers';
 import {setIntervalAsync, clearIntervalAsync} from 'set-interval-async/dynamic';
@@ -84,6 +85,11 @@ export class Wallet extends EventEmitter<WalletEvents> {
       workerThreadAmount: 0, // Disable threading for now
     };
     const engine = await SingleThreadedEngine.create(engineConfig, logger);
+
+    if (populatedConfig.privateKey) {
+      await engine.addSigningKey(makePrivateKey(populatedConfig.privateKey));
+    }
+
     const chainService = populatedConfig.chainServiceConfiguration.attachChainService
       ? new ChainService({
           ...populatedConfig.chainServiceConfiguration,
@@ -124,9 +130,6 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     const handler: MessageHandler = async message => {
       const result = await this._engine.pushMessage(message.data);
-      const {channelResults} = result;
-
-      await this.registerChannels(channelResults);
 
       await this.handleEngineOutput(result);
     };
@@ -146,7 +149,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
         await this._engine.store.updateTransferredOut(
           e.channelId,
           e.assetHolderAddress,
-          transferredOut
+          transferredOut,
+          e.newHoldings
         );
       }),
       challengeRegistered: this.createChainEventlistener('challengeRegistered', e =>
@@ -190,10 +194,14 @@ export class Wallet extends EventEmitter<WalletEvents> {
    * @returns A promise that resolves to a collection of ObjectiveResult.
    */
   public async approveObjectives(objectiveIds: string[]): Promise<ObjectiveResult[]> {
-    const {objectives, messages, chainRequests} = await this._engine.approveObjectives(
-      objectiveIds
-    );
+    const {
+      objectives,
+      messages,
+      chainRequests,
+      channelResults,
+    } = await this._engine.approveObjectives(objectiveIds);
 
+    await this.registerChannels(channelResults);
     const results = objectives.map(async o => ({
       objectiveId: o.objectiveId,
       currentStatus: o.status,
@@ -346,8 +354,11 @@ export class Wallet extends EventEmitter<WalletEvents> {
     return Promise.all(results);
   }
 
-  private emitObjectiveEvents(result: MultipleChannelOutput | SingleChannelOutput): void {
+  private emitEvents(result: MultipleChannelOutput | SingleChannelOutput): void {
     if (isMultipleChannelOutput(result)) {
+      for (const c of result.channelResults) {
+        this.emit('ChannelUpdated', c);
+      }
       // Receiving messages from other participants may have resulted in completed objectives
       for (const o of result.completedObjectives) {
         this.emit('ObjectiveCompleted', o);
@@ -360,6 +371,8 @@ export class Wallet extends EventEmitter<WalletEvents> {
         }
       }
     } else {
+      this.emit('ChannelUpdated', result.channelResult);
+
       if (hasNewObjective(result)) {
         if (result.newObjective.status === 'pending') {
           this.emit('ObjectiveProposed', result.newObjective);
@@ -375,7 +388,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   private async handleEngineOutput(
     output: MultipleChannelOutput | SingleChannelOutput
   ): Promise<void> {
-    this.emitObjectiveEvents(output);
+    this.emitEvents(output);
     await this._messageService.send(getMessages(output));
     await this._chainService.handleChainRequests(output.chainRequests);
   }
