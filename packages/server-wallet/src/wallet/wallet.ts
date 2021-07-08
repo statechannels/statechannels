@@ -423,7 +423,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
   private async registerChannels(channelsToRegister: ChannelResult[]): Promise<void> {
     const channelsWithAssetHolders = channelsToRegister.map(cr => ({
-      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.asset)),
       channelId: cr.channelId,
     }));
 
