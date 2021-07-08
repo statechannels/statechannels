@@ -25,7 +25,7 @@ interface IMultiAssetHolder {
         bytes32 stateHash,
         address challengerAddress,
         uint256[] memory indices
-    ) external returns (bytes memory);
+    ) external;
 
     /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
