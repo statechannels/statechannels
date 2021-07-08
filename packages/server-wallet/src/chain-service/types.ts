@@ -1,4 +1,4 @@
-import {Address, PrivateKey, SignedState, State, Uint256, Bytes} from '@statechannels/wallet-core';
+import {Address, PrivateKey, SignedState, State, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {Logger} from 'pino';
 
@@ -12,7 +12,7 @@ export type HoldingUpdatedArg = {
 
 export type FingerprintUpdatedArg = {
   channelId: Bytes32;
-  outcomeBytes: Bytes;
+  outcomeBytes: string;
 };
 
 export type FundChannelArg = {

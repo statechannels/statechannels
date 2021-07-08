@@ -630,12 +630,8 @@ export class Store {
     await Channel.setInitialSupport(channelId, support, tx ?? this.knex);
   }
 
-  async updateFunding(
-    channelId: string,
-    fromAmount: Uint256,
-    assetHolderAddress: Address
-  ): Promise<void> {
-    await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
+  async updateFunding(channelId: string, fromAmount: Uint256, asset: Address): Promise<void> {
+    await Funding.updateFunding(this.knex, channelId, fromAmount, asset);
   }
 
   async insertAdjudicatorStatus(

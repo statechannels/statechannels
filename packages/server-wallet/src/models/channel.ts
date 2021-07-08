@@ -238,10 +238,10 @@ export class Channel extends Model implements ChannelColumns {
       fundingStrategy,
       fundingLedgerChannelId,
     } = this;
-    const funding = (assetHolder: Address): ChannelStateFunding | undefined => {
+    const funding = (asset: Address): ChannelStateFunding | undefined => {
       const noFunding = {amount: Zero, transferredOut: []};
       if (!this.funding) return undefined; // funding hasn't been fetched from db
-      const result = this.funding.find(f => f.assetHolder === assetHolder);
+      const result = this.funding.find(f => f.asset === asset);
       return result ? {amount: result.amount, transferredOut: result.transferredOut} : noFunding;
     };
     // directFundingStatus will return 'Uncategorized' e.g. if there's no supported outcome, even if
@@ -460,8 +460,8 @@ export class Channel extends Model implements ChannelColumns {
       throw new ChannelError(ChannelError.reasons.noSupportedState);
     }
 
-    const {assetHolderAddress, allocationItems} = checkThat(outcome, isSimpleAllocation);
-    const channelFunds = this.funding.find(f => f.assetHolder === assetHolderAddress);
+    const {asset, allocationItems} = checkThat(outcome, isSimpleAllocation);
+    const channelFunds = this.funding.find(f => f.asset === asset);
     if (!channelFunds) return false;
 
     switch (threshold) {
