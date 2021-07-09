@@ -12,7 +12,7 @@ import {
   SupportProof,
 } from '../../../../src/contract/embedded-application';
 import {getTestProvider, setupContract} from '../../../test-helpers';
-import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../../lib/test/test-helpers';
+import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../../src/transactions';
 
 type RevertReason =
   // each reason represents a distinct code path that we should check in this test
