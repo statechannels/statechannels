@@ -55,7 +55,7 @@ describe('claim', () => {
     ${'12. (all) straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 5}}       | ${{g: 0}} | ${{A: 5}}       | ${undefined}
     ${'13. (all) allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${[]}   | ${{}}                 | ${{g: 0}} | ${{B: 5}}       | ${reason5}
     ${'14. (all) guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${reason5}
-    ${'15. (all) swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{}}                 | ${{g: 2}} | ${{A: 5, B: 5}} | ${undefined}
+    ${'15. (all) swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 0}}       | ${{g: 2}} | ${{A: 5, B: 5}} | ${undefined}
     ${'16. (all) underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{A: 5, B: 5}} | ${undefined}
   `(
     '$name',
@@ -218,7 +218,7 @@ describe('claim', () => {
           {
             event: 'AllocationUpdated',
             args: {
-              targetId,
+              channelId: targetId,
               initialHoldings: heldBefore[addresses.g],
             },
           },
