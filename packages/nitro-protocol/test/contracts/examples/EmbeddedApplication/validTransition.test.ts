@@ -34,7 +34,8 @@ type RevertReason =
   | 'sig0 on state1 !by participant0'
   | 'sig0 on state0 !by participant1'
   | 'invalid whoSignedWhat' // tested
-  | 'invalid transition in X';
+  | 'invalid transition in X'
+  | 'Everyone must sign None state';
 
 async function expectRevert(fn: () => void, reason: RevertReason) {
   return innerExpectRevert(fn, reason);
@@ -197,9 +198,31 @@ const signedBy = {
   all: 0b111,
   alice: 0b001,
   bob: 0b010,
+  ab: 0b011,
+  ai: 0b101,
+  bi: 0b110,
 };
 
 describe('EmbeddedApplication: named state transitions', () => {
+  test('signature checks on transitions from None state', async () => {
+    const generateTX = signedByFrom =>
+      embeddedApplication.validTransition(
+        NoneVariablePartForJ,
+        AvariablePartForJ,
+        turnNumTo,
+        nParticipants,
+        signedByFrom,
+        signedBy.alice
+      );
+    await expectRevert(() => generateTX(signedBy.alice), 'Everyone must sign None state');
+    await expectRevert(() => generateTX(signedBy.bob), 'Everyone must sign None state');
+    await expectRevert(() => generateTX(signedBy.ab), 'Everyone must sign None state');
+    await expectRevert(() => generateTX(signedBy.ai), 'Everyone must sign None state');
+    await expectRevert(() => generateTX(signedBy.bi), 'Everyone must sign None state');
+
+    await expect(generateTX(signedBy.all)).resolves.toEqual(true);
+  });
+
   it('returns true / reverts for a correct / incorrect None => A transition', async () => {
     const result = await embeddedApplication.validTransition(
       NoneVariablePartForJ,
