@@ -495,11 +495,11 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
-  private listenForAssetEvents(assetHolderContract: Contract): void {
+  private listenForAssetEvents(adjudicatorContract: Contract): void {
     // Listen to all contract events
-    assetHolderContract.on({}, async (ethersEvent: Event) => {
+    adjudicatorContract.on({}, async (ethersEvent: Event) => {
       this.logger.trace(
-        {address: assetHolderContract.address, event: ethersEvent},
+        {address: adjudicatorContract.address, event: ethersEvent},
         'Asset event being handled'
       );
       await this.waitForConfirmations(ethersEvent);
@@ -609,7 +609,6 @@ export class ChainService implements ChainServiceInterface {
     };
   }
 
-  // TODO replace with FingerprintUpdate Event
   private async getFingerprintUpdatedEvent(event: Event): Promise<FingerprintUpdatedEvent> {
     if (!event.args) {
       throw new Error('FingerprintUpdated event must have args');
