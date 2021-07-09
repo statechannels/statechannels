@@ -172,7 +172,7 @@ export function computeNewAllocation(
 
 /**
  *
- * Takes a FingerprintUpdated Event and the transaction that emittted it, and returns updated information in a convenient format.
+ * Takes a AllocationUpdated Event and the transaction that emittted it, and returns updated information in a convenient format.
  * @param nitroAdjudicatorAddress
  * @param allocationUpdatedEvent
  * @param tx Transaction which gave rise to the event
@@ -236,7 +236,7 @@ export function computeNewOutcome(
 }
 
 /**
- * Extracts the outcome, assetIndex and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator giving rise to a FingerprintUpdated event.
+ * Extracts the outcome, assetIndex and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator giving rise to a AllocationUpdated event.
  * @param nitroAdjudicatorAddress
  * @param tx Transaction which contained the allocation and indices
  */
