@@ -162,10 +162,10 @@ describe('transfer', () => {
 
         const expectedEvents = [
           {
-            event: 'FingerprintUpdated',
+            event: 'AllocationUpdated',
             args: {
               channelId,
-              outcomeBytes: encodeOutcome(outcomeAfter),
+              initialHoldings: heldBefore[addresses.c],
             },
           },
         ];

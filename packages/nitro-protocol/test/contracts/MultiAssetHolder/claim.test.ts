@@ -216,10 +216,10 @@ describe('claim', () => {
         // Compile event expectations
         const expectedEvents = [
           {
-            event: 'FingerprintUpdated',
+            event: 'AllocationUpdated',
             args: {
-              channelId: targetId,
-              outcomeBytes: encodeOutcome(outcomeAfter),
+              targetId,
+              initialHoldings: heldBefore[addresses.c],
             },
           },
         ];
