@@ -182,6 +182,7 @@ export function computeNewOutcome(
   allocationUpdatedEvent: {channelId: Bytes32; assetIndex: Uint256; initialHoldings: string},
   tx: ethers.Transaction
 ): {
+  assetIndex: number;
   newOutcome: Outcome;
   newHoldings: BigNumber;
   externalPayouts: AllocationItem[];
@@ -229,7 +230,7 @@ export function computeNewOutcome(
 
   const newOutcome = {...oldOutcome};
   newOutcome[assetIndex] = newAssetOutcome;
-  return {newOutcome, newHoldings, externalPayouts, internalPayouts};
+  return {assetIndex, newOutcome, newHoldings, externalPayouts, internalPayouts};
 }
 
 /**
