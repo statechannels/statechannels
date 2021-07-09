@@ -32,7 +32,7 @@ import {defaultTestWalletConfig} from '../config';
 
 import {
   AllowanceMode,
-  FingerprintUpdatedArg,
+  AllocationUpdatedArg,
   ChainEventSubscriberInterface,
   ChainRequest,
   ChainServiceArgs,
@@ -43,14 +43,14 @@ import {
 import {EventTracker} from './event-tracker';
 
 const Deposited = 'Deposited' as const;
-const FingerprintUpdated = 'FingerprintUpdated' as const;
+const AllocationUpdated = 'AllocationUpdated' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 const Concluded = 'Concluded' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
-type FingerprintUpdatedEvent = {
-  type: typeof FingerprintUpdated;
+type AllocationUpdatedEvent = {
+  type: typeof AllocationUpdated;
   ethersEvent: Event;
-} & FingerprintUpdatedArg;
+} & AllocationUpdatedArg;
 
 /* eslint-disable no-process-env, */
 const nitroAdjudicatorAddress = makeAddress(
@@ -521,16 +521,16 @@ export class ChainService implements ChainServiceInterface {
           });
         }
         break;
-      case FingerprintUpdated:
+      case AllocationUpdated:
         {
-          const fingerprintUpdatedEvent = await this.getFingerprintUpdatedEvent(ethersEvent);
+          const AllocationUpdatedEvent = await this.getAllocationUpdatedEvent(ethersEvent);
           this.channelToEventTrackers
-            .get(fingerprintUpdatedEvent.channelId)
+            .get(AllocationUpdatedEvent.channelId)
             ?.forEach(eventTracker => {
-              eventTracker.fingerprintUpdated(
-                fingerprintUpdatedEvent,
-                fingerprintUpdatedEvent.ethersEvent.blockNumber,
-                fingerprintUpdatedEvent.ethersEvent.logIndex
+              eventTracker.allocationUpdated(
+                AllocationUpdatedEvent,
+                AllocationUpdatedEvent.ethersEvent.blockNumber,
+                AllocationUpdatedEvent.ethersEvent.logIndex
               );
             });
         }
@@ -609,16 +609,16 @@ export class ChainService implements ChainServiceInterface {
     };
   }
 
-  private async getFingerprintUpdatedEvent(event: Event): Promise<FingerprintUpdatedEvent> {
+  private async getAllocationUpdatedEvent(event: Event): Promise<AllocationUpdatedEvent> {
     if (!event.args) {
-      throw new Error('FingerprintUpdated event must have args');
+      throw new Error('AllocationUpdated event must have args');
     }
     const [channelId, outcomeBytes] = event.args;
     // future optimizations of this event may require clients to parse the calldata of the transaction generating the event
     // in order to have sufficient information to compute the new outcome corresponding to the new fingerprint.
 
     return {
-      type: FingerprintUpdated,
+      type: AllocationUpdated,
       channelId,
       outcomeBytes,
       ethersEvent: event,

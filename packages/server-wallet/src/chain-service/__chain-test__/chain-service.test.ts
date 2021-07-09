@@ -1,7 +1,6 @@
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {
   channelDataToStatus,
-  ContractArtifacts,
   encodeOutcome,
   getChannelId,
   randomChannelId,
@@ -15,8 +14,6 @@ import {
   simpleEthAllocation,
   simpleTokenAllocation,
   State,
-  toNitroState,
-  Uint256,
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
@@ -30,7 +27,7 @@ import {
 import {alice as aWallet, bob as bWallet} from '../../engine/__test__/fixtures/signing-wallets';
 import {stateSignedBy} from '../../engine/__test__/fixtures/states';
 import {ChainService} from '../chain-service';
-import {FingerprintUpdatedArg, ChallengeRegisteredArg, HoldingUpdatedArg} from '../types';
+import {AllocationUpdatedArg, ChallengeRegisteredArg, HoldingUpdatedArg} from '../types';
 
 const zeroAddress = makeAddress(constants.AddressZero);
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -45,7 +42,7 @@ const provider: providers.JsonRpcProvider = new providers.JsonRpcProvider(rpcEnd
 
 const defaultNoopListeners = {
   holdingUpdated: _.noop,
-  fingerprintUpdated: _.noop,
+  allocationUpdated: _.noop,
   channelFinalized: _.noop,
   challengeRegistered: _.noop,
 };
@@ -417,7 +414,7 @@ describe('concludeAndWithdraw', () => {
   it('Successful concludeAndWithdraw with eth allocation', async () => {
     const {channelId, aAddress, bAddress, state, signatures, outcomeAfter} = await setUpConclude();
 
-    const fingerprintUpdated: FingerprintUpdatedArg = {
+    const AllocationUpdated: AllocationUpdatedArg = {
       channelId,
       outcomeBytes: encodeOutcome([outcomeAfter]),
     };
@@ -425,8 +422,8 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [zeroAddress], {
         ...defaultNoopListeners,
-        fingerprintUpdated: arg => {
-          expect(arg).toMatchObject(fingerprintUpdated);
+        allocationUpdated: arg => {
+          expect(arg).toMatchObject(AllocationUpdated);
           resolve();
         },
       })
@@ -447,7 +444,7 @@ describe('concludeAndWithdraw', () => {
       false
     );
 
-    const fingerprintUpdated: FingerprintUpdatedArg = {
+    const AllocationUpdated: AllocationUpdatedArg = {
       channelId,
       outcomeBytes: encodeOutcome([outcomeAfter]),
     };
@@ -455,8 +452,8 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20Address], {
         ...defaultNoopListeners,
-        fingerprintUpdated: arg => {
-          expect(arg).toMatchObject(fingerprintUpdated);
+        allocationUpdated: arg => {
+          expect(arg).toMatchObject(AllocationUpdated);
           resolve();
         },
       })
@@ -483,7 +480,7 @@ describe('concludeAndWithdraw', () => {
       false
     );
 
-    const fingerprintUpdated: FingerprintUpdatedArg = {
+    const AllocationUpdated: AllocationUpdatedArg = {
       channelId,
       outcomeBytes: encodeOutcome([outcomeAfter]),
     };
@@ -491,8 +488,8 @@ describe('concludeAndWithdraw', () => {
     const p = new Promise<void>(resolve =>
       chainService.registerChannel(channelId, [erc20Address], {
         ...defaultNoopListeners,
-        fingerprintUpdated: arg => {
-          expect(arg).toMatchObject(fingerprintUpdated);
+        allocationUpdated: arg => {
+          expect(arg).toMatchObject(AllocationUpdated);
           resolve();
         },
       })
