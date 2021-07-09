@@ -1,7 +1,6 @@
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {
   channelDataToStatus,
-  encodeOutcome,
   getChannelId,
   randomChannelId,
   TestContractArtifacts,
@@ -14,6 +13,7 @@ import {
   simpleEthAllocation,
   simpleTokenAllocation,
   State,
+  Uint256,
 } from '@statechannels/wallet-core';
 import {BigNumber, constants, Contract, providers, Wallet} from 'ethers';
 import _ from 'lodash';
@@ -152,7 +152,7 @@ async function setUpConclude(isEth = true) {
         {destination: alice.destination, amount: BN.from(1)},
         {destination: bob.destination, amount: BN.from(3)},
       ]);
-  const outcomeAfter = isEth
+  const newAssetOutcome = isEth
     ? simpleEthAllocation([
         {destination: alice.destination, amount: BN.from(0)},
         {destination: bob.destination, amount: BN.from(0)},
@@ -186,7 +186,7 @@ async function setUpConclude(isEth = true) {
     bAddress: bEthWallet.address,
     state: state1,
     signatures,
-    outcomeAfter,
+    newAssetOutcome,
   };
 }
 
@@ -412,11 +412,31 @@ describe('concludeAndWithdraw', () => {
   });
 
   it('Successful concludeAndWithdraw with eth allocation', async () => {
-    const {channelId, aAddress, bAddress, state, signatures, outcomeAfter} = await setUpConclude();
+    const {
+      channelId,
+      aAddress,
+      bAddress,
+      state,
+      signatures,
+      newAssetOutcome,
+    } = await setUpConclude();
 
     const AllocationUpdated: AllocationUpdatedArg = {
       channelId,
-      outcomeBytes: encodeOutcome([outcomeAfter]),
+      asset: zeroAddress,
+      newHoldings: '0x00' as Uint256,
+      externalPayouts: [
+        {
+          amount: BN.from(1),
+          destination: makeDestination(aAddress).toLowerCase(),
+        },
+        {
+          amount: BN.from(3),
+          destination: makeDestination(bAddress).toLowerCase(),
+        },
+      ],
+      internalPayouts: [],
+      newAssetOutcome,
     };
 
     const p = new Promise<void>(resolve =>
@@ -440,13 +460,26 @@ describe('concludeAndWithdraw', () => {
   });
 
   it('Register channel -> concludeAndWithdraw -> mine confirmation blocks for erc20', async () => {
-    const {channelId, aAddress, bAddress, state, signatures, outcomeAfter} = await setUpConclude(
+    const {channelId, aAddress, bAddress, state, signatures, newAssetOutcome} = await setUpConclude(
       false
     );
 
     const AllocationUpdated: AllocationUpdatedArg = {
       channelId,
-      outcomeBytes: encodeOutcome([outcomeAfter]),
+      asset: erc20Address,
+      newHoldings: '0x00' as Uint256,
+      externalPayouts: [
+        {
+          amount: BN.from(1),
+          destination: makeDestination(aAddress).toLowerCase(),
+        },
+        {
+          amount: BN.from(3),
+          destination: makeDestination(bAddress).toLowerCase(),
+        },
+      ],
+      internalPayouts: [],
+      newAssetOutcome,
     };
 
     const p = new Promise<void>(resolve =>
@@ -476,13 +509,26 @@ describe('concludeAndWithdraw', () => {
   });
 
   it('concludeAndWithdraw -> register channel -> mine confirmation blocks for erc20', async () => {
-    const {channelId, aAddress, bAddress, state, signatures, outcomeAfter} = await setUpConclude(
+    const {channelId, aAddress, bAddress, state, signatures, newAssetOutcome} = await setUpConclude(
       false
     );
 
     const AllocationUpdated: AllocationUpdatedArg = {
       channelId,
-      outcomeBytes: encodeOutcome([outcomeAfter]),
+      asset: erc20Address,
+      newHoldings: '0x00' as Uint256,
+      externalPayouts: [
+        {
+          amount: BN.from(1),
+          destination: makeDestination(aAddress).toLowerCase(),
+        },
+        {
+          amount: BN.from(3),
+          destination: makeDestination(bAddress).toLowerCase(),
+        },
+      ],
+      internalPayouts: [],
+      newAssetOutcome,
     };
 
     const p = new Promise<void>(resolve =>

@@ -24,8 +24,9 @@ import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
 import _ from 'lodash';
-
 const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
+import {computeNewOutcome} from '@statechannels/nitro-protocol/src/contract/multi-asset-holder';
+
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import {defaultTestWalletConfig} from '../config';
@@ -613,14 +614,24 @@ export class ChainService implements ChainServiceInterface {
     if (!event.args) {
       throw new Error('AllocationUpdated event must have args');
     }
-    const [channelId, outcomeBytes] = event.args;
-    // future optimizations of this event may require clients to parse the calldata of the transaction generating the event
-    // in order to have sufficient information to compute the new outcome corresponding to the new fingerprint.
+
+    const [channelId, assetIndex, initialHoldings] = event.args;
+    const tx = await this.provider.getTransaction(event.transactionHash);
+
+    const {newOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewOutcome(
+      this.nitroAdjudicator.address,
+      {channelId, assetIndex, initialHoldings},
+      tx
+    );
 
     return {
       type: AllocationUpdated,
-      channelId,
-      outcomeBytes,
+      channelId: channelId,
+      asset: makeAddress(newOutcome[assetIndex].asset),
+      newHoldings: BN.from(newHoldings),
+      externalPayouts: externalPayouts,
+      internalPayouts: internalPayouts,
+      newAssetOutcome: newOutcome[assetIndex],
       ethersEvent: event,
     };
   }

@@ -1,3 +1,4 @@
+import {Allocation, AssetOutcome} from '@statechannels/nitro-protocol';
 import {Address, PrivateKey, SignedState, State, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {Logger} from 'pino';
@@ -12,7 +13,11 @@ export type HoldingUpdatedArg = {
 
 export type AllocationUpdatedArg = {
   channelId: Bytes32;
-  outcomeBytes: string;
+  asset: Address;
+  newHoldings: Uint256;
+  externalPayouts: Allocation;
+  internalPayouts: Allocation;
+  newAssetOutcome: AssetOutcome;
 };
 
 export type FundChannelArg = {

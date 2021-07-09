@@ -137,7 +137,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
       holdingUpdated: this.createChainEventlistener('holdingUpdated', e =>
         this._engine.store.updateFunding(e.channelId, e.amount, e.asset)
       ),
-      allocationUpdated: this.createChainEventlistener('AllocationUpdated', async e => {
+      allocationUpdated: this.createChainEventlistener('allocationUpdated', async e => {
         const transferredOut = e.externalPayouts.map(ai => ({
           toAddress: makeDestination(ai.destination),
           amount: ai.amount as Uint256,
