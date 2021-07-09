@@ -1,5 +1,5 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, constants} from 'ethers';
+import {Contract, constants, BigNumber} from 'ethers';
 
 import {
   getRandomNonce,
@@ -219,6 +219,7 @@ describe('claim', () => {
             event: 'AllocationUpdated',
             args: {
               channelId: targetId,
+              assetIndex: BigNumber.from(0),
               initialHoldings: heldBefore[addresses.g],
             },
           },

@@ -12,7 +12,7 @@ import {
   Guarantee,
   Outcome,
 } from './outcome';
-import {Address, Bytes32} from './types';
+import {Address, Bytes32, Uint256} from './types';
 
 export interface DepositedEvent {
   destination: string;
@@ -179,20 +179,18 @@ export function computeNewAllocation(
  */
 export function computeNewOutcome(
   nitroAdjudicatorAddress: Address,
-  allocationUpdatedEvent: {channelId: Bytes32; initialHoldings: string},
+  allocationUpdatedEvent: {channelId: Bytes32; assetIndex: Uint256; initialHoldings: string},
   tx: ethers.Transaction
 ): {
+  assetIndex: number;
   newOutcome: Outcome;
   newHoldings: BigNumber;
   externalPayouts: AllocationItem[];
   internalPayouts: AllocationItem[];
 } {
   // Extract the calldata that we need
-  const {oldOutcome, assetIndex, indices, guarantee} = extractOldOutcomeAndIndices(
-    nitroAdjudicatorAddress,
-    tx
-  );
-
+  const {oldOutcome, indices, guarantee} = extractOldOutcomeAndIndices(nitroAdjudicatorAddress, tx);
+  const assetIndex = BigNumber.from(allocationUpdatedEvent.assetIndex).toNumber();
   const oldAllocation = (oldOutcome[assetIndex] as AllocationAssetOutcome).allocationItems;
 
   // Use the emulated, pure solidity functions to figure out what the chain will have done
@@ -232,7 +230,7 @@ export function computeNewOutcome(
 
   const newOutcome = {...oldOutcome};
   newOutcome[assetIndex] = newAssetOutcome;
-  return {newOutcome, newHoldings, externalPayouts, internalPayouts};
+  return {assetIndex, newOutcome, newHoldings, externalPayouts, internalPayouts};
 }
 
 /**

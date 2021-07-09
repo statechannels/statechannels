@@ -88,5 +88,5 @@ interface IMultiAssetHolder {
      * @param channelId The channelId of the funds being withdrawn.
      * @param initialHoldings holdings[asset][channelId] **before** the allocations were updated. The asset in question can be inferred from the calldata of the transaction (it might be "all assets")
      */
-    event AllocationUpdated(bytes32 indexed channelId, uint256 initialHoldings);
+    event AllocationUpdated(bytes32 indexed channelId, uint256 assetIndex, uint256 initialHoldings);
 }
