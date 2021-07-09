@@ -1,6 +1,7 @@
-import {utils, providers, Signature} from 'ethers';
+import {utils, providers, Signature, constants} from 'ethers';
 
 import NitroAdjudicatorArtifact from '../../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
+import {getChannelId, hashState} from '../../';
 import {encodeOutcome} from '../outcome';
 import {getFixedPart, hashAppPart, State} from '../state';
 
@@ -52,6 +53,30 @@ export function createConcludeAndTransferAllAssetsTransaction(
     data: NitroAdjudicatorContractInterface.encodeFunctionData(
       'concludeAndTransferAllAssets',
       concludeAndTransferAllAssetsArgs(states, signatures, whoSignedWhat)
+    ),
+  };
+}
+
+function transferAllAssetsArgs(
+  state: State,
+  challengerAddress: string,
+  overrideStateHash = false // set to true if channel concluded happily
+): any[] {
+  const channelId = getChannelId(state.channel);
+  const outcomeBytes = encodeOutcome(state.outcome);
+  const stateHash = overrideStateHash ? constants.HashZero : hashState(state);
+  return [channelId, outcomeBytes, stateHash, challengerAddress];
+}
+
+export function createTransferAllAssetsTransaction(
+  state: State,
+  challengerAddress: string,
+  overrideStateHash = false // set to true if channel concluded happily
+): providers.TransactionRequest {
+  return {
+    data: NitroAdjudicatorContractInterface.encodeFunctionData(
+      'transferAllAssets',
+      transferAllAssetsArgs(state, challengerAddress, overrideStateHash)
     ),
   };
 }

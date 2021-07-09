@@ -1,9 +1,8 @@
-import {Address} from '@statechannels/nitro-protocol/src/contract/types';
 import {Logger} from 'pino';
 
 import {
   HoldingUpdatedArg,
-  AssetOutcomeUpdatedArg,
+  FingerprintUpdatedArg,
   ChannelFinalizedArg,
   ChallengeRegisteredArg,
   ChainEventSubscriberInterface,
@@ -13,26 +12,26 @@ import {
  * This class is a wrapper of ChainEventSubscriberInterface.
  * Purpose - 2 functions can trigger AssetHolder events to be played to ChainEventSubscriberInterface
  *    1. chainservice.getInitialHoldings
- *    2. chainservice.addAssetHolderObservable
+ *    2. chainservice.onAssetEvent
  * Some events can be played twice by both functions, order not predictable,
  * this class ensures each event is played once and in the right order
  */
 export class EventTracker {
   private logger: Logger;
-  private assetHolderMap: Map<Address, {blockNumber: number; logIndex: number}>;
+  private eventRecordFor: Map<string, {blockNumber: number; logIndex: number}>;
   private managedSubscriber: ChainEventSubscriberInterface;
 
   constructor(managedSubscriber: ChainEventSubscriberInterface, logger: Logger) {
     this.logger = logger;
     this.managedSubscriber = managedSubscriber;
     this.logger = logger;
-    this.assetHolderMap = new Map<string, {blockNumber: number; logIndex: number}>();
+    this.eventRecordFor = new Map<string, {blockNumber: number; logIndex: number}>();
   }
 
-  private isNewEvent(assetHolderAddress: Address, blockNumber: number, logIndex: number): boolean {
-    const eventRecord = this.assetHolderMap.get(assetHolderAddress);
+  private isNewEvent(queue: string, blockNumber: number, logIndex: number): boolean {
+    const eventRecord = this.eventRecordFor.get(queue);
     this.logger.debug(
-      `EventTracker.isNewEvent: ${assetHolderAddress}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
+      `EventTracker.isNewEvent: ${queue}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
         eventRecord
       )}`
     );
@@ -50,7 +49,7 @@ export class EventTracker {
 
     if (isNew) {
       // Save latest event ever seen
-      this.assetHolderMap.set(assetHolderAddress, {blockNumber: blockNumber, logIndex: logIndex});
+      this.eventRecordFor.set(queue, {blockNumber: blockNumber, logIndex: logIndex});
       this.logger.debug('Event is new');
       return true;
     } else {
@@ -66,15 +65,15 @@ export class EventTracker {
     logIndex: number = Number.MAX_SAFE_INTEGER // Why default to max: getInitialHoldings can call this without logIndex,
     // in which case should be considered the latest balance in block
   ): void {
-    if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
+    if (this.isNewEvent(arg.asset, blockNumber, logIndex)) {
       this.managedSubscriber.holdingUpdated(arg);
     }
   }
 
   // Pass event to managed subscriber only if new
-  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg, blockNumber: number, logIndex: number): void {
-    if (this.isNewEvent(arg.assetHolderAddress, blockNumber, logIndex)) {
-      this.managedSubscriber.assetOutcomeUpdated(arg);
+  fingerprintUpdated(arg: FingerprintUpdatedArg, blockNumber: number, logIndex: number): void {
+    if (this.isNewEvent('fingerPrintUpdatedQueue', blockNumber, logIndex)) {
+      this.managedSubscriber.fingerprintUpdated(arg);
     }
   }
 

@@ -19,20 +19,20 @@ import {
   toNitroState,
   unreachable,
 } from '@statechannels/wallet-core';
-import {constants, Contract, ContractInterface, Event, providers, Wallet} from 'ethers';
+import {constants, Contract, Event, providers, Wallet} from 'ethers';
 import {NonceManager} from '@ethersproject/experimental';
 import PQueue from 'p-queue';
 import {Logger} from 'pino';
 import _ from 'lodash';
-import {computeNewAssetOutcome} from '@statechannels/nitro-protocol/lib/src/contract/asset-holder';
 
+const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
 import {defaultTestWalletConfig} from '../config';
 
 import {
   AllowanceMode,
-  AssetOutcomeUpdatedArg,
+  FingerprintUpdatedArg,
   ChainEventSubscriberInterface,
   ChainRequest,
   ChainServiceArgs,
@@ -43,22 +43,24 @@ import {
 import {EventTracker} from './event-tracker';
 
 const Deposited = 'Deposited' as const;
-const AllocationUpdated = 'AllocationUpdated' as const;
+const FingerprintUpdated = 'FingerprintUpdated' as const;
 const ChallengeRegistered = 'ChallengeRegistered' as const;
 const Concluded = 'Concluded' as const;
 type DepositedEvent = {type: 'Deposited'; ethersEvent: Event} & HoldingUpdatedArg;
-type AllocationUpdatedEvent = {
-  type: 'AllocationUpdated';
+type FingerprintUpdatedEvent = {
+  type: typeof FingerprintUpdated;
   ethersEvent: Event;
-} & AssetOutcomeUpdatedArg;
+} & FingerprintUpdatedArg;
 
+/* eslint-disable no-process-env, */
+const nitroAdjudicatorAddress = makeAddress(
+  process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
+);
 export class ChainService implements ChainServiceInterface {
   private logger: Logger;
   private readonly ethWallet: NonceManager;
   private provider: providers.JsonRpcProvider;
   private allowanceMode: AllowanceMode;
-  private registeredContracts: Set<Address> = new Set();
-  private addressToContract: Map<Address, Contract> = new Map();
   private channelToEventTrackers: Map<Bytes32, EventTracker[]> = new Map();
   // For convenience, can also use addressToContract map
   private nitroAdjudicator: Contract;
@@ -67,9 +69,6 @@ export class ChainService implements ChainServiceInterface {
   private transactionQueue = new PQueue({concurrency: 1});
 
   private finalizingChannels: {finalizesAtS: number; channelId: Bytes32}[] = [];
-
-  private ethAssetHolderAddress: Address;
-  private nitroAdjudicatorAddress: Address;
 
   constructor({
     provider,
@@ -93,19 +92,10 @@ export class ChainService implements ChainServiceInterface {
     }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
 
-    this.ethAssetHolderAddress = makeAddress(
-      // eslint-disable-next-line no-process-env
-      process.env.ETH_ASSET_HOLDER_ADDRESS || constants.AddressZero
-    );
-
-    this.nitroAdjudicatorAddress = makeAddress(
-      // eslint-disable-next-line no-process-env
-      process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
-    );
-
-    this.nitroAdjudicator = this.getOrAddContractMapping(
-      this.nitroAdjudicatorAddress,
-      ContractArtifacts.NitroAdjudicatorArtifact.abi
+    this.nitroAdjudicator = new Contract(
+      nitroAdjudicatorAddress,
+      ContractArtifacts.NitroAdjudicatorArtifact.abi,
+      this.ethWallet
     );
 
     this.nitroAdjudicator.on(ChallengeRegistered, (...args) => {
@@ -126,6 +116,9 @@ export class ChainService implements ChainServiceInterface {
     this.nitroAdjudicator.on(Concluded, (channelId, finalizesAtS) => {
       this.addFinalizingChannel({channelId, finalizesAtS});
     });
+
+    // this sets up listeners for the "asset holding part" of the nitro adjudicator
+    this.listenForAssetEvents(this.nitroAdjudicator);
 
     this.provider.on('block', async (blockTag: providers.BlockTag) =>
       this.checkFinalizingChannels(await this.provider.getBlock(blockTag))
@@ -160,11 +153,8 @@ export class ChainService implements ChainServiceInterface {
         case 'FundChannel':
           response = await this.fundChannel(chainRequest);
           break;
-        case 'PushOutcomeAndWithdraw':
-          response = await this.pushOutcomeAndWithdraw(
-            chainRequest.state,
-            chainRequest.challengerAddress
-          );
+        case 'Withdraw':
+          response = await this.withdraw(chainRequest.state, chainRequest.challengerAddress);
 
           break;
         default:
@@ -190,34 +180,8 @@ export class ChainService implements ChainServiceInterface {
     this.channelToEventTrackers.clear();
     this.provider.polling = false;
     this.provider.removeAllListeners();
-
-    this.addressToContract.forEach(contract => contract.removeAllListeners());
-
+    this.nitroAdjudicator.removeAllListeners();
     this.logger.trace('Completed destroy');
-  }
-
-  private addContractMapping(
-    assetHolderAddress: Address,
-    contractInterface?: ContractInterface
-  ): Contract {
-    const abi =
-      contractInterface ??
-      (assetHolderAddress === this.ethAssetHolderAddress
-        ? ContractArtifacts.EthAssetHolderArtifact.abi
-        : ContractArtifacts.Erc20AssetHolderArtifact.abi);
-    const contract: Contract = new Contract(assetHolderAddress, abi, this.ethWallet);
-    this.addressToContract.set(assetHolderAddress, contract);
-    return contract;
-  }
-
-  private getOrAddContractMapping(
-    contractAddress: Address,
-    contractInterface?: ContractInterface
-  ): Contract {
-    return (
-      this.addressToContract.get(contractAddress) ??
-      this.addContractMapping(contractAddress, contractInterface)
-    );
   }
 
   private async sendTransaction(
@@ -239,28 +203,28 @@ export class ChainService implements ChainServiceInterface {
   async fundChannel(arg: FundChannelArg): Promise<providers.TransactionResponse> {
     this.logger.info({...arg}, 'fundChannel: entry');
 
-    const assetHolderAddress = arg.assetHolderAddress;
-    const isEthFunding = assetHolderAddress === this.ethAssetHolderAddress;
+    let depositRequest;
 
-    if (!isEthFunding) {
-      await this.increaseAllowance(assetHolderAddress, arg.amount);
+    if (arg.asset === MAGIC_ADDRESS_INDICATING_ETH) {
+      depositRequest = {
+        to: this.nitroAdjudicator.address,
+        value: arg.amount,
+        ...createETHDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
+      };
+    } else {
+      await this.increaseAllowance(arg.asset, arg.amount);
+      depositRequest = {
+        to: this.nitroAdjudicator.address,
+        ...createERC20DepositTransaction(arg.asset, arg.channelId, arg.expectedHeld, arg.amount),
+      };
     }
-
-    const createDepositTransaction = isEthFunding
-      ? createETHDepositTransaction
-      : createERC20DepositTransaction;
-    const depositRequest = {
-      ...createDepositTransaction(arg.channelId, arg.expectedHeld, arg.amount),
-      to: assetHolderAddress,
-      value: isEthFunding ? arg.amount : undefined,
-    };
 
     const tx = await this.sendTransaction(depositRequest);
 
     this.logger.info(
       {
         channelId: arg.channelId,
-        assetHolderAddress,
+        nitroAdjudicatorAddress: this.nitroAdjudicator.address,
         tx: tx.hash,
       },
       'Finished funding channel'
@@ -283,10 +247,10 @@ export class ChainService implements ChainServiceInterface {
     this.logger.info({channelId}, 'concludeAndWithdraw: entry');
 
     const transactionRequest = {
-      ...Transactions.createConcludePushOutcomeAndTransferAllTransaction(
+      ...Transactions.createConcludeAndTransferAllAssetsTransaction(
         finalizationProof.flatMap(toNitroSignedState)
       ),
-      to: this.nitroAdjudicatorAddress,
+      to: this.nitroAdjudicator.address,
     };
 
     const captureExpectedErrors = async (reason: any) => {
@@ -344,33 +308,20 @@ export class ChainService implements ChainServiceInterface {
         challengeStates.flatMap(toNitroSignedState),
         privateKey
       ),
-      to: this.nitroAdjudicatorAddress,
+      to: this.nitroAdjudicator.address,
     };
     return this.sendTransaction(challengeTransactionRequest);
   }
 
-  async pushOutcomeAndWithdraw(
-    state: State,
-    challengerAddress: Address
-  ): Promise<providers.TransactionResponse> {
-    this.logger.info('pushOutcomeAndWithdraw: entry');
+  async withdraw(state: State, challengerAddress: Address): Promise<providers.TransactionResponse> {
+    this.logger.info('withdraw: entry');
     const lastState = toNitroState(state);
-    const channelId = getChannelId(lastState.channel);
-    const [turnNumRecord, finalizesAt, _Status] = await this.nitroAdjudicator.unpackStatus(
-      channelId
-    );
 
-    const pushTransactionRequest = {
-      ...Transactions.createPushOutcomeAndTransferAllTransaction({
-        turnNumRecord,
-        finalizesAt,
-        state: lastState,
-        outcome: lastState.outcome,
-        challengerAddress,
-      }),
-      to: this.nitroAdjudicatorAddress,
+    const transactionRequest = {
+      ...Transactions.createTransferAllAssetsTransaction(lastState, challengerAddress),
+      to: this.nitroAdjudicator.address,
     };
-    return this.sendTransaction(pushTransactionRequest);
+    return this.sendTransaction(transactionRequest);
   }
 
   // TODO add another public method for transferring from an channel that has already been concluded *and* pushed
@@ -383,10 +334,10 @@ export class ChainService implements ChainServiceInterface {
 
   registerChannel(
     channelId: Bytes32,
-    assetHolders: Address[],
+    assets: Address[],
     subscriber: ChainEventSubscriberInterface
   ): void {
-    this.logger.info({channelId, assetHolders}, 'registerChannel: entry');
+    this.logger.info({channelId}, 'registerChannel: entry');
 
     const eventTracker = new EventTracker(subscriber, this.logger);
     this.channelToEventTrackers.set(channelId, [
@@ -394,13 +345,10 @@ export class ChainService implements ChainServiceInterface {
       eventTracker,
     ]);
 
-    assetHolders.map(assetHolder => {
-      this.setUpAssetHolderListener(assetHolder);
-      const contract = this.getOrAddContractMapping(assetHolder);
-      if (!contract) throw new Error('The addressToContract mapping should contain the contract');
-      // Fetch the current contract holding, and emit as an event
-      this.getInitialHoldings(contract, channelId, eventTracker);
-    });
+    // Fetch the current contract holding, and emit as an event
+    for (const asset of assets) {
+      this.getInitialHoldings(asset, channelId, eventTracker);
+    }
 
     // This method is async so it will continue to run after the method has been exited
     // That's ok since we're just registering some things and/or dispatching some events
@@ -466,7 +414,7 @@ export class ChainService implements ChainServiceInterface {
   }
 
   private async getInitialHoldings(
-    contract: Contract,
+    asset: Address,
     channelId: string,
     eventTracker: EventTracker
   ): Promise<void> {
@@ -475,7 +423,7 @@ export class ChainService implements ChainServiceInterface {
     if (!this.provider.polling) return;
     const currentBlock = await this.provider.getBlockNumber();
     const confirmedBlock = currentBlock - this.blockConfirmations;
-    const currentHolding = BN.from(await contract.holdings(channelId));
+    const currentHolding = BN.from(await this.nitroAdjudicator.holdings(asset, channelId));
     let confirmedHolding = BN.from(0);
     try {
       // https://docs.ethers.io/v5/api/contract/contract/#Contract--metaclass
@@ -484,7 +432,7 @@ export class ChainService implements ChainServiceInterface {
         blockTag: confirmedBlock,
       };
 
-      confirmedHolding = BN.from(await contract.holdings(channelId, overrides));
+      confirmedHolding = BN.from(await this.nitroAdjudicator.holdings(asset, channelId, overrides));
       this.logger.debug(
         `Successfully read confirmedHoldings (${confirmedHolding}), from block ${confirmedBlock}.`
       );
@@ -519,7 +467,7 @@ export class ChainService implements ChainServiceInterface {
     eventTracker.holdingUpdated(
       {
         channelId: channelId,
-        assetHolderAddress: makeAddress(contract.address),
+        asset,
         amount: confirmedHolding,
       },
       confirmedBlock
@@ -528,10 +476,12 @@ export class ChainService implements ChainServiceInterface {
     // We're unsure if the same events are also played by contract observer callback,
     // but need to play it regardless, so subscribers won't miss anything.
     // See EventTracker documentation
-    const ethersEvents = (await contract.queryFilter({}, confirmedBlock)).sort(e => e.blockNumber);
+    const ethersEvents = (await this.nitroAdjudicator.queryFilter({}, confirmedBlock)).sort(
+      e => e.blockNumber
+    );
     for (const ethersEvent of ethersEvents) {
       await this.waitForConfirmations(ethersEvent);
-      this.onAssetHolderEvent(contract, ethersEvent);
+      this.onAssetEvent(ethersEvent);
     }
   }
 
@@ -545,56 +495,42 @@ export class ChainService implements ChainServiceInterface {
     );
   }
 
-  private setUpAssetHolderListener(assetHolderAddress: Address): void {
-    if (!this.registeredContracts.has(assetHolderAddress)) {
-      const contract = this.getOrAddContractMapping(assetHolderAddress);
-      this.listenForContractEvents(contract);
-      this.registeredContracts.add(assetHolderAddress);
-    }
-  }
-
-  private listenForContractEvents(assetHolderContract: Contract): void {
+  private listenForAssetEvents(adjudicatorContract: Contract): void {
     // Listen to all contract events
-    assetHolderContract.on({}, async (ethersEvent: Event) => {
+    adjudicatorContract.on({}, async (ethersEvent: Event) => {
       this.logger.trace(
-        {address: assetHolderContract.address, event: ethersEvent},
-        'AssetHolder event being handled'
+        {address: adjudicatorContract.address, event: ethersEvent},
+        'Asset event being handled'
       );
       await this.waitForConfirmations(ethersEvent);
-      this.onAssetHolderEvent(assetHolderContract, ethersEvent);
+      this.onAssetEvent(ethersEvent);
     });
   }
 
-  private async onAssetHolderEvent(
-    assetHolderContract: Contract,
-    ethersEvent: Event
-  ): Promise<void> {
+  private async onAssetEvent(ethersEvent: Event): Promise<void> {
     switch (ethersEvent.event) {
       case Deposited:
         {
-          const depostedEvent = await this.getDepositedEvent(assetHolderContract, ethersEvent);
-          this.channelToEventTrackers.get(depostedEvent.channelId)?.forEach(eventTracker => {
+          const depositedEvent = await this.getDepositedEvent(ethersEvent);
+          this.channelToEventTrackers.get(depositedEvent.channelId)?.forEach(eventTracker => {
             eventTracker.holdingUpdated(
-              depostedEvent,
-              depostedEvent.ethersEvent.blockNumber,
-              depostedEvent.ethersEvent.logIndex
+              depositedEvent,
+              depositedEvent.ethersEvent.blockNumber,
+              depositedEvent.ethersEvent.logIndex
             );
           });
         }
         break;
-      case AllocationUpdated:
+      case FingerprintUpdated:
         {
-          const allocationUpdatedEvent = await this.getAllocationUpdatedEvent(
-            assetHolderContract,
-            ethersEvent
-          );
+          const fingerprintUpdatedEvent = await this.getFingerprintUpdatedEvent(ethersEvent);
           this.channelToEventTrackers
-            .get(allocationUpdatedEvent.channelId)
+            .get(fingerprintUpdatedEvent.channelId)
             ?.forEach(eventTracker => {
-              eventTracker.assetOutcomeUpdated(
-                allocationUpdatedEvent,
-                allocationUpdatedEvent.ethersEvent.blockNumber,
-                allocationUpdatedEvent.ethersEvent.logIndex
+              eventTracker.fingerprintUpdated(
+                fingerprintUpdatedEvent,
+                fingerprintUpdatedEvent.ethersEvent.blockNumber,
+                fingerprintUpdatedEvent.ethersEvent.logIndex
               );
             });
         }
@@ -604,23 +540,21 @@ export class ChainService implements ChainServiceInterface {
     }
   }
 
-  private async increaseAllowance(assetHolderAddress: Address, amount: string): Promise<void> {
-    const assetHolderContract = this.getOrAddContractMapping(assetHolderAddress);
-    const tokenAddress = await assetHolderContract.Token();
-    const tokenContract = this.getOrAddContractMapping(
+  private async increaseAllowance(tokenAddress: Address, amount: string): Promise<void> {
+    const tokenContract = new Contract(
       tokenAddress,
-      TestContractArtifacts.TokenArtifact.abi
+      TestContractArtifacts.TokenArtifact.abi,
+      this.ethWallet
     );
-
     switch (this.allowanceMode) {
       case 'PerDeposit': {
         const increaseAllowance = tokenContract.interface.encodeFunctionData('increaseAllowance', [
-          assetHolderAddress,
+          this.nitroAdjudicator.address,
           amount,
         ]);
         const increaseAllowanceRequest = {
           data: increaseAllowance,
-          to: tokenContract.address,
+          to: tokenAddress,
         };
 
         const tx = await this.sendTransaction(increaseAllowanceRequest);
@@ -635,12 +569,12 @@ export class ChainService implements ChainServiceInterface {
       case 'MaxUint': {
         const currentAllowance = await tokenContract.allowance(
           await this.ethWallet.getAddress(),
-          assetHolderAddress
+          this.nitroAdjudicator.address
         );
         // Half of MaxUint256 is the threshold for bumping up the allowance
         if (BN.gt(BN.div(constants.MaxUint256, 2), currentAllowance)) {
           const approveAllowance = tokenContract.interface.encodeFunctionData('approve', [
-            assetHolderAddress,
+            this.nitroAdjudicator.address,
             constants.MaxUint256,
           ]);
           const approveAllowanceRequest = {
@@ -661,45 +595,32 @@ export class ChainService implements ChainServiceInterface {
     }
   }
 
-  private async getDepositedEvent(contract: Contract, event: Event): Promise<DepositedEvent> {
+  private async getDepositedEvent(event: Event): Promise<DepositedEvent> {
     if (!event.args) {
       throw new Error('Deposited event must have args');
     }
-    const [destination, _amountDeposited, destinationHoldings] = event.args;
+    const [destination, asset, _amountDeposited, destinationHoldings] = event.args;
     return {
       type: Deposited,
       channelId: destination,
-      assetHolderAddress: makeAddress(contract.address),
+      asset,
       amount: BN.from(destinationHoldings),
       ethersEvent: event,
     };
   }
 
-  private async getAllocationUpdatedEvent(
-    contract: Contract,
-    event: Event
-  ): Promise<AllocationUpdatedEvent> {
+  private async getFingerprintUpdatedEvent(event: Event): Promise<FingerprintUpdatedEvent> {
     if (!event.args) {
-      throw new Error('Allocation event must have args');
+      throw new Error('FingerprintUpdated event must have args');
     }
-    const [channelId, initialHoldings] = event.args;
-    const tx = await this.provider.getTransaction(event.transactionHash);
-
-    const {newAssetOutcome, newHoldings, externalPayouts, internalPayouts} = computeNewAssetOutcome(
-      contract.address,
-      this.nitroAdjudicatorAddress,
-      {channelId, initialHoldings},
-      tx
-    );
+    const [channelId, outcomeBytes] = event.args;
+    // future optimizations of this event may require clients to parse the calldata of the transaction generating the event
+    // in order to have sufficient information to compute the new outcome corresponding to the new fingerprint.
 
     return {
-      type: AllocationUpdated,
-      channelId: channelId,
-      assetHolderAddress: makeAddress(contract.address),
-      newHoldings: BN.from(newHoldings),
-      externalPayouts: externalPayouts,
-      internalPayouts: internalPayouts,
-      newAssetOutcome: newAssetOutcome,
+      type: FingerprintUpdated,
+      channelId,
+      outcomeBytes,
       ethersEvent: event,
     };
   }

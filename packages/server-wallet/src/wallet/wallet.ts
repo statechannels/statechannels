@@ -36,7 +36,7 @@ import {
   SyncConfiguration,
 } from '../engine';
 import {
-  AssetOutcomeUpdatedArg,
+  FingerprintUpdatedArg,
   ChainEventSubscriberInterface,
   ChainService,
   ChainServiceInterface,
@@ -135,19 +135,15 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     this._chainListener = {
       holdingUpdated: this.createChainEventlistener('holdingUpdated', e =>
-        this._engine.store.updateFunding(e.channelId, e.amount, e.assetHolderAddress)
+        this._engine.store.updateFunding(e.channelId, e.amount, e.asset)
       ),
-      assetOutcomeUpdated: this.createChainEventlistener('assetOutcomeUpdated', async e => {
+      fingerprintUpdated: this.createChainEventlistener('fingerprintUpdated', async e => {
         const transferredOut = e.externalPayouts.map(ai => ({
           toAddress: makeDestination(ai.destination),
           amount: ai.amount as Uint256,
         }));
 
-        await this._engine.store.updateTransferredOut(
-          e.channelId,
-          e.assetHolderAddress,
-          transferredOut
-        );
+        await this._engine.store.updateTransferredOut(e.channelId, e.asset, transferredOut);
       }),
       challengeRegistered: this.createChainEventlistener('challengeRegistered', e =>
         this._engine.store.insertAdjudicatorStatus(e.channelId, e.finalizesAt, e.challengeStates)
@@ -423,7 +419,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
   private async registerChannels(channelsToRegister: ChannelResult[]): Promise<void> {
     const channelsWithAssetHolders = channelsToRegister.map(cr => ({
-      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.asset)),
       channelId: cr.channelId,
     }));
 
@@ -438,7 +434,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
   >(eventName: K, storeUpdater: EH) {
     return async (
       event: HoldingUpdatedArg &
-        AssetOutcomeUpdatedArg &
+        FingerprintUpdatedArg &
         ChannelFinalizedArg &
         ChallengeRegisteredArg
     ) => {

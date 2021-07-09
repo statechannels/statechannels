@@ -9,7 +9,6 @@ import {ChainService} from '../chain-service';
 const pk = TEST_ACCOUNTS[0].privateKey;
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const erc20AssetHolderAddress = makeAddress(process.env.ERC20_ASSET_HOLDER_ADDRESS!);
 const erc20Address = makeAddress(process.env.ERC20_ADDRESS!);
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 const rpcEndpoint = process.env.RPC_ENDPOINT;
@@ -52,7 +51,7 @@ describe('fundChannel', () => {
       chainService
         .fundChannel({
           channelId: randomChannelId(),
-          assetHolderAddress: erc20AssetHolderAddress,
+          asset: erc20Address,
           expectedHeld: BN.from(0),
           amount: BN.from(depositAmount),
         })

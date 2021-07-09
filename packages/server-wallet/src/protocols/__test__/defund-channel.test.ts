@@ -113,12 +113,7 @@ describe('when there is an active challenge', () => {
 describe('when the channel is finalized on chain', () => {
   it('should call pushOutcome if the outcome has not been pushed', async () => {
     // If there is a funding entry that means the outcome has not been pushed
-    await Funding.updateFunding(
-      knex,
-      testChan.channelId,
-      '0x05',
-      makeAddress(testChan.assetHolderAddress)
-    );
+    await Funding.updateFunding(knex, testChan.channelId, '0x05', makeAddress(testChan.asset));
 
     const challengeState = stateSignedBy([alice()])();
     await setAdjudicatorStatus('finalized', testChan.channelId, challengeState);
