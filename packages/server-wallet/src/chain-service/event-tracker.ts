@@ -1,4 +1,3 @@
-import {Address} from '@statechannels/nitro-protocol/src/contract/types';
 import {Logger} from 'pino';
 
 import {
@@ -13,26 +12,26 @@ import {
  * This class is a wrapper of ChainEventSubscriberInterface.
  * Purpose - 2 functions can trigger AssetHolder events to be played to ChainEventSubscriberInterface
  *    1. chainservice.getInitialHoldings
- *    2. chainservice.addAssetHolderObservable
+ *    2. chainservice.onAssetEvent
  * Some events can be played twice by both functions, order not predictable,
  * this class ensures each event is played once and in the right order
  */
 export class EventTracker {
   private logger: Logger;
-  private assetMap: Map<Address, {blockNumber: number; logIndex: number}>;
+  private eventRecordFor: Map<string, {blockNumber: number; logIndex: number}>;
   private managedSubscriber: ChainEventSubscriberInterface;
 
   constructor(managedSubscriber: ChainEventSubscriberInterface, logger: Logger) {
     this.logger = logger;
     this.managedSubscriber = managedSubscriber;
     this.logger = logger;
-    this.assetMap = new Map<string, {blockNumber: number; logIndex: number}>();
+    this.eventRecordFor = new Map<string, {blockNumber: number; logIndex: number}>();
   }
 
-  private isNewEvent(asset: Address, blockNumber: number, logIndex: number): boolean {
-    const eventRecord = this.assetMap.get(asset);
+  private isNewEvent(queue: string, blockNumber: number, logIndex: number): boolean {
+    const eventRecord = this.eventRecordFor.get(queue);
     this.logger.debug(
-      `EventTracker.isNewEvent: ${asset}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
+      `EventTracker.isNewEvent: ${queue}, ${blockNumber}, ${logIndex}, ${JSON.stringify(
         eventRecord
       )}`
     );
@@ -50,7 +49,7 @@ export class EventTracker {
 
     if (isNew) {
       // Save latest event ever seen
-      this.assetMap.set(asset, {blockNumber: blockNumber, logIndex: logIndex});
+      this.eventRecordFor.set(queue, {blockNumber: blockNumber, logIndex: logIndex});
       this.logger.debug('Event is new');
       return true;
     } else {
@@ -73,13 +72,7 @@ export class EventTracker {
 
   // Pass event to managed subscriber only if new
   fingerprintUpdated(arg: FingerprintUpdatedArg, blockNumber: number, logIndex: number): void {
-    if (
-      this.isNewEvent(
-        arg.channelId, // TODO does this make sense to put here?
-        blockNumber,
-        logIndex
-      )
-    ) {
+    if (this.isNewEvent('fingerPrintUpdatedQueue', blockNumber, logIndex)) {
       this.managedSubscriber.fingerprintUpdated(arg);
     }
   }
