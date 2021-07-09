@@ -96,7 +96,7 @@ const sixFour: [AllocationAssetOutcome] = [
 ];
 const fourSix: [AllocationAssetOutcome] = [
   {
-    asset: process.env.MAGIC_ADDRESS_INDICATING_ETH,
+    asset: MAGIC_ADDRESS_INDICATING_ETH,
     allocationItems: [
       {destination: convertAddressToBytes32(Alice.address), amount: '0x4'},
       {destination: convertAddressToBytes32(Bob.address), amount: '0x6'},
