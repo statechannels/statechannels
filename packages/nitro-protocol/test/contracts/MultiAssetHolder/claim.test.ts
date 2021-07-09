@@ -219,7 +219,7 @@ describe('claim', () => {
             event: 'AllocationUpdated',
             args: {
               targetId,
-              initialHoldings: heldBefore[addresses.c],
+              initialHoldings: heldBefore[addresses.g],
             },
           },
         ];
