@@ -57,7 +57,7 @@ export function createConcludeAndTransferAllAssetsTransaction(
   };
 }
 
-export function transferAllAssetsArgs(
+function transferAllAssetsArgs(
   state: State,
   challengerAddress: string,
   overrideStateHash = false // set to true if channel concluded happily
