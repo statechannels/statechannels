@@ -59,12 +59,17 @@ export function computeNewAllocationWithGuarantee(
   allocation: AllocationItem[], // we must index this with a JS number that is less than 2**32 - 1
   indices: number[],
   guarantee: Guarantee
-): {newAllocation: AllocationItem[]; deleted: boolean; payouts: string[]; totalPayouts: string} {
+): {
+  newAllocation: AllocationItem[];
+  allocatesOnlyZeros: boolean;
+  payouts: string[];
+  totalPayouts: string;
+} {
   const payouts: string[] = Array(indices.length > 0 ? indices.length : allocation.length).fill(
     BigNumber.from(0).toHexString()
   );
   let totalPayouts = BigNumber.from(0);
-  let safeToDelete = true;
+  let allocatesOnlyZeros = true;
   let surplus = BigNumber.from(initialHoldings);
   let k = 0;
 
@@ -108,14 +113,14 @@ export function computeNewAllocationWithGuarantee(
 
   for (let i = 0; i < allocation.length; i++) {
     if (!BigNumber.from(newAllocation[i].amount).isZero()) {
-      safeToDelete = false;
+      allocatesOnlyZeros = false;
       break;
     }
   }
 
   return {
     newAllocation,
-    deleted: safeToDelete,
+    allocatesOnlyZeros,
     payouts,
     totalPayouts: totalPayouts.toHexString(),
   };
@@ -132,13 +137,18 @@ export function computeNewAllocation(
   initialHoldings: string,
   allocation: AllocationItem[], // we must index this with a JS number that is less than 2**32 - 1
   indices: number[]
-): {newAllocation: AllocationItem[]; deleted: boolean; payouts: string[]; totalPayouts: string} {
+): {
+  newAllocation: AllocationItem[];
+  allocatesOnlyZeros: boolean;
+  payouts: string[];
+  totalPayouts: string;
+} {
   const payouts: string[] = Array(indices.length > 0 ? indices.length : allocation.length).fill(
     BigNumber.from(0).toHexString()
   );
   let totalPayouts = BigNumber.from(0);
   const newAllocation: AllocationItem[] = [];
-  let safeToDelete = true;
+  let allocatesOnlyZeros = true;
   let surplus = BigNumber.from(initialHoldings);
   let k = 0;
 
@@ -158,13 +168,13 @@ export function computeNewAllocation(
     } else {
       newAllocation[i].amount = allocation[i].amount;
     }
-    if (!BigNumber.from(newAllocation[i].amount).isZero()) safeToDelete = false;
+    if (!BigNumber.from(newAllocation[i].amount).isZero()) allocatesOnlyZeros = false;
     surplus = surplus.sub(affordsForDestination);
   }
 
   return {
     newAllocation,
-    deleted: safeToDelete,
+    allocatesOnlyZeros,
     payouts,
     totalPayouts: totalPayouts.toHexString(),
   };

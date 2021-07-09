@@ -69,7 +69,9 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
         amount: BigNumber.from(a.amount),
       }))
     );
-    expect((result as any).safeToDelete).toEqual(locallyComputedNewAllocation.deleted);
+    expect((result as any).allocatesOnlyZeros).toEqual(
+      locallyComputedNewAllocation.allocatesOnlyZeros
+    );
     expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
     expect(result.payouts).toMatchObject(
       locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))
