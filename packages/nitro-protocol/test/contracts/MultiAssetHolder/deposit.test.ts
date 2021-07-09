@@ -107,7 +107,7 @@ describe('deposit', () => {
 
     const balanceBefore = await getBalance(asset, signer0Address);
 
-    const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount, {
+    const tx = testNitroAdjudicator.deposit(asset, destination, expectedHeld, amount, {
       value: asset === ETH ? amount : 0,
     });
 
@@ -129,7 +129,7 @@ describe('deposit', () => {
         expect(balanceAfter.eq(balanceBefore.sub(heldAfter.sub(held)))).toBe(true);
       }
 
-      const allocatedAmount = await testNitroAdjudicator.holdings(token.address, destination);
+      const allocatedAmount = await testNitroAdjudicator.holdings(asset, destination);
       await expect(allocatedAmount).toEqual(heldAfter);
     }
   });
