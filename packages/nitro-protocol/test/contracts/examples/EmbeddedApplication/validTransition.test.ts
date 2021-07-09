@@ -18,7 +18,10 @@ type RevertReason =
   | 'destinations may not change' // tested
   | 'p2.amt !constant' // tested
   | 'total allocation changed' // tested
-  | 'incorrect move from None' // tested
+  | 'None->B: from not signed by AI'
+  | 'None->B: to not signed by B'
+  | 'None->A: from not signed by BI'
+  | 'None->A: to not signed by A'
   | 'inferior support proof' // tested
   | 'incorrect move from A' // tested
   | 'incorrect move from B' // tested
@@ -195,32 +198,53 @@ const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
 const nParticipants = 0; // TODO this is unused
 
 const signedBy = {
-  all: 0b111,
+  none: 0b000,
   alice: 0b001,
   bob: 0b010,
+  irene: 0b100,
   ab: 0b011,
   ai: 0b101,
   bi: 0b110,
+  all: 0b111,
 };
 
 describe('EmbeddedApplication: named state transitions', () => {
   test('signature checks on transitions from None state', async () => {
-    const generateTX = signedByFrom =>
+    const tx = (to: 'a' | 'b', signedByFrom, signedByTo) =>
       embeddedApplication.validTransition(
         NoneVariablePartForJ,
-        AvariablePartForJ,
+        to == 'a' ? AvariablePartForJ : BvariablePartForJ,
         turnNumTo,
         nParticipants,
         signedByFrom,
-        signedBy.alice
+        signedByTo
       );
-    await expectRevert(() => generateTX(signedBy.alice), 'Everyone must sign None state');
-    await expectRevert(() => generateTX(signedBy.bob), 'Everyone must sign None state');
-    await expectRevert(() => generateTX(signedBy.ab), 'Everyone must sign None state');
-    await expectRevert(() => generateTX(signedBy.ai), 'Everyone must sign None state');
-    await expectRevert(() => generateTX(signedBy.bi), 'Everyone must sign None state');
+    let msg: RevertReason = 'None->A: from not signed by BI';
+    await expectRevert(() => tx('a', signedBy.alice, signedBy.alice), msg);
+    await expectRevert(() => tx('a', signedBy.bob, signedBy.alice), msg);
+    await expectRevert(() => tx('a', signedBy.ai, signedBy.alice), msg);
+    await expectRevert(() => tx('a', signedBy.none, signedBy.alice), msg);
 
-    await expect(generateTX(signedBy.all)).resolves.toEqual(true);
+    msg = 'None->A: to not signed by A';
+    await expectRevert(() => tx('a', signedBy.bi, signedBy.bob), msg);
+    await expectRevert(() => tx('a', signedBy.bi, signedBy.irene), msg);
+    await expectRevert(() => tx('a', signedBy.all, signedBy.none), msg);
+
+    msg = 'None->B: to not signed by B';
+    await expectRevert(() => tx('b', signedBy.all, signedBy.irene), msg);
+    await expectRevert(() => tx('b', signedBy.all, signedBy.alice), msg);
+    await expectRevert(() => tx('b', signedBy.all, signedBy.ai), msg);
+    await expectRevert(() => tx('b', signedBy.all, signedBy.none), msg);
+
+    msg = 'None->B: from not signed by AI';
+    await expectRevert(() => tx('b', signedBy.bi, signedBy.all), msg);
+    await expectRevert(() => tx('b', signedBy.irene, signedBy.all), msg);
+    await expectRevert(() => tx('b', signedBy.none, signedBy.ai), msg);
+
+    await expect(tx('a', signedBy.all, signedBy.alice)).resolves.toEqual(true);
+    await expect(tx('a', signedBy.bi, signedBy.alice)).resolves.toEqual(true);
+    await expect(tx('b', signedBy.all, signedBy.bob)).resolves.toEqual(true);
+    await expect(tx('b', signedBy.ai, signedBy.bob)).resolves.toEqual(true);
   });
 
   it('returns true / reverts for a correct / incorrect None => A transition', async () => {

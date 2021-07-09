@@ -163,6 +163,8 @@ contract EmbeddedApplication is
     uint8 internal constant BIndex = 1;
     uint8 internal constant IIndex = 2;
     uint256 internal constant AllMask = 2 ** AIndex + 2**BIndex + 2**IIndex;
+    uint256 internal constant AIMask = 2 ** AIndex + 2**IIndex;
+    uint256 internal constant BIMask = 2 ** BIndex + 2**IIndex;
     uint256 internal constant AMask = 2 ** AIndex;
     uint256 internal constant BMask = 2 ** BIndex;
 
@@ -211,13 +213,15 @@ contract EmbeddedApplication is
         //   None
 
         if (fromAppData.alreadyMoved == AlreadyMoved.None) {
-            require(ForceMoveAppUtilities.isSignedBy(signedByFrom, AllMask), 'Everyone must sign None state');
-
-            require(
-                (toAppData.alreadyMoved == AlreadyMoved.A && signedByA) ||
-                    (toAppData.alreadyMoved == AlreadyMoved.B && signedByB),
-                'incorrect move from None'
-            );
+            if (toAppData.alreadyMoved == AlreadyMoved.A) {
+                require(ForceMoveAppUtilities.isSignedBy(signedByFrom, BIMask), 'None->A: from not signed by BI');
+                require(ForceMoveAppUtilities.isSignedBy(signedByTo, AMask), 'None->A: to not signed by A');
+            } else if (toAppData.alreadyMoved == AlreadyMoved.B){
+                require(ForceMoveAppUtilities.isSignedBy(signedByFrom, AIMask), 'None->B: from not signed by AI');
+                require(ForceMoveAppUtilities.isSignedBy(signedByTo, BMask), 'None->B: to not signed by B');
+            } else {
+                revert('None -> None or AB not allowed');
+            }
         } else {
             // If a support proof has already been supplied, the current support proof must be greater
             require(
