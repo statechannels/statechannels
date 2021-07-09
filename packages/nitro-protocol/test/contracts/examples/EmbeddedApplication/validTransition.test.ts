@@ -192,7 +192,12 @@ beforeAll(async () => {
 
 const turnNumTo = 0; // TODO this is unused, but presumably it _should_ be used
 const nParticipants = 0; // TODO this is unused
-const signedByFrom = 0b00; // TODO this is unused
+
+const signedBy = {
+  all: 0b111,
+  alice: 0b001,
+  bob: 0b010,
+};
 
 describe('EmbeddedApplication: named state transitions', () => {
   it('returns true / reverts for a correct / incorrect None => A transition', async () => {
@@ -201,8 +206,8 @@ describe('EmbeddedApplication: named state transitions', () => {
       AvariablePartForJ,
       turnNumTo,
       nParticipants,
-      signedByFrom,
-      0b01 // signedByTo = just Alice
+      signedBy.all,
+      signedBy.alice
     );
     expect(result).toBe(true);
     await expectRevert(
@@ -212,8 +217,8 @@ describe('EmbeddedApplication: named state transitions', () => {
           AvariablePartForJ,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b10 // signedByTo = just Bob
+          signedBy.all,
+          signedBy.bob
         ),
       'incorrect move from None'
     );
@@ -224,8 +229,8 @@ describe('EmbeddedApplication: named state transitions', () => {
       BvariablePartForJ,
       turnNumTo,
       nParticipants,
-      signedByFrom,
-      0b10 // signedByTo = just Bob
+      signedBy.all,
+      signedBy.bob
     );
     expect(result).toBe(true);
     await expectRevert(
@@ -235,8 +240,8 @@ describe('EmbeddedApplication: named state transitions', () => {
           BvariablePartForJ,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'incorrect move from None'
     );
@@ -247,8 +252,8 @@ describe('EmbeddedApplication: named state transitions', () => {
       ABvariablePartForJ,
       turnNumTo,
       nParticipants,
-      signedByFrom,
-      0b10 // signedByTo = just Bob
+      signedBy.alice,
+      signedBy.bob
     );
     expect(result).toBe(true);
     await expectRevert(
@@ -258,8 +263,8 @@ describe('EmbeddedApplication: named state transitions', () => {
           ABvariablePartForJ,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.alice,
+          signedBy.alice
         ),
       'incorrect move from A'
     );
@@ -270,8 +275,8 @@ describe('EmbeddedApplication: named state transitions', () => {
       ABvariablePartForJ,
       turnNumTo,
       nParticipants,
-      signedByFrom,
-      0b01 // signedByTo = just Alice
+      signedBy.alice,
+      signedBy.alice
     );
     expect(result).toBe(true);
     await expectRevert(
@@ -281,8 +286,8 @@ describe('EmbeddedApplication: named state transitions', () => {
           ABvariablePartForJ,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b10 // signedByTo = just Bob
+          signedBy.alice,
+          signedBy.bob
         ),
       'incorrect move from B'
     );
@@ -303,8 +308,8 @@ describe('EmbeddedApplication: named state transitions', () => {
           evenGreaterSupportProofForX,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b10 // signedByTo = just Bob
+          signedBy.alice,
+          signedBy.bob
         ),
       'move from None,A,B only'
     );
@@ -322,8 +327,8 @@ describe('EmbeddedApplication: reversions', () => {
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'destinations may not change'
     );
@@ -338,8 +343,8 @@ describe('EmbeddedApplication: reversions', () => {
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'p2.amt !constant'
     );
@@ -354,8 +359,8 @@ describe('EmbeddedApplication: reversions', () => {
           {...AvariablePartForJ, outcome: encodeOutcome(maliciousOutcome)},
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'total allocation changed'
     );
@@ -374,8 +379,8 @@ describe('EmbeddedApplication: reversions', () => {
             inferiorSupportProof,
             turnNumTo,
             nParticipants,
-            signedByFrom,
-            0b10 // signedByTo = just Bob
+            signedBy.all,
+            signedBy.bob
           ),
         'inferior support proof'
       );
@@ -390,8 +395,8 @@ describe('EmbeddedApplication: reversions', () => {
           notProperlyAbsorbed,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'X / J outcome mismatch'
     );
@@ -410,8 +415,8 @@ describe('EmbeddedApplication: reversions', () => {
           appDefinitionChanged,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'X.appDefinition changed'
     );
@@ -430,8 +435,8 @@ describe('EmbeddedApplication: reversions', () => {
           challengeDurationChanged,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'X.challengeDuration changed'
     );
@@ -450,8 +455,8 @@ describe('EmbeddedApplication: reversions', () => {
           malicious,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       '1 or 2 states required'
     );
@@ -470,8 +475,8 @@ describe('EmbeddedApplication: reversions', () => {
           malicious,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'invalid whoSignedWhat'
     );
@@ -493,8 +498,8 @@ describe('EmbeddedApplication: reversions', () => {
           malicious,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'sig0 !by participant0'
     );
@@ -516,8 +521,8 @@ describe('EmbeddedApplication: reversions', () => {
           malicious,
           turnNumTo,
           nParticipants,
-          signedByFrom,
-          0b01 // signedByTo = just Alice
+          signedBy.all,
+          signedBy.alice
         ),
       'sig1 !by participant1'
     );

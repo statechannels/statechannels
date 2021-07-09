@@ -51,12 +51,16 @@ library ForceMoveAppUtilities {
     /**
      * @notice Given a "signedBy" bitmap and a participant index, indicate whether the participant has provided a signature
      * @dev Given a "signedBy" bitmap and a participant index, indicate whether the participant has provided a signature
-     * @param signedBy uint256 bitmap of which participants has provided a signature
-     * @param participantIndex index of participant in channel's participants array
-     * @return whether the participantIndex-th bit of signedBy is 1 or 0
+     * @param signedBy uint256 bitmap of which participants has provided a signature.
+     *                 The right-most bit is for participant 0, the next for participant 1, etc.
+     *                 Therefore, signedBy = sum_{participants p} (2 ** p.index if p signed else 0;)
+     * @param participants uint256 bitmask of participant in channel's participants array
+     *                 As with signedBy, the right most bit is 1 when we want to know if participant 0 signed.
+     *                 The next-significant bit is 1 when we want to know if participant 1 signed, etc.
+     * @return whether the given participants has signed the state
      */
-    function isSignedBy(uint256 signedBy, uint8 participantIndex) internal pure returns (bool) {
-        return ((signedBy >> participantIndex) % 2 == 1);
+    function isSignedBy(uint256 signedBy, uint256 participants) internal pure returns (bool) {
+        return (signedBy & participants) == participants;
     }
 
     // This function can be used inside validTransition
@@ -67,10 +71,11 @@ library ForceMoveAppUtilities {
         uint256 signedByFrom,
         uint256 signedByTo
     ) internal pure returns (bool) {
+        uint48 turnNumA = turnNumB - 1;
         require(
             turnNumB > 0 &&
-                isSignedBy(signedByFrom, uint8((turnNumB - 1) % nParticipants)) &&
-                isSignedBy(signedByTo, uint8(turnNumB % nParticipants)),
+                isSignedBy(signedByFrom, 2 ** (turnNumA % nParticipants)) &&
+                isSignedBy(signedByTo,   2 ** (turnNumB % nParticipants)),
             'roundRobin violation'
         );
         return true;
@@ -157,18 +162,22 @@ contract EmbeddedApplication is
     uint8 internal constant AIndex = 0;
     uint8 internal constant BIndex = 1;
     uint8 internal constant IIndex = 2;
+    uint256 internal constant AllMask = 2 ** AIndex + 2**BIndex + 2**IIndex;
+    uint256 internal constant AMask = 2 ** AIndex;
+    uint256 internal constant BMask = 2 ** BIndex;
+
 
     function validTransition(
         VariablePart memory from,
         VariablePart memory to,
         uint48, // turnNumTo (unused)
         uint256, // nParticipants (unused)
-        uint256, // signedByFrom - Bitmap of who has signed the "from" state?
-        uint256 signedByTo // Bitmap of who has signed the "to" state?
+        uint256 signedByFrom, // Bitmap of who has signed the "from" state
+        uint256 signedByTo    // Bitmap of who has signed the "to" state
     ) public override pure returns (bool) {
         // parameter wrangling
-        bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, AIndex);
-        bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, BIndex);
+        bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, AMask ); // 0b001
+        bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, BMask);  // 0b010
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
         Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
@@ -202,6 +211,8 @@ contract EmbeddedApplication is
         //   None
 
         if (fromAppData.alreadyMoved == AlreadyMoved.None) {
+            require(ForceMoveAppUtilities.isSignedBy(signedByFrom, AllMask), 'Everyone must sign None state');
+
             require(
                 (toAppData.alreadyMoved == AlreadyMoved.A && signedByA) ||
                     (toAppData.alreadyMoved == AlreadyMoved.B && signedByB),
