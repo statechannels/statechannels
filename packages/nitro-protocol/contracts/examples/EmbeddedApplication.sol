@@ -220,7 +220,6 @@ contract EmbeddedApplication is
                 revert('None -> None or AB not allowed');
             }
         } else {
-            require(toAppData.alreadyMoved == AlreadyMoved.AB , 'must transition to AB');
             if (fromAppData.alreadyMoved == AlreadyMoved.A) {
                 require(ForceMoveAppUtilities.isSignedBy(signedByFrom, AMask), 'A->AB: from not signed by A');
                 require(ForceMoveAppUtilities.isSignedBy(signedByTo, BMask), 'A->AB: to not signed by B');
@@ -228,8 +227,11 @@ contract EmbeddedApplication is
                 require(ForceMoveAppUtilities.isSignedBy(signedByFrom, BMask), 'B->AB: from not signed by B');
                 require(ForceMoveAppUtilities.isSignedBy(signedByTo, AMask), 'B->AB: to not signed by A');
             } else {
-                revert('AB->AB not allowed');
+                revert('AB->? not allowed');
             }
+
+            // This should be an A -> AB or B -> AB
+            require(toAppData.alreadyMoved == AlreadyMoved.AB , 'must transition to AB');
 
             // Since a support proof has already been supplied, the current support proof must be greater
             require(
