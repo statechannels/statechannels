@@ -46,7 +46,7 @@ interface IForceMoveApp2 {
     // 0b111 = 7 : everyone
 }
 
-library ForceMoveAppUtilities {
+library NitroAppUtils {
     /**
      * @notice Given a "signedBy" bitmap and a participant index, indicate whether the participant has provided a signature
      * @dev Given a "signedBy" bitmap and a participant index, indicate whether the participant has provided a signature
@@ -210,44 +210,32 @@ contract EmbeddedApplication is
         if (fromAppData.alreadyMoved == AlreadyMoved.None) {
             if (toAppData.alreadyMoved == AlreadyMoved.A) {
                 require(
-                    ForceMoveAppUtilities.isSignedBy(signedByFrom, BIMask),
+                    NitroAppUtils.isSignedBy(signedByFrom, BIMask),
                     'None->A: from not signed by BI'
                 );
-                require(
-                    ForceMoveAppUtilities.isSignedBy(signedByTo, AMask),
-                    'None->A: to not signed by A'
-                );
+                require(NitroAppUtils.isSignedBy(signedByTo, AMask), 'None->A: to not signed by A');
             } else if (toAppData.alreadyMoved == AlreadyMoved.B) {
                 require(
-                    ForceMoveAppUtilities.isSignedBy(signedByFrom, AIMask),
+                    NitroAppUtils.isSignedBy(signedByFrom, AIMask),
                     'None->B: from not signed by AI'
                 );
-                require(
-                    ForceMoveAppUtilities.isSignedBy(signedByTo, BMask),
-                    'None->B: to not signed by B'
-                );
+                require(NitroAppUtils.isSignedBy(signedByTo, BMask), 'None->B: to not signed by B');
             } else {
                 revert('None -> None or AB not allowed');
             }
         } else {
             if (fromAppData.alreadyMoved == AlreadyMoved.A) {
                 require(
-                    ForceMoveAppUtilities.isSignedBy(signedByFrom, AMask),
+                    NitroAppUtils.isSignedBy(signedByFrom, AMask),
                     'A->AB: from not signed by A'
                 );
-                require(
-                    ForceMoveAppUtilities.isSignedBy(signedByTo, BMask),
-                    'A->AB: to not signed by B'
-                );
+                require(NitroAppUtils.isSignedBy(signedByTo, BMask), 'A->AB: to not signed by B');
             } else if (fromAppData.alreadyMoved == AlreadyMoved.B) {
                 require(
-                    ForceMoveAppUtilities.isSignedBy(signedByFrom, BMask),
+                    NitroAppUtils.isSignedBy(signedByFrom, BMask),
                     'B->AB: from not signed by B'
                 );
-                require(
-                    ForceMoveAppUtilities.isSignedBy(signedByTo, AMask),
-                    'B->AB: to not signed by A'
-                );
+                require(NitroAppUtils.isSignedBy(signedByTo, AMask), 'B->AB: to not signed by A');
             } else {
                 revert('AB->? not allowed');
             }
@@ -340,14 +328,14 @@ contract EmbeddedApplication is
             (toAppData.supportProofForX.whoSignedWhat[1] == 0)
         ) {
             require(
-                (ForceMoveAppUtilities._recoverSigner(
+                (NitroAppUtils._recoverSigner(
                     greaterStateHash,
                     toAppData.supportProofForX.sigs[0]
                 ) == toAppData.supportProofForX.fixedPart.participants[0]),
                 'sig0 !by participant0'
             );
             require(
-                ForceMoveAppUtilities._recoverSigner(
+                NitroAppUtils._recoverSigner(
                     greaterStateHash,
                     toAppData.supportProofForX.sigs[1]
                 ) == toAppData.supportProofForX.fixedPart.participants[1],
@@ -371,14 +359,14 @@ contract EmbeddedApplication is
                 (toAppData.supportProofForX.whoSignedWhat[1] == 1)
             ) {
                 require(
-                    (ForceMoveAppUtilities._recoverSigner(
+                    (NitroAppUtils._recoverSigner(
                         lesserStateHash,
                         toAppData.supportProofForX.sigs[0]
                     ) == toAppData.supportProofForX.fixedPart.participants[0]),
                     'sig0 on state0 !by participant0'
                 );
                 require(
-                    ForceMoveAppUtilities._recoverSigner(
+                    NitroAppUtils._recoverSigner(
                         greaterStateHash,
                         toAppData.supportProofForX.sigs[1]
                     ) == toAppData.supportProofForX.fixedPart.participants[1],
@@ -389,14 +377,14 @@ contract EmbeddedApplication is
                 (toAppData.supportProofForX.whoSignedWhat[1] == 0)
             ) {
                 require(
-                    (ForceMoveAppUtilities._recoverSigner(
+                    (NitroAppUtils._recoverSigner(
                         greaterStateHash,
                         toAppData.supportProofForX.sigs[0]
                     ) == toAppData.supportProofForX.fixedPart.participants[0]),
                     'sig0 on state1 !by participant0'
                 );
                 require(
-                    ForceMoveAppUtilities._recoverSigner(
+                    NitroAppUtils._recoverSigner(
                         lesserStateHash,
                         toAppData.supportProofForX.sigs[1]
                     ) == toAppData.supportProofForX.fixedPart.participants[1],
