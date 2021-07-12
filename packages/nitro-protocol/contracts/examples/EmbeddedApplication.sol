@@ -177,9 +177,6 @@ contract EmbeddedApplication is
         uint256 signedByFrom, // Bitmap of who has signed the "from" state
         uint256 signedByTo    // Bitmap of who has signed the "to" state
     ) public override pure returns (bool) {
-        // parameter wrangling
-        bool signedByA = ForceMoveAppUtilities.isSignedBy(signedByTo, AMask ); // 0b001
-        bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, BMask);  // 0b010
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
         Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
@@ -223,24 +220,22 @@ contract EmbeddedApplication is
                 revert('None -> None or AB not allowed');
             }
         } else {
-            // If a support proof has already been supplied, the current support proof must be greater
+            require(toAppData.alreadyMoved == AlreadyMoved.AB , 'must transition to AB');
+            if (fromAppData.alreadyMoved == AlreadyMoved.A) {
+                require(ForceMoveAppUtilities.isSignedBy(signedByFrom, AMask), 'A->AB: from not signed by A');
+                require(ForceMoveAppUtilities.isSignedBy(signedByTo, BMask), 'A->AB: to not signed by B');
+            } else if (fromAppData.alreadyMoved == AlreadyMoved.B) {
+                require(ForceMoveAppUtilities.isSignedBy(signedByFrom, BMask), 'B->AB: from not signed by B');
+                require(ForceMoveAppUtilities.isSignedBy(signedByTo, AMask), 'B->AB: to not signed by A');
+            } else {
+                revert('AB->AB not allowed');
+            }
+
+            // Since a support proof has already been supplied, the current support proof must be greater
             require(
                 toAppData.supportProofForX.turnNumTo > fromAppData.supportProofForX.turnNumTo,
                 'inferior support proof'
             );
-            if (fromAppData.alreadyMoved == AlreadyMoved.A) {
-                require(
-                    toAppData.alreadyMoved == AlreadyMoved.AB && signedByB,
-                    'incorrect move from A'
-                );
-            } else if (fromAppData.alreadyMoved == AlreadyMoved.B) {
-                require(
-                    toAppData.alreadyMoved == AlreadyMoved.AB && signedByA,
-                    'incorrect move from B'
-                );
-            } else {
-                revert('move from None,A,B only');
-            }
         }
 
         // validate the supplied support proof
