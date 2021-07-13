@@ -43,12 +43,19 @@ type SignedState = {
  *       _____|
  *
  * In the happy path, Alice through Ivy sign a state with turn number equal to their
- * index. Turn 4 state can be signed by either Alice (moving to an A state) or Bob
+ * index. This state includes a special hash in its app data, which is the hash of
+ * a ledger update that adds a guarantee.
+ *
+ * Turn 4 state can be signed by either Alice (moving to an A state) or Bob
  * (moving to a B state) by providing a valid support proof for X. Note that Bob
  * doesn't need to explicitly sign a state in the joint channel -- his signature in
  * the support proof for X can be used as implicit support for the outcome in J.
  *
- * From an A state, Bob can provide a superior support proof, moving to an AB state.
+ * The turn 4 state must reveal two signatures for each hash provided in states 0,1,2,3.
+ * This creates a dichotomy:
+ * - either a support proof for J is provided, allowing all guarantees can be claimed
+ * - or, no support proof for J is provided, meaning all guarantees turn into refunds
+ *
  * Likewise, from a B state, Alice can move to an AB state by providing a superior
  * support proof. This enables TTP=2 in a bi-directional virtually funded channel
  * among `N` intermediaries.
