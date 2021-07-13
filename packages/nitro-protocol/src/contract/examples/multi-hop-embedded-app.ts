@@ -38,7 +38,9 @@ type SignedState = {
  *   A      B
  *   ^      ^
  *    \    /
- *     None
+ *     None <--
+ *      |     | (3 times)
+ *       _____|
  *
  * In the happy path, Alice through Ivy sign a state with turn number equal to their
  * index. Turn 4 state can be signed by either Alice (moving to an A state) or Bob
