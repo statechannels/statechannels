@@ -29,6 +29,9 @@ async function createLoad() {
     numberOfChannels,
     prettyOutput,
     roleFile,
+    closeTime,
+    createTime,
+    updateTime,
     outputFile,
   } = await yargs(hideBin(process.argv))
     .option('closeChannels', {
@@ -47,7 +50,24 @@ async function createLoad() {
       default: 10,
       describe: 'The amount of channels that should be created.',
     })
-
+    .option('createTime', {
+      type: 'number',
+      description: `The range of time for a CreateChannelStep.
+      CreateChannelSteps will be assigned a timestamp randomly from 0 to createTime`,
+      default: ms('10s'),
+    })
+    .option('updateTime', {
+      type: 'number',
+      description: `The range of time for a UpdateChannelStep.
+      Each UpdateChannelStep will be incremented by a random value from 0 to updateTime `,
+      default: ms('10s'),
+    })
+    .option('closeTime', {
+      type: 'number',
+      description: `The range of time for a CloseChannelStep.
+      CloseChannelSteps will be assigned a timestamp randomly from updateTime to CloseTime`,
+      default: ms('10s'),
+    })
     .option('amountOfUpdates', {
       alias: 'u',
       description:
@@ -78,6 +98,9 @@ async function createLoad() {
         numberOfChannels,
         prettyOutput,
         closeChannels,
+        createTime,
+        updateTime,
+        closeTime,
       })}`
     )
   );
@@ -85,7 +108,7 @@ async function createLoad() {
   _.times(numberOfChannels, () => {
     // The timestamp represents when these steps should occur
     // As we add steps we keep increasing the timestamp
-    let timestamp = generateRandomNumber(0, ms('10s'));
+    let timestamp = generateRandomNumber(0, createTime);
     const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
 
     // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
@@ -104,11 +127,8 @@ async function createLoad() {
       channelParams: generateChannelParams(roles, participants),
     });
 
-    // We add some time to allow the channels to be created
-    if (amountOfUpdates > 0) timestamp += ms('30s');
-
     _.times(amountOfUpdates, async updateIndex => {
-      timestamp += generateRandomNumber(ms('5s'), ms('30s'));
+      timestamp += generateRandomNumber(0, updateTime);
       steps.push({
         type: 'UpdateChannel',
         serverId: participants[updateIndex % participants.length].participantId,
@@ -122,7 +142,7 @@ async function createLoad() {
     });
     if (closeChannels) {
       // Allow some time for updates or channel creation to be done before closing
-      timestamp += ms('30s');
+      timestamp += generateRandomNumber(ms('1s'), closeTime);
 
       steps.push({
         type: 'CloseChannel',
