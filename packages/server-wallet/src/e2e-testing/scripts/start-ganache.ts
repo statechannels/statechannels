@@ -84,7 +84,7 @@ async function setupGanache() {
     });
   }, commandArguments.miningInterval);
 
-  console.log(chalk.green(`Ganche started on port ${commandArguments.port}`));
+  console.log(chalk.green(`Ganache started on port ${commandArguments.port}`));
 
   const endpoint = `http://localhost:${commandArguments.port}`;
 
