@@ -15,11 +15,15 @@ export async function expectLatestStateToMatch(
   expect(latest.channelResult).toMatchObject(partial);
 }
 
-export function getWithPeersCreateChannelsArgs(peerSetup: PeerSetup): CreateChannelParams {
-  return createChannelArgs({
-    participants: [peerSetup.participantA, peerSetup.participantB],
+export function getWithPeersCreateChannelsArgs(
+  peerSetup: PeerSetup
+): CreateChannelParams & {fundingStrategy: 'Fake'} {
+  return {
+    ...createChannelArgs({
+      participants: [peerSetup.participantA, peerSetup.participantB],
+    }),
     fundingStrategy: 'Fake',
-  });
+  };
 }
 
 export function waitForObjectiveProposals(objectiveIds: string[], wallet: Wallet): Promise<void> {

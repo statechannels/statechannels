@@ -288,7 +288,7 @@ export class SingleThreadedEngine implements EngineInterface {
   async createLedgerChannel(
     args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
-  ): Promise<SingleChannelOutput> {
+  ): Promise<SingleChannelOutput & {newObjective: WalletObjective}> {
     const response = EngineResponse.initialize();
 
     await this._createChannel(
@@ -304,7 +304,13 @@ export class SingleThreadedEngine implements EngineInterface {
 
     // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
 
-    return response.singleChannelOutput();
+    const result = response.singleChannelOutput();
+
+    if (!hasNewObjective(result)) {
+      throw new Error('No new objective created for create channel');
+    } else {
+      return result;
+    }
   }
   /**
    * Creates a channel.

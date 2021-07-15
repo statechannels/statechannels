@@ -186,6 +186,48 @@ export class Wallet extends EventEmitter<WalletEvents> {
   }
 
   /**
+   * Creates a ledger channel
+   * @param channelParams The parameters for the ledger channel
+   * @param fundingStrategy The funding strategy to use
+   * @returns An ObjectiveResult indicating success or the error that occured
+   */
+  public async createLedgerChannel(
+    channelParams: Pick<
+      CreateChannelParams,
+      'participants' | 'allocations' | 'challengeDuration' | 'fundingStrategy'
+    > & {fundingStrategy: 'Direct' | 'Fake'}
+  ): Promise<ObjectiveResult> {
+    try {
+      const createResult = await this._engine.createLedgerChannel(
+        channelParams,
+        channelParams.fundingStrategy
+      );
+      await this.registerChannels([createResult.channelResult]);
+
+      const {newObjective, channelResult} = createResult;
+      const done = this.createObjectiveDoneResult(newObjective.objectiveId);
+      await this.handleEngineOutput(createResult);
+      return {
+        channelId: channelResult.channelId,
+        currentStatus: newObjective.status,
+        objectiveId: newObjective.objectiveId,
+        done,
+      };
+    } catch (error) {
+      this._logger.error({err: error}, 'Uncaught InternalError in CreateLedgerChannel');
+      // TODO: This is slightly hacky but it's less painful then having to narrow the type down every time
+      // you get a result back from the createChannels method
+      // This should be looked at in https://github.com/statechannels/statechannels/issues/3461
+      return {
+        channelId: 'ERROR',
+        currentStatus: 'failed' as const,
+        objectiveId: 'ERROR',
+        done: Promise.resolve({type: 'InternalError' as const, error}),
+      };
+    }
+  }
+
+  /**
    * Approves an objective that has been proposed by another participant.
    * Once the objective has been approved progress can be made to completing the objective.
    * @remarks
