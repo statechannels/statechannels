@@ -24,12 +24,9 @@ describe('CreateLedger', () => {
       dropRate: 0,
       meanDelay: undefined,
     },
-    // Lots of messages dropping but no delay
-    {dropRate: 0.3, meanDelay: undefined},
-    // delay but no dropping
-    {dropRate: 0, meanDelay: 50},
+
     // Delay and drop
-    {dropRate: 0.2, meanDelay: 25},
+    {dropRate: 0.1, meanDelay: 25},
   ];
   test.each(testCases)(
     'can successfully create a ledger channel with the latency options: %o',
@@ -37,17 +34,31 @@ describe('CreateLedger', () => {
       const {peerWallets, peerEngines} = peerSetup;
       TestMessageService.setLatencyOptions(peerWallets, options);
 
-      const response = await peerWallets.a.createLedgerChannel(
+      const ledgerResponse = await peerWallets.a.createLedgerChannel(
         getWithPeersCreateChannelsArgs(peerSetup)
       );
-      const {objectiveId} = response;
-      const proposalPromise = waitForObjectiveProposals([objectiveId], peerWallets.b);
+      const {objectiveId: ledgerObjectiveId} = ledgerResponse;
+      await waitForObjectiveProposals([ledgerObjectiveId], peerWallets.b);
 
-      await proposalPromise;
-      const bResponse = await peerWallets.b.approveObjectives([objectiveId]);
-      expect(await response.done).toMatchObject({type: 'Success'});
+      const bResponse = await peerWallets.b.approveObjectives([ledgerObjectiveId]);
+      expect(await ledgerResponse.done).toMatchObject({type: 'Success'});
       await expect(bResponse).toBeObjectiveDoneType('Success');
 
+      // We should be able to fund a channel with the ledger channel we just created
+      const createResponse = await peerWallets.a.createChannels([
+        {
+          ...getWithPeersCreateChannelsArgs(peerSetup),
+          fundingStrategy: 'Ledger',
+          fundingLedgerChannelId: ledgerResponse.channelId,
+        },
+      ]);
+
+      const {objectiveId: fundedByLedgerObjectiveId} = createResponse[0];
+
+      await waitForObjectiveProposals([fundedByLedgerObjectiveId], peerWallets.b);
+      const bCreateResponse = await peerWallets.b.approveObjectives([fundedByLedgerObjectiveId]);
+      await expect(createResponse).toBeObjectiveDoneType('Success');
+      await expect(bCreateResponse).toBeObjectiveDoneType('Success');
       // Ensure that all of A's channels are running
       const {channelResults: aChannels} = await peerEngines.a.getChannels();
       for (const a of aChannels) {
