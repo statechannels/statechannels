@@ -377,7 +377,9 @@ export class SingleThreadedEngine implements EngineInterface {
         newObjective: WalletObjective;
     }>;
     createChannels(args: CreateChannelParams, numberOfChannels: number): Promise<MultipleChannelOutput>;
-    createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput>;
+    createLedgerChannel(args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>, fundingStrategy?: 'Direct' | 'Fake'): Promise<SingleChannelOutput & {
+        newObjective: WalletObjective;
+    }>;
     destroy(): Promise<void>;
     getApprovedObjectives(): Promise<WalletObjective[]>;
     getChannels(): Promise<MultipleChannelOutput>;
@@ -450,6 +452,9 @@ export class Wallet extends EventEmitter<WalletEvents> {
     // Warning: (ae-forgotten-export) The symbol "MessageServiceFactory" needs to be exported by the entry point index.d.ts
     static create(incomingConfig: IncomingWalletConfig, messageServiceFactory: MessageServiceFactory): Promise<Wallet>;
     createChannels(channelParameters: CreateChannelParams[]): Promise<ObjectiveResult[]>;
+    createLedgerChannel(channelParams: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration' | 'fundingStrategy'> & {
+        fundingStrategy: 'Direct' | 'Fake';
+    }): Promise<ObjectiveResult>;
     // (undocumented)
     destroy(): Promise<void>;
     // (undocumented)
