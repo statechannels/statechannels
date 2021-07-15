@@ -291,7 +291,7 @@ export class SingleThreadedEngine implements EngineInterface {
   ): Promise<SingleChannelOutput & {newObjective: WalletObjective}> {
     const response = EngineResponse.initialize();
 
-    await this._createChannel(
+    const channelId = await this._createChannel(
       response,
       {
         ...args,
@@ -302,8 +302,7 @@ export class SingleThreadedEngine implements EngineInterface {
       'ledger'
     );
 
-    // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
-
+    await this.takeActions([channelId], response);
     const result = response.singleChannelOutput();
 
     if (!hasNewObjective(result)) {
