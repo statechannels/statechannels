@@ -10,7 +10,7 @@ import got from 'got';
 
 import {RoleConfig} from '../types';
 
-const SCRIPT_DIR = './src/e2e-testing/scripts';
+const SCRIPT_DIR = './e2e-testing/scripts';
 
 startAll();
 
@@ -19,12 +19,12 @@ async function startAll() {
     .option('roleFile', {
       alias: 'f',
       describe: 'The path to a file containing the role information',
-      default: './src/e2e-testing/test-data/roles.json',
+      default: './e2e-testing/test-data/roles.json',
     })
     .option('loadFile', {
       alias: 'l',
       description: 'The file containing the load data to send to the nodes',
-      default: './src/e2e-testing/test-data/load-data.json',
+      default: './e2e-testing/test-data/load-data.json',
     }).argv;
 
   const ganache = execa.command(`npx ts-node ${SCRIPT_DIR}/start-ganache.ts -d off`, {all: true});

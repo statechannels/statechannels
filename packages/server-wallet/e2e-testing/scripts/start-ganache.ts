@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import _ from 'lodash';
 import ms from 'ms';
 
-import {deploy} from '../../../deployment/deploy';
+import {deploy} from '../../deployment/deploy';
 import {setupUnhandledErrorListeners} from '../utils';
 
 setupUnhandledErrorListeners();

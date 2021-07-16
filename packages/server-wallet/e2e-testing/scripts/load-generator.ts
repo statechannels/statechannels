@@ -11,7 +11,7 @@ import _ from 'lodash';
 import {BigNumber, ethers, utils} from 'ethers';
 import ms from 'ms';
 
-import {COUNTING_APP_DEFINITION} from '../../models/__test__/fixtures/app-bytecode';
+import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-bytecode';
 import {RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
 
@@ -77,7 +77,7 @@ async function createLoad() {
     .option('roleFile', {
       alias: 'f',
       describe: 'The path to a file containing the role information',
-      default: './src/e2e-testing/test-data/roles.json',
+      default: './e2e-testing/test-data/roles.json',
     })
     .option('outputFile', {
       alias: 'o',

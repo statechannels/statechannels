@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import chalk from 'chalk';
 import jsonfile from 'jsonfile';
 
-import {ARTIFACTS_DIR} from '../../jest/chain-setup';
+import {ARTIFACTS_DIR} from '../jest/chain-setup';
 
 import {RoleConfig, Peers} from './types';
 

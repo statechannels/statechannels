@@ -2,9 +2,7 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     // This prevents conflicting @types from the parents node_modules/@types
-        "typeRoots": [
-      "./node_modules/@types"
-    ],
+    "typeRoots": ["./node_modules/@types"],
     "allowSyntheticDefaultImports": true,
     "lib": ["ES2019"],
     "target": "es2019",
@@ -29,6 +27,6 @@
       "path": "../wallet-core"
     }
   ],
-  "include": ["src", "e2e-test", "deployment", "jest"],
+  "include": ["src", "deployment", "jest", "e2e-testing"],
   "exclude": ["**/node_modules", "**/.*/"]
 }

@@ -12,9 +12,9 @@ import {
   defaultTestWalletConfig,
   overwriteConfigWithDatabaseConnection,
   WalletConfig,
-} from '../../config';
-import {DBAdmin} from '../..';
-import {ARTIFACTS_DIR} from '../../../jest/chain-setup';
+} from '../../src/config';
+import {DBAdmin} from '../../src';
+import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 import {WalletLoadNode} from '../wallet-load-node';
 import {createArtifactDirectory, getRoleInfo, setupUnhandledErrorListeners} from '../utils';
 
@@ -40,7 +40,7 @@ async function setupNode(): Promise<WalletLoadNode> {
     .option('roleFile', {
       alias: 'f',
       describe: 'The path to a file containing the role information',
-      default: './src/e2e-testing/test-data/roles.json',
+      default: './e2e-testing/test-data/roles.json',
     })
     .option('dbPoolSizeMax', {
       alias: 'db',

@@ -5,10 +5,10 @@ import P from 'pino';
 import got from 'got';
 import ms from 'ms';
 
-import {WalletConfig} from '../config';
-import {ObjectiveDoneResult, UpdateChannelResult, Wallet} from '../wallet';
-import {SocketIOMessageService} from '../message-service/socket-io-message-service';
-import {createLogger} from '../logger';
+import {WalletConfig} from '../src/config';
+import {ObjectiveDoneResult, UpdateChannelResult, Wallet} from '../src/wallet';
+import {SocketIOMessageService} from '../src/message-service/socket-io-message-service';
+import {createLogger} from '../src/logger';
 
 import {
   CloseChannelStep,
