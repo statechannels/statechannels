@@ -65,7 +65,7 @@ async function createLoad() {
     .option('closeRate', {
       default: 5,
       describe:
-        'The amount of channels to be closed per a second. If this is larger than the createRate then all channels will eventually get closed.',
+        'The amount of channels to be closed per a second. If this is larger than the createRate then all channels will eventually get closed. Otherwise, some channels will remain open.',
     }).argv;
 
   const roles = (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
