@@ -69,13 +69,12 @@ async function createLoad() {
 
   const roles = (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
 
-  const jobIds = new Array<string>();
-  const steps: Step[] = [];
-
   console.log(chalk.whiteBright(`Generating a test load file to  ${outputFile}`));
   console.log(
     chalk.whiteBright(
       `Using the following options ${util.inspect({
+        outputFile,
+        roleFile,
         duration,
         createRate,
         closeRate,
@@ -90,31 +89,22 @@ async function createLoad() {
     );
   }
 
-  _.times(createRate * duration, () => {
-    // The timestamp represents when these steps should occur
-    // As we add steps we keep increasing the timestamp
-    const timestamp = generateRandomNumber(0, toMilliseconds(duration));
-    const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
+  const createSteps = generateCreateSteps(createRate, duration, roles);
+  const steps = generateCloseSteps(closeRate, duration, createWait, createSteps);
+  await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
+  console.log(chalk.greenBright(`Complete!`));
+}
 
-    // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
-    // For now we re-order the participants based on who is creating the channel.
-    const participants = generateParticipants(roles, startIndex);
-
-    // Generate a jobId that is 4 random words
-    const jobId = generateSlug(4);
-    jobIds.push(jobId);
-
-    steps.push({
-      type: 'CreateChannel',
-      jobId,
-      serverId: participants[0].participantId,
-      timestamp,
-      channelParams: generateChannelParams(roles, participants),
-    });
-  });
+function generateCloseSteps(
+  closeRate: number,
+  duration: number,
+  createWait: number,
+  previousSteps: Readonly<Step[]>
+): Step[] {
+  const steps = _.clone(previousSteps as Step[]);
   if (closeRate > 0) {
     _.times(closeRate * duration, () => {
-      const createStep = getRandomStepToClose(steps);
+      const createStep = getRandomStepToClose(previousSteps);
       if (createStep) {
         const timestamp = Math.max(
           generateRandomNumber(createStep.timestamp, toMilliseconds(duration)),
@@ -130,8 +120,37 @@ async function createLoad() {
       }
     });
   }
-  await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
-  console.log(chalk.greenBright(`Complete!`));
+  return steps;
+}
+
+function generateCreateSteps(
+  createRate: number,
+  duration: number,
+  roles: Record<string, RoleConfig>
+): Step[] {
+  const steps: Step[] = [];
+  _.times(createRate * duration, () => {
+    // The timestamp represents when these steps should occur
+    // As we add steps we keep increasing the timestamp
+    const timestamp = generateRandomNumber(0, toMilliseconds(duration));
+    const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
+
+    // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
+    // For now we re-order the participants based on who is creating the channel.
+    const participants = generateParticipants(roles, startIndex);
+
+    // Generate a jobId that is 4 random words
+    const jobId = generateSlug(4);
+
+    steps.push({
+      type: 'CreateChannel',
+      jobId,
+      serverId: participants[0].participantId,
+      timestamp,
+      channelParams: generateChannelParams(roles, participants),
+    });
+  });
+  return steps;
 }
 
 function generateRandomNumber(min: number, max: number): number {
@@ -200,8 +219,9 @@ function toMilliseconds(num: number): number {
   return num * 1000;
 }
 
-function getRandomStepToClose(steps: Step[]): Step | undefined {
+function getRandomStepToClose(steps: readonly Step[]): Step | undefined {
   const jobsAlreadyWithClose = steps.filter(s => s.type === 'CloseChannel').map(s => s.jobId);
+
   const filtered = steps
     .filter(s => s.jobId)
     .filter(s => s.type === 'CreateChannel' && !jobsAlreadyWithClose.includes(s.jobId));
