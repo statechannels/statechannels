@@ -49,21 +49,25 @@ async function createLoad() {
     })
     .option('duration', {
       alias: 'd',
+      min: 10,
       default: 30,
       describe: `The amount of time (in seconds) that the load should run for.
       This dictactes the max timestamp a step can have.`,
     })
     .option('createRate', {
       alias: 'cr',
+      min: 1,
       default: 5,
       describe: 'The number of channels that should be created per a second.',
     })
     .option('createWait', {
       default: 5,
+      min: 0,
       describe: `The minumum amount of time (in seconds) to wait for a channel be fully open, before another step is scheduled.`,
     })
     .option('closeRate', {
       default: 5,
+      min: 0,
       describe:
         'The amount of channels to be closed per a second. If this is larger than the createRate then all channels will eventually get closed. Otherwise, some channels will remain open.',
     }).argv;
