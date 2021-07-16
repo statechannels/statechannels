@@ -88,6 +88,15 @@ async function createLoad() {
     )
   );
 
+  console.log(chalk.whiteBright(`${createRate * duration} will be created.`));
+  console.log(
+    chalk.whiteBright(
+      `${
+        closeRate * duration > 0 ? closeRate * duration : 'None'
+      } of those channels will be closed.`
+    )
+  );
+
   if (closeRate >= createRate) {
     console.log(
       chalk.yellow('The close rate is larger than the create rate! All channels will end up closed')
