@@ -1,6 +1,6 @@
 import util from 'util';
 
-import exaca from 'execa';
+import execa from 'execa';
 import jsonfile from 'jsonfile';
 import waitOn from 'wait-on';
 import yargs from 'yargs';
@@ -27,16 +27,16 @@ async function startAll() {
       default: './src/e2e-testing/test-data/load-data.json',
     }).argv;
 
-  const ganache = exaca.command(`npx ts-node ${SCRIPT_DIR}/start-ganache.ts -d off`, {all: true});
+  const ganache = execa.command(`npx ts-node ${SCRIPT_DIR}/start-ganache.ts -d off`, {all: true});
   registerHandlers(ganache, 'ganache', chalk.grey);
 
-  const servers: exaca.ExecaChildProcess<string>[] = [];
+  const servers: execa.ExecaChildProcess<string>[] = [];
 
   const roles = (await jsonfile.readFile(commandArguments.roleFile)) as Record<string, RoleConfig>;
 
   for (const roleId of Object.keys(roles)) {
     const color = roleId === 'A' ? chalk.yellow : chalk.cyan;
-    const server = exaca.command(`npx ts-node ${SCRIPT_DIR}/start-load-node.ts --role ${roleId}`, {
+    const server = execa.command(`npx ts-node ${SCRIPT_DIR}/start-load-node.ts --role ${roleId}`, {
       all: true,
     });
     registerHandlers(server, roleId, color);
@@ -72,7 +72,7 @@ async function startAll() {
  * @param color
  */
 function registerHandlers(
-  childProcess: exaca.ExecaChildProcess,
+  childProcess: execa.ExecaChildProcess,
   roleId: string,
   color: chalk.Chalk
 ) {
