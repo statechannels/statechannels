@@ -96,7 +96,6 @@ async function createLoad() {
       } of those channels will be closed.`
     )
   );
-
   if (closeRate >= createRate) {
     console.log(
       chalk.yellow('The close rate is larger than the create rate! All channels will end up closed')
@@ -105,7 +104,9 @@ async function createLoad() {
 
   const createSteps = generateCreateSteps(createRate, duration, roles);
   const steps = generateCloseSteps(closeRate, duration, createWait, createSteps);
+
   await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
+
   console.log(chalk.greenBright(`Complete!`));
 }
 
@@ -115,11 +116,15 @@ function generateCloseSteps(
   createWait: number,
   previousSteps: Readonly<Step[]>
 ): Step[] {
-  const steps = _.clone(previousSteps as Step[]);
+  // TODO: We cast this so we can mutate the cloned array
+  const steps = _.clone(previousSteps) as Step[];
+
   if (closeRate > 0) {
     _.times(closeRate * duration, () => {
-      const createStep = getRandomStepToClose(previousSteps);
+      const createStep = getRandomJobToClose(previousSteps);
+
       if (createStep) {
+        // We want a close timestamp that occurs at least createWait time after the create time
         const timestamp = Math.max(
           generateRandomNumber(createStep.timestamp, toMilliseconds(duration)),
           createStep.timestamp + toMilliseconds(createWait)
@@ -144,9 +149,8 @@ function generateCreateSteps(
 ): Step[] {
   const steps: Step[] = [];
   _.times(createRate * duration, () => {
-    // The timestamp represents when these steps should occur
-    // As we add steps we keep increasing the timestamp
     const timestamp = generateRandomNumber(0, toMilliseconds(duration));
+
     const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
 
     // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
@@ -229,16 +233,26 @@ function generateChannelParams(
   };
 }
 
-function toMilliseconds(num: number): number {
-  return num * 1000;
+/**
+ * Converts seconds to milliseconds
+ */
+function toMilliseconds(seconds: number): number {
+  return seconds * 1000;
 }
 
-function getRandomStepToClose(steps: readonly Step[]): Step | undefined {
+/**
+ * Gets a random job that doesn't already have a close step scheduled
+ */
+function getRandomJobToClose(
+  steps: readonly Step[]
+): Pick<Step, 'jobId' | 'timestamp' | 'serverId'> | undefined {
   const jobsAlreadyWithClose = steps.filter(s => s.type === 'CloseChannel').map(s => s.jobId);
 
-  const filtered = steps
-    .filter(s => s.jobId)
-    .filter(s => s.type === 'CreateChannel' && !jobsAlreadyWithClose.includes(s.jobId));
+  // We only want jobs that don't have a close channel step yet
+  const filtered = steps.filter(
+    s => s.type === 'CreateChannel' && !jobsAlreadyWithClose.includes(s.jobId)
+  );
+
   const index = generateRandomNumber(0, filtered.length - 1);
   return filtered[index];
 }
