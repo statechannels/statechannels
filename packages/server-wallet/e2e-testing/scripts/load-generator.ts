@@ -28,9 +28,10 @@ async function createLoad() {
     prettyOutput,
     roleFile,
     outputFile,
-    createWait,
+
     closeRate,
     duration,
+    closeDelay,
   } = await yargs(hideBin(process.argv))
     .option('prettyOutput', {
       default: true,
@@ -60,10 +61,10 @@ async function createLoad() {
       default: 5,
       describe: 'The number of channels that should be created per a second.',
     })
-    .option('createWait', {
+    .option('closeDelay', {
       default: 5,
       min: 0,
-      describe: `The minumum amount of time (in seconds) to wait for a channel be fully open, before another step is scheduled.`,
+      describe: `The minumum amount of time (in seconds) to wait before closing a channel.`,
     })
     .option('closeRate', {
       default: 5,
@@ -83,7 +84,7 @@ async function createLoad() {
         duration,
         createRate,
         closeRate,
-        createWait,
+        closeDelay,
       })}`
     )
   );
@@ -103,7 +104,7 @@ async function createLoad() {
   }
 
   const createSteps = generateCreateSteps(createRate, duration, roles);
-  const steps = generateCloseSteps(closeRate, duration, createWait, createSteps);
+  const steps = generateCloseSteps(closeRate, duration, closeDelay, createSteps);
 
   await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
 
@@ -113,7 +114,7 @@ async function createLoad() {
 function generateCloseSteps(
   closeRate: number,
   duration: number,
-  createWait: number,
+  closeDelay: number,
   previousSteps: Readonly<Step[]>
 ): Step[] {
   // TODO: We cast this so we can mutate the cloned array
@@ -124,10 +125,10 @@ function generateCloseSteps(
       const createStep = getRandomJobToClose(previousSteps);
 
       if (createStep) {
-        // We want a close timestamp that occurs at least createWait time after the create time
+        // We want a close timestamp that occurs at least closeDelay time after the create time
         const timestamp = Math.max(
           generateRandomNumber(createStep.timestamp, toMilliseconds(duration)),
-          createStep.timestamp + toMilliseconds(createWait)
+          createStep.timestamp + toMilliseconds(closeDelay)
         );
 
         steps.push({
