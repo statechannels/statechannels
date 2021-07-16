@@ -35,36 +35,37 @@ async function createLoad() {
     .option('prettyOutput', {
       default: true,
       type: 'boolean',
-      describe: 'Whether the output is formatted nicely with spaces',
+      describe: 'Whether the output is formatted nicely with spaces.',
+    })
+    .option('outputFile', {
+      alias: 'o',
+      description: 'The file to write the generated load to.',
+      default: 'temp/test_load.json',
     })
     .option('roleFile', {
       alias: 'f',
-      describe: 'The path to a file containing the role information',
+      describe: 'The path to a file containing the role information.',
       default: './e2e-testing/test-data/roles.json',
     })
     .option('duration', {
       alias: 'd',
       default: 30,
-      describe: 'The  amount of time (in seconds) that the load should run for.',
+      describe: `The amount of time (in seconds) that the load should run for.
+      This dictactes the max timestamp a step can have.`,
     })
     .option('createRate', {
       alias: 'cr',
       default: 5,
-      describe: 'The amount of channels that should be created per a sseonc.',
+      describe: 'The number of channels that should be created per a second.',
     })
     .option('createWait', {
       default: 5,
-      describe:
-        'The minumum amount of time to wait for a channel be fully open, before attempting another step',
+      describe: `The minumum amount of time (in seconds) to wait for a channel be fully open, before another step is scheduled.`,
     })
     .option('closeRate', {
       default: 5,
-      describe: 'The amount of channels to be closed per a second.',
-    })
-    .option('outputFile', {
-      alias: 'o',
-      description: 'The file to write the generated load to',
-      default: 'temp/test_load.json',
+      describe:
+        'The amount of channels to be closed per a second. If this is larger than the createRate then all channels will eventually get closed.',
     }).argv;
 
   const roles = (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
