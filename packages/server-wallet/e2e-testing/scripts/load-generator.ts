@@ -1,7 +1,7 @@
 import util from 'util';
 
 import {CreateChannelParams, Participant} from '@statechannels/client-api-schema';
-import {hexlify, hexZeroPad} from 'ethers/lib/utils';
+import {hexZeroPad} from 'ethers/lib/utils';
 import yargs from 'yargs';
 import {hideBin} from 'yargs/helpers';
 import * as jsonfile from 'jsonfile';
@@ -24,24 +24,14 @@ const ETH_ASSET_HOLDER_ADDRESS = '0x9eD274314f0fB37837346C425D3cF28d89ca9599';
 
 async function createLoad() {
   const {
-    closeChannels,
-    createDuration,
     createRate,
     prettyOutput,
     roleFile,
-    updateRate,
-    updateInterval,
     outputFile,
-    closeDuration,
-    updateBuffer,
-    closeBuffer,
+    createWait,
+    closeRate,
+    duration,
   } = await yargs(hideBin(process.argv))
-    .option('closeChannels', {
-      alias: 'c',
-      default: true,
-      type: 'boolean',
-      describe: 'Whether channels are closed',
-    })
     .option('prettyOutput', {
       default: true,
       type: 'boolean',
@@ -52,45 +42,25 @@ async function createLoad() {
       describe: 'The path to a file containing the role information',
       default: './e2e-testing/test-data/roles.json',
     })
+    .option('duration', {
+      alias: 'd',
+      default: 30,
+      describe: 'The  amount of time (in seconds) that the load should run for.',
+    })
     .option('createRate', {
       alias: 'cr',
       default: 5,
-      describe: 'The amount of channels that should be created per second',
+      describe: 'The amount of channels that should be created per a sseonc.',
     })
-
-    .option('createPeriod', {
-      alias: 'cd',
+    .option('createWait', {
       default: 5,
-      describe: 'The amount of time (in seconds) that channels will be created for',
-    })
-    .option('updateRate', {
-      alias: 'ur',
-      default: 2,
-      describe: 'The amount of channel updates that should be done per second',
-    })
-
-    .option('updateBuffer', {
-      default: 10,
       describe:
-        'The minumum amount of time (in seconds) to wait for a channel to be created before updating',
+        'The minumum amount of time to wait for a channel be fully open, before attempting another step',
     })
-    .option('closeBuffer', {
-      default: 1,
-      describe:
-        'The minumum amount of time (in seconds) to wait for updates to complete before attempting to close the channel',
-    })
-    .option('updateInterval', {
-      alias: 'ud',
-      default: 2,
-      describe: 'The amount of time (in seconds) that channels will be created for',
-    })
-
-    .option('closeDuration', {
-      alias: 'cld',
+    .option('closeRate', {
       default: 5,
-      describe: 'The amount of time (in seconds) that channels will be created for',
+      describe: 'The amount of channels to be closed per a second.',
     })
-
     .option('outputFile', {
       alias: 'o',
       description: 'The file to write the generated load to',
@@ -106,23 +76,24 @@ async function createLoad() {
   console.log(
     chalk.whiteBright(
       `Using the following options ${util.inspect({
+        duration,
         createRate,
-        createDuration,
-        updateRate,
-        updateInterval,
-        closeDuration,
-        prettyOutput,
-        closeChannels,
-        updateBuffer,
-        closeBuffer,
+        closeRate,
+        createWait,
       })}`
     )
   );
 
-  _.times(createRate * createDuration, () => {
+  if (closeRate >= createRate) {
+    console.log(
+      chalk.yellow('The close rate is larger than the create rate! All channels will end up closed')
+    );
+  }
+
+  _.times(createRate * duration, () => {
     // The timestamp represents when these steps should occur
     // As we add steps we keep increasing the timestamp
-    let timestamp = generateRandomNumber(0, toMilliseconds(createDuration));
+    const timestamp = generateRandomNumber(0, toMilliseconds(duration));
     const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
 
     // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
@@ -140,44 +111,25 @@ async function createLoad() {
       timestamp,
       channelParams: generateChannelParams(roles, participants),
     });
-
-    if (updateRate !== 0) {
-      // We want at least updateBuffer seconds since the channel creation
-      timestamp += Math.max(
-        generateRandomNumber(0, toMilliseconds(updateInterval)),
-        timestamp + toMilliseconds(updateBuffer)
-      );
-
-      _.times(updateRate * updateInterval, async updateIndex => {
-        steps.push({
-          type: 'UpdateChannel',
-          serverId: participants[updateIndex % participants.length].participantId,
-          jobId,
-          timestamp,
-          updateParams: {
-            appData: hexZeroPad(hexlify(updateIndex), 32),
-            allocations: generateChannelParams(roles, participants).allocations,
-          },
-        });
-        timestamp += generateRandomNumber(0, toMilliseconds(updateInterval));
-      });
-    }
-
-    if (closeChannels) {
-      timestamp += Math.max(
-        generateRandomNumber(0, toMilliseconds(closeDuration)),
-        timestamp + toMilliseconds(closeBuffer)
-      );
-
-      steps.push({
-        type: 'CloseChannel',
-        jobId,
-        serverId: participants[0].participantId,
-        timestamp,
-      });
-    }
   });
+  if (closeRate > 0) {
+    _.times(closeRate * duration, () => {
+      const createStep = getRandomStepToClose(steps);
+      if (createStep) {
+        const timestamp = Math.max(
+          generateRandomNumber(createStep.timestamp, toMilliseconds(duration)),
+          createStep.timestamp + toMilliseconds(createWait)
+        );
 
+        steps.push({
+          type: 'CloseChannel',
+          jobId: createStep.jobId,
+          serverId: createStep.serverId,
+          timestamp,
+        });
+      }
+    });
+  }
   await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
   console.log(chalk.greenBright(`Complete!`));
 }
@@ -246,4 +198,13 @@ function generateChannelParams(
 
 function toMilliseconds(num: number): number {
   return num * 1000;
+}
+
+function getRandomStepToClose(steps: Step[]): Step | undefined {
+  const jobsAlreadyWithClose = steps.filter(s => s.type === 'CloseChannel').map(s => s.jobId);
+  const filtered = steps
+    .filter(s => s.jobId)
+    .filter(s => s.type === 'CreateChannel' && !jobsAlreadyWithClose.includes(s.jobId));
+  const index = generateRandomNumber(0, filtered.length - 1);
+  return filtered[index];
 }

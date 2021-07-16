@@ -1,31 +1,31 @@
 [
  {
   "type": "CreateChannel",
-  "jobId": "icy-polite-victorious-teenager",
-  "serverId": "B",
-  "timestamp": 3525,
+  "jobId": "cuddly-raspy-whining-pillow",
+  "serverId": "A",
+  "timestamp": 7806,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
-    },
     {
      "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
      "participantId": "A",
      "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       }
      ],
@@ -37,136 +37,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "icy-polite-victorious-teenager",
-  "timestamp": 17050,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "icy-polite-victorious-teenager",
-  "timestamp": 17521,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "icy-polite-victorious-teenager",
-  "timestamp": 18339,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "icy-polite-victorious-teenager",
-  "timestamp": 19896,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "icy-polite-victorious-teenager",
-  "serverId": "B",
-  "timestamp": 44590
  },
  {
   "type": "CreateChannel",
-  "jobId": "thousands-noisy-most-cricket",
-  "serverId": "A",
-  "timestamp": 4747,
+  "jobId": "tangy-panicky-little-advertisement",
+  "serverId": "B",
+  "timestamp": 4128,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -178,136 +76,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "thousands-noisy-most-cricket",
-  "timestamp": 19494,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "thousands-noisy-most-cricket",
-  "timestamp": 20604,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "thousands-noisy-most-cricket",
-  "timestamp": 21134,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "thousands-noisy-most-cricket",
-  "timestamp": 22247,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "thousands-noisy-most-cricket",
-  "serverId": "A",
-  "timestamp": 47832
  },
  {
   "type": "CreateChannel",
-  "jobId": "flabby-deafening-deafening-helicopter",
-  "serverId": "B",
-  "timestamp": 2200,
+  "jobId": "juicy-lazy-rotten-jewellery",
+  "serverId": "A",
+  "timestamp": 248,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
-    },
     {
      "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
      "participantId": "A",
      "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       }
      ],
@@ -319,136 +115,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "flabby-deafening-deafening-helicopter",
-  "timestamp": 14400,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "flabby-deafening-deafening-helicopter",
-  "timestamp": 15755,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "flabby-deafening-deafening-helicopter",
-  "timestamp": 16723,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "flabby-deafening-deafening-helicopter",
-  "timestamp": 17215,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "flabby-deafening-deafening-helicopter",
-  "serverId": "B",
-  "timestamp": 38786
  },
  {
   "type": "CreateChannel",
-  "jobId": "bitter-plump-handsome-computer",
-  "serverId": "A",
-  "timestamp": 1846,
+  "jobId": "screeching-old-clever-window",
+  "serverId": "B",
+  "timestamp": 5976,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -460,114 +154,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "bitter-plump-handsome-computer",
-  "timestamp": 13692,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "bitter-plump-handsome-computer",
-  "timestamp": 13915,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "bitter-plump-handsome-computer",
-  "timestamp": 14290,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "bitter-plump-handsome-computer",
-  "timestamp": 15076,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "bitter-plump-handsome-computer",
-  "serverId": "A",
-  "timestamp": 31438
  },
  {
   "type": "CreateChannel",
-  "jobId": "lively-curved-clever-battery",
+  "jobId": "steep-dirty-numerous-dress",
   "serverId": "B",
-  "timestamp": 3963,
+  "timestamp": 5785,
   "channelParams": {
    "participants": [
     {
@@ -601,136 +193,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "lively-curved-clever-battery",
-  "timestamp": 17926,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "lively-curved-clever-battery",
-  "timestamp": 19333,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "lively-curved-clever-battery",
-  "timestamp": 20394,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "lively-curved-clever-battery",
-  "timestamp": 22365,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "lively-curved-clever-battery",
-  "serverId": "B",
-  "timestamp": 48476
  },
  {
   "type": "CreateChannel",
-  "jobId": "inexpensive-orange-yummy-soccer",
-  "serverId": "A",
-  "timestamp": 1783,
+  "jobId": "creamy-fit-rich-dream",
+  "serverId": "B",
+  "timestamp": 9804,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -742,136 +232,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "inexpensive-orange-yummy-soccer",
-  "timestamp": 13566,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "inexpensive-orange-yummy-soccer",
-  "timestamp": 13988,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "inexpensive-orange-yummy-soccer",
-  "timestamp": 15392,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "inexpensive-orange-yummy-soccer",
-  "timestamp": 15705,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "inexpensive-orange-yummy-soccer",
-  "serverId": "A",
-  "timestamp": 35000
  },
  {
   "type": "CreateChannel",
-  "jobId": "zealous-easy-uninterested-energy",
-  "serverId": "A",
-  "timestamp": 2585,
+  "jobId": "cuddly-clean-unkempt-restaurant",
+  "serverId": "B",
+  "timestamp": 521,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -883,136 +271,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "zealous-easy-uninterested-energy",
-  "timestamp": 15170,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "zealous-easy-uninterested-energy",
-  "timestamp": 15312,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "zealous-easy-uninterested-energy",
-  "timestamp": 16064,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "zealous-easy-uninterested-energy",
-  "timestamp": 17896,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "zealous-easy-uninterested-energy",
-  "serverId": "A",
-  "timestamp": 40270
  },
  {
   "type": "CreateChannel",
-  "jobId": "petite-round-microscopic-energy",
-  "serverId": "A",
-  "timestamp": 1392,
+  "jobId": "plain-wide-faithful-bear",
+  "serverId": "B",
+  "timestamp": 5401,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -1024,114 +310,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "petite-round-microscopic-energy",
-  "timestamp": 12784,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "petite-round-microscopic-energy",
-  "timestamp": 13348,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "petite-round-microscopic-energy",
-  "timestamp": 15024,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "petite-round-microscopic-energy",
-  "timestamp": 16939,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "petite-round-microscopic-energy",
-  "serverId": "A",
-  "timestamp": 38226
  },
  {
   "type": "CreateChannel",
-  "jobId": "squeaking-scary-silly-lunch",
+  "jobId": "delightful-rancid-immense-quill",
   "serverId": "B",
-  "timestamp": 2357,
+  "timestamp": 5562,
   "channelParams": {
    "participants": [
     {
@@ -1165,114 +349,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "squeaking-scary-silly-lunch",
-  "timestamp": 14714,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "squeaking-scary-silly-lunch",
-  "timestamp": 14977,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "squeaking-scary-silly-lunch",
-  "timestamp": 16483,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "squeaking-scary-silly-lunch",
-  "timestamp": 16959,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "squeaking-scary-silly-lunch",
-  "serverId": "B",
-  "timestamp": 37090
  },
  {
   "type": "CreateChannel",
-  "jobId": "inexpensive-crooked-petite-pencil",
+  "jobId": "enough-squeaking-powerful-uganda",
   "serverId": "A",
-  "timestamp": 4334,
+  "timestamp": 6655,
   "channelParams": {
    "participants": [
     {
@@ -1306,114 +388,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "inexpensive-crooked-petite-pencil",
-  "timestamp": 18668,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "inexpensive-crooked-petite-pencil",
-  "timestamp": 19896,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "inexpensive-crooked-petite-pencil",
-  "timestamp": 21655,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "inexpensive-crooked-petite-pencil",
-  "timestamp": 22997,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "inexpensive-crooked-petite-pencil",
-  "serverId": "A",
-  "timestamp": 49330
  },
  {
   "type": "CreateChannel",
-  "jobId": "quaint-crooked-fluffy-needle",
+  "jobId": "young-careful-strong-night",
   "serverId": "A",
-  "timestamp": 4342,
+  "timestamp": 6854,
   "channelParams": {
    "participants": [
     {
@@ -1447,114 +427,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "quaint-crooked-fluffy-needle",
-  "timestamp": 18684,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "quaint-crooked-fluffy-needle",
-  "timestamp": 18969,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "quaint-crooked-fluffy-needle",
-  "timestamp": 20736,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "quaint-crooked-fluffy-needle",
-  "timestamp": 21347,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "quaint-crooked-fluffy-needle",
-  "serverId": "A",
-  "timestamp": 47244
  },
  {
   "type": "CreateChannel",
-  "jobId": "lemon-fluffy-large-branch",
+  "jobId": "sharp-short-uneven-vase",
   "serverId": "B",
-  "timestamp": 2619,
+  "timestamp": 3919,
   "channelParams": {
    "participants": [
     {
@@ -1588,136 +466,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "lemon-fluffy-large-branch",
-  "timestamp": 15238,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "lemon-fluffy-large-branch",
-  "timestamp": 15630,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "lemon-fluffy-large-branch",
-  "timestamp": 16761,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "lemon-fluffy-large-branch",
-  "timestamp": 17862,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "lemon-fluffy-large-branch",
-  "serverId": "B",
-  "timestamp": 38424
  },
  {
   "type": "CreateChannel",
-  "jobId": "big-bewildered-stocky-grandmother",
-  "serverId": "B",
-  "timestamp": 1290,
+  "jobId": "ambitious-strong-high-house",
+  "serverId": "A",
+  "timestamp": 7514,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
-    },
     {
      "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
      "participantId": "A",
      "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       }
      ],
@@ -1729,136 +505,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "big-bewildered-stocky-grandmother",
-  "timestamp": 12580,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "big-bewildered-stocky-grandmother",
-  "timestamp": 14380,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "big-bewildered-stocky-grandmother",
-  "timestamp": 15353,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "big-bewildered-stocky-grandmother",
-  "timestamp": 16453,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "big-bewildered-stocky-grandmother",
-  "serverId": "B",
-  "timestamp": 36230
  },
  {
   "type": "CreateChannel",
-  "jobId": "greasy-cool-freezing-breakfast",
-  "serverId": "A",
-  "timestamp": 1005,
+  "jobId": "cold-glamorous-high-ghost",
+  "serverId": "B",
+  "timestamp": 5834,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -1870,114 +544,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "greasy-cool-freezing-breakfast",
-  "timestamp": 12010,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "greasy-cool-freezing-breakfast",
-  "timestamp": 13664,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "greasy-cool-freezing-breakfast",
-  "timestamp": 14314,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "greasy-cool-freezing-breakfast",
-  "timestamp": 14406,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "greasy-cool-freezing-breakfast",
-  "serverId": "A",
-  "timestamp": 33594
  },
  {
   "type": "CreateChannel",
-  "jobId": "plain-long-deafening-lion",
+  "jobId": "wet-crooked-important-parrot",
   "serverId": "A",
-  "timestamp": 1817,
+  "timestamp": 4729,
   "channelParams": {
    "participants": [
     {
@@ -2011,114 +583,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "plain-long-deafening-lion",
-  "timestamp": 13634,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "plain-long-deafening-lion",
-  "timestamp": 14021,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "plain-long-deafening-lion",
-  "timestamp": 14146,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "plain-long-deafening-lion",
-  "timestamp": 15702,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "plain-long-deafening-lion",
-  "serverId": "A",
-  "timestamp": 35890
  },
  {
   "type": "CreateChannel",
-  "jobId": "nice-scary-crooked-breakfast",
+  "jobId": "crashing-vast-odd-football",
   "serverId": "A",
-  "timestamp": 2602,
+  "timestamp": 1365,
   "channelParams": {
    "participants": [
     {
@@ -2152,114 +622,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "nice-scary-crooked-breakfast",
-  "timestamp": 15204,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "nice-scary-crooked-breakfast",
-  "timestamp": 16595,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "nice-scary-crooked-breakfast",
-  "timestamp": 16799,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "nice-scary-crooked-breakfast",
-  "timestamp": 17332,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "nice-scary-crooked-breakfast",
-  "serverId": "A",
-  "timestamp": 36126
  },
  {
   "type": "CreateChannel",
-  "jobId": "angry-muscular-modern-flag",
+  "jobId": "short-little-stocky-monkey",
   "serverId": "A",
-  "timestamp": 813,
+  "timestamp": 2620,
   "channelParams": {
    "participants": [
     {
@@ -2293,114 +661,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "angry-muscular-modern-flag",
-  "timestamp": 11626,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "angry-muscular-modern-flag",
-  "timestamp": 11688,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "angry-muscular-modern-flag",
-  "timestamp": 12572,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "angry-muscular-modern-flag",
-  "timestamp": 13422,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "angry-muscular-modern-flag",
-  "serverId": "A",
-  "timestamp": 31526
  },
  {
   "type": "CreateChannel",
-  "jobId": "ambitious-substantial-silly-oil",
+  "jobId": "panicky-sticky-straight-window",
   "serverId": "A",
-  "timestamp": 2572,
+  "timestamp": 4372,
   "channelParams": {
    "participants": [
     {
@@ -2434,136 +700,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "ambitious-substantial-silly-oil",
-  "timestamp": 15144,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "ambitious-substantial-silly-oil",
-  "timestamp": 15278,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "ambitious-substantial-silly-oil",
-  "timestamp": 16037,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "ambitious-substantial-silly-oil",
-  "timestamp": 17028,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "ambitious-substantial-silly-oil",
-  "serverId": "A",
-  "timestamp": 36148
  },
  {
   "type": "CreateChannel",
-  "jobId": "wet-jealous-scrawny-car",
-  "serverId": "B",
-  "timestamp": 194,
+  "jobId": "incalculable-thoughtless-square-advertisement",
+  "serverId": "A",
+  "timestamp": 6434,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
-    },
     {
      "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
      "participantId": "A",
      "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       }
      ],
@@ -2575,136 +739,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "wet-jealous-scrawny-car",
-  "timestamp": 10388,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "wet-jealous-scrawny-car",
-  "timestamp": 12037,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "wet-jealous-scrawny-car",
-  "timestamp": 13291,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "wet-jealous-scrawny-car",
-  "timestamp": 15058,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "wet-jealous-scrawny-car",
-  "serverId": "B",
-  "timestamp": 33270
  },
  {
   "type": "CreateChannel",
-  "jobId": "gray-blue-prickly-continent",
-  "serverId": "A",
-  "timestamp": 2770,
+  "jobId": "uninterested-some-jealous-garden",
+  "serverId": "B",
+  "timestamp": 7085,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -2716,136 +778,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "gray-blue-prickly-continent",
-  "timestamp": 15540,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "gray-blue-prickly-continent",
-  "timestamp": 16608,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "gray-blue-prickly-continent",
-  "timestamp": 17966,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "gray-blue-prickly-continent",
-  "timestamp": 19215,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "gray-blue-prickly-continent",
-  "serverId": "A",
-  "timestamp": 40824
  },
  {
   "type": "CreateChannel",
-  "jobId": "shrilling-tasteless-freezing-sweden",
-  "serverId": "A",
-  "timestamp": 4877,
+  "jobId": "raspy-stocky-black-death",
+  "serverId": "B",
+  "timestamp": 2576,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -2857,114 +817,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "shrilling-tasteless-freezing-sweden",
-  "timestamp": 19754,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "shrilling-tasteless-freezing-sweden",
-  "timestamp": 21179,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "shrilling-tasteless-freezing-sweden",
-  "timestamp": 23054,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "shrilling-tasteless-freezing-sweden",
-  "timestamp": 23812,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "shrilling-tasteless-freezing-sweden",
-  "serverId": "A",
-  "timestamp": 51400
  },
  {
   "type": "CreateChannel",
-  "jobId": "gifted-mysterious-noisy-oyster",
+  "jobId": "scrawny-mango-witty-iron",
   "serverId": "A",
-  "timestamp": 2066,
+  "timestamp": 6293,
   "channelParams": {
    "participants": [
     {
@@ -2998,114 +856,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "gifted-mysterious-noisy-oyster",
-  "timestamp": 14132,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "gifted-mysterious-noisy-oyster",
-  "timestamp": 15434,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "gifted-mysterious-noisy-oyster",
-  "timestamp": 16789,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "gifted-mysterious-noisy-oyster",
-  "timestamp": 17916,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "gifted-mysterious-noisy-oyster",
-  "serverId": "A",
-  "timestamp": 37830
  },
  {
   "type": "CreateChannel",
-  "jobId": "puny-bewildered-raspy-businessperson",
+  "jobId": "glamorous-helpless-few-boy",
   "serverId": "A",
-  "timestamp": 2184,
+  "timestamp": 6495,
   "channelParams": {
    "participants": [
     {
@@ -3139,136 +895,34 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "puny-bewildered-raspy-businessperson",
-  "timestamp": 14368,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "puny-bewildered-raspy-businessperson",
-  "timestamp": 16240,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "puny-bewildered-raspy-businessperson",
-  "timestamp": 17713,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "puny-bewildered-raspy-businessperson",
-  "timestamp": 18368,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "puny-bewildered-raspy-businessperson",
-  "serverId": "A",
-  "timestamp": 40894
  },
  {
   "type": "CreateChannel",
-  "jobId": "scruffy-teeny-wailing-library",
-  "serverId": "A",
-  "timestamp": 2497,
+  "jobId": "shrilling-teeny-black-egypt",
+  "serverId": "B",
+  "timestamp": 2999,
   "channelParams": {
    "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
-    },
     {
      "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
      "participantId": "B",
      "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
     }
    ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       }
      ],
@@ -3280,114 +934,12 @@
    "fundingStrategy": "Direct",
    "challengeDuration": 86400
   }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "scruffy-teeny-wailing-library",
-  "timestamp": 14994,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "scruffy-teeny-wailing-library",
-  "timestamp": 15100,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "scruffy-teeny-wailing-library",
-  "timestamp": 16954,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "scruffy-teeny-wailing-library",
-  "timestamp": 18361,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
-  }
- },
- {
-  "type": "CloseChannel",
-  "jobId": "scruffy-teeny-wailing-library",
-  "serverId": "A",
-  "timestamp": 39804
  },
  {
   "type": "CreateChannel",
-  "jobId": "high-billions-great-kangaroo",
+  "jobId": "few-acidic-fresh-room",
   "serverId": "B",
-  "timestamp": 581,
+  "timestamp": 5217,
   "channelParams": {
    "participants": [
     {
@@ -3423,60 +975,140 @@
   }
  },
  {
-  "type": "UpdateChannel",
-  "serverId": "B",
-  "jobId": "high-billions-great-kangaroo",
-  "timestamp": 11162,
-  "updateParams": {
+  "type": "CreateChannel",
+  "jobId": "numerous-tart-rotten-library",
+  "serverId": "A",
+  "timestamp": 8599,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
    "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ]
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
   }
  },
  {
-  "type": "UpdateChannel",
+  "type": "CreateChannel",
+  "jobId": "eager-late-sticky-apple",
   "serverId": "A",
-  "jobId": "high-billions-great-kangaroo",
-  "timestamp": 12636,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000001",
+  "timestamp": 8957,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
    "allocations": [
     {
      "allocationItems": [
       {
-       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
        "amount": "0x05"
       },
       {
-       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
        "amount": "0x05"
       }
      ],
      "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
     }
-   ]
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
   }
  },
  {
-  "type": "UpdateChannel",
+  "type": "CreateChannel",
+  "jobId": "howling-muscular-zealous-uganda",
+  "serverId": "A",
+  "timestamp": 5258,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "damp-refined-mushy-raincoat",
   "serverId": "B",
-  "jobId": "high-billions-great-kangaroo",
-  "timestamp": 13470,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000002",
+  "timestamp": 9944,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
    "allocations": [
     {
      "allocationItems": [
@@ -3491,16 +1123,31 @@
      ],
      "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
     }
-   ]
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
   }
  },
  {
-  "type": "UpdateChannel",
-  "serverId": "A",
-  "jobId": "high-billions-great-kangaroo",
-  "timestamp": 13493,
-  "updateParams": {
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000003",
+  "type": "CreateChannel",
+  "jobId": "brave-grumpy-unimportant-flag",
+  "serverId": "B",
+  "timestamp": 6902,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
    "allocations": [
     {
      "allocationItems": [
@@ -3515,13 +1162,1091 @@
      ],
      "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
     }
-   ]
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "short-thousands-quick-garden",
+  "serverId": "A",
+  "timestamp": 9211,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "fat-small-slow-window",
+  "serverId": "A",
+  "timestamp": 9173,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tasty-shrilling-scrawny-lamp",
+  "serverId": "A",
+  "timestamp": 5518,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "gentle-fat-nice-glass",
+  "serverId": "B",
+  "timestamp": 7513,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sparse-clean-lazy-hydrogen",
+  "serverId": "B",
+  "timestamp": 3359,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "careful-crooked-clever-microphone",
+  "serverId": "B",
+  "timestamp": 7773,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "dry-kind-noisy-television",
+  "serverId": "A",
+  "timestamp": 9402,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "rough-better-ripe-pencil",
+  "serverId": "A",
+  "timestamp": 2823,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "chubby-big-breezy-table",
+  "serverId": "A",
+  "timestamp": 5498,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "black-rancid-shrilling-jewellery",
+  "serverId": "B",
+  "timestamp": 8586,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tinkling-teeny-high-lighter",
+  "serverId": "A",
+  "timestamp": 6354,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "billions-faint-short-garden",
+  "serverId": "B",
+  "timestamp": 9151,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "orange-scruffy-brief-shoe",
+  "serverId": "A",
+  "timestamp": 6333,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "scarce-few-petite-minister",
+  "serverId": "B",
+  "timestamp": 7331,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "thankful-most-sharp-iron",
+  "serverId": "B",
+  "timestamp": 999,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "mango-damaged-clumsy-dream",
+  "serverId": "B",
+  "timestamp": 6180,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "thundering-broad-square-market",
+  "serverId": "A",
+  "timestamp": 5173,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "fresh-nervous-grumpy-xylophone",
+  "serverId": "B",
+  "timestamp": 1582,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "zealous-stocky-better-breakfast",
+  "serverId": "B",
+  "timestamp": 9464,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "long-eager-important-pencil",
+  "serverId": "B",
+  "timestamp": 6325,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000d4Fa489Eacc52BA59438993f37Be9fcC20090E39",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000D9995BAE12FEe327256FFec1e3184d492bD94C31",
+       "amount": "0x05"
+      }
+     ],
+     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "fundingStrategy": "Direct",
+   "challengeDuration": 86400
   }
  },
  {
   "type": "CloseChannel",
-  "jobId": "high-billions-great-kangaroo",
+  "jobId": "sharp-short-uneven-vase",
   "serverId": "B",
-  "timestamp": 28370
+  "timestamp": 9357
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "mango-damaged-clumsy-dream",
+  "serverId": "B",
+  "timestamp": 7566
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "cuddly-raspy-whining-pillow",
+  "serverId": "A",
+  "timestamp": 9342
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "thankful-most-sharp-iron",
+  "serverId": "B",
+  "timestamp": 5672
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "fat-small-slow-window",
+  "serverId": "A",
+  "timestamp": 10173
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "dry-kind-noisy-television",
+  "serverId": "A",
+  "timestamp": 10402
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "gentle-fat-nice-glass",
+  "serverId": "B",
+  "timestamp": 9804
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "glamorous-helpless-few-boy",
+  "serverId": "A",
+  "timestamp": 7552
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "howling-muscular-zealous-uganda",
+  "serverId": "A",
+  "timestamp": 7095
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "zealous-stocky-better-breakfast",
+  "serverId": "B",
+  "timestamp": 10464
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "orange-scruffy-brief-shoe",
+  "serverId": "A",
+  "timestamp": 9590
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "wet-crooked-important-parrot",
+  "serverId": "A",
+  "timestamp": 9928
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "incalculable-thoughtless-square-advertisement",
+  "serverId": "A",
+  "timestamp": 7434
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "scarce-few-petite-minister",
+  "serverId": "B",
+  "timestamp": 8331
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "raspy-stocky-black-death",
+  "serverId": "B",
+  "timestamp": 7297
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "enough-squeaking-powerful-uganda",
+  "serverId": "A",
+  "timestamp": 9490
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "thundering-broad-square-market",
+  "serverId": "A",
+  "timestamp": 6173
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "cuddly-clean-unkempt-restaurant",
+  "serverId": "B",
+  "timestamp": 3077
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "tangy-panicky-little-advertisement",
+  "serverId": "B",
+  "timestamp": 5128
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "numerous-tart-rotten-library",
+  "serverId": "A",
+  "timestamp": 9599
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "damp-refined-mushy-raincoat",
+  "serverId": "B",
+  "timestamp": 10944
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "panicky-sticky-straight-window",
+  "serverId": "A",
+  "timestamp": 8234
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "steep-dirty-numerous-dress",
+  "serverId": "B",
+  "timestamp": 7882
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "delightful-rancid-immense-quill",
+  "serverId": "B",
+  "timestamp": 9633
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "few-acidic-fresh-room",
+  "serverId": "B",
+  "timestamp": 6217
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "scrawny-mango-witty-iron",
+  "serverId": "A",
+  "timestamp": 9699
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "tasty-shrilling-scrawny-lamp",
+  "serverId": "A",
+  "timestamp": 6518
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "shrilling-teeny-black-egypt",
+  "serverId": "B",
+  "timestamp": 7073
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "short-little-stocky-monkey",
+  "serverId": "A",
+  "timestamp": 5019
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "careful-crooked-clever-microphone",
+  "serverId": "B",
+  "timestamp": 8773
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "uninterested-some-jealous-garden",
+  "serverId": "B",
+  "timestamp": 8085
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "creamy-fit-rich-dream",
+  "serverId": "B",
+  "timestamp": 10804
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "rough-better-ripe-pencil",
+  "serverId": "A",
+  "timestamp": 4264
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "sparse-clean-lazy-hydrogen",
+  "serverId": "B",
+  "timestamp": 9808
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "black-rancid-shrilling-jewellery",
+  "serverId": "B",
+  "timestamp": 9586
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "crashing-vast-odd-football",
+  "serverId": "A",
+  "timestamp": 3012
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "juicy-lazy-rotten-jewellery",
+  "serverId": "A",
+  "timestamp": 8518
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "tinkling-teeny-high-lighter",
+  "serverId": "A",
+  "timestamp": 8374
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "fresh-nervous-grumpy-xylophone",
+  "serverId": "B",
+  "timestamp": 2582
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "screeching-old-clever-window",
+  "serverId": "B",
+  "timestamp": 9191
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "eager-late-sticky-apple",
+  "serverId": "A",
+  "timestamp": 9992
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "short-thousands-quick-garden",
+  "serverId": "A",
+  "timestamp": 10211
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "cold-glamorous-high-ghost",
+  "serverId": "B",
+  "timestamp": 7839
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "young-careful-strong-night",
+  "serverId": "A",
+  "timestamp": 9237
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "long-eager-important-pencil",
+  "serverId": "B",
+  "timestamp": 9347
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "chubby-big-breezy-table",
+  "serverId": "A",
+  "timestamp": 8799
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "brave-grumpy-unimportant-flag",
+  "serverId": "B",
+  "timestamp": 7902
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "ambitious-strong-high-house",
+  "serverId": "A",
+  "timestamp": 8514
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "billions-faint-short-garden",
+  "serverId": "B",
+  "timestamp": 10151
+ },
+ {
+  "type": "CloseChannel",
+  "jobId": "plain-wide-faithful-bear",
+  "serverId": "B",
+  "timestamp": 7055
  }
 ]
