@@ -1,30 +1,24 @@
 import {CreateChannelParams, UpdateChannelParams} from '@statechannels/client-api-schema';
 
-import {CreateLedgerChannelParams} from '../wallet';
+import {CreateLedgerChannelParams} from '../src/wallet';
 
-export type CreateDirectlyFundedChannelStep = {
-  type: 'CreateDirectlyFundedChannel';
+export type CreateChannelStep = {
+  type: 'CreateChannel';
   serverId: string;
   jobId: string;
   timestamp: number;
   channelParams: Omit<CreateChannelParams, 'fundingLedgerChannelId' | 'fundingStrategy'>;
+  fundingInfo: FundingInfo;
 };
 
-export type CreateLedgerFundedChannelStep = {
-  type: 'CreateLedgerFundedChannel';
-  serverId: string;
-  jobId: string;
-  timestamp: number;
-  fundingLedgerJobId: string;
-  channelParams: Omit<CreateChannelParams, 'fundingLedgerChannelId' | 'fundingStrategy'>;
-};
+export type FundingInfo = {type: 'Direct'} | {type: 'Ledger'; fundingLedgerJob: string};
 
 export type CreateLedgerChannelStep = {
   serverId: string;
   type: 'CreateLedgerChannel';
   jobId: string;
   timestamp: number;
-  ledgerChannelParams: CreateLedgerChannelParams;
+  ledgerChannelParams: Omit<CreateLedgerChannelParams, 'fundingStrategy'>;
 };
 export type CloseChannelStep = {
   serverId: string;
@@ -43,8 +37,7 @@ export type UpdateChannelStep = {
 
 export type Step =
   | CreateLedgerChannelStep
-  | CreateLedgerFundedChannelStep
-  | CreateDirectlyFundedChannelStep
+  | CreateChannelStep
   | CloseChannelStep
   | UpdateChannelStep;
 

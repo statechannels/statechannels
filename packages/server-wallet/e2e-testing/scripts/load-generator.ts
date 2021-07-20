@@ -12,7 +12,7 @@ import {BigNumber, ethers, utils} from 'ethers';
 import ms from 'ms';
 
 import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-bytecode';
-import {RoleConfig, Step} from '../types';
+import {FundingInfo, RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
 
 setupUnhandledErrorListeners();
@@ -28,10 +28,13 @@ async function createLoad() {
     prettyOutput,
     roleFile,
     outputFile,
-
     closeRate,
     duration,
     closeDelay,
+    fundingStrategy,
+    ledgerDelay,
+    ledgerRate,
+    createLedgerDuration,
   } = await yargs(hideBin(process.argv))
     .option('prettyOutput', {
       default: true,
@@ -44,22 +47,44 @@ async function createLoad() {
       default: 'temp/test_load.json',
     })
     .option('roleFile', {
-      alias: 'f',
+      alias: 'rf',
       describe: 'The path to a file containing the role information.',
       default: './e2e-testing/test-data/roles.json',
+    })
+    .option('fundingStrategy', {
+      alias: 'f',
+      describe: 'Whether channels are funded directly or by ledger channels.',
+      choices: ['Ledger', 'Direct'],
+      demandOption: true,
     })
     .option('duration', {
       alias: 'd',
       min: 10,
-      default: 30,
+      default: 60,
       describe: `The amount of time (in seconds) that the load should run for.
       This dictactes the max timestamp a step can have.`,
     })
     .option('createRate', {
       alias: 'cr',
       min: 1,
-      default: 5,
+      default: 1,
       describe: 'The number of channels that should be created per a second.',
+    })
+    .option('createLedgerDuration', {
+      default: 15,
+      min: 5,
+      describe: `The amount of time (in seconds) that create ledger channels can be scheduled for.
+      This dictactes the max timestamp a step can have.`,
+    })
+    .option('ledgerRate', {
+      default: 1,
+      min: 1,
+      describe: `The number of ledger channels to create per a second during the createLedgerDuration.`,
+    })
+    .option('ledgerDelay', {
+      default: 15,
+      min: 0,
+      describe: `The minumum amount of time (in seconds) to wait for a ledger channel to be created before scheduling a createChannel job.`,
     })
     .option('closeDelay', {
       default: 5,
@@ -67,7 +92,7 @@ async function createLoad() {
       describe: `The minumum amount of time (in seconds) to wait before closing a channel.`,
     })
     .option('closeRate', {
-      default: 5,
+      default: 0,
       min: 0,
       describe:
         'The amount of channels to be closed per a second. If this is larger than the createRate then all channels will eventually get closed. Otherwise, some channels will remain open.',
@@ -85,6 +110,10 @@ async function createLoad() {
         createRate,
         closeRate,
         closeDelay,
+        fundingStrategy,
+        ledgerDelay,
+        ledgerRate,
+        createLedgerDuration,
       })}`
     )
   );
@@ -99,16 +128,57 @@ async function createLoad() {
   );
   if (closeRate >= createRate) {
     console.log(
-      chalk.yellow('The close rate is larger than the create rate! All channels will end up closed')
+      chalk.yellow(
+        'The close rate is equal to or larger than the create rate! All channels will end up closed!'
+      )
     );
   }
 
-  const createSteps = generateCreateSteps(createRate, duration, roles);
-  const steps = generateCloseSteps(closeRate, duration, closeDelay, createSteps);
+  let steps: Step[] = [];
+  if (fundingStrategy === 'Ledger') {
+    steps = generateCreateLedgerSteps(ledgerRate, createLedgerDuration, roles);
+  }
+  steps = generateCreateSteps(
+    createRate,
+    duration,
+    roles,
+    fundingStrategy === 'Ledger' ? {type: 'Ledger', ledgerDelay} : {type: 'Direct'},
+    steps
+  );
+
+  steps = generateCloseSteps(closeRate, duration, closeDelay, steps);
 
   await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
 
   console.log(chalk.greenBright(`Complete!`));
+}
+
+function generateCreateLedgerSteps(
+  ledgerRate: number,
+  duration: number,
+  roles: Record<string, RoleConfig>
+): Step[] {
+  const steps: Step[] = [];
+  _.times(ledgerRate * duration, () => {
+    const timestamp = generateRandomNumber(0, toMilliseconds(duration));
+    const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
+
+    const participants = generateParticipants(roles, startIndex);
+
+    // Generate a jobId that is 4 random words
+    const jobId = generateSlug(4);
+
+    steps.push({
+      type: 'CreateLedgerChannel',
+      jobId,
+      serverId: participants[0].participantId,
+      timestamp,
+      // We want well funded ledger channels
+      ledgerChannelParams: generateChannelParams(participants, 100_000),
+    });
+  });
+
+  return steps;
 }
 
 function generateCloseSteps(
@@ -146,12 +216,14 @@ function generateCloseSteps(
 function generateCreateSteps(
   createRate: number,
   duration: number,
-  roles: Record<string, RoleConfig>
-): Step[] {
-  const steps: Step[] = [];
-  _.times(createRate * duration, () => {
-    const timestamp = generateRandomNumber(0, toMilliseconds(duration));
+  roles: Record<string, RoleConfig>,
+  funding: {type: 'Ledger'; ledgerDelay: number} | {type: 'Direct'},
 
+  previousSteps: readonly Step[]
+): Step[] {
+  const steps = _.clone(previousSteps) as Step[];
+  const ledgerSteps = steps.filter(s => s.type === 'CreateLedgerChannel');
+  _.times(createRate * duration, () => {
     const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
 
     // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
@@ -161,14 +233,34 @@ function generateCreateSteps(
     // Generate a jobId that is 4 random words
     const jobId = generateSlug(4);
 
+    let timestamp;
+    let fundingInfo: FundingInfo;
+    // If  this create channel step will be funded by a ledger grab a random ledger channel that is sceduled to be created before this
+    if (funding.type === 'Ledger') {
+      const ledgerToUse = getRandomElement(ledgerSteps);
+      // We want to wait ledgerDelay before attempting to use the ledger channel
+      timestamp = Math.max(
+        generateRandomNumber(ledgerToUse.timestamp, toMilliseconds(duration)),
+        ledgerToUse.timestamp + toMilliseconds(funding.ledgerDelay)
+      );
+
+      fundingInfo = {type: 'Ledger', fundingLedgerJob: ledgerToUse.jobId};
+    } else {
+      timestamp = generateRandomNumber(0, toMilliseconds(duration));
+      fundingInfo = {type: 'Direct'};
+    }
+
     steps.push({
       type: 'CreateChannel',
       jobId,
       serverId: participants[0].participantId,
       timestamp,
-      channelParams: generateChannelParams(roles, participants),
+      // We want a well funded ledger channel
+      channelParams: generateChannelParams(participants),
+      fundingInfo,
     });
   });
+
   return steps;
 }
 
@@ -210,13 +302,13 @@ function generateParticipants(roles: Record<string, RoleConfig>, startIndex: num
  * @returns A CreateChannelParams object that can be passed into createChannel
  */
 function generateChannelParams(
-  roles: Record<string, RoleConfig>,
-  participants: Participant[]
-): CreateChannelParams {
+  participants: Participant[],
+  fundingAmountPerParticipant = 5
+): Omit<CreateChannelParams, 'fundingStrategy'> {
   // Eventually these should vary
   const allocationItems = participants.map(p => ({
     destination: p.destination,
-    amount: BigNumber.from(5).toHexString(),
+    amount: BigNumber.from(fundingAmountPerParticipant).toHexString(),
   }));
 
   return {
@@ -229,7 +321,7 @@ function generateChannelParams(
     ],
     appDefinition: COUNTING_APP_DEFINITION,
     appData: utils.hexZeroPad('0x0', 32),
-    fundingStrategy: 'Direct',
+
     challengeDuration: ms('1d') / 1000, // This is 1 day in seconds,
   };
 }
@@ -239,6 +331,11 @@ function generateChannelParams(
  */
 function toMilliseconds(seconds: number): number {
   return seconds * 1000;
+}
+
+function getRandomElement<T>(array: Array<T>): T {
+  const index = generateRandomNumber(0, array.length - 1);
+  return array[index];
 }
 
 /**

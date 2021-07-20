@@ -12,9 +12,8 @@ import {createLogger} from '../src/logger';
 
 import {
   CloseChannelStep,
-  CreateDirectlyFundedChannelStep,
+  CreateChannelStep,
   CreateLedgerChannelStep,
-  CreateLedgerFundedChannelStep,
   JobChannelLink,
   LoadNodeConfig,
   Peers,
@@ -39,7 +38,6 @@ export class WalletLoadNode {
     this.serverWallet.on('ObjectiveProposed', async o => {
       if (o.type === 'OpenChannel') {
         // This is an easy work around for https://github.com/statechannels/statechannels/issues/3668
-
         if (!this.proposedObjectives.has(o.objectiveId)) {
           this.logger.trace({objectiveId: o.objectiveId}, 'Auto approving objective');
           this.serverWallet.approveObjectives([o.objectiveId]);
@@ -206,32 +204,37 @@ export class WalletLoadNode {
    * TODO: Typing should not use any type for the request
    */
   private stepHandlers: Record<Step['type'], (req: any) => Promise<ObjectiveDoneResult>> = {
-    CreateDirectlyFundedChannel: async (request: CreateDirectlyFundedChannelStep) => {
-      const [result] = await this.serverWallet.createChannels([
-        {...request.channelParams, fundingStrategy: 'Direct'},
-      ]);
-      const {jobId} = request;
-      const {channelId} = result;
+    CreateChannel: async (request: CreateChannelStep) => {
+      const {fundingInfo} = request;
+      if (fundingInfo.type === 'Direct') {
+        const [result] = await this.serverWallet.createChannels([
+          {...request.channelParams, fundingStrategy: 'Direct'},
+        ]);
+        const {jobId} = request;
+        const {channelId} = result;
 
-      this.jobToChannelMap.push({jobId, channelId});
-      await this.shareChannelIdsWithPeers({jobId, channelId});
-      return result.done;
-    },
-    CreateLedgerFundedChannel: async (request: CreateLedgerFundedChannelStep) => {
-      const ledgerResult = this.jobToChannelMap.find(j => j.jobId === request.fundingLedgerJobId);
-      if (!ledgerResult) {
-        throw new Error(`Cannot find channel id for ledger job ${request.fundingLedgerJobId}`);
+        this.jobToChannelMap.push({jobId, channelId});
+        await this.shareChannelIdsWithPeers({jobId, channelId});
+        return result.done;
+      } else {
+        const ledgerResult = this.jobToChannelMap.find(
+          j => j.jobId === fundingInfo.fundingLedgerJob
+        );
+        if (!ledgerResult) {
+          throw new Error(`Cannot find channel id for ledger job ${fundingInfo.fundingLedgerJob}`);
+        }
+
+        const {channelId: fundingLedgerChannelId} = ledgerResult;
+        const [result] = await this.serverWallet.createChannels([
+          {...request.channelParams, fundingStrategy: 'Ledger', fundingLedgerChannelId},
+        ]);
+        const {jobId} = request;
+        const {channelId} = result;
+
+        this.jobToChannelMap.push({jobId, channelId});
+        await this.shareChannelIdsWithPeers({jobId, channelId});
+        return result.done;
       }
-      const {channelId: fundingLedgerChannelId} = ledgerResult;
-      const [result] = await this.serverWallet.createChannels([
-        {...request.channelParams, fundingStrategy: 'Ledger', fundingLedgerChannelId},
-      ]);
-      const {jobId} = request;
-      const {channelId} = result;
-
-      this.jobToChannelMap.push({jobId, channelId});
-      await this.shareChannelIdsWithPeers({jobId, channelId});
-      return result.done;
     },
     CloseChannel: async (request: CloseChannelStep) => {
       const channelId = this.getChannelIdForJob(request.jobId);
@@ -250,7 +253,10 @@ export class WalletLoadNode {
     },
 
     CreateLedgerChannel: async (req: CreateLedgerChannelStep) => {
-      const result = await this.serverWallet.createLedgerChannel(req.ledgerChannelParams);
+      const result = await this.serverWallet.createLedgerChannel({
+        ...req.ledgerChannelParams,
+        fundingStrategy: 'Direct',
+      });
       const {jobId} = req;
       const {channelId} = result;
 
