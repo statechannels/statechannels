@@ -46,7 +46,6 @@ const state: State = {
 };
 let signedStateA: SignedState;
 let signedStateB: SignedState;
-const largestOutcome = largeOutcome(MAX_OUTCOME_ITEMS);
 const stateWithLargeOutcome = {...state, outcome: largeOutcome(MAX_OUTCOME_ITEMS)};
 
 beforeAll(async () => {
