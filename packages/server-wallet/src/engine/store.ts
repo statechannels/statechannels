@@ -663,11 +663,11 @@ export class Store {
 
   async updateTransferredOut(
     channelId: string,
-    assetHolder: Address,
+    asset: Address,
     transferredOut: TransferredOutEntry[]
   ): Promise<void> {
     this.lockApp(channelId, tx =>
-      Funding.updateTransferredOut(tx, channelId, assetHolder, transferredOut)
+      Funding.updateTransferredOut(tx, channelId, asset, transferredOut)
     );
   }
 
@@ -683,10 +683,10 @@ export class Store {
 
   async getFunding(
     channelId: string,
-    assetHolder: Address,
+    asset: Address,
     tx: Transaction
   ): Promise<Funding | undefined> {
-    const funding = Funding.query(tx).where({channelId, assetHolder}).first();
+    const funding = Funding.query(tx).where({channelId, asset}).first();
 
     return funding;
   }
