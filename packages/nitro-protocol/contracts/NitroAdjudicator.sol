@@ -82,15 +82,22 @@ contract NitroAdjudicator is MultiAssetHolder {
                 (Outcome.AllocationItem[])
             );
             address asset = outcome[assetIndex].asset;
-            (allocation, ) = _transfer(asset, channelId, allocation, new uint256[](0)); // update in place to newAllocation
+            uint256 initialHoldings;
+           // update allocation in place, to the new allocation returned by _transfer
+            (allocation, initialHoldings) = _transfer(
+                asset,
+                channelId,
+                allocation,
+                new uint256[](0)
+            );
             outcome[assetIndex].assetOutcomeBytes = abi.encode(
                 Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
             );
+            emit AllocationUpdated(channelId, assetIndex, initialHoldings);
         }
         outcomeBytes = abi.encode(outcome);
         bytes32 outcomeHash = keccak256(outcomeBytes);
         _updateFingerprint(channelId, stateHash, challengerAddress, outcomeHash);
-        emit FingerprintUpdated(channelId, outcomeBytes);
     }
 
     /**
