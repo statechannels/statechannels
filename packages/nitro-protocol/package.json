@@ -102,7 +102,7 @@
     "test:ci": "yarn test:ci:gas && yarn test:ci:app && yarn test:ci:contracts ",
     "test:ci:app": "yarn test:app --all --ci --bail --maxWorkers=4",
     "test:ci:gas": "yarn test:gas",
-    "test:ci:contracts": "yarn test:contracts --all --ci --bail --maxWorkers=4",
+    "test:ci:contracts": "yarn test:contracts --all --ci --bail --maxWorkers=1",
     "test:contracts": "jest -c ./config/jest/jest.contracts.config.js",
     "test:gas": "jest -c ./config/jest/jest.gas-benchmarks.config.js"
   },
