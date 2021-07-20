@@ -664,11 +664,13 @@ export class Store {
   async updateTransferredOut(
     channelId: string,
     assetHolder: Address,
-    transferredOut: TransferredOutEntry[]
+    transferredOut: TransferredOutEntry[],
+    newHoldings: string
   ): Promise<void> {
-    this.lockApp(channelId, tx =>
-      Funding.updateTransferredOut(tx, channelId, assetHolder, transferredOut)
-    );
+    this.lockApp(channelId, async tx => {
+      await Funding.updateTransferredOut(tx, channelId, assetHolder, transferredOut);
+      await Funding.updateFunding(tx, channelId, newHoldings, assetHolder);
+    });
   }
 
   async nextNonce(signingAddresses: Address[]): Promise<number> {

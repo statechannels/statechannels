@@ -94,6 +94,11 @@ export interface OptionalWalletConfig {
   loggingConfiguration: LoggingConfiguration;
   metricsConfiguration: MetricsConfiguration;
   syncConfiguration: SyncConfiguration;
+  /**
+   * This is the private key used to sign channel updates.
+   * If not provided one will be generated.
+   */
+  privateKey?: string;
 }
 
 /**

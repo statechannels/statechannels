@@ -8,6 +8,7 @@ import {
   Participant as APIParticipant,
   ChannelId,
   Message,
+  ChannelResult,
 } from '@statechannels/client-api-schema';
 import {
   deserializeAllocations,
@@ -287,10 +288,10 @@ export class SingleThreadedEngine implements EngineInterface {
   async createLedgerChannel(
     args: Pick<CreateChannelParams, 'participants' | 'allocations' | 'challengeDuration'>,
     fundingStrategy: 'Direct' | 'Fake' = 'Direct'
-  ): Promise<SingleChannelOutput> {
+  ): Promise<SingleChannelOutput & {newObjective: WalletObjective}> {
     const response = EngineResponse.initialize();
 
-    await this._createChannel(
+    const channelId = await this._createChannel(
       response,
       {
         ...args,
@@ -301,9 +302,14 @@ export class SingleThreadedEngine implements EngineInterface {
       'ledger'
     );
 
-    // NB: We intentionally do not call this.takeActions, because there are no actions to take when creating a channel.
+    await this.takeActions([channelId], response);
+    const result = response.singleChannelOutput();
 
-    return response.singleChannelOutput();
+    if (!hasNewObjective(result)) {
+      throw new Error('No new objective created for create channel');
+    } else {
+      return result;
+    }
   }
   /**
    * Creates a channel.
@@ -445,7 +451,12 @@ export class SingleThreadedEngine implements EngineInterface {
 
   async approveObjectives(
     objectiveIds: string[]
-  ): Promise<{objectives: WalletObjective[]; messages: Message[]; chainRequests: ChainRequest[]}> {
+  ): Promise<{
+    objectives: WalletObjective[];
+    messages: Message[];
+    chainRequests: ChainRequest[];
+    channelResults: ChannelResult[];
+  }> {
     const channelIds: string[] = [];
     const response = EngineResponse.initialize();
     let objectives = await this.store.getObjectivesByIds(objectiveIds);
@@ -466,6 +477,7 @@ export class SingleThreadedEngine implements EngineInterface {
       objectives,
       messages: getMessages(response.multipleChannelOutput()),
       chainRequests: response.chainRequests,
+      channelResults: response.channelResults,
     };
   }
 

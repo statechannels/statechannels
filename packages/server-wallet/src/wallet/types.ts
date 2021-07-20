@@ -71,4 +71,5 @@ export interface WalletEvents {
   ObjectiveCompleted: (o: WalletObjective) => void;
   ObjectiveProposed: (o: WalletObjective) => void;
   ObjectiveTimedOut: (o: WalletObjective) => void;
+  ChannelUpdated: (c: ChannelResult) => void;
 }
