@@ -1,5 +1,6 @@
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
 import {
+  AssetOutcome,
   channelDataToStatus,
   getChannelId,
   randomChannelId,
@@ -141,8 +142,8 @@ async function setUpConclude(isEth = true) {
   const aEthWallet = Wallet.createRandom();
   const bEthWallet = Wallet.createRandom();
 
-  const alice = aliceParticipant({destination: makeDestination(aEthWallet.address)});
-  const bob = bobParticipant({destination: makeDestination(bEthWallet.address)});
+  const alice = aliceParticipant({destination: makeDestination(aEthWallet.address).toLowerCase()});
+  const bob = bobParticipant({destination: makeDestination(bEthWallet.address).toLowerCase()});
   const outcome = isEth
     ? simpleEthAllocation([
         {destination: alice.destination, amount: BN.from(1)},
@@ -152,15 +153,13 @@ async function setUpConclude(isEth = true) {
         {destination: alice.destination, amount: BN.from(1)},
         {destination: bob.destination, amount: BN.from(3)},
       ]);
-  const newAssetOutcome = isEth
-    ? simpleEthAllocation([
-        {destination: alice.destination, amount: BN.from(0)},
-        {destination: bob.destination, amount: BN.from(0)},
-      ])
-    : simpleTokenAllocation(erc20Address, [
-        {destination: alice.destination, amount: BN.from(0)},
-        {destination: bob.destination, amount: BN.from(0)},
-      ]);
+  const newAssetOutcome: AssetOutcome = {
+    asset: isEth ? constants.AddressZero : erc20Address,
+    allocationItems: [
+      {destination: alice.destination, amount: BN.from(0)},
+      {destination: bob.destination, amount: BN.from(0)},
+    ],
+  };
   const state1: State = {
     appData: constants.HashZero,
     appDefinition: makeAddress(constants.AddressZero),
