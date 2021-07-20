@@ -190,20 +190,18 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 targetOutcomeBytes,
                 (Outcome.OutcomeItem[])
             );
-            {
-                Outcome.AssetOutcome memory assetOutcome = abi.decode(
-                    outcome[assetIndex].assetOutcomeBytes,
-                    (Outcome.AssetOutcome)
-                );
-                require(
-                    assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-                    '!allocation'
-                );
-                allocation = abi.decode(
-                    assetOutcome.allocationOrGuaranteeBytes,
-                    (Outcome.AllocationItem[])
-                );
-            }
+            Outcome.AssetOutcome memory assetOutcome = abi.decode(
+                outcome[assetIndex].assetOutcomeBytes,
+                (Outcome.AssetOutcome)
+            );
+            require(
+                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
+                '!allocation'
+            );
+            allocation = abi.decode(
+                assetOutcome.allocationOrGuaranteeBytes,
+                (Outcome.AllocationItem[])
+            );
 
             // effects and interactions
             uint256 initialHoldings;
@@ -217,15 +215,13 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             outcome[assetIndex].assetOutcomeBytes = abi.encode(
                 Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
             );
-            {
-                bytes32 outcomeHash = keccak256(abi.encode(outcome));
-                _updateFingerprint(
-                    guarantee.targetChannelId,
-                    targetStateHash,
-                    targetChallengerAddress,
-                    outcomeHash
-                );
-            }
+            bytes32 outcomeHash = keccak256(abi.encode(outcome));
+            _updateFingerprint(
+                guarantee.targetChannelId,
+                targetStateHash,
+                targetChallengerAddress,
+                outcomeHash
+            );
             emit AllocationUpdated(guarantee.targetChannelId, assetIndex, initialHoldings);
         }
     }
