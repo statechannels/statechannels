@@ -10,11 +10,11 @@ import {generateSlug} from 'random-word-slugs';
 import _ from 'lodash';
 import {BigNumber, ethers, utils} from 'ethers';
 import ms from 'ms';
+import {zeroAddress} from '@statechannels/wallet-core/src/config';
 
 import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-bytecode';
 import {RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
-import {zeroAddress} from '@statechannels/wallet-core/src/config';
 
 setupUnhandledErrorListeners();
 
