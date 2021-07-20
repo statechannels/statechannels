@@ -194,7 +194,7 @@ describe('Direct channel defunding', () => {
     });
   });
 
-  it('Channel is defunded via pushOutcome transaction', async () => {
+  it('Channel is defunded via withdraw transaction', async () => {
     // Channel has yet to be concluded
     await testChannel.insertInto(store, {
       participant: 0,
@@ -225,7 +225,7 @@ describe('Direct channel defunding', () => {
       });
 
       expect(response.chainRequests[0]).toMatchObject({
-        type: 'PushOutcomeAndWithdraw',
+        type: 'Withdraw',
         state: state4,
         challengerAddress: channel.myAddress,
       });
