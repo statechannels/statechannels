@@ -14,6 +14,7 @@ import ms from 'ms';
 import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-bytecode';
 import {RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
+import {zeroAddress} from '@statechannels/wallet-core/src/config';
 
 setupUnhandledErrorListeners();
 
@@ -209,7 +210,7 @@ function generateChannelParams(
     allocations: [
       {
         allocationItems,
-        assetHolderAddress: ETH_ASSET_HOLDER_ADDRESS,
+        asset: zeroAddress,
       },
     ],
     appDefinition: COUNTING_APP_DEFINITION,
