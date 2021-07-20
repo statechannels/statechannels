@@ -27,6 +27,7 @@ export class WalletLoadNode {
   private jobToChannelMap: JobChannelLink[] = [];
   private completedSteps = 0;
   private server: Express;
+  private proposedObjectives = new Set<string>();
 
   private constructor(
     private serverWallet: Wallet,
@@ -37,8 +38,13 @@ export class WalletLoadNode {
     // This will approve any new objectives proposed by other participants
     this.serverWallet.on('ObjectiveProposed', async o => {
       if (o.type === 'OpenChannel') {
-        this.logger.trace({objectiveId: o.objectiveId}, 'Auto approving objective');
-        this.serverWallet.approveObjectives([o.objectiveId]);
+        // This is an easy work around for https://github.com/statechannels/statechannels/issues/3668
+
+        if (!this.proposedObjectives.has(o.objectiveId)) {
+          this.logger.trace({objectiveId: o.objectiveId}, 'Auto approving objective');
+          this.serverWallet.approveObjectives([o.objectiveId]);
+          this.proposedObjectives.add(o.objectiveId);
+        }
       }
     });
 
