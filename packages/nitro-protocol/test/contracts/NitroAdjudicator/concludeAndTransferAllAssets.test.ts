@@ -35,7 +35,7 @@ const token = (setupContract(
   process.env.TEST_TOKEN_ADDRESS
 ) as unknown) as Token & Contract;
 
-jest.setTimeout(15_000);
+jest.setTimeout(30_000);
 
 const provider = getTestProvider();
 const chainId = process.env.CHAIN_NETWORK_ID;
