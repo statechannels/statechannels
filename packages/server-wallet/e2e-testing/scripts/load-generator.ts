@@ -20,9 +20,6 @@ setupUnhandledErrorListeners();
 
 createLoad();
 
-// TODO: This should probably be ready from the contract artifacts file
-const ETH_ASSET_HOLDER_ADDRESS = '0x9eD274314f0fB37837346C425D3cF28d89ca9599';
-
 async function createLoad() {
   const {
     closeChannels,
