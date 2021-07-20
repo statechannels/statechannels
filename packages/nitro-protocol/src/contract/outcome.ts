@@ -1,4 +1,4 @@
-import {utils} from 'ethers';
+import {BigNumber, utils} from 'ethers';
 
 import {Address, Bytes, Bytes32, Uint256} from './types';
 
@@ -58,9 +58,9 @@ export function decodeAllocation(encodedAllocation: Bytes): Allocation {
     encodedAllocation
   )[0];
 
-  return allocationItems.map(a => ({
+  return allocationItems.map((a: AllocationItem) => ({
     destination: a.destination,
-    amount: a.amount.toHexString(),
+    amount: BigNumber.from(a.amount).toHexString(),
   }));
 }
 
@@ -151,7 +151,9 @@ export function decodeOutcome(encodedOutcome: Bytes): Outcome {
     ['tuple(address asset, bytes outcomeContent)[]'],
     encodedOutcome
   )[0];
-  return assetOutcomes.map(a => decodeOutcomeItem(a.outcomeContent, a.asset));
+  return assetOutcomes.map((a: AssetOutcome & {outcomeContent: string}) =>
+    decodeOutcomeItem(a.outcomeContent, a.asset)
+  );
 }
 
 export function encodeOutcome(outcome: Outcome): Bytes32 {
