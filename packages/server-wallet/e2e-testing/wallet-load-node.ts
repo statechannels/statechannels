@@ -210,29 +210,35 @@ export class WalletLoadNode {
         const [result] = await this.serverWallet.createChannels([
           {...request.channelParams, fundingStrategy: 'Direct'},
         ]);
+
         const {jobId} = request;
         const {channelId} = result;
 
         this.jobToChannelMap.push({jobId, channelId});
         await this.shareChannelIdsWithPeers({jobId, channelId});
+
         return result.done;
       } else {
         const ledgerResult = this.jobToChannelMap.find(
           j => j.jobId === fundingInfo.fundingLedgerJob
         );
+
         if (!ledgerResult) {
           throw new Error(`Cannot find channel id for ledger job ${fundingInfo.fundingLedgerJob}`);
         }
 
         const {channelId: fundingLedgerChannelId} = ledgerResult;
+
         const [result] = await this.serverWallet.createChannels([
           {...request.channelParams, fundingStrategy: 'Ledger', fundingLedgerChannelId},
         ]);
+
         const {jobId} = request;
         const {channelId} = result;
 
         this.jobToChannelMap.push({jobId, channelId});
         await this.shareChannelIdsWithPeers({jobId, channelId});
+
         return result.done;
       }
     },
@@ -257,6 +263,7 @@ export class WalletLoadNode {
         ...req.ledgerChannelParams,
         fundingStrategy: 'Direct',
       });
+
       const {jobId} = req;
       const {channelId} = result;
 
