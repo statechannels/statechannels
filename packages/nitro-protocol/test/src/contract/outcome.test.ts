@@ -9,6 +9,7 @@ import {
   encodeOutcome,
   Guarantee,
   AllocationItem,
+  Outcome,
 } from '../../../src/contract/outcome';
 
 const destination = utils.id('d');
@@ -26,7 +27,7 @@ const outcome = [
   {assetHolderAddress, allocationItems},
   {assetHolderAddress, guarantee},
 ];
-const emptyOutcome = [];
+const emptyOutcome: Outcome = [];
 
 const description0 = 'Encodes and decodes guarantee';
 const description1 = 'Encodes and decodes allocation';

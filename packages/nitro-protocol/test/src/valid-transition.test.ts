@@ -39,7 +39,7 @@ const incorrectTurnNumCases: TestCaseWithError[] = [
 //prettier-ignore
 const changedAConstantCases: TestCaseWithError[] = [
   [/chainId must not change/, {}, { channel: {...baseToState.channel, chainId: '0x2'}}],
-  [/participants must not change/, {}, { channel: {...baseToState.channel, participants: [baseToState.channel[0]]}}],
+  [/participants must not change/, {}, { channel: {...baseToState.channel, participants: baseToState.channel.participants.reverse()}}],
   [/channelNonce must not change/, {}, { channel: {... baseToState.channel, channelNonce: baseToState.channel.channelNonce + 1}} ],
   [/appDefinition must not change/, {}, { appDefinition: channel.participants[0]} ],
   [/challengeDuration must not change/, {}, { challengeDuration: baseToState.challengeDuration + 1}],
@@ -78,9 +78,12 @@ function expectError(fromOverrides: Partial<State>, toOverrides: Partial<State>,
 }
 
 describe('getValidProtocolTransitionStatus', () => {
-  it.each(valid)('Returns Status.True for valid cases ', (from: State, to: State) => {
-    expectStatus(from, to, Status.True);
-  });
+  it.each(valid)(
+    'Returns Status.True for valid cases ',
+    (from: Partial<State>, to: Partial<State>) => {
+      expectStatus(from, to, Status.True);
+    }
+  );
   it.each([
     ...incorrectTurnNumCases,
     ...changedAConstantCases,
@@ -96,7 +99,7 @@ describe('getValidProtocolTransitionStatus', () => {
   );
   it.each([...commonCase])(
     'Returns Status.NeedToCheckApp for otherwise valid cases ',
-    (from: State, to: State) => {
+    (from: Partial<State>, to: Partial<State>) => {
       expectStatus(from, to, Status.NeedToCheckApp);
     }
   );

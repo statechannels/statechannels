@@ -63,7 +63,7 @@ describe('transaction-generators', () => {
       ],
       walletA.privateKey
     );
-    expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
+    expect(transactionRequest.data!.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
 
   it('creates a challenge transaction', async () => {
