@@ -14,5 +14,6 @@
     "downlevelIteration": true
   },
   "include": ["src/**/*", "test/**/*", "artifacts/**/*.json", "addresses.json"],
+  "exclude": ["node_modules"],
   "references": [{"path": "../jest-gas-reporter"}]
 }
