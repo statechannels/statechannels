@@ -203,15 +203,15 @@ export class WalletLoadNode {
    * These are the various handlers for different step types
    * TODO: Typing should not use any type for the request
    */
-  private stepHandlers: Record<Step['type'], (req: any) => Promise<ObjectiveDoneResult>> = {
-    CreateChannel: async (request: CreateChannelStep) => {
-      const {fundingInfo} = request;
+  private stepHandlers: Record<Step['type'], (step: any) => Promise<ObjectiveDoneResult>> = {
+    CreateChannel: async (step: CreateChannelStep) => {
+      const {fundingInfo} = step;
       if (fundingInfo.type === 'Direct') {
         const [result] = await this.serverWallet.createChannels([
-          {...request.channelParams, fundingStrategy: 'Direct'},
+          {...step.channelParams, fundingStrategy: 'Direct'},
         ]);
 
-        const {jobId} = request;
+        const {jobId} = step;
         const {channelId} = result;
 
         this.jobToChannelMap.push({jobId, channelId});
@@ -230,10 +230,10 @@ export class WalletLoadNode {
         const {channelId: fundingLedgerChannelId} = ledgerResult;
 
         const [result] = await this.serverWallet.createChannels([
-          {...request.channelParams, fundingStrategy: 'Ledger', fundingLedgerChannelId},
+          {...step.channelParams, fundingStrategy: 'Ledger', fundingLedgerChannelId},
         ]);
 
-        const {jobId} = request;
+        const {jobId} = step;
         const {channelId} = result;
 
         this.jobToChannelMap.push({jobId, channelId});
@@ -242,29 +242,29 @@ export class WalletLoadNode {
         return result.done;
       }
     },
-    CloseChannel: async (request: CloseChannelStep) => {
-      const channelId = this.getChannelIdForJob(request.jobId);
+    CloseChannel: async (step: CloseChannelStep) => {
+      const channelId = this.getChannelIdForJob(step.jobId);
 
       const [result] = await this.serverWallet.closeChannels([channelId]);
 
       return result.done;
     },
-    UpdateChannel: async (req: UpdateChannelStep) => {
-      const channelId = this.getChannelIdForJob(req.jobId);
+    UpdateChannel: async (step: UpdateChannelStep) => {
+      const channelId = this.getChannelIdForJob(step.jobId);
 
-      const {allocations, appData} = req.updateParams;
+      const {allocations, appData} = step.updateParams;
       const result = await this.serverWallet.updateChannel(channelId, allocations, appData);
 
       return result;
     },
 
-    CreateLedgerChannel: async (req: CreateLedgerChannelStep) => {
+    CreateLedgerChannel: async (step: CreateLedgerChannelStep) => {
       const result = await this.serverWallet.createLedgerChannel({
-        ...req.ledgerChannelParams,
+        ...step.ledgerChannelParams,
         fundingStrategy: 'Direct',
       });
 
-      const {jobId} = req;
+      const {jobId} = step;
       const {channelId} = result;
 
       this.jobToChannelMap.push({jobId, channelId});
