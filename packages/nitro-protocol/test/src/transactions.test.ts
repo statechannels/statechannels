@@ -159,7 +159,7 @@ describe('transaction-generators', () => {
 
     it('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondTransaction(null, signedStateA);
+        createRespondTransaction((null as unknown) as State, signedStateA);
       }).toThrow();
     });
   });
