@@ -38,7 +38,6 @@ click MultiAssetHolder "/contract-api/natspec/MultiAssetHolder";
 click IMultiAssetHolder "/contract-api/natspec/IMultiAssetHolder";
 click IERC20 "/contract-api/natspec/IERC20";
 Outcome([Outcome])
-IAdjudicator
 IForceMove
 ForceMove
 NitroAdjudicator
@@ -47,7 +46,6 @@ TESTNitroAdjudicator
 IForceMoveApp-.-> ForceMove
 IForceMove--> ForceMove
 Outcome--> NitroAdjudicator
-IAdjudicator--> NitroAdjudicator
 ForceMove-->TESTForceMove
 ForceMove-->MultiAssetHolder
 NitroAdjudicator--> TESTNitroAdjudicator
@@ -59,14 +57,13 @@ classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
 classDef TestContract fill:#fafe4f,stroke-width:0px;
 classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 class Outcome,SafeMath Library;
-class IAdjudicator,IForceMoveApp,IForceMove Interface;
+class IForceMoveApp,IForceMove Interface;
 class ForceMove Contract;
 class TESTForceMove,TESTNitroAdjudicator TestContract;
 class NitroAdjudicator DeployedContract;
 click IForceMoveApp "/contract-api/natspec/IForceMoveApp";
 click SafeMath "/contract-api/natspec/SafeMath";
 click Outcome "/contract-api/natspec/Outcome";
-click IAdjudicator "/contract-api/natspec/IAdjudicator";
 click ForceMove "/contract-api/natspec/ForceMove";
 click IForceMove "/contract-api/natspec/IForceMove";
 click NitroAdjudicator "/contract-api/natspec/NitroAdjudicator";
