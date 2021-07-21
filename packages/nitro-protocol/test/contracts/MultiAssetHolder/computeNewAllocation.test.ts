@@ -50,7 +50,9 @@ describe('AssetHolder._computeNewAllocation', () => {
       }))
     );
 
-    expect((result as any).safeToDelete).toEqual(locallyComputedNewAllocation.deleted);
+    expect((result as any).allocatesOnlyZeros).toEqual(
+      locallyComputedNewAllocation.allocatesOnlyZeros
+    );
 
     expect(result.payouts).toMatchObject(
       locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))

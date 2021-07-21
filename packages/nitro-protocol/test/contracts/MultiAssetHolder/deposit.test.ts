@@ -46,7 +46,8 @@ const description3 = 'Reverts deposit of Tokens (expectedHeld + amount < holding
 const description4 = 'Deposits Tokens (amount < holdings < amount + expectedHeld)';
 const description5 = 'Deposits ETH (msg.value = amount , expectedHeld = 0)';
 const description6 = 'Reverts deposit of ETH (msg.value = amount, expectedHeld > holdings)';
-const description7 = 'Deposits ETH (msg.value = amount, expectedHeld + amount < holdings)';
+const description7 =
+  'Reverts deposit of ETH (msg.value = amount, expectedHeld + amount < holdings)';
 const description8 =
   'Deposits ETH (msg.value = amount,  amount < holdings < amount + expectedHeld)';
 
@@ -94,17 +95,19 @@ describe('deposit', () => {
       // Set holdings by depositing in the 'safest' way
       const {events} = await (
         await testNitroAdjudicator.deposit(asset, destination, 0, held, {
-          value: asset === ETH ? amount : 0,
+          value: asset === ETH ? held : 0,
         })
       ).wait();
       expect(await testNitroAdjudicator.holdings(asset, destination)).toEqual(held);
-      const {data: amountTransferred} = getTransferEvent(events);
-      expect(held.eq(amountTransferred)).toBe(true);
+      if (asset === ERC20) {
+        const {data: amountTransferred} = getTransferEvent(events);
+        expect(held.eq(amountTransferred)).toBe(true);
+      }
     }
 
     const balanceBefore = await getBalance(asset, signer0Address);
 
-    const tx = testNitroAdjudicator.deposit(token.address, destination, expectedHeld, amount, {
+    const tx = testNitroAdjudicator.deposit(asset, destination, expectedHeld, amount, {
       value: asset === ETH ? amount : 0,
     });
 
@@ -112,7 +115,6 @@ describe('deposit', () => {
       await expectRevert(() => tx, reasonString);
     } else {
       const {events} = await (await tx).wait();
-
       const depositedEvent = getDepositedEvent(events);
       expect(depositedEvent).toMatchObject({
         destination,
@@ -123,14 +125,12 @@ describe('deposit', () => {
       if (asset == ERC20) {
         const amountTransferred = BigNumber.from(getTransferEvent(events).data);
         expect(heldAfter.sub(held).eq(amountTransferred)).toBe(true);
+        const balanceAfter = await getBalance(asset, signer0Address);
+        expect(balanceAfter.eq(balanceBefore.sub(heldAfter.sub(held)))).toBe(true);
       }
 
-      const allocatedAmount = await testNitroAdjudicator.holdings(token.address, destination);
+      const allocatedAmount = await testNitroAdjudicator.holdings(asset, destination);
       await expect(allocatedAmount).toEqual(heldAfter);
-
-      const balanceAfter = await getBalance(asset, signer0Address);
-
-      expect(balanceAfter.eq(balanceBefore.sub(heldAfter.sub(held)))).toBe(true);
     }
   });
 });

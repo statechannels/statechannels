@@ -83,7 +83,7 @@ contract NitroAdjudicator is MultiAssetHolder {
             );
             address asset = outcome[assetIndex].asset;
             uint256 initialHoldings;
-           // update allocation in place, to the new allocation returned by _transfer
+            // update allocation in place, to the new allocation returned by _transfer
             (allocation, initialHoldings) = _transfer(
                 asset,
                 channelId,
