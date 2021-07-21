@@ -237,11 +237,10 @@ function generateCreateSteps(
     if (funding.type === 'Ledger') {
       const ledgerToUse = getRandomElement(ledgerSteps);
       // We want to wait ledgerDelay before attempting to use the ledger channel
-      timestamp = Math.max(
-        generateRandomNumber(ledgerToUse.timestamp, toMilliseconds(duration)),
-        ledgerToUse.timestamp + toMilliseconds(funding.ledgerDelay)
+      timestamp = generateRandomNumber(
+        ledgerToUse.timestamp + funding.ledgerDelay,
+        toMilliseconds(duration)
       );
-
       fundingInfo = {type: 'Ledger', fundingLedgerJob: ledgerToUse.jobId};
     } else {
       timestamp = generateRandomNumber(0, toMilliseconds(duration));
