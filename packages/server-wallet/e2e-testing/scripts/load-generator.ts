@@ -233,7 +233,6 @@ function generateCreateSteps(
 
     let timestamp;
     let fundingInfo: FundingInfo;
-    // If  this create channel step will be funded by a ledger grab a random ledger channel that is sceduled to be created before this
     if (funding.type === 'Ledger') {
       const ledgerToUse = getRandomElement(ledgerSteps);
       // We want to wait ledgerDelay before attempting to use the ledger channel
