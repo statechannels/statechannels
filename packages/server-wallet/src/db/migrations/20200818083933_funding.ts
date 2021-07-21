@@ -5,9 +5,9 @@ export async function up(knex: Knex): Promise<any> {
   await knex.schema.createTable(funding, function (table) {
     table.string('channel_id').notNullable();
     table.string('amount').notNullable();
-    table.string('asset_holder').notNullable();
+    table.string('asset').notNullable();
 
-    table.primary(['channel_id', 'asset_holder']);
+    table.primary(['channel_id', 'asset']);
     table.foreign('channel_id').references('channels.channel_id');
   });
 }

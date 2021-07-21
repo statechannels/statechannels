@@ -11,7 +11,6 @@ import {
   createRespondTransaction,
   createSignatureArguments,
   MAX_TX_DATA_SIZE,
-  createPushOutcomeTransaction,
 } from '../../src/transactions';
 import {getRandomNonce, largeOutcome} from '../test-helpers';
 
@@ -47,7 +46,6 @@ const state: State = {
 };
 let signedStateA: SignedState;
 let signedStateB: SignedState;
-const largestOutcome = largeOutcome(MAX_OUTCOME_ITEMS);
 const stateWithLargeOutcome = {...state, outcome: largeOutcome(MAX_OUTCOME_ITEMS)};
 
 beforeAll(async () => {
@@ -91,16 +89,6 @@ describe('transaction-generators', () => {
     ]);
 
     expect(transactionRequest.data).toBeDefined();
-  });
-
-  it('creates a pushOutcome transaction with MAX_OUTCOME_ITEMS outcome items that is smaller than MAX_TX_DATA_SIZE', async () => {
-    const transactionRequest: ethers.providers.TransactionRequest = createPushOutcomeTransaction({
-      turnNumRecord: 1,
-      finalizesAt: 1606389728,
-      state: stateWithLargeOutcome,
-      outcome: largestOutcome,
-    });
-    expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
 
   it.each`

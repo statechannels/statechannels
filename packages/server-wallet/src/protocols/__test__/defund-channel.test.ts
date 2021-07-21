@@ -111,14 +111,9 @@ describe('when there is an active challenge', () => {
 });
 
 describe('when the channel is finalized on chain', () => {
-  it('should call pushOutcome if the outcome has not been pushed', async () => {
+  it('should call withdraw if the funds have not yet been withdrawn ', async () => {
     // If there is a funding entry that means the outcome has not been pushed
-    await Funding.updateFunding(
-      knex,
-      testChan.channelId,
-      '0x05',
-      makeAddress(testChan.assetHolderAddress)
-    );
+    await Funding.updateFunding(knex, testChan.channelId, '0x05', makeAddress(testChan.asset));
 
     const challengeState = stateSignedBy([alice()])();
     await setAdjudicatorStatus('finalized', testChan.channelId, challengeState);
@@ -128,7 +123,7 @@ describe('when the channel is finalized on chain', () => {
 
     // Check the results
     expect(response.chainRequests[0]).toMatchObject({
-      type: 'PushOutcomeAndWithdraw',
+      type: 'Withdraw',
       state: expect.objectContaining(challengeState),
       challengerAddress: testChan.participantA.signingAddress,
     });
@@ -136,7 +131,7 @@ describe('when the channel is finalized on chain', () => {
     expect(reloadedObjective.status).toEqual('succeeded');
   });
 
-  it('does nothing if the outcome has already been pushed', async () => {
+  it('does nothing if the funds have already been withdrawn', async () => {
     // Set a finalized channel with a final state
     await setAdjudicatorStatus('finalized', testChan.channelId);
 

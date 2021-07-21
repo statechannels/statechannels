@@ -37,10 +37,10 @@ export class DirectFunder {
     response: EngineResponse,
     tx: Transaction
   ): Promise<boolean> {
-    const assetHolderAddress = this.assetHolder(channel);
+    const asset = this.asset(channel);
     const {targetBefore, targetAfter, targetTotal} = channel.fundingMilestones;
 
-    const currentFunding = await this.store.getFunding(channel.channelId, assetHolderAddress, tx);
+    const currentFunding = await this.store.getFunding(channel.channelId, asset, tx);
     const currentAmount = currentFunding?.amount || 0;
 
     // if we're fully funded, we're done
@@ -62,7 +62,7 @@ export class DirectFunder {
       {
         type: 'FundChannel',
         channelId: channel.channelId,
-        assetHolderAddress: assetHolderAddress,
+        asset,
         expectedHeld: BN.from(currentAmount),
         amount: BN.from(amountToDeposit),
       },
@@ -71,14 +71,14 @@ export class DirectFunder {
     return false;
   }
 
-  private assetHolder(channel: Channel): Address {
+  private asset(channel: Channel): Address {
     const supported = channel.supported;
     if (!supported) {
       throw new Error(`Channel passed to DirectFunder has no supported state`);
     }
 
-    const {assetHolderAddress} = checkThat(supported?.outcome, isSimpleAllocation);
+    const {asset} = checkThat(supported?.outcome, isSimpleAllocation);
 
-    return assetHolderAddress;
+    return asset;
   }
 }

@@ -5810,10 +5810,10 @@
   resolved "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.8.2.tgz#a6a5e93ac8dca6884a99a532f133beba59b87b69"
   integrity sha512-8LySx3qrNXPgB5JiULfG10O3V7QTxI/TLzSw5hFQhXWSkVxZBAv4rZQ0sYgLEbc8g3L2lmnujj1hKul38Eu5NQ==
 
-"@statechannels/wasm-utils@0.1.6":
-  version "0.1.6"
-  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.6.tgz#2b0b7de5a63f158d4202718ebb5bdd3a910b0c6c"
-  integrity sha512-eUBeE/ChxksfhrGHwsdxx5ncvZnY4JkdBta6Y8mcgtJxQxdoxjqrJYiBbyZY5LqgW9mPowAaRQ09gm6Eebf4mQ==
+"@statechannels/wasm-utils@0.1.6-asset":
+  version "0.1.6-asset"
+  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.6-asset.tgz#9e4342c94bd256990450cb03358740fb8fd34bf0"
+  integrity sha512-+tu3u0e7K2Kyzz0NLj7UJDt8fXoF0CCRFRZfB/ORQegY90cohtBsmDEcJSc8uA9HWAbDV4bFVPk2YCnV7DgEkA==
 
 "@storybook/addon-actions@6.2.3":
   version "6.2.3"

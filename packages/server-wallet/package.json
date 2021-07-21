@@ -9,7 +9,7 @@
     "@statechannels/client-api-schema": "0.10.1",
     "@statechannels/nitro-protocol": "0.17.0",
     "@statechannels/wallet-core": "0.14.1",
-    "@statechannels/wasm-utils": "0.1.6",
+    "@statechannels/wasm-utils": "0.1.6-asset",
     "@statechannels/wire-format": "0.9.1",
     "ethers": "5.0.12",
     "eventemitter3": "4.0.7",

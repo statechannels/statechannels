@@ -3,7 +3,6 @@ import {
   Allocation,
   CloseChannelParams,
 } from '@statechannels/client-api-schema';
-import {makeAddress} from '@statechannels/wallet-core';
 import {BigNumber, ethers, constants} from 'ethers';
 
 import {ONE_DAY} from '../../__test__/test-helpers';
@@ -25,14 +24,13 @@ afterAll(async () => {
 });
 
 it('Create a fake-funded channel between two engines ', async () => {
-  const assetHolderAddress = makeAddress(constants.AddressZero);
   const aBal = BigNumber.from(1).toHexString();
 
   const {participantA, participantB, peerEngines, messageService} = peerSetup;
 
   const allocation: Allocation = {
     allocationItems: [{destination: participantA.destination, amount: aBal}],
-    assetHolderAddress,
+    asset: constants.AddressZero,
   };
 
   const channelParams: CreateChannelParams = {

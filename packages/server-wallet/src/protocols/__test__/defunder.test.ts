@@ -178,7 +178,7 @@ describe('Direct channel defunding', () => {
 
       // The channel has NOT been fully defunded.
       // Defunder does not complete
-      await Funding.updateFunding(tx, channel.channelId, '0x03', testChannel.assetHolderAddress);
+      await Funding.updateFunding(tx, channel.channelId, '0x03', testChannel.asset);
       expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: false,
@@ -186,7 +186,7 @@ describe('Direct channel defunding', () => {
 
       // The channel has been fully defunded
       // Defunder completes
-      await Funding.updateFunding(tx, channel.channelId, '0x00', testChannel.assetHolderAddress);
+      await Funding.updateFunding(tx, channel.channelId, '0x00', testChannel.asset);
       expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: true,
@@ -194,7 +194,7 @@ describe('Direct channel defunding', () => {
     });
   });
 
-  it('Channel is defunded via pushOutcome transaction', async () => {
+  it('Channel is defunded via withdraw transaction', async () => {
     // Channel has yet to be concluded
     await testChannel.insertInto(store, {
       participant: 0,
@@ -225,13 +225,13 @@ describe('Direct channel defunding', () => {
       });
 
       expect(response.chainRequests[0]).toMatchObject({
-        type: 'PushOutcomeAndWithdraw',
+        type: 'Withdraw',
         state: state4,
         challengerAddress: channel.myAddress,
       });
       // The channel has been fully defunded
       // Defunder completes
-      await Funding.updateFunding(tx, channel.channelId, '0x00', testChannel.assetHolderAddress);
+      await Funding.updateFunding(tx, channel.channelId, '0x00', testChannel.asset);
       expect(await defunder.crank(channel, objective, response, tx)).toEqual({
         didSubmitTransaction: false,
         isChannelDefunded: true,

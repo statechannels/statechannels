@@ -630,12 +630,8 @@ export class Store {
     await Channel.setInitialSupport(channelId, support, tx ?? this.knex);
   }
 
-  async updateFunding(
-    channelId: string,
-    fromAmount: Uint256,
-    assetHolderAddress: Address
-  ): Promise<void> {
-    await Funding.updateFunding(this.knex, channelId, fromAmount, assetHolderAddress);
+  async updateFunding(channelId: string, fromAmount: Uint256, asset: Address): Promise<void> {
+    await Funding.updateFunding(this.knex, channelId, fromAmount, asset);
   }
 
   async insertAdjudicatorStatus(
@@ -667,13 +663,13 @@ export class Store {
 
   async updateTransferredOut(
     channelId: string,
-    assetHolder: Address,
+    asset: Address,
     transferredOut: TransferredOutEntry[],
     newHoldings: string
   ): Promise<void> {
     this.lockApp(channelId, async tx => {
-      await Funding.updateTransferredOut(tx, channelId, assetHolder, transferredOut);
-      await Funding.updateFunding(tx, channelId, newHoldings, assetHolder);
+      await Funding.updateTransferredOut(tx, channelId, asset, transferredOut);
+      await Funding.updateFunding(tx, channelId, newHoldings, asset);
     });
   }
 
@@ -689,10 +685,10 @@ export class Store {
 
   async getFunding(
     channelId: string,
-    assetHolder: Address,
+    asset: Address,
     tx: Transaction
   ): Promise<Funding | undefined> {
-    const funding = Funding.query(tx).where({channelId, assetHolder}).first();
+    const funding = Funding.query(tx).where({channelId, asset}).first();
 
     return funding;
   }

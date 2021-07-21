@@ -24,7 +24,7 @@ import {BrowserServerMessageService} from '../message-service';
 jest.setTimeout(60_000);
 
 /* eslint-disable no-process-env, @typescript-eslint/no-non-null-assertion */
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 const rpcEndpoint = process.env.RPC_ENDPOINT;
 const chainId = process.env.CHAIN_ID;
 /* eslint-enable no-process-env, @typescript-eslint/no-non-null-assertion */
@@ -54,7 +54,7 @@ const serverConfig = defaultTestWalletConfig({
 });
 
 let provider: providers.JsonRpcProvider;
-let assetHolderContract: Contract;
+let nitroAdjudicatorContract: Contract;
 let serverWallet: ServerWallet;
 let browserWallet: ChannelWallet;
 let serverAddress: Address;
@@ -64,12 +64,12 @@ let browserDestination: Destination;
 
 beforeAll(async () => {
   provider = new providers.JsonRpcProvider(rpcEndpoint);
-  assetHolderContract = new Contract(
-    ethAssetHolderAddress,
-    ContractArtifacts.EthAssetHolderArtifact.abi,
+  nitroAdjudicatorContract = new Contract(
+    nitroAdjudicatorAddress,
+    ContractArtifacts.NitroAdjudicatorArtifact.abi,
     provider
   );
-  mineOnEvent(assetHolderContract);
+  mineOnEvent(nitroAdjudicatorContract);
   // TODO: The onSendMessage listener can still be executing
   // so we can't properly restart the engine
   await DBAdmin.truncateDatabase(serverConfig);
@@ -93,7 +93,7 @@ afterAll(async () => {
   await serverWallet.destroy();
   provider.polling = false;
   provider.removeAllListeners();
-  assetHolderContract.removeAllListeners();
+  nitroAdjudicatorContract.removeAllListeners();
 });
 
 async function mineBlocks(confirmations = 5) {
@@ -127,7 +127,7 @@ it('server wallet creates channel + cooperates with browser wallet to fund chann
       ],
       allocations: [
         {
-          assetHolderAddress: ethAssetHolderAddress,
+          asset: constants.AddressZero,
           allocationItems: [
             {
               amount: BN.from(3),
@@ -172,7 +172,7 @@ it('browser wallet creates channel + cooperates with server wallet to fund chann
     ],
     allocations: [
       {
-        assetHolderAddress: ethAssetHolderAddress,
+        asset: constants.AddressZero,
         allocationItems: [
           {
             amount: formatAmount('0x5' as Uint256),

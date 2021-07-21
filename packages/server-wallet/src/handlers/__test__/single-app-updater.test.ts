@@ -103,7 +103,7 @@ describe('not an app channel', () => {
 
     await store.pushMessage(testLedger.wirePayload(5));
     await store.pushMessage(testLedger.wirePayload(6));
-    await store.updateFunding(testLedger.channelId, BN.from(10), testLedger.assetHolderAddress);
+    await store.updateFunding(testLedger.channelId, BN.from(10), testLedger.asset);
 
     await expect(singleAppUpdater.update(testLedger.wirePayload(7), response)).rejects.toThrow(
       'The update sent to pushUpdate must be for an application channel'
@@ -120,5 +120,5 @@ const setup = async ({states}: SetupParams): Promise<void> => {
   for (const state of states) {
     await store.pushMessage(state);
   }
-  await store.updateFunding(testChan.channelId, BN.from(10), testChan.assetHolderAddress);
+  await store.updateFunding(testChan.channelId, BN.from(10), testChan.asset);
 };

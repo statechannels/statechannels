@@ -1,7 +1,6 @@
 import _ from 'lodash';
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import {
-  Address,
   BN,
   calculateChannelId,
   ChannelConstants,
@@ -21,9 +20,8 @@ import {
   OpenChannel,
   Destination,
 } from '@statechannels/wallet-core';
-import {ETH_ASSET_HOLDER_ADDRESS} from '@statechannels/wallet-core/lib/src/config';
 import {SignedState as WireState, Payload} from '@statechannels/wire-format';
-import {utils} from 'ethers';
+import {constants, utils} from 'ethers';
 
 import {Channel} from '../../../models/channel';
 import {defaultTestWalletConfig} from '../../../config';
@@ -66,6 +64,7 @@ export class TestChannel {
   public fundingLedgerChannelId: Bytes32 | undefined;
   static maximumNonce = 0;
 
+  public asset = makeAddress(constants.AddressZero);
   public get participants(): Participant[] {
     return [this.participantA, this.participantB];
   }
@@ -240,10 +239,6 @@ export class TestChannel {
     };
   }
 
-  public get assetHolderAddress(): Address {
-    return ETH_ASSET_HOLDER_ADDRESS;
-  }
-
   public get getChannelRequest(): Payload {
     return {
       walletVersion: WALLET_VERSION,
@@ -334,7 +329,7 @@ export class TestChannel {
 
     // set the funds as specified
     if (funds > 0) {
-      await store.updateFunding(this.channelId, BN.from(funds), this.assetHolderAddress);
+      await store.updateFunding(this.channelId, BN.from(funds), this.asset);
     }
 
     // patch the funding strategy

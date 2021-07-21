@@ -119,7 +119,7 @@ export function directFundingStatus(
     return 'Uncategorized';
   }
 
-  const {allocationItems, assetHolderAddress} = checkThat(outcome, isSimpleAllocation);
+  const {allocationItems, asset} = checkThat(outcome, isSimpleAllocation);
 
   // Collapse all allocation items with my destination into one
   const myDestination = myParticipant.destination;
@@ -128,7 +128,7 @@ export function directFundingStatus(
     .map(ai => ai.amount)
     .reduce(BN.add, BN.from(0));
 
-  const funding = fundingFn(assetHolderAddress);
+  const funding = fundingFn(asset);
   if (!funding) return undefined;
 
   const amountTransferredToMe = funding.transferredOut

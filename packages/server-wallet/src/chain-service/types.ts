@@ -1,4 +1,4 @@
-import {AllocationItem, AssetOutcome} from '@statechannels/nitro-protocol';
+import {Allocation, AssetOutcome} from '@statechannels/nitro-protocol';
 import {Address, PrivateKey, SignedState, State, Uint256} from '@statechannels/wallet-core';
 import {providers} from 'ethers';
 import {Logger} from 'pino';
@@ -7,22 +7,22 @@ import {Bytes32} from '../type-aliases';
 
 export type HoldingUpdatedArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   amount: Uint256;
 };
 
-export type AssetOutcomeUpdatedArg = {
+export type AllocationUpdatedArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   newHoldings: Uint256;
-  externalPayouts: AllocationItem[];
-  internalPayouts: AllocationItem[];
-  newAssetOutcome: AssetOutcome | '0x00'; // '0x00' in case the asset outcome hash was deleted on chain
+  externalPayouts: Allocation;
+  internalPayouts: Allocation;
+  newAssetOutcome: AssetOutcome;
 };
 
 export type FundChannelArg = {
   channelId: Bytes32;
-  assetHolderAddress: Address;
+  asset: Address;
   expectedHeld: Uint256;
   amount: Uint256;
 };
@@ -42,7 +42,7 @@ export type ChallengeRegisteredArg = {
 
 export interface ChainEventSubscriberInterface<T extends void = void> {
   holdingUpdated(arg: HoldingUpdatedArg): T;
-  assetOutcomeUpdated(arg: AssetOutcomeUpdatedArg): T;
+  allocationUpdated(arg: AllocationUpdatedArg): T;
   channelFinalized(arg: ChannelFinalizedArg): T;
   challengeRegistered(arg: ChallengeRegisteredArg): T;
 }
@@ -51,7 +51,7 @@ interface ChainEventEmitterInterface {
   checkChainId(networkChainId: number): Promise<void>;
   registerChannel(
     channelId: Bytes32,
-    assetHolders: Address[],
+    assets: Address[],
     listener: ChainEventSubscriberInterface
   ): void;
   unregisterChannel(channelId: Bytes32): void;
@@ -63,8 +63,8 @@ export type ConcludeAndWithdrawRequest = {
   type: 'ConcludeAndWithdraw';
   finalizationProof: SignedState[];
 };
-export type PushOutcomeAndWithdrawRequest = {
-  type: 'PushOutcomeAndWithdraw';
+export type WithdrawRequest = {
+  type: 'Withdraw';
   state: State;
   challengerAddress: Address;
 };
@@ -78,11 +78,10 @@ export type ChallengeRequest = {
 export type ChainRequest =
   | FundChannelRequest
   | ConcludeAndWithdrawRequest
-  | PushOutcomeAndWithdrawRequest
+  | WithdrawRequest
   | ChallengeRequest;
 interface ChainModifierInterface {
   handleChainRequests(chainRequests: ChainRequest[]): Promise<providers.TransactionResponse[]>;
-
   fetchBytecode(address: string): Promise<string>;
 }
 
