@@ -220,7 +220,7 @@ describe('claim', () => {
             args: {
               channelId: targetId,
               assetIndex: BigNumber.from(0),
-              initialHoldings: heldBefore[guarantorId],
+              initialHoldings: heldBefore[addresses.g],
             },
           },
         ];
