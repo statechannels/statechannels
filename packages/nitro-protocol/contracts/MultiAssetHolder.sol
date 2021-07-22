@@ -190,6 +190,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 targetOutcomeBytes,
                 (Outcome.OutcomeItem[])
             );
+            require(outcome[assetIndex].asset == asset, 'asset mismatch!');
             {
                 Outcome.AssetOutcome memory assetOutcome = abi.decode(
                     outcome[assetIndex].assetOutcomeBytes,
