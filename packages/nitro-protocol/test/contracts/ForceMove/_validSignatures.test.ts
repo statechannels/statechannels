@@ -7,8 +7,6 @@ import {sign} from '../../../src/signatures';
 const provider = getTestProvider();
 let ForceMove: Contract;
 
-jest.setTimeout(10_000);
-
 beforeAll(async () => {
   ForceMove = setupContract(provider, ForceMoveArtifact, process.env.TEST_FORCE_MOVE_ADDRESS);
 });
