@@ -253,12 +253,12 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
         payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
         totalPayouts = 0;
-        newAllocation = new Outcome.AllocationItem[](allocation.length);
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
 
         // copy allocation
+        newAllocation = new Outcome.AllocationItem[](allocation.length);
         for (uint256 i = 0; i < allocation.length; i++) {
             newAllocation[i].destination = allocation[i].destination;
             newAllocation[i].amount = allocation[i].amount;
