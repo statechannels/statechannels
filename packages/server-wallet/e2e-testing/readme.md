@@ -71,7 +71,14 @@ Convenience utility that starts up ganache, two load nodes and runs a load file 
 
 ## How to use It?
 
-The easiest way is to run the `start-all` script. From the package root:
+You'll need to create and migrate a couple of test databases:
+
+```shell
+SERVER_DB_NAME=server_wallet_test_a yarn db:create && yarn db:migrate
+SERVER_DB_NAME=server_wallet_test_b yarn db:create && yarn db:migrate
+```
+
+The easiest way to run the stress test is to use the `start-all` script. From the package root:
 
 ```shell
 npx ts-node e2e-testing/scripts/start-all.ts
