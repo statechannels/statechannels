@@ -1,4 +1,3 @@
-The e2e testing folder contains various scripts that are used for stress testing the server wallet.
 
 # Quick Start
 
@@ -10,9 +9,10 @@ This runs the `start-all` script which starts up [ganache](#start-ganache) and t
 
 It then sends a sample [load file](#load-file) that tells the wallets how many channels to create and close (and when to try and create them).
 
-It then tells the nodes to start processing those instructions and waits for it to complete  succesfully. 
+It then tells the nodes to start processing those instructions and waits for it to complete  succesfully.
 
 You should see something like this indicating that it ran succesfully.
+
 ```shell
 [A] Updated job queue with 60 steps
 [B] Updated job queue with 60 steps
@@ -31,7 +31,7 @@ SUCCESS!
 
 The load file is a list of instructions for a server wallet to perform. It looks something like this:
 
-```
+```JSON
 [ {
   "type": "CreateChannel",
   "jobId": "mushy-spicy-loose-uganda",
@@ -72,7 +72,6 @@ A `LoadNode` co-operates with it's peers by
 
 This means you only have to interact with one LoadNode to load and run the load file.
 
-
 ### How Load is processed
 
 Each step in the [load file](#load-file) contains a timestamp value. We set a timeout with the timestamp value
@@ -99,6 +98,7 @@ This starts up a load node server. The only required argument is the `roleId` (b
 ## Load Generator
 
 The load generator is responsible for generating load files.  The load generator accepts arguments for
+
 - how often channels should be created/closed
 - how long channels should be created/closed
 - whether channels are funded using ledger channels or direct funding
@@ -110,6 +110,7 @@ Currently we used fixed `outcome` and `appData`s  when creating channels.
 We also do not support update channel steps yet.
 
 ### Scheduling  
+
 The load generator uses a pretty basic scheduling algorithim.
 
 Generally for each step type we add `duration * rate` steps to the load file with a timestamp randonly selected from `0` to `duration`.
@@ -120,13 +121,14 @@ The basic flow is:
 
 2. `duration*CreateRate` createChannel steps are added to the load file.
 
-    If they ledger funded then we randomly select a CreateLedgerChannel `ledger` and generate a timestamp from `ledger.timestamp+ledgerDelay` to `duration`. 
+    If they ledger funded then we randomly select a CreateLedgerChannel `ledger` and generate a timestamp from `ledger.timestamp+ledgerDelay` to `duration`.
 
     If directly funded then the timestamp will be randomly selected from `0` to `duration`.
 
 3. `duration*CloseRate` close channel steps are added to the load file. For each step we randomly select a CreateChannel step `app` and schedule a close step with a timestamp randomly selected from `app.timestamp+closeDelay` to `duration`.
- 
+
 ### Direct Funding Example
+
 ```shell
 npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/example.json -f  0.82s user 0.07s system 123% cpu 0.725 total
 ❯ npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/example.json -f Direct --createRate 5 --duration 30 --closeRate 0
@@ -173,7 +175,6 @@ Complete!
 Here we are asking for a load file that will create 1 channel a second for 30 seconds. No channels will be closed.
 
 Ledger channels will be created for the first 5 seconds at the rate of 1 ledger channel a second. Any steps that depend on a ledger channel for funding will wait 15 seconds before attempting to use it.
-
 
 ## Start All
 
