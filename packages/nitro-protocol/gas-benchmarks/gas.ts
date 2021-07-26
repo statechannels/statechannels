@@ -65,11 +65,11 @@ export const gasRequiredTo: GasRequiredTo = {
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 146769,
+    vanillaNitro: 156969,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 139124,
+    vanillaNitro: 149324,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
@@ -78,8 +78,8 @@ export const gasRequiredTo: GasRequiredTo = {
     // pushOutcomeAndTransferAll ⬛ --------> 👩
     vanillaNitro: {
       challenge: 93390,
-      pushOutcomeAndTransferAll: 107733,
-      total: 201123,
+      pushOutcomeAndTransferAll: 117933,
+      total: 211323,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -91,9 +91,9 @@ export const gasRequiredTo: GasRequiredTo = {
       // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
       challengeX: 93390,
       challengeL: 92324,
-      pushOutcomeAndTransferAllL: 58631,
-      pushOutcomeAndTransferAllX: 107733,
-      total: 352078,
+      pushOutcomeAndTransferAllL: 68831,
+      pushOutcomeAndTransferAllX: 117933,
+      total: 372478,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -110,12 +110,12 @@ export const gasRequiredTo: GasRequiredTo = {
       challengeG: 94607,
       challengeJ: 101741,
       challengeX: 93390,
-      pushOutcomeAndTransferAllL: 58643,
+      pushOutcomeAndTransferAllL: 68843,
       pushOutcomeG: 61410,
       pushOutcomeJ: 60558,
-      claimG: 58492,
-      pushOutcomeAndTransferAllX: 107733,
-      total: 728910,
+      claimG: 68692,
+      pushOutcomeAndTransferAllX: 117933,
+      total: 759510,
     },
   },
 };
