@@ -74,12 +74,12 @@ async function createLoad() {
       default: 5,
       min: 5,
       describe: `The amount of time (in seconds) that create ledger channels can be scheduled for.
-      This dictactes the max timestamp a step can have.`,
+      This dictates the max timestamp a step can have.`,
     })
     .option('ledgerRate', {
       default: 1,
       min: 1,
-      describe: `The number of ledger channels to create per a second during the createLedgerDuration.`,
+      describe: `The number of ledger channels to create per second during the createLedgerDuration.`,
     })
     .option('ledgerDelay', {
       default: 20,
