@@ -160,8 +160,8 @@ function generateCreateLedgerSteps(
 ): Step[] {
   const steps: Step[] = [];
   _.times(ledgerRate * duration, () => {
-    const timestamp = generateRandomNumber(0, toMilliseconds(duration));
-    const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
+    const timestamp = generateRandomInteger(0, toMilliseconds(duration));
+    const startIndex = generateRandomInteger(0, Object.keys(roles).length - 1);
 
     const participants = generateParticipants(roles, startIndex);
 
@@ -197,7 +197,7 @@ function generateCloseSteps(
       if (createStep) {
         // We want a close timestamp that occurs at least closeDelay time after the create time
         const timestamp = Math.max(
-          generateRandomNumber(createStep.timestamp, toMilliseconds(duration)),
+          generateRandomInteger(createStep.timestamp, toMilliseconds(duration)),
           createStep.timestamp + toMilliseconds(closeDelay)
         );
 
@@ -224,7 +224,7 @@ function generateCreateSteps(
   const steps = _.clone(previousSteps) as Step[];
   const ledgerSteps = steps.filter(s => s.type === 'CreateLedgerChannel');
   _.times(createRate * duration, () => {
-    const startIndex = generateRandomNumber(0, Object.keys(roles).length - 1);
+    const startIndex = generateRandomInteger(0, Object.keys(roles).length - 1);
 
     // Due to https://github.com/statechannels/statechannels/issues/3652 we'll run into duplicate channelIds if we use the same constants.
     // For now we re-order the participants based on who is creating the channel.
@@ -238,13 +238,13 @@ function generateCreateSteps(
     if (funding.type === 'Ledger') {
       const ledgerToUse = getRandomElement(ledgerSteps);
       // We want to wait ledgerDelay before attempting to use the ledger channel
-      timestamp = generateRandomNumber(
+      timestamp = generateRandomInteger(
         ledgerToUse.timestamp + funding.ledgerDelay,
         toMilliseconds(duration)
       );
       fundingInfo = {type: 'Ledger', fundingLedgerJob: ledgerToUse.jobId};
     } else {
-      timestamp = generateRandomNumber(0, toMilliseconds(duration));
+      timestamp = generateRandomInteger(0, toMilliseconds(duration));
       fundingInfo = {type: 'Direct'};
     }
 
@@ -262,7 +262,13 @@ function generateCreateSteps(
   return steps;
 }
 
-function generateRandomNumber(min: number, max: number): number {
+/**
+ * Generates a random integer from [min,max]
+ * @param min The minimum possible value that can be generated
+ * @param max The maximum possible value that can be generated
+ * @returns The generated number
+ */
+function generateRandomInteger(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
@@ -332,7 +338,7 @@ function toMilliseconds(seconds: number): number {
 }
 
 function getRandomElement<T>(array: Array<T>): T {
-  const index = generateRandomNumber(0, array.length - 1);
+  const index = generateRandomInteger(0, array.length - 1);
   return array[index];
 }
 
@@ -349,6 +355,6 @@ function getRandomJobToClose(
     s => s.type === 'CreateChannel' && !jobsAlreadyWithClose.includes(s.jobId)
   );
 
-  const index = generateRandomNumber(0, filtered.length - 1);
+  const index = generateRandomInteger(0, filtered.length - 1);
   return filtered[index];
 }
