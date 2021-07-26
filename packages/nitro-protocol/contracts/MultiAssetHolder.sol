@@ -13,6 +13,10 @@ import './interfaces/IMultiAssetHolder.sol';
 contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     using SafeMath for uint256;
 
+    // *******
+    // Storage
+    // *******
+
     /**
      * holdings[asset][channelId] is the amount of asset held against channel channelId. 0 address implies ETH
      */
