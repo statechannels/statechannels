@@ -294,10 +294,10 @@ function generateParticipants(roles: Record<string, RoleConfig>, startIndex: num
 }
 
 /**
- * Creates channel parameters based on the provided roles and participants.
- * @param roles
- * @param participants
- * @returns A CreateChannelParams object that can be passed into createChannel
+ * Creates channel parameters based on the provided participants.
+ * @param participants The participants for the channel.
+ * @param fundingAmountPerParticipant The amount of funding each participant has. Defaults to 5.
+ * @returns A CreateChannelParams object (omitting the fundingStrategy)
  */
 function generateChannelParams(
   participants: Participant[],
