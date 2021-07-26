@@ -1,6 +1,33 @@
-This folder containts some basic testing infrastructure to set us up for stress testing our server wallet. It introduces load node that is responsible for calling wallet methods. A load file specifies what calls to make to the wallet and in what order to make them.
+The e2e testing folder contains various scripts that are used for stress testing the server wallet.
 
-### Load file
+# Quick Start
+
+```shell
+npx ts-node ./e2e-testing/scripts/start-all.ts -l ./e2e-testing/test-data/sample-direct-load-data.json
+```
+
+This runs the `start-all` script which starts up [ganache](#start-ganache) and two [server wallets](#load-node).
+
+It then sends a sample [load file](#load-file) that tells the wallets how many channels to create and close (and when to try and create them).
+
+It then tells the nodes to start processing those instructions and waits for it to complete  succesfully. 
+
+You should see something like this indicating that it ran succesfully.
+```shell
+[A] Updated job queue with 60 steps
+[B] Updated job queue with 60 steps
+[A] Starting job processing..
+[A] This node will create 29 channel(s) using Direct funding
+[B] Starting job processing..
+[B] This node will create 31 channel(s) using Direct funding
+[A] All jobs complete!
+[B] All jobs complete!
+SUCCESS!
+```
+
+# Concepts
+
+## Load file
 
 The load file is a list of instructions for a server wallet to perform. It looks something like this:
 
@@ -33,7 +60,7 @@ The `timestamp` is when these instructions should be executed. The `timestamp` i
 
 The `serverId` indicates which LoadNode is responsible for that step. Each LoadNode will have a unique `serverId` based on the entries in the `role.config`
 
-### LoadNode
+## Load Node
 
 There is a new class `WalletLoadNode` which is an http server that has its own wallet. The load node is responsible for loading a load file and then performing the instructions specified in the file.
 
@@ -45,41 +72,109 @@ A `LoadNode` co-operates with it's peers by
 
 This means you only have to interact with one LoadNode to load and run the load file.
 
-### Role Config
+
+### How Load is processed
+
+Each step in the [load file](#load-file) contains a timestamp value. We set a timeout with the timestamp value
+for each step. When the timer executes we attempt to create or close the channel as instructed.
+
+Steps don't wait for the completion of previous steps before starting.
+
+## Role Config
 
 [A simple JSON config](./test-data/roles.json) file specifies various ports and private keys to be used for a LoadNode. This is used to easily start up LoadNodes without having to specify a bunch of different options.
 
-## New Scripts
+# Scripts
 
 All scripts are typescript files that can be run with `ts-node`.
 
-### Start Ganache
+## Start Ganache
 
 This is similar to what we have in devtools but I wanted to avoid messing with env vars. It is responsible for starting ganache and deploying the contracts.
 
-### Start Load Node
+## Start Load Node
 
 This starts up a load node server. The only required argument is the `roleId` (based on the roleConfig). Using the default role config the valid options are "A" or "B.
 
-### Load Generator
+## Load Generator
 
-Generates a load file that can be run against a set of nodes.
+The load generator is responsible for generating load files.  The load generator accepts arguments for
+- how often channels should be created/closed
+- how long channels should be created/closed
+- whether channels are funded using ledger channels or direct funding
 
-### Start All
+### Limitations
+
+Currently we used fixed `outcome` and `appData`s  when creating channels.
+
+We also do not support update channel steps yet.
+
+### Scheduling  
+The load generator uses a pretty basic scheduling algorithim.
+
+Generally for each step type we add `duration * rate` steps to the load file with a timestamp randonly selected from `0` to `duration`.
+
+The basic flow is:
+
+1. (If applicable) `createLedgerDuration*ledgerRate` CreateLedgerChannel steps are added with a timestamp randomly chosen between `0` and `createLedgerDuration`
+
+2. `duration*CreateRate` createChannel steps are added to the load file.
+
+    If they ledger funded then we randomly select a CreateLedgerChannel `ledger` and generate a timestamp from `ledger.timestamp+ledgerDelay` to `duration`. 
+
+    If directly funded then the timestamp will be randomly selected from `0` to `duration`.
+
+3. `duration*CloseRate` close channel steps are added to the load file. For each step we randomly select a CreateChannel step `app` and schedule a close step with a timestamp randomly selected from `app.timestamp+closeDelay` to `duration`.
+ 
+### Direct Funding Example
+```shell
+npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/example.json -f  0.82s user 0.07s system 123% cpu 0.725 total
+❯ npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/example.json -f Direct --createRate 5 --duration 30 --closeRate 0
+[@statechannels/devtools] NODE_ENV is undefined — setting to "development"
+Generating a test load file to  ./temp/example.json
+Using the following options {
+  outputFile: './temp/example.json',
+  roleFile: './e2e-testing/test-data/roles.json',
+  duration: 30,
+  createRate: 5,
+  closeRate: 0,
+  closeDelay: 5,
+  fundingStrategy: 'Direct'
+}
+150 channels will be created.
+None of those channels will be closed.
+Complete!
+```
+
+Here we are asking for a load file that will create 5 channels a second for 30 seconds. No channels will be closed.
+All channels will be directly funded.
+
+### Ledger Funding Example
+
+```shell
+❯ npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/ledger-example.json -f Ledger --createRate 1  --duration 30 --closeRate 0 --createLedgerDuration 5 --ledgerDelay 15
+[@statechannels/devtools] NODE_ENV is undefined — setting to "development"
+Generating a test load file to  ./temp/ledger-example.json
+Using the following options {
+  outputFile: './temp/ledger-example.json',
+  roleFile: './e2e-testing/test-data/roles.json',
+  duration: 30,
+  createRate: 1,
+  closeRate: 0,
+  closeDelay: 5,
+  fundingStrategy: 'Ledger'
+}
+Ledger options { ledgerDelay: 15, ledgerRate: 1, createLedgerDuration: 5 }
+30 channels will be created.
+None of those channels will be closed.
+Complete!
+```
+
+Here we are asking for a load file that will create 1 channel a second for 30 seconds. No channels will be closed.
+
+Ledger channels will be created for the first 5 seconds at the rate of 1 ledger channel a second. Any steps that depend on a ledger channel for funding will wait 15 seconds before attempting to use it.
+
+
+## Start All
 
 Convenience utility that starts up ganache, two load nodes and runs a load file against them.
-
-## How to use It?
-
-You'll need to create and migrate a couple of test databases:
-
-```shell
-SERVER_DB_NAME=server_wallet_test_a yarn db:create && yarn db:migrate
-SERVER_DB_NAME=server_wallet_test_b yarn db:create && yarn db:migrate
-```
-
-The easiest way to run the stress test is to use the `start-all` script. From the package root:
-
-```shell
-npx ts-node e2e-testing/scripts/start-all.ts
-```
