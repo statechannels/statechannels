@@ -28,15 +28,15 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 4092117, // Singleton
+      NitroAdjudicator: 4070552, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 48754,
+    vanillaNitro: 47992,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 31666,
+    vanillaNitro: 30904,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -48,7 +48,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 72132,
+      deposit: 71370,
     },
   },
   directlyFundAChannelWithERC20Second: {
@@ -58,7 +58,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 55044,
+      deposit: 54282,
     },
   },
   ETHexit: {

@@ -47,16 +47,14 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // 2. Participant B sees A's deposit, which means it is now safe for them to deposit
         // 3. Participant B submits their deposit
         // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
-        require(holdings[asset][channelId] >= expectedHeld, 'holdings < expectedHeld');
-        require(
-            holdings[asset][channelId] < expectedHeld.add(amount),
-            'holdings already sufficient'
-        );
+        uint256 held = holdings[asset][channelId];
+        require(held >= expectedHeld, 'holdings < expectedHeld');
+        require(held < expectedHeld.add(amount), 'holdings already sufficient');
 
         // The depositor wishes to increase the holdings against channelId to amount + expectedHeld
         // The depositor need only deposit (at most) amount + (expectedHeld - holdings) (the term in parentheses is non-positive)
 
-        amountDeposited = expectedHeld.add(amount).sub(holdings[asset][channelId]); // strictly positive
+        amountDeposited = expectedHeld.add(amount).sub(held); // strictly positive
         // require successful deposit before updating holdings (protect against reentrancy)
         if (asset == address(0)) {
             require(msg.value == amount, 'Incorrect msg.value for deposit');
@@ -68,8 +66,9 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             );
         }
 
-        holdings[asset][channelId] = holdings[asset][channelId].add(amountDeposited);
-        emit Deposited(channelId, asset, amountDeposited, holdings[asset][channelId]);
+        uint256 nowHeld = held.add(amountDeposited);
+        holdings[asset][channelId] = nowHeld;
+        emit Deposited(channelId, asset, amountDeposited, nowHeld);
 
         if (asset == address(0)) {
             // refund whatever wasn't deposited.
