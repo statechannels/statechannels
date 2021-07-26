@@ -8,7 +8,7 @@ import * as jsonfile from 'jsonfile';
 import chalk from 'chalk';
 import {generateSlug} from 'random-word-slugs';
 import _ from 'lodash';
-import {BigNumber, ethers, utils} from 'ethers';
+import {BigNumber, ethers} from 'ethers';
 import ms from 'ms';
 
 import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-bytecode';
@@ -324,7 +324,7 @@ function generateChannelParams(
       },
     ],
     appDefinition: COUNTING_APP_DEFINITION,
-    appData: utils.hexZeroPad('0x0', 32),
+    appData: '0x',
 
     challengeDuration: ms('1d') / 1000, // This is 1 day in seconds,
   };
