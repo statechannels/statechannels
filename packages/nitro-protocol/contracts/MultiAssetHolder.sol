@@ -128,14 +128,18 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
 
         // execute the exit at the specified indices, updating allocation in place to the updated
         // allocation returned by _transfer
-        (allocation, initialHoldings) = _transfer(asset, fromChannelId, allocation, indices); 
-
+        (allocation, initialHoldings) = _transfer(asset, fromChannelId, allocation, indices);
 
         // Update the fingerprint
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
             Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
-        _updateFingerprint(fromChannelId, stateHash, challengerAddress, keccak256(abi.encode(outcome)));
+        _updateFingerprint(
+            fromChannelId,
+            stateHash,
+            challengerAddress,
+            keccak256(abi.encode(outcome))
+        );
 
         // Emit the information needed to compute the new outcome stored in the fingerprint
         emit AllocationUpdated(fromChannelId, assetIndex, initialHoldings);
@@ -304,7 +308,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         return (newAllocation, initialHoldings);
     }
 
-
     function _computeNewAllocation(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
@@ -461,7 +464,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             }
         }
     }
-
 
     /**
      * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
