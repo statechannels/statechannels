@@ -31,6 +31,7 @@ const addresses = {
 };
 
 const reason5 = 'Channel not finalized';
+const reason6 = 'targetAsset != guaranteeAsset';
 
 // 1. claim G1 (step 1 of figure 23 of nitro paper)
 // 2. claim G2 (step 2 of figure 23 of nitro paper)
@@ -57,6 +58,7 @@ describe('claim', () => {
     ${'14. (all) guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${reason5}
     ${'15. (all) swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 0}}       | ${{g: 2}} | ${{A: 5, B: 5}} | ${undefined}
     ${'16. (all) underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{A: 5, B: 5}} | ${undefined}
+    ${'17. guarantee and target assets do not match'}         | ${{g: 1}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 4, B: 5}}       | ${{g: 0}} | ${{A: 1}}       | ${reason6}
   `(
     '$name',
     async ({
@@ -152,7 +154,10 @@ describe('claim', () => {
         targetChannelId: targetId,
       };
 
-      const guaranteeOutcome: Outcome = [{asset: MAGIC_ADDRESS_INDICATING_ETH, guarantee}];
+      const guaranteeOutcome: Outcome =
+        reason === reason6
+          ? [{asset: '0xdac17f958d2ee523a2206206994597c13d831ec7', guarantee}] // USDT
+          : [{asset: MAGIC_ADDRESS_INDICATING_ETH, guarantee}];
       const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
       const guarantorOutcomeHash = hashOutcome(guaranteeOutcome);
 
