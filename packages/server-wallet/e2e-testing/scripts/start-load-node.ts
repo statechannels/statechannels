@@ -50,7 +50,7 @@ async function setupNode(): Promise<WalletLoadNode> {
     })
     .option('migrateDB', {
       alias: 'm',
-      default: false,
+      default: true,
       describe: `Whether the db should be migrated (and created if it doesn't exist`,
     })
     .option('clearDB', {
