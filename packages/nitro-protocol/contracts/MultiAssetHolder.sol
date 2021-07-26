@@ -121,15 +121,23 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         );
         address asset = outcome[assetIndex].asset;
 
+        // ************************
         // effects and interactions
+        // ************************
         uint256 initialHoldings;
-        (allocation, initialHoldings) = _transfer(asset, fromChannelId, allocation, indices); // update in place to newAllocation
+
+        // execute the exit at the specified indices, updating allocation in place to the updated
+        // allocation returned by _transfer
+        (allocation, initialHoldings) = _transfer(asset, fromChannelId, allocation, indices); 
+
+
+        // Update the fingerprint
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
             Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
-        outcomeBytes = abi.encode(outcome);
-        bytes32 outcomeHash = keccak256(outcomeBytes);
-        _updateFingerprint(fromChannelId, stateHash, challengerAddress, outcomeHash);
+        _updateFingerprint(fromChannelId, stateHash, challengerAddress, keccak256(abi.encode(outcome)));
+
+        // Emit the information needed to compute the new outcome stored in the fingerprint
         emit AllocationUpdated(fromChannelId, assetIndex, initialHoldings);
     }
 
