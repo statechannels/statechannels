@@ -271,7 +271,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
     ) internal returns (Outcome.AllocationItem[] memory, uint256) {
-        uint256 initialHoldings = holdings[asset][fromChannelId];
+        mapping(bytes32 => uint256) storage assetHoldings = holdings[asset];
+        uint256 initialHoldings = assetHoldings[fromChannelId];
 
         (
             Outcome.AllocationItem[] memory newAllocation,
@@ -284,7 +285,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // EFFECTS
         // *******
 
-        holdings[asset][fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+        assetHoldings[fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
         // *******
         // INTERACTIONS
@@ -296,7 +297,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 if (_isExternalDestination(destination)) {
                     _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
                 } else {
-                    holdings[asset][destination] += payouts[j];
+                    assetHoldings[destination] += payouts[j];
                 }
             }
         }
@@ -362,7 +363,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         Outcome.AllocationItem[] memory allocation,
         uint256[] memory indices
     ) internal returns (Outcome.AllocationItem[] memory, uint256) {
-        uint256 initialHoldings = holdings[asset][guarantorChannelId];
+        mapping(bytes32 => uint256) storage assetHoldings = holdings[asset];
+        uint256 initialHoldings = assetHoldings[guarantorChannelId];
 
         (
             Outcome.AllocationItem[] memory newAllocation,
@@ -375,7 +377,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // EFFECTS
         // *******
 
-        holdings[asset][guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+        assetHoldings[guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
 
         // *******
         // INTERACTIONS
@@ -388,7 +390,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 if (_isExternalDestination(destination)) {
                     _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
                 } else {
-                    holdings[asset][destination] += payouts[j];
+                    assetHoldings[destination] += payouts[j];
                 }
             }
         }
