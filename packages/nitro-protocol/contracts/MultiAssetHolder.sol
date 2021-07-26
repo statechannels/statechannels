@@ -258,6 +258,144 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     // Internal methods
     // **************
 
+    /**
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
+     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
+     * @param allocation An AssetOutcome.AllocationItem[]
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to. Should be in increasing order. An empty array indicates "all".
+     */
+    function _transfer(
+        address asset,
+        bytes32 fromChannelId,
+        Outcome.AllocationItem[] memory allocation,
+        uint256[] memory indices
+    ) internal returns (Outcome.AllocationItem[] memory, uint256) {
+        uint256 initialHoldings = holdings[asset][fromChannelId];
+
+        (
+            Outcome.AllocationItem[] memory newAllocation,
+            ,
+            uint256[] memory payouts,
+            uint256 totalPayouts
+        ) = _computeNewAllocation(initialHoldings, allocation, indices);
+
+        // *******
+        // EFFECTS
+        // *******
+
+        holdings[asset][fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+
+        // *******
+        // INTERACTIONS
+        // *******
+
+        for (uint256 j = 0; j < payouts.length; j++) {
+            if (payouts[j] > 0) {
+                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
+                if (_isExternalDestination(destination)) {
+                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
+                } else {
+                    holdings[asset][destination] += payouts[j];
+                }
+            }
+        }
+        return (newAllocation, initialHoldings);
+    }
+
+
+    function _computeNewAllocation(
+        uint256 initialHoldings,
+        Outcome.AllocationItem[] memory allocation,
+        uint256[] memory indices
+    )
+        public
+        pure
+        returns (
+            Outcome.AllocationItem[] memory newAllocation,
+            bool allocatesOnlyZeros,
+            uint256[] memory payouts,
+            uint256 totalPayouts
+        )
+    {
+        // `indices == []` means "pay out to all"
+        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
+        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
+        totalPayouts = 0;
+        newAllocation = new Outcome.AllocationItem[](allocation.length);
+        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
+        uint256 surplus = initialHoldings; // tracks funds available during calculation
+        uint256 k = 0; // indexes the `indices` array
+
+        // loop over allocations and decrease surplus
+        for (uint256 i = 0; i < allocation.length; i++) {
+            // copy destination part
+            newAllocation[i].destination = allocation[i].destination;
+            // compute new amount part
+            uint256 affordsForDestination = min(allocation[i].amount, surplus);
+            if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
+                // found a match
+                // reduce the current allocationItem.amount
+                newAllocation[i].amount = allocation[i].amount - affordsForDestination;
+                // increase the relevant payout
+                payouts[k] = affordsForDestination;
+                totalPayouts += affordsForDestination;
+                // move on to the next supplied index
+                ++k;
+            } else {
+                newAllocation[i].amount = allocation[i].amount;
+            }
+            if (newAllocation[i].amount != 0) allocatesOnlyZeros = false;
+            // decrease surplus by the current amount if possible, else surplus goes to zero
+            surplus -= affordsForDestination;
+        }
+    }
+
+    /**
+     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
+     * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
+     */
+    function _claim(
+        address asset,
+        bytes32 guarantorChannelId,
+        Outcome.Guarantee memory guarantee,
+        Outcome.AllocationItem[] memory allocation,
+        uint256[] memory indices
+    ) internal returns (Outcome.AllocationItem[] memory, uint256) {
+        uint256 initialHoldings = holdings[asset][guarantorChannelId];
+
+        (
+            Outcome.AllocationItem[] memory newAllocation,
+            ,
+            uint256[] memory payouts,
+            uint256 totalPayouts
+        ) = _computeNewAllocationWithGuarantee(initialHoldings, allocation, indices, guarantee);
+
+        // *******
+        // EFFECTS
+        // *******
+
+        holdings[asset][guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
+
+        // *******
+        // INTERACTIONS
+        // *******
+
+        for (uint256 j = 0; j < payouts.length; j++) {
+            if (payouts[j] > 0) {
+                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
+                // storage updated BEFORE external contracts called (prevent reentrancy attacks)
+                if (_isExternalDestination(destination)) {
+                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
+                } else {
+                    holdings[asset][destination] += payouts[j];
+                }
+            }
+        }
+
+        return (newAllocation, initialHoldings);
+    }
+
     function _computeNewAllocationWithGuarantee(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
@@ -322,142 +460,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         }
     }
 
-    function _computeNewAllocation(
-        uint256 initialHoldings,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices
-    )
-        public
-        pure
-        returns (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool allocatesOnlyZeros,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        )
-    {
-        // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
-        totalPayouts = 0;
-        newAllocation = new Outcome.AllocationItem[](allocation.length);
-        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
-
-        // loop over allocations and decrease surplus
-        for (uint256 i = 0; i < allocation.length; i++) {
-            // copy destination part
-            newAllocation[i].destination = allocation[i].destination;
-            // compute new amount part
-            uint256 affordsForDestination = min(allocation[i].amount, surplus);
-            if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                // found a match
-                // reduce the current allocationItem.amount
-                newAllocation[i].amount = allocation[i].amount - affordsForDestination;
-                // increase the relevant payout
-                payouts[k] = affordsForDestination;
-                totalPayouts += affordsForDestination;
-                // move on to the next supplied index
-                ++k;
-            } else {
-                newAllocation[i].amount = allocation[i].amount;
-            }
-            if (newAllocation[i].amount != 0) allocatesOnlyZeros = false;
-            // decrease surplus by the current amount if possible, else surplus goes to zero
-            surplus -= affordsForDestination;
-        }
-    }
-
-    /**
-     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
-     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries. Does not check allocationBytes against on chain storage.
-     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
-     * @param allocation An AssetOutcome.AllocationItem[]
-     * @param indices Array with each entry denoting the index of a destination to transfer funds to. Should be in increasing order. An empty array indicates "all".
-     */
-    function _transfer(
-        address asset,
-        bytes32 fromChannelId,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices
-    ) internal returns (Outcome.AllocationItem[] memory, uint256) {
-        uint256 initialHoldings = holdings[asset][fromChannelId];
-
-        (
-            Outcome.AllocationItem[] memory newAllocation,
-            ,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        ) = _computeNewAllocation(initialHoldings, allocation, indices);
-
-        // *******
-        // EFFECTS
-        // *******
-
-        holdings[asset][fromChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
-
-        // *******
-        // INTERACTIONS
-        // *******
-
-        for (uint256 j = 0; j < payouts.length; j++) {
-            if (payouts[j] > 0) {
-                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
-                if (_isExternalDestination(destination)) {
-                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
-                } else {
-                    holdings[asset][destination] += payouts[j];
-                }
-            }
-        }
-        return (newAllocation, initialHoldings);
-    }
-
-    /**
-     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
-     * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel.  Does not check allocationBytes or guarantee against on chain storage.
-     */
-    function _claim(
-        address asset,
-        bytes32 guarantorChannelId,
-        Outcome.Guarantee memory guarantee,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices
-    ) internal returns (Outcome.AllocationItem[] memory, uint256) {
-        uint256 initialHoldings = holdings[asset][guarantorChannelId];
-
-        (
-            Outcome.AllocationItem[] memory newAllocation,
-            ,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        ) = _computeNewAllocationWithGuarantee(initialHoldings, allocation, indices, guarantee);
-
-        // *******
-        // EFFECTS
-        // *******
-
-        holdings[asset][guarantorChannelId] = initialHoldings.sub(totalPayouts); // expect gas rebate if this is set to 0
-
-        // *******
-        // INTERACTIONS
-        // *******
-
-        for (uint256 j = 0; j < payouts.length; j++) {
-            if (payouts[j] > 0) {
-                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
-                // storage updated BEFORE external contracts called (prevent reentrancy attacks)
-                if (_isExternalDestination(destination)) {
-                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
-                } else {
-                    holdings[asset][destination] += payouts[j];
-                }
-            }
-        }
-
-        return (newAllocation, initialHoldings);
-    }
 
     /**
      * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
