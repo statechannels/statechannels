@@ -37,52 +37,47 @@ type SignedState = {
  * The support proof for X from the last state provided is used to update Alice & Bob's
  * outcome in the joint channel. Irene's balance should be invariant.
  */
-export function validSupport(proof: Proof): boolean {
-  const [first, second, third] = proof;
-  requireThat(first.type === 'None');
-  requireThat(first.signedby('Irene'));
-
-  if (proof.length === 1) {
-    requireThat(first.signedby('Alice', 'Bob'));
-  } else if (proof.length === 2) {
-    // None -> A or None -> B are allowed
+export function validTransition(first: SignedState, second: SignedState): boolean {
+  requireThat(first.type === 'None' || first.type === 'A' || first.type === 'B');
+  if (first.type === 'None') {
+    //
     requireThat(second.type === 'A' || second.type === 'B');
     if (second.type === 'A') {
-      requireThat(first.signedby('Bob'));
+      requireThat(first.signedby('Bob', 'Irene'));
       requireThat(second.signedby('Alice'));
-    } else if (second.type === 'B') {
-      requireThat(first.signedby('Alice'));
-      requireThat(second.signedby('Bob'));
     } else {
-      revert('Invalid second state -- expecting A or B');
-    }
-
-    requireThat(validTransition(first, second));
-  } else if (proof.length === 3) {
-    // None -> A -> AB and None -> B -> AB are allowed
-    requireThat(second.type === 'A' || second.type === 'B');
-    requireThat(third.type === 'AB');
-
-    if (second.type === 'A') {
-      requireThat(second.signedby('Alice'));
-      requireThat(third.signedby('Bob'));
-    } else if (second.type === 'B') {
+      requireThat(first.signedby('Alice', 'Irene'));
       requireThat(second.signedby('Bob'));
-      requireThat(third.signedby('Alice'));
-    } else {
-      revert('Invalid second state -- expecting A or B');
     }
+  } else if (first.type === 'A') {
+    // In this case, and the case below, we are unable to validate that Irene has signed _any_ state.
+    // Therefore, the adjudicator needs to run some additional logic to validate that Irene signed _some_
+    // state. Otherwise, Alice & Bob can collude to take Irene's money.
 
-    requireThat(validTransition(first, second));
-    requireThat(validTransition(second, third));
+    // Even with the additional signature checking, validTransition seems less clear than validSupport.
+    // Suppose we want to argue that disputes can last at most 3 challenges.
+    // - With validTransition, we have to combine knowledge about signature checking and multiple invocations of
+    //   validTransition to convince ourselves that
+    //     - at most 3 disputes are possible
+    //     - Irene must have signed off on _some_ state that recently preceded the most recently known state
+    // - validSupport lays out the possible cases of signatures-on-states in the code itself
+    requireThat(second.type === 'AB');
+    requireThat(first.signedby('Alice'));
+    requireThat(second.signedby('Bob'));
+  } else if (first.type === 'B') {
+    requireThat(second.type === 'AB');
+    requireThat(first.signedby('Bob'));
+    requireThat(second.signedby('Alice'));
   } else {
-    revert('Invalid proof length -- expecting at most three states');
+    revert('Unexpected type on first');
   }
+
+  requireThat(validAppTransition(first, second));
 
   return true;
 }
 
-function validTransition(_first: SignedState, _second: SignedState): boolean {
+function validAppTransition(_first: SignedState, _second: SignedState): boolean {
   // Check that
   // - the embedded app's support proof is valid for both states
   // - the embeddeded turn number is larger in _second than in _first
