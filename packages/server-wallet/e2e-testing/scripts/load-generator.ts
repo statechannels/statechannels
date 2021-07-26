@@ -111,14 +111,22 @@ async function createLoad() {
         closeRate,
         closeDelay,
         fundingStrategy,
-        ledgerDelay,
-        ledgerRate,
-        createLedgerDuration,
       })}`
     )
   );
+  if (fundingStrategy === 'Ledger') {
+    console.log(
+      chalk.whiteBright(
+        `Ledger options ${util.inspect({
+          ledgerDelay,
+          ledgerRate,
+          createLedgerDuration,
+        })}`
+      )
+    );
+  }
 
-  console.log(chalk.whiteBright(`${createRate * duration} will be created.`));
+  console.log(chalk.whiteBright(`${createRate * duration} channels will be created.`));
   console.log(
     chalk.whiteBright(
       `${
