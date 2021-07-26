@@ -237,9 +237,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     // **************
     // Internal methods
     // **************
-    /**
-     * 
-     */
+
     function _computeNewAllocationWithGuarantee(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
@@ -304,9 +302,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         }
     }
 
-    /**
-     * @notice 
-     */
     function _computeNewAllocation(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
