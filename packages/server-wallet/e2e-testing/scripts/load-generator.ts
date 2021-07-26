@@ -79,7 +79,7 @@ async function createLoad() {
     .option('ledgerRate', {
       default: 1,
       min: 1,
-      describe: `The number of ledger channels to create per a second during the createLedgerDuration.`,
+      describe: `The number of ledger channels to create per second during the createLedgerDuration.`,
     })
     .option('ledgerDelay', {
       default: 15,
