@@ -41,7 +41,7 @@ const allocation = randomAllocation(Math.ceil(Math.random() * 20));
 const indices = shuffle([...Array(allocation.length).keys()]); // [0, 1, 2, 3,...] but shuffled
 const guarantee = randomGuarantee(allocation);
 
-describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
+describe('MultiAssetHolder._computeNewAllocationWithGuarantee', () => {
   it(`matches on chain method for input \n heldBefore: ${heldBefore}, \n allocation: ${JSON.stringify(
     allocation,
     null,
