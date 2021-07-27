@@ -167,12 +167,8 @@ export const newDepositedEvent = (
 const genRanHex = size =>
   [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
 
-export function randomChannelId(): Bytes32 {
-  return '0x' + genRanHex(64);
-}
-
-export const randomExternalDestination = (): string =>
-  '0x' + ethers.Wallet.createRandom().address.slice(2, 42).padStart(64, '0').toLowerCase();
+export const randomChannelId = (): Bytes32 => '0x' + genRanHex(64);
+export const randomExternalDestination = (): Bytes32 => '0x' + genRanHex(40).padStart(64, '0');
 
 export async function sendTransaction(
   provider: ethers.providers.JsonRpcProvider,
