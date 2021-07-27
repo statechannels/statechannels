@@ -97,11 +97,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         // checks
         _requireIncreasingIndices(indices); // This assumption relied on by _computeNewAllocation (below)
         _requireChannelFinalized(fromChannelId);
-        _requireMatchingFingerprint(
-            stateHash,
-            keccak256(outcomeBytes),
-            fromChannelId
-        );
+        _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), fromChannelId);
 
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
         Outcome.AssetOutcome memory assetOutcome = abi.decode(
@@ -131,11 +127,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         outcome[assetIndex].assetOutcomeBytes = abi.encode(
             Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
         );
-        _updateFingerprint(
-            fromChannelId,
-            stateHash,
-            keccak256(abi.encode(outcome))
-        );
+        _updateFingerprint(fromChannelId, stateHash, keccak256(abi.encode(outcome)));
 
         // Emit the information needed to compute the new outcome stored in the fingerprint
         emit AllocationUpdated(fromChannelId, assetIndex, initialHoldings);
@@ -237,11 +229,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             );
             {
                 bytes32 outcomeHash = keccak256(abi.encode(outcome));
-                _updateFingerprint(
-                    guarantee.targetChannelId,
-                    targetStateHash,
-                    outcomeHash
-                );
+                _updateFingerprint(guarantee.targetChannelId, targetStateHash, outcomeHash);
             }
             emit AllocationUpdated(guarantee.targetChannelId, assetIndex, initialHoldings);
         }

@@ -58,11 +58,7 @@ contract NitroAdjudicator is MultiAssetHolder {
     ) public {
         // checks
         _requireChannelFinalized(channelId);
-        _requireMatchingFingerprint(
-            stateHash,
-            keccak256(outcomeBytes),
-            channelId
-        );
+        _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), channelId);
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
