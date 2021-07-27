@@ -46,7 +46,7 @@ const baseConfig = defaultTestWalletConfig({
     logLevel: 'trace',
     logDestination: path.join(ARTIFACTS_DIR, 'with-peers.log'),
   },
-  syncConfiguration: {pollInterval: 50, staleThreshold: 1_000, timeOutThreshold: 45_000},
+  syncConfiguration: {pollInterval: 500, staleThreshold: 1_000, timeOutThreshold: 45_000},
 });
 export const aWalletConfig = overwriteConfigWithDatabaseConnection(baseConfig, {
   database: aDatabase,
