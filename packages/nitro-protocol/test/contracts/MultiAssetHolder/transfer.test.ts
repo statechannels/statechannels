@@ -2,7 +2,6 @@ import {expectRevert} from '@statechannels/devtools';
 import {BigNumber, constants, Contract} from 'ethers';
 
 import {
-  getRandomNonce,
   getTestProvider,
   randomChannelId,
   randomExternalDestination,
@@ -59,13 +58,12 @@ describe('transfer', () => {
     ${'16. incorrect fingerprint        '} | ${{c: 1}}  | ${{}}                 | ${[0]}       | ${{}}                 | ${{}}           | ${{A: 1}}       | ${reason2}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
-    async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, reason}) => {
+    async ({heldBefore, setOutcome, indices, newOutcome, heldAfter, reason}) => {
       // Compute channelId
-      const nonce = getRandomNonce(name);
-      addresses.c = randomChannelId(nonce);
+      addresses.c = randomChannelId();
       const channelId = addresses.c;
-      addresses.C = randomChannelId(nonce + 1);
-      addresses.X = randomChannelId(nonce + 2);
+      addresses.C = randomChannelId();
+      addresses.X = randomChannelId();
       // Transform input data (unpack addresses and BigNumberify amounts)
       heldBefore = replaceAddressesAndBigNumberify(heldBefore, addresses);
       setOutcome = replaceAddressesAndBigNumberify(setOutcome, addresses);
