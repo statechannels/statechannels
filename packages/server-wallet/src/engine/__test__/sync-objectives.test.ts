@@ -68,6 +68,8 @@ describe('SyncObjective', () => {
   });
 
   it('includes the ledger channel when syncing a ledger funded open channel objective', async () => {
+    // We up the nonce to avoid collisions with the other tests not using TestChannel
+    TestChannel.maximumNonce = 100;
     const ledger = TestLedgerChannel.create({});
     const app = TestChannel.create({
       fundingStrategy: 'Ledger',
@@ -98,13 +100,13 @@ describe('SyncObjective', () => {
       data: {
         // We expect states for the app channel as well as the ledger channel that funds it
         signedStates: [
-          expect.objectContaining({channelId: app.channelId}),
           expect.objectContaining({channelId: ledger.channelId}),
+          expect.objectContaining({channelId: app.channelId}),
         ],
         // We expect a getChannel request (from syncChannel) for both channels
         requests: [
-          expect.objectContaining({channelId: app.channelId, type: 'GetChannel'}),
           expect.objectContaining({channelId: ledger.channelId, type: 'GetChannel'}),
+          expect.objectContaining({channelId: app.channelId, type: 'GetChannel'}),
         ],
       },
     };
