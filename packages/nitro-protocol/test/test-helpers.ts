@@ -1,13 +1,4 @@
-import {
-  Contract,
-  ethers,
-  BigNumberish,
-  BigNumber,
-  constants,
-  providers,
-  utils,
-  Event,
-} from 'ethers';
+import {Contract, ethers, BigNumberish, BigNumber, constants, providers, Event} from 'ethers';
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {Bytes} from '../src/contract/types';
@@ -172,20 +163,12 @@ export const newDepositedEvent = (
   });
 };
 
-export function randomChannelId(channelNonce = 0): Bytes32 {
-  // Populate participants array (every test run targets a unique channel)
-  const participants = [];
-  for (let i = 0; i < 3; i++) {
-    participants[i] = ethers.Wallet.createRandom().address;
-  }
-  // Compute channelId
-  const channelId = utils.keccak256(
-    utils.defaultAbiCoder.encode(
-      ['uint256', 'address[]', 'uint256'],
-      [1234, participants, channelNonce]
-    )
-  );
-  return channelId;
+// Copied from https://stackoverflow.com/questions/58325771/how-to-generate-random-hex-string-in-javascript
+const genRanHex = size =>
+  [...Array(size)].map(() => Math.floor(Math.random() * 16).toString(16)).join('');
+
+export function randomChannelId(): Bytes32 {
+  return '0x' + genRanHex(64);
 }
 
 export const randomExternalDestination = (): string =>
