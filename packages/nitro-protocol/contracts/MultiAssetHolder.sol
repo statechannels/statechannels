@@ -97,7 +97,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         uint256[] calldata indices
     ) external override {
         // checks
-        _requireIncreasingIndices(indices);
+        _requireIncreasingIndices(indices); // This assumption relied on by _computeNewAllocation (below)
         _requireChannelFinalized(fromChannelId);
         _requireMatchingFingerprint(
             stateHash,
@@ -173,7 +173,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         Outcome.Guarantee memory guarantee;
         address asset;
         {
-            _requireIncreasingIndices(indices);
+            _requireIncreasingIndices(indices); // This assumption relied on by _computeNewAllocationWithGuarantee (below)
             _requireChannelFinalized(guarantorChannelId);
         }
         {
@@ -330,6 +330,9 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
+        //  We rely on the assumption that the indices are strictly increasing.
+        //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
+        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
 
         // loop over allocations and decrease surplus
         for (uint256 i = 0; i < allocation.length; i++) {
@@ -423,6 +426,9 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 k = 0; // indexes the `indices` array
+        //  We rely on the assumption that the indices are strictly increasing.
+        //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
+        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
 
         // copy allocation
         newAllocation = new Outcome.AllocationItem[](allocation.length);
@@ -535,6 +541,10 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         );
     }
 
+    /**
+     * @notice Checks that the supplied indices are strictly increasing.
+     * @dev Checks that the supplied indices are strictly increasing. This allows us allows us to write a more efficient claim function.
+     */
     function _requireIncreasingIndices(uint256[] memory indices) internal pure {
         for (uint256 i = 0; i + 1 < indices.length; i++) {
             require(indices[i] < indices[i + 1], 'Indices must be sorted');
