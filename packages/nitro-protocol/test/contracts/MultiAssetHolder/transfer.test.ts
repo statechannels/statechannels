@@ -2,7 +2,6 @@ import {expectRevert} from '@statechannels/devtools';
 import {BigNumber, constants, Contract} from 'ethers';
 
 import {
-  getRandomNonce,
   getTestProvider,
   randomChannelId,
   randomExternalDestination,
