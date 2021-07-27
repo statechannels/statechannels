@@ -24,7 +24,8 @@ async function startAll() {
     .option('loadFile', {
       alias: 'l',
       description: 'The file containing the load data to send to the nodes',
-      default: './e2e-testing/test-data/load-data.json',
+      demandOption: 'true',
+      type: 'string',
     }).argv;
 
   const ganache = execa.command(`npx ts-node ${SCRIPT_DIR}/start-ganache.ts -d off`, {all: true});
