@@ -6,7 +6,6 @@ import {claimAllArgs} from '../../../src/contract/transaction-creators/asset-hol
 import {
   allocationToParams,
   AssetOutcomeShortHand,
-  getRandomNonce,
   getTestProvider,
   guaranteeToParams,
   randomChannelId,
@@ -62,7 +61,6 @@ describe('claim', () => {
   `(
     '$name',
     async ({
-      name,
       heldBefore,
       guaranteeDestinations,
       tOutcomeBefore,
@@ -72,7 +70,6 @@ describe('claim', () => {
       payouts,
       reason,
     }: {
-      name;
       heldBefore: AssetOutcomeShortHand;
       guaranteeDestinations;
       tOutcomeBefore: AssetOutcomeShortHand;
@@ -83,10 +80,8 @@ describe('claim', () => {
       reason;
     }) => {
       // Compute channelIds
-      const tNonce = getRandomNonce(name);
-      const gNonce = getRandomNonce(name + 'g');
-      const targetId = randomChannelId(tNonce);
-      const guarantorId = randomChannelId(gNonce);
+      const targetId = randomChannelId();
+      const guarantorId = randomChannelId();
       addresses.t = targetId;
       addresses.g = guarantorId;
 
