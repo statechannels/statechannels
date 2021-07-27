@@ -626,9 +626,7 @@ describe('challenge', () => {
 
     await Promise.all(channelsFinalized);
     await Promise.all(
-      state1s.map(
-        async state1 => await (await chainService.withdraw(state1, aWallet().address)).wait()
-      )
+      state1s.map(async state1 => await (await chainService.withdraw(state1)).wait())
     );
 
     expect(await provider.getBalance(aDestinationAddress)).toEqual(BigNumber.from(2));

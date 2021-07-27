@@ -155,7 +155,7 @@ export class ChainService implements ChainServiceInterface {
           response = await this.fundChannel(chainRequest);
           break;
         case 'Withdraw':
-          response = await this.withdraw(chainRequest.state, chainRequest.challengerAddress);
+          response = await this.withdraw(chainRequest.state);
 
           break;
         default:
@@ -314,12 +314,12 @@ export class ChainService implements ChainServiceInterface {
     return this.sendTransaction(challengeTransactionRequest);
   }
 
-  async withdraw(state: State, challengerAddress: Address): Promise<providers.TransactionResponse> {
+  async withdraw(state: State): Promise<providers.TransactionResponse> {
     this.logger.info('withdraw: entry');
     const lastState = toNitroState(state);
 
     const transactionRequest = {
-      ...Transactions.createTransferAllAssetsTransaction(lastState, challengerAddress),
+      ...Transactions.createTransferAllAssetsTransaction(lastState),
       to: this.nitroAdjudicator.address,
     };
     return this.sendTransaction(transactionRequest);

@@ -66,7 +66,6 @@ export type ConcludeAndWithdrawRequest = {
 export type WithdrawRequest = {
   type: 'Withdraw';
   state: State;
-  challengerAddress: Address;
 };
 
 export type ChallengeRequest = {

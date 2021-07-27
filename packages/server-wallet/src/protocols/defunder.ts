@@ -131,7 +131,6 @@ export class Defunder {
         {
           type: 'Withdraw',
           state: adjudicatorStatus.states[0],
-          challengerAddress: channel.myAddress,
         },
       ]);
 
