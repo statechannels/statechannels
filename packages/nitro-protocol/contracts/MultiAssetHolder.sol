@@ -78,8 +78,11 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @param assetIndex Will be used to slice the outcome into a single asset outcome.
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param outcomeBytes The encoded Outcome of this state channel
+     * @param stateHash The hash of the state stored when the channel finalized.
+     * @param challengerAddress The challengerAddress stored when the channel finalized (zero for collaborative concludes)
      * @param indices Array with each entry denoting the index of a destination to transfer funds to. An empty array indicates "all".
      */
     function transfer(
@@ -88,7 +91,7 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes memory outcomeBytes,
         bytes32 stateHash,
         address challengerAddress,
-        uint256[] memory indices
+        uint256[] calldata indices
     ) external override {
         // checks
         _requireIncreasingIndices(indices);
@@ -130,6 +133,15 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     /**
      * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
      * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
+     * @param assetIndex Will be used to slice the outcome into a single asset outcome.
+     * @param guarantorOutcomeBytes The abi.encode of guarantor channel outcome
+     * @param guarantorChannelId Unique identifier for a guarantor state channel.
+     * @param guarantorStateHash Hash of the state stored when the guarantor channel finalized.
+     * @param guarantorChallengerAddress Address of the challenger stored when the guarantor channel finalized. Zero for collaborative concludes.
+     * @param targetOutcomeBytes The abi.encode of target channel outcome
+     * @param targetStateHash Hash of the state stored when the target channel finalized.
+     * @param targetChallengerAddress Address of the challenger stored when the target channel finalized. Zero for collaborative concludes.
+     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all"
      */
     function claim(
         uint256 assetIndex, // TODO consider a uint48?
