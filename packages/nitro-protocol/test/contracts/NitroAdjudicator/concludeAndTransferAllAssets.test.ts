@@ -207,7 +207,8 @@ describe('concludeAndTransferAllAssets', () => {
         encodeOutcome(outcome),
         numStates,
         whoSignedWhat,
-        sigs
+        sigs,
+        {gasLimit: NITRO_MAX_GAS}
       );
 
       // Switch on overall test expectation
