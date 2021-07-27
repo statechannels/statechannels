@@ -129,7 +129,7 @@ export class Defunder {
       // This is not a valid assumption as the defunder protocol can be run no matter how the channel was finalized
       response.queueChainRequest([
         {
-          type: 'PushOutcomeAndWithdraw',
+          type: 'Withdraw',
           state: adjudicatorStatus.states[0],
           challengerAddress: channel.myAddress,
         },

@@ -28,17 +28,15 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 2416171, // Singleton
-      ETHAssetHolder: 1636603, // Singleton (could be more in principle)
-      ERC20AssetHolder: 1659990, // Per Token (could be more in principle)
+      NitroAdjudicator: 4052839, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 47608,
+    vanillaNitro: 47992,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 30520,
+    vanillaNitro: 30904,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -50,7 +48,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 72854,
+      deposit: 71370,
     },
   },
   directlyFundAChannelWithERC20Second: {
@@ -60,26 +58,26 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 55766,
+      deposit: 54282,
     },
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 156969,
+    vanillaNitro: 153934,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 149324,
+    vanillaNitro: 144323,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
     // initially                 ⬛ ->  X  -> 👩
     // challenge + timeout       ⬛ -> (X) -> 👩
-    // pushOutcomeAndTransferAll ⬛ --------> 👩
+    // transferAllAssets         ⬛ --------> 👩
     vanillaNitro: {
-      challenge: 93390,
-      pushOutcomeAndTransferAll: 117933,
-      total: 211323,
+      challenge: 93193,
+      transferAllAssets: 115661,
+      total: 208854,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -87,13 +85,13 @@ export const gasRequiredTo: GasRequiredTo = {
     vanillaNitro: {
       // initially                   ⬛ ->  L  ->  X  -> 👩
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
-      // pushOutcomeAndTransferAllL  ⬛ --------> (X) -> 👩
-      // pushOutcomeAndTransferAllX  ⬛ ---------------> 👩
-      challengeX: 93390,
-      challengeL: 92324,
-      pushOutcomeAndTransferAllL: 68831,
-      pushOutcomeAndTransferAllX: 117933,
-      total: 372478,
+      // transferAllAssetsL          ⬛ --------> (X) -> 👩
+      // transferAllAssetsX          ⬛ ---------------> 👩
+      challengeX: 93193,
+      challengeL: 92127,
+      transferAllAssetsL: 66193,
+      transferAllAssetsX: 115661,
+      total: 367174,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -101,21 +99,17 @@ export const gasRequiredTo: GasRequiredTo = {
     vanillaNitro: {
       // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
       // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
-      // pushOutcomeAndTransferAllL  ⬛ --------> (G) -> (J) -> (X) -> 👩
-      // pushOutcomeG                ⬛ --------> (G) -> (J) -> (X) -> 👩
-      // pushOutcomeJ                ⬛ --------> (G) -> (J) -> (X) -> 👩
+      // transferAllAssetsL          ⬛ --------> (G) -> (J) -> (X) -> 👩
       // claimG                      ⬛ ----------------------> (X) -> 👩
-      // pushOutcomeAndTransferAllX  ⬛ -----------------------------> 👩
-      challengeL: 92336,
-      challengeG: 94607,
-      challengeJ: 101741,
-      challengeX: 93390,
-      pushOutcomeAndTransferAllL: 68843,
-      pushOutcomeG: 61410,
-      pushOutcomeJ: 60558,
-      claimG: 68692,
-      pushOutcomeAndTransferAllX: 117933,
-      total: 759510,
+      // transferAllAssetsX          ⬛ -----------------------------> 👩
+      challengeL: 92127,
+      challengeG: 94386,
+      challengeJ: 101504,
+      challengeX: 93193,
+      transferAllAssetsL: 66193,
+      claimG: 83687,
+      transferAllAssetsX: 115661,
+      total: 646751,
     },
   },
 };

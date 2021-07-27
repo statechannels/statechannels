@@ -37,7 +37,7 @@ import {
   SyncConfiguration,
 } from '../engine';
 import {
-  AssetOutcomeUpdatedArg,
+  AllocationUpdatedArg,
   ChainEventSubscriberInterface,
   ChainService,
   ChainServiceInterface,
@@ -138,9 +138,9 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
     this._chainListener = {
       holdingUpdated: this.createChainEventlistener('holdingUpdated', e =>
-        this._engine.store.updateFunding(e.channelId, e.amount, e.assetHolderAddress)
+        this._engine.store.updateFunding(e.channelId, e.amount, e.asset)
       ),
-      assetOutcomeUpdated: this.createChainEventlistener('assetOutcomeUpdated', async e => {
+      allocationUpdated: this.createChainEventlistener('allocationUpdated', async e => {
         const transferredOut = e.externalPayouts.map(ai => ({
           toAddress: makeDestination(ai.destination),
           amount: ai.amount as Uint256,
@@ -148,7 +148,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
         await this._engine.store.updateTransferredOut(
           e.channelId,
-          e.assetHolderAddress,
+          e.asset,
           transferredOut,
           e.newHoldings
         );
@@ -478,7 +478,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
 
   private async registerChannels(channelsToRegister: ChannelResult[]): Promise<void> {
     const channelsWithAssetHolders = channelsToRegister.map(cr => ({
-      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.assetHolderAddress)),
+      assetHolderAddresses: cr.allocations.map(a => makeAddress(a.asset)),
       channelId: cr.channelId,
     }));
 
@@ -492,10 +492,7 @@ export class Wallet extends EventEmitter<WalletEvents> {
     EH extends ChainEventSubscriberInterface[K]
   >(eventName: K, storeUpdater: EH) {
     return async (
-      event: HoldingUpdatedArg &
-        AssetOutcomeUpdatedArg &
-        ChannelFinalizedArg &
-        ChallengeRegisteredArg
+      event: HoldingUpdatedArg & AllocationUpdatedArg & ChannelFinalizedArg & ChallengeRegisteredArg
     ) => {
       const {channelId} = event;
       this._logger.trace({event}, `${eventName} being handled`);

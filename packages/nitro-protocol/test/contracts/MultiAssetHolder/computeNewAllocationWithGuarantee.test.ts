@@ -1,4 +1,4 @@
-import {Contract, BigNumber} from 'ethers';
+import {BigNumber} from 'ethers';
 import shuffle from 'lodash.shuffle';
 
 import {
@@ -7,22 +7,18 @@ import {
   randomExternalDestination,
   randomChannelId,
 } from '../../test-helpers';
+import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
-import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
+import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 
-const provider = getTestProvider();
-
-let AssetHolder: Contract;
-
-beforeAll(async () => {
-  AssetHolder = setupContract(provider, AssetHolderArtifact, process.env.TEST_ASSET_HOLDER_ADDRESS);
-});
+const testNitroAdjudicator = (setupContract(
+  getTestProvider(),
+  TESTNitroAdjudicatorArtifact,
+  process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
+) as unknown) as TESTNitroAdjudicator;
 
 import {AllocationItem, Guarantee} from '../../../src';
-import {
-  computeNewAllocation,
-  computeNewAllocationWithGuarantee,
-} from '../../../src/contract/asset-holder';
+import {computeNewAllocationWithGuarantee} from '../../../src/contract/multi-asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
@@ -45,7 +41,7 @@ const allocation = randomAllocation(Math.ceil(Math.random() * 20));
 const indices = shuffle([...Array(allocation.length).keys()]); // [0, 1, 2, 3,...] but shuffled
 const guarantee = randomGuarantee(allocation);
 
-describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
+describe('MultiAssetHolder._computeNewAllocationWithGuarantee', () => {
   it(`matches on chain method for input \n heldBefore: ${heldBefore}, \n allocation: ${JSON.stringify(
     allocation,
     null,
@@ -59,12 +55,12 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
       guarantee
     );
 
-    const result = (await AssetHolder._computeNewAllocationWithGuarantee(
+    const result = await testNitroAdjudicator._computeNewAllocationWithGuarantee(
       BigNumber.from(heldBefore),
       allocation,
       indices,
       guarantee
-    )) as ReturnType<typeof computeNewAllocation>;
+    );
 
     expect(result).toBeDefined();
     expect(result.newAllocation).toMatchObject(
@@ -73,7 +69,9 @@ describe('AsserHolder._computeNewAllocationWithGuarantee', () => {
         amount: BigNumber.from(a.amount),
       }))
     );
-    expect((result as any).safeToDelete).toEqual(locallyComputedNewAllocation.deleted);
+    expect((result as any).allocatesOnlyZeros).toEqual(
+      locallyComputedNewAllocation.allocatesOnlyZeros
+    );
     expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
     expect(result.payouts).toMatchObject(
       locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))

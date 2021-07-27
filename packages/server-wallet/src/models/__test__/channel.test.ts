@@ -136,13 +136,13 @@ describe('Channel funding', () => {
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
-    await store.updateFunding(testChannel.channelId, BN.from(1), testChannelObj.assetHolderAddress);
+    await store.updateFunding(testChannel.channelId, BN.from(1), testChannelObj.asset);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
     expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
-    await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.assetHolderAddress);
+    await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.asset);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
     expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(true);
@@ -159,13 +159,13 @@ describe('Channel funding', () => {
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
-    await store.updateFunding(testChannel.channelId, BN.from(6), testChannelObj.assetHolderAddress);
+    await store.updateFunding(testChannel.channelId, BN.from(6), testChannelObj.asset);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
     expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(false);
 
     // Update funding and refetch channel
-    await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.assetHolderAddress);
+    await store.updateFunding(testChannel.channelId, BN.from(8), testChannelObj.asset);
     testChannel = await Channel.forId(testChannelObj.channelId, knex);
     expect(testChannel.isPartlyDirectFunded).toEqual(true);
     expect(testChannel.isFullyDirectFunded).toEqual(true);

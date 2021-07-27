@@ -22,7 +22,7 @@ import {SocketIOMessageService} from '../message-service/socket-io-message-servi
 jest.setTimeout(60_000);
 
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
-const ethAssetHolderAddress = makeAddress(process.env.ETH_ASSET_HOLDER_ADDRESS!);
+const nitroAdjudicatorAddress = makeAddress(process.env.NITRO_ADJUDICATOR_ADDRESS!);
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
 if (!process.env.RPC_ENDPOINT) throw new Error('RPC_ENDPOINT must be defined');
 // eslint-disable-next-line no-process-env, @typescript-eslint/no-non-null-assertion
@@ -120,12 +120,12 @@ beforeAll(async () => {
   await a.registerPeerMessageService(`http://localhost:${B_PORT}`);
   await b.registerPeerMessageService(`http://localhost:${A_PORT}`);
 
-  const assetHolder = new Contract(
-    ethAssetHolderAddress,
-    ContractArtifacts.EthAssetHolderArtifact.abi,
+  const nitroAdjudicator = new Contract(
+    nitroAdjudicatorAddress,
+    ContractArtifacts.NitroAdjudicatorArtifact.abi,
     provider
   );
-  mineOnEvent(assetHolder);
+  mineOnEvent(nitroAdjudicator);
 });
 
 afterAll(async () => {
@@ -160,7 +160,7 @@ test.each(['A', 'B'])(
           amount: bFunding,
         },
       ],
-      assetHolderAddress: ethAssetHolderAddress,
+      asset: constants.AddressZero,
     };
 
     const channelParams: CreateChannelParams = {
@@ -173,7 +173,7 @@ test.each(['A', 'B'])(
     };
     const aBalanceInit = await getBalance(aAddress);
     const bBalanceInit = await getBalance(bAddress);
-    const assetHolderBalanceInit = await getBalance(ethAssetHolderAddress);
+    const assetHolderBalanceInit = await getBalance(nitroAdjudicatorAddress);
 
     const response = await a.createChannels([channelParams]);
     await waitForObjectiveProposals([response[0].objectiveId], b);
@@ -182,7 +182,7 @@ test.each(['A', 'B'])(
     await expect(response).toBeObjectiveDoneType('Success');
     await expect(bResponse).toBeObjectiveDoneType('Success');
 
-    const assetHolderBalanceUpdated = await getBalance(ethAssetHolderAddress);
+    const assetHolderBalanceUpdated = await getBalance(nitroAdjudicatorAddress);
     expect(BN.sub(assetHolderBalanceUpdated, assetHolderBalanceInit)).toEqual(
       BN.add(aFunding, bFunding)
     );
