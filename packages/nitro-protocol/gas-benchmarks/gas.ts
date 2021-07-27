@@ -28,15 +28,15 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 4092117, // Singleton
+      NitroAdjudicator: 4052839, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 48754,
+    vanillaNitro: 47992,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 31666,
+    vanillaNitro: 30904,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -48,7 +48,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 72132,
+      deposit: 71370,
     },
   },
   directlyFundAChannelWithERC20Second: {
@@ -58,16 +58,16 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 55044,
+      deposit: 54282,
     },
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 154016,
+    vanillaNitro: 153934,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 144405,
+    vanillaNitro: 144323,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
@@ -76,8 +76,8 @@ export const gasRequiredTo: GasRequiredTo = {
     // transferAllAssets         ⬛ --------> 👩
     vanillaNitro: {
       challenge: 93193,
-      transferAllAssets: 115743,
-      total: 208936,
+      transferAllAssets: 115661,
+      total: 208854,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -89,9 +89,9 @@ export const gasRequiredTo: GasRequiredTo = {
       // transferAllAssetsX          ⬛ ---------------> 👩
       challengeX: 93193,
       challengeL: 92127,
-      transferAllAssetsL: 66362,
-      transferAllAssetsX: 115743,
-      total: 367425,
+      transferAllAssetsL: 66193,
+      transferAllAssetsX: 115661,
+      total: 367174,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -106,10 +106,10 @@ export const gasRequiredTo: GasRequiredTo = {
       challengeG: 94386,
       challengeJ: 101504,
       challengeX: 93193,
-      transferAllAssetsL: 66362,
-      claimG: 83856,
-      transferAllAssetsX: 115743,
-      total: 647171,
+      transferAllAssetsL: 66193,
+      claimG: 83687,
+      transferAllAssetsX: 115661,
+      total: 646751,
     },
   },
 };
