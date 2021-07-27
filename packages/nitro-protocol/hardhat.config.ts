@@ -66,7 +66,7 @@ const config: HardhatUserConfig = {
       chainId: 212984383488152,
     },
     hardhat: {
-      hardfork: 'berlin',
+      hardfork: 'london',
     },
   },
   etherscan: {
