@@ -112,11 +112,6 @@ export async function setupPeerWallets(withWalletsSeeding = false): Promise<Peer
 export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerSetup> {
   try {
     await Promise.all([
-      DBAdmin.truncateDatabase(aWalletConfig),
-      DBAdmin.truncateDatabase(bWalletConfig),
-    ]);
-
-    await Promise.all([
       DBAdmin.createDatabase(aWalletConfig),
       DBAdmin.createDatabase(bWalletConfig),
     ]);
@@ -124,6 +119,11 @@ export async function setupPeerEngines(withWalletSeeding = false): Promise<PeerS
     await Promise.all([
       DBAdmin.migrateDatabase(aWalletConfig),
       DBAdmin.migrateDatabase(bWalletConfig),
+    ]);
+
+    await Promise.all([
+      DBAdmin.truncateDatabase(aWalletConfig),
+      DBAdmin.truncateDatabase(bWalletConfig),
     ]);
 
     const peerEngines = {
