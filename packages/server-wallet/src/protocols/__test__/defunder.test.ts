@@ -227,7 +227,6 @@ describe('Direct channel defunding', () => {
       expect(response.chainRequests[0]).toMatchObject({
         type: 'Withdraw',
         state: state4,
-        challengerAddress: channel.myAddress,
       });
       // The channel has been fully defunded
       // Defunder completes
