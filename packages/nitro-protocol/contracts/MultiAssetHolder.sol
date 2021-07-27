@@ -23,36 +23,36 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
     // **************
 
     /**
-     * @notice Deposit ETH or erc20 tokens against a given destination.
-     * @dev Deposit ETH or erc20 tokens against a given destination.
+     * @notice Deposit ETH or erc20 tokens against a given channelId.
+     * @dev Deposit ETH or erc20 tokens against a given channelId.
      * @param asset erc20 token address, or zero address to indicate ETH
-     * @param destination ChannelId to be credited.
+     * @param channelId ChannelId to be credited.
      * @param expectedHeld The number of wei/tokens the depositor believes are _already_ escrowed against the channelId.
      * @param amount The intended number of wei/tokens to be deposited.
      */
     function deposit(
         address asset,
-        bytes32 destination,
+        bytes32 channelId,
         uint256 expectedHeld,
         uint256 amount
     ) external override payable {
-        require(!_isExternalDestination(destination), 'Deposit to external destination');
+        require(!_isExternalDestination(channelId), 'Deposit to external destination');
         uint256 amountDeposited;
         // this allows participants to reduce the wait between deposits, while protecting them from losing funds by depositing too early. Specifically it protects against the scenario:
         // 1. Participant A deposits
         // 2. Participant B sees A's deposit, which means it is now safe for them to deposit
         // 3. Participant B submits their deposit
         // 4. The chain re-orgs, leaving B's deposit in the chain but not A's
-        require(holdings[asset][destination] >= expectedHeld, 'holdings < expectedHeld');
+        require(holdings[asset][channelId] >= expectedHeld, 'holdings < expectedHeld');
         require(
-            holdings[asset][destination] < expectedHeld.add(amount),
+            holdings[asset][channelId] < expectedHeld.add(amount),
             'holdings already sufficient'
         );
 
         // The depositor wishes to increase the holdings against channelId to amount + expectedHeld
         // The depositor need only deposit (at most) amount + (expectedHeld - holdings) (the term in parentheses is non-positive)
 
-        amountDeposited = expectedHeld.add(amount).sub(holdings[asset][destination]); // strictly positive
+        amountDeposited = expectedHeld.add(amount).sub(holdings[asset][channelId]); // strictly positive
         // require successful deposit before updating holdings (protect against reentrancy)
         if (asset == address(0)) {
             require(msg.value == amount, 'Incorrect msg.value for deposit');
@@ -64,8 +64,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             );
         }
 
-        holdings[asset][destination] = holdings[asset][destination].add(amountDeposited);
-        emit Deposited(destination, asset, amountDeposited, holdings[asset][destination]);
+        holdings[asset][channelId] = holdings[asset][channelId].add(amountDeposited);
+        emit Deposited(channelId, asset, amountDeposited, holdings[asset][channelId]);
 
         if (asset == address(0)) {
             // refund whatever wasn't deposited.
