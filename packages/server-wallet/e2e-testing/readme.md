@@ -27,6 +27,31 @@ SUCCESS!
 
 # Concepts
 
+## Load Node
+
+There is a new class `WalletLoadNode` which is an http server that has its own wallet. The load node accepts a [load file](#load-file) and runs the steps specified by the load file.
+
+A `LoadNode` co-operates with it's peers by
+
+- letting peers know when a channel id has been created for a job file
+- sending the load file to peers
+- letting peers know when to start processing
+
+This means you only have to interact with one LoadNode to load and run the load file.
+
+If any error is returned from the `serverWallet` we stop the `LoadNode` process.
+
+The `/load` endpoint can be used to load a load file. It accepts a POST request with a JSON body of `Step`s.
+
+The `/start` endpoint is used to trigger processing of the steps in this and other nodes. It accepts a GET request. A response won't be returned until all jobs are completed and all our peer's jobs are completed as well. If an error occurs this returns a 500 error code with details on the error.
+
+### How Load is processed
+
+Each step in the [load file](#load-file) contains a timestamp value. We set a timeout with the timestamp value
+for each step. When the timer executes we attempt to create or close the channel as instructed.
+
+Steps don't wait for the completion of previous steps before starting.
+
 ## Load file
 
 The load file is a list of instructions for a server wallet to perform. It looks something like this:
@@ -60,25 +85,6 @@ The `timestamp` is when these instructions should be executed. The `timestamp` i
 
 The `serverId` indicates which LoadNode is responsible for that step. Each LoadNode will have a unique `serverId` based on the entries in the `role.config`
 
-## Load Node
-
-There is a new class `WalletLoadNode` which is an http server that has its own wallet. The load node is responsible for loading a load file and then performing the instructions specified in the file.
-
-A `LoadNode` co-operates with it's peers by
-
-- letting peers know when a channel id has been created for a job file
-- sending the load file to peers
-- letting peers know when to start processing
-
-This means you only have to interact with one LoadNode to load and run the load file.
-
-### How Load is processed
-
-Each step in the [load file](#load-file) contains a timestamp value. We set a timeout with the timestamp value
-for each step. When the timer executes we attempt to create or close the channel as instructed.
-
-Steps don't wait for the completion of previous steps before starting.
-
 ## Role Config
 
 [A simple JSON config](./test-data/roles.json) file specifies various ports and private keys to be used for a LoadNode. This is used to easily start up LoadNodes without having to specify a bunch of different options.
@@ -103,12 +109,6 @@ The load generator is responsible for generating load files.  The load generator
 - how long channels should be created/closed
 - whether channels are funded using ledger channels or direct funding
 
-### Limitations
-
-Currently we used fixed `outcome` and `appData`s  when creating channels.
-
-We also do not support update channel steps yet.
-
 ### Scheduling  
 
 The load generator uses a pretty basic scheduling algorithim.
@@ -126,6 +126,12 @@ The basic flow is:
     If directly funded then the timestamp will be randomly selected from `0` to `duration`.
 
 3. `duration*CloseRate` close channel steps are added to the load file. For each step we randomly select a CreateChannel step `app` and schedule a close step with a timestamp randomly selected from `app.timestamp+closeDelay` to `duration`.
+
+### Limitations
+
+Currently we used fixed `outcome` and `appData`s  when creating channels.
+
+We also do not support update channel steps yet.
 
 ### Direct Funding Example
 
