@@ -15,7 +15,6 @@ interface IMultiAssetHolder {
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param outcomeBytes The abi.encode of AssetOutcome.Allocation
      * @param stateHash the hash of the state stored on chain
-     * @param challengerAddress the challengerAddress stored on chain
      * @param indices Array with each entry denoting the index of a destination to transfer funds to.
      */
     function transfer(
@@ -23,7 +22,6 @@ interface IMultiAssetHolder {
         bytes32 fromChannelId,
         bytes calldata outcomeBytes,
         bytes32 stateHash,
-        address challengerAddress,
         uint256[] memory indices
     ) external;
 
@@ -34,10 +32,8 @@ interface IMultiAssetHolder {
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
      * @param guarantorOutcomeBytes The abi.encode of the guarantor outcome.
      * @param guarantorStateHash the hash of the state stored on chain for the guarantor
-     * @param guarantorChallengerAddress the challengerAddress stored on chain for the guarantor channel
      * @param targetOutcomeBytes The abi.encode of the guarantor outcome.
      * @param targetStateHash the hash of the state stored on chain for the guarantor
-     * @param targetChallengerAddress the challengerAddress stored on chain for the guarantor channel
      * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
      */
     function claim(
@@ -45,10 +41,8 @@ interface IMultiAssetHolder {
         bytes32 guarantorChannelId,
         bytes memory guarantorOutcomeBytes,
         bytes32 guarantorStateHash,
-        address guarantorChallengerAddress,
         bytes memory targetOutcomeBytes,
         bytes32 targetStateHash,
-        address targetChallengerAddress,
         uint256[] memory indices
     ) external;
 

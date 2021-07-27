@@ -107,7 +107,6 @@ contract ForceMove is IForceMove {
                 largestTurnNum,
                 uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
                 supportedStateHash,
-                challenger,
                 keccak256(variableParts[variableParts.length - 1].outcome)
             )
         );
@@ -116,14 +115,12 @@ contract ForceMove is IForceMove {
     /**
      * @notice Repsonds to an ongoing challenge registered against a state channel.
      * @dev Repsonds to an ongoing challenge registered against a state channel.
-     * @param challenger The address of the participant whom registered the challenge.
      * @param isFinalAB An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param variablePartAB An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the response state).
      * @param sig The responder's signature on the `responseStateHash`.
      */
     function respond(
-        address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
         IForceMoveApp.VariablePart[2] memory variablePartAB,
@@ -163,7 +160,6 @@ contract ForceMove is IForceMove {
                 turnNumRecord,
                 finalizesAt,
                 challengeStateHash,
-                challenger,
                 challengeOutcomeHash
             ),
             channelId
@@ -329,7 +325,7 @@ contract ForceMove is IForceMove {
 
         // effects
         statusOf[channelId] = _generateStatus(
-            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash) //solhint-disable-line not-rely-on-time
+            ChannelData(0, uint48(block.timestamp), bytes32(0), outcomeHash) //solhint-disable-line not-rely-on-time
         );
         emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
     }
@@ -673,7 +669,7 @@ contract ForceMove is IForceMove {
      */
     function _clearChallenge(bytes32 channelId, uint48 newTurnNumRecord) internal {
         statusOf[channelId] = _generateStatus(
-            ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+            ChannelData(newTurnNumRecord, 0, bytes32(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
@@ -805,7 +801,6 @@ contract ForceMove is IForceMove {
         result |= uint256(
             _generateFingerprint(
                 channelData.stateHash,
-                channelData.challengerAddress,
                 channelData.outcomeHash
             )
         );
@@ -815,22 +810,20 @@ contract ForceMove is IForceMove {
 
     function _generateFingerprint(
         bytes32 stateHash,
-        address challengerAddress,
         bytes32 outcomeHash
     ) internal pure returns (uint160) {
-        return uint160(uint256(keccak256(abi.encode(stateHash, challengerAddress, outcomeHash))));
+        return uint160(uint256(keccak256(abi.encode(stateHash, outcomeHash))));
     }
 
     function _updateFingerprint(
         bytes32 channelId,
         bytes32 stateHash,
-        address challengerAddress,
         bytes32 outcomeHash
     ) internal {
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _unpackStatus(channelId);
 
         bytes32 newStatus = _generateStatus(
-            ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash)
+            ChannelData(turnNumRecord, finalizesAt, stateHash, outcomeHash)
         );
         statusOf[channelId] = newStatus;
     }
