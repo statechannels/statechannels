@@ -12,6 +12,8 @@ import {channel} from '../../models/__test__/fixtures/channel';
 import {openChannelObjective} from './fixtures/open-channel-objective';
 import {alice} from './fixtures/signing-wallets';
 import {stateWithHashSignedBy} from './fixtures/states';
+import {TestChannel} from './fixtures/test-channel';
+import {TestLedgerChannel} from './fixtures/test-ledger-channel';
 
 let engine: Engine;
 
@@ -62,6 +64,51 @@ describe('SyncObjective', () => {
       },
     };
     // We expect the message to contain the objective as well as the sync channel payload
+    expect(result[0]).toMatchObject(expectedPayload);
+  });
+
+  it('includes the ledger channel when syncing a ledger funded open channel objective', async () => {
+    const ledger = TestLedgerChannel.create({});
+    const app = TestChannel.create({
+      fundingStrategy: 'Ledger',
+      fundingLedgerChannelId: ledger.channelId,
+    });
+    await ledger.insertInto(engine.store);
+    await app.insertInto(engine.store);
+
+    const objective = await ObjectiveModel.insert(
+      openChannelObjective({
+        data: {
+          targetChannelId: app.channelId,
+          fundingStrategy: 'Ledger',
+          fundingLedgerChannelId: ledger.channelId,
+        },
+      }),
+      testKnex
+    );
+
+    const result = await engine.syncObjectives([objective.objectiveId]);
+
+    // We only expect 1 outbox
+    expect(result).toHaveLength(1);
+
+    const expectedPayload = {
+      sender: 'alice',
+      recipient: 'bob',
+      data: {
+        // We expect states for the app channel as well as the ledger channel that funds it
+        signedStates: [
+          expect.objectContaining({channelId: app.channelId}),
+          expect.objectContaining({channelId: ledger.channelId}),
+        ],
+        // We expect a getChannel request (from syncChannel) for both channels
+        requests: [
+          expect.objectContaining({channelId: app.channelId, type: 'GetChannel'}),
+          expect.objectContaining({channelId: ledger.channelId, type: 'GetChannel'}),
+        ],
+      },
+    };
+
     expect(result[0]).toMatchObject(expectedPayload);
   });
 });
