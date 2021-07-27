@@ -28,7 +28,7 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 4052839, // Singleton
+      NitroAdjudicator: 3970996, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
@@ -63,11 +63,11 @@ export const gasRequiredTo: GasRequiredTo = {
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 153934,
+    vanillaNitro: 153672,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 144323,
+    vanillaNitro: 144062,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
@@ -75,9 +75,9 @@ export const gasRequiredTo: GasRequiredTo = {
     // challenge + timeout       ⬛ -> (X) -> 👩
     // transferAllAssets         ⬛ --------> 👩
     vanillaNitro: {
-      challenge: 93193,
-      transferAllAssets: 115661,
-      total: 208854,
+      challenge: 93111,
+      transferAllAssets: 115014,
+      total: 208125,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -87,11 +87,11 @@ export const gasRequiredTo: GasRequiredTo = {
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
       // transferAllAssetsL          ⬛ --------> (X) -> 👩
       // transferAllAssetsX          ⬛ ---------------> 👩
-      challengeX: 93193,
-      challengeL: 92127,
-      transferAllAssetsL: 66193,
-      transferAllAssetsX: 115661,
-      total: 367174,
+      challengeX: 93111,
+      challengeL: 92045,
+      transferAllAssetsL: 65546,
+      transferAllAssetsX: 115014,
+      total: 365716,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -102,14 +102,14 @@ export const gasRequiredTo: GasRequiredTo = {
       // transferAllAssetsL          ⬛ --------> (G) -> (J) -> (X) -> 👩
       // claimG                      ⬛ ----------------------> (X) -> 👩
       // transferAllAssetsX          ⬛ -----------------------------> 👩
-      challengeL: 92127,
-      challengeG: 94386,
-      challengeJ: 101504,
-      challengeX: 93193,
-      transferAllAssetsL: 66193,
-      claimG: 83687,
-      transferAllAssetsX: 115661,
-      total: 646751,
+      challengeL: 92045,
+      challengeG: 94304,
+      challengeJ: 101422,
+      challengeX: 93111,
+      transferAllAssetsL: 65546,
+      claimG: 82495,
+      transferAllAssetsX: 115014,
+      total: 643937,
     },
   },
 };
