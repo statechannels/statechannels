@@ -4,7 +4,6 @@ import {Contract, BigNumber} from 'ethers';
 import AssetHolderArtifact from '../../../artifacts/contracts/test/TESTAssetHolder.sol/TESTAssetHolder.json';
 import {
   allocationToParams,
-  getRandomNonce,
   getTestProvider,
   randomChannelId,
   randomExternalDestination,
@@ -68,10 +67,9 @@ describe('transfer', () => {
     ${'28. (all) -> 2 chan   full/partial'} | ${{c: 3}}  | ${{C: 2, X: 2}}       | ${[]}        | ${{C: 0, X: 1}} | ${{c: 0, C: 2, X: 1}} | ${{}}           | ${undefined}
   `(
     `$name: heldBefore: $heldBefore, setOutcome: $setOutcome, newOutcome: $newOutcome, heldAfter: $heldAfter, payouts: $payouts`,
-    async ({name, heldBefore, setOutcome, indices, newOutcome, heldAfter, reason}) => {
+    async ({heldBefore, setOutcome, indices, newOutcome, heldAfter, reason}) => {
       // Compute channelId
-      const nonce = getRandomNonce(name);
-      const channelId = randomChannelId(nonce);
+      const channelId = randomChannelId();
       addresses.c = channelId;
 
       // Transform input data (unpack addresses and BigNumberify amounts)
