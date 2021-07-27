@@ -85,7 +85,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
      * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
      * @param outcomeBytes The encoded Outcome of this state channel
      * @param stateHash The hash of the state stored when the channel finalized.
-     * @param challengerAddress The challengerAddress stored when the channel finalized (zero for collaborative concludes)
      * @param indices Array with each entry denoting the index of a destination to transfer funds to. An empty array indicates "all".
      */
     function transfer(
@@ -93,15 +92,13 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 fromChannelId,
         bytes memory outcomeBytes,
         bytes32 stateHash,
-        address challengerAddress,
-        uint256[] calldata indices
+        uint256[] memory indices
     ) external override {
         // checks
         _requireIncreasingIndices(indices);
         _requireChannelFinalized(fromChannelId);
         _requireMatchingFingerprint(
             stateHash,
-            challengerAddress,
             keccak256(outcomeBytes),
             fromChannelId
         );
@@ -137,7 +134,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         _updateFingerprint(
             fromChannelId,
             stateHash,
-            challengerAddress,
             keccak256(abi.encode(outcome))
         );
 
@@ -152,10 +148,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
      * @param guarantorOutcomeBytes The abi.encode of guarantor channel outcome
      * @param guarantorChannelId Unique identifier for a guarantor state channel.
      * @param guarantorStateHash Hash of the state stored when the guarantor channel finalized.
-     * @param guarantorChallengerAddress Address of the challenger stored when the guarantor channel finalized. Zero for collaborative concludes.
      * @param targetOutcomeBytes The abi.encode of target channel outcome
      * @param targetStateHash Hash of the state stored when the target channel finalized.
-     * @param targetChallengerAddress Address of the challenger stored when the target channel finalized. Zero for collaborative concludes.
      * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all"
      */
     function claim(
@@ -163,10 +157,8 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
         bytes32 guarantorChannelId,
         bytes memory guarantorOutcomeBytes,
         bytes32 guarantorStateHash,
-        address guarantorChallengerAddress,
         bytes memory targetOutcomeBytes,
         bytes32 targetStateHash,
-        address targetChallengerAddress,
         uint256[] memory indices
     ) external override {
         // checks
@@ -180,7 +172,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             bytes32 guarantorOutcomeHash = keccak256(guarantorOutcomeBytes);
             _requireMatchingFingerprint(
                 guarantorStateHash,
-                guarantorChallengerAddress,
                 guarantorOutcomeHash,
                 guarantorChannelId
             );
@@ -206,7 +197,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             _requireChannelFinalized(guarantee.targetChannelId);
             _requireMatchingFingerprint(
                 targetStateHash,
-                targetChallengerAddress,
                 keccak256(targetOutcomeBytes),
                 guarantee.targetChannelId
             );
@@ -250,7 +240,6 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
                 _updateFingerprint(
                     guarantee.targetChannelId,
                     targetStateHash,
-                    targetChallengerAddress,
                     outcomeHash
                 );
             }
@@ -524,13 +513,12 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
      */
     function _requireMatchingFingerprint(
         bytes32 stateHash,
-        address challengerAddress,
         bytes32 outcomeHash,
         bytes32 channelId
     ) internal view {
         (, , uint160 fingerprint) = _unpackStatus(channelId);
         require(
-            fingerprint == _generateFingerprint(stateHash, challengerAddress, outcomeHash),
+            fingerprint == _generateFingerprint(stateHash, outcomeHash),
             'incorrect fingerprint'
         );
     }

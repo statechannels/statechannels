@@ -80,7 +80,6 @@ contract TESTForceMove is ForceMove {
         if (channelData.finalizesAt == 0) {
             require(
                 channelData.stateHash == bytes32(0) &&
-                    channelData.challengerAddress == address(0) &&
                     channelData.outcomeHash == bytes32(0),
                 'Invalid open channel'
             );
