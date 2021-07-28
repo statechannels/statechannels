@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.17.0...@statechannels/nitro-protocol@0.17.1) (2021-07-28)
+
+
+### Reverts
+
+* Revert "require nonzero holdings in _transfer" ([bd71f1b](https://github.com/statechannels/monorepo/commit/bd71f1b4bcf9bd21271b4236ebc769f8d25b5448))
+
+
+
+
+
 # [0.17.0](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.16.0...@statechannels/nitro-protocol@0.17.0) (2021-03-19)
 
 
