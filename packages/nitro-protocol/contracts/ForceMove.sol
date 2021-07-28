@@ -10,7 +10,9 @@ import './StatusManager.sol';
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
  */
 contract ForceMove is IForceMove, StatusManager {
-    // Public methods:
+    // *****************
+    // External methods:
+    // *****************
 
     /**
      * @notice Unpacks turnNumRecord, finalizesAt and fingerprint from the status of a particular channel.
@@ -354,7 +356,9 @@ contract ForceMove is IForceMove, StatusManager {
         return true;
     }
 
+    // *****************
     // Internal methods:
+    // *****************
 
     /**
      * @notice Checks that the challengerSignature was created by one of the supplied participants.
