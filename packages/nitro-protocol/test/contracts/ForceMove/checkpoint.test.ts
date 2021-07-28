@@ -114,7 +114,6 @@ describe('checkpoint', () => {
 
     const isOpen = !!finalizesAt;
     const outcome = isOpen ? undefined : defaultOutcome;
-    const challengerAddress = isOpen ? undefined : challenger.address;
     const challengeState: State = isOpen
       ? undefined
       : {
@@ -132,7 +131,6 @@ describe('checkpoint', () => {
           turnNumRecord,
           finalizesAt,
           state: challengeState,
-          challengerAddress,
           outcome,
         })
       : HashZero;

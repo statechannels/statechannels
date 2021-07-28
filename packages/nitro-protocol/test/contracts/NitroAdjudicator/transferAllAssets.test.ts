@@ -130,7 +130,6 @@ describe('transferAllAssets', () => {
       const outcomeHash = hashOutcome(outcome);
       // Call public wrapper to set state (only works on test contract)
       const stateHash = constants.HashZero;
-      const challengerAddress = constants.AddressZero;
       const finalizesAt = 42;
       const turnNumRecord = 7;
       await (
@@ -138,18 +137,12 @@ describe('transferAllAssets', () => {
           turnNumRecord,
           finalizesAt,
           stateHash,
-          challengerAddress,
           outcomeHash,
         })
       ).wait();
       const encodedOutcome = encodeOutcome(outcome);
 
-      const tx1 = testNitroAdjudicator.transferAllAssets(
-        channelId,
-        encodedOutcome,
-        stateHash,
-        challengerAddress
-      );
+      const tx1 = testNitroAdjudicator.transferAllAssets(channelId, encodedOutcome, stateHash);
 
       // Call method in a slightly different way if expecting a revert
       if (reasonString) {
@@ -171,7 +164,7 @@ describe('transferAllAssets', () => {
           finalizesAt,
           // stateHash will be set to HashZero by this helper fn
           // if state property of this object is undefined
-          challengerAddress,
+
           outcome: outcomeAfter,
         });
         expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedStatusAfter);
