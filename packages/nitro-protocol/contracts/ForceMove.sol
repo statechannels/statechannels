@@ -81,11 +81,7 @@ contract ForceMove is IForceMove {
             whoSignedWhat
         );
 
-        address challenger = _requireChallengerIsParticipant(
-            supportedStateHash,
-            fixedPart.participants,
-            challengerSig
-        );
+        _requireChallengerIsParticipant(supportedStateHash, fixedPart.participants, challengerSig);
 
         // effects
 
@@ -94,7 +90,6 @@ contract ForceMove is IForceMove {
             largestTurnNum,
             uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
             // This could overflow, so don't join a channel with a huge challengeDuration
-            challenger,
             isFinalCount > 0,
             fixedPart,
             variableParts,
@@ -338,8 +333,8 @@ contract ForceMove is IForceMove {
         bytes32 supportedStateHash,
         address[] memory participants,
         Signature memory challengerSignature
-    ) internal pure returns (address challenger) {
-        challenger = _recoverSigner(
+    ) internal pure {
+        address challenger = _recoverSigner(
             keccak256(abi.encode(supportedStateHash, 'forceMove')),
             challengerSignature
         );

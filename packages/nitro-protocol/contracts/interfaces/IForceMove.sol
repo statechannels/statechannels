@@ -131,7 +131,6 @@ interface IForceMove {
      * @param channelId Unique identifier for a state channel.
      * @param turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @param finalizesAt The unix timestamp when `channelId` will finalize.
-     * @param challenger The address of the participant whom registered the challenge.
      * @param isFinal Boolean denoting whether the challenge state is final.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
@@ -140,10 +139,8 @@ interface IForceMove {
      */
     event ChallengeRegistered(
         bytes32 indexed channelId,
-        // everything needed to respond or checkpoint
         uint48 turnNumRecord,
         uint48 finalizesAt,
-        address challenger,
         bool isFinal,
         FixedPart fixedPart,
         IForceMoveApp.VariablePart[] variableParts,

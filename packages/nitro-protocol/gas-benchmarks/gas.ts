@@ -28,7 +28,7 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 3970996, // Singleton
+      NitroAdjudicator: 3965152, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
@@ -75,9 +75,9 @@ export const gasRequiredTo: GasRequiredTo = {
     // challenge + timeout       ⬛ -> (X) -> 👩
     // transferAllAssets         ⬛ --------> 👩
     vanillaNitro: {
-      challenge: 93111,
+      challenge: 92799,
       transferAllAssets: 115014,
-      total: 208125,
+      total: 207813,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -87,11 +87,11 @@ export const gasRequiredTo: GasRequiredTo = {
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
       // transferAllAssetsL          ⬛ --------> (X) -> 👩
       // transferAllAssetsX          ⬛ ---------------> 👩
-      challengeX: 93111,
-      challengeL: 92045,
+      challengeX: 92799,
+      challengeL: 91733,
       transferAllAssetsL: 65546,
       transferAllAssetsX: 115014,
-      total: 365716,
+      total: 365092,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -102,14 +102,14 @@ export const gasRequiredTo: GasRequiredTo = {
       // transferAllAssetsL          ⬛ --------> (G) -> (J) -> (X) -> 👩
       // claimG                      ⬛ ----------------------> (X) -> 👩
       // transferAllAssetsX          ⬛ -----------------------------> 👩
-      challengeL: 92045,
-      challengeG: 94304,
-      challengeJ: 101422,
-      challengeX: 93111,
+      challengeL: 91733,
+      challengeG: 93992,
+      challengeJ: 101110,
+      challengeX: 92799,
       transferAllAssetsL: 65546,
       claimG: 82495,
       transferAllAssetsX: 115014,
-      total: 643937,
+      total: 642689,
     },
   },
 };

@@ -17,7 +17,6 @@ export function hashChallengeMessage(challengeState: State): Bytes32 {
 
 export interface ChallengeRegisteredEvent {
   channelId: Bytes32;
-  challengerAddress: string;
   finalizesAt: number;
   challengeStates: SignedState[];
 }
