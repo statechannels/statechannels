@@ -86,17 +86,17 @@ describe('checkpoint', () => {
   let channelNonce = getRandomNonce('checkpoint');
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description | largestTurnNum       | support              | challenger    | finalizesAt  | reason
-    ${accepts1} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${undefined} | ${undefined}
-    ${accepts2} | ${turnNumRecord + 3} | ${valid}             | ${wallets[1]} | ${never}     | ${undefined}
-    ${accepts3} | ${turnNumRecord + 4} | ${valid}             | ${wallets[1]} | ${future}    | ${undefined}
-    ${reverts1} | ${turnNumRecord}     | ${valid}             | ${wallets[1]} | ${never}     | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts2} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${never}     | ${COUNTING_APP_INVALID_TRANSITION}
-    ${reverts3} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${never}     | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts4} | ${turnNumRecord}     | ${valid}             | ${wallets[1]} | ${future}    | ${TURN_NUM_RECORD_NOT_INCREASED}
-    ${reverts5} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${future}    | ${COUNTING_APP_INVALID_TRANSITION}
-    ${reverts6} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${future}    | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
-    ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
+    description | largestTurnNum       | support              | finalizesAt  | reason
+    ${accepts1} | ${turnNumRecord + 1} | ${valid}             | ${undefined} | ${undefined}
+    ${accepts2} | ${turnNumRecord + 3} | ${valid}             | ${never}     | ${undefined}
+    ${accepts3} | ${turnNumRecord + 4} | ${valid}             | ${future}    | ${undefined}
+    ${reverts1} | ${turnNumRecord}     | ${valid}             | ${never}     | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts2} | ${turnNumRecord + 1} | ${invalidTransition} | ${never}     | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts3} | ${turnNumRecord + 1} | ${unsupported}       | ${never}     | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts4} | ${turnNumRecord}     | ${valid}             | ${future}    | ${TURN_NUM_RECORD_NOT_INCREASED}
+    ${reverts5} | ${turnNumRecord + 1} | ${invalidTransition} | ${future}    | ${COUNTING_APP_INVALID_TRANSITION}
+    ${reverts6} | ${turnNumRecord + 1} | ${unsupported}       | ${future}    | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
+    ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${past}      | ${CHANNEL_FINALIZED}
   `('$description', async ({largestTurnNum, support, finalizesAt, reason}) => {
     const {appDatas, whoSignedWhat} = support;
     const channel: Channel = {chainId, channelNonce, participants};
