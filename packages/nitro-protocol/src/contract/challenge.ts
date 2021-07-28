@@ -36,7 +36,6 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
     channelId,
     turnNumRecord,
     finalizesAt,
-    challenger,
     isFinal,
     fixedPart,
     variableParts: variablePartsUnstructured,
