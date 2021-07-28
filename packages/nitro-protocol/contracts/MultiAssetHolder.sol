@@ -543,7 +543,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
 
     /**
      * @notice Checks that a given channel is in the Finalized mode.
-     * @dev Checks that a given channel is in the Challenge mode.
+     * @dev Checks that a given channel is in the Finalized mode.
      * @param channelId Unique identifier for a channel.
      */
     function _requireChannelFinalized(bytes32 channelId) internal view {
