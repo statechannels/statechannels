@@ -2,6 +2,9 @@ pragma solidity 0.7.4;
 
 import './interfaces/IStatusManager.sol';
 
+/**
+ * @dev The StatusManager is responsible for on-chain storage of the status of active channels
+ */
 contract StatusManager is IStatusManager {
     mapping(bytes32 => bytes32) public statusOf;
 
