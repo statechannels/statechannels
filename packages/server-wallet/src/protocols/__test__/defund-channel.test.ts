@@ -125,7 +125,6 @@ describe('when the channel is finalized on chain', () => {
     expect(response.chainRequests[0]).toMatchObject({
       type: 'Withdraw',
       state: expect.objectContaining(challengeState),
-      challengerAddress: testChan.participantA.signingAddress,
     });
     const reloadedObjective = await store.getObjective(objective.objectiveId);
     expect(reloadedObjective.status).toEqual('succeeded');
