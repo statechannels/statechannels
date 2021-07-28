@@ -198,7 +198,7 @@ function generateCloseSteps(
 
   if (closeRate > 0) {
     _.times(closeRate * duration, () => {
-      const createStep = getRandomJobToClose(previousSteps);
+      const createStep = getRandomJobToClose(steps);
 
       if (createStep) {
         // We want a close timestamp that occurs at least closeDelay time after the create time
