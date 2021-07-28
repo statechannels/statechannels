@@ -163,24 +163,24 @@ contract EmbeddedApplication is
         bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, 1);
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
-        Outcome.Allocation[] memory fromAllocation = decode3PartyAllocation(from.outcome);
-        Outcome.Allocation[] memory toAllocation = decode3PartyAllocation(to.outcome);
+        Outcome.Allocation[] memory fromAllocations = decode3PartyAllocation(from.outcome);
+        Outcome.Allocation[] memory toAllocations = decode3PartyAllocation(to.outcome);
 
         require(
-            fromAllocation[AIndex].destination == toAllocation[AIndex].destination &&
-                fromAllocation[BIndex].destination == toAllocation[BIndex].destination &&
-                fromAllocation[IIndex].destination == toAllocation[IIndex].destination,
+            fromAllocations[AIndex].destination == toAllocations[AIndex].destination &&
+                fromAllocations[BIndex].destination == toAllocations[BIndex].destination &&
+                fromAllocations[IIndex].destination == toAllocations[IIndex].destination,
             'destinations may not change'
         );
 
-        require(fromAllocation[IIndex].amount == toAllocation[IIndex].amount, 'p2.amt !constant');
+        require(fromAllocations[IIndex].amount == toAllocations[IIndex].amount, 'p2.amt !constant');
         require(
-            fromAllocation[AIndex].amount +
-                fromAllocation[BIndex].amount +
-                fromAllocation[IIndex].amount ==
-                toAllocation[AIndex].amount +
-                    toAllocation[BIndex].amount +
-                    toAllocation[IIndex].amount,
+            fromAllocations[AIndex].amount +
+                fromAllocations[BIndex].amount +
+                fromAllocations[IIndex].amount ==
+                toAllocations[AIndex].amount +
+                    toAllocations[BIndex].amount +
+                    toAllocations[IIndex].amount,
             'total allocation changed'
         );
 
@@ -222,14 +222,14 @@ contract EmbeddedApplication is
 
         // validate the supplied support proof
         // extract the allocation
-        Outcome.Allocation[] memory Xallocation = validateSupportProofForX(fromAppData, toAppData);
+        Outcome.Allocation[] memory Xallocations = validateSupportProofForX(fromAppData, toAppData);
 
         // ensure A,B part of the outcome of X has been absorbed into the outcome of J
         require(
-            Xallocation[AIndex].amount == toAllocation[AIndex].amount &&
-                Xallocation[BIndex].amount == toAllocation[BIndex].amount &&
-                Xallocation[AIndex].destination == toAllocation[AIndex].destination &&
-                Xallocation[BIndex].destination == toAllocation[BIndex].destination,
+            Xallocations[AIndex].amount == toAllocations[AIndex].amount &&
+                Xallocations[BIndex].amount == toAllocations[BIndex].amount &&
+                Xallocations[AIndex].destination == toAllocations[AIndex].destination &&
+                Xallocations[BIndex].destination == toAllocations[BIndex].destination,
             'X / J outcome mismatch'
         );
         return true;
@@ -238,7 +238,7 @@ contract EmbeddedApplication is
     function validateSupportProofForX(AppData memory fromAppData, AppData memory toAppData)
         internal
         pure
-        returns (Outcome.Allocation[] memory Xallocation)
+        returns (Outcome.Allocation[] memory Xallocations)
     {
         // The following checks follow the protocol-level validTransition function
         // They are the members of FixedPart that do not affect the channelId
@@ -388,10 +388,7 @@ contract EmbeddedApplication is
         pure
         returns (Outcome.Allocation[] memory allocations)
     {
-        Outcome.SingleAssetExit[] memory outcome = abi.decode(
-            outcomeBytes,
-            (Outcome.SingleAssetExit[])
-        );
+        Outcome.SingleAssetExit[] memory outcome = Outcome.decodeExit(outcomeBytes);
 
         // Throws if more than one asset
         require(outcome.length == 1, 'outcome: Exactly 1 asset allowed');
@@ -409,10 +406,7 @@ contract EmbeddedApplication is
         pure
         returns (Outcome.Allocation[] memory allocations)
     {
-        Outcome.SingleAssetExit[] memory outcome = abi.decode(
-            outcomeBytes,
-            (Outcome.SingleAssetExit[])
-        );
+        Outcome.SingleAssetExit[] memory outcome = Outcome.decodeExit(outcomeBytes);
 
         Outcome.SingleAssetExit memory assetOutcome = outcome[0];
 
