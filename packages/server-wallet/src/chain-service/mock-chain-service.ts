@@ -59,7 +59,7 @@ export class MockChainService implements ChainServiceInterface {
           responses.push(await this.fundChannel(chainRequest));
           break;
         case 'Withdraw':
-          responses.push(await this.withdraw(chainRequest.state, chainRequest.challengerAddress));
+          responses.push(await this.withdraw(chainRequest.state));
           break;
         default:
           unreachable(chainRequest);
@@ -91,7 +91,7 @@ export class MockChainService implements ChainServiceInterface {
     return Promise.resolve(mockTransactoinResponse);
   }
 
-  withdraw(_state: State, _challengerAddress: Address): Promise<providers.TransactionResponse> {
+  withdraw(_state: State): Promise<providers.TransactionResponse> {
     return Promise.resolve(mockTransactoinResponse);
   }
 
@@ -111,10 +111,7 @@ export class MockChainService implements ChainServiceInterface {
   }
 }
 export class ErorringMockChainService extends MockChainService {
-  pushOutcomeAndWithdraw(
-    _state: State,
-    _challengerAddress: Address
-  ): Promise<providers.TransactionResponse> {
+  withdraw(_state: State): Promise<providers.TransactionResponse> {
     throw new Error('Failed to submit transaction');
   }
 }

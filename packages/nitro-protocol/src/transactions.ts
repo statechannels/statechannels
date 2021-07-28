@@ -65,11 +65,8 @@ export function createConcludeAndTransferAllAssetsTransaction(
   );
 }
 
-export function createTransferAllAssetsTransaction(
-  state: State,
-  challengerAddress: string
-): providers.TransactionRequest {
-  return nitroAdjudicatorTrans.createTransferAllAssetsTransaction(state, challengerAddress);
+export function createTransferAllAssetsTransaction(state: State): providers.TransactionRequest {
+  return nitroAdjudicatorTrans.createTransferAllAssetsTransaction(state);
 }
 
 export function createConcludeTransaction(

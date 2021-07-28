@@ -70,12 +70,10 @@ export function respondArgs({
   responseState,
   responseSignature,
 }: RespondArgs): any[] {
-  const {participants} = challengeState.channel;
-  const challengerAddress = participants[challengeState.turnNum % participants.length];
   const isFinalAB = [challengeState.isFinal, responseState.isFinal];
   const fixedPart = getFixedPart(responseState);
   const variablePartAB = [getVariablePart(challengeState), getVariablePart(responseState)];
-  return [challengerAddress, isFinalAB, fixedPart, variablePartAB, responseSignature];
+  return [isFinalAB, fixedPart, variablePartAB, responseSignature];
 }
 
 export function createRespondTransaction(args: RespondArgs): ethers.providers.TransactionRequest {

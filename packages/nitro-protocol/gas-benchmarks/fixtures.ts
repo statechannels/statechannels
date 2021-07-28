@@ -85,7 +85,6 @@ class TestChannel {
     challengeSignature: Signature;
     outcomeBytes: string;
     stateHash: string;
-    challengerAddress: string;
   } {
     return {
       largestTurnNum: state.turnNum,
@@ -97,7 +96,6 @@ class TestChannel {
       challengeSignature: signChallengeMessage([{state} as SignedState], Alice.privateKey),
       outcomeBytes: encodeOutcome(state.outcome),
       stateHash: hashState(state),
-      challengerAddress: Alice.address,
     };
   }
 

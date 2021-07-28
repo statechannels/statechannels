@@ -2,23 +2,20 @@ import {constants, utils, BigNumber} from 'ethers';
 
 import {hashOutcome, Outcome} from './outcome';
 import {hashState, State} from './state';
-import {Address, Bytes, Bytes32, Uint48} from './types';
+import {Bytes, Bytes32, Uint48} from './types';
 
 export interface ChannelData {
   turnNumRecord: Uint48;
   finalizesAt: Uint48;
   state?: State;
-  challengerAddress?: Address;
   outcome?: Outcome;
 }
 interface FingerprintPreimage {
   stateHash: Bytes32;
-  challengerAddress: Address;
   outcomeHash: Bytes32;
 }
 const FINGERPRINT_PREIMAGE_TYPE = `tuple(
   bytes32 stateHash,
-  address challengerAddress,
   bytes32 outcomeHash
 )`;
 
@@ -55,31 +52,21 @@ export function parseStatus(
 }
 const asNumber: (s: string) => number = s => BigNumber.from(s).toNumber();
 
-function getFingerprintPreimage({
-  finalizesAt,
-  state,
-  challengerAddress,
-  outcome,
-}: ChannelData): FingerprintPreimage {
+function getFingerprintPreimage({finalizesAt, state, outcome}: ChannelData): FingerprintPreimage {
   /*
-  When the channel is not open, it is still possible for the state and
-  challengerAddress to be missing. They should either both be present, or
-  both be missing, the latter indicating that the channel is finalized.
+  When the channel is not open, it is still possible for the state to be missing, indicating that the channel is finalized.
   It is currently up to the caller to ensure this.
   */
   const isOpen = finalizesAt === 0;
 
-  if (isOpen && (outcome || state || challengerAddress)) {
-    console.warn(
-      `Invalid open channel storage: ${JSON.stringify(outcome || state || challengerAddress)}`
-    );
+  if (isOpen && (outcome || state)) {
+    console.warn(`Invalid open channel storage: ${JSON.stringify(outcome || state)}`);
   }
 
   const stateHash = isOpen || !state ? constants.HashZero : hashState(state);
   const outcomeHash = isOpen || !outcome ? constants.HashZero : hashOutcome(outcome);
-  challengerAddress = challengerAddress || constants.AddressZero;
 
-  return {stateHash, challengerAddress, outcomeHash};
+  return {stateHash, outcomeHash};
 }
 
 export function encodeFingerprintPreimage(data: ChannelData): Bytes {

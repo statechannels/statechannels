@@ -41,7 +41,7 @@ contract NitroAdjudicator is MultiAssetHolder {
             sigs
         );
 
-        transferAllAssets(channelId, outcomeBytes, bytes32(0), address(0));
+        transferAllAssets(channelId, outcomeBytes, bytes32(0));
     }
 
     /**
@@ -50,22 +50,15 @@ contract NitroAdjudicator is MultiAssetHolder {
      * @param channelId Unique identifier for a state channel
      * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
      * @param stateHash stored state hash for the channel
-     * @param challengerAddress stored challenger address for the channel
      */
     function transferAllAssets(
         bytes32 channelId,
         bytes memory outcomeBytes,
-        bytes32 stateHash,
-        address challengerAddress
+        bytes32 stateHash
     ) public {
         // checks
         _requireChannelFinalized(channelId);
-        _requireMatchingFingerprint(
-            stateHash,
-            challengerAddress,
-            keccak256(outcomeBytes),
-            channelId
-        );
+        _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), channelId);
         Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
 
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
@@ -97,7 +90,7 @@ contract NitroAdjudicator is MultiAssetHolder {
         }
         outcomeBytes = abi.encode(outcome);
         bytes32 outcomeHash = keccak256(outcomeBytes);
-        _updateFingerprint(channelId, stateHash, challengerAddress, outcomeHash);
+        _updateFingerprint(channelId, stateHash, outcomeHash);
     }
 
     /**

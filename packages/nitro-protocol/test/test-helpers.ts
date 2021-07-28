@@ -70,7 +70,6 @@ export const ongoingChallengeFingerprint = (turnNumRecord = 5): Bytes32 =>
   channelDataToStatus({
     turnNumRecord,
     finalizesAt: 1e12,
-    challengerAddress: constants.AddressZero,
     outcome: [],
   });
 
@@ -78,15 +77,13 @@ export const finalizedFingerprint = (
   turnNumRecord = 5,
   finalizesAt = 1,
   outcome: Outcome = [],
-  state = undefined,
-  challengerAddress = undefined
+  state = undefined
 ): Bytes32 =>
   channelDataToStatus({
     turnNumRecord,
     finalizesAt,
     outcome,
     state,
-    challengerAddress,
   });
 
 export const newChallengeRegisteredEvent = (

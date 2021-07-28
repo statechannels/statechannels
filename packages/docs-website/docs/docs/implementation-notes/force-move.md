@@ -336,7 +336,6 @@ The `fingerprint` is the 160 least significant bits of `keccak256(abi.encode(cha
         uint256 turnNumRecord;
         uint256 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
         bytes32 outcomeHash // keccak256(abi.encode(Outcome));
     }
 ```
@@ -384,7 +383,6 @@ Effects:
   - `turnNumRecord` to the `largestTurnNum`
   - `finalizesAt` to `currentTime` + `challengeInterval`
   - `stateHash`
-  - `challengerAddress`
 - Emit a `ChallengeRegistered` event
 
 :::note
@@ -465,7 +463,6 @@ Effects:
 - Sets `outcomeHash` to be consistent with finalization proof
 - Clears `stateHash`
 - Clears `turnNumRecord`
-- Clears `challengerAddress`
 
 ### `checkpoint`
 

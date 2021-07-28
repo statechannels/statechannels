@@ -19,7 +19,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
+     * @return fingerprint The last 160 bits of kecca256(stateHash, outcomeHash)
      */
     function unpackStatus(bytes32 channelId)
         external
@@ -81,11 +81,7 @@ contract ForceMove is IForceMove {
             whoSignedWhat
         );
 
-        address challenger = _requireChallengerIsParticipant(
-            supportedStateHash,
-            fixedPart.participants,
-            challengerSig
-        );
+        _requireChallengerIsParticipant(supportedStateHash, fixedPart.participants, challengerSig);
 
         // effects
 
@@ -94,7 +90,6 @@ contract ForceMove is IForceMove {
             largestTurnNum,
             uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
             // This could overflow, so don't join a channel with a huge challengeDuration
-            challenger,
             isFinalCount > 0,
             fixedPart,
             variableParts,
@@ -107,7 +102,6 @@ contract ForceMove is IForceMove {
                 largestTurnNum,
                 uint48(block.timestamp) + fixedPart.challengeDuration, //solhint-disable-line not-rely-on-time
                 supportedStateHash,
-                challenger,
                 keccak256(variableParts[variableParts.length - 1].outcome)
             )
         );
@@ -116,14 +110,12 @@ contract ForceMove is IForceMove {
     /**
      * @notice Repsonds to an ongoing challenge registered against a state channel.
      * @dev Repsonds to an ongoing challenge registered against a state channel.
-     * @param challenger The address of the participant whom registered the challenge.
      * @param isFinalAB An pair of booleans describing if the challenge state and/or the response state have the `isFinal` property set to `true`.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param variablePartAB An pair of structs, each decribing the properties of the state channel that may change with each state update (for the challenge state and for the response state).
      * @param sig The responder's signature on the `responseStateHash`.
      */
     function respond(
-        address challenger,
         bool[2] memory isFinalAB,
         FixedPart memory fixedPart,
         IForceMoveApp.VariablePart[2] memory variablePartAB,
@@ -159,13 +151,7 @@ contract ForceMove is IForceMove {
         // checks
 
         _requireSpecificChallenge(
-            ChannelData(
-                turnNumRecord,
-                finalizesAt,
-                challengeStateHash,
-                challenger,
-                challengeOutcomeHash
-            ),
+            ChannelData(turnNumRecord, finalizesAt, challengeStateHash, challengeOutcomeHash),
             channelId
         );
 
@@ -329,7 +315,7 @@ contract ForceMove is IForceMove {
 
         // effects
         statusOf[channelId] = _generateStatus(
-            ChannelData(0, uint48(block.timestamp), bytes32(0), address(0), outcomeHash) //solhint-disable-line not-rely-on-time
+            ChannelData(0, uint48(block.timestamp), bytes32(0), outcomeHash) //solhint-disable-line not-rely-on-time
         );
         emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
     }
@@ -347,8 +333,8 @@ contract ForceMove is IForceMove {
         bytes32 supportedStateHash,
         address[] memory participants,
         Signature memory challengerSignature
-    ) internal pure returns (address challenger) {
-        challenger = _recoverSigner(
+    ) internal pure {
+        address challenger = _recoverSigner(
             keccak256(abi.encode(supportedStateHash, 'forceMove')),
             challengerSignature
         );
@@ -673,7 +659,7 @@ contract ForceMove is IForceMove {
      */
     function _clearChallenge(bytes32 channelId, uint48 newTurnNumRecord) internal {
         statusOf[channelId] = _generateStatus(
-            ChannelData(newTurnNumRecord, 0, bytes32(0), address(0), bytes32(0))
+            ChannelData(newTurnNumRecord, 0, bytes32(0), bytes32(0))
         );
         emit ChallengeCleared(channelId, newTurnNumRecord);
     }
@@ -802,35 +788,28 @@ contract ForceMove is IForceMove {
 
         // logical or with the last 160 bits of the hash the remaining channelData fields
         // (we call this the fingerprint)
-        result |= uint256(
-            _generateFingerprint(
-                channelData.stateHash,
-                channelData.challengerAddress,
-                channelData.outcomeHash
-            )
-        );
+        result |= uint256(_generateFingerprint(channelData.stateHash, channelData.outcomeHash));
 
         status = bytes32(result);
     }
 
-    function _generateFingerprint(
-        bytes32 stateHash,
-        address challengerAddress,
-        bytes32 outcomeHash
-    ) internal pure returns (uint160) {
-        return uint160(uint256(keccak256(abi.encode(stateHash, challengerAddress, outcomeHash))));
+    function _generateFingerprint(bytes32 stateHash, bytes32 outcomeHash)
+        internal
+        pure
+        returns (uint160)
+    {
+        return uint160(uint256(keccak256(abi.encode(stateHash, outcomeHash))));
     }
 
     function _updateFingerprint(
         bytes32 channelId,
         bytes32 stateHash,
-        address challengerAddress,
         bytes32 outcomeHash
     ) internal {
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _unpackStatus(channelId);
 
         bytes32 newStatus = _generateStatus(
-            ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash)
+            ChannelData(turnNumRecord, finalizesAt, stateHash, outcomeHash)
         );
         statusOf[channelId] = newStatus;
     }
@@ -841,8 +820,7 @@ contract ForceMove is IForceMove {
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
-
+     * @return fingerprint The last 160 bits of kecca256(stateHash, outcomeHash)
      */
     function _unpackStatus(bytes32 channelId)
         internal

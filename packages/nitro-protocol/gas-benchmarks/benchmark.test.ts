@@ -126,8 +126,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       await nitroAdjudicator.transferAllAssets(
         X.channelId,
         proof.outcomeBytes, // outcomeBytes,
-        proof.stateHash, // stateHash
-        proof.challengerAddress // challengerAddress
+        proof.stateHash // stateHash
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSad.vanillaNitro.transferAllAssets);
     // transferAllAssets ⬛ --------> 👩
@@ -164,8 +163,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       await nitroAdjudicator.transferAllAssets(
         LforX.channelId,
         ledgerProof.outcomeBytes, // outcomeBytes
-        ledgerProof.stateHash, // stateHash
-        ledgerProof.challengerAddress // challengerAddress
+        ledgerProof.stateHash // stateHash
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.transferAllAssetsL);
     // transferAllAssetsL  ⬛ --------> (X) -> 👩
@@ -173,8 +171,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       await nitroAdjudicator.transferAllAssets(
         X.channelId,
         proof.outcomeBytes, // outcomeBytes
-        proof.stateHash, // stateHash
-        proof.challengerAddress // challengerAddress
+        proof.stateHash // stateHash
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.transferAllAssetsX);
     // transferAllAssetsX  ⬛ ---------------> 👩
@@ -241,8 +238,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       await nitroAdjudicator.transferAllAssets(
         LforG.channelId,
         ledgerProof.outcomeBytes, // outcomeBytes
-        ledgerProof.stateHash, // stateHash
-        ledgerProof.challengerAddress // challengerAddress
+        ledgerProof.stateHash // stateHash
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsL);
     // transferAllAssetsL  ⬛ --------> (G) -> (J) -> (X) -> 👩
@@ -252,10 +248,8 @@ describe('Consumes the expected gas for sad-path exits', () => {
         G.channelId,
         encodeOutcome(G.outcome(MAGIC_ADDRESS_INDICATING_ETH)),
         guarantorProof.stateHash,
-        guarantorProof.challengerAddress,
         encodeOutcome(J.outcome(MAGIC_ADDRESS_INDICATING_ETH)),
         jointProof.stateHash,
-        jointProof.challengerAddress,
         [] // meaning "all"
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimG);
@@ -264,8 +258,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       await nitroAdjudicator.transferAllAssets(
         X.channelId,
         proof.outcomeBytes, // outcomeBytes
-        proof.stateHash, // stateHash
-        proof.challengerAddress // challengerAddress
+        proof.stateHash // stateHash
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsX);
     // transferAllAssetsX  ⬛ -----------------------------> 👩

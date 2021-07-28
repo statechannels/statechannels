@@ -126,7 +126,6 @@ describe('claim', () => {
 
       // Set adjudicator status
       const stateHash = constants.HashZero; // not realistic, but OK for purpose of this test
-      const challengerAddress = constants.AddressZero; // not realistic, but OK for purpose of this test
       const finalizesAt = 42;
       const turnNumRecord = 7;
 
@@ -136,7 +135,6 @@ describe('claim', () => {
             turnNumRecord,
             finalizesAt,
             stateHash,
-            challengerAddress,
             outcomeHash,
           })
         ).wait();
@@ -163,7 +161,6 @@ describe('claim', () => {
             turnNumRecord,
             finalizesAt,
             stateHash,
-            challengerAddress,
             outcomeHash: guarantorOutcomeHash,
           })
         ).wait();
@@ -174,10 +171,8 @@ describe('claim', () => {
         guarantorId,
         guarantorOutcomeBytes,
         stateHash,
-        challengerAddress,
         targetOutcomeBytes,
         stateHash,
-        challengerAddress,
         indices
       );
 
@@ -208,7 +203,6 @@ describe('claim', () => {
           finalizesAt,
           // stateHash will be set to HashZero by this helper fn
           // if state property of this object is undefined
-          challengerAddress,
           outcome: outcomeAfter,
         });
         expect(await testNitroAdjudicator.statusOf(targetId)).toEqual(expectedStatusAfter);

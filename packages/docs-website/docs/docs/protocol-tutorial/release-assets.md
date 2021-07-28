@@ -34,10 +34,9 @@ const outcomeBytes = encodeOutcome([
 
 const assetIndex = 0; // implies we are paying out the 0th asset (in this case the only asset, ETH)
 const stateHash = constants.HashZero; // if the channel was concluded on the happy path, we can use this default value
-const challengerAddress = constants.AddressZero; // if the channel was concluded on the happy path, we can use this default value
 const indices = []; // this magic value (a zero length array) implies we want to pay out all of the allocationItems (in this case there is only one)
 
-const tx2 = NitroAdjudicator.transfer(assetIndex, channelId, outcomeBytes, stateHash, challengerAddress, indices);
+const tx2 = NitroAdjudicator.transfer(assetIndex, channelId, outcomeBytes, stateHash, indices);
 
 /*
   Check that a AllocationUpdated event was emitted.
@@ -114,7 +113,6 @@ const guarantorOutcomeBytes = encodeOutcome([assetOutcomeForTheGuarantorChannel]
 
 const assetIndex = 0; // implies we are paying out the 0th asset (in this case the only asset, ETH)
 const stateHash = (targetStateHash = constants.HashZero); // if the channels were concluded on the happy path, we can use this default value
-const challengerAddress = (targetChallengerAddress = constants.AddressZero); // if the channels were concluded on the happy path, we can use this default value
 const indices = []; // this magic value (a zero length array) implies we want to pay out all of the allocationItems (in this case there is only one)
 
 const tx3 = NitroAdjudicator.claim(
@@ -122,10 +120,8 @@ const tx3 = NitroAdjudicator.claim(
   guarantorId,
   guarantorOutcomeBytes,
   stateHash,
-  challengerAddress,
   targetOutcomeBytes,
   targetStateHash,
-  targetChallengerAddress,
   indices
 );
 

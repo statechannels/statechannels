@@ -111,7 +111,6 @@ describe('respond', () => {
             turnNumRecord,
             finalizesAt,
             state: challenger ? challengeState : undefined,
-            challengerAddress: challenger.address,
             outcome,
           });
 

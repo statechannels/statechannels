@@ -14,7 +14,6 @@ beforeAll(async () => {
 const zeroData = {
   stateHash: ethers.constants.HashZero,
   outcomeHash: ethers.constants.HashZero,
-  challengerAddress: ethers.constants.AddressZero,
 };
 describe('storage', () => {
   it.each`

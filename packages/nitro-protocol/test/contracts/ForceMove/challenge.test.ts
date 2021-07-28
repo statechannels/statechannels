@@ -216,7 +216,6 @@ describe('challenge', () => {
           channelId: eventChannelId,
           turnNumRecord: eventTurnNumRecord,
           finalizesAt: eventFinalizesAt,
-          challenger: eventChallenger,
           isFinal: eventIsFinal,
           fixedPart: eventFixedPart,
           variableParts: eventVariableParts,
@@ -225,7 +224,6 @@ describe('challenge', () => {
         // Check this information is enough to respond
         expect(eventChannelId).toEqual(channelId);
         expect(eventTurnNumRecord).toEqual(largestTurnNum);
-        expect(eventChallenger).toEqual(challenger.address);
         expect(
           ethers.BigNumber.from(eventFixedPart[0]).eq(ethers.BigNumber.from(fixedPart.chainId))
         ).toBe(true);
@@ -245,7 +243,6 @@ describe('challenge', () => {
           turnNumRecord: largestTurnNum,
           finalizesAt: eventFinalizesAt,
           state: states[states.length - 1],
-          challengerAddress: challenger.address,
           outcome,
         };
         const expectedFingerprint = channelDataToStatus(expectedChannelStorage);

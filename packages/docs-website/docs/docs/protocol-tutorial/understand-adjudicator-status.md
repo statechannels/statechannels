@@ -10,7 +10,6 @@ The adjudicator contract stores certain information about any channel that it kn
 - `uint48 turnNumRecord`
 - `uint48 finalizesAt`
 - `bytes32 stateHash // keccak256(abi.encode(State))`
-- `address challengerAddress`
 - `bytes32 outcomeHash`
 
 The derived data is stored inside the following mapping (with `channelId` as the key):
@@ -33,7 +32,6 @@ uint160(
             keccak256(
                 abi.encode(
                     channelData.stateHash,
-                    channelData.challengerAddress,
                     channelData.outcomeHash
                 )
             )
