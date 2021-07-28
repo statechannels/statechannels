@@ -97,7 +97,7 @@ describe('checkpoint', () => {
     ${reverts5} | ${turnNumRecord + 1} | ${invalidTransition} | ${wallets[1]} | ${future}    | ${COUNTING_APP_INVALID_TRANSITION}
     ${reverts6} | ${turnNumRecord + 1} | ${unsupported}       | ${wallets[1]} | ${future}    | ${UNACCEPTABLE_WHO_SIGNED_WHAT}
     ${reverts7} | ${turnNumRecord + 1} | ${valid}             | ${wallets[1]} | ${past}      | ${CHANNEL_FINALIZED}
-  `('$description', async ({largestTurnNum, support, challenger, finalizesAt, reason}) => {
+  `('$description', async ({largestTurnNum, support, finalizesAt, reason}) => {
     const {appDatas, whoSignedWhat} = support;
     const channel: Channel = {chainId, channelNonce, participants};
     const channelId = getChannelId(channel);
