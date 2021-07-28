@@ -320,6 +320,41 @@ contract ForceMove is IForceMove, StatusManager {
         emit Concluded(channelId, uint48(block.timestamp)); //solhint-disable-line not-rely-on-time
     }
 
+    function getChainID() public pure returns (uint256) {
+        uint256 id;
+        /* solhint-disable no-inline-assembly */
+        assembly {
+            id := chainid()
+        }
+        /* solhint-disable no-inline-assembly */
+        return id;
+    }
+
+    /**
+     * @notice Validates input for several external methods.
+     * @dev Validates input for several external methods.
+     * @param numParticipants Length of the participants array
+     * @param numStates Number of states submitted
+     * @param numSigs Number of signatures submitted
+     * @param numWhoSignedWhats whoSignedWhat.length
+     */
+    function requireValidInput(
+        uint256 numParticipants,
+        uint256 numStates,
+        uint256 numSigs,
+        uint256 numWhoSignedWhats
+    ) public pure returns (bool) {
+        require((numParticipants >= numStates) && (numStates > 0), 'Insufficient or excess states');
+        require(
+            (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
+            'Bad |signatures|v|whoSignedWhat|'
+        );
+        require(numParticipants <= type(uint8).max, 'Too many participants!'); // type(uint8).max = 2**8 - 1 = 255
+        // no more than 255 participants
+        // max index for participants is 254
+        return true;
+    }
+
     // Internal methods:
 
     /**
@@ -887,16 +922,6 @@ contract ForceMove is IForceMove, StatusManager {
             );
     }
 
-    function getChainID() public pure returns (uint256) {
-        uint256 id;
-        /* solhint-disable no-inline-assembly */
-        assembly {
-            id := chainid()
-        }
-        /* solhint-disable no-inline-assembly */
-        return id;
-    }
-
     /**
      * @notice Computes the unique id of a channel.
      * @dev Computes the unique id of a channel.
@@ -908,30 +933,5 @@ contract ForceMove is IForceMove, StatusManager {
         channelId = keccak256(
             abi.encode(getChainID(), fixedPart.participants, fixedPart.channelNonce)
         );
-    }
-
-    /**
-     * @notice Validates input for several external methods.
-     * @dev Validates input for several external methods.
-     * @param numParticipants Length of the participants array
-     * @param numStates Number of states submitted
-     * @param numSigs Number of signatures submitted
-     * @param numWhoSignedWhats whoSignedWhat.length
-     */
-    function requireValidInput(
-        uint256 numParticipants,
-        uint256 numStates,
-        uint256 numSigs,
-        uint256 numWhoSignedWhats
-    ) public pure returns (bool) {
-        require((numParticipants >= numStates) && (numStates > 0), 'Insufficient or excess states');
-        require(
-            (numSigs == numParticipants) && (numWhoSignedWhats == numParticipants),
-            'Bad |signatures|v|whoSignedWhat|'
-        );
-        require(numParticipants <= type(uint8).max, 'Too many participants!'); // type(uint8).max = 2**8 - 1 = 255
-        // no more than 255 participants
-        // max index for participants is 254
-        return true;
     }
 }
