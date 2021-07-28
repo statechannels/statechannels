@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [0.15.0](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.14.1...@statechannels/wallet-core@0.15.0) (2021-07-28)
+
+
+### Features
+
+* add approvals to OpenChannelObjective ([eaef881](https://github.com/statechannels/statechannels/commit/eaef881a8fadd57c2ae8ae38c70b89a617936741))
+* implement pure-function DirectFunder in wallet-core ([#3426](https://github.com/statechannels/statechannels/issues/3426)) ([db408cb](https://github.com/statechannels/statechannels/commit/db408cb797f5a138fc3345e143dad900a936a0f7))
+
+
+
+
+
 ## [0.14.1](https://github.com/statechannels/statechannels/compare/@statechannels/wallet-core@0.14.0...@statechannels/wallet-core@0.14.1) (2021-03-19)
 
 **Note:** Version bump only for package @statechannels/wallet-core

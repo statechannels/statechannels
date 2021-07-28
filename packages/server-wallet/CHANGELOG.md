@@ -3,6 +3,31 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [1.25.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.24.0...@statechannels/server-wallet@1.25.0) (2021-07-28)
+
+
+### Bug Fixes
+
+* Channel.latest returns the latest state ([833edf1](https://github.com/statechannels/statechannels/commit/833edf1d992c36542d839ae2ae4eb8a5749cd161))
+* fix incorrect oId check ([50ccf2b](https://github.com/statechannels/statechannels/commit/50ccf2b1dcf7b2454fd5714dd938c94247874da8))
+* ignore conflict if no status or waiting for ([f085eed](https://github.com/statechannels/statechannels/commit/f085eed8e43ccd6d67a803bdeda50556ebc978cc))
+* remove updateFundingForChannels ([#3447](https://github.com/statechannels/statechannels/issues/3447)) ([257741d](https://github.com/statechannels/statechannels/commit/257741d9f7f4951bc0735c9744c1f74bfc3e064d)), closes [#3443](https://github.com/statechannels/statechannels/issues/3443)
+
+
+### Features
+
+* add approveObjectives api method ([bc67ec0](https://github.com/statechannels/statechannels/commit/bc67ec00aa42b2ef26c88aaf142152174fa99a4c))
+* add closeChannels api method ([766d862](https://github.com/statechannels/statechannels/commit/766d862917828e7bd3bd5151ec8f4aed6379ba6e))
+* basic ensureObjective ([ee2cd39](https://github.com/statechannels/statechannels/commit/ee2cd39f84c672aed65303956e241d06b4941b3b))
+* basic jumpstart ([4c30b00](https://github.com/statechannels/statechannels/commit/4c30b00f93ccb56f08898eb67ef9bf07765977cb))
+* create channel api method ([43be857](https://github.com/statechannels/statechannels/commit/43be857b70e4cd28761735ce92e8257fad3434af))
+* holdingUpdate returns a SingleChannelOutput ([456597c](https://github.com/statechannels/statechannels/commit/456597cd73d6218e3bffa2cdd497cbaae3881228))
+* introduce new message service ([b4521ea](https://github.com/statechannels/statechannels/commit/b4521ea16c46cf1ad44ea676487c274848762bfb))
+
+
+
+
+
 # [1.24.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.23.0...@statechannels/server-wallet@1.24.0) (2021-03-19)
 
 
