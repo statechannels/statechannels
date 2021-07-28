@@ -9,7 +9,7 @@ import './MultiAssetHolder.sol';
 /**
  * @dev The NitroAdjudicator contract extends MultiAssetHolder and hence inherits all MultiAssetHolder methods.
  */
-contract NitroAdjudicator is MultiAssetHolder {
+contract NitroAdjudicator is ForceMove, MultiAssetHolder {
     /**
      * @notice Finalizes a channel by providing a finalization proof, and liquidates all assets for the channel.
      * @dev Finalizes a channel by providing a finalization proof, and liquidates all assets for the channel.
