@@ -9,44 +9,6 @@ import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFo
  */
 interface IMultiAssetHolder {
     /**
-     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
-     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
-     * @param assetIndex The index of the asset to be paid out (in the outcome)
-     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
-     * @param outcomeBytes The abi.encode of AssetOutcome.Allocation
-     * @param stateHash the hash of the state stored on chain
-     * @param indices Array with each entry denoting the index of a destination to transfer funds to.
-     */
-    function transfer(
-        uint256 assetIndex,
-        bytes32 fromChannelId,
-        bytes calldata outcomeBytes,
-        bytes32 stateHash,
-        uint256[] memory indices
-    ) external;
-
-    /**
-     * @notice Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-     * @dev Transfers as many funds escrowed against `guarantorChannelId` as can be afforded for a specific destination in the beneficiaries of the __target__ of that channel. Checks against the storage in this contract.
-     * @param assetIndex The index of the asset to be paid out (in the outcome)
-     * @param guarantorChannelId Unique identifier for a guarantor state channel.
-     * @param guarantorOutcomeBytes The abi.encode of the guarantor outcome.
-     * @param guarantorStateHash the hash of the state stored on chain for the guarantor
-     * @param targetOutcomeBytes The abi.encode of the guarantor outcome.
-     * @param targetStateHash the hash of the state stored on chain for the guarantor
-     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all".
-     */
-    function claim(
-        uint256 assetIndex,
-        bytes32 guarantorChannelId,
-        bytes memory guarantorOutcomeBytes,
-        bytes32 guarantorStateHash,
-        bytes memory targetOutcomeBytes,
-        bytes32 targetStateHash,
-        uint256[] memory indices
-    ) external;
-
-    /**
      * @notice Deposit ETH against a given destination.
      * @dev Deposit ETH against a given destination.
      * @param asset erc20 token address, or zero address to indicate ETH
