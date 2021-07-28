@@ -163,8 +163,8 @@ contract EmbeddedApplication is
         bool signedByB = ForceMoveAppUtilities.isSignedBy(signedByTo, 1);
         AppData memory fromAppData = abi.decode(from.appData, (AppData));
         AppData memory toAppData = abi.decode(to.appData, (AppData));
-        Outcome.AllocationItem[] memory fromAllocation = decode3PartyAllocation(from.outcome);
-        Outcome.AllocationItem[] memory toAllocation = decode3PartyAllocation(to.outcome);
+        Outcome.Allocation[] memory fromAllocation = decode3PartyAllocation(from.outcome);
+        Outcome.Allocation[] memory toAllocation = decode3PartyAllocation(to.outcome);
 
         require(
             fromAllocation[AIndex].destination == toAllocation[AIndex].destination &&
@@ -222,10 +222,7 @@ contract EmbeddedApplication is
 
         // validate the supplied support proof
         // extract the allocation
-        Outcome.AllocationItem[] memory Xallocation = validateSupportProofForX(
-            fromAppData,
-            toAppData
-        );
+        Outcome.Allocation[] memory Xallocation = validateSupportProofForX(fromAppData, toAppData);
 
         // ensure A,B part of the outcome of X has been absorbed into the outcome of J
         require(
@@ -241,7 +238,7 @@ contract EmbeddedApplication is
     function validateSupportProofForX(AppData memory fromAppData, AppData memory toAppData)
         internal
         pure
-        returns (Outcome.AllocationItem[] memory Xallocation)
+        returns (Outcome.Allocation[] memory Xallocation)
     {
         // The following checks follow the protocol-level validTransition function
         // They are the members of FixedPart that do not affect the channelId
@@ -389,59 +386,39 @@ contract EmbeddedApplication is
     function decode3PartyAllocation(bytes memory outcomeBytes)
         private
         pure
-        returns (Outcome.AllocationItem[] memory allocation)
+        returns (Outcome.Allocation[] memory allocations)
     {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+        Outcome.SingleAssetExit[] memory outcome = abi.decode(
+            outcomeBytes,
+            (Outcome.SingleAssetExit[])
+        );
 
         // Throws if more than one asset
         require(outcome.length == 1, 'outcome: Exactly 1 asset allowed');
 
-        Outcome.AssetOutcome memory assetOutcome = abi.decode(
-            outcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
+        Outcome.SingleAssetExit memory assetOutcome = outcome[0];
 
-        // Throws unless the assetoutcome is an allocation
-        require(
-            assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-            'AssetOutcome must be Allocation'
-        );
+        allocations = assetOutcome.allocations; // TODO should we check each allocation is a "simple" one?
 
-        allocation = abi.decode(
-            assetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
         // Throws unless there are exactly 3 allocations
-        require(allocation.length == 3, 'allocation.length != 3');
+        require(allocations.length == 3, 'allocation.length != 3');
     }
 
     function decode2PartyAllocation(bytes memory outcomeBytes)
         private
         pure
-        returns (Outcome.AllocationItem[] memory allocation)
+        returns (Outcome.Allocation[] memory allocations)
     {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
-
-        // Throws if more than one asset
-        require(outcome.length == 1, 'outcome: Only one asset allowed');
-
-        Outcome.AssetOutcome memory assetOutcome = abi.decode(
-            outcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
+        Outcome.SingleAssetExit[] memory outcome = abi.decode(
+            outcomeBytes,
+            (Outcome.SingleAssetExit[])
         );
 
-        // Throws unless the assetoutcome is an allocation
-        require(
-            assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-            'AssetOutcome must be Allocation'
-        );
+        Outcome.SingleAssetExit memory assetOutcome = outcome[0];
 
-        allocation = abi.decode(
-            assetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
+        allocations = assetOutcome.allocations; // TODO should we check each allocation is a "simple" one?
 
-        // Throws unless there are exactly 2 allocations
-        require(allocation.length == 2, 'allocation.length != 2');
+        // Throws unless there are exactly 3 allocations
+        require(allocations.length == 2, 'allocation.length != 3');
     }
 }

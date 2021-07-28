@@ -24,42 +24,31 @@ contract SingleAssetPayments is IForceMoveApp {
         uint48 turnNumB,
         uint256 nParticipants
     ) public override pure returns (bool) {
-        Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
-        Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
+        Outcome.SingleAssetExit[] memory outcomeA = abi.decode(
+            a.outcome,
+            (Outcome.SingleAssetExit[])
+        );
+        Outcome.SingleAssetExit[] memory outcomeB = abi.decode(
+            b.outcome,
+            (Outcome.SingleAssetExit[])
+        );
 
         // Throws if more than one asset
         require(outcomeA.length == 1, 'outcomeA: Only one asset allowed');
         require(outcomeB.length == 1, 'outcomeB: Only one asset allowed');
 
         // Throws unless the assetoutcome is an allocation
-        Outcome.AssetOutcome memory assetOutcomeA = abi.decode(
-            outcomeA[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        Outcome.AssetOutcome memory assetOutcomeB = abi.decode(
-            outcomeB[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
-        );
-        require(
-            assetOutcomeA.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-            'AssetOutcomeA must be Allocation'
-        );
-        require(
-            assetOutcomeB.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-            'AssetOutcomeB must be Allocation'
-        );
+        Outcome.SingleAssetExit memory assetOutcomeA = outcomeA[0];
+        Outcome.SingleAssetExit memory assetOutcomeB = outcomeA[1];
 
         // Throws unless that allocation has exactly n outcomes
-        Outcome.AllocationItem[] memory allocationA = abi.decode(
-            assetOutcomeA.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        Outcome.AllocationItem[] memory allocationB = abi.decode(
-            assetOutcomeB.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
-        require(allocationA.length == nParticipants, '|AllocationA|!=|participants|');
-        require(allocationB.length == nParticipants, '|AllocationB|!=|participants|');
+        Outcome.Allocation[] memory allocationsA = assetOutcomeA.allocations;
+        Outcome.Allocation[] memory allocationsB = assetOutcomeB.allocations;
+
+        // TODO should we check each allocation is a "simple" one?
+
+        require(allocationsA.length == nParticipants, '|AllocationA|!=|participants|');
+        require(allocationsB.length == nParticipants, '|AllocationB|!=|participants|');
 
         // Interprets the nth outcome as benefiting participant n
         // checks the destinations have not changed
@@ -70,14 +59,14 @@ contract SingleAssetPayments is IForceMoveApp {
         uint256 allocationSumB;
         for (uint256 i = 0; i < nParticipants; i++) {
             require(
-                allocationB[i].destination == allocationA[i].destination,
+                allocationsB[i].destination == allocationsA[i].destination,
                 'Destinations may not change'
             );
-            allocationSumA += allocationA[i].amount;
-            allocationSumB += allocationB[i].amount;
+            allocationSumA += allocationsA[i].amount;
+            allocationSumB += allocationsB[i].amount;
             if (i != turnNumB % nParticipants) {
                 require(
-                    allocationB[i].amount >= allocationA[i].amount,
+                    allocationsB[i].amount >= allocationsA[i].amount,
                     'Nonmover balance decreased'
                 );
             }
