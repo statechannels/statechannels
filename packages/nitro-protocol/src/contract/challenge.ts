@@ -73,7 +73,7 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
     };
     return {state, signature};
   });
-  return {channelId, challengeStates, finalizesAt, challengerAddress: challenger};
+  return {channelId, challengeStates, finalizesAt};
 }
 
 export interface ChallengeClearedEvent {
