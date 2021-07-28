@@ -123,7 +123,6 @@ With these considerations in mind, the ForceMove interface should be something l
         uint256 turnNumRecord;
         uint256 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
         bytes32 outcomeHash;
     }
 
