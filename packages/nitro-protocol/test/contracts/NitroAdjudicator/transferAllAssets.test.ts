@@ -164,7 +164,6 @@ describe('transferAllAssets', () => {
           finalizesAt,
           // stateHash will be set to HashZero by this helper fn
           // if state property of this object is undefined
-
           outcome: outcomeAfter,
         });
         expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedStatusAfter);
