@@ -4,6 +4,7 @@ pragma experimental ABIEncoderV2;
 
 import './interfaces/IForceMove.sol';
 import './interfaces/IForceMoveApp.sol';
+import './StatusManager.sol';
 
 /**
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
@@ -749,15 +750,6 @@ contract ForceMove is IForceMove, StatusManager {
      */
     function _requireChannelNotFinalized(bytes32 channelId) internal view {
         require(_mode(channelId) != ChannelMode.Finalized, 'Channel finalized.');
-    }
-
-    /**
-     * @notice Checks that a given channel is in the Finalized mode.
-     * @dev Checks that a given channel is in the Challenge mode.
-     * @param channelId Unique identifier for a channel.
-     */
-    function _requireChannelFinalized(bytes32 channelId) internal view {
-        require(_mode(channelId) == ChannelMode.Finalized, 'Channel not finalized.');
     }
 
     /**
