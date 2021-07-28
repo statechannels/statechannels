@@ -50,23 +50,17 @@ contract StatusManager is IStatusManager {
 
         // logical or with the last 160 bits of the hash the remaining channelData fields
         // (we call this the fingerprint)
-        result |= uint256(
-            _generateFingerprint(
-                channelData.stateHash,
-                channelData.challengerAddress,
-                channelData.outcomeHash
-            )
-        );
+        result |= uint256(_generateFingerprint(channelData.stateHash, channelData.outcomeHash));
 
         status = bytes32(result);
     }
 
-    function _generateFingerprint(
-        bytes32 stateHash,
-        address challengerAddress,
-        bytes32 outcomeHash
-    ) internal pure returns (uint160) {
-        return uint160(uint256(keccak256(abi.encode(stateHash, challengerAddress, outcomeHash))));
+    function _generateFingerprint(bytes32 stateHash, bytes32 outcomeHash)
+        internal
+        pure
+        returns (uint160)
+    {
+        return uint160(uint256(keccak256(abi.encode(stateHash, outcomeHash))));
     }
 
     /**
@@ -75,8 +69,7 @@ contract StatusManager is IStatusManager {
      * @param channelId Unique identifier for a state channel.
      * @return turnNumRecord A turnNum that (the adjudicator knows) is supported by a signature from each participant.
      * @return finalizesAt The unix timestamp when `channelId` will finalize.
-     * @return fingerprint The last 160 bits of kecca256(stateHash, challengerAddress, outcomeHash)
-
+     * @return fingerprint The last 160 bits of kecca256(stateHash, outcomeHash)
      */
     function _unpackStatus(bytes32 channelId)
         internal

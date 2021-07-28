@@ -529,13 +529,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     function _updateFingerprint(
         bytes32 channelId,
         bytes32 stateHash,
-        address challengerAddress,
         bytes32 outcomeHash
     ) internal {
         (uint48 turnNumRecord, uint48 finalizesAt, ) = _unpackStatus(channelId);
 
         bytes32 newStatus = _generateStatus(
-            ChannelData(turnNumRecord, finalizesAt, stateHash, challengerAddress, outcomeHash)
+            ChannelData(turnNumRecord, finalizesAt, stateHash, outcomeHash)
         );
         statusOf[channelId] = newStatus;
     }

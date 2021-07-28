@@ -7,7 +7,6 @@ interface IStatusManager {
         uint48 turnNumRecord;
         uint48 finalizesAt;
         bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
         bytes32 outcomeHash;
     }
 }
