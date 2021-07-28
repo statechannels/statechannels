@@ -176,10 +176,8 @@ describe('claim', () => {
         guarantorId,
         guarantorOutcomeBytes,
         stateHash,
-
         targetOutcomeBytes,
         stateHash,
-
         indices
       );
 
@@ -210,7 +208,6 @@ describe('claim', () => {
           finalizesAt,
           // stateHash will be set to HashZero by this helper fn
           // if state property of this object is undefined
-
           outcome: outcomeAfter,
         });
         expect(await testNitroAdjudicator.statusOf(targetId)).toEqual(expectedStatusAfter);
