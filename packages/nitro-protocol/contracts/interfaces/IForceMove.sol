@@ -37,16 +37,6 @@ interface IForceMove {
         bytes32 outcomeHash;
     }
 
-    struct ChannelData {
-        uint48 turnNumRecord;
-        uint48 finalizesAt;
-        bytes32 stateHash; // keccak256(abi.encode(State))
-        address challengerAddress;
-        bytes32 outcomeHash;
-    }
-
-    enum ChannelMode {Open, Challenge, Finalized}
-
     /**
      * @notice Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
      * @dev Registers a challenge against a state channel. A challenge will either prompt another participant into clearing the challenge (via one of the other methods), or cause the channel to finalize at a specific time.
