@@ -57,7 +57,7 @@ export class WalletLoadNode {
 
       this.logger.trace('Starting job processing');
       console.log(chalk.whiteBright('Starting job processing..'));
-
+      this.outputChannelStats();
       // If we didn't receive this from a peer it means it came from the user
       // We want to kick off processing in all nodes so we message our peers
       const fromPeer = req.query['fromPeer'];
@@ -121,6 +121,27 @@ export class WalletLoadNode {
 
     // Simple endpoint for checking if the server is ready
     this.server.get('/', (req, res) => res.end());
+  }
+
+  private outputChannelStats() {
+    const ourSteps = this.steps.filter(s => s.serverId === this.loadNodeConfig.serverId);
+    const createdAmount = ourSteps.filter(s => s.type === 'CreateChannel').length;
+    const ledgerAmount = ourSteps.filter(s => s.type === 'CreateLedgerChannel').length;
+    console.log(
+      chalk.whiteBright(
+        `This node will create ${createdAmount} channel(s) using ${
+          ledgerAmount > 0 ? 'ledger' : 'direct'
+        } funding`
+      )
+    );
+    if (ledgerAmount > 0) {
+      console.log(chalk.whiteBright(`This node will create ${ledgerAmount} ledger channel(s)`));
+    }
+
+    const closedAmount = ourSteps.filter(s => s.type === 'CloseChannel').length;
+    if (closedAmount > 0) {
+      console.log(chalk.whiteBright(`This node will close ${closedAmount} channel(s)`));
+    }
   }
 
   private parseBooleanQueryParam(paramName: string, req: express.Request): boolean {
