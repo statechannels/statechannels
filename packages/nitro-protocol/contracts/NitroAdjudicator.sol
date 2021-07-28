@@ -59,37 +59,26 @@ contract NitroAdjudicator is ForceMove, MultiAssetHolder {
         // checks
         _requireChannelFinalized(channelId);
         _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), channelId);
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
+        Outcome.SingleAssetExit[] memory outcome = Outcome.decodeExit(outcomeBytes);
 
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
-            Outcome.AssetOutcome memory assetOutcome = abi.decode(
-                outcome[assetIndex].assetOutcomeBytes,
-                (Outcome.AssetOutcome)
-            );
-            require(
-                assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-                '!allocation'
-            );
-            Outcome.AllocationItem[] memory allocation = abi.decode(
-                assetOutcome.allocationOrGuaranteeBytes,
-                (Outcome.AllocationItem[])
-            );
+            Outcome.SingleAssetExit memory assetOutcome = outcome[assetIndex];
+            Outcome.Allocation[] memory allocations = assetOutcome.allocations;
             address asset = outcome[assetIndex].asset;
             uint256 initialHoldings;
             // update allocation in place, to the new allocation returned by _transfer
-            (allocation, initialHoldings) = _transfer(
-                asset,
-                channelId,
-                allocation,
-                new uint256[](0)
-            );
-            outcome[assetIndex].assetOutcomeBytes = abi.encode(
-                Outcome.AssetOutcome(Outcome.AssetOutcomeType.Allocation, abi.encode(allocation))
-            );
+            // TODO reinstate next line
+            // TODO ensure check on allocationType
+            // (allocations, initialHoldings) = _transfer(
+            //     asset,
+            //     channelId,
+            //     allocations,
+            //     new uint256[](0)
+            // );
+            outcome[assetIndex].allocations = allocations;
             emit AllocationUpdated(channelId, assetIndex, initialHoldings);
         }
-        outcomeBytes = abi.encode(outcome);
-        bytes32 outcomeHash = keccak256(outcomeBytes);
+        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
         _updateFingerprint(channelId, stateHash, outcomeHash);
     }
 
