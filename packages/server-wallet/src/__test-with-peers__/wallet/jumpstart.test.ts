@@ -14,7 +14,7 @@ beforeAll(async () => {
 afterAll(async () => {
   await teardownPeerSetup(peerSetup);
 });
-jest.setTimeout(600000_000);
+jest.setTimeout(60_000);
 
 describe('jumpstartObjectives', () => {
   it('returns an empty array when there are no objectives', async () => {
