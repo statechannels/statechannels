@@ -39,7 +39,6 @@ For example, as ForceMove only works if the channel is open, which implies that 
   - Can deduce `turnNumRecord`
   - Needs to read `finalizesAt`
 - Refute
-  - Can deduce `challengerAddress` (from recoverSignature)
   - Needs to read `turnNumRecord`, `finalizesAt`
 - ConcludeFromOpen
   - Can deduce all fields apart from `turnNumRecord` (they must all be null)
