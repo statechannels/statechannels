@@ -9,8 +9,6 @@ import './interfaces/IForceMoveApp.sol';
  * @dev An implementation of ForceMove protocol, which allows state channels to be adjudicated and finalized.
  */
 contract ForceMove is IForceMove, StatusManager {
-    mapping(bytes32 => bytes32) public statusOf;
-
     // Public methods:
 
     /**
