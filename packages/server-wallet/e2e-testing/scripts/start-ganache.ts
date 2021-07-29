@@ -1,16 +1,18 @@
 import yargs from 'yargs/yargs';
 import {hideBin} from 'yargs/helpers';
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
-import {writeFile} from 'jsonfile';
+import jsonfile, {writeFile} from 'jsonfile';
 import ganache from 'ganache-core';
 import {ethers} from 'ethers';
 import {waitUntilUsed} from 'tcp-port-used';
 import chalk from 'chalk';
 import _ from 'lodash';
 import ms from 'ms';
+import exitHook from 'async-exit-hook';
 
-import {deploy} from '../../deployment/deploy';
-import {setupUnhandledErrorListeners} from '../utils';
+import {deploy, TestNetworkContext} from '../../deployment/deploy';
+import {getRoles, setupUnhandledErrorListeners} from '../utils';
+import {ChainState} from '../types';
 
 setupUnhandledErrorListeners();
 setupGanache();
@@ -38,9 +40,14 @@ async function setupGanache() {
     .option('artifactFile', {
       alias: 'af',
       description: 'The file to write the artifacts to',
-      default: 'temp/contract_artifacts.json',
+      default: './temp/contract_artifacts.json',
+    })
+    .option('chainStateFile', {default: './temp/chain-state-file.json'})
+    .option('roleFile', {
+      alias: 'f',
+      describe: 'The path to a file containing the role information',
+      default: './e2e-testing/test-data/roles.json',
     }).argv;
-
   // ganache core exports a very permissive object[] type for accounts
   // it should be {balance: HexString, secretKey: string}[]
   const serverOptions: ganache.IServerOptions = {
@@ -71,7 +78,6 @@ async function setupGanache() {
   server.listen(commandArguments.port, () => {});
 
   await waitUntilUsed(commandArguments.port, 500, ms('10s'));
-
   // While ganache supports time based mining it disables auto mining after contract calls
   // By sending the mine instructions ourselves we get the best of both worlds
   setInterval(() => {
@@ -83,14 +89,67 @@ async function setupGanache() {
       }
     });
   }, commandArguments.miningInterval);
-
   console.log(chalk.green(`Ganache started on port ${commandArguments.port}`));
 
   const endpoint = `http://localhost:${commandArguments.port}`;
 
   // Deploy the contracts and output to the artifact file
   const deployResults = await deploy(endpoint);
+
   await writeFile(commandArguments.artifactFile, deployResults);
 
+  setupUnhandledErrorListeners();
+  // ganache registers handlers for these events and intercepts them
+  // We want to avoid this so we can write out results before exiting so we remove all existing listeners
+  process.removeAllListeners('SIGINT');
+  process.removeAllListeners('SIGTERM');
+  process.removeAllListeners('beforeExit');
+
   console.log(chalk.green(`Contract artifacts written to ${commandArguments.artifactFile}`));
+
+  const roles = await getRoles(commandArguments.roleFile);
+  const destinations = Object.keys(roles).map(rId => roles[rId].destination);
+
+  // exitHook will run when the process gets terminated for whatever reason
+  exitHook(done =>
+    writeBalances(
+      destinations,
+      deployResults,
+      commandArguments.port,
+      commandArguments.chainStateFile
+    ).then(() => {
+      server.close();
+      done();
+    })
+  );
+}
+
+async function writeBalances(
+  destinations: string[],
+  deployResults: TestNetworkContext,
+  ganachePort: number,
+  chainStateFile: string
+) {
+  const provider = new ethers.providers.JsonRpcProvider(`http://localhost:${ganachePort}`);
+
+  const accounts: ChainState['accounts'] = {};
+
+  for (const address of destinations) {
+    const balance = (await provider.getBalance(address)).toHexString();
+    accounts[address] = balance;
+  }
+
+  const contractBalance = await (
+    await provider.getBalance(deployResults.ETH_ASSET_HOLDER_ADDRESS)
+  ).toHexString();
+
+  const contracts: ChainState['contracts'] = {
+    ETH_ASSET_HOLDER_ADDRESS: {
+      address: deployResults.ETH_ASSET_HOLDER_ADDRESS,
+      balance: contractBalance,
+    },
+  };
+
+  await jsonfile.writeFile(chainStateFile, {accounts, contracts});
+  console.log(`Wrote account balances to file ${chainStateFile}`);
 }
