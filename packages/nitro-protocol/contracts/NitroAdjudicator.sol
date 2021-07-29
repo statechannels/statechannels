@@ -59,27 +59,54 @@ contract NitroAdjudicator is ForceMove, MultiAssetHolder {
         // checks
         _requireChannelFinalized(channelId);
         _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), channelId);
-        Outcome.SingleAssetExit[] memory outcome = Outcome.decodeExit(outcomeBytes);
 
+        // computation
+        bool allocatesOnlyZerosForAllAssets = true;
+        Outcome.SingleAssetExit[] memory outcome = Outcome.decodeExit(outcomeBytes);
+        Outcome.SingleAssetExit[] memory exit = new Outcome.SingleAssetExit[](outcome.length);
+        uint256[] memory initialHoldings = new uint256[](outcome.length);
+        uint256[] memory totalPayouts = new uint256[](outcome.length);
         for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
             Outcome.SingleAssetExit memory assetOutcome = outcome[assetIndex];
             Outcome.Allocation[] memory allocations = assetOutcome.allocations;
             address asset = outcome[assetIndex].asset;
-            uint256 initialHoldings;
-            // update allocation in place, to the new allocation returned by _transfer
-            // TODO reinstate next line
-            // TODO ensure check on allocationType
-            // (allocations, initialHoldings) = _transfer(
-            //     asset,
-            //     channelId,
-            //     allocations,
-            //     new uint256[](0)
-            // );
-            outcome[assetIndex].allocations = allocations;
-            emit AllocationUpdated(channelId, assetIndex, initialHoldings);
+            initialHoldings[assetIndex] = holdings[asset][channelId];
+            (
+                Outcome.Allocation[] memory newAllocations,
+                bool allocatesOnlyZeros,
+                Outcome.Allocation[] memory exitAllocations,
+                uint256 totalPayoutsForAsset
+            ) = compute_transfer_effects_and_interactions(
+                initialHoldings[assetIndex],
+                allocations,
+                new uint256[](0)
+            );
+            if (!allocatesOnlyZeros) allocatesOnlyZerosForAllAssets = false;
+            totalPayouts[assetIndex] = totalPayoutsForAsset;
+            outcome[assetIndex].allocations = newAllocations;
+            exit[assetIndex] = Outcome.SingleAssetExit(
+                asset,
+                assetOutcome.metadata,
+                exitAllocations
+            );
         }
-        bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
-        _updateFingerprint(channelId, stateHash, outcomeHash);
+
+        // effects
+        for (uint256 assetIndex = 0; assetIndex < outcome.length; assetIndex++) {
+            address asset = outcome[assetIndex].asset;
+            holdings[asset][channelId] -= totalPayouts[assetIndex];
+            emit AllocationUpdated(channelId, assetIndex, initialHoldings[assetIndex]);
+        }
+
+        if (allocatesOnlyZerosForAllAssets) {
+            delete statusOf[channelId];
+        } else {
+            bytes32 outcomeHash = keccak256(abi.encode(outcomeBytes));
+            _updateFingerprint(channelId, stateHash, outcomeHash);
+        }
+
+        // interactions
+        Outcome.executeExit(exit);
     }
 
     /**
