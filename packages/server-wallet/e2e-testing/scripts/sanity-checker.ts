@@ -85,7 +85,7 @@ async function checkChain(chainState: ChainState, channels: Channel[]): Promise<
 
   const myTotal = myAddresses.map(d => chainState.accounts[d]).reduce(BN.add, '0x0');
 
-  const assetHolderFunds = chainState.contracts.ETH_ASSET_HOLDER_ADDRESS.balance;
+  const assetHolderFunds = chainState.contracts.NITRO_ADJUDICATOR_ADDRESS.balance;
 
   return [
     createAssertion(closedFunds, myTotal, 'Received Funds on chain'),

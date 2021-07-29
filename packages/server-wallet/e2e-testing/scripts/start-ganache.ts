@@ -140,12 +140,12 @@ async function writeBalances(
   }
 
   const contractBalance = await (
-    await provider.getBalance(deployResults.ETH_ASSET_HOLDER_ADDRESS)
+    await provider.getBalance(deployResults.NITRO_ADJUDICATOR_ADDRESS)
   ).toHexString();
 
   const contracts: ChainState['contracts'] = {
-    ETH_ASSET_HOLDER_ADDRESS: {
-      address: deployResults.ETH_ASSET_HOLDER_ADDRESS,
+    NITRO_ADJUDICATOR_ADDRESS: {
+      address: deployResults.NITRO_ADJUDICATOR_ADDRESS,
       balance: contractBalance,
     },
   };
