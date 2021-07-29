@@ -63,9 +63,8 @@ async function checkDatabase() {
 
       process.exit(1);
     }
-
-    process.exit(0);
   }
+  process.exit(0);
 }
 
 async function checkChain(chainState: ChainState, channels: Channel[]): Promise<Assertion[]> {
