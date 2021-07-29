@@ -78,5 +78,5 @@ export type RoleConfig = {
 
 export type ChainState = {
   accounts: Record<string, Uint256>;
-  contracts: Record<'ETH_ASSET_HOLDER_ADDRESS', {balance: Uint256; address: string}>;
+  contracts: Record<'NITRO_ADJUDICATOR_ADDRESS', {balance: Uint256; address: string}>;
 };
