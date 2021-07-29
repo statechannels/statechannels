@@ -13,59 +13,54 @@ The following diagram shows how the contracts inherit from one another. Click on
   chart='
 graph TD
 linkStyle default interpolate basis
-SafeMath([SafeMath])
-Outcome([Outcome])
-IMultiAssetHolder
-MultiAssetHolder
-IERC20
-IMultiAssetHolder--> MultiAssetHolder
-SafeMath-.-> MultiAssetHolder
-Outcome-.-> MultiAssetHolder
-MultiAssetHolder-->NitroAdjudicator
-IERC20.->MultiAssetHolder
 classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
 classDef Contract fill:#ffffff,stroke:#656664;
 classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
 classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5;
 classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5;
 classDef TestContract fill:#fafe4f,stroke-width:0px
-class SafeMath,Outcome Library;
-class IMultiAssetHolder,IERC20 Interface;
-class MultiAssetHolder Contract;
-click SafeMath "/contract-api/natspec/SafeMath";
-click Outcome "/contract-api/natspec/Outcome";
-click MultiAssetHolder "/contract-api/natspec/MultiAssetHolder";
-click IMultiAssetHolder "/contract-api/natspec/IMultiAssetHolder";
-click IERC20 "/contract-api/natspec/IERC20";
 Outcome([Outcome])
+SafeMath([SafeMath])
 IForceMove
+IForceMoveApp 
+IStatusManager
+IMultiAssetHolder
 ForceMove
-NitroAdjudicator
+IERC20
+MultiAssetHolder
+StatusManager
 TESTForceMove
 TESTNitroAdjudicator
+NitroAdjudicator
+class SafeMath,Outcome Library;
+class IMultiAssetHolder,IERC20,IForceMoveApp,IForceMove,IStatusManager Interface;
+class MultiAssetHolder,ForceMove,StatusManager Contract;
+class NitroAdjudicator DeployedContract;
+class TESTForceMove,TESTNitroAdjudicator TestContract;
+IMultiAssetHolder--> MultiAssetHolder
+IStatusManager--> StatusManager
+StatusManager--> ForceMove
+StatusManager--> MultiAssetHolder
+SafeMath-.-> MultiAssetHolder
+Outcome-.-> MultiAssetHolder
+MultiAssetHolder-->NitroAdjudicator
+IERC20.->MultiAssetHolder
 IForceMoveApp-.-> ForceMove
 IForceMove--> ForceMove
 Outcome-.-> NitroAdjudicator
 ForceMove-->TESTForceMove
-ForceMove-->MultiAssetHolder
+ForceMove-->NitroAdjudicator
 NitroAdjudicator--> TESTNitroAdjudicator
 TESTForceMove--> TESTNitroAdjudicator
-classDef Contract fill:#ffffff,stroke:#656664;
-classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
-classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5
-classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5
-classDef TestContract fill:#fafe4f,stroke-width:0px;
-classDef Library fill:#ffffff,stroke:#656664,stroke-dasharray: 5 5
-class Outcome,SafeMath Library;
-class IForceMoveApp,IForceMove Interface;
-class ForceMove Contract;
-class TESTForceMove,TESTNitroAdjudicator TestContract;
-class NitroAdjudicator DeployedContract;
-click IForceMoveApp "/contract-api/natspec/IForceMoveApp";
-click SafeMath "/contract-api/natspec/SafeMath";
-click Outcome "/contract-api/natspec/Outcome";
+click IStatusManager "/contract-api/natspec/IStatusManager";
+click StatusManager "/contract-api/natspec/StatusManager";
 click ForceMove "/contract-api/natspec/ForceMove";
+click ForceMove "/contract-api/natspec/ForceMove";
+click IERC20 "/contract-api/natspec/IERC20";
 click IForceMove "/contract-api/natspec/IForceMove";
+click IForceMoveApp "/contract-api/natspec/IForceMoveApp";
+click IMultiAssetHolder "/contract-api/natspec/IMultiAssetHolder";
+click MultiAssetHolder "/contract-api/natspec/MultiAssetHolder";
 click NitroAdjudicator "/contract-api/natspec/NitroAdjudicator";
 click Outcome "/contract-api/natspec/Outcome";
 click SafeMath "/contract-api/natspec/SafeMath";

@@ -8,9 +8,9 @@ import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import './interfaces/IMultiAssetHolder.sol';
 
 /**
-@dev An implementation of the IMultiAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channel and/or external destinations, as well as for guarantees to be claimed.
+@dev An implementation of the IMultiAssetHolder interface. The AssetHolder contract escrows ETH or tokens against state channels. It allows assets to be internally accounted for, and ultimately prepared for transfer from one channel to other channels and/or external destinations, as well as for guarantees to be claimed.
  */
-contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
+contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     using SafeMath for uint256;
 
     // *******
@@ -515,6 +515,28 @@ contract MultiAssetHolder is IMultiAssetHolder, ForceMove {
             fingerprint == _generateFingerprint(stateHash, outcomeHash),
             'incorrect fingerprint'
         );
+    }
+
+    /**
+     * @notice Checks that a given channel is in the Finalized mode.
+     * @dev Checks that a given channel is in the Finalized mode.
+     * @param channelId Unique identifier for a channel.
+     */
+    function _requireChannelFinalized(bytes32 channelId) internal view {
+        require(_mode(channelId) == ChannelMode.Finalized, 'Channel not finalized.');
+    }
+
+    function _updateFingerprint(
+        bytes32 channelId,
+        bytes32 stateHash,
+        bytes32 outcomeHash
+    ) internal {
+        (uint48 turnNumRecord, uint48 finalizesAt, ) = _unpackStatus(channelId);
+
+        bytes32 newStatus = _generateStatus(
+            ChannelData(turnNumRecord, finalizesAt, stateHash, outcomeHash)
+        );
+        statusOf[channelId] = newStatus;
     }
 
     /**
