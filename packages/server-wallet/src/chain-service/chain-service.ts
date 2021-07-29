@@ -53,10 +53,6 @@ type AllocationUpdatedEvent = {
   ethersEvent: Event;
 } & AllocationUpdatedArg;
 
-/* eslint-disable no-process-env, */
-const nitroAdjudicatorAddress = makeAddress(
-  process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
-);
 export class ChainService implements ChainServiceInterface {
   private logger: Logger;
   private readonly ethWallet: NonceManager;
@@ -92,7 +88,10 @@ export class ChainService implements ChainServiceInterface {
       pollingInterval = pollingInterval ?? 50;
     }
     if (pollingInterval) this.provider.pollingInterval = pollingInterval;
-
+    /* eslint-disable no-process-env, */
+    const nitroAdjudicatorAddress = makeAddress(
+      process.env.NITRO_ADJUDICATOR_ADDRESS || constants.AddressZero
+    );
     this.nitroAdjudicator = new Contract(
       nitroAdjudicatorAddress,
       ContractArtifacts.NitroAdjudicatorArtifact.abi,
