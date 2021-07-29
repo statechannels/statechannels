@@ -1,9 +1,173 @@
 [
  {
   "type": "CreateChannel",
-  "jobId": "better-massive-shaggy-battery",
+  "jobId": "green-crashing-shallow-potato",
+  "serverId": "B",
+  "timestamp": 18047,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "microscopic-future-wooden-guitar",
+  "serverId": "B",
+  "timestamp": 17852,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "abundant-brave-flabby-carpet",
+  "serverId": "B",
+  "timestamp": 25906,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "lazy-quaint-beautiful-rocket",
+  "serverId": "B",
+  "timestamp": 25230,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tiny-rapid-crooked-jelly",
   "serverId": "A",
-  "timestamp": 10415,
+  "timestamp": 22219,
   "channelParams": {
    "participants": [
     {
@@ -29,11 +193,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -42,9 +206,50 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "tangy-modern-uptight-glass",
+  "jobId": "shaggy-mammoth-warm-yak",
+  "serverId": "B",
+  "timestamp": 8515,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "salmon-fresh-tinkling-spoon",
   "serverId": "A",
-  "timestamp": 54636,
+  "timestamp": 2916,
   "channelParams": {
    "participants": [
     {
@@ -70,11 +275,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -83,214 +288,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "dazzling-nutty-most-garden",
-  "serverId": "B",
-  "timestamp": 49650,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "petite-wonderful-harsh-nest",
-  "serverId": "B",
-  "timestamp": 59779,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "plain-gentle-disgusting-magazine",
-  "serverId": "B",
-  "timestamp": 50982,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "ugly-large-tight-book",
-  "serverId": "B",
-  "timestamp": 4792,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "brief-drab-poor-egg",
-  "serverId": "B",
-  "timestamp": 27341,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "dazzling-creamy-deafening-computer",
+  "jobId": "rough-hollow-cuddly-potato",
   "serverId": "A",
-  "timestamp": 52738,
+  "timestamp": 29391,
   "channelParams": {
    "participants": [
     {
@@ -316,11 +316,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -329,214 +329,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "kind-quiet-delightful-teacher",
-  "serverId": "A",
-  "timestamp": 1992,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "tall-greasy-green-jelly",
-  "serverId": "A",
-  "timestamp": 15480,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "rapping-shapely-tender-country",
-  "serverId": "A",
-  "timestamp": 6540,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "blue-gifted-green-wall",
-  "serverId": "A",
-  "timestamp": 43401,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "long-mammoth-wide-house",
-  "serverId": "A",
-  "timestamp": 5546,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "teeny-little-billions-yacht",
+  "jobId": "easy-dirty-nutritious-cartoon",
   "serverId": "B",
-  "timestamp": 33256,
+  "timestamp": 8130,
   "channelParams": {
    "participants": [
     {
@@ -562,11 +357,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -575,9 +370,91 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "fast-square-plump-bear",
+  "jobId": "rough-jolly-muscular-manchester",
+  "serverId": "B",
+  "timestamp": 7092,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "hissing-wet-screeching-wolf",
+  "serverId": "B",
+  "timestamp": 14903,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "bitter-melodic-echoing-death",
   "serverId": "A",
-  "timestamp": 29763,
+  "timestamp": 1796,
   "channelParams": {
    "participants": [
     {
@@ -603,11 +480,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -616,9 +493,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "weak-icy-wailing-zoo",
+  "jobId": "greasy-short-creamy-belgium",
   "serverId": "A",
-  "timestamp": 42206,
+  "timestamp": 1401,
   "channelParams": {
    "participants": [
     {
@@ -644,11 +521,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -657,50 +534,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "sweet-clumsy-melted-lion",
-  "serverId": "B",
-  "timestamp": 12835,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "shaggy-melodic-bald-bear",
+  "jobId": "bald-magnificent-thankful-telephone",
   "serverId": "A",
-  "timestamp": 58957,
+  "timestamp": 1613,
   "channelParams": {
    "participants": [
     {
@@ -726,11 +562,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -739,9 +575,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "drab-shapely-proud-house",
+  "jobId": "sparse-better-nutty-thailand",
   "serverId": "B",
-  "timestamp": 9323,
+  "timestamp": 21700,
   "channelParams": {
    "participants": [
     {
@@ -767,11 +603,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -780,9 +616,91 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "rapping-ambitious-elegant-river",
+  "jobId": "helpless-thoughtless-tinkling-branch",
+  "serverId": "B",
+  "timestamp": 25422,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "deafening-tall-round-alligator",
+  "serverId": "B",
+  "timestamp": 16462,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "strong-numerous-fluffy-kitchen",
   "serverId": "A",
-  "timestamp": 47557,
+  "timestamp": 13047,
   "channelParams": {
    "participants": [
     {
@@ -808,11 +726,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -821,9 +739,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "putrid-yummy-short-teacher",
+  "jobId": "chubby-greasy-wonderful-stone",
   "serverId": "B",
-  "timestamp": 23315,
+  "timestamp": 8126,
   "channelParams": {
    "participants": [
     {
@@ -849,11 +767,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -862,9 +780,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "dry-lazy-yummy-evening",
+  "jobId": "disgusting-many-melodic-magazine",
   "serverId": "A",
-  "timestamp": 7656,
+  "timestamp": 26691,
   "channelParams": {
    "participants": [
     {
@@ -890,11 +808,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -903,9 +821,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "curved-crashing-unsightly-branch",
+  "jobId": "defeated-uptight-wrong-student",
   "serverId": "B",
-  "timestamp": 8002,
+  "timestamp": 12066,
   "channelParams": {
    "participants": [
     {
@@ -931,11 +849,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -944,91 +862,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "bitter-slimy-gray-train",
-  "serverId": "B",
-  "timestamp": 54027,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "quick-long-acidic-juice",
-  "serverId": "B",
-  "timestamp": 53812,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "harsh-freezing-old-businessperson",
+  "jobId": "powerful-screeching-fit-telephone",
   "serverId": "A",
-  "timestamp": 4475,
+  "timestamp": 26669,
   "channelParams": {
    "participants": [
     {
@@ -1054,11 +890,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1067,50 +903,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "tall-long-tasty-rainbow",
-  "serverId": "B",
-  "timestamp": 32821,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "puny-dirty-chilly-match",
+  "jobId": "lemon-delicious-little-nail",
   "serverId": "A",
-  "timestamp": 45227,
+  "timestamp": 28089,
   "channelParams": {
    "participants": [
     {
@@ -1136,11 +931,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1149,9 +944,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "curved-clumsy-howling-businessperson",
+  "jobId": "clever-skinny-nutritious-island",
   "serverId": "B",
-  "timestamp": 43061,
+  "timestamp": 5577,
   "channelParams": {
    "participants": [
     {
@@ -1177,11 +972,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1190,9 +985,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "nutty-sparse-brief-lion",
+  "jobId": "sweet-little-brave-animal",
   "serverId": "B",
-  "timestamp": 19931,
+  "timestamp": 26230,
   "channelParams": {
    "participants": [
     {
@@ -1218,11 +1013,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1231,9 +1026,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "helpless-clean-embarrassed-egg",
+  "jobId": "sparse-nervous-brief-child",
   "serverId": "B",
-  "timestamp": 40044,
+  "timestamp": 21611,
   "channelParams": {
    "participants": [
     {
@@ -1259,11 +1054,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1272,9 +1067,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "nervous-flabby-mango-baby",
+  "jobId": "thousands-hundreds-ripe-jelly",
   "serverId": "A",
-  "timestamp": 3382,
+  "timestamp": 24758,
   "channelParams": {
    "participants": [
     {
@@ -1300,11 +1095,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1313,132 +1108,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "gorgeous-numerous-sticky-restaurant",
-  "serverId": "B",
-  "timestamp": 21515,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "chubby-limited-vast-teenager",
-  "serverId": "B",
-  "timestamp": 30855,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "muscular-cold-hissing-vulture",
-  "serverId": "B",
-  "timestamp": 28402,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "crashing-uptight-purple-city",
+  "jobId": "full-deep-cold-family",
   "serverId": "A",
-  "timestamp": 31668,
+  "timestamp": 24236,
   "channelParams": {
    "participants": [
     {
@@ -1464,11 +1136,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1477,9 +1149,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "icy-gifted-broad-banana",
+  "jobId": "freezing-silly-nutritious-dinner",
   "serverId": "A",
-  "timestamp": 38802,
+  "timestamp": 4445,
   "channelParams": {
    "participants": [
     {
@@ -1505,11 +1177,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1518,50 +1190,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "steep-calm-tight-hydrogen",
-  "serverId": "B",
-  "timestamp": 12672,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "rich-obnoxious-polite-scooter",
+  "jobId": "crooked-sparse-chubby-disease",
   "serverId": "A",
-  "timestamp": 644,
+  "timestamp": 9315,
   "channelParams": {
    "participants": [
     {
@@ -1587,11 +1218,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1600,9 +1231,296 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "ripe-orange-magnificent-oil",
+  "jobId": "big-bitter-echoing-soccer",
+  "serverId": "B",
+  "timestamp": 29028,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "many-raspy-clever-thailand",
+  "serverId": "B",
+  "timestamp": 23473,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "ugly-deep-swift-room",
+  "serverId": "B",
+  "timestamp": 13805,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "lazy-plump-rotten-rain",
+  "serverId": "B",
+  "timestamp": 2267,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "cool-wet-enough-engine",
+  "serverId": "B",
+  "timestamp": 1205,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sparse-massive-screeching-engine",
+  "serverId": "B",
+  "timestamp": 24410,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "noisy-harsh-melodic-cartoon",
+  "serverId": "B",
+  "timestamp": 27203,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "icy-prickly-stocky-carpet",
   "serverId": "A",
-  "timestamp": 12065,
+  "timestamp": 5958,
   "channelParams": {
    "participants": [
     {
@@ -1628,11 +1546,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1641,9 +1559,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "handsome-sparse-inexpensive-apple",
+  "jobId": "itchy-unsightly-noisy-apple",
   "serverId": "B",
-  "timestamp": 6152,
+  "timestamp": 24026,
   "channelParams": {
    "participants": [
     {
@@ -1669,11 +1587,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1682,50 +1600,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "blue-faint-careful-mother",
-  "serverId": "B",
-  "timestamp": 1925,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "long-wet-green-cricket",
+  "jobId": "mealy-grumpy-loud-horse",
   "serverId": "A",
-  "timestamp": 15263,
+  "timestamp": 850,
   "channelParams": {
    "participants": [
     {
@@ -1751,11 +1628,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1764,91 +1641,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "bumpy-freezing-sticky-ocean",
-  "serverId": "B",
-  "timestamp": 16586,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "important-modern-hundreds-rocket",
-  "serverId": "B",
-  "timestamp": 15247,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    },
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "rapping-limited-black-raincoat",
+  "jobId": "purple-sweet-strong-army",
   "serverId": "A",
-  "timestamp": 51804,
+  "timestamp": 22683,
   "channelParams": {
    "participants": [
     {
@@ -1874,11 +1669,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1887,9 +1682,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "long-mealy-fat-match",
+  "jobId": "skinny-raspy-helpful-garage",
   "serverId": "B",
-  "timestamp": 24397,
+  "timestamp": 22074,
   "channelParams": {
    "participants": [
     {
@@ -1915,11 +1710,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1928,9 +1723,132 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "freezing-delightful-mammoth-restaurant",
+  "jobId": "clean-savory-dead-nest",
+  "serverId": "A",
+  "timestamp": 21039,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "aggressive-wooden-squeaking-microphone",
+  "serverId": "A",
+  "timestamp": 4002,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "steep-flat-huge-daughter",
+  "serverId": "A",
+  "timestamp": 22701,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tart-wonderful-bewildered-baby",
   "serverId": "B",
-  "timestamp": 58936,
+  "timestamp": 18882,
   "channelParams": {
    "participants": [
     {
@@ -1956,11 +1874,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -1969,9 +1887,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "gray-muscular-teeny-horse",
+  "jobId": "bumpy-helpful-uptight-wire",
   "serverId": "A",
-  "timestamp": 34089,
+  "timestamp": 17432,
   "channelParams": {
    "participants": [
     {
@@ -1997,11 +1915,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -2010,91 +1928,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "unimportant-yellow-melted-coffeeshop",
-  "serverId": "A",
-  "timestamp": 13589,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "quick-cold-jolly-football",
-  "serverId": "A",
-  "timestamp": 20332,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "tall-young-tender-xylophone",
+  "jobId": "clean-chubby-strong-vulture",
   "serverId": "B",
-  "timestamp": 51355,
+  "timestamp": 5215,
   "channelParams": {
    "participants": [
     {
@@ -2120,11 +1956,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -2133,9 +1969,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "salmon-long-dazzling-vase",
+  "jobId": "angry-wailing-sparse-animal",
   "serverId": "B",
-  "timestamp": 4882,
+  "timestamp": 27690,
   "channelParams": {
    "participants": [
     {
@@ -2161,11 +1997,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -2174,9 +2010,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "petite-tasteless-rancid-helmet",
+  "jobId": "scary-weak-prehistoric-daughter",
   "serverId": "B",
-  "timestamp": 52829,
+  "timestamp": 14573,
   "channelParams": {
    "participants": [
     {
@@ -2202,11 +2038,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -2215,9 +2051,50 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "tangy-tall-whining-egg",
+  "jobId": "powerful-tasty-cold-man",
+  "serverId": "A",
+  "timestamp": 20665,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "clever-rhythmic-thankful-toothbrush",
   "serverId": "B",
-  "timestamp": 55850,
+  "timestamp": 15177,
   "channelParams": {
    "participants": [
     {
@@ -2243,11 +2120,11 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
@@ -2256,173 +2133,9 @@
  },
  {
   "type": "CreateChannel",
-  "jobId": "gifted-fluffy-tart-kangaroo",
-  "serverId": "A",
-  "timestamp": 49940,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "big-nice-vast-vase",
-  "serverId": "A",
-  "timestamp": 9415,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "hollow-curved-loose-russia",
-  "serverId": "A",
-  "timestamp": 1396,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "gorgeous-tangy-chilly-greece",
-  "serverId": "A",
-  "timestamp": 16240,
-  "channelParams": {
-   "participants": [
-    {
-     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
-     "participantId": "A",
-     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
-    },
-    {
-     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
-     "participantId": "B",
-     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
-    }
-   ],
-   "allocations": [
-    {
-     "allocationItems": [
-      {
-       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
-       "amount": "0x05"
-      },
-      {
-       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
-       "amount": "0x05"
-      }
-     ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
-    }
-   ],
-   "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-   "challengeDuration": 86400
-  },
-  "fundingInfo": {
-   "type": "Direct"
-  }
- },
- {
-  "type": "CreateChannel",
-  "jobId": "crooked-fancy-witty-coat",
+  "jobId": "deafening-loud-greasy-vulture",
   "serverId": "B",
-  "timestamp": 29928,
+  "timestamp": 3926,
   "channelParams": {
    "participants": [
     {
@@ -2448,11 +2161,3988 @@
        "amount": "0x05"
       }
      ],
-     "assetHolderAddress": "0x9eD274314f0fB37837346C425D3cF28d89ca9599"
+     "asset": "0x0000000000000000000000000000000000000000"
     }
    ],
    "appDefinition": "0x00000000000000000000000000000000000000ca",
-   "appData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "acidic-clean-spicy-flower",
+  "serverId": "A",
+  "timestamp": 24015,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "large-agreeable-most-traffic",
+  "serverId": "A",
+  "timestamp": 2860,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "whispering-mango-deep-orange",
+  "serverId": "B",
+  "timestamp": 14875,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "gentle-kind-noisy-shoe",
+  "serverId": "B",
+  "timestamp": 22880,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tasty-pitiful-wooden-france",
+  "serverId": "B",
+  "timestamp": 5564,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "scary-howling-chubby-rainbow",
+  "serverId": "A",
+  "timestamp": 14518,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tasteless-rhythmic-whispering-ocean",
+  "serverId": "B",
+  "timestamp": 24928,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "abundant-narrow-better-teacher",
+  "serverId": "A",
+  "timestamp": 13603,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "hot-harsh-swift-forest",
+  "serverId": "A",
+  "timestamp": 1681,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "shallow-quiet-ancient-ocean",
+  "serverId": "A",
+  "timestamp": 105,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "flaky-straight-grumpy-telephone",
+  "serverId": "B",
+  "timestamp": 28894,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "rapid-noisy-great-boots",
+  "serverId": "A",
+  "timestamp": 28123,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "wet-hot-breezy-magician",
+  "serverId": "B",
+  "timestamp": 4189,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "immense-disgusting-juicy-kangaroo",
+  "serverId": "B",
+  "timestamp": 12883,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sour-incalculable-deafening-eye",
+  "serverId": "A",
+  "timestamp": 15658,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "low-wide-stocky-cricket",
+  "serverId": "B",
+  "timestamp": 6314,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tender-muscular-massive-city",
+  "serverId": "A",
+  "timestamp": 24758,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "fresh-nutritious-deafening-wire",
+  "serverId": "B",
+  "timestamp": 15121,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "itchy-abundant-unimportant-garage",
+  "serverId": "B",
+  "timestamp": 15932,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "some-shy-inexpensive-easter",
+  "serverId": "A",
+  "timestamp": 7005,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "freezing-limited-black-pencil",
+  "serverId": "B",
+  "timestamp": 7922,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "stocky-polite-sour-parrot",
+  "serverId": "B",
+  "timestamp": 10405,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "embarrassed-brave-harsh-branch",
+  "serverId": "B",
+  "timestamp": 3796,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "angry-long-easy-china",
+  "serverId": "A",
+  "timestamp": 10588,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "hot-obedient-brief-lighter",
+  "serverId": "A",
+  "timestamp": 9105,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "great-noisy-gentle-bird",
+  "serverId": "A",
+  "timestamp": 10862,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "skinny-muscular-long-easter",
+  "serverId": "A",
+  "timestamp": 690,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "crashing-alive-howling-park",
+  "serverId": "A",
+  "timestamp": 7286,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "famous-crooked-purple-plastic",
+  "serverId": "B",
+  "timestamp": 24477,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "skinny-greasy-rough-yak",
+  "serverId": "B",
+  "timestamp": 2193,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "mammoth-clean-crashing-dress",
+  "serverId": "B",
+  "timestamp": 3765,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "slow-thundering-nice-branch",
+  "serverId": "B",
+  "timestamp": 11834,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "dirty-some-elegant-train",
+  "serverId": "B",
+  "timestamp": 458,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "young-happy-ambitious-orange",
+  "serverId": "B",
+  "timestamp": 11608,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "scruffy-delicious-vast-soccer",
+  "serverId": "B",
+  "timestamp": 23129,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "agreeable-skinny-muscular-shoe",
+  "serverId": "A",
+  "timestamp": 12099,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "acidic-sour-jealous-woman",
+  "serverId": "B",
+  "timestamp": 5263,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "short-shaggy-sharp-teacher",
+  "serverId": "B",
+  "timestamp": 946,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "repulsive-tiny-crooked-glass",
+  "serverId": "A",
+  "timestamp": 11733,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "panicky-bumpy-thankful-notebook",
+  "serverId": "B",
+  "timestamp": 5062,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "grumpy-long-flaky-restaurant",
+  "serverId": "A",
+  "timestamp": 13143,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "deep-helpless-shallow-piano",
+  "serverId": "B",
+  "timestamp": 22660,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "handsome-muscular-jolly-car",
+  "serverId": "B",
+  "timestamp": 10655,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "happy-poor-prehistoric-table",
+  "serverId": "A",
+  "timestamp": 28777,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "weak-attractive-sour-shoe",
+  "serverId": "B",
+  "timestamp": 546,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "obnoxious-tall-helpful-hospital",
+  "serverId": "A",
+  "timestamp": 19991,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tart-hollow-broad-furniture",
+  "serverId": "A",
+  "timestamp": 10025,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "ripe-proud-sticky-king",
+  "serverId": "A",
+  "timestamp": 4901,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "agreeable-spoiled-cuddly-afternoon",
+  "serverId": "B",
+  "timestamp": 20796,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "yummy-shapely-howling-oyster",
+  "serverId": "B",
+  "timestamp": 26649,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "enough-low-important-eggplant",
+  "serverId": "A",
+  "timestamp": 19826,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "muscular-gorgeous-swift-energy",
+  "serverId": "B",
+  "timestamp": 15449,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "clean-elegant-polite-wolf",
+  "serverId": "A",
+  "timestamp": 17945,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "fresh-stale-flat-window",
+  "serverId": "A",
+  "timestamp": 7526,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "panicky-puny-gifted-dog",
+  "serverId": "B",
+  "timestamp": 21201,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tasty-wet-lazy-china",
+  "serverId": "B",
+  "timestamp": 23578,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "slow-fat-echoing-spoon",
+  "serverId": "A",
+  "timestamp": 25318,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "shallow-elegant-lemon-oyster",
+  "serverId": "A",
+  "timestamp": 27818,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "rotten-nice-high-grass",
+  "serverId": "B",
+  "timestamp": 4044,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tiny-bald-enough-orange",
+  "serverId": "B",
+  "timestamp": 19052,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "full-delicious-bumpy-coat",
+  "serverId": "B",
+  "timestamp": 5364,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "hollow-rancid-hot-van",
+  "serverId": "B",
+  "timestamp": 1757,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "lively-lively-rhythmic-zoo",
+  "serverId": "B",
+  "timestamp": 26778,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "beautiful-repulsive-aggressive-scooter",
+  "serverId": "A",
+  "timestamp": 20021,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "shaggy-icy-tasty-garage",
+  "serverId": "A",
+  "timestamp": 24046,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sparse-ripe-short-belgium",
+  "serverId": "A",
+  "timestamp": 2614,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "long-early-wooden-football",
+  "serverId": "B",
+  "timestamp": 25856,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "salty-fancy-mango-morning",
+  "serverId": "A",
+  "timestamp": 27615,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "uneven-panicky-eager-sandwich",
+  "serverId": "A",
+  "timestamp": 18990,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sour-hot-flat-furniture",
+  "serverId": "A",
+  "timestamp": 26403,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sticky-helpful-black-daughter",
+  "serverId": "B",
+  "timestamp": 5697,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "colossal-skinny-salty-lizard",
+  "serverId": "B",
+  "timestamp": 21454,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "noisy-ancient-big-kite",
+  "serverId": "A",
+  "timestamp": 21075,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "defeated-careful-freezing-state",
+  "serverId": "A",
+  "timestamp": 18926,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "witty-prehistoric-prickly-toothbrush",
+  "serverId": "B",
+  "timestamp": 3044,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "wooden-nutritious-skinny-energy",
+  "serverId": "A",
+  "timestamp": 17473,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "large-few-chubby-city",
+  "serverId": "A",
+  "timestamp": 17029,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "scruffy-greasy-high-cricket",
+  "serverId": "B",
+  "timestamp": 28965,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "famous-large-zealous-branch",
+  "serverId": "B",
+  "timestamp": 128,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "abundant-refined-vast-bird",
+  "serverId": "B",
+  "timestamp": 24579,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "grumpy-unkempt-fat-lion",
+  "serverId": "B",
+  "timestamp": 17621,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "deafening-slimy-teeny-lighter",
+  "serverId": "A",
+  "timestamp": 24848,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "gigantic-teeny-puny-garage",
+  "serverId": "A",
+  "timestamp": 25497,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "clumsy-full-zealous-raincoat",
+  "serverId": "B",
+  "timestamp": 24863,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "tart-early-freezing-parrot",
+  "serverId": "A",
+  "timestamp": 1802,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "greasy-broad-important-forest",
+  "serverId": "B",
+  "timestamp": 2076,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "inexpensive-full-rotten-fish",
+  "serverId": "A",
+  "timestamp": 19513,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "uptight-purring-wide-vegetable",
+  "serverId": "B",
+  "timestamp": 20867,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "echoing-salty-gentle-machine",
+  "serverId": "B",
+  "timestamp": 11564,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "dirty-jealous-obedient-window",
+  "serverId": "A",
+  "timestamp": 15260,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "elegant-chubby-modern-guitar",
+  "serverId": "B",
+  "timestamp": 15256,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "sharp-delicious-lively-crayon",
+  "serverId": "B",
+  "timestamp": 17023,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "skinny-fluffy-full-bear",
+  "serverId": "B",
+  "timestamp": 4564,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "gigantic-white-panicky-computer",
+  "serverId": "A",
+  "timestamp": 26368,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "billions-famous-bewildered-jordan",
+  "serverId": "A",
+  "timestamp": 4569,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    },
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "late-shallow-defeated-plastic",
+  "serverId": "B",
+  "timestamp": 26309,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
+   "challengeDuration": 86400
+  },
+  "fundingInfo": {
+   "type": "Direct"
+  }
+ },
+ {
+  "type": "CreateChannel",
+  "jobId": "scruffy-gorgeous-ambitious-mother",
+  "serverId": "B",
+  "timestamp": 9532,
+  "channelParams": {
+   "participants": [
+    {
+     "signingAddress": "0x2222E21c8019b14dA16235319D34b5Dd83E644A9",
+     "participantId": "B",
+     "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
+    },
+    {
+     "signingAddress": "0x11115FAf6f1BF263e81956F0Cc68aEc8426607cf",
+     "participantId": "A",
+     "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412"
+    }
+   ],
+   "allocations": [
+    {
+     "allocationItems": [
+      {
+       "destination": "0x000000000000000000000000BBDDFb5DADcf0E710D898DB8da7861aA8F635B9b",
+       "amount": "0x05"
+      },
+      {
+       "destination": "0x000000000000000000000000AADD1e134cE444B350eE07f0E3E2507475508412",
+       "amount": "0x05"
+      }
+     ],
+     "asset": "0x0000000000000000000000000000000000000000"
+    }
+   ],
+   "appDefinition": "0x00000000000000000000000000000000000000ca",
+   "appData": "0x",
    "challengeDuration": 86400
   },
   "fundingInfo": {
