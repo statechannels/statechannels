@@ -298,6 +298,10 @@ export class Channel extends Model implements ChannelColumns {
     return this.participants[this.myIndex].signingAddress;
   }
 
+  public get myParticipantInfo(): Participant {
+    return this.participants[this.myIndex];
+  }
+
   public get myTurn(): boolean {
     if (this.supported) {
       return (this.supported.turnNum + 1) % this.participants.length === this.myIndex;
