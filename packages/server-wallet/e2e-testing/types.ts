@@ -72,4 +72,5 @@ export type RoleConfig = {
   artifactFile: string;
   privateKey: string;
   chainPrivateKey: string;
+  destination: string;
 };

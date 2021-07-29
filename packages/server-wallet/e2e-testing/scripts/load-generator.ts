@@ -296,8 +296,8 @@ function generateParticipants(roles: Record<string, RoleConfig>, startIndex: num
     const role = roleArray[(i + startIndex) % roleArray.length];
 
     const {address: signingAddress} = new ethers.Wallet(role.privateKey);
-    const {address: destinationAddress} = new ethers.Wallet(role.chainPrivateKey);
-    const destination = hexZeroPad(destinationAddress, 32);
+
+    const destination = hexZeroPad(role.destination, 32);
 
     participants.push({signingAddress, participantId: role.roleId, destination});
   }

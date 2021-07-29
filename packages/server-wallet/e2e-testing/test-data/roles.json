@@ -7,7 +7,8 @@
     "chainId": 9001,
     "artifactFile": "temp/contract_artifacts.json",
     "privateKey": "0x95942b296854c97024ca3145abef8930bf329501b718c0f66d57dba596ff1318",
-    "chainPrivateKey": "0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8"
+    "chainPrivateKey": "0x7ab741b57e8d94dd7e1a29055646bafde7010f38a900f55bbd7647880faa6ee8",
+    "destination":"0xAADD1e134cE444B350eE07f0E3E2507475508412"
   },
   "B": {
     "databaseName": "server_wallet_test_b",
@@ -17,6 +18,7 @@
     "chainId": 9001,
     "artifactFile": "temp/contract_artifacts.json",
     "privateKey": "0xb3ab7b031311fe1764b657a6ae7133f19bac97acd1d7edca9409daa35892e727",
-    "chainPrivateKey": "0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f"
+    "chainPrivateKey": "0x2030b463177db2da82908ef90fa55ddfcef56e8183caf60db464bc398e736e6f",
+    "destination":"0xBBDDFb5DADcf0E710D898DB8da7861aA8F635B9b"
   }
 }
