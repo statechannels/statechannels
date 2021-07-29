@@ -19,23 +19,28 @@ classDef DeployedContract fill:#ffffff,stroke:#3531ff,stroke-width:3px;
 classDef Abstraction fill:#ffffff,stroke:#8dc404,stroke-dasharray: 5 5;
 classDef Interface fill:#ffffff,stroke:#de1065,stroke-dasharray: 5 5;
 classDef TestContract fill:#fafe4f,stroke-width:0px
-ForceMove
-IERC20
-IForceMove
-IForceMoveApp 
-IMultiAssetHolder
-MultiAssetHolder
-NitroAdjudicator
 Outcome([Outcome])
 SafeMath([SafeMath])
+IForceMove
+IForceMoveApp 
+IStatusManager
+IMultiAssetHolder
+ForceMove
+IERC20
+MultiAssetHolder
+StatusManager
 TESTForceMove
 TESTNitroAdjudicator
+NitroAdjudicator
 class SafeMath,Outcome Library;
-class IMultiAssetHolder,IERC20,IForceMoveApp,IForceMove Interface;
-class MultiAssetHolder,ForceMove Contract;
+class IMultiAssetHolder,IERC20,IForceMoveApp,IForceMove,IStatusManager Interface;
+class MultiAssetHolder,ForceMove,StatusManager Contract;
 class NitroAdjudicator DeployedContract;
 class TESTForceMove,TESTNitroAdjudicator TestContract;
 IMultiAssetHolder--> MultiAssetHolder
+IStatusManager--> StatusManager
+StatusManager--> ForceMove
+StatusManager--> MultiAssetHolder
 SafeMath-.-> MultiAssetHolder
 Outcome-.-> MultiAssetHolder
 MultiAssetHolder-->NitroAdjudicator
@@ -44,7 +49,7 @@ IForceMoveApp-.-> ForceMove
 IForceMove--> ForceMove
 Outcome-.-> NitroAdjudicator
 ForceMove-->TESTForceMove
-ForceMove-->MultiAssetHolder
+ForceMove-->NitroAdjudicator
 NitroAdjudicator--> TESTNitroAdjudicator
 TESTForceMove--> TESTNitroAdjudicator
 click ForceMove "/contract-api/natspec/ForceMove";
