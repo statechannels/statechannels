@@ -27,6 +27,7 @@ export class WalletLoadNode {
   private completedSteps = 0;
   private server: Express;
   private proposedObjectives = new Set<string>();
+  private proposedObjectivePromises = new Array<Promise<ObjectiveDoneResult>>();
 
   private constructor(
     private serverWallet: Wallet,
@@ -40,8 +41,9 @@ export class WalletLoadNode {
         // This is an easy work around for https://github.com/statechannels/statechannels/issues/3668
         if (!this.proposedObjectives.has(o.objectiveId)) {
           this.logger.trace({objectiveId: o.objectiveId}, 'Auto approving objective');
-          this.serverWallet.approveObjectives([o.objectiveId]);
+          const [result] = await this.serverWallet.approveObjectives([o.objectiveId]);
           this.proposedObjectives.add(o.objectiveId);
+          this.proposedObjectivePromises.push(result.done);
         }
       }
     });
@@ -65,6 +67,7 @@ export class WalletLoadNode {
         await Promise.all([this.runJobs(), this.sendGetRequestToPeers('/start?fromPeer=true')]);
       } else {
         await this.runJobs();
+        await Promise.all(this.proposedObjectivePromises);
       }
 
       res.end();
