@@ -102,7 +102,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
 
         (
             Outcome.Allocation[] memory newAllocations,
-            bool allocatesOnlyZeros,
+            ,
             Outcome.Allocation[] memory exitAllocations,
             uint256 totalPayouts
         ) = compute_transfer_effects_and_interactions(
