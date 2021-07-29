@@ -98,20 +98,20 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             Outcome.SingleAssetExit[] memory outcome,
             address asset,
             uint256 initialAssetHoldings
-        ) = apply_transfer_checks(assetIndex, indices, fromChannelId, stateHash, outcomeBytes); // view
+        ) = _apply_transfer_checks(assetIndex, indices, fromChannelId, stateHash, outcomeBytes); // view
 
         (
             Outcome.Allocation[] memory newAllocations,
             ,
             Outcome.Allocation[] memory exitAllocations,
             uint256 totalPayouts
-        ) = compute_transfer_effects_and_interactions(
+        ) = _compute_transfer_effects_and_interactions(
             initialAssetHoldings,
             outcome[assetIndex].allocations,
             indices
         ); // pure, also performs checks
 
-        apply_transfer_effects(
+        _apply_transfer_effects(
             assetIndex,
             asset,
             fromChannelId,
@@ -122,10 +122,10 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             totalPayouts
         );
 
-        apply_transfer_interactions(outcome[assetIndex], exitAllocations); // in future, we may pass in the top-level metadata field too
+        _apply_transfer_interactions(outcome[assetIndex], exitAllocations); // in future, we may pass in the top-level metadata field too
     }
 
-    function apply_transfer_checks(
+    function _apply_transfer_checks(
         uint256 assetIndex,
         uint256[] memory indices,
         bytes32 channelId,
@@ -140,7 +140,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             uint256 initialAssetHoldings
         )
     {
-        _requireIncreasingIndices(indices); // This assumption relied on by compute_transfer_effects_and_interactions
+        _requireIncreasingIndices(indices); // This assumption is relied on by compute_transfer_effects_and_interactions
         _requireChannelFinalized(channelId);
         _requireMatchingFingerprint(stateHash, keccak256(outcomeBytes), channelId);
 
@@ -149,12 +149,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         initialAssetHoldings = holdings[asset][channelId];
     }
 
-    function compute_transfer_effects_and_interactions(
+    function _compute_transfer_effects_and_interactions(
         uint256 initialHoldings,
         Outcome.Allocation[] memory allocations,
         uint256[] memory indices
     )
-        public
+        internal
         pure
         returns (
             Outcome.Allocation[] memory newAllocations,
@@ -207,7 +207,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         }
     }
 
-    function apply_transfer_effects(
+    function _apply_transfer_effects(
         uint256 assetIndex,
         address asset,
         bytes32 channelId,
@@ -228,7 +228,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         emit AllocationUpdated(channelId, assetIndex, initialHoldings);
     }
 
-    function apply_transfer_interactions(
+    function _apply_transfer_interactions(
         Outcome.SingleAssetExit memory singleAssetExit,
         Outcome.Allocation[] memory exitAllocations
     ) internal {
