@@ -22,6 +22,10 @@ export function setupUnhandledErrorListeners(): void {
   });
 }
 
+export async function getRoles(roleFile: string): Promise<Record<string, RoleConfig>> {
+  return (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
+}
+
 export async function getRoleInfo(
   roleFile: string,
   roleId: string
@@ -29,8 +33,7 @@ export async function getRoleInfo(
   roleConfig: RoleConfig;
   peers: Peers;
 }> {
-  const roles = (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
-
+  const roles = await getRoles(roleFile);
   const roleConfig = roles[roleId];
 
   if (!roleConfig) {
