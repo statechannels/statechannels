@@ -1,4 +1,5 @@
 import {CreateChannelParams, UpdateChannelParams} from '@statechannels/client-api-schema';
+import {Uint256} from '@statechannels/nitro-protocol';
 
 import {CreateLedgerChannelParams} from '../src/wallet';
 
@@ -73,4 +74,9 @@ export type RoleConfig = {
   privateKey: string;
   chainPrivateKey: string;
   destination: string;
+};
+
+export type ChainState = {
+  accounts: Record<string, Uint256>;
+  contracts: Record<'ETH_ASSET_HOLDER_ADDRESS', {balance: Uint256; address: string}>;
 };
