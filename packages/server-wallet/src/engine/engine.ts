@@ -199,6 +199,11 @@ export class SingleThreadedEngine implements EngineInterface {
 
       const {participants} = channel;
       response.queueSendObjective(o, channel.myIndex, participants);
+
+      // Sync any ledger channels used for the objective
+      if (channel.fundingStrategy === 'Ledger' && channel.fundingLedgerChannelId) {
+        await this._syncChannel(channel.fundingLedgerChannelId, response);
+      }
     }
 
     return response.allMessages;
