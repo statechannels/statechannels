@@ -14,10 +14,11 @@ import {getKnexFromConfig} from '../../src/db-admin/db-admin';
 import {ObjectiveModel} from '../../src/models/objective';
 import {Channel} from '../../src/models/channel';
 import {setupUnhandledErrorListeners} from '../utils';
-setupUnhandledErrorListeners();
-checkDatabase();
 
-async function checkDatabase() {
+setupUnhandledErrorListeners();
+assertSanity();
+
+async function assertSanity() {
   const commandArguments = await yargs(hideBin(process.argv))
     .option('roleFile', {
       alias: 'f',
