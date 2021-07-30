@@ -60,8 +60,28 @@ async function startAll() {
   // This will resolve when all the jobs have run
   await got.get(`http://localhost:${loadServerPort}/start`, {retry: 0});
 
+  // Wrap up all the existing processes
+  servers.forEach(s => s.cancel());
+  ganache.cancel();
+
+  // Run the sanity checker
+  const {
+    stdout,
+    stderr,
+    exitCode,
+  } = await execa.command(
+    `npx ts-node ${SCRIPT_DIR}/sanity-checker.ts -l ${commandArguments.loadFile}`,
+    {env: {FORCE_COLOR: 'true'}}
+  );
+
+  console.log(stdout);
+
+  if (exitCode !== 0) {
+    console.error(stderr);
+    process.exit(exitCode);
+  }
+
   console.log(chalk.greenBright('SUCCESS!'));
-  // Execa is smart enough to clean up all child processes for us
   process.exit(0);
 }
 
@@ -79,10 +99,6 @@ function registerHandlers(
 ) {
   childProcess.on('error', err => {
     console.error(err);
-    process.exit(1);
-  });
-  childProcess.on('exit', errCode => {
-    console.error(`${childProcess.spawnfile} failed with error code ${errCode}`);
     process.exit(1);
   });
 
