@@ -11,13 +11,21 @@ import ms from 'ms';
 import exitHook from 'async-exit-hook';
 
 import {deploy, TestNetworkContext} from '../../deployment/deploy';
-import {getRoles, setupUnhandledErrorListeners} from '../utils';
+import {
+  createArtifactDirectory,
+  createTempDirectory,
+  getRoles,
+  setupUnhandledErrorListeners,
+} from '../utils';
 import {ChainState} from '../types';
 
 setupUnhandledErrorListeners();
 setupGanache();
 
 async function setupGanache() {
+  await createArtifactDirectory();
+  await createTempDirectory();
+
   const commandArguments = await yargs(hideBin(process.argv))
     .option('port', {
       alias: 'p',
