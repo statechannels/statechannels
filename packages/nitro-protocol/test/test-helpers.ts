@@ -3,6 +3,7 @@ import {Contract, ethers, BigNumberish, BigNumber, constants, providers, Event} 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {Bytes} from '../src/contract/types';
 import {channelDataToStatus} from '../src/contract/channel-storage';
+import {Outcome} from '../src/contract/outcome';
 import {
   AllocationAssetOutcome,
   encodeAllocation,
@@ -180,17 +181,6 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function allocationToParams(allocation: AllocationItem[]): [Bytes, Bytes32] {
-  const allocationBytes = encodeAllocation(allocation);
-  let assetOutcomeHash;
-  if (allocation.length === 0) {
-    assetOutcomeHash = constants.HashZero;
-  } else {
-    assetOutcomeHash = hashAssetOutcome(allocation);
-  }
-  return [allocationBytes, assetOutcomeHash];
-}
-
 export function guaranteeToParams(guarantee: Guarantee): [Bytes, Bytes32] {
   const guaranteeBytes = encodeGuarantee(guarantee);
 
@@ -250,28 +240,6 @@ export function checkMultipleHoldings(
           expect((await contract.holdings(destination)).eq(amount)).toBe(true);
         }
       });
-    });
-  });
-}
-
-// Check the assetOutcomeHash on multiple asset Hoders defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
-export function checkMultipleAssetOutcomeHashes(
-  channelId: string,
-  outcome: OutcomeShortHand,
-  contractsArray: Contract[]
-): void {
-  Object.keys(outcome).forEach(assetHolder => {
-    const assetOutcome = outcome[assetHolder];
-    const allocationAfter = [];
-    Object.keys(assetOutcome).forEach(destination => {
-      const amount = assetOutcome[destination];
-      allocationAfter.push({destination, amount});
-    });
-    const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
-    contractsArray.forEach(async contract => {
-      if (contract.address === assetHolder) {
-        expect(await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash);
-      }
     });
   });
 }
