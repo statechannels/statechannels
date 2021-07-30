@@ -1,19 +1,9 @@
-import {Contract, ethers, BigNumberish, BigNumber, constants, providers, Event} from 'ethers';
+import {Contract, ethers, BigNumberish, BigNumber, providers, Event} from 'ethers';
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {Bytes} from '../src/contract/types';
 import {channelDataToStatus} from '../src/contract/channel-storage';
 import {Outcome} from '../src/contract/outcome';
-import {
-  AllocationAssetOutcome,
-  encodeAllocation,
-  encodeGuarantee,
-  Guarantee,
-  hashAssetOutcome,
-  Outcome,
-  Allocation,
-  AllocationItem,
-} from '../src/contract/outcome';
 import {Bytes32} from '../src';
 
 // Interfaces
@@ -181,13 +171,6 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function guaranteeToParams(guarantee: Guarantee): [Bytes, Bytes32] {
-  const guaranteeBytes = encodeGuarantee(guarantee);
-
-  const assetOutcomeHash = hashAssetOutcome(guarantee);
-  return [guaranteeBytes, assetOutcomeHash];
-}
-
 // Recursively replaces any key with the value of that key in the addresses object
 // BigNumberify all numbers
 export function replaceAddressesAndBigNumberify(
@@ -244,26 +227,6 @@ export function checkMultipleHoldings(
   });
 }
 
-// Computes an outcome from a shorthand description
-export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
-  const outcome: AllocationAssetOutcome[] = [];
-  Object.keys(outcomeShortHand).forEach(assetHolder => {
-    const allocation: Allocation = [];
-    Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
-      allocation.push({
-        destination,
-        amount: BigNumber.from(outcomeShortHand[assetHolder][destination]).toHexString(),
-      })
-    );
-    const assetOutcome: AllocationAssetOutcome = {
-      asset: assetHolder,
-      allocationItems: allocation,
-    }; // TODO handle gurantee outcomes
-    outcome.push(assetOutcome);
-  });
-  return outcome;
-}
-
 export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): Event[] {
   const events = [];
   logs.forEach(log => {
@@ -279,21 +242,3 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): 
 export function getRandomNonce(seed: string): number {
   return Number.parseInt(ethers.utils.id(seed).slice(2, 11), 16);
 }
-
-export const largeOutcome = (
-  numAllocationItems: number,
-  asset: string = ethers.Wallet.createRandom().address
-): AllocationAssetOutcome[] => {
-  const randomDestination = randomExternalDestination();
-  return numAllocationItems > 0
-    ? [
-        {
-          allocationItems: Array(numAllocationItems).fill({
-            destination: randomDestination,
-            amount: '0x01',
-          }),
-          asset,
-        },
-      ]
-    : [];
-};
