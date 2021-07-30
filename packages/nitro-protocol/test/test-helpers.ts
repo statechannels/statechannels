@@ -1,18 +1,15 @@
-import {Contract, ethers, BigNumberish, BigNumber, constants, providers, Event} from 'ethers';
+import {Contract, ethers, BigNumberish, BigNumber, providers, Event} from 'ethers';
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {Bytes} from '../src/contract/types';
 import {channelDataToStatus} from '../src/contract/channel-storage';
-import {Outcome} from '../src/contract/outcome';
 import {
   AllocationAssetOutcome,
-  encodeAllocation,
   encodeGuarantee,
   Guarantee,
   hashAssetOutcome,
-  Outcome,
   Allocation,
-  AllocationItem,
+  Outcome,
 } from '../src/contract/outcome';
 import {Bytes32} from '../src';
 
