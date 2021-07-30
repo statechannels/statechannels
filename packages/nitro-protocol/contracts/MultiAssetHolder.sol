@@ -93,7 +93,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         bytes memory outcomeBytes,
         bytes32 stateHash,
         uint256[] memory indices
-    ) external {
+    ) external override {
         (
             Outcome.SingleAssetExit[] memory outcome,
             address asset,

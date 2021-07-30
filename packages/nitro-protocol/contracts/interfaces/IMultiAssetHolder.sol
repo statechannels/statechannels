@@ -24,6 +24,23 @@ interface IMultiAssetHolder {
     ) external payable;
 
     /**
+     * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
+     * @param assetIndex Will be used to slice the outcome into a single asset outcome.
+     * @param fromChannelId Unique identifier for state channel to transfer funds *from*.
+     * @param outcomeBytes The encoded Outcome of this state channel
+     * @param stateHash The hash of the state stored when the channel finalized.
+     * @param indices Array with each entry denoting the index of a destination to transfer funds to. An empty array indicates "all".
+     */
+    function transfer(
+        uint256 assetIndex, // TODO consider a uint48?
+        bytes32 fromChannelId,
+        bytes memory outcomeBytes,
+        bytes32 stateHash,
+        uint256[] memory indices
+    ) external;
+
+    /**
      * @dev Indicates that `amountDeposited` has been deposited into `destination`.
      * @param destination The channel being deposited into.
      * @param amountDeposited The amount being deposited.
