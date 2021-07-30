@@ -67,9 +67,8 @@ export class WalletLoadNode {
         await Promise.all([this.runJobs(), this.sendGetRequestToPeers('/start?fromPeer=true')]);
       } else {
         await this.runJobs();
-        await Promise.all(this.proposedObjectivePromises);
       }
-
+      await Promise.all(this.proposedObjectivePromises);
       res.end();
     });
 
