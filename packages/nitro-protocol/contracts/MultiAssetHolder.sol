@@ -365,13 +365,54 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         Outcome.Allocation[] memory exitAllocations
     ) internal {
         // create a new tuple to avoid mutating singleAssetExit
-        Outcome.executeSingleAssetExit(
+        executeSingleAssetExit(
             Outcome.SingleAssetExit(
                 singleAssetExit.asset,
                 singleAssetExit.metadata,
                 exitAllocations
             )
         );
+    }
+
+
+    /**
+     * @notice Executes a single asset exit by paying out the asset and calling external contracts
+     * @dev Executes a single asset exit by paying out the asset and calling external contracts
+     * @param singleAssetExit The single asset exit to be paid out.
+     * TODO absorb into exit format repo
+     */
+    function executeSingleAssetExit(
+        Outcome.SingleAssetExit memory singleAssetExit
+    ) internal {
+        address asset = singleAssetExit.asset;
+        for (uint256 j = 0; j < singleAssetExit.allocations.length; j++) {
+            bytes32 destination = singleAssetExit.allocations[j].destination;
+            uint256 amount = singleAssetExit.allocations[j].amount;
+            if(_isExternalDestination(destination)) {
+                _transferAsset(asset, destination, amount);
+            } else {
+                holdings[destination] += amount;
+            }
+        }
+    }
+
+    /**
+     * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
+     * @dev Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
+     * @param destination ethereum address to be credited.
+     * @param amount Quantity of assets to be transferred.
+     */
+    function _transferAsset(
+        address asset,
+        address payable destination,
+        uint256 amount
+    ) internal {
+        if (asset == address(0)) {
+            (bool success, ) = destination.call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
+            require(success, 'Could not transfer ETH');
+        } else {
+            IERC20(asset).transfer(destination, amount);
+        }
     }
 
 
