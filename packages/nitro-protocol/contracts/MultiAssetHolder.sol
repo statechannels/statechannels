@@ -374,24 +374,6 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         );
     }
 
-    /**
-     * @notice Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
-     * @dev Transfers the given amount of this AssetHolders's asset type to a supplied ethereum address.
-     * @param destination ethereum address to be credited.
-     * @param amount Quantity of assets to be transferred.
-     */
-    function _transferAsset(
-        address asset,
-        address payable destination,
-        uint256 amount
-    ) internal {
-        if (asset == address(0)) {
-            (bool success, ) = destination.call{value: amount}(''); //solhint-disable-line avoid-low-level-calls
-            require(success, 'Could not transfer ETH');
-        } else {
-            IERC20(asset).transfer(destination, amount);
-        }
-    }
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
