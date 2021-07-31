@@ -389,9 +389,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             bytes32 destination = singleAssetExit.allocations[j].destination;
             uint256 amount = singleAssetExit.allocations[j].amount;
             if(_isExternalDestination(destination)) {
-                _transferAsset(asset, destination, amount);
+                _transferAsset(asset, _bytes32ToAddress(destination), amount);
             } else {
-                holdings[destination] += amount;
+                holdings[asset][destination] += amount;
             }
         }
     }
@@ -404,7 +404,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      */
     function _transferAsset(
         address asset,
-        address payable destination,
+        address destination,
         uint256 amount
     ) internal {
         if (asset == address(0)) {
