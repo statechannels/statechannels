@@ -1,5 +1,5 @@
 import {Contract, ethers, BigNumberish, BigNumber, providers, Event} from 'ethers';
-import {AllocationType} from '@statechannels/exit-format';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
 import {channelDataToStatus} from '../src/contract/channel-storage';
@@ -225,6 +225,24 @@ export function checkMultipleHoldings(
       });
     });
   });
+}
+
+// Computes an outcome from a shorthand description
+export function computeOutcome(outcomeShortHand: OutcomeShortHand): Outcome {
+  const outcome: Outcome = [];
+  Object.keys(outcomeShortHand).forEach(asset => {
+    const allocations: Allocation[] = [];
+    Object.keys(outcomeShortHand[asset]).forEach(destination =>
+      allocations.push({
+        destination,
+        amount: BigNumber.from(outcomeShortHand[asset][destination]).toHexString(),
+        metadata: '0x',
+        allocationType: AllocationType.simple,
+      })
+    );
+    outcome.push({asset, metadata: '0x', allocations});
+  });
+  return outcome;
 }
 
 export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): Event[] {
