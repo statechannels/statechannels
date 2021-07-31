@@ -2,12 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, constants} from 'ethers';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {
-  AllocationAssetOutcome,
-  encodeOutcome,
-  hashOutcome,
-  Outcome,
-} from '../../../src/contract/outcome';
+import {encodeOutcome, hashOutcome, Outcome} from '../../../src/contract/outcome';
 import {
   computeOutcome,
   getRandomNonce,
@@ -126,7 +121,7 @@ describe('transferAllAssets', () => {
       );
 
       // Compute the outcome.
-      const outcome: AllocationAssetOutcome[] = computeOutcome(setOutcome);
+      const outcome: Outcome = computeOutcome(setOutcome);
       const outcomeHash = hashOutcome(outcome);
       // Call public wrapper to set state (only works on test contract)
       const stateHash = constants.HashZero;
@@ -154,8 +149,9 @@ describe('transferAllAssets', () => {
         const {events: eventsFromTx} = await (await tx1).wait();
 
         // expect an event per asset
+        console.log(eventsFromTx);
         expect(eventsFromTx[0].event).toEqual('AllocationUpdated');
-        expect(eventsFromTx[2].event).toEqual('AllocationUpdated'); // skip out the erc20 transfer event in slot 1
+        expect(eventsFromTx[1].event).toEqual('AllocationUpdated'); // skip out the erc20 transfer event in slot 1
 
         // Check new status
         const outcomeAfter: Outcome = computeOutcome(newOutcome);
