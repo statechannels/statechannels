@@ -17,7 +17,7 @@ const baseFromState: State = {
   isFinal: false,
   appDefinition: ethers.constants.AddressZero,
   appData: '0x00',
-  outcome: [{asset: ethers.constants.AddressZero, allocationItems: []}],
+  outcome: [{asset: ethers.constants.AddressZero, allocations: [], metadata: '0x'}],
   channel,
   challengeDuration: 1,
 };
