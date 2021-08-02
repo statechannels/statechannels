@@ -14,11 +14,13 @@ export function hashOutcome(outcome: Outcome): Bytes32 {
   return utils.keccak256(encodedOutcome);
 }
 
-// this will cause executeExit to revert, which is what we want for a guarantee
-// it should only work with a custom 'claim' operation
-// we avoid the magic value of the zero address, because that is already used by executeExit
+export type SimpleAllocation = ExitFormat.Allocation & {
+  allocationType: ExitFormat.AllocationType.simple;
+};
 
 export type GuaranteeAllocation = ExitFormat.Allocation & {
+  // this will cause executeExit to revert, which is what we want for a guarantee
+  // it should only work with a custom 'claim' operation
   allocationType: ExitFormat.AllocationType.guarantee;
 };
 
@@ -52,7 +54,7 @@ const exampleGuaranteeOutcome1: GuaranteeOutcome = [
 
 const exampleGuaranteeOutcome2: ExitFormat.Exit = exampleGuaranteeOutcome1; // GuaranteeOutcome is assignable to Exit
 
-export function encodeGuaranteeData(...destinations: string[]): BytesLike {
+export function encodeGuaranteeData(destinations: string[]): BytesLike {
   return defaultAbiCoder.encode(['bytes32[]'], [destinations]);
 }
 
