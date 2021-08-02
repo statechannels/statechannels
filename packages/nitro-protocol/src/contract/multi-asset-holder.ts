@@ -1,4 +1,4 @@
-import {utils, BigNumber, ethers} from 'ethers';
+import {utils, BigNumber, ethers, constants} from 'ethers';
 import ExitFormat from '@statechannels/exit-format';
 
 import {parseEventResult} from '../ethers-utils';
@@ -144,14 +144,19 @@ export function computeTransferEffectsAndInteractions(
 ): {
   newAllocations: ExitFormat.Allocation[];
   allocatesOnlyZeros: boolean;
-  payouts: string[];
+  exitAllocations: ExitFormat.Allocation[];
   totalPayouts: string;
 } {
-  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocations.length).fill(
-    BigNumber.from(0).toHexString()
-  );
   let totalPayouts = BigNumber.from(0);
   const newAllocations: ExitFormat.Allocation[] = [];
+  const exitAllocations: ExitFormat.Allocation[] = Array(
+    indices.length > 0 ? indices.length : allocations.length
+  ).fill({
+    destination: constants.HashZero,
+    amount: '0x00',
+    metadata: '0x',
+    allocationType: 0,
+  });
   let allocatesOnlyZeros = true;
   let surplus = BigNumber.from(initialHoldings);
   let k = 0;
@@ -168,7 +173,12 @@ export function computeTransferEffectsAndInteractions(
       newAllocations[i].amount = BigNumber.from(allocations[i].amount)
         .sub(affordsForDestination)
         .toHexString();
-      payouts[k] = affordsForDestination.toHexString();
+      exitAllocations[k] = {
+        destination: allocations[i].destination,
+        amount: affordsForDestination.toHexString(),
+        metadata: allocations[i].metadata,
+        allocationType: allocations[i].allocationType,
+      };
       totalPayouts = totalPayouts.add(affordsForDestination);
       ++k;
     } else {
@@ -181,7 +191,7 @@ export function computeTransferEffectsAndInteractions(
   return {
     newAllocations,
     allocatesOnlyZeros,
-    payouts,
+    exitAllocations,
     totalPayouts: totalPayouts.toHexString(),
   };
 }
@@ -210,14 +220,33 @@ export function computeNewOutcome(
   const oldAllocations = oldOutcome[assetIndex].allocations;
 
   // Use the emulated, pure solidity functions to figure out what the chain will have done
-  const {newAllocations, payouts, totalPayouts} = guarantee
-    ? computeNewAllocationWithGuarantee(
-        allocationUpdatedEvent.initialHoldings,
-        oldAllocations,
-        indices,
-        guarantee
-      ) // if guarantee is defined, then we know that claim was called
-    : computeNewAllocation(allocationUpdatedEvent.initialHoldings, oldAllocations, indices);
+  let exitAllocations: ExitFormat.Allocation[];
+  let newAllocations: ExitFormat.Allocation[];
+
+  let totalPayouts;
+  if (guarantee) {
+    const result = computeNewAllocationWithGuarantee(
+      allocationUpdatedEvent.initialHoldings,
+      oldAllocations,
+      indices,
+      guarantee
+    );
+
+    exitAllocations = result.payouts.map((v, i) => ({
+      destination: oldAllocations[longHandIndices[i]].destination,
+      amount: v,
+      allocationType: oldAllocations[longHandIndices[i]].allocationType,
+      metadata: oldAllocations[longHandIndices[i]].metadata,
+    }));
+  } else {
+    const result = computeTransferEffectsAndInteractions(
+      allocationUpdatedEvent.initialHoldings,
+      oldAllocations,
+      indices
+    );
+    newAllocations = result.newAllocations;
+    exitAllocations = result.exitAllocations;
+  }
 
   // Massage the output for convenience
   const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
@@ -229,21 +258,14 @@ export function computeNewOutcome(
 
   const longHandIndices =
     indices.length === 0
-      ? Array.from(Array(payouts.length).keys()) // [0,1,2,...] all indices up to payouts.length
+      ? Array.from(Array(exitAllocations.length).keys()) // [0,1,2,...] all indices up to payouts.length
       : indices;
 
-  const hydratedPayouts: ExitFormat.Allocation[] = payouts.map((v, i) => ({
-    destination: oldAllocations[longHandIndices[i]].destination,
-    amount: v,
-    allocationType: oldAllocations[longHandIndices[i]].allocationType,
-    metadata: oldAllocations[longHandIndices[i]].metadata,
-  }));
-
-  const externalPayouts = hydratedPayouts.filter(payout =>
+  const externalPayouts = exitAllocations.filter(payout =>
     isExternalDestination(payout.destination)
   );
 
-  const internalPayouts = hydratedPayouts.filter(
+  const internalPayouts = exitAllocations.filter(
     payout => !isExternalDestination(payout.destination)
   );
 
