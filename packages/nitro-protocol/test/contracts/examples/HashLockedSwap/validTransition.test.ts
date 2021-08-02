@@ -1,10 +1,11 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 import {Contract, ethers, utils} from 'ethers';
 
 const {HashZero} = ethers.constants;
 import HashLockedSwapArtifact from '../../../../artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json';
 import {Bytes32} from '../../../../src';
-import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {encodeOutcome, Outcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
 import {Bytes} from '../../../../src/contract/types';
 import {
@@ -82,21 +83,39 @@ describe('validTransition', () => {
       balancesB;
     }) => {
       balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
-      const allocationA: Allocation = [];
+      const allocationsA: Allocation[] = [];
       Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key, amount: balancesA[key]})
+        allocationsA.push({
+          destination: key,
+          amount: balancesA[key],
+          allocationType: AllocationType.simple,
+          metadata: '0x',
+        })
       );
-      const outcomeA = [{asset: ethers.constants.AddressZero, allocationItems: allocationA}];
+      const outcomeA: Outcome = [
+        {
+          asset: ethers.constants.AddressZero,
+          allocations: allocationsA,
+          metadata: '0x',
+        },
+      ];
       const variablePartA: VariablePart = {
         outcome: encodeOutcome(outcomeA),
         appData: encodeHashLockedSwapData(dataA),
       };
       balancesB = replaceAddressesAndBigNumberify(balancesB, addresses);
-      const allocationB: Allocation = [];
+      const allocationsB: Allocation[] = [];
       Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key, amount: balancesB[key]})
+        allocationsB.push({
+          destination: key,
+          amount: balancesB[key],
+          allocationType: AllocationType.simple,
+          metadata: '0x',
+        })
       );
-      const outcomeB = [{asset: ethers.constants.AddressZero, allocationItems: allocationB}];
+      const outcomeB: Outcome = [
+        {asset: ethers.constants.AddressZero, allocations: allocationsB, metadata: '0x'},
+      ];
       const variablePartB: VariablePart = {
         outcome: encodeOutcome(outcomeB),
         appData: encodeHashLockedSwapData(dataB),
