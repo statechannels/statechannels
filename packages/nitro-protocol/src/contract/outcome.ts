@@ -9,6 +9,9 @@ export const decodeOutcome = ExitFormat.decodeExit;
 
 import {Bytes32} from './types';
 
+// CONSTANTS
+export const MAX_OUTCOME_ITEMS = 2000;
+
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
   return utils.keccak256(encodedOutcome);

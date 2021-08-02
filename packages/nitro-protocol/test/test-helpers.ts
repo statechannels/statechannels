@@ -1,7 +1,7 @@
 import {Contract, ethers, BigNumberish, BigNumber, providers, Event} from 'ethers';
+import {AllocationType} from '@statechannels/exit-format';
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
-import {Bytes} from '../src/contract/types';
 import {channelDataToStatus} from '../src/contract/channel-storage';
 import {Outcome} from '../src/contract/outcome';
 import {Bytes32} from '../src';
@@ -242,3 +242,24 @@ export function compileEventsFromLogs(logs: any[], contractsArray: Contract[]): 
 export function getRandomNonce(seed: string): number {
   return Number.parseInt(ethers.utils.id(seed).slice(2, 11), 16);
 }
+
+export const largeOutcome = (
+  numAllocationItems: number,
+  asset: string = ethers.Wallet.createRandom().address
+): Outcome => {
+  const randomDestination = '0x8595a84df2d81430f6213ece3d8519c77daf98f04fe54e253a2caeef4d2add39';
+  return numAllocationItems > 0
+    ? [
+        {
+          allocations: Array(numAllocationItems).fill({
+            destination: randomDestination,
+            amount: '0x01',
+            allocationType: AllocationType.simple,
+            metadata: '0x',
+          }),
+          asset,
+          metadata: '0x',
+        },
+      ]
+    : [];
+};
