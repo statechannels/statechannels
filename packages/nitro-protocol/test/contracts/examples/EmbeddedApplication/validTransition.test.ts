@@ -4,7 +4,7 @@ import {constants, Contract, Wallet} from 'ethers';
 
 import embeddedApplicationArtifact from '../../../../artifacts/contracts/examples/EmbeddedApplication.sol/EmbeddedApplication.json';
 import {convertAddressToBytes32, getChannelId, signState} from '../../../../src';
-import {AllocationAssetOutcome, encodeOutcome} from '../../../../src/contract/outcome';
+import {encodeOutcome} from '../../../../src/contract/outcome';
 import {getFixedPart, getVariablePart, State, VariablePart} from '../../../../src/contract/state';
 import {
   AlreadyMoved,
@@ -13,6 +13,8 @@ import {
 } from '../../../../src/contract/embedded-application';
 import {getTestProvider, setupContract} from '../../../test-helpers';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../../src/transactions';
+import {Outcome} from '../../../../lib/src';
+import {AllocationType} from '@statechannels/exit-format';
 
 type RevertReason =
   // each reason represents a distinct code path that we should check in this test
@@ -55,22 +57,29 @@ async function expectRevert(fn: () => void, reason: RevertReason) {
 // TODO we will need to have something more interesting than the null app in order to test [0,1] and [1,0] cases
 
 // Utilities
-function absorbOutcomeOfXIntoJ(xOutcome: [AllocationAssetOutcome]) {
+function absorbOutcomeOfXIntoJ(xOutcome: Outcome): Outcome {
   return [
     {
       asset: xOutcome[0].asset,
-      allocationItems: [
+      metadata: '0x',
+      allocations: [
         {
-          destination: xOutcome[0].allocationItems[0].destination,
-          amount: xOutcome[0].allocationItems[0].amount,
+          destination: xOutcome[0].allocations[0].destination,
+          amount: xOutcome[0].allocations[0].amount,
+          metadata: '0x',
+          allocationType: AllocationType.simple,
         },
         {
-          destination: xOutcome[0].allocationItems[1].destination,
-          amount: xOutcome[0].allocationItems[1].amount,
+          destination: xOutcome[0].allocations[1].destination,
+          amount: xOutcome[0].allocations[1].amount,
+          metadata: '0x',
+          allocationType: AllocationType.simple,
         },
         {
           destination: convertAddressToBytes32(Irene.address),
           amount: '0xa',
+          metadata: '0x',
+          allocationType: AllocationType.simple,
         },
       ],
     },
@@ -85,21 +94,43 @@ const Alice = Wallet.createRandom();
 const Bob = Wallet.createRandom();
 const Irene = Wallet.createRandom();
 
-const sixFour: [AllocationAssetOutcome] = [
+const sixFour: Outcome = [
   {
     asset: MAGIC_ADDRESS_INDICATING_ETH,
-    allocationItems: [
-      {destination: convertAddressToBytes32(Alice.address), amount: '0x6'},
-      {destination: convertAddressToBytes32(Bob.address), amount: '0x4'},
+    metadata: '0x',
+    allocations: [
+      {
+        destination: convertAddressToBytes32(Alice.address),
+        amount: '0x6',
+        metadata: '0x',
+        allocationType: AllocationType.simple,
+      },
+      {
+        destination: convertAddressToBytes32(Bob.address),
+        amount: '0x4',
+        metadata: '0x',
+        allocationType: AllocationType.simple,
+      },
     ],
   },
 ];
-const fourSix: [AllocationAssetOutcome] = [
+const fourSix: Outcome = [
   {
     asset: MAGIC_ADDRESS_INDICATING_ETH,
-    allocationItems: [
-      {destination: convertAddressToBytes32(Alice.address), amount: '0x4'},
-      {destination: convertAddressToBytes32(Bob.address), amount: '0x6'},
+    metadata: '0x',
+    allocations: [
+      {
+        destination: convertAddressToBytes32(Alice.address),
+        amount: '0x4',
+        metadata: '0x',
+        allocationType: AllocationType.simple,
+      },
+      {
+        destination: convertAddressToBytes32(Bob.address),
+        amount: '0x6',
+        metadata: '0x',
+        allocationType: AllocationType.simple,
+      },
     ],
   },
 ];
@@ -144,7 +175,7 @@ const supportProofForX: (stateForX: State) => SupportProof = stateForX => ({
 });
 
 const NoneVariablePartForJ: VariablePart = {
-  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])), // TOOD we should have a different outcome here
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as Outcome)), // TOOD we should have a different outcome here
   appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.None,
     channelIdForX: getChannelId(stateForX.channel),
@@ -153,7 +184,7 @@ const NoneVariablePartForJ: VariablePart = {
 };
 
 const AvariablePartForJ: VariablePart = {
-  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as Outcome)),
   appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.A,
     channelIdForX: getChannelId(stateForX.channel),
@@ -162,7 +193,7 @@ const AvariablePartForJ: VariablePart = {
 };
 
 const BvariablePartForJ: VariablePart = {
-  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome])),
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(stateForX.outcome as Outcome)),
   appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.B,
     channelIdForX: getChannelId(stateForX.channel),
@@ -171,9 +202,7 @@ const BvariablePartForJ: VariablePart = {
 };
 
 const ABvariablePartForJ: VariablePart = {
-  outcome: encodeOutcome(
-    absorbOutcomeOfXIntoJ(greaterStateForX.outcome as [AllocationAssetOutcome])
-  ),
+  outcome: encodeOutcome(absorbOutcomeOfXIntoJ(greaterStateForX.outcome as Outcome)),
   appData: encodeEmbeddedApplicationData({
     alreadyMoved: AlreadyMoved.AB,
     channelIdForX: getChannelId(stateForX.channel),
@@ -314,8 +343,8 @@ describe('EmbeddedApplication: named state transitions', () => {
 
 describe('EmbeddedApplication: reversions', () => {
   it('reverts if destinations change', async () => {
-    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
-    maliciousOutcome[0].allocationItems[2].destination = convertAddressToBytes32(Alice.address);
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as Outcome);
+    maliciousOutcome[0].allocations[2].destination = convertAddressToBytes32(Alice.address);
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
@@ -330,8 +359,8 @@ describe('EmbeddedApplication: reversions', () => {
     );
   });
   it('reverts if Irene`s balance changes', async () => {
-    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
-    maliciousOutcome[0].allocationItems[2].amount = '0x0';
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as Outcome);
+    maliciousOutcome[0].allocations[2].amount = '0x0';
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
@@ -346,8 +375,8 @@ describe('EmbeddedApplication: reversions', () => {
     );
   });
   it('reverts if the total amount allocated changes', async () => {
-    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as [AllocationAssetOutcome]);
-    maliciousOutcome[0].allocationItems[1].amount = '0xaaa';
+    const maliciousOutcome = absorbOutcomeOfXIntoJ(stateForX.outcome as Outcome);
+    maliciousOutcome[0].allocations[1].amount = '0xaaa';
     await expectRevert(
       () =>
         embeddedApplication.validTransition(
