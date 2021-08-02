@@ -37,9 +37,8 @@ contract SingleAssetPayments is IForceMoveApp {
         require(outcomeA.length == 1, 'outcomeA: Only one asset allowed');
         require(outcomeB.length == 1, 'outcomeB: Only one asset allowed');
 
-        // Throws unless the assetoutcome is an allocation
         Outcome.SingleAssetExit memory assetOutcomeA = outcomeA[0];
-        Outcome.SingleAssetExit memory assetOutcomeB = outcomeA[1];
+        Outcome.SingleAssetExit memory assetOutcomeB = outcomeB[0];
 
         // Throws unless that allocation has exactly n outcomes
         Outcome.Allocation[] memory allocationsA = assetOutcomeA.allocations;
