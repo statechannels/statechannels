@@ -11,8 +11,8 @@ import {
   AllocationItem,
 } from '../../../src/contract/outcome';
 
-const destination = utils.id('d');
-const targetChannelId = utils.id('t');
+const destination = '0x14bcc435f49d130d189737f9762feb25c44ef5b886bef833e31a702af6be4748';
+const targetChannelId = '0xcac1bb71f0a97c8ac94ca9546b43178a9ad254c7b757ac07433aa6df35cd8089';
 const destinations = [destination];
 const asset = Wallet.createRandom().address;
 
