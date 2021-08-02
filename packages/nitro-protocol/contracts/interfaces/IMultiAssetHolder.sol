@@ -24,29 +24,6 @@ interface IMultiAssetHolder {
     ) external payable;
 
     /**
-     * @dev Computes the new outcome that should be stored against a target channel after a claim is made on its guarantor.
-     * @param initialGuaranteeOutcome the outcome containing at least one guarantee(s) which will be claimed for each asset.
-     * @param initialHoldings initial quantity of each asset held on chain for the guarantor channel. Order matches that of initialGuaranteeOutcome.
-     * @param targetChannelIndex the index of the guarantee in the list of guarantees for the given asset -- equivalent to declaring a target channel
-     * @param initialTargetOutcome initial outcome stored on chain for the target channel.
-     * @param exitRequest list  of indices expressing which destinations in the allocation should be paid out for each asset.
-     */
-    function claim(
-        Outcome.SingleAssetExit[] memory initialGuaranteeOutcome,
-        uint256[] memory initialHoldings,
-        uint48 targetChannelIndex,
-        Outcome.SingleAssetExit[] memory initialTargetOutcome,
-        uint48[][] memory exitRequest
-    )
-        external
-        pure
-        returns (
-            Outcome.SingleAssetExit[] memory updatedTargetOutcome,
-            uint256[] memory updatedHoldings,
-            Outcome.SingleAssetExit[] memory exit
-        );
-
-    /**
      * @notice Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @dev Transfers as many funds escrowed against `channelId` as can be afforded for a specific destination. Assumes no repeated entries.
      * @param assetIndex Will be used to slice the outcome into a single asset outcome.
