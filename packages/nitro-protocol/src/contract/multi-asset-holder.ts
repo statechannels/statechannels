@@ -137,7 +137,7 @@ export function computeNewAllocationWithGuarantee(
  * @param allocation
  * @param indices
  */
-export function computeNewAllocation(
+export function computeTransferEffectsAndInteractions(
   initialHoldings: string,
   allocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
   indices: number[]
