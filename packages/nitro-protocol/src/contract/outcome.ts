@@ -1,6 +1,6 @@
 import {BytesLike, constants, utils} from 'ethers';
 import {defaultAbiCoder} from '@ethersproject/abi';
-import ExitFormat from '@statechannels/exit-format';
+import * as ExitFormat from '@statechannels/exit-format';
 
 export type AssetOutcome = ExitFormat.SingleAssetExit;
 export type Outcome = ExitFormat.Exit;
@@ -10,7 +10,7 @@ export const decodeOutcome = ExitFormat.decodeExit;
 import {Bytes32} from './types';
 
 // CONSTANTS
-export const MAX_OUTCOME_ITEMS = 2000;
+export const MAX_OUTCOME_ITEMS = 600;
 
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
