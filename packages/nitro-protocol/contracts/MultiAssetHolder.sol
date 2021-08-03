@@ -122,7 +122,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             totalPayouts
         );
 
-        _apply_transfer_interactions(outcome[assetIndex], exitAllocations); // in future, we may pass in the top-level metadata field too
+        _apply_transfer_interactions(outcome[assetIndex], exitAllocations);
     }
 
     function _apply_transfer_checks(
@@ -164,7 +164,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         )
     {
         // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
+        // Note: by initializing exitAllocations to be an array of fixed length, its entries are initialized to be `0`
         exitAllocations = new Outcome.Allocation[](
             indices.length > 0 ? indices.length : allocations.length
         );
@@ -188,7 +188,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                 // found a match
                 // reduce the current allocationItem.amount
                 newAllocations[i].amount = allocations[i].amount - affordsForDestination;
-                // increase the relevant payout
+                // increase the relevant exit allocation
                 exitAllocations[k] = Outcome.Allocation(
                     allocations[i].destination,
                     affordsForDestination,
@@ -229,6 +229,255 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     }
 
     function _apply_transfer_interactions(
+        Outcome.SingleAssetExit memory singleAssetExit,
+        Outcome.Allocation[] memory exitAllocations
+    ) internal {
+        // create a new tuple to avoid mutating singleAssetExit
+        executeSingleAssetExit(
+            Outcome.SingleAssetExit(
+                singleAssetExit.asset,
+                singleAssetExit.metadata,
+                exitAllocations
+            )
+        );
+    }
+
+    /**
+     * @notice Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
+     * @dev Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
+     * @param assetIndex the index of the targetted asset
+     * @param claimArgs arguments used in the claim function. Used to avoid stack too deep error.
+     */
+    function claim(uint256 assetIndex, ClaimArgs memory claimArgs) external override {
+        Outcome.SingleAssetExit[] memory sourceOutcome;
+        Outcome.SingleAssetExit[] memory targetOutcome;
+        uint256 initialAssetHoldings;
+        {
+            bytes memory sourceOutcomeBytes = claimArgs.sourceOutcomeBytes;
+            bytes memory targetOutcomeBytes = claimArgs.targetOutcomeBytes;
+            (sourceOutcome, targetOutcome, initialAssetHoldings) = _apply_claim_checks(
+                assetIndex,
+                claimArgs.indexOfTargetInSource,
+                claimArgs.indices,
+                claimArgs.sourceChannelId,
+                claimArgs.sourceStateHash,
+                sourceOutcomeBytes,
+                claimArgs.targetStateHash,
+                targetOutcomeBytes
+            ); // view
+        }
+        Outcome.Allocation[] memory newSourceAllocations;
+        Outcome.Allocation[] memory newTargetAllocations;
+        Outcome.Allocation[] memory exitAllocations;
+        uint256 totalPayouts;
+        {
+            Outcome.Allocation[] memory sourceAllocations = sourceOutcome[assetIndex].allocations;
+            Outcome.Allocation[] memory targetAllocations = targetOutcome[assetIndex].allocations;
+            (
+                newSourceAllocations,
+                newTargetAllocations,
+                exitAllocations,
+                totalPayouts
+            ) = compute_claim_effects_and_interactions(
+                initialAssetHoldings,
+                sourceAllocations,
+                targetAllocations,
+                claimArgs.indexOfTargetInSource,
+                claimArgs.indices
+            ); // pure, also performs checks
+        }
+
+        _apply_claim_effects(
+            assetIndex,
+            claimArgs.sourceChannelId,
+            claimArgs.sourceStateHash,
+            sourceOutcome,
+            newSourceAllocations,
+            sourceOutcome[assetIndex].allocations[claimArgs.indexOfTargetInSource].destination, // targetChannelId
+            claimArgs.targetStateHash,
+            targetOutcome,
+            newTargetAllocations,
+            initialAssetHoldings,
+            totalPayouts
+        );
+
+        _apply_claim_interactions(targetOutcome[assetIndex], exitAllocations);
+    }
+
+    function _apply_claim_checks(
+        uint256 assetIndex,
+        uint256 indexOfTargetInSource,
+        uint256[] memory indices,
+        bytes32 sourceChannelId,
+        bytes32 sourceStateHash,
+        bytes memory sourceOutcomeBytes,
+        bytes32 targetStateHash,
+        bytes memory targetOutcomeBytes
+    )
+        internal
+        view
+        returns (
+            Outcome.SingleAssetExit[] memory sourceOutcome,
+            Outcome.SingleAssetExit[] memory targetOutcome,
+            uint256 initialAssetHoldings
+        )
+    {
+        _requireIncreasingIndices(indices); // This assumption is relied on by compute_transfer_effects_and_interactions
+
+        // source checks
+        _requireChannelFinalized(sourceChannelId);
+        _requireMatchingFingerprint(
+            sourceStateHash,
+            keccak256(sourceOutcomeBytes),
+            sourceChannelId
+        );
+
+        sourceOutcome = Outcome.decodeExit(sourceOutcomeBytes);
+        targetOutcome = Outcome.decodeExit(targetOutcomeBytes);
+        address asset = sourceOutcome[assetIndex].asset;
+        require(targetOutcome[assetIndex].asset == asset, 'asset mismatch');
+        initialAssetHoldings = holdings[asset][sourceChannelId];
+        bytes32 targetChannelId = sourceOutcome[assetIndex].allocations[indexOfTargetInSource]
+            .destination;
+
+        // target checks
+        _requireChannelFinalized(targetChannelId);
+        _requireMatchingFingerprint(
+            targetStateHash,
+            keccak256(targetOutcomeBytes),
+            targetChannelId
+        );
+    }
+
+    function compute_claim_effects_and_interactions(
+        uint256 initialHoldings,
+        Outcome.Allocation[] memory sourceAllocations,
+        Outcome.Allocation[] memory targetAllocations,
+        uint256 indexOfTargetInSource,
+        uint256[] memory indices
+    )
+        public
+        pure
+        returns (
+            Outcome.Allocation[] memory newSourceAllocations,
+            Outcome.Allocation[] memory newTargetAllocations,
+            Outcome.Allocation[] memory exitAllocations,
+            uint256 totalPayouts
+        )
+    {
+        // `indices == []` means "pay out to all"
+        // Note: by initializing exitAllocations to be an array of fixed length, its entries are initialized to be `0`
+        exitAllocations = new Outcome.Allocation[](
+            indices.length > 0 ? indices.length : targetAllocations.length
+        );
+        totalPayouts = 0;
+        uint256 k = 0; // indexes the `indices` array
+        //  We rely on the assumption that the indices are strictly increasing.
+        //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
+        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
+
+        // copy allocations
+        newSourceAllocations = new Outcome.Allocation[](sourceAllocations.length);
+        newTargetAllocations = new Outcome.Allocation[](targetAllocations.length);
+        for (uint256 i = 0; i < sourceAllocations.length; i++) {
+            newSourceAllocations[i].destination = sourceAllocations[i].destination;
+            newSourceAllocations[i].amount = sourceAllocations[i].amount;
+            newSourceAllocations[i].metadata = sourceAllocations[i].metadata;
+            newSourceAllocations[i].allocationType = sourceAllocations[i].allocationType;
+        }
+        for (uint256 i = 0; i < targetAllocations.length; i++) {
+            newTargetAllocations[i].destination = targetAllocations[i].destination;
+            newTargetAllocations[i].amount = targetAllocations[i].amount;
+            newTargetAllocations[i].metadata = targetAllocations[i].metadata;
+            newTargetAllocations[i].allocationType = targetAllocations[i].allocationType;
+        }
+
+        // compute how much the source can afford for the target
+        uint256 sourceSurplus = initialHoldings;
+        for (
+            uint256 sourceAllocationIndex;
+            sourceAllocationIndex < indexOfTargetInSource;
+            sourceAllocationIndex++
+        ) {
+            if (sourceSurplus == 0) break;
+            uint256 affordsForDestination = min(
+                sourceAllocations[sourceAllocationIndex].amount,
+                sourceSurplus
+            );
+            sourceSurplus -= affordsForDestination;
+        }
+
+        uint256 targetSurplus = min(sourceSurplus, sourceAllocations[indexOfTargetInSource].amount);
+
+        bytes32[] memory guaranteeDestinations = decodeGuaranteeData(
+            sourceAllocations[indexOfTargetInSource].metadata
+        );
+
+        for (uint256 j = 0; j < guaranteeDestinations.length; j++) {
+            if (targetSurplus == 0) break;
+            for (uint256 i = 0; i < newTargetAllocations.length; i++) {
+                if (targetSurplus == 0) break;
+                // search for it in the allocation
+                if (guaranteeDestinations[j] == newTargetAllocations[i].destination) {
+                    // if we find it, compute new amount
+                    uint256 affordsForDestination = min(targetAllocations[i].amount, targetSurplus);
+                    // decrease surplus by the current amount regardless of hitting a specified index
+                    targetSurplus -= affordsForDestination;
+                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
+                        // only if specified in supplied indices, or we if we are doing "all"
+                        // reduce the new allocationItem.amount
+                        newTargetAllocations[i].amount -= affordsForDestination;
+                        newSourceAllocations[indexOfTargetInSource].amount -= affordsForDestination;
+                        // increase the relevant exit allocation
+                        exitAllocations[k] = Outcome.Allocation(
+                            targetAllocations[i].destination,
+                            affordsForDestination,
+                            targetAllocations[i].allocationType,
+                            targetAllocations[i].metadata
+                        );
+                        totalPayouts += affordsForDestination;
+                        // move on to the next supplied index
+                        ++k;
+                    }
+                    break; // start again with the next guarantee destination
+                }
+            }
+        }
+    }
+
+    function _apply_claim_effects(
+        uint256 assetIndex,
+        bytes32 sourceChannelId,
+        bytes32 sourceStateHash,
+        Outcome.SingleAssetExit[] memory sourceOutcome,
+        Outcome.Allocation[] memory newSourceAllocations,
+        bytes32 targetChannelId,
+        bytes32 targetStateHash,
+        Outcome.SingleAssetExit[] memory targetOutcome,
+        Outcome.Allocation[] memory newTargetAllocations,
+        uint256 initialHoldings,
+        uint256 totalPayouts
+    ) internal {
+        // compute asset
+        address asset = sourceOutcome[assetIndex].asset;
+
+        // update holdings
+        holdings[asset][sourceChannelId] -= totalPayouts;
+
+        // store fingerprint of modified source outcome
+        sourceOutcome[assetIndex].allocations = newSourceAllocations;
+        _updateFingerprint(sourceChannelId, sourceStateHash, keccak256(abi.encode(sourceOutcome)));
+
+        // store fingerprint of modified target outcome
+        targetOutcome[assetIndex].allocations = newTargetAllocations;
+        _updateFingerprint(targetChannelId, targetStateHash, keccak256(abi.encode(targetOutcome)));
+
+        // emit the information needed to compute the new source outcome stored in the fingerprint
+        emit AllocationUpdated(sourceChannelId, assetIndex, initialHoldings);
+        // TODO emit two events? or one? and which channel id to use?
+    }
+
+    function _apply_claim_interactions(
         Outcome.SingleAssetExit memory singleAssetExit,
         Outcome.Allocation[] memory exitAllocations
     ) internal {
@@ -364,5 +613,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
 
     function min(uint256 a, uint256 b) internal pure returns (uint256) {
         return a > b ? b : a;
+    }
+
+    function decodeGuaranteeData(bytes memory data) internal pure returns (bytes32[] memory) {
+        return abi.decode(data, (bytes32[]));
     }
 }
