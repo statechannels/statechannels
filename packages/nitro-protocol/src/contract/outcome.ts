@@ -55,6 +55,7 @@ const exampleGuaranteeOutcome1: GuaranteeOutcome = [
   },
 ];
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const exampleGuaranteeOutcome2: ExitFormat.Exit = exampleGuaranteeOutcome1; // GuaranteeOutcome is assignable to Exit
 
 export function encodeGuaranteeData(destinations: string[]): BytesLike {
