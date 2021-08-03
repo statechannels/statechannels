@@ -9,6 +9,7 @@ import {WalletConfig} from '../src/config';
 import {ObjectiveDoneResult, UpdateChannelResult, Wallet} from '../src/wallet';
 import {SocketIOMessageService} from '../src/message-service/socket-io-message-service';
 import {createLogger} from '../src/logger';
+import {LatencyOptions} from '../src/message-service/test-message-service';
 
 import {
   CloseChannelStep,
@@ -321,6 +322,10 @@ export class WalletLoadNode {
    */
   public async registerMessagePeer(port: number): Promise<void> {
     this.serverWallet.messageService.registerPeer(`http://localhost:${port}`);
+  }
+
+  public setLatencyOptions(latencyOptions: LatencyOptions): void {
+    (this.serverWallet.messageService as SocketIOMessageService).setLatencyOptions(latencyOptions);
   }
 
   public static async create(

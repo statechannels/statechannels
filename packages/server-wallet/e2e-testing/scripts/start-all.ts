@@ -26,6 +26,18 @@ async function startAll() {
       description: 'The file containing the load data to send to the nodes',
       demandOption: 'true',
       type: 'string',
+    })
+    .option('meanDelay', {
+      default: 0,
+      describe:
+        'The mean delay (in MS) that the node will wait before attempting to send a message. If undefined or 0 no delays are added.',
+      type: 'number',
+    })
+    .option('dropRatePercentage', {
+      default: 0,
+      min: 0,
+      max: 100,
+      describe: 'The percentage of messages that get dropped when trying to send a message.',
     }).argv;
 
   const ganache = execa.command(`npx ts-node ${SCRIPT_DIR}/start-ganache.ts -d off`, {all: true});
@@ -34,12 +46,15 @@ async function startAll() {
   const servers: execa.ExecaChildProcess<string>[] = [];
 
   const roles = (await jsonfile.readFile(commandArguments.roleFile)) as Record<string, RoleConfig>;
-
+  const {dropRatePercentage, meanDelay} = commandArguments;
   for (const roleId of Object.keys(roles)) {
     const color = roleId === 'A' ? chalk.yellow : chalk.cyan;
-    const server = execa.command(`npx ts-node ${SCRIPT_DIR}/start-load-node.ts --role ${roleId}`, {
-      all: true,
-    });
+    const server = execa.command(
+      `npx ts-node ${SCRIPT_DIR}/start-load-node.ts --role ${roleId} --dropRatePercentage ${dropRatePercentage} --meanDelay ${meanDelay}`,
+      {
+        all: true,
+      }
+    );
     registerHandlers(server, roleId, color);
     servers.push(server);
   }
