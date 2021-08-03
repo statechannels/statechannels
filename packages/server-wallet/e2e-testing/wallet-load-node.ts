@@ -1,3 +1,5 @@
+import util from 'util';
+
 import express, {Express} from 'express';
 import _ from 'lodash';
 import chalk from 'chalk';
@@ -15,12 +17,12 @@ import {
   CreateChannelStep,
   CreateLedgerChannelStep,
   JobChannelLink,
+  LoadData,
   LoadNodeConfig,
   Peers,
   Step,
   UpdateChannelStep,
 } from './types';
-
 export class WalletLoadNode {
   private steps: Step[] = [];
   private jobToChannelMap: JobChannelLink[] = [];
@@ -102,16 +104,22 @@ export class WalletLoadNode {
     // This endpoint loads the load file into the load node
     // It will not start processing the jobs unless the start query param is set to true
     this.server.post('/load', async (req, res) => {
-      const requests: Step[] = req.body;
+      const {steps, latencyOptions} = req.body as LoadData;
 
       const fromPeer = this.parseBooleanQueryParam('fromPeer', req);
       const startProcessing = this.parseBooleanQueryParam('start', req);
 
-      await this.updateJobQueue(requests);
+      console.log(`Setting latency options ${util.inspect(latencyOptions)}`);
+
+      (this.serverWallet.messageService as SocketIOMessageService).setLatencyOptions(
+        latencyOptions
+      );
+
+      await this.updateJobQueue(steps);
 
       // If we received this from a peer we don't want to send it right back to them
       if (!fromPeer) {
-        await this.shareJobsWithPeers(requests);
+        await this.shareJobsWithPeers({steps, latencyOptions});
       }
 
       if (startProcessing) {
@@ -197,9 +205,9 @@ export class WalletLoadNode {
       await got.post(`http://localhost:${loadServerPort}/channelId/`, {json: jobAndChannel});
     }
   }
-  private async shareJobsWithPeers(steps: Step[]) {
+  private async shareJobsWithPeers(loadData: LoadData) {
     for (const {loadServerPort} of this.peers) {
-      await got.post(`http://localhost:${loadServerPort}/load/?fromPeer=true`, {json: steps});
+      await got.post(`http://localhost:${loadServerPort}/load/?fromPeer=true`, {json: loadData});
     }
   }
   private async sendGetRequestToPeers(urlPath: string) {

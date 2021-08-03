@@ -13,7 +13,7 @@ import ms from 'ms';
 import {zeroAddress} from '@statechannels/wallet-core/src/config';
 
 import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-bytecode';
-import {FundingInfo, RoleConfig, Step} from '../types';
+import {FundingInfo, LoadData, RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
 
 setupUnhandledErrorListeners();
@@ -33,6 +33,8 @@ async function createLoad() {
     ledgerDelay,
     ledgerRate,
     createLedgerDuration,
+    meanDelay,
+    dropRate,
   } = await yargs(hideBin(process.argv))
     .option('prettyOutput', {
       default: true,
@@ -94,6 +96,13 @@ async function createLoad() {
       min: 0,
       describe:
         'The amount of channels to be closed per a second. If this is larger than the createRate then all channels will eventually get closed. Otherwise, some channels will remain open.',
+    })
+    .option('meanDelay', {default: 0, describe: 'The mean delay added to messages'})
+    .option('dropRate', {
+      default: 0,
+      min: 0,
+      max: 100,
+      describe: 'The percentage of messages that are dropped.',
     }).argv;
 
   const roles = (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
@@ -109,6 +118,8 @@ async function createLoad() {
         closeRate,
         closeDelay,
         fundingStrategy,
+        meanDelay,
+        dropRate,
       })}`
     )
   );
@@ -153,8 +164,8 @@ async function createLoad() {
   );
 
   steps = generateCloseSteps(closeRate, duration, closeDelay, steps);
-
-  await jsonfile.writeFile(outputFile, steps, {spaces: prettyOutput ? 1 : 0});
+  const loadFile: LoadData = {steps, latencyOptions: {meanDelay, dropRate}};
+  await jsonfile.writeFile(outputFile, loadFile, {spaces: prettyOutput ? 1 : 0});
 
   console.log(chalk.greenBright(`Complete!`));
 }

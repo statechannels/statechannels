@@ -1,6 +1,7 @@
 import {CreateChannelParams, UpdateChannelParams} from '@statechannels/client-api-schema';
 import {Uint256} from '@statechannels/nitro-protocol';
 
+import {LatencyOptions} from '../src/message-service/test-message-service';
 import {CreateLedgerChannelParams} from '../src/wallet';
 
 export type CreateChannelStep = {
@@ -46,6 +47,11 @@ export type Step =
  * A job is just a collection of steps all with the same job id
  */
 export type Job = Step[];
+
+export type LoadData = {
+  steps: Step[];
+  latencyOptions: LatencyOptions;
+};
 
 export type Peer = {serverId: string; messagePort: number; loadServerPort: number};
 export type Peers = Peer[];

@@ -8,7 +8,7 @@ import _ from 'lodash';
 import {BigNumberish, utils} from 'ethers';
 import columnify from 'columnify';
 
-import {ChainState, RoleConfig, Step} from '../types';
+import {ChainState, LoadData, RoleConfig, Step} from '../types';
 import {defaultTestWalletConfig, overwriteConfigWithDatabaseConnection} from '../../src';
 import {getKnexFromConfig} from '../../src/db-admin/db-admin';
 import {ObjectiveModel} from '../../src/models/objective';
@@ -32,7 +32,7 @@ async function assertSanity() {
       default: './e2e-testing/test-data/load-data.json',
     }).argv;
 
-  const steps = (await jsonfile.readFile(commandArguments.loadFile)) as Step[];
+  const {steps} = (await jsonfile.readFile(commandArguments.loadFile)) as LoadData;
   console.log(
     chalk.yellow(
       `Using load file ${chalk.bold(commandArguments.loadFile)} to generate expected values`
