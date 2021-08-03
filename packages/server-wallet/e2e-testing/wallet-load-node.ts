@@ -66,7 +66,7 @@ export class WalletLoadNode {
       // We want to kick off processing in all nodes so we message our peers
       const fromPeer = req.query['fromPeer'];
       if (!fromPeer) {
-        await Promise.all([this.runJobs(), this.sendGetRequestToPeers('/start?fromPeer=true')]);
+        await Promise.all([this.runJobs(), this.makeRequest('/start?fromPeer=true')]);
       } else {
         await this.runJobs();
       }
@@ -83,7 +83,7 @@ export class WalletLoadNode {
 
       const fromPeer = req.query['fromPeer'];
       if (!fromPeer) {
-        await this.sendGetRequestToPeers('/reset?fromPeer=true');
+        await this.makeRequest('/reset?fromPeer=true');
       }
 
       this.logger.info('Jobs have been reset');
@@ -123,7 +123,7 @@ export class WalletLoadNode {
       }
 
       if (startProcessing) {
-        await Promise.all([this.sendGetRequestToPeers('/start?fromPeer=true'), this.runJobs()]);
+        await Promise.all([this.makeRequest('/start?fromPeer=true'), this.runJobs()]);
       }
 
       res.end();
@@ -175,7 +175,7 @@ export class WalletLoadNode {
 
             const result = await this.handleStep(s);
             if (result.type !== 'Success') {
-              this.logger.error({result, step: s}, 'Load step failed!');
+              this.logger.error({result, step: s}, 'Step failed!');
               console.error(chalk.redBright(`Step failed for ${s.jobId}-${s.timestamp}`));
               process.exit(1);
             } else {
@@ -201,18 +201,27 @@ export class WalletLoadNode {
   }
 
   private async shareChannelIdsWithPeers(jobAndChannel: {channelId: string; jobId: string}) {
-    for (const {loadServerPort} of this.peers) {
-      await got.post(`http://localhost:${loadServerPort}/channelId/`, {json: jobAndChannel});
-    }
+    await this.makeRequest(`channelId`, jobAndChannel);
   }
+
   private async shareJobsWithPeers(loadData: LoadData) {
-    for (const {loadServerPort} of this.peers) {
-      await got.post(`http://localhost:${loadServerPort}/load/?fromPeer=true`, {json: loadData});
-    }
+    await this.makeRequest(`load?fromPeer=true`, loadData);
   }
-  private async sendGetRequestToPeers(urlPath: string) {
-    for (const {loadServerPort} of this.peers) {
-      await got.get(`http://localhost:${loadServerPort}${urlPath}`, {retry: 0});
+
+  private async makeRequest(urlPath: string, payload?: any) {
+    if (!urlPath.startsWith('/')) {
+      urlPath = `/${urlPath}`;
+    }
+    let url = '';
+    try {
+      for (const {loadServerPort} of this.peers) {
+        url = `http://localhost:${loadServerPort}${urlPath}`;
+        payload ? await got.post(url, {retry: 0, json: payload}) : await got.get(url, {retry: 0});
+      }
+    } catch (error) {
+      console.error(util.inspect(error));
+      console.error(`Request to ${url} with code ${error.code}`);
+      process.exit(1);
     }
   }
 
@@ -310,7 +319,12 @@ export class WalletLoadNode {
    * @returns A promise that resolves to a result object. The result object may indicate success or an error.
    */
   private async handleStep(step: Step): Promise<ObjectiveDoneResult | UpdateChannelResult> {
-    return this.stepHandlers[step.type](step);
+    try {
+      return this.stepHandlers[step.type](step);
+    } catch (error) {
+      console.error(`Step with job id ${step.jobId} and timestamp ${step.timestamp}`);
+      process.exit(1);
+    }
   }
 
   public async destroy(): Promise<void> {

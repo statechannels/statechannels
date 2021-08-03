@@ -54,11 +54,15 @@ async function startAll() {
 
   // Since the nodes communicate with each other we only need to talk to one node
   const {loadServerPort} = roles[Object.keys(roles)[0]];
+  try {
+    await got.post(`http://localhost:${loadServerPort}/load`, {json: loadData});
 
-  await got.post(`http://localhost:${loadServerPort}/load`, {json: loadData});
-
-  // This will resolve when all the jobs have run
-  await got.get(`http://localhost:${loadServerPort}/start`, {retry: 0});
+    // This will resolve when all the jobs have run
+    await got.get(`http://localhost:${loadServerPort}/start`, {retry: 0});
+  } catch (err) {
+    console.error(`Request to load node failed with code ${err.code}`);
+    process.exit(1);
+  }
 
   // Wrap up all the existing processes
   servers.forEach(s => s.cancel());
