@@ -34,7 +34,7 @@ async function createLoad() {
     ledgerRate,
     createLedgerDuration,
     meanDelay,
-    dropRate,
+    dropRate: dropRateWholeNumber,
   } = await yargs(hideBin(process.argv))
     .option('prettyOutput', {
       default: true,
@@ -119,7 +119,7 @@ async function createLoad() {
         closeDelay,
         fundingStrategy,
         meanDelay,
-        dropRate,
+        dropRate: dropRateWholeNumber,
       })}`
     )
   );
@@ -164,6 +164,9 @@ async function createLoad() {
   );
 
   steps = generateCloseSteps(closeRate, duration, closeDelay, steps);
+  const dropRate = dropRateWholeNumber / 100;
+  console.log(dropRateWholeNumber);
+  console.log(dropRate);
   const loadFile: LoadData = {steps, latencyOptions: {meanDelay, dropRate}};
   await jsonfile.writeFile(outputFile, loadFile, {spaces: prettyOutput ? 1 : 0});
 
