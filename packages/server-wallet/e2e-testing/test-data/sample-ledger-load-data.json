@@ -1451,8 +1451,8 @@
    }
   }
  ],
- "latencyOptions": {
-  "meanDelay": 0,
-  "dropRate": 0
+"latencyOptions": {
+  "meanDelay": 50,
+  "dropRate": 0.1
  }
 }
