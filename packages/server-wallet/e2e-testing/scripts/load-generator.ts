@@ -165,8 +165,7 @@ async function createLoad() {
 
   steps = generateCloseSteps(closeRate, duration, closeDelay, steps);
   const dropRate = dropRateWholeNumber / 100;
-  console.log(dropRateWholeNumber);
-  console.log(dropRate);
+
   const loadFile: LoadData = {steps, latencyOptions: {meanDelay, dropRate}};
   await jsonfile.writeFile(outputFile, loadFile, {spaces: prettyOutput ? 1 : 0});
 
