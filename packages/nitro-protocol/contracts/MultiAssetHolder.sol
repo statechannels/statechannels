@@ -242,21 +242,18 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         );
     }
 
-
     /**
      * @notice Executes a single asset exit by paying out the asset and calling external contracts
      * @dev Executes a single asset exit by paying out the asset and calling external contracts
      * @param singleAssetExit The single asset exit to be paid out.
      * TODO absorb into exit format repo
      */
-    function executeSingleAssetExit(
-        Outcome.SingleAssetExit memory singleAssetExit
-    ) internal {
+    function executeSingleAssetExit(Outcome.SingleAssetExit memory singleAssetExit) internal {
         address asset = singleAssetExit.asset;
         for (uint256 j = 0; j < singleAssetExit.allocations.length; j++) {
             bytes32 destination = singleAssetExit.allocations[j].destination;
             uint256 amount = singleAssetExit.allocations[j].amount;
-            if(_isExternalDestination(destination)) {
+            if (_isExternalDestination(destination)) {
                 _transferAsset(asset, _bytes32ToAddress(destination), amount);
             } else {
                 holdings[asset][destination] += amount;
@@ -282,7 +279,6 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             IERC20(asset).transfer(destination, amount);
         }
     }
-
 
     /**
      * @notice Checks if a given destination is external (and can therefore have assets transferred to it) or not.
