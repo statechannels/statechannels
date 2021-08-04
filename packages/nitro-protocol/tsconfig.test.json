@@ -1,0 +1,5 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*", "test/**/*.ts", "artifacts/**/*.json", "addresses.json"],
+  "compilerOptions": {"noEmit": true}
+}

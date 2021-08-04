@@ -97,6 +97,7 @@
     "solhint:check": "solhint -w 0  './contracts/**/*.sol'",
     "solhint:write": "echo 'This command does not seem to work. Use yarn prettier:write ' && solhint --fix './contracts/**/*.sol'",
     "prettier:write": "prettier --write './contracts/**/*.sol'",
+    "typecheck-tests": "tsc -p tsconfig.test.json",
     "test": "yarn test:contracts && yarn test:app --all",
     "test:app": "jest -c ./config/jest/jest.config.js",
     "test:ci": "yarn test:ci:gas && yarn test:ci:app && yarn test:ci:contracts ",
