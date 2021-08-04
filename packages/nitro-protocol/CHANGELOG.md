@@ -3,6 +3,20 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [0.17.2](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.17.1...@statechannels/nitro-protocol@0.17.2) (2021-08-04)
+
+
+### Bug Fixes
+
+* apply challengerAdrss changes lost in rebase ([787fe77](https://github.com/statechannels/monorepo/commit/787fe7780a9dbe5b089c4f1d526e080760ae039f))
+* import/export computeNewOutcome thru entry point ([#3718](https://github.com/statechannels/monorepo/issues/3718)) ([75539cc](https://github.com/statechannels/monorepo/commit/75539cc40e68ee82be6db696105d29ff04fb5cf1))
+* remove unnecessary parameter from ChannelData ([6338901](https://github.com/statechannels/monorepo/commit/63389014670de5c638f8279f40ebd61d8c823601))
+* typo in doccomment ([4b25c8c](https://github.com/statechannels/monorepo/commit/4b25c8c3c4958e876c62c2784f2e31a4429ff303))
+
+
+
+
+
 ## [0.17.1](https://github.com/statechannels/monorepo/compare/@statechannels/nitro-protocol@0.17.0...@statechannels/nitro-protocol@0.17.1) (2021-07-28)
 
 
