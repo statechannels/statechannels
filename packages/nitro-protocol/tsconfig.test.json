@@ -1,5 +1,5 @@
 {
   "extends": "./tsconfig.json",
-  "include": ["src/**/*", "test/**/*.ts", "artifacts/**/*.json", "addresses.json"],
+  "include": ["src/**/*", "test/**/*.ts", "artifacts/**/*.json", "addresses.json", "typechain"],
   "compilerOptions": {"noEmit": true}
 }
