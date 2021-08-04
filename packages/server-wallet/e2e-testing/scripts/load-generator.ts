@@ -16,6 +16,9 @@ import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-by
 import {FundingInfo, RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
 
+// We want to create all the ledger channels in the first 5 seconds.
+const MAX_CREATE_LEDGER_TIME = ms('5 seconds');
+
 setupUnhandledErrorListeners();
 
 createLoad();
@@ -157,9 +160,7 @@ function generateCreateLedgerSteps(
 ): Step[] {
   const steps: Step[] = [];
   _.times(amountOfLedgerChannels, () => {
-    // We create ledger channels in the first quarter of the duration
-    const maxLedgerTime = Math.floor(duration / 4);
-    const timestamp = generateRandomInteger(0, toMilliseconds(maxLedgerTime));
+    const timestamp = generateRandomInteger(0, MAX_CREATE_LEDGER_TIME);
     const startIndex = generateRandomInteger(0, Object.keys(roles).length - 1);
 
     const participants = generateParticipants(roles, startIndex);
