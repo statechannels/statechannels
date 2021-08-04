@@ -85,11 +85,11 @@ async function checkChain(chainState: ChainState, channels: Channel[]): Promise<
 
   const myTotal = myAddresses.map(d => chainState.accounts[d]).reduce(BN.add, '0x0');
 
-  const assetHolderFunds = chainState.contracts.NITRO_ADJUDICATOR_ADDRESS.balance;
+  const adjudicatorFunds = chainState.contracts.NITRO_ADJUDICATOR_ADDRESS.balance;
 
   return [
-    createAssertion(closedFunds, myTotal, 'Received Funds on chain'),
-    createAssertion(fundsStillOnChain, assetHolderFunds, 'Funds still locked on chain'),
+    createAssertion(closedFunds, myTotal, `Funds sent to this node's destination`),
+    createAssertion(fundsStillOnChain, adjudicatorFunds, 'Adjudicator funds'),
   ];
 }
 
@@ -123,11 +123,7 @@ async function checkServer(
 
   const actualAppChannelCount = channels.filter(c => !c.isLedgerChannel).length;
   assertions.push(
-    createAssertion(
-      expectedAppChannelCount,
-      actualAppChannelCount,
-      'Number of app channels in the DB'
-    )
+    createAssertion(expectedAppChannelCount, actualAppChannelCount, 'Open app channels in the DB')
   );
   const expectedClosedCount = steps.filter(s => s.type === 'CloseChannel').length;
   const actualClosedChannelCount = channels.filter(c => c.isAppChannel && c.hasConclusionProof)
@@ -136,18 +132,14 @@ async function checkServer(
     o => o.type === 'CloseChannel' && o.status === 'succeeded'
   ).length;
   assertions.push(
-    createAssertion(
-      expectedClosedCount,
-      actualClosedChannelCount,
-      'Number of closed app channels in the DB'
-    )
+    createAssertion(expectedClosedCount, actualClosedChannelCount, 'Closed app channels in the DB')
   );
 
   assertions.push(
     createAssertion(
       expectedClosedCount,
       acualCloseChannelObjectiveCount,
-      'Number of complete closed channel objectives in the DB'
+      'Completed CloseChannel objectives in the DB'
     )
   );
 
