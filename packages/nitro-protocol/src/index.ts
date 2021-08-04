@@ -57,6 +57,9 @@ export {
   getDepositedEvent,
   convertBytes32ToAddress,
   convertAddressToBytes32,
+  computeNewAllocation,
+  computeNewAllocationWithGuarantee,
+  computeNewOutcome,
 } from './contract/multi-asset-holder';
 export {
   getChallengeRegisteredEvent,

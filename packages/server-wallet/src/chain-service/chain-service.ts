@@ -6,6 +6,7 @@ import {
   getChallengeRegisteredEvent,
   getChannelId,
   Transactions,
+  computeNewOutcome,
 } from '@statechannels/nitro-protocol';
 import {
   Address,
@@ -25,7 +26,6 @@ import PQueue from 'p-queue';
 import {Logger} from 'pino';
 import _ from 'lodash';
 const MAGIC_ADDRESS_INDICATING_ETH = constants.AddressZero;
-import {computeNewOutcome} from '@statechannels/nitro-protocol/src/contract/multi-asset-holder';
 
 import {Bytes32} from '../type-aliases';
 import {createLogger} from '../logger';
