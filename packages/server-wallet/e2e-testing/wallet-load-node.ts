@@ -127,10 +127,11 @@ export class WalletLoadNode {
     const ourSteps = this.steps.filter(s => s.serverId === this.loadNodeConfig.serverId);
     const createdAmount = ourSteps.filter(s => s.type === 'CreateChannel').length;
     const ledgerAmount = ourSteps.filter(s => s.type === 'CreateLedgerChannel').length;
+    const isLedgerFunding = this.steps.some(s => s.type === 'CreateLedgerChannel');
     console.log(
       chalk.whiteBright(
         `This node will create ${createdAmount} channel(s) using ${
-          ledgerAmount > 0 ? 'ledger' : 'direct'
+          isLedgerFunding ? 'ledger' : 'direct'
         } funding`
       )
     );
