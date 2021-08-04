@@ -31,8 +31,7 @@ async function createLoad() {
     closeDelay,
     fundingStrategy,
     ledgerDelay,
-    ledgerRate,
-    createLedgerDuration,
+    amountOfLedgerChannels,
   } = await yargs(hideBin(process.argv))
     .option('prettyOutput', {
       default: true,
@@ -68,16 +67,10 @@ async function createLoad() {
       default: 1,
       describe: 'The number of channels that should be created per a second.',
     })
-    .option('createLedgerDuration', {
-      default: 5,
-      min: 5,
-      describe: `The amount of time (in seconds) that create ledger channels can be scheduled for.
-      This dictates the max timestamp a step can have.`,
-    })
-    .option('ledgerRate', {
+    .option('amountOfLedgerChannels', {
+      alias: 'l',
       default: 1,
-      min: 1,
-      describe: `The number of ledger channels to create per second during the createLedgerDuration.`,
+      describe: `The number of ledger channels that will be created and used for funding.`,
     })
     .option('ledgerDelay', {
       default: 20,
@@ -117,8 +110,7 @@ async function createLoad() {
       chalk.whiteBright(
         `Ledger options ${util.inspect({
           ledgerDelay,
-          ledgerRate,
-          createLedgerDuration,
+          amountOfLedgerChannels,
         })}`
       )
     );
@@ -142,7 +134,7 @@ async function createLoad() {
 
   let steps: Step[] = [];
   if (fundingStrategy === 'Ledger') {
-    steps = generateCreateLedgerSteps(ledgerRate, createLedgerDuration, roles);
+    steps = generateCreateLedgerSteps(amountOfLedgerChannels, duration, roles);
   }
   steps = generateCreateSteps(
     createRate,
@@ -160,13 +152,15 @@ async function createLoad() {
 }
 
 function generateCreateLedgerSteps(
-  ledgerRate: number,
+  amountOfLedgerChannels: number,
   duration: number,
   roles: Record<string, RoleConfig>
 ): Step[] {
   const steps: Step[] = [];
-  _.times(ledgerRate * duration, () => {
-    const timestamp = generateRandomInteger(0, toMilliseconds(duration));
+  _.times(amountOfLedgerChannels, () => {
+    // We create ledger channels in the first quarter of the duration
+    const maxLedgerTime = Math.floor(duration / 4);
+    const timestamp = generateRandomInteger(0, toMilliseconds(maxLedgerTime));
     const startIndex = generateRandomInteger(0, Object.keys(roles).length - 1);
 
     const participants = generateParticipants(roles, startIndex);
