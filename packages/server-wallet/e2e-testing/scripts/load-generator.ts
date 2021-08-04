@@ -50,7 +50,7 @@ async function createLoad() {
     })
     .option('fundingStrategy', {
       alias: 'f',
-      describe: 'Whether channels are funded directly or by ledger channels.',
+      describe: 'Whether application channels are funded directly or by ledger channels.',
       choices: ['Ledger', 'Direct'],
       demandOption: true,
     })
@@ -58,8 +58,7 @@ async function createLoad() {
       alias: 'd',
       min: 10,
       default: 60,
-      describe: `The amount of time (in seconds) that the load should run for.
-      This dictactes the max timestamp a step can have.`,
+      describe: `The amount of time (in seconds) that the load should run for. Steps will be generated with a timestamp such that step.timestamp <= duration.`,
     })
     .option('createRate', {
       alias: 'cr',
@@ -75,12 +74,12 @@ async function createLoad() {
     .option('ledgerDelay', {
       default: 20,
       min: 0,
-      describe: `The minumum amount of time (in seconds) to wait for a ledger channel to be created before scheduling a createChannel job.`,
+      describe: `The minumum amount of time (in seconds) to wait before attempting to use a ledger channel. This is used to prevent using a ledger channel that has not finished being funded.`,
     })
     .option('closeDelay', {
       default: 5,
       min: 0,
-      describe: `The minumum amount of time (in seconds) to wait before closing a channel.`,
+      describe: `The minumum amount of time (in seconds) to wait before closing a channel. This is used to prevent closing a channel that has not finished being funded.`,
     })
     .option('closeRate', {
       default: 0,
