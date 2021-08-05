@@ -6149,10 +6149,10 @@
   resolved "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.8.2.tgz#a6a5e93ac8dca6884a99a532f133beba59b87b69"
   integrity sha512-8LySx3qrNXPgB5JiULfG10O3V7QTxI/TLzSw5hFQhXWSkVxZBAv4rZQ0sYgLEbc8g3L2lmnujj1hKul38Eu5NQ==
 
-"@statechannels/exit-format@0.0.3":
-  version "0.0.3"
-  resolved "https://registry.npmjs.org/@statechannels/exit-format/-/exit-format-0.0.3.tgz#aefafdfb6c963366fc08914a5b6abccb66c0eb66"
-  integrity sha512-TBuwfKC0R4bWt7I7H4CFiSS5bw6Fwt/qihPG493JyZ5904+3JrSk4TosMSI4+780Zpdcd4xcEwlrlLQ004oNOQ==
+"@statechannels/exit-format@0.0.4":
+  version "0.0.4"
+  resolved "https://registry.npmjs.org/@statechannels/exit-format/-/exit-format-0.0.4.tgz#301b38b26a382fb8ff6c923604f426b066f383e9"
+  integrity sha512-FZtX71OcLNXMBctK1zQaaW6+xbreGprszYDJ0Sk0CY0XOnaBMm6IEGm7PYU4gD7fCG5s6mdtQWRBOcT+7R9ZyA==
   dependencies:
     ethers "^5.1.4"
     lodash "^4.17.21"
