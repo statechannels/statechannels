@@ -41,6 +41,36 @@ interface IMultiAssetHolder {
     ) external;
 
     /**
+     * @param sourceChannelId Unique identifier for a guarantor state channel.
+     * @param sourceStateHash Hash of the state stored when the guarantor channel finalized.
+     * @param sourceOutcomeBytes The abi.encode of guarantor channel outcome
+     * @param sourceAssetIndex the index of the targetted asset in the source outcome.
+     * @param indexOfTargetInSource The index of the guarantee allocation to the target channel in the source outcome.
+     * @param targetStateHash Hash of the state stored when the target channel finalized.
+     * @param targetOutcomeBytes The abi.encode of target channel outcome
+     * @param targetAssetIndex the index of the targetted asset in the target outcome.
+     * @param targetAllocationIndicesToPayout Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all"
+     */
+    struct ClaimArgs {
+        bytes32 sourceChannelId;
+        bytes32 sourceStateHash;
+        bytes sourceOutcomeBytes;
+        uint256 sourceAssetIndex;
+        uint256 indexOfTargetInSource;
+        bytes32 targetStateHash;
+        bytes targetOutcomeBytes;
+        uint256 targetAssetIndex;
+        uint256[] targetAllocationIndicesToPayout;
+    }
+
+    /**
+     * @notice Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
+     * @dev Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
+     * @param claimArgs arguments used in the claim function. Used to avoid stack too deep error.
+     */
+    function claim(ClaimArgs memory claimArgs) external;
+
+    /**
      * @dev Indicates that `amountDeposited` has been deposited into `destination`.
      * @param destination The channel being deposited into.
      * @param amountDeposited The amount being deposited.
