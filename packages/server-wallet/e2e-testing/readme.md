@@ -98,11 +98,11 @@ All scripts are typescript files that can be run with `ts-node`.
 
 ## Sanity Checker
 
-The sanity checker is a simple script that checks databases and ganache to make sure we created the right amount of channels and sent the right amount of funds.
+The sanity checker is a simple script that checks databases and ganache balances to make sure the correct amount of channels were created and the on-chain funds ended up where we thought.
 
 The main argument it accepts is the load file to use. The sanity checker uses this to figure out how many channels we expect to see in the database (and in what status).
 
-The sanity checker also checks the balance file outputed by `start-ganache`. It checks the destinations and contracts to ensure that the funds went where we expected them.
+The sanity checker also checks the balance file outputed by `start-ganache`. It checks the destinations and contracts to perform a rough check of on-chain funds.
 
 ## Start Ganache
 
