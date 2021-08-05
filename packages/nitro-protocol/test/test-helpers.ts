@@ -227,7 +227,7 @@ export function checkMultipleHoldings(
   });
 }
 
-// Computes an outcome from a shorthand description
+/** Computes an Outcome from a shorthand description */
 export function computeOutcome(outcomeShortHand: OutcomeShortHand): Outcome {
   const outcome: Outcome = [];
   Object.keys(outcomeShortHand).forEach(asset => {
