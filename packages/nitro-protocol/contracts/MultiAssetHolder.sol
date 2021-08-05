@@ -105,7 +105,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             ,
             Outcome.Allocation[] memory exitAllocations,
             uint256 totalPayouts
-        ) = _compute_transfer_effects_and_interactions(
+        ) = compute_transfer_effects_and_interactions(
             initialAssetHoldings,
             outcome[assetIndex].allocations,
             indices
@@ -149,12 +149,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         initialAssetHoldings = holdings[asset][channelId];
     }
 
-    function _compute_transfer_effects_and_interactions(
+    function compute_transfer_effects_and_interactions(
         uint256 initialHoldings,
         Outcome.Allocation[] memory allocations,
         uint256[] memory indices
     )
-        internal
+        public
         pure
         returns (
             Outcome.Allocation[] memory newAllocations,

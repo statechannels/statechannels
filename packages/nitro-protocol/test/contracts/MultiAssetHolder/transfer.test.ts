@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {BigNumber, constants, Contract} from 'ethers';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 
 import {
   getTestProvider,
@@ -88,15 +89,20 @@ describe('transfer', () => {
       );
 
       // Compute an appropriate allocation.
-      const allocation = [];
+      const allocations: Allocation[] = [];
       Object.keys(setOutcome).forEach(key =>
-        allocation.push({destination: key, amount: setOutcome[key]})
+        allocations.push({
+          destination: key,
+          amount: setOutcome[key],
+          metadata: '0x',
+          allocationType: AllocationType.simple,
+        })
       );
       const outcomeHash = hashOutcome([
-        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+        {asset: MAGIC_ADDRESS_INDICATING_ETH, metadata: '0x', allocations},
       ]);
       const outcomeBytes = encodeOutcome([
-        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+        {asset: MAGIC_ADDRESS_INDICATING_ETH, metadata: '0x', allocations},
       ]);
 
       // Set adjudicator status
@@ -138,12 +144,17 @@ describe('transfer', () => {
         );
 
         // Check new status
-        const allocationAfter = [];
+        const allocationsAfter: Allocation[] = [];
         Object.keys(newOutcome).forEach(key => {
-          allocationAfter.push({destination: key, amount: newOutcome[key]});
+          allocationsAfter.push({
+            destination: key,
+            amount: newOutcome[key],
+            metadata: '0x',
+            allocationType: AllocationType.simple,
+          });
         });
         const outcomeAfter: Outcome = [
-          {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocationAfter},
+          {asset: MAGIC_ADDRESS_INDICATING_ETH, metadata: '0x', allocations: allocationsAfter},
         ];
         const expectedStatusAfter = channelDataToStatus({
           turnNumRecord,
