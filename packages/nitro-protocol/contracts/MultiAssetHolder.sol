@@ -243,8 +243,8 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     }
 
     /**
-     * @notice Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
-     * @dev Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
+     * @notice Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by targetAllocationIndicesToPayout in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
+     * @dev Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by targetAllocationIndicesToPayout in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
      * @param claimArgs arguments used in the claim function. Used to avoid stack too deep error.
      */
     function claim(ClaimArgs memory claimArgs) external override {
@@ -276,7 +276,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                 sourceAllocations,
                 targetAllocations,
                 claimArgs.indexOfTargetInSource,
-                claimArgs.indices
+                claimArgs.targetAllocationIndicesToPayout
             ); // pure, also performs checks
         }
 
@@ -297,7 +297,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     }
 
     /**
-     * @dev Checks that indices are increasing; that the source and target channels are finalized; that the supplied outcomes match the stored fingerprints; that the asset is identical in source and target. Computes and returns: the decoded outcomes, the asset being targetted; the number of assets held against the guarantor.
+     * @dev Checks that targetAllocationIndicesToPayout are increasing; that the source and target channels are finalized; that the supplied outcomes match the stored fingerprints; that the asset is identical in source and target. Computes and returns: the decoded outcomes, the asset being targetted; the number of assets held against the guarantor.
      */
     function _apply_claim_checks(ClaimArgs memory claimArgs)
         internal
@@ -323,7 +323,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             claimArgs.targetAssetIndex
         );
 
-        _requireIncreasingIndices(claimArgs.indices); // This assumption is relied on by compute_transfer_effects_and_interactions
+        _requireIncreasingIndices(claimArgs.targetAllocationIndicesToPayout); // This assumption is relied on by compute_transfer_effects_and_interactions
 
         // source checks
         _requireChannelFinalized(sourceChannelId);
@@ -359,7 +359,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         Outcome.Allocation[] memory sourceAllocations,
         Outcome.Allocation[] memory targetAllocations,
         uint256 indexOfTargetInSource,
-        uint256[] memory indices
+        uint256[] memory targetAllocationIndicesToPayout
     )
         public
         pure
@@ -370,16 +370,16 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             uint256 totalPayouts
         )
     {
-        // `indices == []` means "pay out to all"
+        // `targetAllocationIndicesToPayout == []` means "pay out to all"
         // Note: by initializing exitAllocations to be an array of fixed length, its entries are initialized to be `0`
         exitAllocations = new Outcome.Allocation[](
-            indices.length > 0 ? indices.length : targetAllocations.length
+            targetAllocationIndicesToPayout.length > 0 ? targetAllocationIndicesToPayout.length : targetAllocations.length
         );
         totalPayouts = 0;
-        uint256 k = 0; // indexes the `indices` array
-        //  We rely on the assumption that the indices are strictly increasing.
+        uint256 k = 0; // indexes the `targetAllocationIndicesToPayout` array
+        //  We rely on the assumption that the targetAllocationIndicesToPayout are strictly increasing.
         //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
-        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
+        //  If the targetAllocationIndicesToPayout were to decrease, we would have to start from the beginning: doing a full search for each index.
 
         // copy allocations
         newSourceAllocations = new Outcome.Allocation[](sourceAllocations.length);
@@ -428,8 +428,8 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                     uint256 affordsForDestination = min(targetAllocations[i].amount, targetSurplus);
                     // decrease surplus by the current amount regardless of hitting a specified index
                     targetSurplus -= affordsForDestination;
-                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                        // only if specified in supplied indices, or we if we are doing "all"
+                    if ((targetAllocationIndicesToPayout.length == 0) || ((k < targetAllocationIndicesToPayout.length) && (targetAllocationIndicesToPayout[k] == i))) {
+                        // only if specified in supplied targetAllocationIndicesToPayout, or we if we are doing "all"
                         // reduce the new allocationItem.amount
                         newTargetAllocations[i].amount -= affordsForDestination;
                         newSourceAllocations[indexOfTargetInSource].amount -= affordsForDestination;

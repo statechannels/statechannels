@@ -49,7 +49,7 @@ interface IMultiAssetHolder {
      * @param targetStateHash Hash of the state stored when the target channel finalized.
      * @param targetOutcomeBytes The abi.encode of target channel outcome
      * @param targetAssetIndex the index of the targetted asset in the target outcome.
-     * @param indices Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all"
+     * @param targetAllocationIndicesToPayout Array with each entry denoting the index of a destination (in the target channel) to transfer funds to. Should be in increasing order. An empty array indicates "all"
      */
     struct ClaimArgs {
         bytes32 sourceChannelId;
@@ -60,7 +60,7 @@ interface IMultiAssetHolder {
         bytes32 targetStateHash;
         bytes targetOutcomeBytes;
         uint256 targetAssetIndex;
-        uint256[] indices;
+        uint256[] targetAllocationIndicesToPayout;
     }
 
     /**
