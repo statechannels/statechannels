@@ -8,7 +8,7 @@ import _ from 'lodash';
 import {BigNumberish, utils} from 'ethers';
 import columnify from 'columnify';
 
-import {ChainState, RoleConfig, Step} from '../types';
+import {Assertion, ChainState, RoleConfig, Step} from '../types';
 import {defaultTestWalletConfig, overwriteConfigWithDatabaseConnection} from '../../src';
 import {getKnexFromConfig} from '../../src/db-admin/db-admin';
 import {ObjectiveModel} from '../../src/models/objective';
@@ -163,5 +163,3 @@ function createAssertion(
 ): Assertion {
   return {description, expected, actual};
 }
-
-type Assertion = {expected: BigNumberish; actual: BigNumberish; description: string};
