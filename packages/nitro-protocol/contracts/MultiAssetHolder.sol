@@ -253,7 +253,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             Outcome.SingleAssetExit[] memory targetOutcome,
             address asset,
             uint256 initialAssetHoldings
-        ) = _apply_claim_checks(claimArgs);
+        ) = _apply_claim_checks(claimArgs); // view
 
         Outcome.Allocation[] memory newSourceAllocations;
         Outcome.Allocation[] memory newTargetAllocations;
@@ -352,7 +352,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     }
 
     /**
-     * @dev Computes side effects for the claim function. First, computes the amount the source channel can afford for the target. Then, computes and returns an updated allocations for the source and for the target, as well as exit allocations (to be paid out). It does this by walking the target allocations, testing against the guarantee in the source, and conditionally siphoning money out. See the Nitro paper.
+     * @dev Computes side effects for the claim function. First, computes the amount the source channel can afford for the target. Then, computes and returns updated allocations for the source and for the target, as well as exit allocations (to be paid out). It does this by walking the target allocations, testing against the guarantee in the source, and conditionally siphoning money out. See the Nitro paper.
      */
     function compute_claim_effects_and_interactions(
         uint256 initialHoldings,

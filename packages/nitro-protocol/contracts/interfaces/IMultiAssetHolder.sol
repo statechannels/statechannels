@@ -41,7 +41,6 @@ interface IMultiAssetHolder {
     ) external;
 
     /**
-     * @param assetIndex Will be used to slice the outcome into a single asset outcome.
      * @param sourceChannelId Unique identifier for a guarantor state channel.
      * @param sourceStateHash Hash of the state stored when the guarantor channel finalized.
      * @param sourceOutcomeBytes The abi.encode of guarantor channel outcome
