@@ -254,6 +254,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             address asset,
             uint256 initialAssetHoldings
         ) = _apply_claim_checks(claimArgs);
+
         Outcome.Allocation[] memory newSourceAllocations;
         Outcome.Allocation[] memory newTargetAllocations;
         Outcome.Allocation[] memory exitAllocations;
