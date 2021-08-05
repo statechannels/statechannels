@@ -245,34 +245,26 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     /**
      * @notice Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
      * @dev Transfers as many funds escrowed against `sourceChannelId` as can be afforded for the destinations specified by indices in the beneficiaries of the __target__ of the channel at indexOfTargetInSource.
-     * @param assetIndex the index of the targetted asset
      * @param claimArgs arguments used in the claim function. Used to avoid stack too deep error.
      */
-    function claim(uint256 assetIndex, ClaimArgs memory claimArgs) external override {
-        Outcome.SingleAssetExit[] memory sourceOutcome;
-        Outcome.SingleAssetExit[] memory targetOutcome;
-        uint256 initialAssetHoldings;
-        {
-            bytes memory sourceOutcomeBytes = claimArgs.sourceOutcomeBytes;
-            bytes memory targetOutcomeBytes = claimArgs.targetOutcomeBytes;
-            (sourceOutcome, targetOutcome, initialAssetHoldings) = _apply_claim_checks(
-                assetIndex,
-                claimArgs.indexOfTargetInSource,
-                claimArgs.indices,
-                claimArgs.sourceChannelId,
-                claimArgs.sourceStateHash,
-                sourceOutcomeBytes,
-                claimArgs.targetStateHash,
-                targetOutcomeBytes
-            ); // view
-        }
+    function claim(ClaimArgs memory claimArgs) external override {
+        (
+            Outcome.SingleAssetExit[] memory sourceOutcome,
+            Outcome.SingleAssetExit[] memory targetOutcome,
+            address asset,
+            uint256 initialAssetHoldings
+        ) = _apply_claim_checks(claimArgs);
         Outcome.Allocation[] memory newSourceAllocations;
         Outcome.Allocation[] memory newTargetAllocations;
         Outcome.Allocation[] memory exitAllocations;
         uint256 totalPayouts;
         {
-            Outcome.Allocation[] memory sourceAllocations = sourceOutcome[assetIndex].allocations;
-            Outcome.Allocation[] memory targetAllocations = targetOutcome[assetIndex].allocations;
+            Outcome.Allocation[] memory sourceAllocations = sourceOutcome[claimArgs
+                .sourceAssetIndex]
+                .allocations;
+            Outcome.Allocation[] memory targetAllocations = targetOutcome[claimArgs
+                .targetAssetIndex]
+                .allocations;
             (
                 newSourceAllocations,
                 newTargetAllocations,
@@ -288,62 +280,68 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         }
 
         _apply_claim_effects(
-            assetIndex,
-            claimArgs.sourceChannelId,
-            claimArgs.sourceStateHash,
+            claimArgs,
+            asset,
             sourceOutcome,
             newSourceAllocations,
-            sourceOutcome[assetIndex].allocations[claimArgs.indexOfTargetInSource].destination, // targetChannelId
-            claimArgs.targetStateHash,
+            sourceOutcome[claimArgs.sourceAssetIndex].allocations[claimArgs.indexOfTargetInSource]
+                .destination, // targetChannelId
             targetOutcome,
             newTargetAllocations,
             initialAssetHoldings,
             totalPayouts
         );
 
-        _apply_claim_interactions(targetOutcome[assetIndex], exitAllocations);
+        _apply_claim_interactions(targetOutcome[claimArgs.targetAssetIndex], exitAllocations);
     }
 
-    function _apply_claim_checks(
-        uint256 assetIndex,
-        uint256 indexOfTargetInSource,
-        uint256[] memory indices,
-        bytes32 sourceChannelId,
-        bytes32 sourceStateHash,
-        bytes memory sourceOutcomeBytes,
-        bytes32 targetStateHash,
-        bytes memory targetOutcomeBytes
-    )
+    function _apply_claim_checks(ClaimArgs memory claimArgs)
         internal
         view
         returns (
             Outcome.SingleAssetExit[] memory sourceOutcome,
             Outcome.SingleAssetExit[] memory targetOutcome,
+            address asset,
             uint256 initialAssetHoldings
         )
     {
-        _requireIncreasingIndices(indices); // This assumption is relied on by compute_transfer_effects_and_interactions
+        (
+            bytes32 sourceChannelId,
+            bytes memory sourceOutcomeBytes,
+            uint256 sourceAssetIndex,
+            bytes memory targetOutcomeBytes,
+            uint256 targetAssetIndex
+        ) = (
+            claimArgs.sourceChannelId,
+            claimArgs.sourceOutcomeBytes,
+            claimArgs.sourceAssetIndex,
+            claimArgs.targetOutcomeBytes,
+            claimArgs.targetAssetIndex
+        );
+
+        _requireIncreasingIndices(claimArgs.indices); // This assumption is relied on by compute_transfer_effects_and_interactions
 
         // source checks
         _requireChannelFinalized(sourceChannelId);
         _requireMatchingFingerprint(
-            sourceStateHash,
+            claimArgs.sourceStateHash,
             keccak256(sourceOutcomeBytes),
             sourceChannelId
         );
 
         sourceOutcome = Outcome.decodeExit(sourceOutcomeBytes);
         targetOutcome = Outcome.decodeExit(targetOutcomeBytes);
-        address asset = sourceOutcome[assetIndex].asset;
-        require(targetOutcome[assetIndex].asset == asset, 'asset mismatch');
+        asset = sourceOutcome[sourceAssetIndex].asset;
+        require(targetOutcome[targetAssetIndex].asset == asset, 'asset mismatch');
         initialAssetHoldings = holdings[asset][sourceChannelId];
-        bytes32 targetChannelId = sourceOutcome[assetIndex].allocations[indexOfTargetInSource]
+        bytes32 targetChannelId = sourceOutcome[sourceAssetIndex].allocations[claimArgs
+            .indexOfTargetInSource]
             .destination;
 
         // target checks
         _requireChannelFinalized(targetChannelId);
         _requireMatchingFingerprint(
-            targetStateHash,
+            claimArgs.targetStateHash,
             keccak256(targetOutcomeBytes),
             targetChannelId
         );
@@ -446,35 +444,46 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     }
 
     function _apply_claim_effects(
-        uint256 assetIndex,
-        bytes32 sourceChannelId,
-        bytes32 sourceStateHash,
+        ClaimArgs memory claimArgs,
+        address asset,
         Outcome.SingleAssetExit[] memory sourceOutcome,
         Outcome.Allocation[] memory newSourceAllocations,
         bytes32 targetChannelId,
-        bytes32 targetStateHash,
         Outcome.SingleAssetExit[] memory targetOutcome,
         Outcome.Allocation[] memory newTargetAllocations,
         uint256 initialHoldings,
         uint256 totalPayouts
     ) internal {
-        // compute asset
-        address asset = sourceOutcome[assetIndex].asset;
+        (bytes32 sourceChannelId, uint256 sourceAssetIndex, uint256 targetAssetIndex) = (
+            claimArgs.sourceChannelId,
+            claimArgs.sourceAssetIndex,
+            claimArgs.targetAssetIndex
+        );
 
         // update holdings
         holdings[asset][sourceChannelId] -= totalPayouts;
 
         // store fingerprint of modified source outcome
-        sourceOutcome[assetIndex].allocations = newSourceAllocations;
-        _updateFingerprint(sourceChannelId, sourceStateHash, keccak256(abi.encode(sourceOutcome)));
+        sourceOutcome[sourceAssetIndex].allocations = newSourceAllocations;
+        _updateFingerprint(
+            sourceChannelId,
+            claimArgs.sourceStateHash,
+            keccak256(abi.encode(sourceOutcome))
+        );
 
         // store fingerprint of modified target outcome
-        targetOutcome[assetIndex].allocations = newTargetAllocations;
-        _updateFingerprint(targetChannelId, targetStateHash, keccak256(abi.encode(targetOutcome)));
+        targetOutcome[targetAssetIndex].allocations = newTargetAllocations;
+        _updateFingerprint(
+            targetChannelId,
+            claimArgs.targetStateHash,
+            keccak256(abi.encode(targetOutcome))
+        );
 
         // emit the information needed to compute the new source outcome stored in the fingerprint
-        emit AllocationUpdated(sourceChannelId, assetIndex, initialHoldings);
-        // TODO emit two events? or one? and which channel id to use?
+        emit AllocationUpdated(sourceChannelId, sourceAssetIndex, initialHoldings);
+
+        // emit the information needed to compute the new target outcome stored in the fingerprint
+        emit AllocationUpdated(targetChannelId, targetAssetIndex, initialHoldings);
     }
 
     function _apply_claim_interactions(
