@@ -373,7 +373,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         // `targetAllocationIndicesToPayout == []` means "pay out to all"
         // Note: by initializing exitAllocations to be an array of fixed length, its entries are initialized to be `0`
         exitAllocations = new Outcome.Allocation[](
-            targetAllocationIndicesToPayout.length > 0 ? targetAllocationIndicesToPayout.length : targetAllocations.length
+            targetAllocationIndicesToPayout.length > 0
+                ? targetAllocationIndicesToPayout.length
+                : targetAllocations.length
         );
         totalPayouts = 0;
         uint256 k = 0; // indexes the `targetAllocationIndicesToPayout` array
@@ -428,7 +430,11 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                     uint256 affordsForDestination = min(targetAllocations[i].amount, targetSurplus);
                     // decrease surplus by the current amount regardless of hitting a specified index
                     targetSurplus -= affordsForDestination;
-                    if ((targetAllocationIndicesToPayout.length == 0) || ((k < targetAllocationIndicesToPayout.length) && (targetAllocationIndicesToPayout[k] == i))) {
+                    if (
+                        (targetAllocationIndicesToPayout.length == 0) ||
+                        ((k < targetAllocationIndicesToPayout.length) &&
+                            (targetAllocationIndicesToPayout[k] == i))
+                    ) {
                         // only if specified in supplied targetAllocationIndicesToPayout, or we if we are doing "all"
                         // reduce the new allocationItem.amount
                         newTargetAllocations[i].amount -= affordsForDestination;
