@@ -22,6 +22,10 @@ export function setupUnhandledErrorListeners(): void {
   });
 }
 
+export async function getRoles(roleFile: string): Promise<Record<string, RoleConfig>> {
+  return (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
+}
+
 export async function getRoleInfo(
   roleFile: string,
   roleId: string
@@ -29,8 +33,7 @@ export async function getRoleInfo(
   roleConfig: RoleConfig;
   peers: Peers;
 }> {
-  const roles = (await jsonfile.readFile(roleFile)) as Record<string, RoleConfig>;
-
+  const roles = await getRoles(roleFile);
   const roleConfig = roles[roleId];
 
   if (!roleConfig) {
@@ -47,9 +50,17 @@ export async function getRoleInfo(
   return {roleConfig, peers};
 }
 
-export function createArtifactDirectory(): void {
+export async function createArtifactDirectory(): Promise<void> {
+  return createDirectory(ARTIFACTS_DIR);
+}
+
+export async function createTempDirectory(): Promise<void> {
+  return createDirectory('./temp');
+}
+
+async function createDirectory(path: string): Promise<void> {
   try {
-    fs.mkdirSync(ARTIFACTS_DIR);
+    await fs.promises.mkdir(path);
   } catch (err) {
     if (!(err.message as string).includes('EEXIST')) throw err;
   }

@@ -96,9 +96,19 @@ The `serverId` indicates which LoadNode is responsible for that step. Each LoadN
 
 All scripts are typescript files that can be run with `ts-node`.
 
+## Sanity Checker
+
+The sanity checker is a simple script that checks databases and ganache balances to make sure the correct amount of channels were created and the on-chain funds ended up where we thought.
+
+The main argument it accepts is the load file to use. The sanity checker uses this to figure out how many channels we expect to see in the database (and in what status).
+
+The sanity checker also checks the balance file outputed by `start-ganache`. It checks the destinations and contracts to perform a rough check of on-chain funds.
+
 ## Start Ganache
 
 This is similar to what we have in devtools but I wanted to avoid messing with env vars. It is responsible for starting ganache and deploying the contracts.
+
+When the script stops running it saves the balances to a file, so we can easily check the final state of the chain.
 
 ## Start Load Node
 

@@ -171,6 +171,20 @@ jobs:
           no_output_timeout: 30m
       - upload_artifacts
 
+  server-wallet-simple-stress-test:
+    <<: *postgres
+    steps:
+      - checkout
+      - attach_workspace:
+          at: /home/circleci/project
+      - install_postgresql_client
+      - run:
+          name: server-wallet-simple-stress-test
+          working_directory: packages/server-wallet
+          command: npx ts-node ./e2e-testing/scripts/start-all.ts -l ./e2e-testing/test-data/simple-ci-run.json
+          no_output_timeout: 30m
+      - upload_artifacts
+
   deploy-docs-website:
     <<: *defaults
     steps:
@@ -227,6 +241,9 @@ workflows:
           requires:
             - prepare
       - server-wallet-with-peers-test:
+          requires:
+            - prepare
+      - server-wallet-simple-stress-test:
           requires:
             - prepare
       - deploy-docs-website:

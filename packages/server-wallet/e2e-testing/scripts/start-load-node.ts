@@ -16,7 +16,12 @@ import {
 import {DBAdmin} from '../../src';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 import {WalletLoadNode} from '../wallet-load-node';
-import {createArtifactDirectory, getRoleInfo, setupUnhandledErrorListeners} from '../utils';
+import {
+  createArtifactDirectory,
+  createTempDirectory,
+  getRoleInfo,
+  setupUnhandledErrorListeners,
+} from '../utils';
 
 setupUnhandledErrorListeners();
 
@@ -26,7 +31,8 @@ setupNode().then(serverNode => {
 });
 
 async function setupNode(): Promise<WalletLoadNode> {
-  createArtifactDirectory();
+  await createArtifactDirectory();
+  await createTempDirectory();
 
   const {role: roleId, roleFile, dbPoolSizeMax, migrateDB, clearDB} = await yargs(
     hideBin(process.argv)
