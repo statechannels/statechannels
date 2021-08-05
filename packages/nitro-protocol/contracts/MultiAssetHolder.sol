@@ -296,6 +296,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         _apply_claim_interactions(targetOutcome[claimArgs.targetAssetIndex], exitAllocations);
     }
 
+    /**
+     * @dev Checks that indices are increasing; that the source and target channels are finalized; that the supplied outcomes match the stored fingerprints; that the asset is identical in source and target. Computes and returns: the decoded outcomes, the asset being targetted; the number of assets held against the guarantor.
+     */
     function _apply_claim_checks(ClaimArgs memory claimArgs)
         internal
         view
@@ -348,6 +351,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         );
     }
 
+    /**
+     * @dev Computes side effects for the claim function. First, computes the amount the source channel can afford for the target. Then, computes and returns an updated allocations for the source and for the target, as well as exit allocations (to be paid out). It does this by walking the target allocations, testing against the guarantee in the source, and conditionally siphoning money out. See the Nitro paper.
+     */
     function compute_claim_effects_and_interactions(
         uint256 initialHoldings,
         Outcome.Allocation[] memory sourceAllocations,
@@ -444,6 +450,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         }
     }
 
+    /**
+     * @dev Applies precomputed side effects for claim. Updates the holdings of the source channel. Updates the fingerprint of the outcome for the source and the target channel. Emits an event for each channel.
+     */
     function _apply_claim_effects(
         ClaimArgs memory claimArgs,
         address asset,
@@ -487,6 +496,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         emit AllocationUpdated(targetChannelId, targetAssetIndex, initialHoldings);
     }
 
+    /**
+     * @dev Applies precomputed side effects for claim that interact with external contracts. "Executes" the supplied exit (pays out the money).
+     */
     function _apply_claim_interactions(
         Outcome.SingleAssetExit memory singleAssetExit,
         Outcome.Allocation[] memory exitAllocations
@@ -502,10 +514,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     }
 
     /**
-     * @notice Executes a single asset exit by paying out the asset and calling external contracts
-     * @dev Executes a single asset exit by paying out the asset and calling external contracts
+     * @notice Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
+     * @dev Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
      * @param singleAssetExit The single asset exit to be paid out.
-     * TODO absorb into exit format repo
      */
     function executeSingleAssetExit(Outcome.SingleAssetExit memory singleAssetExit) internal {
         address asset = singleAssetExit.asset;
