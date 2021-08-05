@@ -2,12 +2,15 @@
 # Quick Start
 
 ```shell
-npx ts-node ./e2e-testing/scripts/start-all.ts -l ./e2e-testing/test-data/sample-direct-load-data.json
+npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/sample_load.json -f Direct
+npx ts-node ./e2e-testing/scripts/start-all.ts -l ./temp/sample_load.json
 ```
 
-This runs the `start-all` script which starts up [ganache](#start-ganache) and two [server wallets](#load-node).
+This generates a [load file](#load-file) that uses Direct funding.
 
-It then sends a sample [load file](#load-file) that tells the wallets how many channels to create and close (and when to try and create them).
+The `start-all` script then starts up [ganache](#start-ganache) and two [server wallets](#load-node).
+
+It then sends the generated [load file](#load-file) that tells the wallets how many channels to create and close (and when to try and create them).
 
 It then tells the nodes to start processing those instructions and waits for it to complete  succesfully.
 
