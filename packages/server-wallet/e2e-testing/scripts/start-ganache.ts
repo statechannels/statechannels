@@ -1,7 +1,7 @@
 import yargs from 'yargs/yargs';
 import {hideBin} from 'yargs/helpers';
 import {TEST_ACCOUNTS} from '@statechannels/devtools';
-import jsonfile, {writeFile} from 'jsonfile';
+import jsonfile from 'jsonfile';
 import ganache from 'ganache-core';
 import {ethers} from 'ethers';
 import {waitUntilUsed} from 'tcp-port-used';
@@ -104,7 +104,7 @@ async function setupGanache() {
   // Deploy the contracts and output to the artifact file
   const deployResults = await deploy(endpoint);
 
-  await writeFile(commandArguments.artifactFile, deployResults);
+  await jsonfile.writeFile(commandArguments.artifactFile, deployResults);
 
   setupUnhandledErrorListeners();
   // ganache registers handlers for these events and intercepts them
