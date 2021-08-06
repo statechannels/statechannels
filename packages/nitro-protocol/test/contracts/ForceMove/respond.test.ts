@@ -27,7 +27,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const asset = Wallet.createRandom().address;
-const outcome: Outcome = [{asset, allocationItems: []}];
+const outcome: Outcome = [{asset, metadata: '0x', allocations: []}];
 let appDefinition;
 
 // Populate wallets and participants array

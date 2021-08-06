@@ -42,7 +42,7 @@ const chainId = process.env.CHAIN_NETWORK_ID;
 const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 86400; // 1 day
-const outcome = [{allocationItems: [], asset: Wallet.createRandom().address}];
+const outcome: Outcome = [{allocations: [], asset: Wallet.createRandom().address, metadata: '0x'}];
 
 const appDefinition = getPlaceHolderContractAddress();
 const keys = [
