@@ -147,7 +147,7 @@ async function setupNode(): Promise<WalletLoadNode> {
   for (const {messagePort} of peers) {
     await serverNode.registerMessagePeer(messagePort);
   }
-  const dropRate = dropRatePercentage === 0 ? 0 : dropRatePercentage / 100;
+  const dropRate = dropRatePercentage / 100;
   serverNode.setLatencyOptions({meanDelay, dropRate});
 
   return serverNode;
