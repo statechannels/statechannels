@@ -10,9 +10,7 @@ import {LatencyOptions} from './test-message-service';
 export class SocketIOMessageService implements MessageServiceInterface {
   private server: Server;
   private peers: ClientSocket[] = [];
-  private _frozen = false;
-  private _messageQueue: Message[] = [];
-  protected _destroyed = false;
+
   private _abortController = new AbortController();
   private _latencyOptions: LatencyOptions = {meanDelay: undefined, dropRate: 0};
   constructor(private handler: MessageHandler, hostName: string, port: number) {
@@ -35,27 +33,21 @@ export class SocketIOMessageService implements MessageServiceInterface {
   }
 
   public async send(messages: Message[]): Promise<void> {
-    if (this._frozen) {
-      this._messageQueue.push(...messages);
-    } else {
-      const shouldDrop = Math.random() > 1 - this._latencyOptions.dropRate;
+    const shouldDrop = Math.random() > 1 - this._latencyOptions.dropRate;
 
-      if (!shouldDrop) {
-        const {meanDelay} = this._latencyOptions;
-        if (meanDelay && meanDelay > 0) {
-          const delayAmount = meanDelay / 2 + Math.random() * meanDelay;
+    if (!shouldDrop) {
+      const {meanDelay} = this._latencyOptions;
+      if (meanDelay && meanDelay > 0) {
+        const delayAmount = meanDelay / 2 + Math.random() * meanDelay;
 
-          await delay(delayAmount, {signal: this._abortController.signal});
-        }
-        if (!this._destroyed) {
-          this.server.emit('message', messages);
-        }
+        await delay(delayAmount, {signal: this._abortController.signal});
       }
+      this.server.emit('message', messages);
     }
   }
 
   public async destroy(): Promise<void> {
-    this._destroyed = true;
+    this._abortController.abort();
     this.server.close();
 
     for (const p of this.peers) {
