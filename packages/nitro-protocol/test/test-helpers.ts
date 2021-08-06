@@ -1,18 +1,9 @@
-import {Contract, ethers, BigNumberish, BigNumber, constants, providers, Event} from 'ethers';
+import {Contract, ethers, BigNumberish, BigNumber, providers, Event} from 'ethers';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 
 import {ChallengeClearedEvent, ChallengeRegisteredStruct} from '../src/contract/challenge';
-import {Bytes} from '../src/contract/types';
 import {channelDataToStatus} from '../src/contract/channel-storage';
-import {
-  AllocationAssetOutcome,
-  encodeAllocation,
-  encodeGuarantee,
-  Guarantee,
-  hashAssetOutcome,
-  Outcome,
-  Allocation,
-  AllocationItem,
-} from '../src/contract/outcome';
+import {Outcome} from '../src/contract/outcome';
 import {Bytes32} from '../src';
 
 // Interfaces
@@ -180,24 +171,6 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function allocationToParams(allocation: AllocationItem[]): [Bytes, Bytes32] {
-  const allocationBytes = encodeAllocation(allocation);
-  let assetOutcomeHash;
-  if (allocation.length === 0) {
-    assetOutcomeHash = constants.HashZero;
-  } else {
-    assetOutcomeHash = hashAssetOutcome(allocation);
-  }
-  return [allocationBytes, assetOutcomeHash];
-}
-
-export function guaranteeToParams(guarantee: Guarantee): [Bytes, Bytes32] {
-  const guaranteeBytes = encodeGuarantee(guarantee);
-
-  const assetOutcomeHash = hashAssetOutcome(guarantee);
-  return [guaranteeBytes, assetOutcomeHash];
-}
-
 // Recursively replaces any key with the value of that key in the addresses object
 // BigNumberify all numbers
 export function replaceAddressesAndBigNumberify(
@@ -254,44 +227,20 @@ export function checkMultipleHoldings(
   });
 }
 
-// Check the assetOutcomeHash on multiple asset Hoders defined in the multipleHoldings object. Requires an array of the relevant contracts to be passed in.
-export function checkMultipleAssetOutcomeHashes(
-  channelId: string,
-  outcome: OutcomeShortHand,
-  contractsArray: Contract[]
-): void {
-  Object.keys(outcome).forEach(assetHolder => {
-    const assetOutcome = outcome[assetHolder];
-    const allocationAfter = [];
-    Object.keys(assetOutcome).forEach(destination => {
-      const amount = assetOutcome[destination];
-      allocationAfter.push({destination, amount});
-    });
-    const [, expectedNewAssetOutcomeHash] = allocationToParams(allocationAfter);
-    contractsArray.forEach(async contract => {
-      if (contract.address === assetHolder) {
-        expect(await contract.assetOutcomeHashes(channelId)).toEqual(expectedNewAssetOutcomeHash);
-      }
-    });
-  });
-}
-
-// Computes an outcome from a shorthand description
-export function computeOutcome(outcomeShortHand: OutcomeShortHand): AllocationAssetOutcome[] {
-  const outcome: AllocationAssetOutcome[] = [];
-  Object.keys(outcomeShortHand).forEach(assetHolder => {
-    const allocation: Allocation = [];
-    Object.keys(outcomeShortHand[assetHolder]).forEach(destination =>
-      allocation.push({
+/** Computes an Outcome from a shorthand description */
+export function computeOutcome(outcomeShortHand: OutcomeShortHand): Outcome {
+  const outcome: Outcome = [];
+  Object.keys(outcomeShortHand).forEach(asset => {
+    const allocations: Allocation[] = [];
+    Object.keys(outcomeShortHand[asset]).forEach(destination =>
+      allocations.push({
         destination,
-        amount: BigNumber.from(outcomeShortHand[assetHolder][destination]).toHexString(),
+        amount: BigNumber.from(outcomeShortHand[asset][destination]).toHexString(),
+        metadata: '0x',
+        allocationType: AllocationType.simple,
       })
     );
-    const assetOutcome: AllocationAssetOutcome = {
-      asset: assetHolder,
-      allocationItems: allocation,
-    }; // TODO handle gurantee outcomes
-    outcome.push(assetOutcome);
+    outcome.push({asset, metadata: '0x', allocations});
   });
   return outcome;
 }
@@ -315,16 +264,19 @@ export function getRandomNonce(seed: string): number {
 export const largeOutcome = (
   numAllocationItems: number,
   asset: string = ethers.Wallet.createRandom().address
-): AllocationAssetOutcome[] => {
-  const randomDestination = randomExternalDestination();
+): Outcome => {
+  const randomDestination = '0x8595a84df2d81430f6213ece3d8519c77daf98f04fe54e253a2caeef4d2add39';
   return numAllocationItems > 0
     ? [
         {
-          allocationItems: Array(numAllocationItems).fill({
+          allocations: Array(numAllocationItems).fill({
             destination: randomDestination,
             amount: '0x01',
+            allocationType: AllocationType.simple,
+            metadata: '0x',
           }),
           asset,
+          metadata: '0x',
         },
       ]
     : [];

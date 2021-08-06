@@ -69,22 +69,7 @@ export {
   ForceMoveAppContractInterface,
   createValidTransitionTransaction,
 } from './contract/force-move-app';
-export {
-  encodeAllocation,
-  encodeOutcome,
-  decodeOutcome,
-  Outcome,
-  Allocation,
-  AllocationItem,
-  Guarantee,
-  isAllocationOutcome,
-  isGuaranteeOutcome,
-  encodeGuarantee,
-  AssetOutcome,
-  GuaranteeAssetOutcome,
-  AllocationAssetOutcome,
-  hashOutcome,
-} from './contract/outcome';
+export {encodeOutcome, decodeOutcome, Outcome, AssetOutcome, hashOutcome} from './contract/outcome';
 export {channelDataToStatus} from './contract/channel-storage';
 
 export {
