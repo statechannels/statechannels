@@ -4,11 +4,14 @@ import chalk from 'chalk';
 import P from 'pino';
 import got from 'got';
 import ms from 'ms';
+import {StopWatch} from 'stopwatch-node';
+import prettyMilliseconds from 'pretty-ms';
 
 import {WalletConfig} from '../src/config';
 import {ObjectiveDoneResult, UpdateChannelResult, Wallet} from '../src/wallet';
 import {SocketIOMessageService} from '../src/message-service/socket-io-message-service';
 import {createLogger} from '../src/logger';
+import {LatencyOptions} from '../src/message-service/test-message-service';
 
 import {
   CloseChannelStep,
@@ -20,7 +23,6 @@ import {
   Step,
   UpdateChannelStep,
 } from './types';
-
 export class WalletLoadNode {
   private steps: Step[] = [];
   private jobToChannelMap: JobChannelLink[] = [];
@@ -58,17 +60,22 @@ export class WalletLoadNode {
       req.setTimeout(ms('1 day'));
 
       this.logger.trace('Starting job processing');
+
       console.log(chalk.whiteBright('Starting job processing..'));
       this.outputChannelStats();
       // If we didn't receive this from a peer it means it came from the user
       // We want to kick off processing in all nodes so we message our peers
       const fromPeer = req.query['fromPeer'];
+      const stopWatch = new StopWatch();
+      stopWatch.start();
       if (!fromPeer) {
         await Promise.all([this.runJobs(), this.sendGetRequestToPeers('/start?fromPeer=true')]);
       } else {
         await this.runJobs();
       }
       await Promise.all(this.proposedObjectivePromises);
+      stopWatch.stop();
+      console.log(`Job processing took ${prettyMilliseconds(stopWatch.getTotalTime())}`);
       res.end();
     });
 
@@ -321,6 +328,10 @@ export class WalletLoadNode {
    */
   public async registerMessagePeer(port: number): Promise<void> {
     this.serverWallet.messageService.registerPeer(`http://localhost:${port}`);
+  }
+
+  public setLatencyOptions(latencyOptions: LatencyOptions): void {
+    (this.serverWallet.messageService as SocketIOMessageService).setLatencyOptions(latencyOptions);
   }
 
   public static async create(
