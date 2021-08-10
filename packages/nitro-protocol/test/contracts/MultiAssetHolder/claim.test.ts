@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, constants, BigNumber} from 'ethers';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 
 import {
   getTestProvider,
@@ -14,6 +15,7 @@ import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
 import {channelDataToStatus, encodeOutcome, hashOutcome, Outcome} from '../../../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../src/transactions';
+import {encodeGuaranteeData} from '../../../src/contract/outcome';
 const testNitroAdjudicator: TESTNitroAdjudicator & Contract = (setupContract(
   getTestProvider(),
   TESTNitroAdjudicatorArtifact,
@@ -113,15 +115,20 @@ describe('claim', () => {
       );
 
       // Compute an appropriate allocation.
-      const allocation = [];
+      const allocation: Allocation[] = [];
       Object.keys(tOutcomeBefore).forEach(key =>
-        allocation.push({destination: key, amount: tOutcomeBefore[key]})
+        allocation.push({
+          destination: key,
+          amount: tOutcomeBefore[key].toString(),
+          metadata: '0x',
+          allocationType: AllocationType.simple,
+        })
       );
       const outcomeHash = hashOutcome([
-        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocation, metadata: '0x'},
       ]);
       const targetOutcomeBytes = encodeOutcome([
-        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
+        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocation, metadata: '0x'},
       ]);
 
       // Set adjudicator status
@@ -141,6 +148,25 @@ describe('claim', () => {
       }
 
       // Compute an appropriate guarantee
+      const encodedGuaranteeData = encodeGuaranteeData(guaranteeDestinations);
+      const guaranteeOutcome: Outcome = [
+        {
+          metadata: '0x',
+          allocations: [
+            {
+              allocationType: AllocationType.guarantee,
+              amount: '0x00',
+              destination: targetId,
+              metadata: encodedGuaranteeData,
+            },
+          ],
+          asset:
+            reason === reason6 // test case for mismatched source and target assets
+              ? '0xdac17f958d2ee523a2206206994597c13d831ec7' // USDT
+              : MAGIC_ADDRESS_INDICATING_ETH,
+        },
+      ];
+      console.log(`Creates Guarantee`);
 
       const guarantee = {
         destinations: guaranteeDestinations,
@@ -166,15 +192,17 @@ describe('claim', () => {
         ).wait();
       }
 
-      const tx = testNitroAdjudicator.claim(
-        0,
-        guarantorId,
-        guarantorOutcomeBytes,
-        stateHash,
+      const tx = await testNitroAdjudicator.claim({
+        sourceChannelId: guarantorId,
+        sourceStateHash: stateHash,
+        sourceOutcomeBytes: guarantorOutcomeBytes,
+        sourceAssetIndex: 0, // TODO: introduce test cases with multiple-asset Source and Targets
+        indexOfTargetInSource: 0,
+        targetStateHash: stateHash,
         targetOutcomeBytes,
-        stateHash,
-        indices
-      );
+        targetAssetIndex: 0,
+        targetAllocationIndicesToPayout: indices,
+      });
 
       // Call method in a slightly different way if expecting a revert
       if (reason) {
@@ -193,12 +221,17 @@ describe('claim', () => {
         await Promise.all(heldAfterChecks);
 
         // Check new outcomeHash
-        const allocationAfter = [];
+        const allocationAfter: Allocation[] = [];
         Object.keys(tOutcomeAfter).forEach(key => {
-          allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
+          allocationAfter.push({
+            destination: key,
+            amount: tOutcomeAfter[key].toString(),
+            metadata: '0x',
+            allocationType: AllocationType.simple,
+          });
         });
         const outcomeAfter: Outcome = [
-          {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocationAfter},
+          {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocationAfter, metadata: '0x'},
         ];
         const expectedStatusAfter = channelDataToStatus({
           turnNumRecord,
