@@ -184,11 +184,13 @@ describe('claim', () => {
         const {events: eventsFromTx} = await (await tx).wait();
 
         // Check new holdings
-        Object.keys(heldAfter).forEach(async key =>
-          expect(await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).toEqual(
-            heldAfter[key]
-          )
-        );
+        const heldAfterChecks = Object.keys(heldAfter).map(async g => {
+          return expect(
+            await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, g)
+          ).toEqual(heldAfter[g]);
+        });
+
+        await Promise.all(heldAfterChecks);
 
         // Check new outcomeHash
         const allocationAfter = [];
