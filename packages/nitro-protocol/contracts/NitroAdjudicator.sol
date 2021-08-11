@@ -106,7 +106,7 @@ contract NitroAdjudicator is ForceMove, MultiAssetHolder {
         }
 
         // interactions
-        Outcome.executeExit(exit);
+        executeExit(exit);
     }
 
     /**
@@ -128,5 +128,16 @@ contract NitroAdjudicator is ForceMove, MultiAssetHolder {
         address appDefinition
     ) public pure returns (bool) {
         return _requireValidTransition(nParticipants, isFinalAB, ab, turnNumB, appDefinition);
+    }
+
+    /**
+     * @notice Executes an exit by paying out assets and calling external contracts
+     * @dev Executes an exit by paying out assets and calling external contracts
+     * @param exit The exit to be paid out.
+     */
+    function executeExit(Outcome.SingleAssetExit[] memory exit) internal {
+        for (uint256 assetIndex = 0; assetIndex < exit.length; assetIndex++) {
+            executeSingleAssetExit(exit[assetIndex]);
+        }
     }
 }
