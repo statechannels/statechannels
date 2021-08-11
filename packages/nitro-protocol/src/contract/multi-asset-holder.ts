@@ -1,5 +1,5 @@
 import {utils, BigNumber, ethers, constants} from 'ethers';
-import ExitFormat from '@statechannels/exit-format';
+import ExitFormat, {AllocationType, Exit} from '@statechannels/exit-format';
 
 import {parseEventResult} from '../ethers-utils';
 import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
@@ -56,58 +56,104 @@ export function convertAddressToBytes32(address: string): string {
  */
 export function computeClaimEffectsAndInteractions(
   initialHoldings: string,
-  allocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
-  indices: number[],
-  guarantee: GuaranteeAllocation
+  sourceAllocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
+  targetAllocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
+  indexOfTargetInSource: number,
+  targetAllocationIndicesToPayout: number[]
 ): {
-  newAllocations: ExitFormat.Allocation[];
-  allocatesOnlyZeros: boolean;
-  payouts: string[];
+  newSourceAllocations: ExitFormat.Allocation[];
+  newTargetAllocations: ExitFormat.Allocation[];
+  exitAllocations: ExitFormat.Allocation[];
   totalPayouts: string;
 } {
-  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocations.length).fill(
-    BigNumber.from(0).toHexString()
-  );
+  const exitAllocations: ExitFormat.Allocation[] = [];
+
   let totalPayouts = BigNumber.from(0);
-  let allocatesOnlyZeros = true;
-  let surplus = BigNumber.from(initialHoldings);
   let k = 0;
 
-  // copy allocation
-  const newAllocations: ExitFormat.Allocation[] = [];
-  for (let i = 0; i < allocations.length; i++) {
-    newAllocations.push({
-      destination: allocations[i].destination,
-      amount: allocations[i].amount,
-      metadata: allocations[i].metadata,
-      allocationType: allocations[i].allocationType,
+  // copy allocations
+  const newSourceAllocations: ExitFormat.Allocation[] = [];
+  const newTargetAllocations: ExitFormat.Allocation[] = [];
+  for (let i = 0; i < sourceAllocations.length; i++) {
+    newSourceAllocations.push({
+      destination: sourceAllocations[i].destination,
+      amount: sourceAllocations[i].amount,
+      metadata: sourceAllocations[i].metadata,
+      allocationType: sourceAllocations[i].allocationType,
+    });
+  }
+  for (let i = 0; i < targetAllocations.length; i++) {
+    newTargetAllocations.push({
+      destination: newTargetAllocations[i].destination,
+      amount: newTargetAllocations[i].amount,
+      metadata: newTargetAllocations[i].metadata,
+      allocationType: newTargetAllocations[i].allocationType,
     });
   }
 
-  const guaranteeDestinations = decodeGuaranteeData(guarantee.metadata);
+  let sourceSurplus = BigNumber.from(initialHoldings);
+  for (
+    let sourceAllocationIndex = 0;
+    sourceAllocationIndex < indexOfTargetInSource;
+    sourceAllocationIndex++
+  ) {
+    if (BigNumber.from(sourceSurplus).isZero()) break;
+    const affordsForDestination = min(
+      BigNumber.from(sourceAllocations[sourceAllocationIndex].amount),
+      sourceSurplus
+    );
+    sourceSurplus = sourceSurplus.sub(affordsForDestination);
+  }
+
+  let targetSurplus = min(
+    sourceSurplus,
+    BigNumber.from(sourceAllocations[indexOfTargetInSource].amount)
+  );
+
+  if (sourceAllocations[indexOfTargetInSource].allocationType !== AllocationType.guarantee)
+    throw Error('not a guarantee allocation');
+
+  const guaranteeDestinations = decodeGuaranteeData(
+    sourceAllocations[indexOfTargetInSource].metadata
+  );
 
   // for each guarantee destination
   for (let j = 0; j < guaranteeDestinations.length; j++) {
-    if (surplus.isZero()) break;
-    for (let i = 0; i < newAllocations.length; i++) {
-      if (surplus.isZero()) break;
+    if (targetSurplus.isZero()) break;
+    for (let i = 0; i < newTargetAllocations.length; i++) {
+      if (targetSurplus.isZero()) break;
       // search for it in the allocation
       if (
-        BigNumber.from(guaranteeDestinations[j]).eq(BigNumber.from(newAllocations[i].destination))
+        BigNumber.from(guaranteeDestinations[j]).eq(
+          BigNumber.from(newTargetAllocations[i].destination)
+        )
       ) {
         // if we find it, compute new amount
-        const affordsForDestination = min(BigNumber.from(newAllocations[i].amount), surplus);
+        const affordsForDestination = min(
+          BigNumber.from(newTargetAllocations[i].amount),
+          targetSurplus
+        );
         // decrease surplus by the current amount regardless of hitting a specified index
-        surplus = surplus.sub(affordsForDestination);
-        if (indices.length === 0 || (k < indices.length && indices[k] === i)) {
+        targetSurplus = targetSurplus.sub(affordsForDestination);
+        if (
+          targetAllocationIndicesToPayout.length === 0 ||
+          (k < targetAllocationIndicesToPayout.length && targetAllocationIndicesToPayout[k] === i)
+        ) {
           // only if specified in supplied indices, or we if we are doing "all"
           // reduce the current allocationItem.amount
-          newAllocations[i].amount = BigNumber.from(newAllocations[i].amount)
+          newTargetAllocations[i].amount = BigNumber.from(newTargetAllocations[i].amount)
             .sub(affordsForDestination)
             .toHexString();
-          // increase the relevant payout
-          payouts[k] = affordsForDestination.toHexString();
+
+          // increase the relevant exit allocation
+          exitAllocations[k] = {
+            destination: targetAllocations[i].destination,
+            amount: affordsForDestination.toHexString(),
+            allocationType: targetAllocations[i].allocationType,
+            metadata: targetAllocations[i].metadata,
+          };
           totalPayouts = totalPayouts.add(affordsForDestination);
+          // move on to the next supplied index
           ++k;
         }
         break;
@@ -115,17 +161,10 @@ export function computeClaimEffectsAndInteractions(
     }
   }
 
-  for (let i = 0; i < allocations.length; i++) {
-    if (!BigNumber.from(newAllocations[i].amount).isZero()) {
-      allocatesOnlyZeros = false;
-      break;
-    }
-  }
-
   return {
-    newAllocations,
-    allocatesOnlyZeros,
-    payouts,
+    newSourceAllocations,
+    newTargetAllocations,
+    exitAllocations,
     totalPayouts: totalPayouts.toHexString(),
   };
 }
