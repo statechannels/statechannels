@@ -102,6 +102,12 @@ const testcase1: TestCase = {
     ],
     exitAllocations: [
       {
+        destination: Alice,
+        amount: '0x00',
+        allocationType: AllocationType.simple,
+        metadata: '0x',
+      },
+      {
         destination: Bob,
         amount: '0x07',
         allocationType: AllocationType.simple,
@@ -143,9 +149,17 @@ describe('computeClaimEffectsAndInteractions', () => {
       testCase.inputs.targetAllocationIndicesToPayout
     );
 
-    expect(onChainResult.newSourceAllocations).toMatchObject(testCase.outputs.newSourceAllocations);
-    expect(onChainResult.newTargetAllocations).toMatchObject(testCase.outputs.newTargetAllocations);
-    expect(onChainResult.exitAllocations).toMatchObject(testCase.outputs.exitAllocations);
-    expect(onChainResult.totalPayouts).toEqual(testCase.outputs.totalPayouts);
+    expect(onChainResult.newSourceAllocations.map(convertAmountToHexString)).toMatchObject(
+      testCase.outputs.newSourceAllocations
+    );
+    expect(onChainResult.newTargetAllocations.map(convertAmountToHexString)).toMatchObject(
+      testCase.outputs.newTargetAllocations
+    );
+    expect(onChainResult.exitAllocations.map(convertAmountToHexString)).toMatchObject(
+      testCase.outputs.exitAllocations
+    );
+    expect(onChainResult.totalPayouts.toHexString()).toEqual(testCase.outputs.totalPayouts);
   });
+
+  const convertAmountToHexString = a => ({...a, amount: a.amount.toHexString()});
 });

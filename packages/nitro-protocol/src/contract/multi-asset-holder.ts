@@ -4,15 +4,8 @@ import ExitFormat, {AllocationType, Exit} from '@statechannels/exit-format';
 import {parseEventResult} from '../ethers-utils';
 import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 
-import {isExternalDestination} from './channel';
-import {
-  AssetOutcome,
-  decodeGuaranteeData,
-  decodeOutcome,
-  GuaranteeAllocation,
-  Outcome,
-} from './outcome';
-import {Address, Bytes32, Uint256} from './types';
+import {decodeGuaranteeData, decodeOutcome, GuaranteeAllocation, Outcome} from './outcome';
+import {Address} from './types';
 
 export interface DepositedEvent {
   destination: string;
@@ -66,14 +59,13 @@ export function computeClaimEffectsAndInteractions(
   exitAllocations: ExitFormat.Allocation[];
   totalPayouts: string;
 } {
-  const exitAllocations: ExitFormat.Allocation[] = [];
-
   let totalPayouts = BigNumber.from(0);
   let k = 0;
 
   // copy allocations
   const newSourceAllocations: ExitFormat.Allocation[] = [];
   const newTargetAllocations: ExitFormat.Allocation[] = [];
+  const exitAllocations: ExitFormat.Allocation[] = [];
   for (let i = 0; i < sourceAllocations.length; i++) {
     newSourceAllocations.push({
       destination: sourceAllocations[i].destination,
@@ -86,6 +78,12 @@ export function computeClaimEffectsAndInteractions(
     newTargetAllocations.push({
       destination: targetAllocations[i].destination,
       amount: targetAllocations[i].amount,
+      metadata: targetAllocations[i].metadata,
+      allocationType: targetAllocations[i].allocationType,
+    });
+    exitAllocations.push({
+      destination: targetAllocations[i].destination,
+      amount: '0x00',
       metadata: targetAllocations[i].metadata,
       allocationType: targetAllocations[i].allocationType,
     });
@@ -151,12 +149,9 @@ export function computeClaimEffectsAndInteractions(
             .toHexString();
 
           // increase the relevant exit allocation
-          exitAllocations[k] = {
-            destination: targetAllocations[i].destination,
-            amount: affordsForDestination.toHexString(),
-            allocationType: targetAllocations[i].allocationType,
-            metadata: targetAllocations[i].metadata,
-          };
+          exitAllocations[i].amount = BigNumber.from(exitAllocations[i].amount)
+            .add(affordsForDestination)
+            .toHexString();
           totalPayouts = totalPayouts.add(affordsForDestination);
           // move on to the next supplied index
           ++k;

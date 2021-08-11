@@ -371,12 +371,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         )
     {
         // `targetAllocationIndicesToPayout == []` means "pay out to all"
-        // Note: by initializing exitAllocations to be an array of fixed length, its entries are initialized to be `0`
-        exitAllocations = new Outcome.Allocation[](
-            targetAllocationIndicesToPayout.length > 0
-                ? targetAllocationIndicesToPayout.length
-                : targetAllocations.length
-        );
+
         totalPayouts = 0;
         uint256 k = 0; // indexes the `targetAllocationIndicesToPayout` array
         //  We rely on the assumption that the targetAllocationIndicesToPayout are strictly increasing.
@@ -386,6 +381,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         // copy allocations
         newSourceAllocations = new Outcome.Allocation[](sourceAllocations.length);
         newTargetAllocations = new Outcome.Allocation[](targetAllocations.length);
+        exitAllocations = new Outcome.Allocation[](targetAllocations.length);
         for (uint256 i = 0; i < sourceAllocations.length; i++) {
             newSourceAllocations[i].destination = sourceAllocations[i].destination;
             newSourceAllocations[i].amount = sourceAllocations[i].amount;
@@ -397,6 +393,10 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             newTargetAllocations[i].amount = targetAllocations[i].amount;
             newTargetAllocations[i].metadata = targetAllocations[i].metadata;
             newTargetAllocations[i].allocationType = targetAllocations[i].allocationType;
+            exitAllocations[i].destination = targetAllocations[i].destination;
+            exitAllocations[i].amount = 0; // default to zero
+            exitAllocations[i].metadata = targetAllocations[i].metadata;
+            exitAllocations[i].allocationType = targetAllocations[i].allocationType;
         }
 
         // compute how much the source can afford for the target
@@ -442,16 +442,11 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                             (targetAllocationIndicesToPayout[k] == i))
                     ) {
                         // only if specified in supplied targetAllocationIndicesToPayout, or we if we are doing "all"
-                        // reduce the new allocationItem.amount
+                        // reduce the new allocationItem.amount in target and source
                         newTargetAllocations[i].amount -= affordsForDestination;
                         newSourceAllocations[indexOfTargetInSource].amount -= affordsForDestination;
                         // increase the relevant exit allocation
-                        exitAllocations[k] = Outcome.Allocation(
-                            targetAllocations[i].destination,
-                            affordsForDestination,
-                            targetAllocations[i].allocationType,
-                            targetAllocations[i].metadata
-                        );
+                        exitAllocations[i].amount = affordsForDestination;
                         totalPayouts += affordsForDestination;
                         // move on to the next supplied index
                         ++k;
