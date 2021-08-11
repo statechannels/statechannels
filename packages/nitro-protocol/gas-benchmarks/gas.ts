@@ -97,17 +97,14 @@ export const gasRequiredTo: GasRequiredTo = {
   ETHexitSadVirtualFunded: {
     // Scenario: Intermediary Ingrid goes offline
     vanillaNitro: {
-      // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
-      // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
-      // transferAllAssetsL          ⬛ --------> (G) -> (J) -> (X) -> 👩
-      // claimG                      ⬛ ----------------------> (X) -> 👩
-      // transferAllAssetsX          ⬛ -----------------------------> 👩
+      // initially                   ⬛ ->  L  ->  J  ->  X  -> 👩
+      // challenge L,J,X + timeout   ⬛ -> (L) -> (J) -> (X) -> 👩
+      // claimL                      ⬛ ---------------> (X) -> 👩
+      // transferAllAssetsX          ⬛ ----------------------> 👩
       challengeL: 91691,
-      challengeG: 93950,
       challengeJ: 101068,
       challengeX: 92757,
-      transferAllAssetsL: 65462,
-      claimG: 82369,
+      claimL: 82369,
       transferAllAssetsX: 114930,
       total: 642227,
     },
