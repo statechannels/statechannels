@@ -416,6 +416,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
 
         uint256 targetSurplus = min(sourceSurplus, sourceAllocations[indexOfTargetInSource].amount);
 
+        require(
+            sourceAllocations[indexOfTargetInSource].allocationType ==
+                uint8(Outcome.AllocationType.guarantee),
+            'not a guarante allocation'
+        );
+
         bytes32[] memory guaranteeDestinations = decodeGuaranteeData(
             sourceAllocations[indexOfTargetInSource].metadata
         );
