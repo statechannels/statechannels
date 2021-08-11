@@ -152,15 +152,6 @@ describe('claim', () => {
       ];
       console.log(`Creates Guarantee`);
 
-      const guarantee = {
-        destinations: guaranteeDestinations,
-        targetChannelId: targetId,
-      };
-
-      const guaranteeOutcome: Outcome =
-        reason === reason6
-          ? [{asset: '0xdac17f958d2ee523a2206206994597c13d831ec7', guarantee}] // USDT
-          : [{asset: MAGIC_ADDRESS_INDICATING_ETH, guarantee}];
       const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
       const guarantorOutcomeHash = hashOutcome(guaranteeOutcome);
 
