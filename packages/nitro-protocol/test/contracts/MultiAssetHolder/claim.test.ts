@@ -139,7 +139,7 @@ describe('claim', () => {
           allocations: [
             {
               allocationType: AllocationType.guarantee,
-              amount: '0x00',
+              amount: heldBefore[addresses.g].toString(),
               destination: targetId,
               metadata: encodedGuaranteeData,
             },
