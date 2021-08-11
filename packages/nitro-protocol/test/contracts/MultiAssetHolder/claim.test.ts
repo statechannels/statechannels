@@ -176,7 +176,7 @@ describe('claim', () => {
         ).wait();
       }
 
-      const tx = await testNitroAdjudicator.claim({
+      const tx = testNitroAdjudicator.claim({
         sourceChannelId: guarantorId,
         sourceStateHash: stateHash,
         sourceOutcomeBytes: guarantorOutcomeBytes,
