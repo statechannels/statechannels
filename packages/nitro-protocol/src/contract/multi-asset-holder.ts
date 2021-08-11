@@ -84,10 +84,10 @@ export function computeClaimEffectsAndInteractions(
   }
   for (let i = 0; i < targetAllocations.length; i++) {
     newTargetAllocations.push({
-      destination: newTargetAllocations[i].destination,
-      amount: newTargetAllocations[i].amount,
-      metadata: newTargetAllocations[i].metadata,
-      allocationType: newTargetAllocations[i].allocationType,
+      destination: targetAllocations[i].destination,
+      amount: targetAllocations[i].amount,
+      metadata: targetAllocations[i].metadata,
+      allocationType: targetAllocations[i].allocationType,
     });
   }
 
@@ -142,6 +142,11 @@ export function computeClaimEffectsAndInteractions(
           // only if specified in supplied indices, or we if we are doing "all"
           // reduce the current allocationItem.amount
           newTargetAllocations[i].amount = BigNumber.from(newTargetAllocations[i].amount)
+            .sub(affordsForDestination)
+            .toHexString();
+          newSourceAllocations[indexOfTargetInSource].amount = BigNumber.from(
+            newSourceAllocations[indexOfTargetInSource].amount
+          )
             .sub(affordsForDestination)
             .toHexString();
 
@@ -242,76 +247,76 @@ export function computeTransferEffectsAndInteractions(
  * @param allocationUpdatedEvent
  * @param tx Transaction which gave rise to the event
  */
-export function computeNewOutcome(
-  nitroAdjudicatorAddress: Address,
-  allocationUpdatedEvent: {channelId: Bytes32; assetIndex: Uint256; initialHoldings: string},
-  tx: ethers.Transaction
-): {
-  assetIndex: number;
-  newOutcome: Outcome;
-  newHoldings: BigNumber;
-  externalPayouts: ExitFormat.Allocation[];
-  internalPayouts: ExitFormat.Allocation[];
-} {
-  // Extract the calldata that we need
-  const {oldOutcome, indices, guarantee} = extractOldOutcomeAndIndices(nitroAdjudicatorAddress, tx);
-  const assetIndex = BigNumber.from(allocationUpdatedEvent.assetIndex).toNumber();
-  const oldAllocations = oldOutcome[assetIndex].allocations;
+// export function computeNewOutcome(
+//   nitroAdjudicatorAddress: Address,
+//   allocationUpdatedEvent: {channelId: Bytes32; assetIndex: Uint256; initialHoldings: string},
+//   tx: ethers.Transaction
+// ): {
+//   assetIndex: number;
+//   newOutcome: Outcome;
+//   newHoldings: BigNumber;
+//   externalPayouts: ExitFormat.Allocation[];
+//   internalPayouts: ExitFormat.Allocation[];
+// } {
+//   // Extract the calldata that we need
+//   const {oldOutcome, indices, guarantee} = extractOldOutcomeAndIndices(nitroAdjudicatorAddress, tx);
+//   const assetIndex = BigNumber.from(allocationUpdatedEvent.assetIndex).toNumber();
+//   const oldAllocations = oldOutcome[assetIndex].allocations;
 
-  // Use the emulated, pure solidity functions to figure out what the chain will have done
-  let exitAllocations: ExitFormat.Allocation[];
-  let newAllocations: ExitFormat.Allocation[];
+//   // Use the emulated, pure solidity functions to figure out what the chain will have done
+//   let exitAllocations: ExitFormat.Allocation[];
+//   let newAllocations: ExitFormat.Allocation[];
 
-  let totalPayouts;
-  if (guarantee) {
-    const result = computeNewAllocationWithGuarantee(
-      allocationUpdatedEvent.initialHoldings,
-      oldAllocations,
-      indices,
-      guarantee
-    );
+//   let totalPayouts;
+//   if (guarantee) {
+//     const result = computeNewAllocationWithGuarantee(
+//       allocationUpdatedEvent.initialHoldings,
+//       oldAllocations,
+//       indices,
+//       guarantee
+//     );
 
-    exitAllocations = result.payouts.map((v, i) => ({
-      destination: oldAllocations[longHandIndices[i]].destination,
-      amount: v,
-      allocationType: oldAllocations[longHandIndices[i]].allocationType,
-      metadata: oldAllocations[longHandIndices[i]].metadata,
-    }));
-  } else {
-    const result = computeTransferEffectsAndInteractions(
-      allocationUpdatedEvent.initialHoldings,
-      oldAllocations,
-      indices
-    );
-    newAllocations = result.newAllocations;
-    exitAllocations = result.exitAllocations;
-  }
+//     exitAllocations = result.payouts.map((v, i) => ({
+//       destination: oldAllocations[longHandIndices[i]].destination,
+//       amount: v,
+//       allocationType: oldAllocations[longHandIndices[i]].allocationType,
+//       metadata: oldAllocations[longHandIndices[i]].metadata,
+//     }));
+//   } else {
+//     const result = computeTransferEffectsAndInteractions(
+//       allocationUpdatedEvent.initialHoldings,
+//       oldAllocations,
+//       indices
+//     );
+//     newAllocations = result.newAllocations;
+//     exitAllocations = result.exitAllocations;
+//   }
 
-  // Massage the output for convenience
-  const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
-  const newAssetOutcome: AssetOutcome = {
-    asset: oldOutcome[assetIndex].asset,
-    allocations: newAllocations,
-    metadata: oldOutcome[assetIndex].metadata,
-  };
+//   // Massage the output for convenience
+//   const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
+//   const newAssetOutcome: AssetOutcome = {
+//     asset: oldOutcome[assetIndex].asset,
+//     allocations: newAllocations,
+//     metadata: oldOutcome[assetIndex].metadata,
+//   };
 
-  const longHandIndices =
-    indices.length === 0
-      ? Array.from(Array(exitAllocations.length).keys()) // [0,1,2,...] all indices up to payouts.length
-      : indices;
+//   const longHandIndices =
+//     indices.length === 0
+//       ? Array.from(Array(exitAllocations.length).keys()) // [0,1,2,...] all indices up to payouts.length
+//       : indices;
 
-  const externalPayouts = exitAllocations.filter(payout =>
-    isExternalDestination(payout.destination)
-  );
+//   const externalPayouts = exitAllocations.filter(payout =>
+//     isExternalDestination(payout.destination)
+//   );
 
-  const internalPayouts = exitAllocations.filter(
-    payout => !isExternalDestination(payout.destination)
-  );
+//   const internalPayouts = exitAllocations.filter(
+//     payout => !isExternalDestination(payout.destination)
+//   );
 
-  const newOutcome = {...oldOutcome};
-  newOutcome[assetIndex] = newAssetOutcome;
-  return {assetIndex, newOutcome, newHoldings, externalPayouts, internalPayouts};
-}
+//   const newOutcome = {...oldOutcome};
+//   newOutcome[assetIndex] = newAssetOutcome;
+//   return {assetIndex, newOutcome, newHoldings, externalPayouts, internalPayouts};
+// }
 
 /**
  * Extracts the outcome, assetIndex and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator giving rise to a AllocationUpdated event.
