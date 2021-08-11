@@ -166,7 +166,6 @@ describe('claim', () => {
               : MAGIC_ADDRESS_INDICATING_ETH,
         },
       ];
-      console.log(`Creates Guarantee`);
 
       const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
       const guarantorOutcomeHash = hashOutcome(guaranteeOutcome);
