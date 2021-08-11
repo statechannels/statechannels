@@ -336,7 +336,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         sourceOutcome = Outcome.decodeExit(sourceOutcomeBytes);
         targetOutcome = Outcome.decodeExit(targetOutcomeBytes);
         asset = sourceOutcome[sourceAssetIndex].asset;
-        require(targetOutcome[targetAssetIndex].asset == asset, 'asset mismatch');
+        require(targetOutcome[targetAssetIndex].asset == asset, 'targetAsset != guaranteeAsset');
         initialAssetHoldings = holdings[asset][sourceChannelId];
         bytes32 targetChannelId = sourceOutcome[sourceAssetIndex].allocations[claimArgs
             .indexOfTargetInSource]
