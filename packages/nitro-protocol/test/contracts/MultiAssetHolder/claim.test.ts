@@ -231,6 +231,14 @@ describe('claim', () => {
           {
             event: 'AllocationUpdated',
             args: {
+              channelId: guarantorId,
+              assetIndex: BigNumber.from(0),
+              initialHoldings: heldBefore[addresses.g],
+            },
+          },
+          {
+            event: 'AllocationUpdated',
+            args: {
               channelId: targetId,
               assetIndex: BigNumber.from(0),
               initialHoldings: heldBefore[addresses.g],
