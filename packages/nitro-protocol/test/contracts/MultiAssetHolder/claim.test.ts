@@ -29,10 +29,6 @@ const addresses = {
   I: randomExternalDestination(),
   A: randomExternalDestination(),
   B: randomExternalDestination(),
-  // I: '0x0000000000000000000000000000000000000001',
-  // A: '0x0000000000000000000000000000000000000002',
-  // B: '0x0000000000000000000000000000000000000003',
-  // c: '0xEC1Ce986ded5056B9DB178EFa21F1a33892Ae49F'
 };
 
 const reason5 = 'Channel not finalized';
@@ -65,23 +61,6 @@ describe('claim', () => {
     ${'16. (all) underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{A: 5, B: 5}} | ${undefined}
     ${'17. guarantee and target assets do not match'}         | ${{g: 1}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 4, B: 5}}       | ${{g: 0}} | ${{A: 1}}       | ${reason6}
   `(
-    //${' 2. swap guarantee,             2 destinations'}       | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5, B: 0}}       | ${{g: 0}} | ${{B: 5}}       | ${undefined}
-    // ${' 3. swap guarantee,             3 destinations'}       | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${[0]}  | ${{I: 0, A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
-    // ${' 4. straight-through guarantee, 2 destinations'}       | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[0]}  | ${{A: 0, B: 5}}       | ${{g: 0}} | ${{A: 5}}       | ${undefined}
-    // ${' 5. allocation not on chain'}                          | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${[0]}  | ${{A: 5}}             | ${{g: 0}} | ${{B: 5}}       | ${reason5}
-    // ${' 6. guarantee not on chain'}                           | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5}}             | ${{g: 0}} | ${{B: 5}}       | ${reason5}
-    // ${' 7. swap guarantee, overfunded, 2 destinations'}       | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{B: 5}}       | ${undefined}
-    // ${' 8. underspecified guarantee, overfunded      '}       | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{B: 5}}       | ${undefined}
-    // ${' 9. (all) straight-through guarantee, 3 destinations'} | ${{g: 5}}  | ${['I', 'A', 'B']}    | ${{I: 5, A: 5, B: 5}} | ${[]}   | ${{I: 0, A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
-    // ${'10. (all) swap guarantee,             2 destinations'} | ${{g: 5}}  | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 0}} | ${{B: 5}}       | ${undefined}
-    // ${'11. (all) swap guarantee,             3 destinations'} | ${{g: 5}}  | ${['I', 'B', 'A']}    | ${{I: 5, A: 5, B: 5}} | ${[]}   | ${{I: 0, A: 5, B: 5}} | ${{g: 0}} | ${{I: 5}}       | ${undefined}
-    // ${'12. (all) straight-through guarantee, 2 destinations'} | ${{g: 5}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 5}}       | ${{g: 0}} | ${{A: 5}}       | ${undefined}
-    // ${'13. (all) allocation not on chain'}                    | ${{g: 5}}  | ${['B', 'A']}         | ${{}}                 | ${[]}   | ${{}}                 | ${{g: 0}} | ${{B: 5}}       | ${reason5}
-    // ${'14. (all) guarantee not on chain'}                     | ${{g: 5}}  | ${[]}                 | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 5}}       | ${{g: 0}} | ${{B: 5}}       | ${reason5}
-    // ${'15. (all) swap guarantee, overfunded, 2 destinations'} | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 0}}       | ${{g: 2}} | ${{A: 5, B: 5}} | ${undefined}
-    // ${'16. (all) underspecified guarantee, overfunded      '} | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 7}} | ${{A: 5, B: 5}} | ${undefined}
-    // ${'17. guarantee and target assets do not match'}         | ${{g: 1}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 4, B: 5}}       | ${{g: 0}} | ${{A: 1}}       | ${reason6}
-    //`(
     '$name',
     async ({
       heldBefore,
@@ -102,7 +81,6 @@ describe('claim', () => {
       payouts: AssetOutcomeShortHand;
       reason;
     }) => {
-      // console.log(`LOG: prints logs statements`);
       // Compute channelIds
       const targetId = randomChannelId();
       const guarantorId = randomChannelId();
@@ -118,8 +96,6 @@ describe('claim', () => {
         payouts,
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as AssetOutcomeShortHand);
       guaranteeDestinations = guaranteeDestinations.map(x => addresses[x]);
-      console.log(`Guarantee Destinations:`);
-      console.log(guaranteeDestinations.toString());
 
       // Deposit into channels
 
@@ -137,7 +113,6 @@ describe('claim', () => {
           ).toBe(true);
         })
       );
-      console.log(`Deposits into channels`);
 
       // Compute an appropriate allocation.
       const allocation: Allocation[] = [];
@@ -149,18 +124,13 @@ describe('claim', () => {
           allocationType: AllocationType.simple,
         })
       );
-      console.log(`Comuptes Allocation`);
-      allocation.forEach(a => {
-        console.log(JSON.stringify(a));
-      });
       const outcomeHash = hashOutcome([
         {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocation, metadata: '0x'},
       ]);
-      console.log(`Hashes outcome`);
       const targetOutcomeBytes = encodeOutcome([
         {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocation, metadata: '0x'},
       ]);
-      console.log(`encodes Outcome`);
+
       // Set adjudicator status
       const stateHash = constants.HashZero; // not realistic, but OK for purpose of this test
       const finalizesAt = 42;
@@ -185,7 +155,7 @@ describe('claim', () => {
           allocations: [
             {
               allocationType: AllocationType.guarantee,
-              amount: heldBefore[addresses.g].toString(),
+              amount: '0x00',
               destination: targetId,
               metadata: encodedGuaranteeData,
             },
@@ -198,16 +168,17 @@ describe('claim', () => {
       ];
       console.log(`Creates Guarantee`);
 
-      console.log(`guaranteeOutcome:`);
-      guaranteeOutcome.forEach(g => {
-        console.log(JSON.stringify(g));
-      });
-      const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
-      console.log(`encoded guaranteeOutcome: ${guarantorOutcomeBytes}`);
+      const guarantee = {
+        destinations: guaranteeDestinations,
+        targetChannelId: targetId,
+      };
 
-      console.log(`Encodes Guarantee`);
+      const guaranteeOutcome: Outcome =
+        reason === reason6
+          ? [{asset: '0xdac17f958d2ee523a2206206994597c13d831ec7', guarantee}] // USDT
+          : [{asset: MAGIC_ADDRESS_INDICATING_ETH, guarantee}];
+      const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
       const guarantorOutcomeHash = hashOutcome(guaranteeOutcome);
-      console.log(`Hashes guarontorOutcome`);
 
       // Set status for guarantor
       if (guaranteeDestinations.length > 0) {
@@ -220,7 +191,6 @@ describe('claim', () => {
           })
         ).wait();
       }
-      console.log(`Sets status for guarantor`);
 
       const tx = await testNitroAdjudicator.claim({
         sourceChannelId: guarantorId,
@@ -240,11 +210,6 @@ describe('claim', () => {
       } else {
         // Extract logs
         const {events: eventsFromTx} = await (await tx).wait();
-        console.log(
-          `Events: ${eventsFromTx.map(e => {
-            return '\n' + JSON.stringify(e);
-          })}`
-        );
 
         // Check new holdings
         const heldAfterChecks = Object.keys(heldAfter).map(async g => {
@@ -252,7 +217,7 @@ describe('claim', () => {
             await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, g)
           ).toEqual(heldAfter[g]);
         });
-        // fails - eth balance not updated
+
         await Promise.all(heldAfterChecks);
 
         // Check new outcomeHash
@@ -265,11 +230,6 @@ describe('claim', () => {
             allocationType: AllocationType.simple,
           });
         });
-        console.log(
-          `Allocations After: ${allocationAfter.map(a => {
-            return '\n' + JSON.stringify(a);
-          })}`
-        );
         const outcomeAfter: Outcome = [
           {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocationAfter, metadata: '0x'},
         ];
@@ -280,19 +240,10 @@ describe('claim', () => {
           // if state property of this object is undefined
           outcome: outcomeAfter,
         });
-        //fails - eth balance not updated
         expect(await testNitroAdjudicator.statusOf(targetId)).toEqual(expectedStatusAfter);
 
         // Compile event expectations
         const expectedEvents = [
-          {
-            event: 'AllocationUpdated',
-            args: {
-              channelId: guarantorId,
-              assetIndex: BigNumber.from(0),
-              initialHoldings: heldBefore[addresses.g],
-            },
-          },
           {
             event: 'AllocationUpdated',
             args: {
