@@ -54,7 +54,7 @@ export function convertAddressToBytes32(address: string): string {
  * @param allocation
  * @param indices
  */
-export function computeNewAllocationWithGuarantee(
+export function computeClaimEffectsAndInteractions(
   initialHoldings: string,
   allocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
   indices: number[],

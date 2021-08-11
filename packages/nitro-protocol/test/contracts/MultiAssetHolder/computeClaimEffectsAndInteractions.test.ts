@@ -18,7 +18,7 @@ const testNitroAdjudicator = (setupContract(
 ) as unknown) as TESTNitroAdjudicator;
 
 import {AllocationItem, Guarantee} from '../../../src';
-import {computeNewAllocationWithGuarantee} from '../../../src/contract/multi-asset-holder';
+import {computeClaimEffectsAndInteractions} from '../../../src/contract/multi-asset-holder';
 
 const randomAllocation = (numAllocationItems: number): AllocationItem[] => {
   return numAllocationItems > 0
@@ -48,19 +48,20 @@ describe('MultiAssetHolder._computeNewAllocationWithGuarantee', () => {
     2
   )}, \n indices: ${indices}, \n guarantee: ${JSON.stringify(guarantee, null, 2)}`, async () => {
     // check local function works as expected
-    const locallyComputedNewAllocation = computeNewAllocationWithGuarantee(
+    const locallyComputedNewAllocation = computeClaimEffectsAndInteractions(
       heldBefore,
       allocation,
       indices,
       guarantee
     );
 
-    const result = await testNitroAdjudicator._computeNewAllocationWithGuarantee(
-      BigNumber.from(heldBefore),
-      allocation,
-      indices,
-      guarantee
-    );
+    const result = await testNitroAdjudicator.compute_claim_effects_and_interactions({});
+
+    //   BigNumber.from(heldBefore),
+    //   allocation,
+    //   indices,
+    //   guarantee
+    // );
 
     expect(result).toBeDefined();
     expect(result.newAllocation).toMatchObject(
