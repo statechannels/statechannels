@@ -7,7 +7,7 @@
   "bugs": "https://github.com/statechannels/monorepo/issues",
   "dependencies": {
     "@openzeppelin/contracts": "3.2.2-solc-0.7",
-    "@statechannels/exit-format": "0.0.4",
+    "@statechannels/exit-format": "0.0.5",
     "ethers": "5.0.12",
     "lodash.isequal": "^4.5.0",
     "lodash.pick": "4.4.0",
