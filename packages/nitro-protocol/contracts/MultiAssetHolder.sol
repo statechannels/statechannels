@@ -336,13 +336,19 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         sourceOutcome = Outcome.decodeExit(sourceOutcomeBytes);
         targetOutcome = Outcome.decodeExit(targetOutcomeBytes);
         asset = sourceOutcome[sourceAssetIndex].asset;
-        require(targetOutcome[targetAssetIndex].asset == asset, 'targetAsset != guaranteeAsset');
+        require(
+            sourceOutcome[sourceAssetIndex].allocations[targetAssetIndex].allocationType ==
+                uint8(Outcome.AllocationType.guarantee),
+            'not a guarantee allocation'
+        );
+
         initialAssetHoldings = holdings[asset][sourceChannelId];
         bytes32 targetChannelId = sourceOutcome[sourceAssetIndex].allocations[claimArgs
             .indexOfTargetInSource]
             .destination;
 
         // target checks
+        require(targetOutcome[targetAssetIndex].asset == asset, 'asset mismatch');
         _requireChannelFinalized(targetChannelId);
         _requireMatchingFingerprint(
             claimArgs.targetStateHash,
@@ -415,12 +421,6 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         }
 
         uint256 targetSurplus = min(sourceSurplus, sourceAllocations[indexOfTargetInSource].amount);
-
-        require(
-            sourceAllocations[indexOfTargetInSource].allocationType ==
-                uint8(Outcome.AllocationType.guarantee),
-            'not a guarante allocation'
-        );
 
         bytes32[] memory guaranteeDestinations = decodeGuaranteeData(
             sourceAllocations[indexOfTargetInSource].metadata
