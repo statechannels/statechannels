@@ -1,18 +1,11 @@
 import {utils, BigNumber, ethers, constants} from 'ethers';
-import ExitFormat from '@statechannels/exit-format';
+import ExitFormat, {AllocationType, Exit} from '@statechannels/exit-format';
 
 import {parseEventResult} from '../ethers-utils';
 import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 
-import {isExternalDestination} from './channel';
-import {
-  AssetOutcome,
-  decodeGuaranteeData,
-  decodeOutcome,
-  GuaranteeAllocation,
-  Outcome,
-} from './outcome';
-import {Address, Bytes32, Uint256} from './types';
+import {decodeGuaranteeData, decodeOutcome, GuaranteeAllocation, Outcome} from './outcome';
+import {Address} from './types';
 
 export interface DepositedEvent {
   destination: string;
@@ -54,60 +47,113 @@ export function convertAddressToBytes32(address: string): string {
  * @param allocation
  * @param indices
  */
-export function computeNewAllocationWithGuarantee(
+export function computeClaimEffectsAndInteractions(
   initialHoldings: string,
-  allocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
-  indices: number[],
-  guarantee: GuaranteeAllocation
+  sourceAllocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
+  targetAllocations: ExitFormat.Allocation[], // we must index this with a JS number that is less than 2**32 - 1
+  indexOfTargetInSource: number,
+  targetAllocationIndicesToPayout: number[]
 ): {
-  newAllocations: ExitFormat.Allocation[];
-  allocatesOnlyZeros: boolean;
-  payouts: string[];
+  newSourceAllocations: ExitFormat.Allocation[];
+  newTargetAllocations: ExitFormat.Allocation[];
+  exitAllocations: ExitFormat.Allocation[];
   totalPayouts: string;
 } {
-  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocations.length).fill(
-    BigNumber.from(0).toHexString()
-  );
   let totalPayouts = BigNumber.from(0);
-  let allocatesOnlyZeros = true;
-  let surplus = BigNumber.from(initialHoldings);
   let k = 0;
 
-  // copy allocation
-  const newAllocations: ExitFormat.Allocation[] = [];
-  for (let i = 0; i < allocations.length; i++) {
-    newAllocations.push({
-      destination: allocations[i].destination,
-      amount: allocations[i].amount,
-      metadata: allocations[i].metadata,
-      allocationType: allocations[i].allocationType,
+  // copy allocations
+  const newSourceAllocations: ExitFormat.Allocation[] = [];
+  const newTargetAllocations: ExitFormat.Allocation[] = [];
+  const exitAllocations: ExitFormat.Allocation[] = [];
+  for (let i = 0; i < sourceAllocations.length; i++) {
+    newSourceAllocations.push({
+      destination: sourceAllocations[i].destination,
+      amount: sourceAllocations[i].amount,
+      metadata: sourceAllocations[i].metadata,
+      allocationType: sourceAllocations[i].allocationType,
+    });
+  }
+  for (let i = 0; i < targetAllocations.length; i++) {
+    newTargetAllocations.push({
+      destination: targetAllocations[i].destination,
+      amount: targetAllocations[i].amount,
+      metadata: targetAllocations[i].metadata,
+      allocationType: targetAllocations[i].allocationType,
+    });
+    exitAllocations.push({
+      destination: targetAllocations[i].destination,
+      amount: '0x00',
+      metadata: targetAllocations[i].metadata,
+      allocationType: targetAllocations[i].allocationType,
     });
   }
 
-  const guaranteeDestinations = decodeGuaranteeData(guarantee.metadata);
+  let sourceSurplus = BigNumber.from(initialHoldings);
+  for (
+    let sourceAllocationIndex = 0;
+    sourceAllocationIndex < indexOfTargetInSource;
+    sourceAllocationIndex++
+  ) {
+    if (BigNumber.from(sourceSurplus).isZero()) break;
+    const affordsForDestination = min(
+      BigNumber.from(sourceAllocations[sourceAllocationIndex].amount),
+      sourceSurplus
+    );
+    sourceSurplus = sourceSurplus.sub(affordsForDestination);
+  }
+
+  let targetSurplus = min(
+    sourceSurplus,
+    BigNumber.from(sourceAllocations[indexOfTargetInSource].amount)
+  );
+
+  if (sourceAllocations[indexOfTargetInSource].allocationType !== AllocationType.guarantee)
+    throw Error('not a guarantee allocation');
+
+  const guaranteeDestinations = decodeGuaranteeData(
+    sourceAllocations[indexOfTargetInSource].metadata
+  );
 
   // for each guarantee destination
   for (let j = 0; j < guaranteeDestinations.length; j++) {
-    if (surplus.isZero()) break;
-    for (let i = 0; i < newAllocations.length; i++) {
-      if (surplus.isZero()) break;
+    if (targetSurplus.isZero()) break;
+    for (let i = 0; i < newTargetAllocations.length; i++) {
+      if (targetSurplus.isZero()) break;
       // search for it in the allocation
       if (
-        BigNumber.from(guaranteeDestinations[j]).eq(BigNumber.from(newAllocations[i].destination))
+        BigNumber.from(guaranteeDestinations[j]).eq(
+          BigNumber.from(newTargetAllocations[i].destination)
+        )
       ) {
         // if we find it, compute new amount
-        const affordsForDestination = min(BigNumber.from(newAllocations[i].amount), surplus);
+        const affordsForDestination = min(
+          BigNumber.from(newTargetAllocations[i].amount),
+          targetSurplus
+        );
         // decrease surplus by the current amount regardless of hitting a specified index
-        surplus = surplus.sub(affordsForDestination);
-        if (indices.length === 0 || (k < indices.length && indices[k] === i)) {
+        targetSurplus = targetSurplus.sub(affordsForDestination);
+        if (
+          targetAllocationIndicesToPayout.length === 0 ||
+          (k < targetAllocationIndicesToPayout.length && targetAllocationIndicesToPayout[k] === i)
+        ) {
           // only if specified in supplied indices, or we if we are doing "all"
           // reduce the current allocationItem.amount
-          newAllocations[i].amount = BigNumber.from(newAllocations[i].amount)
+          newTargetAllocations[i].amount = BigNumber.from(newTargetAllocations[i].amount)
             .sub(affordsForDestination)
             .toHexString();
-          // increase the relevant payout
-          payouts[k] = affordsForDestination.toHexString();
+          newSourceAllocations[indexOfTargetInSource].amount = BigNumber.from(
+            newSourceAllocations[indexOfTargetInSource].amount
+          )
+            .sub(affordsForDestination)
+            .toHexString();
+
+          // increase the relevant exit allocation
+          exitAllocations[i].amount = BigNumber.from(exitAllocations[i].amount)
+            .add(affordsForDestination)
+            .toHexString();
           totalPayouts = totalPayouts.add(affordsForDestination);
+          // move on to the next supplied index
           ++k;
         }
         break;
@@ -115,17 +161,10 @@ export function computeNewAllocationWithGuarantee(
     }
   }
 
-  for (let i = 0; i < allocations.length; i++) {
-    if (!BigNumber.from(newAllocations[i].amount).isZero()) {
-      allocatesOnlyZeros = false;
-      break;
-    }
-  }
-
   return {
-    newAllocations,
-    allocatesOnlyZeros,
-    payouts,
+    newSourceAllocations,
+    newTargetAllocations,
+    exitAllocations,
     totalPayouts: totalPayouts.toHexString(),
   };
 }
@@ -194,127 +233,6 @@ export function computeTransferEffectsAndInteractions(
     exitAllocations,
     totalPayouts: totalPayouts.toHexString(),
   };
-}
-
-/**
- *
- * Takes a AllocationUpdated Event and the transaction that emittted it, and returns updated information in a convenient format.
- * @param nitroAdjudicatorAddress
- * @param allocationUpdatedEvent
- * @param tx Transaction which gave rise to the event
- */
-export function computeNewOutcome(
-  nitroAdjudicatorAddress: Address,
-  allocationUpdatedEvent: {channelId: Bytes32; assetIndex: Uint256; initialHoldings: string},
-  tx: ethers.Transaction
-): {
-  assetIndex: number;
-  newOutcome: Outcome;
-  newHoldings: BigNumber;
-  externalPayouts: ExitFormat.Allocation[];
-  internalPayouts: ExitFormat.Allocation[];
-} {
-  // Extract the calldata that we need
-  const {oldOutcome, indices, guarantee} = extractOldOutcomeAndIndices(nitroAdjudicatorAddress, tx);
-  const assetIndex = BigNumber.from(allocationUpdatedEvent.assetIndex).toNumber();
-  const oldAllocations = oldOutcome[assetIndex].allocations;
-
-  // Use the emulated, pure solidity functions to figure out what the chain will have done
-  let exitAllocations: ExitFormat.Allocation[];
-  let newAllocations: ExitFormat.Allocation[];
-
-  let totalPayouts;
-  if (guarantee) {
-    const result = computeNewAllocationWithGuarantee(
-      allocationUpdatedEvent.initialHoldings,
-      oldAllocations,
-      indices,
-      guarantee
-    );
-
-    exitAllocations = result.payouts.map((v, i) => ({
-      destination: oldAllocations[longHandIndices[i]].destination,
-      amount: v,
-      allocationType: oldAllocations[longHandIndices[i]].allocationType,
-      metadata: oldAllocations[longHandIndices[i]].metadata,
-    }));
-  } else {
-    const result = computeTransferEffectsAndInteractions(
-      allocationUpdatedEvent.initialHoldings,
-      oldAllocations,
-      indices
-    );
-    newAllocations = result.newAllocations;
-    exitAllocations = result.exitAllocations;
-  }
-
-  // Massage the output for convenience
-  const newHoldings = BigNumber.from(allocationUpdatedEvent.initialHoldings).sub(totalPayouts);
-  const newAssetOutcome: AssetOutcome = {
-    asset: oldOutcome[assetIndex].asset,
-    allocations: newAllocations,
-    metadata: oldOutcome[assetIndex].metadata,
-  };
-
-  const longHandIndices =
-    indices.length === 0
-      ? Array.from(Array(exitAllocations.length).keys()) // [0,1,2,...] all indices up to payouts.length
-      : indices;
-
-  const externalPayouts = exitAllocations.filter(payout =>
-    isExternalDestination(payout.destination)
-  );
-
-  const internalPayouts = exitAllocations.filter(
-    payout => !isExternalDestination(payout.destination)
-  );
-
-  const newOutcome = {...oldOutcome};
-  newOutcome[assetIndex] = newAssetOutcome;
-  return {assetIndex, newOutcome, newHoldings, externalPayouts, internalPayouts};
-}
-
-/**
- * Extracts the outcome, assetIndex and indices that were submitted in the calldata of the supplied transaction, which targeted a method on the Adjudicator giving rise to a AllocationUpdated event.
- * @param nitroAdjudicatorAddress
- * @param tx Transaction which contained the allocation and indices
- */
-function extractOldOutcomeAndIndices(
-  nitroAdjudicatorAddress: Address,
-  tx: ethers.Transaction
-): {
-  oldOutcome: Outcome;
-  assetIndex: number | undefined; // undefined meaning "all assets"
-  indices: number[];
-  guarantee: GuaranteeAllocation | undefined;
-} {
-  let indices = [];
-  let guarantee: GuaranteeAllocation | undefined = undefined;
-
-  const txDescription = new ethers.Contract(
-    nitroAdjudicatorAddress,
-    NitroAdjudicatorArtifact.abi
-  ).interface.parseTransaction(tx);
-
-  // all methods (transfer, transferAll, claim, claimAll)
-  // have a parameter outcomeBytes:
-  const oldOutcome = decodeOutcome(txDescription.args.outcomeBytes);
-
-  if (txDescription.name === 'claim') {
-    guarantee = decodeOutcome(txDescription.args.guarantee)[txDescription.args.assetIndex]
-      .allocations[txDescription.args.targetChannelIndex] as GuaranteeAllocation;
-  }
-  indices =
-    txDescription.name === 'transfer' || txDescription.name == 'claim'
-      ? txDescription.args.indices
-      : [];
-
-  const assetIndex =
-    txDescription.name === 'transfer' || txDescription.name == 'claim'
-      ? txDescription.args.assetIndex
-      : undefined;
-
-  return {oldOutcome, assetIndex, indices, guarantee};
 }
 
 function min(a: BigNumber, b: BigNumber) {
