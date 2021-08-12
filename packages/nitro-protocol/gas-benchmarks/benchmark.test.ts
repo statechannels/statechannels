@@ -192,7 +192,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       })
     ).wait();
     // end setup
-    // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
+    // initially                   ⬛ ->  L  ->  J  ->  X  -> 👩
     // challenge L
     const {proof: ledgerProof, finalizesAt: ledgerFinalizesAt} = await challengeChannelAndExpectGas(
       LforJ,
