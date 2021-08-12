@@ -106,7 +106,7 @@ contract NitroAdjudicator is ForceMove, MultiAssetHolder {
         }
 
         // interactions
-        executeExit(exit);
+        _executeExit(exit);
     }
 
     /**
