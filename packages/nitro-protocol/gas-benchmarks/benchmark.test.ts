@@ -15,18 +15,18 @@ import {gasRequiredTo} from './gas';
 import {nitroAdjudicator, token} from './vanillaSetup';
 
 /**
- * Ensures the supplied asset holder always has a nonzero token balance.
+ * Ensures the asset holding contract always has a nonzero token balance.
  */
 async function addResidualTokenBalance(asset: string) {
   /**
    * Funding someOtherChannel with tokens, as well as the channel in question
    * makes the benchmark more realistic. In practice many other
-   * channels are funded by this asset holder. If we didn't reflect
+   * channels are funded by the nitro adjudicator. If we didn't reflect
    * that, our benchmark might reflect a gas refund for clearing storage
    * in the token contract (setting the token balance of the asset holder to 0)
    * which we would only expect in rare cases.
    */
-  await (await nitroAdjudicator.deposit(asset, Y.channelId, 0, 1)).wait(); // other channels are funded by this asset holder
+  await (await nitroAdjudicator.deposit(asset, Y.channelId, 0, 1)).wait();
 }
 
 describe('Consumes the expected gas for deployments', () => {
