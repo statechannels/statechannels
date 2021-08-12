@@ -28,15 +28,15 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 3963428, // Singleton
+      NitroAdjudicator: 4225403, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 47992,
+    vanillaNitro: 48014,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 30904,
+    vanillaNitro: 30926,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -48,7 +48,7 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 71370,
+      deposit: 71392,
     },
   },
   directlyFundAChannelWithERC20Second: {
@@ -58,16 +58,16 @@ export const gasRequiredTo: GasRequiredTo = {
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 54282,
+      deposit: 54304,
     },
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 153546,
+    vanillaNitro: 133112,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 143936,
+    vanillaNitro: 123510,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
@@ -75,9 +75,9 @@ export const gasRequiredTo: GasRequiredTo = {
     // challenge + timeout       ⬛ -> (X) -> 👩
     // transferAllAssets         ⬛ --------> 👩
     vanillaNitro: {
-      challenge: 92757,
-      transferAllAssets: 114930,
-      total: 207687,
+      challenge: 94673,
+      transferAllAssets: 109517,
+      total: 204190,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -87,29 +87,26 @@ export const gasRequiredTo: GasRequiredTo = {
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
       // transferAllAssetsL          ⬛ --------> (X) -> 👩
       // transferAllAssetsX          ⬛ ---------------> 👩
-      challengeX: 92757,
-      challengeL: 91691,
-      transferAllAssetsL: 65462,
-      transferAllAssetsX: 114930,
-      total: 364840,
+      challengeX: 94673,
+      challengeL: 91703,
+      transferAllAssetsL: 58742,
+      transferAllAssetsX: 109517,
+      total: 354635,
     },
   },
   ETHexitSadVirtualFunded: {
     // Scenario: Intermediary Ingrid goes offline
     vanillaNitro: {
-      // initially                   ⬛ ->  L  ->  G  ->  J  ->  X  -> 👩
-      // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
-      // transferAllAssetsL          ⬛ --------> (G) -> (J) -> (X) -> 👩
-      // claimG                      ⬛ ----------------------> (X) -> 👩
-      // transferAllAssetsX          ⬛ -----------------------------> 👩
-      challengeL: 91691,
-      challengeG: 93950,
-      challengeJ: 101068,
-      challengeX: 92757,
-      transferAllAssetsL: 65462,
-      claimG: 82369,
-      transferAllAssetsX: 114930,
-      total: 642227,
+      // initially                   ⬛ ->  L  ->  J  ->  X  -> 👩
+      // challenge L,J,X + timeout   ⬛ -> (L) -> (J) -> (X) -> 👩
+      // claimL                      ⬛ ---------------> (X) -> 👩
+      // transferAllAssetsX          ⬛ ----------------------> 👩
+      challengeL: 94980,
+      challengeJ: 103014,
+      challengeX: 94673,
+      claimL: 95060,
+      transferAllAssetsX: 109517,
+      total: 497244,
     },
   },
 };

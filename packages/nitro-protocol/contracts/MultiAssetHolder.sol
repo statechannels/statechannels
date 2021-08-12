@@ -233,7 +233,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         Outcome.Allocation[] memory exitAllocations
     ) internal {
         // create a new tuple to avoid mutating singleAssetExit
-        executeSingleAssetExit(
+        _executeSingleAssetExit(
             Outcome.SingleAssetExit(
                 singleAssetExit.asset,
                 singleAssetExit.metadata,
@@ -511,7 +511,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         Outcome.Allocation[] memory exitAllocations
     ) internal {
         // create a new tuple to avoid mutating singleAssetExit
-        executeSingleAssetExit(
+        _executeSingleAssetExit(
             Outcome.SingleAssetExit(
                 singleAssetExit.asset,
                 singleAssetExit.metadata,
@@ -525,7 +525,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      * @dev Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
      * @param singleAssetExit The single asset exit to be paid out.
      */
-    function executeSingleAssetExit(Outcome.SingleAssetExit memory singleAssetExit) internal {
+    function _executeSingleAssetExit(Outcome.SingleAssetExit memory singleAssetExit) internal {
         address asset = singleAssetExit.asset;
         for (uint256 j = 0; j < singleAssetExit.allocations.length; j++) {
             bytes32 destination = singleAssetExit.allocations[j].destination;
