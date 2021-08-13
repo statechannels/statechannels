@@ -432,12 +432,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                         // increase the relevant payout
                         payouts[k] += affordsForDestination;
                         totalPayouts += affordsForDestination;
-                        // move on to the next supplied index
-                        ++k;
                     }
                     break; // start again with the next guarantee destination
                 }
             }
+            // move on to the next supplied index
+            ++k;
         }
 
         for (uint256 i = 0; i < allocation.length; i++) {

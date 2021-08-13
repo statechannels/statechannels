@@ -107,9 +107,9 @@ export const gasRequiredTo: GasRequiredTo = {
       challengeJ: 101068,
       challengeX: 92757,
       transferAllAssetsL: 65462,
-      claimG: 82369,
-      transferAllAssetsX: 114930,
-      total: 642227,
+      claimG: 94758,
+      transferAllAssetsX: 44478,
+      total: 584164,
     },
   },
 };
