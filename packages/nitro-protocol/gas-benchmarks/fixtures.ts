@@ -1,6 +1,6 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
-import {BigNumber, constants, ContractReceipt, ethers} from 'ethers';
+import {BigNumber, BigNumberish, constants, ContractReceipt, ethers} from 'ethers';
 
 import {
   Allocation,
@@ -33,8 +33,10 @@ export const Ingrid = new Wallet(
 );
 export const participants = [Alice.address, Bob.address];
 
-export const amountForAlice = 6;
-export const amountForBob = 4;
+export const amountForAlice = BigNumber.from(6).toHexString();
+export const amountForBob = BigNumber.from(4).toHexString();
+export const amountForAliceAndBob = BigNumber.from(amountForAlice).add(amountForBob).toHexString();
+
 class TestChannel {
   constructor(
     channelNonce: number,
@@ -157,14 +159,8 @@ export const X = new TestChannel(
   2,
   [Alice, Bob],
   [
-    {
-      destination: convertAddressToBytes32(Alice.address),
-      amount: BigNumber.from(amountForAlice).toHexString(),
-    },
-    {
-      destination: convertAddressToBytes32(Bob.address),
-      amount: BigNumber.from(amountForBob).toHexString(),
-    },
+    {destination: convertAddressToBytes32(Alice.address), amount: amountForAlice},
+    {destination: convertAddressToBytes32(Bob.address), amount: amountForBob},
   ]
 );
 
@@ -173,14 +169,8 @@ export const Y = new TestChannel(
   3,
   [Alice, Bob],
   [
-    {
-      destination: convertAddressToBytes32(Alice.address),
-      amount: BigNumber.from(amountForAlice).toHexString(),
-    },
-    {
-      destination: convertAddressToBytes32(Bob.address),
-      amount: BigNumber.from(amountForBob).toHexString(),
-    },
+    {destination: convertAddressToBytes32(Alice.address), amount: amountForAlice},
+    {destination: convertAddressToBytes32(Bob.address), amount: amountForBob},
   ]
 );
 
@@ -188,7 +178,7 @@ export const Y = new TestChannel(
 export const LforX = new TestChannel(
   4,
   [Alice, Bob],
-  [{destination: X.channelId, amount: BigNumber.from(amountForAlice + amountForBob).toHexString()}]
+  [{destination: X.channelId, amount: amountForAliceAndBob}]
 );
 
 /** Joint channel between Alice, Bob, and Ingrid, funding application channel X */
@@ -196,11 +186,8 @@ export const J = new TestChannel(
   5,
   [Alice, Bob, Ingrid],
   [
-    {destination: X.channelId, amount: BigNumber.from(amountForAlice + amountForBob).toHexString()},
-    {
-      destination: convertAddressToBytes32(Ingrid.address),
-      amount: BigNumber.from(amountForAlice + amountForBob).toHexString(),
-    },
+    {destination: X.channelId, amount: amountForAliceAndBob},
+    {destination: convertAddressToBytes32(Ingrid.address), amount: amountForAliceAndBob},
   ]
 );
 
@@ -216,7 +203,7 @@ export const G = new TestChannel(6, [Alice, Ingrid], {
 export const LforG = new TestChannel(
   7,
   [Alice, Bob],
-  [{destination: G.channelId, amount: BigNumber.from(amountForAlice + amountForBob).toHexString()}]
+  [{destination: G.channelId, amount: amountForAliceAndBob}]
 );
 
 // Utils
@@ -258,16 +245,16 @@ export async function challengeChannelAndExpectGas(
 }
 
 interface ETHBalances {
-  Alice: number;
-  Bob: number;
-  Ingrid: number;
+  Alice: BigNumberish;
+  Bob: BigNumberish;
+  Ingrid: BigNumberish;
 }
 
 interface ETHHoldings {
-  LforG: number;
-  G: number;
-  J: number;
-  X: number;
+  LforG: BigNumberish;
+  G: BigNumberish;
+  J: BigNumberish;
+  X: BigNumberish;
 }
 
 /**
@@ -289,17 +276,17 @@ export async function assertETHSanityChecks(
     Ingrid: Ingrid.address,
   };
   await Promise.all([
-    ...Object.keys(ethHoldings).map(async channelId => {
+    ...Object.keys(ethHoldings).map(async key => {
       expect(
-        (
-          await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[channelId])
-        ).toNumber()
-      ).toEqual(ethHoldings[channelId]);
+        (await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[key])).eq(
+          BigNumber.from(ethHoldings[key])
+        )
+      ).toBe(true);
     }),
-    ...Object.keys(ethBalances).map(async address => {
-      expect((await provider.getBalance(externalDestinations[address])).toNumber()).toEqual(
-        ethBalances[address]
-      );
+    ...Object.keys(ethBalances).map(async key => {
+      expect(
+        (await provider.getBalance(externalDestinations[key])).eq(BigNumber.from(ethBalances[key]))
+      ).toBe(true);
     }),
   ]);
 }
