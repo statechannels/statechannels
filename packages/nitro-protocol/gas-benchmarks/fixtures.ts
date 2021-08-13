@@ -263,16 +263,16 @@ export async function assertETHSanityChecks(
     Ingrid: Ingrid.address,
   };
   await Promise.all([
-    ...Object.keys(ethHoldings).map(async key => {
+    ...Object.keys(ethHoldings).map(async channelId => {
       expect(
         (
-          await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[key])
+          await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[channelId])
         ).toNumber()
-      ).toEqual(ethHoldings[key]);
+      ).toEqual(ethHoldings[channelId]);
     }),
-    ...Object.keys(ethBalances).map(async key => {
-      expect((await provider.getBalance(externalDestinations[key])).toNumber()).toEqual(
-        ethBalances[key]
+    ...Object.keys(ethBalances).map(async address => {
+      expect((await provider.getBalance(externalDestinations[address])).toNumber()).toEqual(
+        ethBalances[address]
       );
     }),
   ]);
