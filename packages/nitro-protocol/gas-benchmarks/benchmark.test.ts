@@ -1,3 +1,4 @@
+import {constants} from 'ethers';
 import {encodeOutcome} from '../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../src/transactions';
 
@@ -10,9 +11,12 @@ import {
   LforG,
   G,
   J,
+  Alice,
+  Ingrid,
+  Bob,
 } from './fixtures';
 import {gasRequiredTo} from './gas';
-import {nitroAdjudicator, token} from './vanillaSetup';
+import {nitroAdjudicator, provider, token} from './vanillaSetup';
 
 /**
  * Ensures the supplied asset holder always has a nonzero token balance.
@@ -186,7 +190,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     ).toEqual(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.total);
   });
 
-  it(`when exiting a virtual funded (with ETH) channel`, async () => {
+  it.only(`when exiting a virtual funded (with ETH) channel`, async () => {
     // begin setup
     await (
       await nitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, LforG.channelId, 0, 10, {
@@ -234,6 +238,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     ]);
     // end wait
     // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
+    await logEthHoldingsAndBalances();
     await expect(
       await nitroAdjudicator.transferAllAssets(
         LforG.channelId,
@@ -242,6 +247,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsL);
     // transferAllAssetsL  ⬛ --------> (G) -> (J) -> (X) -> 👩
+    await logEthHoldingsAndBalances();
     await expect(
       await nitroAdjudicator.claim(
         0,
@@ -253,6 +259,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         [] // meaning "all"
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimG);
+    await logEthHoldingsAndBalances();
     // claimG                      ⬛ ----------------------> (X) -> 👩
     await expect(
       await nitroAdjudicator.transferAllAssets(
@@ -270,5 +277,37 @@ describe('Consumes the expected gas for sad-path exits', () => {
         (a, b) => a + b
       ) - gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total
     ).toEqual(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total);
+
+    await logEthHoldingsAndBalances();
   });
 });
+
+async function logEthHoldingsAndBalances() {
+  const internalDestinations = {
+    LforG: LforG.channelId,
+    G: G.channelId,
+    J: J.channelId,
+    X: X.channelId,
+  };
+  const externalDestinations = {
+    Alice: Alice.address,
+    Bob: Bob.address,
+    Ingrid: Ingrid.address,
+  };
+
+  const results = {};
+  await Promise.all([
+    ...Object.keys(internalDestinations).map(
+      async key =>
+        (results[key] = await nitroAdjudicator.holdings(
+          constants.AddressZero,
+          internalDestinations[key]
+        ))
+    ),
+    ...Object.keys(externalDestinations).map(
+      async key => (results[key] = await provider.getBalance(externalDestinations[key]))
+    ),
+  ]);
+  Object.keys(results).map(key => (results[key] = results[key].toNumber()));
+  console.log(results);
+}
