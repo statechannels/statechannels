@@ -238,7 +238,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     ]);
     // end wait
     // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
-    await logEthHoldingsAndBalances();
+    await assertETHSanityChecks({Alice: 0, Bob: 0, Ingrid: 0}, {LforG: 10, G: 0, J: 0, X: 0});
     await expect(
       await nitroAdjudicator.transferAllAssets(
         LforG.channelId,
@@ -247,7 +247,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsL);
     // transferAllAssetsL  ⬛ --------> (G) -> (J) -> (X) -> 👩
-    await logEthHoldingsAndBalances();
+    await assertETHSanityChecks({Alice: 0, Bob: 0, Ingrid: 0}, {LforG: 0, G: 10, J: 0, X: 0});
     await expect(
       await nitroAdjudicator.claim(
         0,
@@ -259,7 +259,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
         [] // meaning "all"
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimG);
-    await logEthHoldingsAndBalances();
+    await assertETHSanityChecks({Alice: 0, Bob: 0, Ingrid: 0}, {LforG: 0, G: 0, J: 0, X: 10});
     // claimG                      ⬛ ----------------------> (X) -> 👩
     await expect(
       await nitroAdjudicator.transferAllAssets(
@@ -278,36 +278,51 @@ describe('Consumes the expected gas for sad-path exits', () => {
       ) - gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total
     ).toEqual(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total);
 
-    await logEthHoldingsAndBalances();
+    await assertETHSanityChecks({Alice: 5, Bob: 5, Ingrid: 0}, {LforG: 0, G: 0, J: 0, X: 0});
   });
 });
 
-async function logEthHoldingsAndBalances() {
-  const internalDestinations = {
+interface ETHBalances {
+  Alice: number;
+  Bob: number;
+  Ingrid: number;
+}
+
+interface ETHHoldings {
+  LforG: number;
+  G: number;
+  J: number;
+  X: number;
+}
+
+async function assertETHSanityChecks(
+  ethBalances: Partial<ETHBalances>,
+  ethHoldings: Partial<ETHHoldings>
+) {
+  const internalDestinations: {[Property in keyof ETHHoldings]: string} = {
+    // todo type this
     LforG: LforG.channelId,
     G: G.channelId,
     J: J.channelId,
     X: X.channelId,
   };
-  const externalDestinations = {
+  const externalDestinations: {[Property in keyof ETHBalances]: string} = {
     Alice: Alice.address,
     Bob: Bob.address,
     Ingrid: Ingrid.address,
   };
-
-  const results = {};
   await Promise.all([
-    ...Object.keys(internalDestinations).map(
-      async key =>
-        (results[key] = await nitroAdjudicator.holdings(
-          constants.AddressZero,
-          internalDestinations[key]
-        ))
-    ),
-    ...Object.keys(externalDestinations).map(
-      async key => (results[key] = await provider.getBalance(externalDestinations[key]))
-    ),
+    ...Object.keys(ethHoldings).map(async key => {
+      expect(
+        (
+          await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[key])
+        ).toNumber()
+      ).toEqual(ethHoldings[key]);
+    }),
+    ...Object.keys(ethBalances).map(async key => {
+      expect((await provider.getBalance(externalDestinations[key])).toNumber()).toEqual(
+        ethBalances[key]
+      );
+    }),
   ]);
-  Object.keys(results).map(key => (results[key] = results[key].toNumber()));
-  console.log(results);
 }
