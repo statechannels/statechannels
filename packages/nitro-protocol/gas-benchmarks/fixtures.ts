@@ -1,6 +1,6 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
-import {constants, ContractReceipt, ethers} from 'ethers';
+import {BigNumber, constants, ContractReceipt, ethers} from 'ethers';
 
 import {
   Allocation,
@@ -32,6 +32,9 @@ export const Ingrid = new Wallet(
   '0x558789345da13a7ac1d6d6ac9275ba66836eb4a088efc1920db0f5d092d6ee71'
 );
 export const participants = [Alice.address, Bob.address];
+
+export const amountForAlice = 6;
+export const amountForBob = 4;
 class TestChannel {
   constructor(
     channelNonce: number,
@@ -154,8 +157,14 @@ export const X = new TestChannel(
   2,
   [Alice, Bob],
   [
-    {destination: convertAddressToBytes32(Alice.address), amount: '0x5'},
-    {destination: convertAddressToBytes32(Bob.address), amount: '0x5'},
+    {
+      destination: convertAddressToBytes32(Alice.address),
+      amount: BigNumber.from(amountForAlice).toHexString(),
+    },
+    {
+      destination: convertAddressToBytes32(Bob.address),
+      amount: BigNumber.from(amountForBob).toHexString(),
+    },
   ]
 );
 
@@ -164,21 +173,34 @@ export const Y = new TestChannel(
   3,
   [Alice, Bob],
   [
-    {destination: convertAddressToBytes32(Alice.address), amount: '0x5'},
-    {destination: convertAddressToBytes32(Bob.address), amount: '0x5'},
+    {
+      destination: convertAddressToBytes32(Alice.address),
+      amount: BigNumber.from(amountForAlice).toHexString(),
+    },
+    {
+      destination: convertAddressToBytes32(Bob.address),
+      amount: BigNumber.from(amountForBob).toHexString(),
+    },
   ]
 );
 
 /** Ledger channel between Alice and Bob, providing funds to channel X */
-export const LforX = new TestChannel(4, [Alice, Bob], [{destination: X.channelId, amount: '0xa'}]);
+export const LforX = new TestChannel(
+  4,
+  [Alice, Bob],
+  [{destination: X.channelId, amount: BigNumber.from(amountForAlice + amountForBob).toHexString()}]
+);
 
 /** Joint channel between Alice, Bob, and Ingrid, funding application channel X */
 export const J = new TestChannel(
   5,
   [Alice, Bob, Ingrid],
   [
-    {destination: X.channelId, amount: '0xa'},
-    {destination: convertAddressToBytes32(Ingrid.address), amount: '0xa'},
+    {destination: X.channelId, amount: BigNumber.from(amountForAlice + amountForBob).toHexString()},
+    {
+      destination: convertAddressToBytes32(Ingrid.address),
+      amount: BigNumber.from(amountForAlice + amountForBob).toHexString(),
+    },
   ]
 );
 
@@ -191,7 +213,11 @@ export const G = new TestChannel(6, [Alice, Ingrid], {
     convertAddressToBytes32(Ingrid.address),
   ],
 });
-export const LforG = new TestChannel(7, [Alice, Bob], [{destination: G.channelId, amount: '0xa'}]);
+export const LforG = new TestChannel(
+  7,
+  [Alice, Bob],
+  [{destination: G.channelId, amount: BigNumber.from(amountForAlice + amountForBob).toHexString()}]
+);
 
 // Utils
 export async function getFinalizesAtFromTransactionHash(hash: string): Promise<number> {

@@ -11,6 +11,8 @@ import {
   G,
   J,
   assertETHSanityChecks,
+  amountForAlice,
+  amountForBob,
 } from './fixtures';
 import {gasRequiredTo} from './gas';
 import {nitroAdjudicator, token} from './vanillaSetup';
@@ -235,7 +237,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
     ]);
     // end wait
     // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
-    await assertETHSanityChecks({Alice: 0, Bob: 0, Ingrid: 0}, {LforG: 10, G: 0, J: 0, X: 0});
+    await assertETHSanityChecks(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforG: amountForAlice + amountForBob, G: 0, J: 0, X: 0}
+    );
     await expect(
       await nitroAdjudicator.transferAllAssets(
         LforG.channelId,
@@ -244,7 +249,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsL);
     // transferAllAssetsL  ⬛ --------> (G) -> (J) -> (X) -> 👩
-    await assertETHSanityChecks({Alice: 0, Bob: 0, Ingrid: 0}, {LforG: 0, G: 10, J: 0, X: 0});
+    await assertETHSanityChecks(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforG: 0, G: amountForAlice + amountForBob, J: 0, X: 0}
+    );
     await expect(
       await nitroAdjudicator.claim(
         0,
@@ -256,7 +264,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
         [] // meaning "all"
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimG);
-    await assertETHSanityChecks({Alice: 0, Bob: 0, Ingrid: 0}, {LforG: 0, G: 0, J: 0, X: 10});
+    await assertETHSanityChecks(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforG: 0, G: 0, J: 0, X: amountForAlice + amountForBob}
+    );
     // claimG                      ⬛ ----------------------> (X) -> 👩
     await expect(
       await nitroAdjudicator.transferAllAssets(
@@ -275,6 +286,9 @@ describe('Consumes the expected gas for sad-path exits', () => {
       ) - gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total
     ).toEqual(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total);
 
-    await assertETHSanityChecks({Alice: 5, Bob: 5, Ingrid: 0}, {LforG: 0, G: 0, J: 0, X: 0});
+    await assertETHSanityChecks(
+      {Alice: amountForAlice, Bob: amountForBob, Ingrid: 0},
+      {LforG: 0, G: 0, J: 0, X: 0}
+    );
   });
 });
