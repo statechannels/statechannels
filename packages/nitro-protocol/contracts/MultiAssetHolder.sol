@@ -368,7 +368,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
 
         for (uint256 j = 0; j < payouts.length; j++) {
             if (payouts[j] > 0) {
-                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
+                bytes32 destination = allocation[j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
                     _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
@@ -398,7 +398,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     {
         // `indices == []` means "pay out to all"
         // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
+        payouts = new uint256[](allocation.length);
         totalPayouts = 0;
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
@@ -430,14 +430,14 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                         // reduce the new allocationItem.amount
                         newAllocation[i].amount -= affordsForDestination;
                         // increase the relevant payout
-                        payouts[k] += affordsForDestination;
+                        payouts[i] += affordsForDestination;
                         totalPayouts += affordsForDestination;
+                        // move on to the next supplied index
+                        ++k;
                     }
                     break; // start again with the next guarantee destination
                 }
             }
-            // move on to the next supplied index
-            ++k;
         }
 
         for (uint256 i = 0; i < allocation.length; i++) {
