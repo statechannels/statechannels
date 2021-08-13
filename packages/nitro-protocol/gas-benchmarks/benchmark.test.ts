@@ -1,4 +1,5 @@
 import {constants} from 'ethers';
+
 import {encodeOutcome} from '../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../src/transactions';
 
@@ -190,7 +191,7 @@ describe('Consumes the expected gas for sad-path exits', () => {
     ).toEqual(gasRequiredTo.ETHexitSadLedgerFunded.vanillaNitro.total);
   });
 
-  it.only(`when exiting a virtual funded (with ETH) channel`, async () => {
+  it(`when exiting a virtual funded (with ETH) channel`, async () => {
     // begin setup
     await (
       await nitroAdjudicator.deposit(MAGIC_ADDRESS_INDICATING_ETH, LforG.channelId, 0, 10, {
