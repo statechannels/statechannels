@@ -1,6 +1,6 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
-import {ContractReceipt, ethers} from 'ethers';
+import {constants, ContractReceipt, ethers} from 'ethers';
 
 import {
   Allocation,
@@ -229,4 +229,51 @@ export async function challengeChannelAndExpectGas(
 
   const finalizesAt = await getFinalizesAtFromTransactionHash(challengeTx.hash);
   return {proof, finalizesAt};
+}
+
+interface ETHBalances {
+  Alice: number;
+  Bob: number;
+  Ingrid: number;
+}
+
+interface ETHHoldings {
+  LforG: number;
+  G: number;
+  J: number;
+  X: number;
+}
+
+/**
+ * Asserts the ETH balance of the supplied ethereum account addresses and the ETH holdings in the statechannels asset holding contract for the supplied channelIds.
+ */
+export async function assertETHSanityChecks(
+  ethBalances: Partial<ETHBalances>,
+  ethHoldings: Partial<ETHHoldings>
+): Promise<void> {
+  const internalDestinations: {[Property in keyof ETHHoldings]: string} = {
+    LforG: LforG.channelId,
+    G: G.channelId,
+    J: J.channelId,
+    X: X.channelId,
+  };
+  const externalDestinations: {[Property in keyof ETHBalances]: string} = {
+    Alice: Alice.address,
+    Bob: Bob.address,
+    Ingrid: Ingrid.address,
+  };
+  await Promise.all([
+    ...Object.keys(ethHoldings).map(async key => {
+      expect(
+        (
+          await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[key])
+        ).toNumber()
+      ).toEqual(ethHoldings[key]);
+    }),
+    ...Object.keys(ethBalances).map(async key => {
+      expect((await provider.getBalance(externalDestinations[key])).toNumber()).toEqual(
+        ethBalances[key]
+      );
+    }),
+  ]);
 }

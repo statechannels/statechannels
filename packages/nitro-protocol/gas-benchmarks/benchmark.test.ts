@@ -1,5 +1,3 @@
-import {constants} from 'ethers';
-
 import {encodeOutcome} from '../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../src/transactions';
 
@@ -12,12 +10,10 @@ import {
   LforG,
   G,
   J,
-  Alice,
-  Ingrid,
-  Bob,
+  assertETHSanityChecks,
 } from './fixtures';
 import {gasRequiredTo} from './gas';
-import {nitroAdjudicator, provider, token} from './vanillaSetup';
+import {nitroAdjudicator, token} from './vanillaSetup';
 
 /**
  * Ensures the supplied asset holder always has a nonzero token balance.
@@ -282,48 +278,3 @@ describe('Consumes the expected gas for sad-path exits', () => {
     await assertETHSanityChecks({Alice: 5, Bob: 5, Ingrid: 0}, {LforG: 0, G: 0, J: 0, X: 0});
   });
 });
-
-interface ETHBalances {
-  Alice: number;
-  Bob: number;
-  Ingrid: number;
-}
-
-interface ETHHoldings {
-  LforG: number;
-  G: number;
-  J: number;
-  X: number;
-}
-
-async function assertETHSanityChecks(
-  ethBalances: Partial<ETHBalances>,
-  ethHoldings: Partial<ETHHoldings>
-) {
-  const internalDestinations: {[Property in keyof ETHHoldings]: string} = {
-    // todo type this
-    LforG: LforG.channelId,
-    G: G.channelId,
-    J: J.channelId,
-    X: X.channelId,
-  };
-  const externalDestinations: {[Property in keyof ETHBalances]: string} = {
-    Alice: Alice.address,
-    Bob: Bob.address,
-    Ingrid: Ingrid.address,
-  };
-  await Promise.all([
-    ...Object.keys(ethHoldings).map(async key => {
-      expect(
-        (
-          await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[key])
-        ).toNumber()
-      ).toEqual(ethHoldings[key]);
-    }),
-    ...Object.keys(ethBalances).map(async key => {
-      expect((await provider.getBalance(externalDestinations[key])).toNumber()).toEqual(
-        ethBalances[key]
-      );
-    }),
-  ]);
-}
