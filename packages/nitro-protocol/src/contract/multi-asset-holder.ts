@@ -65,9 +65,7 @@ export function computeNewAllocationWithGuarantee(
   payouts: string[];
   totalPayouts: string;
 } {
-  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocation.length).fill(
-    BigNumber.from(0).toHexString()
-  );
+  const payouts: string[] = Array(allocation.length).fill(BigNumber.from(0).toHexString());
   let totalPayouts = BigNumber.from(0);
   let allocatesOnlyZeros = true;
   let surplus = BigNumber.from(initialHoldings);
@@ -102,7 +100,7 @@ export function computeNewAllocationWithGuarantee(
             .sub(affordsForDestination)
             .toHexString();
           // increase the relevant payout
-          payouts[k] = affordsForDestination.toHexString();
+          payouts[i] = affordsForDestination.toHexString();
           totalPayouts = totalPayouts.add(affordsForDestination);
           ++k;
         }
