@@ -384,7 +384,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     function _computeNewAllocationWithGuarantee(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices,
+        uint256[] memory payoutAllowlist,
         Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
     )
         public
@@ -396,16 +396,16 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             uint256 totalPayouts
         )
     {
-        // `indices == []` means "pay out to all"
+        // `payoutAllowlist == []` means "pay out to all"
         // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
         payouts = new uint256[](allocation.length);
         totalPayouts = 0;
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
-        //  We rely on the assumption that the indices are strictly increasing.
+        uint256 numPaid = 0; // indexes the `payoutAllowlist` array
+        //  We rely on the assumption that the payoutAllowlist are strictly increasing.
         //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
-        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
+        //  If the payoutAllowlist were to decrease, we would have to start from the beginning: doing a full search for each index.
 
         // copy allocation
         newAllocation = new Outcome.AllocationItem[](allocation.length);
@@ -415,25 +415,31 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         }
 
         // for each guarantee destination
-        for (uint256 j = 0; j < guarantee.destinations.length; j++) {
+        for (uint256 destIdx = 0; destIdx < guarantee.destinations.length; destIdx++) {
             if (surplus == 0) break;
-            for (uint256 i = 0; i < newAllocation.length; i++) {
+            for (uint256 allocIdx = 0; allocIdx < newAllocation.length; allocIdx++) {
                 if (surplus == 0) break;
                 // search for it in the allocation
-                if (guarantee.destinations[j] == newAllocation[i].destination) {
+                if (guarantee.destinations[destIdx] == newAllocation[allocIdx].destination) {
                     // if we find it, compute new amount
-                    uint256 affordsForDestination = min(allocation[i].amount, surplus);
+                    uint256 affordsForDestination = min(allocation[allocIdx].amount, surplus);
                     // decrease surplus by the current amount regardless of hitting a specified index
                     surplus -= affordsForDestination;
-                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                        // only if specified in supplied indices, or we if we are doing "all"
+
+                    if (
+                        // only execute payout if all payouts are allowed
+                        (payoutAllowlist.length == 0) ||
+                        // or allocIdx is the "next" payout allowed
+                        ((numPaid < payoutAllowlist.length) &&
+                            (payoutAllowlist[numPaid] == allocIdx))
+                    ) {
                         // reduce the new allocationItem.amount
-                        newAllocation[i].amount -= affordsForDestination;
+                        newAllocation[allocIdx].amount -= affordsForDestination;
                         // increase the relevant payout
-                        payouts[i] += affordsForDestination;
+                        payouts[allocIdx] += affordsForDestination;
                         totalPayouts += affordsForDestination;
                         // move on to the next supplied index
-                        ++k;
+                        ++numPaid;
                     }
                     break; // start again with the next guarantee destination
                 }
