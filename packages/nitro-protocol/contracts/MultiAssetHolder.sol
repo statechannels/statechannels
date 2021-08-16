@@ -351,8 +351,6 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
 
         (
             Outcome.AllocationItem[] memory newAllocation,
-            ,
-            uint256[] memory payouts,
             uint256 totalPayouts
         ) = _computeNewAllocationWithGuarantee(initialHoldings, allocation, indices, guarantee);
 
@@ -366,14 +364,15 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         // INTERACTIONS
         // *******
 
-        for (uint256 j = 0; j < payouts.length; j++) {
-            if (payouts[j] > 0) {
+        for (uint256 j = 0; j < allocation.length; j++) {
+            uint256 payout = allocation[j].amount - newAllocation[j].amount;
+            if (payout > 0) {
                 bytes32 destination = allocation[j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
-                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
+                    _transferAsset(asset, _bytes32ToAddress(destination), payout);
                 } else {
-                    assetHoldings[destination] += payouts[j];
+                    assetHoldings[destination] += payout;
                 }
             }
         }
@@ -384,23 +383,9 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
     function _computeNewAllocationWithGuarantee(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
-        uint256[] memory payoutAllowlist,
+        uint256[] memory payoutAllowlist, // `payoutAllowlist == []` means "pay out to all"
         Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
-    )
-        public
-        pure
-        returns (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool allocatesOnlyZeros,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        )
-    {
-        // `payoutAllowlist == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](allocation.length);
-        totalPayouts = 0;
-        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
+    ) public pure returns (Outcome.AllocationItem[] memory newAllocation, uint256 totalPayouts) {
         uint256 surplus = initialHoldings; // tracks funds available during calculation
         uint256 numPaid = 0; // indexes the `payoutAllowlist` array
         //  We rely on the assumption that the payoutAllowlist are strictly increasing.
@@ -435,21 +420,12 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                     ) {
                         // reduce the new allocationItem.amount
                         newAllocation[allocIdx].amount -= affordsForDestination;
-                        // increase the relevant payout
-                        payouts[allocIdx] += affordsForDestination;
                         totalPayouts += affordsForDestination;
                         // move on to the next supplied index
                         ++numPaid;
                     }
                     break; // start again with the next guarantee destination
                 }
-            }
-        }
-
-        for (uint256 i = 0; i < allocation.length; i++) {
-            if (newAllocation[i].amount != 0) {
-                allocatesOnlyZeros = false;
-                break;
             }
         }
     }
