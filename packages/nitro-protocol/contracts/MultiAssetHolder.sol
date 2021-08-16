@@ -402,7 +402,6 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         totalPayouts = 0;
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
         //  We rely on the assumption that the indices are strictly increasing.
         //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
         //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
@@ -425,16 +424,13 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                     uint256 affordsForDestination = min(allocation[i].amount, surplus);
                     // decrease surplus by the current amount regardless of hitting a specified index
                     surplus -= affordsForDestination;
-                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                        // only if specified in supplied indices, or we if we are doing "all"
-                        // reduce the new allocationItem.amount
-                        newAllocation[i].amount -= affordsForDestination;
-                        // increase the relevant payout
-                        payouts[i] += affordsForDestination;
-                        totalPayouts += affordsForDestination;
-                        // move on to the next supplied index
-                        ++k;
-                    }
+                    // only if specified in supplied indices, or we if we are doing "all"
+                    // reduce the new allocationItem.amount
+                    newAllocation[i].amount -= affordsForDestination;
+                    // increase the relevant payout
+                    payouts[i] += affordsForDestination;
+                    totalPayouts += affordsForDestination;
+
                     break; // start again with the next guarantee destination
                 }
             }
