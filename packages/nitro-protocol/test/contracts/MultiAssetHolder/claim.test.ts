@@ -59,8 +59,8 @@ describe('claim', () => {
     ${'15. (all) swap guarantee, overfunded, 2 destinations'}         | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 0}}       | ${{g: 2}}        | ${{A: 5, B: 5}} | ${undefined}
     ${'16. (all) underspecified guarantee, overfunded      '}         | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 7}}        | ${{A: 5, B: 5}} | ${undefined}
     ${'17. guarantee and target assets do not match'}                 | ${{g: 1}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 4, B: 5}}       | ${{g: 0}}        | ${{A: 1}}       | ${reason6}
-    ${'18. absent guarantee entry, indices=[], bad guarantee order'}  | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[]}   | ${{x: 10, I: 0}}      | ${{g: 0}}        | ${{I: 10}}      | ${undefined}
-    ${'19. absent guarantee entry, indices=[1], bad guarantee order'} | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[1]}  | ${{x: 10, I: 0}}      | ${{g: 0}}        | ${{I: 10}}      | ${undefined}
+    ${'18. absent guarantee entry, indices=[], bad guarantee order'}  | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[]}   | ${{x: 10, I: 0}}      | ${{g: 0, x: 0}}  | ${{I: 10}}      | ${undefined}
+    ${'19. absent guarantee entry, indices=[1], bad guarantee order'} | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[1]}  | ${{x: 10, I: 0}}      | ${{g: 0, x: 0}}  | ${{I: 10}}      | ${undefined}
     ${'20. absent guarantee entry, indices=[]'}                       | ${{g: 10}} | ${['A', 'x', 'I']}    | ${{x: 10, I: 10}}     | ${[]}   | ${{x: 0, I: 10}}      | ${{g: 0, x: 10}} | ${{}}           | ${undefined}
     ${'21. absent guarantee entry, indices=[1]'}                      | ${{g: 10}} | ${['A', 'x', 'I']}    | ${{x: 10, I: 10}}     | ${[0]}  | ${{x: 0, I: 10}}      | ${{g: 0, x: 10}} | ${{}}           | ${undefined}
   `(
