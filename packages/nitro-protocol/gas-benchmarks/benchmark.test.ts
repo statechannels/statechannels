@@ -10,6 +10,10 @@ import {
   LforG,
   G,
   J,
+  assertEthBalancesAndHoldings,
+  amountForAlice,
+  amountForBob,
+  amountForAliceAndBob,
 } from './fixtures';
 import {gasRequiredTo} from './gas';
 import {nitroAdjudicator, token} from './vanillaSetup';
@@ -234,6 +238,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
     ]);
     // end wait
     // challenge L,G,J,X + timeout ⬛ -> (L) -> (G) -> (J) -> (X) -> 👩
+    await assertEthBalancesAndHoldings(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforG: amountForAliceAndBob, G: 0, J: 0, X: 0}
+    );
     await expect(
       await nitroAdjudicator.transferAllAssets(
         LforG.channelId,
@@ -242,6 +250,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsL);
     // transferAllAssetsL  ⬛ --------> (G) -> (J) -> (X) -> 👩
+    await assertEthBalancesAndHoldings(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforG: 0, G: amountForAliceAndBob, J: 0, X: 0}
+    );
     await expect(
       await nitroAdjudicator.claim(
         0,
@@ -253,6 +265,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
         [] // meaning "all"
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimG);
+    await assertEthBalancesAndHoldings(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforG: 0, G: 0, J: 0, X: amountForAliceAndBob}
+    );
     // claimG                      ⬛ ----------------------> (X) -> 👩
     await expect(
       await nitroAdjudicator.transferAllAssets(
@@ -270,5 +286,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
         (a, b) => a + b
       ) - gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total
     ).toEqual(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.total);
+
+    await assertEthBalancesAndHoldings(
+      {Alice: amountForAlice, Bob: amountForBob, Ingrid: 0},
+      {LforG: 0, G: 0, J: 0, X: 0}
+    );
   });
 });
