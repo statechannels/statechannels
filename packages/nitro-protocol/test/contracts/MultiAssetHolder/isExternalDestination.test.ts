@@ -1,5 +1,3 @@
-import {Wallet} from 'ethers';
-
 import {getTestProvider, setupContract} from '../../test-helpers';
 import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
@@ -9,15 +7,6 @@ const testNitroAdjudicator = (setupContract(
   TESTNitroAdjudicatorArtifact,
   process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
 ) as unknown) as TESTNitroAdjudicator;
-
-const participants = ['', '', ''];
-const wallets = new Array(3);
-
-// Populate wallets and participants array
-for (let i = 0; i < 3; i++) {
-  wallets[i] = Wallet.createRandom();
-  participants[i] = wallets[i].address;
-}
 
 describe('isExternalDestination', () => {
   it('verifies an external destination', async () => {
