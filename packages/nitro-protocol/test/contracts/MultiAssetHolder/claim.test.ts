@@ -12,10 +12,17 @@ import {
 import {TESTNitroAdjudicator} from '../../../typechain/TESTNitroAdjudicator';
 // eslint-disable-next-line import/order
 import TESTNitroAdjudicatorArtifact from '../../../artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json';
-import {channelDataToStatus, encodeOutcome, hashOutcome, Outcome} from '../../../src';
+import {
+  channelDataToStatus,
+  convertBytes32ToAddress,
+  encodeOutcome,
+  hashOutcome,
+  Outcome,
+} from '../../../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../src/transactions';
+const provider = getTestProvider();
 const testNitroAdjudicator: TESTNitroAdjudicator & Contract = (setupContract(
-  getTestProvider(),
+  provider,
   TESTNitroAdjudicatorArtifact,
   process.env.TEST_NITRO_ADJUDICATOR_ADDRESS
 ) as unknown) as TESTNitroAdjudicator & Contract;
@@ -59,8 +66,8 @@ describe('claim', () => {
     ${'15. (all) swap guarantee, overfunded, 2 destinations'}         | ${{g: 12}} | ${['B', 'A']}         | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 0, B: 0}}       | ${{g: 2}}        | ${{A: 5, B: 5}} | ${undefined}
     ${'16. (all) underspecified guarantee, overfunded      '}         | ${{g: 12}} | ${['B']}              | ${{A: 5, B: 5}}       | ${[]}   | ${{A: 5, B: 0}}       | ${{g: 7}}        | ${{A: 5, B: 5}} | ${undefined}
     ${'17. guarantee and target assets do not match'}                 | ${{g: 1}}  | ${['A', 'B']}         | ${{A: 5, B: 5}}       | ${[1]}  | ${{A: 4, B: 5}}       | ${{g: 0}}        | ${{A: 1}}       | ${reason6}
-    ${'18. absent guarantee entry, indices=[], bad guarantee order'}  | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[]}   | ${{x: 10, I: 0}}      | ${{g: 0, x: 0}}  | ${{I: 10}}      | ${undefined}
-    ${'19. absent guarantee entry, indices=[1], bad guarantee order'} | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[1]}  | ${{x: 10, I: 0}}      | ${{g: 0, x: 0}}  | ${{I: 10}}      | ${undefined}
+    ${'18. absent guarantee entry, indices=[], bad guarantee order'}  | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[]}   | ${{x: 10, I: 0}}      | ${{g: 0}}        | ${{I: 10}}      | ${undefined}
+    ${'19. absent guarantee entry, indices=[1], bad guarantee order'} | ${{g: 10}} | ${['A', 'I', 'x']}    | ${{x: 10, I: 10}}     | ${[1]}  | ${{x: 10, I: 0}}      | ${{g: 0}}        | ${{I: 10}}      | ${undefined}
     ${'20. absent guarantee entry, indices=[]'}                       | ${{g: 10}} | ${['A', 'x', 'I']}    | ${{x: 10, I: 10}}     | ${[]}   | ${{x: 0, I: 10}}      | ${{g: 0, x: 10}} | ${{}}           | ${undefined}
     ${'21. absent guarantee entry, indices=[1]'}                      | ${{g: 10}} | ${['A', 'x', 'I']}    | ${{x: 10, I: 10}}     | ${[0]}  | ${{x: 0, I: 10}}      | ${{g: 0, x: 10}} | ${{}}           | ${undefined}
   `(
@@ -173,6 +180,14 @@ describe('claim', () => {
         ).wait();
       }
 
+      // record eth balances before the transaction so we can check payouts later
+      const ethBalancesBefore = {};
+      await Promise.all(
+        Object.keys(payouts).map(async destination => {
+          const address = convertBytes32ToAddress(destination);
+          ethBalancesBefore[address] = await provider.getBalance(address);
+        })
+      );
       const tx = testNitroAdjudicator.claim(
         0,
         guarantorId,
@@ -228,6 +243,18 @@ describe('claim', () => {
 
         // Check that each expectedEvent is contained as a subset of the properies of each *corresponding* event: i.e. the order matters!
         expect(eventsFromTx).toMatchObject(expectedEvents);
+
+        // check payouts
+        await Promise.all(
+          Object.keys(payouts).map(async destination => {
+            const address = convertBytes32ToAddress(destination);
+            expect(
+              (await provider.getBalance(address)).eq(
+                ethBalancesBefore[address].add(payouts[destination])
+              )
+            ).toBe(true);
+          })
+        );
       }
     }
   );
