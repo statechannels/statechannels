@@ -352,7 +352,6 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         (
             Outcome.AllocationItem[] memory newAllocation,
             ,
-            uint256[] memory payouts,
             uint256 totalPayouts
         ) = _computeNewAllocationWithGuarantee(initialHoldings, allocation, indices, guarantee);
 
@@ -366,14 +365,15 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         // INTERACTIONS
         // *******
 
-        for (uint256 j = 0; j < payouts.length; j++) {
-            if (payouts[j] > 0) {
-                bytes32 destination = allocation[indices.length > 0 ? indices[j] : j].destination;
+        for (uint256 j = 0; j < newAllocation.length; j++) {
+            uint256 payout = allocation[j].amount - newAllocation[j].amount;
+            if (payout > 0) {
+                bytes32 destination = newAllocation[j].destination;
                 // storage updated BEFORE external contracts called (prevent reentrancy attacks)
                 if (_isExternalDestination(destination)) {
-                    _transferAsset(asset, _bytes32ToAddress(destination), payouts[j]);
+                    _transferAsset(asset, _bytes32ToAddress(destination), payout);
                 } else {
-                    assetHoldings[destination] += payouts[j];
+                    assetHoldings[destination] += payout;
                 }
             }
         }
@@ -392,13 +392,10 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         returns (
             Outcome.AllocationItem[] memory newAllocation,
             bool allocatesOnlyZeros,
-            uint256[] memory payouts,
             uint256 totalPayouts
         )
     {
         // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
         totalPayouts = 0;
         allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
         uint256 surplus = initialHoldings; // tracks funds available during calculation
@@ -429,8 +426,8 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
                         // only if specified in supplied indices, or we if we are doing "all"
                         // reduce the new allocationItem.amount
                         newAllocation[i].amount -= affordsForDestination;
-                        // increase the relevant payout
-                        payouts[k] += affordsForDestination;
+                        // the amount subtracted should be paid out to this destination
+                        // increase the total payouts
                         totalPayouts += affordsForDestination;
                         // move on to the next supplied index
                         ++k;

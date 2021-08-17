@@ -28,7 +28,7 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 3963428, // Singleton
+      NitroAdjudicator: 3942872, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
@@ -107,9 +107,9 @@ export const gasRequiredTo: GasRequiredTo = {
       challengeJ: 101068,
       challengeX: 92757,
       transferAllAssetsL: 65462,
-      claimG: 82369,
-      transferAllAssetsX: 114930,
-      total: 642227,
+      claimG: 94510,
+      transferAllAssetsX: 44478,
+      total: 583916,
     },
   },
 };
