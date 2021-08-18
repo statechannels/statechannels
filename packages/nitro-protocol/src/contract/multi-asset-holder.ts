@@ -62,12 +62,8 @@ export function computeNewAllocationWithGuarantee(
 ): {
   newAllocation: AllocationItem[];
   allocatesOnlyZeros: boolean;
-  payouts: string[];
   totalPayouts: string;
 } {
-  const payouts: string[] = Array(indices.length > 0 ? indices.length : allocation.length).fill(
-    BigNumber.from(0).toHexString()
-  );
   let totalPayouts = BigNumber.from(0);
   let allocatesOnlyZeros = true;
   let surplus = BigNumber.from(initialHoldings);
@@ -101,8 +97,8 @@ export function computeNewAllocationWithGuarantee(
           newAllocation[i].amount = BigNumber.from(newAllocation[i].amount)
             .sub(affordsForDestination)
             .toHexString();
-          // increase the relevant payout
-          payouts[k] = affordsForDestination.toHexString();
+          // the amount subtracted should be paid out to this destination
+          // increase the total payouts
           totalPayouts = totalPayouts.add(affordsForDestination);
           ++k;
         }
@@ -121,7 +117,6 @@ export function computeNewAllocationWithGuarantee(
   return {
     newAllocation,
     allocatesOnlyZeros,
-    payouts,
     totalPayouts: totalPayouts.toHexString(),
   };
 }
@@ -204,7 +199,7 @@ export function computeNewOutcome(
   const oldAllocation = (oldOutcome[assetIndex] as AllocationAssetOutcome).allocationItems;
 
   // Use the emulated, pure solidity functions to figure out what the chain will have done
-  const {newAllocation, payouts, totalPayouts} = guarantee
+  const {newAllocation, totalPayouts} = guarantee
     ? computeNewAllocationWithGuarantee(
         allocationUpdatedEvent.initialHoldings,
         oldAllocation,
@@ -220,14 +215,9 @@ export function computeNewOutcome(
     allocationItems: newAllocation,
   };
 
-  const longHandIndices =
-    indices.length === 0
-      ? Array.from(Array(payouts.length).keys()) // [0,1,2,...] all indices up to payouts.length
-      : indices;
-
-  const hydratedPayouts: AllocationItem[] = payouts.map((v, i) => ({
-    destination: oldAllocation[longHandIndices[i]].destination,
-    amount: v,
+  const hydratedPayouts: AllocationItem[] = oldAllocation.map((v, i) => ({
+    destination: oldAllocation[i].destination,
+    amount: BigNumber.from(oldAllocation[i].amount).sub(newAllocation[i].amount).toHexString(),
   }));
 
   const externalPayouts = hydratedPayouts.filter(payout =>

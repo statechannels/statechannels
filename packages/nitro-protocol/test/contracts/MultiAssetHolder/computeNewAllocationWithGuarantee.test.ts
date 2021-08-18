@@ -73,8 +73,5 @@ describe('MultiAssetHolder._computeNewAllocationWithGuarantee', () => {
       locallyComputedNewAllocation.allocatesOnlyZeros
     );
     expect(result.totalPayouts).toEqual(BigNumber.from(locallyComputedNewAllocation.totalPayouts));
-    expect(result.payouts).toMatchObject(
-      locallyComputedNewAllocation.payouts.map(p => BigNumber.from(p))
-    );
   });
 });
