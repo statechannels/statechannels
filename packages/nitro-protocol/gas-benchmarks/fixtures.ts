@@ -195,9 +195,9 @@ export const J = new TestChannel(
 export const G = new TestChannel(6, [Alice, Ingrid], {
   targetChannelId: J.channelId,
   destinations: [
+    X.channelId,
     convertAddressToBytes32(Alice.address),
     convertAddressToBytes32(Ingrid.address),
-    X.channelId,
   ],
 });
 export const LforG = new TestChannel(

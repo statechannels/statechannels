@@ -103,13 +103,13 @@ export const gasRequiredTo: GasRequiredTo = {
       // claimG                      ⬛ ----------------------> (X) -> 👩
       // transferAllAssetsX          ⬛ -----------------------------> 👩
       challengeL: 91691,
-      challengeG: 93950,
+      challengeG: 93974,
       challengeJ: 101068,
       challengeX: 92757,
       transferAllAssetsL: 65462,
-      claimG: 94510,
-      transferAllAssetsX: 44478,
-      total: 583916,
+      claimG: 81523,
+      transferAllAssetsX: 114930,
+      total: 641405,
     },
   },
 };
