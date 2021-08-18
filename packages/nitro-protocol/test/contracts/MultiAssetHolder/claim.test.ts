@@ -207,6 +207,7 @@ describe('claim', () => {
           ethBalancesBefore[address] = await provider.getBalance(address);
         })
       );
+
       const tx = testNitroAdjudicator.claim(
         0,
         guarantorId,
@@ -267,11 +268,9 @@ describe('claim', () => {
         await Promise.all(
           Object.keys(payouts).map(async destination => {
             const address = convertBytes32ToAddress(destination);
-            expect(
-              (await provider.getBalance(address)).eq(
-                ethBalancesBefore[address].add(payouts[destination])
-              )
-            ).toBe(true);
+            const balanceAfter = await provider.getBalance(address);
+            const expectedBalanceAfter = ethBalancesBefore[address].add(payouts[destination]);
+            expect(balanceAfter).toEqual(expectedBalanceAfter);
           })
         );
       }
