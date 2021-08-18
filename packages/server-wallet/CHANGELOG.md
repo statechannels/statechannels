@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.25.1](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.25.0...@statechannels/server-wallet@1.25.1) (2021-08-04)
+
+
+### Bug Fixes
+
+* import/export computeNewOutcome thru entry point ([#3718](https://github.com/statechannels/statechannels/issues/3718)) ([75539cc](https://github.com/statechannels/statechannels/commit/75539cc40e68ee82be6db696105d29ff04fb5cf1))
+* update chain service to not include challenger address ([37aaa03](https://github.com/statechannels/statechannels/commit/37aaa03dd7c8f17842a11c572144cbd93ef9dcdf))
+
+
+
+
+
 # [1.25.0](https://github.com/statechannels/statechannels/compare/@statechannels/server-wallet@1.24.0...@statechannels/server-wallet@1.25.0) (2021-07-28)
 
 

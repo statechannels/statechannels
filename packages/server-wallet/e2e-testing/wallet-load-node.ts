@@ -4,11 +4,14 @@ import chalk from 'chalk';
 import P from 'pino';
 import got from 'got';
 import ms from 'ms';
+import {StopWatch} from 'stopwatch-node';
+import prettyMilliseconds from 'pretty-ms';
 
 import {WalletConfig} from '../src/config';
 import {ObjectiveDoneResult, UpdateChannelResult, Wallet} from '../src/wallet';
 import {SocketIOMessageService} from '../src/message-service/socket-io-message-service';
 import {createLogger} from '../src/logger';
+import {LatencyOptions} from '../src/message-service/test-message-service';
 
 import {
   CloseChannelStep,
@@ -20,13 +23,13 @@ import {
   Step,
   UpdateChannelStep,
 } from './types';
-
 export class WalletLoadNode {
   private steps: Step[] = [];
   private jobToChannelMap: JobChannelLink[] = [];
   private completedSteps = 0;
   private server: Express;
   private proposedObjectives = new Set<string>();
+  private proposedObjectivePromises = new Array<Promise<ObjectiveDoneResult>>();
 
   private constructor(
     private serverWallet: Wallet,
@@ -40,8 +43,9 @@ export class WalletLoadNode {
         // This is an easy work around for https://github.com/statechannels/statechannels/issues/3668
         if (!this.proposedObjectives.has(o.objectiveId)) {
           this.logger.trace({objectiveId: o.objectiveId}, 'Auto approving objective');
-          this.serverWallet.approveObjectives([o.objectiveId]);
+          const [result] = await this.serverWallet.approveObjectives([o.objectiveId]);
           this.proposedObjectives.add(o.objectiveId);
+          this.proposedObjectivePromises.push(result.done);
         }
       }
     });
@@ -56,17 +60,22 @@ export class WalletLoadNode {
       req.setTimeout(ms('1 day'));
 
       this.logger.trace('Starting job processing');
+
       console.log(chalk.whiteBright('Starting job processing..'));
       this.outputChannelStats();
       // If we didn't receive this from a peer it means it came from the user
       // We want to kick off processing in all nodes so we message our peers
       const fromPeer = req.query['fromPeer'];
+      const stopWatch = new StopWatch();
+      stopWatch.start();
       if (!fromPeer) {
         await Promise.all([this.runJobs(), this.sendGetRequestToPeers('/start?fromPeer=true')]);
       } else {
         await this.runJobs();
       }
-
+      await Promise.all(this.proposedObjectivePromises);
+      stopWatch.stop();
+      console.log(`Job processing took ${prettyMilliseconds(stopWatch.getTotalTime())}`);
       res.end();
     });
 
@@ -127,10 +136,11 @@ export class WalletLoadNode {
     const ourSteps = this.steps.filter(s => s.serverId === this.loadNodeConfig.serverId);
     const createdAmount = ourSteps.filter(s => s.type === 'CreateChannel').length;
     const ledgerAmount = ourSteps.filter(s => s.type === 'CreateLedgerChannel').length;
+    const isLedgerFunding = this.steps.some(s => s.type === 'CreateLedgerChannel');
     console.log(
       chalk.whiteBright(
         `This node will create ${createdAmount} channel(s) using ${
-          ledgerAmount > 0 ? 'ledger' : 'direct'
+          isLedgerFunding ? 'ledger' : 'direct'
         } funding`
       )
     );
@@ -318,6 +328,10 @@ export class WalletLoadNode {
    */
   public async registerMessagePeer(port: number): Promise<void> {
     this.serverWallet.messageService.registerPeer(`http://localhost:${port}`);
+  }
+
+  public setLatencyOptions(latencyOptions: LatencyOptions): void {
+    (this.serverWallet.messageService as SocketIOMessageService).setLatencyOptions(latencyOptions);
   }
 
   public static async create(

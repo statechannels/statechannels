@@ -26,6 +26,18 @@ async function startAll() {
       description: 'The file containing the load data to send to the nodes',
       demandOption: 'true',
       type: 'string',
+    })
+    .option('meanDelay', {
+      default: 0,
+      describe:
+        'The mean delay (in MS) that the node will wait before attempting to send a message. If undefined or 0 no delays are added.',
+      type: 'number',
+    })
+    .option('dropRatePercentage', {
+      default: 0,
+      min: 0,
+      max: 100,
+      describe: 'The percentage of messages that get dropped when trying to send a message.',
     }).argv;
 
   const ganache = execa.command(`npx ts-node ${SCRIPT_DIR}/start-ganache.ts -d off`, {all: true});
@@ -34,12 +46,15 @@ async function startAll() {
   const servers: execa.ExecaChildProcess<string>[] = [];
 
   const roles = (await jsonfile.readFile(commandArguments.roleFile)) as Record<string, RoleConfig>;
-
+  const {dropRatePercentage, meanDelay} = commandArguments;
   for (const roleId of Object.keys(roles)) {
     const color = roleId === 'A' ? chalk.yellow : chalk.cyan;
-    const server = execa.command(`npx ts-node ${SCRIPT_DIR}/start-load-node.ts --role ${roleId}`, {
-      all: true,
-    });
+    const server = execa.command(
+      `npx ts-node ${SCRIPT_DIR}/start-load-node.ts --role ${roleId} --dropRatePercentage ${dropRatePercentage} --meanDelay ${meanDelay}`,
+      {
+        all: true,
+      }
+    );
     registerHandlers(server, roleId, color);
     servers.push(server);
   }
@@ -60,8 +75,28 @@ async function startAll() {
   // This will resolve when all the jobs have run
   await got.get(`http://localhost:${loadServerPort}/start`, {retry: 0});
 
+  // Wrap up all the existing processes
+  servers.forEach(s => s.cancel());
+  ganache.cancel();
+
+  // Run the sanity checker
+  const {
+    stdout,
+    stderr,
+    exitCode,
+  } = await execa.command(
+    `npx ts-node ${SCRIPT_DIR}/sanity-checker.ts -l ${commandArguments.loadFile}`,
+    {env: {FORCE_COLOR: 'true'}}
+  );
+
+  console.log(stdout);
+
+  if (exitCode !== 0) {
+    console.error(stderr);
+    process.exit(exitCode);
+  }
+
   console.log(chalk.greenBright('SUCCESS!'));
-  // Execa is smart enough to clean up all child processes for us
   process.exit(0);
 }
 
@@ -79,10 +114,6 @@ function registerHandlers(
 ) {
   childProcess.on('error', err => {
     console.error(err);
-    process.exit(1);
-  });
-  childProcess.on('exit', errCode => {
-    console.error(`${childProcess.spawnfile} failed with error code ${errCode}`);
     process.exit(1);
   });
 

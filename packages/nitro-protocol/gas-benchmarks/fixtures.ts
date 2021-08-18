@@ -1,7 +1,7 @@
 import {Signature} from '@ethersproject/bytes';
 import {Wallet} from '@ethersproject/wallet';
 import {AllocationType} from '@statechannels/exit-format';
-import {ContractReceipt, ethers} from 'ethers';
+import {BigNumber, BigNumberish, constants, ContractReceipt, ethers} from 'ethers';
 
 import {
   Bytes32,
@@ -37,6 +37,11 @@ export const Ingrid = new Wallet(
   '0x558789345da13a7ac1d6d6ac9275ba66836eb4a088efc1920db0f5d092d6ee71'
 );
 export const participants = [Alice.address, Bob.address];
+
+export const amountForAlice = BigNumber.from(5).toHexString();
+export const amountForBob = BigNumber.from(5).toHexString();
+export const amountForAliceAndBob = BigNumber.from(amountForAlice).add(amountForBob).toHexString();
+
 class TestChannel {
   constructor(
     channelNonce: number,
@@ -160,13 +165,13 @@ export const X = new TestChannel(
   [
     {
       destination: convertAddressToBytes32(Alice.address),
-      amount: '0x5',
+      amount: amountForAlice,
       metadata: '0x',
       allocationType: AllocationType.simple,
     },
     {
       destination: convertAddressToBytes32(Bob.address),
-      amount: '0x5',
+      amount: amountForBob,
       metadata: '0x',
       allocationType: AllocationType.simple,
     },
@@ -180,13 +185,13 @@ export const Y = new TestChannel(
   [
     {
       destination: convertAddressToBytes32(Alice.address),
-      amount: '0x5',
+      amount: amountForAlice,
       metadata: '0x',
       allocationType: AllocationType.simple,
     },
     {
       destination: convertAddressToBytes32(Bob.address),
-      amount: '0x5',
+      amount: amountForBob,
       metadata: '0x',
       allocationType: AllocationType.simple,
     },
@@ -197,7 +202,14 @@ export const Y = new TestChannel(
 export const LforX = new TestChannel(
   4,
   [Alice, Bob],
-  [{destination: X.channelId, amount: '0xa', metadata: '0x', allocationType: AllocationType.simple}]
+  [
+    {
+      destination: X.channelId,
+      amount: amountForAliceAndBob,
+      metadata: '0x',
+      allocationType: AllocationType.simple,
+    },
+  ]
 );
 
 /** Joint channel between Alice, Bob, and Ingrid, funding application channel X */
@@ -207,13 +219,13 @@ export const J = new TestChannel(
   [
     {
       destination: X.channelId,
-      amount: '0xa',
+      amount: amountForAliceAndBob,
       metadata: '0x',
       allocationType: AllocationType.simple,
     },
     {
       destination: convertAddressToBytes32(Ingrid.address),
-      amount: '0xa',
+      amount: amountForAliceAndBob,
       metadata: '0x',
       allocationType: AllocationType.simple,
     },
@@ -275,4 +287,49 @@ export async function challengeChannelAndExpectGas(
 
   const finalizesAt = await getFinalizesAtFromTransactionHash(challengeTx.hash);
   return {proof, finalizesAt};
+}
+
+interface ETHBalances {
+  Alice: BigNumberish;
+  Bob: BigNumberish;
+  Ingrid: BigNumberish;
+}
+
+interface ETHHoldings {
+  LforJ: BigNumberish;
+  J: BigNumberish;
+  X: BigNumberish;
+}
+
+/**
+ * Asserts the ETH balance of the supplied ethereum account addresses and the ETH holdings in the statechannels asset holding contract for the supplied channelIds.
+ */
+export async function assertEthBalancesAndHoldings(
+  ethBalances: Partial<ETHBalances>,
+  ethHoldings: Partial<ETHHoldings>
+): Promise<void> {
+  const internalDestinations: {[Property in keyof ETHHoldings]: string} = {
+    LforJ: LforJ.channelId,
+    J: J.channelId,
+    X: X.channelId,
+  };
+  const externalDestinations: {[Property in keyof ETHBalances]: string} = {
+    Alice: Alice.address,
+    Bob: Bob.address,
+    Ingrid: Ingrid.address,
+  };
+  await Promise.all([
+    ...Object.keys(ethHoldings).map(async key => {
+      expect(
+        (await nitroAdjudicator.holdings(constants.AddressZero, internalDestinations[key])).eq(
+          BigNumber.from(ethHoldings[key])
+        )
+      ).toBe(true);
+    }),
+    ...Object.keys(ethBalances).map(async key => {
+      expect(
+        (await provider.getBalance(externalDestinations[key])).eq(BigNumber.from(ethBalances[key]))
+      ).toBe(true);
+    }),
+  ]);
 }

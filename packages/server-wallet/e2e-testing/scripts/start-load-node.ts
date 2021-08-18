@@ -16,7 +16,12 @@ import {
 import {DBAdmin} from '../../src';
 import {ARTIFACTS_DIR} from '../../jest/chain-setup';
 import {WalletLoadNode} from '../wallet-load-node';
-import {createArtifactDirectory, getRoleInfo, setupUnhandledErrorListeners} from '../utils';
+import {
+  createArtifactDirectory,
+  createTempDirectory,
+  getRoleInfo,
+  setupUnhandledErrorListeners,
+} from '../utils';
 
 setupUnhandledErrorListeners();
 
@@ -26,11 +31,18 @@ setupNode().then(serverNode => {
 });
 
 async function setupNode(): Promise<WalletLoadNode> {
-  createArtifactDirectory();
+  await createArtifactDirectory();
+  await createTempDirectory();
 
-  const {role: roleId, roleFile, dbPoolSizeMax, migrateDB, clearDB} = await yargs(
-    hideBin(process.argv)
-  )
+  const {
+    role: roleId,
+    roleFile,
+    dbPoolSizeMax,
+    migrateDB,
+    clearDB,
+    meanDelay,
+    dropRatePercentage,
+  } = await yargs(hideBin(process.argv))
     .option('role', {
       alias: 'r',
       describe: 'The id of the role for this node',
@@ -57,6 +69,18 @@ async function setupNode(): Promise<WalletLoadNode> {
       alias: 'c',
       default: true,
       describe: 'Whether the db is truncated before the node is started',
+    })
+    .option('meanDelay', {
+      default: 0,
+      describe:
+        'The mean delay (in MS) that the node will wait before attempting to send a message. If undefined or 0 no delays are added.',
+      type: 'number',
+    })
+    .option('dropRatePercentage', {
+      default: 0,
+      min: 0,
+      max: 100,
+      describe: 'The percentage of messages that get dropped when trying to send a message.',
     }).argv;
 
   const {peers, roleConfig} = await getRoleInfo(roleFile, roleId);
@@ -123,6 +147,8 @@ async function setupNode(): Promise<WalletLoadNode> {
   for (const {messagePort} of peers) {
     await serverNode.registerMessagePeer(messagePort);
   }
+  const dropRate = dropRatePercentage / 100;
+  serverNode.setLatencyOptions({meanDelay, dropRate});
 
   return serverNode;
 }

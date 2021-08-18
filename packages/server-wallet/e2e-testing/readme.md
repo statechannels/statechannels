@@ -2,12 +2,15 @@
 # Quick Start
 
 ```shell
-npx ts-node ./e2e-testing/scripts/start-all.ts -l ./e2e-testing/test-data/sample-direct-load-data.json
+npx ts-node ./e2e-testing/scripts/load-generator.ts -o ./temp/sample_load.json -f Direct
+npx ts-node ./e2e-testing/scripts/start-all.ts -l ./temp/sample_load.json
 ```
 
-This runs the `start-all` script which starts up [ganache](#start-ganache) and two [server wallets](#load-node).
+This generates a [load file](#load-file) that uses Direct funding.
 
-It then sends a sample [load file](#load-file) that tells the wallets how many channels to create and close (and when to try and create them).
+The `start-all` script then starts up [ganache](#start-ganache) and two [server wallets](#load-node).
+
+It then sends the generated [load file](#load-file) that tells the wallets how many channels to create and close (and when to try and create them).
 
 It then tells the nodes to start processing those instructions and waits for it to complete  succesfully.
 
@@ -93,9 +96,19 @@ The `serverId` indicates which LoadNode is responsible for that step. Each LoadN
 
 All scripts are typescript files that can be run with `ts-node`.
 
+## Sanity Checker
+
+The sanity checker is a simple script that checks databases and ganache balances to make sure the correct amount of channels were created and the on-chain funds ended up where we thought.
+
+The main argument it accepts is the load file to use. The sanity checker uses this to figure out how many channels we expect to see in the database (and in what status).
+
+The sanity checker also checks the balance file outputed by `start-ganache`. It checks the destinations and contracts to perform a rough check of on-chain funds.
+
 ## Start Ganache
 
 This is similar to what we have in devtools but I wanted to avoid messing with env vars. It is responsible for starting ganache and deploying the contracts.
+
+When the script stops running it saves the balances to a file, so we can easily check the final state of the chain.
 
 ## Start Load Node
 

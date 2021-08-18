@@ -16,6 +16,9 @@ import {COUNTING_APP_DEFINITION} from '../../src/models/__test__/fixtures/app-by
 import {FundingInfo, RoleConfig, Step} from '../types';
 import {setupUnhandledErrorListeners} from '../utils';
 
+// We want to create all the ledger channels in the first 5 seconds.
+const MAX_CREATE_LEDGER_TIME = ms('5 seconds');
+
 setupUnhandledErrorListeners();
 
 createLoad();
@@ -31,8 +34,7 @@ async function createLoad() {
     closeDelay,
     fundingStrategy,
     ledgerDelay,
-    ledgerRate,
-    createLedgerDuration,
+    amountOfLedgerChannels,
   } = await yargs(hideBin(process.argv))
     .option('prettyOutput', {
       default: true,
@@ -51,7 +53,7 @@ async function createLoad() {
     })
     .option('fundingStrategy', {
       alias: 'f',
-      describe: 'Whether channels are funded directly or by ledger channels.',
+      describe: 'Whether application channels are funded directly or by ledger channels.',
       choices: ['Ledger', 'Direct'],
       demandOption: true,
     })
@@ -59,8 +61,7 @@ async function createLoad() {
       alias: 'd',
       min: 10,
       default: 60,
-      describe: `The amount of time (in seconds) that the load should run for.
-      This dictactes the max timestamp a step can have.`,
+      describe: `The amount of time (in seconds) that the load should run for. Steps will be generated with a timestamp such that step.timestamp <= duration.`,
     })
     .option('createRate', {
       alias: 'cr',
@@ -68,26 +69,20 @@ async function createLoad() {
       default: 1,
       describe: 'The number of channels that should be created per a second.',
     })
-    .option('createLedgerDuration', {
-      default: 5,
-      min: 5,
-      describe: `The amount of time (in seconds) that create ledger channels can be scheduled for.
-      This dictates the max timestamp a step can have.`,
-    })
-    .option('ledgerRate', {
+    .option('amountOfLedgerChannels', {
+      alias: 'l',
       default: 1,
-      min: 1,
-      describe: `The number of ledger channels to create per second during the createLedgerDuration.`,
+      describe: `The number of ledger channels that will be created and used for funding.`,
     })
     .option('ledgerDelay', {
       default: 20,
       min: 0,
-      describe: `The minumum amount of time (in seconds) to wait for a ledger channel to be created before scheduling a createChannel job.`,
+      describe: `The minumum amount of time (in seconds) to wait before attempting to use a ledger channel. This is used to prevent using a ledger channel that has not finished being funded.`,
     })
     .option('closeDelay', {
       default: 5,
       min: 0,
-      describe: `The minumum amount of time (in seconds) to wait before closing a channel.`,
+      describe: `The minumum amount of time (in seconds) to wait before closing a channel. This is used to prevent closing a channel that has not finished being funded.`,
     })
     .option('closeRate', {
       default: 0,
@@ -117,8 +112,7 @@ async function createLoad() {
       chalk.whiteBright(
         `Ledger options ${util.inspect({
           ledgerDelay,
-          ledgerRate,
-          createLedgerDuration,
+          amountOfLedgerChannels,
         })}`
       )
     );
@@ -142,7 +136,7 @@ async function createLoad() {
 
   let steps: Step[] = [];
   if (fundingStrategy === 'Ledger') {
-    steps = generateCreateLedgerSteps(ledgerRate, createLedgerDuration, roles);
+    steps = generateCreateLedgerSteps(amountOfLedgerChannels, duration, roles);
   }
   steps = generateCreateSteps(
     createRate,
@@ -160,13 +154,13 @@ async function createLoad() {
 }
 
 function generateCreateLedgerSteps(
-  ledgerRate: number,
+  amountOfLedgerChannels: number,
   duration: number,
   roles: Record<string, RoleConfig>
 ): Step[] {
   const steps: Step[] = [];
-  _.times(ledgerRate * duration, () => {
-    const timestamp = generateRandomInteger(0, toMilliseconds(duration));
+  _.times(amountOfLedgerChannels, () => {
+    const timestamp = generateRandomInteger(0, MAX_CREATE_LEDGER_TIME);
     const startIndex = generateRandomInteger(0, Object.keys(roles).length - 1);
 
     const participants = generateParticipants(roles, startIndex);
@@ -198,7 +192,7 @@ function generateCloseSteps(
 
   if (closeRate > 0) {
     _.times(closeRate * duration, () => {
-      const createStep = getRandomJobToClose(previousSteps);
+      const createStep = getRandomJobToClose(steps);
 
       if (createStep) {
         // We want a close timestamp that occurs at least closeDelay time after the create time
@@ -296,8 +290,8 @@ function generateParticipants(roles: Record<string, RoleConfig>, startIndex: num
     const role = roleArray[(i + startIndex) % roleArray.length];
 
     const {address: signingAddress} = new ethers.Wallet(role.privateKey);
-    const {address: destinationAddress} = new ethers.Wallet(role.chainPrivateKey);
-    const destination = hexZeroPad(destinationAddress, 32);
+
+    const destination = hexZeroPad(role.destination, 32);
 
     participants.push({signingAddress, participantId: role.roleId, destination});
   }

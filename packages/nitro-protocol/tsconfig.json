@@ -13,6 +13,18 @@
     "resolveJsonModule": true,
     "downlevelIteration": true
   },
-  "include": ["src/**/*", "test/test-helpers.ts", "artifacts/**/*.json", "addresses.json"],
+  "include": [
+    "src/**/*",
+    "artifacts/contracts/Token.sol/Token.json",
+    "artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json",
+    "artifacts/contracts/test/TESTNitroAdjudicator.sol/TESTNitroAdjudicator.json",
+    "artifacts/contracts/CountingApp.sol/CountingApp.json",
+    "artifacts/contracts/examples/HashLockedSwap.sol/HashLockedSwap.json",
+    "artifacts/contracts/interfaces/IForceMoveApp.sol/IForceMoveApp.json",
+    "artifacts/contracts/ForceMove.sol/ForceMove.json",
+    "addresses.json",
+    "test/test-helpers.ts"
+  ],
+  "exclude": ["node_modules", "artifacts/build-info/**/*.json", "artifacts/**/*.dbg.json"],
   "references": [{"path": "../jest-gas-reporter"}]
 }

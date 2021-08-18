@@ -8,23 +8,27 @@ import {
   LforX,
   LforJ,
   J,
+  assertEthBalancesAndHoldings,
+  amountForAlice,
+  amountForBob,
+  amountForAliceAndBob,
 } from './fixtures';
 import {gasRequiredTo} from './gas';
 import {nitroAdjudicator, token} from './vanillaSetup';
 
 /**
- * Ensures the supplied asset holder always has a nonzero token balance.
+ * Ensures the asset holding contract always has a nonzero token balance.
  */
 async function addResidualTokenBalance(asset: string) {
   /**
    * Funding someOtherChannel with tokens, as well as the channel in question
    * makes the benchmark more realistic. In practice many other
-   * channels are funded by this asset holder. If we didn't reflect
+   * channels are funded by the nitro adjudicator. If we didn't reflect
    * that, our benchmark might reflect a gas refund for clearing storage
    * in the token contract (setting the token balance of the asset holder to 0)
    * which we would only expect in rare cases.
    */
-  await (await nitroAdjudicator.deposit(asset, Y.channelId, 0, 1)).wait(); // other channels are funded by this asset holder
+  await (await nitroAdjudicator.deposit(asset, Y.channelId, 0, 1)).wait();
 }
 
 describe('Consumes the expected gas for deployments', () => {
@@ -218,6 +222,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
     await waitForChallengesToTimeOut([ledgerFinalizesAt, jointChannelFinalizesAt, finalizesAt]);
     // end wait
     // challenge L,J,X + timeout   ⬛ -> (L) -> (J) -> (X) -> 👩
+    await assertEthBalancesAndHoldings(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforJ: amountForAliceAndBob, J: 0, X: 0}
+    );
     await expect(
       await nitroAdjudicator.claim({
         sourceChannelId: LforJ.channelId,
@@ -232,6 +240,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
       })
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.claimL);
     // claimL                      ⬛ ---------------> (X) -> 👩
+    await assertEthBalancesAndHoldings(
+      {Alice: 0, Bob: 0, Ingrid: 0},
+      {LforJ: 0, J: 0, X: amountForAliceAndBob}
+    );
     await expect(
       await nitroAdjudicator.transferAllAssets(
         X.channelId,
@@ -240,6 +252,10 @@ describe('Consumes the expected gas for sad-path exits', () => {
       )
     ).toConsumeGas(gasRequiredTo.ETHexitSadVirtualFunded.vanillaNitro.transferAllAssetsX);
     // transferAllAssetsX          ⬛ ----------------------> 👩
+    await assertEthBalancesAndHoldings(
+      {Alice: amountForAlice, Bob: amountForBob, Ingrid: 0},
+      {LforJ: 0, J: 0, X: 0}
+    );
 
     // meta-test here to confirm the total recorded in gas.ts is up to date
     // with the recorded costs of each step

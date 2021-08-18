@@ -1,4 +1,6 @@
 import {CreateChannelParams, UpdateChannelParams} from '@statechannels/client-api-schema';
+import {Uint256} from '@statechannels/nitro-protocol';
+import {BigNumberish} from 'ethers';
 
 import {CreateLedgerChannelParams} from '../src/wallet';
 
@@ -72,4 +74,12 @@ export type RoleConfig = {
   artifactFile: string;
   privateKey: string;
   chainPrivateKey: string;
+  destination: string;
 };
+
+export type ChainState = {
+  accounts: Record<string, Uint256>;
+  contracts: Record<'NITRO_ADJUDICATOR_ADDRESS', {balance: Uint256; address: string}>;
+};
+
+export type Assertion = {expected: BigNumberish; actual: BigNumberish; description: string};

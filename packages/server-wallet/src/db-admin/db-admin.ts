@@ -118,7 +118,7 @@ export class DBAdmin {
   }
 }
 
-function getKnexFromConfig(config: IncomingWalletConfig): Knex {
+export function getKnexFromConfig(config: IncomingWalletConfig): Knex {
   const populatedConfig = _.assign({}, defaultConfig, config);
   return Knex(extractDBConfigFromWalletConfig(populatedConfig));
 }
