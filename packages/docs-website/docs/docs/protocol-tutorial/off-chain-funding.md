@@ -224,102 +224,181 @@ We could fund more application channels from the same ledger channel in the same
 
 ## Indirect defunding
 
-Let's say application A1 finished and between me and the hub, we finalize it off chain with an outcome that allocates all the funds to me. To defund it off chain, we just agree to get the funds back into the ledger channel in a manner that preserves each of our balances in the funding graph.
+## Virtual funding
+
+It is possible for two parties (Alice and Bob) each having a ledger channel connection with the same hub, to use those connections to fund a channel off-chain without ever needing a directly funded channel. This is called virtual funding.
+
+Concretely, let us start from the a situation where Alice and the hub have a directly funded ledger channel `LA`, and Bob and the hub have a directly funded ledger channel `LB`. The channel they wish to fund is called `X`, and has initial balances `{Alice: a, Bob: b}`. Each ledger channel is funded on chain with `x := a + b`.
 
 ```typescript
-// Construct a state that allocates 6 wei to me
-
-const sixForMe: State = {
-  isFinal: true,
-  channel: applicationChannel1,
-  outcome: [
-    {
-      asset: MAGIC_ADDRESS_INDICATING_ETH,
-      allocationItems: [{destination: myDestination, amount: parseUnits('6', 'wei').toHexString()}]
-    }
-  ],
-  appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
-  appData: HashZero,
-  challengeDuration: 86400, // 1 day
-  turnNum: 100
+// In lesson17.test.ts (TODO)
+// Construct an application channel to be funded virtually
+const participants = [alice, bob, hub];
+const chainId = '0x1234';
+const X: Channel = {
+  chainId,
+  channelNonce: BigNumber.from(0).toHexString(),
+  participants
 };
+const XChannelId = getChannelId(X);
 
-// Collect a support proof by getting all participants to sign this state
-signState(sixForMe, mySigningKey);
-signState(sixForMe, hubSigningKey);
-```
+// Construct a state for that allocates a to Alice and b to Bob and has turn numer n - 1
+// This is called the "pre fund setup" state
 
-<Mermaid chart='
-graph LR;
-linkStyle default interpolate basis;
-ETHAssetHolder( )
-ledger((L))
-me(( )):::external
-hub(( )):::external
-me(( )):::external
-hub(( )):::external
-ETHAssetHolder-->|12|ledger;
-ledger-->|3|me;
-ledger-->|3|hub;
-ledger-->|6|app
-app((A1))
-app-->|6|me;
-classDef external fill:#f96
-' />
-
----
-
-Now
-
-```typescript
-// Fund our first application channel OFF CHAIN
-// simply by collecting a support proof for a state such as this:
-
-const nineForMeThreeForTheHub: State = {
+const XPreFS: State = {
   isFinal: false,
-  channel: ledgerChannel,
+  channel: X,
   outcome: [
     {
       asset: MAGIC_ADDRESS_INDICATING_ETH,
       allocationItems: [
-        {destination: myDestination, amount: parseUnits('9', 'wei').toHexString()},
-        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()}
+        {destination: aliceDestination, amount: parseUnits(a, 'wei').toHexString()},
+        {destination: bobDestination, amount: parseUnits(b, 'wei').toHexString()}
       ]
     }
   ],
-  appDefinition: AddressZero,
+  appDefinition: AddressZero, // This could be any app that Alice and Bob want to run
   appData: HashZero,
   challengeDuration: 86400, // 1 day
-  turnNum: 5
+  turnNum: 1
 };
 
 // Collect a support proof by getting all participants to sign this state
-signState(nineForMeThreeForTheHub, mySigningKey);
-signState(nineForMeThreeForTheHub, hubSigningKey);
+signState(XPreFS, mySigningKey);
+signState(XPreeFS, hubSigningKey);
 ```
 
-and the funding graph now looks like this:
+At this point `X` has been created off chain but is not yet funded:
 
 <Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
 ETHAssetHolder( )
-ledger((L))
-me(( )):::external
-hub(( )):::external
-me(( )):::external
-hub(( )):::external
-ETHAssetHolder-->|12|ledger;
-ledger-->|9|me;
-ledger-->|3|hub;
-app((A1)):::defunded
-app-->|6|me;
-linkStyle 3 opacity:0.2;
-classDef external fill:#f96
+appChannel((X)):::defunded
+ledgerA((LA))
+Alice(( )):::alice
+hub(( )):::hub
+ETHAssetHolder-->|x|ledgerA;
+ledgerA-->|a|Alice;
+ledgerA-->|b|hub;
+ledgerB((LB))
+Bob(( )):::bob
+hub(( )):::hub
+ETHAssetHolder-->|x|ledgerB;
+ledgerB-->|b|Bob;
+ledgerB-->|a|hub;
+appChannel-->|a|Alice
+appChannel-->|b|Bob
+classDef hub fill:#f96
+classDef alice fill:#eb4034
+classDef bob fill:#4e2bed
+linkStyle 6,7 opacity:0.2;
 classDef defunded opacity:0.2;
 ' />
-The defunded channel A1 can now safely be discarded.
 
-### Challenging with a deep funding tree
+To virtually fund `X` safely, we will need some auxiliary channels. There will be a joint channel `J`, having Alice, Bob and the Hub as participants; and guarantor channels `GA` and `GB`, having the hub and Alice/Bob respectively as participants. All of these channels will run the [null app](../implementation-notes/null-app). The guarantor channels have a special outcome called a [guarantee](./outcomes#outcomes-that-guarantee), which we show as a dashed arrow:
+
+<Mermaid chart='
+graph LR;
+linkStyle default interpolate basis;
+ETHAssetHolder( )
+appChannel((X)):::defunded
+J((J)):::defunded
+GA((GA)):::defunded
+GB((GB)):::defunded
+ledgerA((LA))
+Alice(( )):::alice
+hub(( )):::hub
+ETHAssetHolder-->|x|ledgerA;
+ledgerA-->|a|Alice;
+ledgerA-->|b|hub;
+ledgerB((LB))
+Bob(( )):::bob
+hub(( )):::hub
+ETHAssetHolder-->|x|ledgerB;
+ledgerB-->|b|Bob;
+ledgerB-->|a|hub;
+appChannel-->|a|Alice
+appChannel-->|b|Bob
+J-->|a|Alice
+J-->|b|Bob
+J-->|x|hub
+GA-.->|AXI|J
+GB-.->|BXI|J
+classDef hub fill:#f96
+classDef alice fill:#eb4034
+classDef bob fill:#4e2bed
+linkStyle 6,7,8,9,10,11,12 opacity:0.2
+classDef defunded opacity:0.2;
+' />
+
+Now, we "plug in" `GA` by directing the flow of funds away from the "end users" and into the network of channels. We do the same for `GB`: and in fact can do this in any order.
+
+<Mermaid chart='
+graph LR;
+linkStyle default interpolate basis;
+ETHAssetHolder( )
+appChannel((X)):::defunded
+J((J))
+GA((GA))
+GB((GB))
+ledgerA((LA))
+Alice(( )):::alice
+hub(( )):::hub
+ETHAssetHolder-->|x|ledgerA;
+ledgerA-->|x|GA;
+ledgerB((LB))
+Bob(( )):::bob
+ETHAssetHolder-->|x|ledgerB;
+ledgerB-->|x|GB;
+appChannel-->|a|Alice
+appChannel-->|b|Bob
+J-->|a|Alice
+J-->|b|Bob
+J-->|x|hub
+GA-.->|AXI|J
+GB-.->|BXI|J
+classDef hub fill:#f96
+classDef alice fill:#eb4034
+classDef bob fill:#4e2bed
+linkStyle 4,5 opacity:0.2;
+classDef defunded opacity:0.2;
+' />
+
+Finally, we update the joint channel to fund the application channel instead of the end users:
+<Mermaid chart='
+graph LR;
+linkStyle default interpolate basis;
+ETHAssetHolder( )
+appChannel((X))
+J((J))
+GA((GA))
+GB((GB))
+ledgerA((LA))
+Alice(( )):::alice
+hub(( )):::hub
+ETHAssetHolder-->|x|ledgerA;
+ledgerA-->|x|GA;
+ledgerB((LB))
+Bob(( )):::bob
+ETHAssetHolder-->|x|ledgerB;
+ledgerB-->|x|GB;
+appChannel-->|a|Alice
+appChannel-->|b|Bob
+J-->|x|appChannel
+J-->|x|hub
+GA-.->|AXI|J
+GB-.->|BXI|J
+classDef hub fill:#f96
+classDef alice fill:#eb4034
+classDef bob fill:#4e2bed
+classDef defunded opacity:0.2;
+' />
+
+If this seems overly complicated: the complexity is there to ensure that these updates can be executed in any order. If some of the parties do not cooperate, we maintain the property that all of the participatns may recover their funds.
+
+## Virtual defunding
+
+## Challenging with a deep funding tree
 
 If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](./finalize-a-channel-sad).
