@@ -27,17 +27,22 @@ export const goodMessage = {
         isFinal: false,
         outcome: [
           {
-            allocationItems: [
+            allocations: [
               {
                 amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
-                destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+                destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+                allocationType: 0,
+                metadata: '0x'
               },
               {
                 amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
-                destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+                destination: '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
+                allocationType: 0,
+                metadata: '0x'
               }
             ],
-            asset: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'
+            asset: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
+            metadata: '0x'
           }
         ],
         turnNum: 1,
