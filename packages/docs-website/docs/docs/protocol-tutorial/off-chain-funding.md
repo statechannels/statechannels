@@ -35,7 +35,7 @@ const ledgerChannel: Channel = {
 };
 const ledgerChannelId = getChannelId(ledgerChannel);
 
-// Construct a state for that allocates 6 wei to each of us, and has turn numer n - 1
+// Construct a state for that allocates 6 wei to each of us, and has turn number n - 1
 // This is called the "pre fund setup" state
 
 const sixEachStatePreFS: State = {
@@ -107,7 +107,7 @@ const applicationChannel1: Channel = {
 };
 const applicationChannel1Id = getChannelId(applicationChannel1);
 
-// Construct a state that allocates 3 wei to each of us, and has turn numer n - 1
+// Construct a state that allocates 3 wei to each of us, and has turn number n - 1
 // This is the "pre fund setup" state for our application channel A1
 
 const threeEachStatePreFS: State = {
@@ -324,7 +324,7 @@ The defunded channel A1 can now safely be discarded.
 
 It is possible for two parties (Alice and Bob) each having a ledger channel connection with the same hub, to use those connections to fund a channel off-chain without ever needing a directly funded channel. This is called virtual funding.
 
-Concretely, let us start from the a situation where Alice and the hub have a directly funded ledger channel `LA`, and Bob and the hub have a directly funded ledger channel `LB`. The channel they wish to fund is called `X`, and has initial balances `{Alice: a, Bob: b}`. Each ledger channel is funded on chain with `x := a + b`.
+Concretely, let us start from the a situation where Alice and the hub have a directly funded ledger channel `LA`, and Bob and the hub have a directly funded ledger channel `LB`. The channel they wish to fund is called `X`, and has initial balances `{Alice: a, Bob: b}`. Each ledger channel is funded on chain with `a + b`.
 
 ```typescript
 // In lesson17.test.ts (TODO)
@@ -338,7 +338,7 @@ const X: Channel = {
 };
 const XChannelId = getChannelId(X);
 
-// Construct a state for that allocates a to Alice and b to Bob and has turn numer n - 1
+// Construct a state for that allocates a to Alice and b to Bob and has turn number n - 1
 // This is called the "pre fund setup" state
 
 const XPreFS: State = {
@@ -374,13 +374,13 @@ appChannel((X)):::defunded
 ledgerA((LA))
 Alice(( )):::alice
 hub(( )):::hub
-ETHAssetHolder-->|x|ledgerA;
+ETHAssetHolder-->|a+b|ledgerA;
 ledgerA-->|a|Alice;
 ledgerA-->|b|hub;
 ledgerB((LB))
 Bob(( )):::bob
 hub(( )):::hub
-ETHAssetHolder-->|x|ledgerB;
+ETHAssetHolder-->|a+b|ledgerB;
 ledgerB-->|b|Bob;
 ledgerB-->|a|hub;
 appChannel-->|a|Alice
@@ -392,7 +392,9 @@ linkStyle 6,7 opacity:0.2;
 classDef defunded opacity:0.2;
 ' />
 
-To virtually fund `X` safely, we will need some auxiliary channels. There will be a joint channel `J`, having Alice, Bob and the Hub as participants; and guarantor channels `GA` and `GB`, having the hub and Alice/Bob respectively as participants. All of these channels will run the [null app](../implementation-notes/null-app). The guarantor channels have a special outcome called a [guarantee](./outcomes#outcomes-that-guarantee), which we show as a dashed arrow:
+To virtually fund `X` safely, we will need some auxiliary channels. There will be a joint channel `J`, having Alice, Bob and the Hub as participants; and guarantor channels `GA` and `GB`, having the hub and Alice/Bob respectively as participants. All of these channels will run the [null app](../implementation-notes/null-app).
+
+The guarantor channels have a special outcome called a [guarantee](./outcomes#outcomes-that-guarantee), which we show as a dashed arrow:
 
 <Mermaid chart='
 graph LR;
@@ -405,26 +407,26 @@ GB((GB)):::defunded
 ledgerA((LA))
 Alice(( )):::alice
 hub(( )):::hub
-ETHAssetHolder-->|x|ledgerA;
+ETHAssetHolder-->|a+b|ledgerA;
 ledgerA-->|a|Alice;
 ledgerA-->|b|hub;
 ledgerB((LB))
 Bob(( )):::bob
-hub(( )):::hub
-ETHAssetHolder-->|x|ledgerB;
-ledgerB-->|b|Bob;
+ETHAssetHolder-->|a+b|ledgerB;
 ledgerB-->|a|hub;
+ledgerB-->|b|Bob;
 appChannel-->|a|Alice
 appChannel-->|b|Bob
+J-->|a+b|hub
 J-->|a|Alice
 J-->|b|Bob
-J-->|x|hub
 GA-.->|AXI|J
 GB-.->|BXI|J
 classDef hub fill:#f96
 classDef alice fill:#eb4034
 classDef bob fill:#4e2bed
 linkStyle 6,7,8,9,10,11,12 opacity:0.2
+linkStyle 11,12 stroke-dasharray: 5 5,opacity:0.2
 classDef defunded opacity:0.2;
 ' />
 
@@ -441,17 +443,17 @@ GB((GB))
 ledgerA((LA))
 Alice(( )):::alice
 hub(( )):::hub
-ETHAssetHolder-->|x|ledgerA;
-ledgerA-->|x|GA;
+ETHAssetHolder-->|a+b|ledgerA;
+ledgerA-->|a+b|GA;
 ledgerB((LB))
 Bob(( )):::bob
-ETHAssetHolder-->|x|ledgerB;
-ledgerB-->|x|GB;
+ETHAssetHolder-->|a+b|ledgerB;
+ledgerB-->|a+b|GB;
 appChannel-->|a|Alice
 appChannel-->|b|Bob
 J-->|a|Alice
 J-->|b|Bob
-J-->|x|hub
+J-->|a+b|hub
 GA-.->|AXI|J
 GB-.->|BXI|J
 classDef hub fill:#f96
@@ -473,16 +475,16 @@ GB((GB))
 ledgerA((LA))
 Alice(( )):::alice
 hub(( )):::hub
-ETHAssetHolder-->|x|ledgerA;
-ledgerA-->|x|GA;
+ETHAssetHolder-->|a+b|ledgerA;
+ledgerA-->|a+b|GA;
 ledgerB((LB))
 Bob(( )):::bob
-ETHAssetHolder-->|x|ledgerB;
-ledgerB-->|x|GB;
+ETHAssetHolder-->|a+b|ledgerB;
+ledgerB-->|a+b|GB;
 appChannel-->|a|Alice
 appChannel-->|b|Bob
-J-->|x|appChannel
-J-->|x|hub
+J-->|a+b|appChannel
+J-->|a+b|hub
 GA-.->|AXI|J
 GB-.->|BXI|J
 classDef hub fill:#f96
@@ -491,10 +493,10 @@ classDef bob fill:#4e2bed
 classDef defunded opacity:0.2;
 ' />
 
-If this seems overly complicated: the complexity is there to ensure that these updates can be executed in any order. If some of the parties do not cooperate, we maintain the property that all of the participatns may recover their funds.
+If this seems overly complicated: the complexity is there to ensure that these updates can be executed in any order. If some of the parties do not cooperate, we maintain the property that all of the participants may recover their funds.
 
 ## Virtual defunding
 
-## Challenging with a deep funding tree
+## Challenging with a deep funding graph
 
 If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](./finalize-a-channel-sad).
