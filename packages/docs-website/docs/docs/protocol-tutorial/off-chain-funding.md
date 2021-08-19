@@ -394,6 +394,93 @@ classDef defunded opacity:0.2;
 
 To virtually fund `X` safely, we will need some auxiliary channels. There will be a joint channel `J`, having Alice, Bob and the Hub as participants; and guarantor channels `GA` and `GB`, having the hub and Alice/Bob respectively as participants. All of these channels will run the [null app](../implementation-notes/null-app).
 
+```typescript
+// In lesson17.test.ts (TODO)
+// Construct a Joint channel
+const chainId = '0x1234';
+const J: Channel = {
+  chainId,
+  channelNonce: BigNumber.from(0).toHexString(),
+  participants: [Alice, Bob, Hub]
+};
+const GA: Channel = {
+  chainId,
+  channelNonce: BigNumber.from(0).toHexString(),
+  participants: [Alice, Hub]
+};
+const GB: Channel = {
+  chainId,
+  channelNonce: BigNumber.from(0).toHexString(),
+  participants: [Bob, Hub]
+};
+const commonFields = {
+  isFinal: false,
+  appDefinition: AddressZero,
+  appData: HashZero,
+  challengeDuration: 86400, // 1 day
+  };
+
+
+// Joint channel
+const JPreFS: State = {
+  ...commonFields
+  channel: X,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      allocationItems: [
+        {destination: aliceDestination, amount: parseUnits(a, 'wei').toHexString()},
+        {destination: bobDestination, amount: parseUnits(b, 'wei').toHexString()}
+        {destination: hubDestination, amount: parseUnits(a+b, 'wei').toHexString()}
+      ]
+    }
+  ],
+  turnNum: 1
+};
+
+// Collect a support proof by getting all participants to sign this state
+signState(JPreFS, aliceSigningKey);
+signState(JPreFS, bobSigningKey);
+signState(JPreeFS, hubSigningKey);
+
+// Guarantor channels
+const GAPreFS: State = {
+  ...commonFields
+  channel: GA,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      guarantee: {
+        targetChannelId: getChannelId(J)
+        destinations: [Alice, XChannelId, Hub]
+      }
+    }
+  ],
+  turnNum: 1
+};
+const GBPreFS: State = {
+  ...commonFields
+  channel: GB,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      guarantee: {
+        targetChannelId: getChannelId(J)
+        destinations: [Bob, XChannelId, Hub]
+      }
+    }
+  ],
+  turnNum: 1
+};
+
+// Collect a support proof by getting all participants to sign this state
+signState(GAPreFS, aliceSigningKey);
+signState(GAPreFS, hubSigningKey);
+signState(GBPreFS, aliceSigningKey);
+signState(GBPreFS, hubSigningKey);
+
+```
+
 The guarantor channels have a special outcome called a [guarantee](./outcomes#outcomes-that-guarantee), which we show as a dashed arrow:
 
 <Mermaid chart='
@@ -420,8 +507,8 @@ appChannel-->|b|Bob
 J-->|a+b|hub
 J-->|a|Alice
 J-->|b|Bob
-GA-.->|AXI|J
-GB-.->|BXI|J
+GA-.->|AXH|J
+GB-.->|BXH|J
 classDef hub fill:#f96
 classDef alice fill:#eb4034
 classDef bob fill:#4e2bed
@@ -431,6 +518,46 @@ classDef defunded opacity:0.2;
 ' />
 
 Now, we "plug in" `GA` by directing the flow of funds away from the "end users" and into the network of channels. We do the same for `GB`: and in fact can do this in any order. We should think of `J` being funded _only_ when both guarantees have been updated.
+
+```typescript
+// In lesson17.test.ts (TODO)
+
+// Update LA and LB
+const LAUpdate: State = {
+  ...commonFields
+  channel: L,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      allocationItems: [
+        {destination: getChannelID(LA), amount: parseUnits(a+b, 'wei').toHexString()},
+      ]
+    }
+  ],
+  turnNum: 2
+};
+const LBUpdate: State = {
+  ...commonFields
+  channel: L,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      allocationItems: [
+        {destination: getChannelID(LB), amount: parseUnits(a+b, 'wei').toHexString()},
+      ]
+    }
+  ],
+  turnNum: 2
+};
+
+// Collect a support proof on the updates by getting all participants to sign this state
+signState(LAUpdate, aliceSigningKey);
+signState(LAUpdate, hubSigningKey);
+signState(LBUpdate, bobSigningKey);
+signState(LBUpdate, hubSigningKey);
+```
+
+The situation is now like this:
 
 <Mermaid chart='
 graph LR;
@@ -454,8 +581,8 @@ appChannel-->|b|Bob
 J-->|a|Alice
 J-->|b|Bob
 J-->|a+b|hub
-GA-.->|AXI|J
-GB-.->|BXI|J
+GA-.->|AXH|J
+GB-.->|BXH|J
 classDef hub fill:#f96
 classDef alice fill:#eb4034
 classDef bob fill:#4e2bed
@@ -463,7 +590,33 @@ linkStyle 4,5 opacity:0.2;
 classDef defunded opacity:0.2;
 ' />
 
-Now that `J` is funded, we can finally update it to fund the application channel instead of the end users:
+Now that `J` is funded, we can finally update it to fund the application channel instead of the end users.
+
+```typescript
+// In lesson17.test.ts (TODO)
+
+// Update J
+const JUpdate: State = {
+  ...commonFields
+  channel: L,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      allocationItems: [
+        {destination: getChannelId(X), amount: parseUnits(a+b, 'wei').toHexString()},
+        {destination: Hub, amount: parseUnits(a+b, 'wei').toHexString()},
+      ]
+    }
+  ],
+  turnNum: 2
+};
+
+// Collect a support proof on the updates by getting all participants to sign this state
+signState(JUpdate, aliceSigningKey);
+signState(JUpdate, hubSigningKey);
+signState(JUpdate, bobSigningKey);
+```
+
 <Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
@@ -485,18 +638,20 @@ appChannel-->|a|Alice
 appChannel-->|b|Bob
 J-->|a+b|appChannel
 J-->|a+b|hub
-GA-.->|AXI|J
-GB-.->|BXI|J
+GA-.->|AXH|J
+GB-.->|BXH|J
 classDef hub fill:#f96
 classDef alice fill:#eb4034
 classDef bob fill:#4e2bed
 classDef defunded opacity:0.2;
 ' />
 
-If this seems overly complicated: the complexity is there to ensure that these updates can be executed in any order. If some of the parties do not cooperate, we maintain the property that all of the participants may recover their funds.
+If this seems overly complicated: the complexity is there to ensure that these updates can be executed in any order. If some of the parties do not cooperate (say by refusing to sign state updates), we maintain the property that all of the participants may recover their funds.
 
 ## Virtual defunding
 
 ## Challenging with a deep funding graph
 
 If the hub goes AWOL, in the worst-case scenario we would need to finalize the ledger channel as well as _all_ of the channels funded by that ledger channel, in order to recover our on chain deposit. See the section on [sad-path finalization](./finalize-a-channel-sad).
+
+Once all of the channels are finalized, the funds may be moved around as follows. First, `transfer`, from `LA` to `GA`. Then, `claim` `GA` to move the funds to `X` and the hub. Then, `transfer` the funds from `X` to Alice and Bob.
