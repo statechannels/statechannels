@@ -224,6 +224,102 @@ We could fund more application channels from the same ledger channel in the same
 
 ## Indirect defunding
 
+Let's say application A1 finished and between me and the hub, we finalize it off chain with an outcome that allocates all the funds to me. To defund it off chain, we just agree to get the funds back into the ledger channel in a manner that preserves each of our balances in the funding graph.
+
+```typescript
+// Construct a state that allocates 6 wei to me
+
+const sixForMe: State = {
+  isFinal: true,
+  channel: applicationChannel1,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      allocationItems: [{destination: myDestination, amount: parseUnits('6', 'wei').toHexString()}]
+    }
+  ],
+  appDefinition: ROCK_PAPER_SCISSORS_ADDRESS,
+  appData: HashZero,
+  challengeDuration: 86400, // 1 day
+  turnNum: 100
+};
+
+// Collect a support proof by getting all participants to sign this state
+signState(sixForMe, mySigningKey);
+signState(sixForMe, hubSigningKey);
+```
+
+<Mermaid chart='
+graph LR;
+linkStyle default interpolate basis;
+ETHAssetHolder( )
+ledger((L))
+me(( )):::external
+hub(( )):::external
+me(( )):::external
+hub(( )):::external
+ETHAssetHolder-->|12|ledger;
+ledger-->|3|me;
+ledger-->|3|hub;
+ledger-->|6|app
+app((A1))
+app-->|6|me;
+classDef external fill:#f96
+' />
+
+---
+
+Now
+
+```typescript
+// Fund our first application channel OFF CHAIN
+// simply by collecting a support proof for a state such as this:
+
+const nineForMeThreeForTheHub: State = {
+  isFinal: false,
+  channel: ledgerChannel,
+  outcome: [
+    {
+      asset: MAGIC_ADDRESS_INDICATING_ETH,
+      allocationItems: [
+        {destination: myDestination, amount: parseUnits('9', 'wei').toHexString()},
+        {destination: hubDestination, amount: parseUnits('3', 'wei').toHexString()}
+      ]
+    }
+  ],
+  appDefinition: AddressZero,
+  appData: HashZero,
+  challengeDuration: 86400, // 1 day
+  turnNum: 5
+};
+
+// Collect a support proof by getting all participants to sign this state
+signState(nineForMeThreeForTheHub, mySigningKey);
+signState(nineForMeThreeForTheHub, hubSigningKey);
+```
+
+and the funding graph now looks like this:
+
+<Mermaid chart='
+graph LR;
+linkStyle default interpolate basis;
+ETHAssetHolder( )
+ledger((L))
+me(( )):::external
+hub(( )):::external
+me(( )):::external
+hub(( )):::external
+ETHAssetHolder-->|12|ledger;
+ledger-->|9|me;
+ledger-->|3|hub;
+app((A1)):::defunded
+app-->|6|me;
+linkStyle 3 opacity:0.2;
+classDef external fill:#f96
+classDef defunded opacity:0.2;
+' />
+The defunded channel A1 can now safely be discarded.
+
 ## Virtual funding
 
 It is possible for two parties (Alice and Bob) each having a ledger channel connection with the same hub, to use those connections to fund a channel off-chain without ever needing a directly funded channel. This is called virtual funding.
