@@ -11,6 +11,7 @@ export type Address = string;
 export type Bytes32 = string;
 
 export type Uint48 = number;
+export type Uint8 = number;
 
 /**
  * Uint256
@@ -30,36 +31,20 @@ export interface Participant {
   destination: Address; // Address of EOA to receive channel proceeds (the account that'll get the funds).
 }
 
-export interface AllocationItem {
+export interface Allocation {
   destination: Bytes32; // Address of EOA or channelId to receive funds
   amount: Uint256; // How much funds will be transferred to the destination address.
+  metadata: Bytes;
+  allocationType: Uint8;
 }
 
-export interface Allocation {
+export interface SingleAssetOutcome {
   asset: Address; // The asset holder address.
-  allocationItems: AllocationItem[]; // A list of allocations (how much funds will each destination address get).
+  allocations: Allocation[]; // A list of allocations (how much funds will each destination address get).
+  metadata: Bytes;
 }
 
-export type Allocations = Allocation[]; // included for backwards compatibility
-
-export interface Guarantee {
-  asset: Address;
-  targetChannelId: Bytes32;
-  destinations: Bytes32[];
-}
-
-export type Guarantees = Guarantee[];
-
-export type Outcome = Guarantees | Allocations;
-
-export function isAllocations(outcome: Outcome): outcome is Allocations {
-  if (outcome.length === 0) {
-    return true;
-  } else {
-    const first = outcome[0];
-    return 'allocationItems' in first;
-  }
-}
+export type Outcome = SingleAssetOutcome[];
 
 export interface SignedState {
   chainId: string;
