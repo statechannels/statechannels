@@ -332,7 +332,7 @@ linkStyle 6,7,8,9,10,11,12 opacity:0.2
 classDef defunded opacity:0.2;
 ' />
 
-Now, we "plug in" `GA` by directing the flow of funds away from the "end users" and into the network of channels. We do the same for `GB`: and in fact can do this in any order.
+Now, we "plug in" `GA` by directing the flow of funds away from the "end users" and into the network of channels. We do the same for `GB`: and in fact can do this in any order. We should think of `J` being funded _only_ when both guarantees have been updated.
 
 <Mermaid chart='
 graph LR;
@@ -365,7 +365,7 @@ linkStyle 4,5 opacity:0.2;
 classDef defunded opacity:0.2;
 ' />
 
-Finally, we update the joint channel to fund the application channel instead of the end users:
+Now that `J` is funded, we can finally update it to fund the application channel instead of the end users:
 <Mermaid chart='
 graph LR;
 linkStyle default interpolate basis;
