@@ -324,7 +324,7 @@ The defunded channel A1 can now safely be discarded.
 
 It is possible for two parties (Alice and Bob) each having a ledger channel connection with the same hub, to use those connections to fund a channel off-chain without ever needing a directly funded channel. This is called virtual funding.
 
-Concretely, let us start from the a situation where Alice and the hub have a directly funded ledger channel `LA`, and Bob and the hub have a directly funded ledger channel `LB`. The channel they wish to fund is called `X`, and has initial balances `{Alice: a, Bob: b}`. Each ledger channel is funded on chain with `a + b`.
+Concretely, let us start from the a situation where Alice and the hub have a directly funded ledger channel `LA`, and Bob and the hub have a directly funded ledger channel `LB`. The channel they wish to fund is called `X`, and has the initial outcome `{Alice: a, Bob: b}`. Each ledger channel is funded on chain with holdings at least `a + b`.
 
 ```typescript
 // In lesson17.test.ts (TODO)
@@ -418,13 +418,13 @@ const commonFields = {
   appDefinition: AddressZero,
   appData: HashZero,
   challengeDuration: 86400, // 1 day
-  };
+};
 
 
 // Joint channel
 const JPreFS: State = {
   ...commonFields
-  channel: X,
+  channel: J,
   outcome: [
     {
       asset: MAGIC_ADDRESS_INDICATING_ETH,
@@ -476,7 +476,7 @@ const GBPreFS: State = {
 // Collect a support proof by getting all participants to sign this state
 signState(GAPreFS, aliceSigningKey);
 signState(GAPreFS, hubSigningKey);
-signState(GBPreFS, aliceSigningKey);
+signState(GBPreFS, bobSigningKey);
 signState(GBPreFS, hubSigningKey);
 
 ```
@@ -525,12 +525,12 @@ Now, we "plug in" `GA` by directing the flow of funds away from the "end users" 
 // Update LA and LB
 const LAUpdate: State = {
   ...commonFields
-  channel: L,
+  channel: LA,
   outcome: [
     {
       asset: MAGIC_ADDRESS_INDICATING_ETH,
       allocationItems: [
-        {destination: getChannelID(LA), amount: parseUnits(a+b, 'wei').toHexString()},
+        {destination: getChannelID(GA), amount: parseUnits(a+b, 'wei').toHexString()},
       ]
     }
   ],
@@ -538,12 +538,12 @@ const LAUpdate: State = {
 };
 const LBUpdate: State = {
   ...commonFields
-  channel: L,
+  channel: LB,
   outcome: [
     {
       asset: MAGIC_ADDRESS_INDICATING_ETH,
       allocationItems: [
-        {destination: getChannelID(LB), amount: parseUnits(a+b, 'wei').toHexString()},
+        {destination: getChannelID(GB), amount: parseUnits(a+b, 'wei').toHexString()},
       ]
     }
   ],
@@ -598,7 +598,7 @@ Now that `J` is funded, we can finally update it to fund the application channel
 // Update J
 const JUpdate: State = {
   ...commonFields
-  channel: L,
+  channel: J,
   outcome: [
     {
       asset: MAGIC_ADDRESS_INDICATING_ETH,
