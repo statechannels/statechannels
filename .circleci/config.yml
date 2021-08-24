@@ -224,14 +224,28 @@ jobs:
                 command: git diff --exit-code
             - run:
                 name: deploy docs-website (preview)
-                command: >
-                  test ! -d "/home/circleci/project/packages/docs-website/build" || 
-                  npx -p netlify-cli 
-                  -c 'netlify deploy 
-                  --site $NITRO_PROTOCOL_NETLIFY_ID 
-                  --dir=/home/circleci/project/packages/docs-website/build 
-                  --auth $NETLIFY_ACCESS_TOKEN 
-                  --message $(git rev-parse --short HEAD)'
+                command: |
+                  test ! -d "/home/circleci/project/packages/docs-website/build" && exit 0 
+
+                  npx -p netlify-cli -c 'netlify deploy --site $NITRO_PROTOCOL_NETLIFY_ID --dir=/home/circleci/project/packages/docs-website/build --auth $NETLIFY_ACCESS_TOKEN --message $(git rev-parse --short HEAD) --json' | tee ./netlify_output.json
+                  
+                  pr_response=$(curl --location --request GET "https://api.github.com/repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/pulls?head=$CIRCLE_PROJECT_USERNAME:$CIRCLE_BRANCH&state=open" \
+                  -u $GH_USER:$GH_API)
+
+                  if [ $(echo $pr_response | jq length) -eq 0 ]; then
+                    echo "No PR found to update"
+                  else
+                    pr_comment_url=$(echo $pr_response | jq -r ".[]._links.comments.href")
+                  fi
+
+                  preview_url=$(grep -oE '(http).+(.netlify.app)' ./netlify_output.json)
+
+                  curl --location --request POST "$pr_comment_url" \
+                  -u $GH_USER:$GH_API \
+                  --header 'Content-Type: application/json' \
+                  --data-raw '{
+                  "body": "A [new preview]('$preview_url') was generated for the docs-website."
+                  }'
 workflows:
   statechannels:
     jobs:
