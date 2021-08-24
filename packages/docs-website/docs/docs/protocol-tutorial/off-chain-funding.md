@@ -329,12 +329,11 @@ Concretely, let us start from the a situation where Alice and the hub have a dir
 ```typescript
 // In lesson17.test.ts (TODO)
 // Construct an application channel to be funded virtually
-const participants = [alice, bob, hub];
 const chainId = '0x1234';
 const X: Channel = {
   chainId,
   channelNonce: BigNumber.from(0).toHexString(),
-  participants
+  participants: [alice, bob]
 };
 const XChannelId = getChannelId(X);
 
@@ -360,8 +359,8 @@ const XPreFS: State = {
 };
 
 // Collect a support proof by getting all participants to sign this state
-signState(XPreFS, mySigningKey);
-signState(XPreeFS, hubSigningKey);
+signState(XPreFS, aliceSigningKey);
+signState(XPreFS, bobSigningKey);
 ```
 
 At this point `X` has been created off chain but is not yet funded:
