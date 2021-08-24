@@ -647,7 +647,7 @@ classDef defunded opacity:0.2;
 
 If this seems overly complicated: the complexity is there to ensure that these updates can be executed in any order. If some of the parties do not cooperate (say by refusing to sign state updates), we maintain the property that all of the participants may recover their funds.
 
-## Virtual defunding
+## Virtual defunding (TODO)
 
 ## Challenging with a deep funding graph
 
