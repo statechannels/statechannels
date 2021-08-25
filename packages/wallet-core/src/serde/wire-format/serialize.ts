@@ -1,20 +1,12 @@
 import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
-  AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
-  Guarantee as GuaranteeWire,
+  SingleAssetOutcome as SingleAssetOutcomeWire,
   Message as WireMessage
 } from '@statechannels/wire-format';
 
-import {
-  SignedState,
-  Outcome,
-  AllocationItem,
-  SimpleAllocation,
-  Payload,
-  SimpleGuarantee
-} from '../../types';
+import {SignedState, Outcome, Allocation, Payload, SingleAssetOutcome} from '../../types';
 import {calculateChannelId} from '../../state-utils';
 import {formatAmount} from '../../utils';
 
@@ -62,32 +54,25 @@ export function serializeState(state: SignedState, channelId?: string): SignedSt
 }
 
 export function serializeOutcome(outcome: Outcome): OutcomeWire {
-  switch (outcome.type) {
-    case 'SimpleAllocation':
-      return [serializeSimpleAllocation(outcome)];
-    case 'MixedAllocation':
-      return outcome.simpleAllocations.map(serializeSimpleAllocation);
-    case 'SimpleGuarantee':
-      return [serializeSimpleGuarantee(outcome)];
-  }
+  return outcome.map(serializeSingleAssetOutcome);
 }
 
-function serializeSimpleAllocation(allocation: SimpleAllocation): AllocationWire {
+function serializeSingleAssetOutcome(
+  singleAssetOutcome: SingleAssetOutcome
+): SingleAssetOutcomeWire {
   return {
-    asset: allocation.asset,
-    allocationItems: allocation.allocationItems.map(serializeAllocationItem)
+    asset: singleAssetOutcome.asset,
+    metadata: singleAssetOutcome.metadata ?? '0x',
+    allocations: singleAssetOutcome.allocations.map(serializeAllocation)
   };
 }
 
-function serializeSimpleGuarantee(guarantee: SimpleGuarantee): GuaranteeWire {
+function serializeAllocation(allocation: Allocation): AllocationWire {
+  const {destination, amount, metadata, allocationType} = allocation;
   return {
-    asset: guarantee.asset,
-    targetChannelId: guarantee.targetChannelId,
-    destinations: guarantee.destinations
+    destination,
+    amount: formatAmount(amount),
+    metadata: metadata ?? '0x',
+    allocationType: allocationType ?? 0
   };
-}
-
-function serializeAllocationItem(allocationItem: AllocationItem): AllocationItemWire {
-  const {destination, amount} = allocationItem;
-  return {destination, amount: formatAmount(amount)};
 }
