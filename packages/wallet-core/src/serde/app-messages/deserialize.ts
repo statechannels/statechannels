@@ -1,19 +1,19 @@
 import {
   Allocation as AppAllocation,
-  Allocations as AppAllocations,
-  AllocationItem as AppAllocationItem,
+  SingleAssetOutcome as AppSingleAssetOutcome,
   DomainBudget as AppDomainBudget,
+  Outcome as AppOutcome,
   ApproveBudgetAndFundParams as AppBudgetRequest
 } from '@statechannels/client-api-schema';
 import {constants} from 'ethers';
 
 import {
   Allocation,
-  AllocationItem,
-  SimpleAllocation,
   DomainBudget,
   AssetBudget,
-  makeAddress
+  makeAddress,
+  SingleAssetOutcome,
+  Outcome
 } from '../../types';
 import {BN} from '../../bignumber';
 import {makeDestination} from '../../utils';
@@ -58,31 +58,29 @@ export function deserializeDomainBudget(DomainBudget: AppDomainBudget): DomainBu
   };
 }
 
-export function deserializeAllocations(allocations: AppAllocations): Allocation {
-  switch (allocations.length) {
-    case 0:
-      throw new Error('Allocations is empty');
-    case 1:
-      return deserializeAllocation(allocations[0]);
-    default:
-      return {
-        type: 'MixedAllocation',
-        simpleAllocations: allocations.map(deserializeAllocation)
-      };
-  }
+export function deserializeAllocations(allocations: AppAllocation[]): Allocation[] {
+  return allocations.map(deserializeAllocation);
 }
 
-function deserializeAllocation(allocation: AppAllocation): SimpleAllocation {
+export function deserializeSingleAssetOutcome(
+  singleAssetOutcome: AppSingleAssetOutcome
+): SingleAssetOutcome {
   return {
-    type: 'SimpleAllocation',
-    allocationItems: allocation.allocationItems.map(deserializeAllocationItem),
-    asset: makeAddress(allocation.asset)
+    allocations: singleAssetOutcome.allocations.map(deserializeAllocation),
+    asset: makeAddress(singleAssetOutcome.asset),
+    metadata: singleAssetOutcome.metadata
   };
 }
 
-function deserializeAllocationItem(allocationItem: AppAllocationItem): AllocationItem {
+export function deserializeOutcome(outcome: AppOutcome): Outcome {
+  return outcome.map(deserializeSingleAssetOutcome);
+}
+
+function deserializeAllocation(allocation: AppAllocation): Allocation {
   return {
-    destination: makeDestination(allocationItem.destination),
-    amount: BN.from(allocationItem.amount)
+    destination: makeDestination(allocation.destination),
+    amount: BN.from(allocation.amount),
+    metadata: allocation.metadata,
+    allocationType: allocation.allocationType
   };
 }
