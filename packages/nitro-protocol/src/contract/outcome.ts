@@ -14,6 +14,8 @@ export const MAX_OUTCOME_ITEMS = 600;
 // Types
 //
 
+export type AllocationType = ExitFormat.AllocationType;
+export type Allocation = ExitFormat.Allocation;
 export type AssetOutcome = ExitFormat.SingleAssetExit;
 export type Outcome = ExitFormat.Exit; // == AssetOutcome[]
 
