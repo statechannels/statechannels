@@ -1,56 +1,18 @@
 import * as _ from 'lodash';
 import {ethers} from 'ethers';
 
-import {
-  AllocationItem,
-  SimpleAllocation,
-  SimpleGuarantee,
-  Outcome,
-  Allocation,
-  Destination,
-  Address,
-  makeAddress
-} from '../types';
+import {Allocation, Destination, makeAddress, SingleAssetOutcome, Address} from '../types';
 import {BN, Zero} from '../bignumber';
 import {zeroAddress} from '../config';
 
-import {checkThat} from './helpers';
-
-export function isSimpleAllocation(outcome: Outcome): outcome is SimpleAllocation {
-  return outcome.type === 'SimpleAllocation';
-}
-
-export function isSimpleEthAllocation(outcome: Outcome): outcome is SimpleAllocation {
-  return outcome.type === 'SimpleAllocation' && outcome.asset === ethers.constants.AddressZero;
-}
-
-export function assertSimpleEthAllocation(outcome: Outcome): SimpleAllocation {
-  return checkThat(outcome, isSimpleEthAllocation);
-}
-
-export const simpleEthAllocation = (allocationItems: AllocationItem[]): SimpleAllocation => ({
-  type: 'SimpleAllocation',
+export const ethOutcome = (allocations: Allocation[]): SingleAssetOutcome => ({
   asset: zeroAddress,
-  allocationItems
+  allocations
 });
 
-export const simpleEthGuarantee = (
-  targetChannelId: string,
-  ...destinations: string[]
-): SimpleGuarantee => ({
-  type: 'SimpleGuarantee',
-  destinations,
-  targetChannelId,
-  asset: zeroAddress
-});
-
-export const simpleTokenAllocation = (
-  asset: Address,
-  allocationItems: AllocationItem[]
-): SimpleAllocation => ({
-  type: 'SimpleAllocation',
+export const tokenAllocation = (asset: Address, allocations: Allocation[]): SingleAssetOutcome => ({
   asset,
-  allocationItems
+  allocations
 });
 
 export enum Errors {
@@ -59,27 +21,23 @@ export enum Errors {
   InvalidOutcomeType = 'Invalid outcome type'
 }
 
-export const areAllocationItemsEqual = (a: AllocationItem, b: AllocationItem): boolean =>
+export const areAllocationsEqual = (a: Allocation, b: Allocation): boolean =>
   a.destination === b.destination && BN.eq(a.amount, b.amount);
 
 export function allocateToTarget(
-  currentOutcome: Outcome,
-  deductions: readonly AllocationItem[],
+  currentOutcome: SingleAssetOutcome,
+  deductions: readonly Allocation[],
   targetChannelId: string
-): Allocation {
-  if (currentOutcome.type !== 'SimpleAllocation') {
-    throw new Error(Errors.InvalidOutcomeType);
-  }
-
+): SingleAssetOutcome {
   currentOutcome = _.cloneDeep(currentOutcome);
 
   let total = Zero;
-  let currentItems = currentOutcome.allocationItems;
+  let currentAllocations = currentOutcome.allocations;
 
   deductions
     .filter(i => BN.gt(i.amount, 0))
     .forEach(targetItem => {
-      const ledgerItem = currentItems.find(i => i.destination === targetItem.destination);
+      const ledgerItem = currentAllocations.find(i => i.destination === targetItem.destination);
       if (!ledgerItem) {
         throw new Error(Errors.DestinationMissing);
       }
@@ -90,10 +48,10 @@ export function allocateToTarget(
       if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
     });
 
-  currentItems.push({amount: total, destination: makeDestination(targetChannelId)});
-  currentItems = currentItems.filter(i => BN.gt(i.amount, 0));
+  currentAllocations.push({amount: total, destination: makeDestination(targetChannelId)});
+  currentAllocations = currentAllocations.filter(i => BN.gt(i.amount, 0));
 
-  currentOutcome.allocationItems = currentItems;
+  currentOutcome.allocations = currentAllocations;
   return currentOutcome;
 }
 
