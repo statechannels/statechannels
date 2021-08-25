@@ -1,13 +1,14 @@
 import {
+  SingleAssetOutcome as AppSingleAssetOutcome,
   Allocation as AppAllocation,
-  Allocations as AppAllocations,
-  AllocationItem as AppAllocationItem,
   DomainBudget as AppDomainBudget,
-  TokenBudget
+  TokenBudget,
+  Outcome as AppOutcome
 } from '@statechannels/client-api-schema';
 import {constants} from 'ethers';
+import {AllocationType} from '@statechannels/exit-format';
 
-import {Allocation, AllocationItem, SimpleAllocation, DomainBudget, AssetBudget} from '../../types';
+import {Allocation, DomainBudget, AssetBudget, SingleAssetOutcome, Outcome} from '../../types';
 import {checkThat, exists, formatAmount} from '../../utils';
 import {BN} from '../../bignumber';
 
@@ -33,25 +34,29 @@ export function serializeDomainBudget(budget: DomainBudget): AppDomainBudget {
   };
 }
 
-export function serializeAllocation(allocation: Allocation): AppAllocations {
-  switch (allocation.type) {
-    case 'SimpleAllocation':
-      return [serializeSimpleAllocation(allocation)];
-    case 'MixedAllocation':
-      return allocation.simpleAllocations.map(serializeSimpleAllocation);
-  }
+export function serializeAllocations(allocations: Allocation[]): AppAllocation[] {
+  return allocations.map(serializeAllocation);
 }
 
-function serializeSimpleAllocation(allocation: SimpleAllocation): AppAllocation {
+function serializeAllocation(allocation: Allocation): AppAllocation {
   return {
-    allocationItems: allocation.allocationItems.map(serializeAllocationItem),
-    asset: allocation.asset
+    destination: allocation.destination,
+    amount: formatAmount(allocation.amount),
+    metadata: allocation.metadata ?? '0x',
+    allocationType: allocation.allocationType ?? AllocationType.simple
   };
 }
 
-function serializeAllocationItem(allocationItem: AllocationItem): AppAllocationItem {
+export function serializeSingleAssetOutcome(
+  singleAssetOutcome: SingleAssetOutcome
+): AppSingleAssetOutcome {
   return {
-    destination: allocationItem.destination,
-    amount: formatAmount(allocationItem.amount)
+    asset: singleAssetOutcome.asset,
+    metadata: singleAssetOutcome.metadata ?? '0x',
+    allocations: singleAssetOutcome.allocations.map(serializeAllocation)
   };
+}
+
+export function serializeOutcome(outcome: Outcome): AppOutcome {
+  return outcome.map(serializeSingleAssetOutcome);
 }
