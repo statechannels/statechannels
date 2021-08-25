@@ -1,5 +1,6 @@
 import {FundingStrategy} from '@statechannels/client-api-schema';
 import {utils} from 'ethers';
+import {AllocationType} from '@statechannels/exit-format';
 
 export type Uint256 = string & {_isUint256: void};
 // These "integers" have "type-safe" addition:
@@ -37,33 +38,25 @@ export interface StateVariables {
 }
 export type StateVariablesWithHash = StateVariables & Hashed;
 export type Destination = string & {_isDestination: void};
-export interface AllocationItem {
+
+export interface Allocation {
   destination: Destination;
   amount: Uint256;
-}
-export interface SimpleAllocation {
-  type: 'SimpleAllocation';
-  asset: Address;
-  allocationItems: AllocationItem[];
-}
-export interface SimpleGuarantee {
-  type: 'SimpleGuarantee';
-  targetChannelId: string;
-  asset: Address;
-  destinations: string[];
-}
-export interface MixedAllocation {
-  type: 'MixedAllocation';
-  simpleAllocations: SimpleAllocation[];
+  allocationType?: AllocationType;
+  metadata?: string;
 }
 
-// Should we even have these two different types??
-export type Allocation = SimpleAllocation | MixedAllocation;
-export type Outcome = Allocation | SimpleGuarantee;
-
-export function isAllocation(outcome: Outcome): outcome is Allocation {
-  return outcome.type !== 'SimpleGuarantee';
+export interface SingleAssetOutcome {
+  asset: Address;
+  allocations: Allocation[];
+  metadata?: string;
 }
+
+export type Outcome = SingleAssetOutcome[];
+
+// export function isAllocation(outcome: Outcome): outcome is Allocation {
+//   return outcome.type !== 'SimpleGuarantee';
+// }
 
 export interface ChannelConstants {
   chainId: string;
@@ -110,12 +103,11 @@ export type CloseChannel = _Objective<
     /**
      * Collaboratively concluding a channel on-chain involves the following:
      * 1. Submit a conclusion proof to the NitroAdjudicator.
-     * 2. Push the outcome to all AssetHolders.
-     * 3. Transfer out of the channel for all asset holders.
+     * 2. Transfer out of the channel for all assets.
      *
-     * Steps 1 and 2 require one or two transactions that are submitted by one participant
-     * but affect (and block) both participants. txSubmitterOrder defines the order in which
-     * participants will try to submit the collaborative transactions.
+     * Step 1 requires a transactions that is submitted by one participant
+     * but affecst (and blocsk) both participants. txSubmitterOrder defines the order in which
+     * participants will try to submit the collaborative transaction.
      *
      * CAVEAT:
      * Let's say 2 participants are concluding a channel with:
