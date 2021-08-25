@@ -2,10 +2,9 @@ import {
   SignedState as SignedStateWire,
   Outcome as OutcomeWire,
   Objective as ObjectiveWire,
-  AllocationItem as AllocationItemWire,
   Allocation as AllocationWire,
+  SingleAssetOutcome as SingleAssetOutcomeWire,
   Message as WireMessage,
-  isAllocations,
   validateMessage
 } from '@statechannels/wire-format';
 import {State as NitroState, hashState} from '@statechannels/nitro-protocol';
@@ -13,8 +12,8 @@ import {State as NitroState, hashState} from '@statechannels/nitro-protocol';
 import {
   SignedState,
   Outcome,
-  AllocationItem,
-  SimpleAllocation,
+  SingleAssetOutcome,
+  Allocation,
   Participant,
   makeAddress,
   Payload,
@@ -103,49 +102,27 @@ export function deserializeObjective(objective: ObjectiveWire): SharedObjective 
 
   return {...objective, participants};
 }
-// where do I move between token and asset holder?
-// I have to have asset holder between the wallets, otherwise there is ambiguity
-// I don't want asset holders in the json rpc layer, as the client shouldn't care
 
 export function deserializeOutcome(outcome: OutcomeWire): Outcome {
-  if (isAllocations(outcome)) {
-    switch (outcome.length) {
-      case 0:
-        // TODO: specify in wire format
-        throw new Error('Empty allocation');
-      case 1:
-        return deserializeAllocation(outcome[0]);
-      default:
-        return {
-          type: 'MixedAllocation',
-          simpleAllocations: outcome.map(deserializeAllocation)
-        };
-    }
-  } else {
-    if (outcome.length !== 1) {
-      throw new Error('Currently only supporting guarantees of length 1.');
-    } else {
-      return {
-        type: 'SimpleGuarantee',
-        ...outcome[0],
-        asset: makeAddress(outcome[0].asset)
-      };
-    }
-  }
-
-  // either an outcome is all guarantees or all
+  return outcome.map(deserializeSingleAssetOutcome);
 }
 
-function deserializeAllocation(allocation: AllocationWire): SimpleAllocation {
-  const {asset, allocationItems} = allocation;
+function deserializeSingleAssetOutcome(
+  singleAssetOutcome: SingleAssetOutcomeWire
+): SingleAssetOutcome {
   return {
-    type: 'SimpleAllocation',
-    asset: makeAddress(asset),
-    allocationItems: allocationItems.map(deserializeAllocationItem)
+    asset: makeAddress(singleAssetOutcome.asset),
+    allocations: singleAssetOutcome.allocations.map(deserializeAllocation),
+    metadata: singleAssetOutcome.metadata
   };
 }
 
-function deserializeAllocationItem(allocationItem: AllocationItemWire): AllocationItem {
-  const {amount, destination} = allocationItem;
-  return {amount: BN.from(amount), destination: makeDestination(destination)};
+function deserializeAllocation(allocation: AllocationWire): Allocation {
+  const {amount, destination, metadata, allocationType} = allocation;
+  return {
+    amount: BN.from(amount),
+    destination: makeDestination(destination),
+    metadata,
+    allocationType
+  };
 }

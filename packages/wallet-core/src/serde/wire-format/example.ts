@@ -1,7 +1,8 @@
 import {Message as WireMessage, SignedState as WireState} from '@statechannels/wire-format';
+import {AllocationType} from '@statechannels/exit-format';
 
 import {BN} from '../../bignumber';
-import {makeAddress, Payload, SignedState} from '../../types';
+import {makeAddress, Payload, SignedState, Uint256} from '../../types';
 import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../state-utils';
 
@@ -30,17 +31,22 @@ export const wireStateFormat: WireState = {
   isFinal: false,
   outcome: [
     {
-      allocationItems: [
+      allocations: [
         {
           amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
-          destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'
+          destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
+          metadata: '0x',
+          allocationType: AllocationType.simple
         },
         {
           amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
-          destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'
+          destination: '0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7',
+          metadata: '0x',
+          allocationType: AllocationType.simple
         }
       ],
-      asset: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'
+      asset: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
+      metadata: '0x'
     }
   ],
   turnNum: 1,
@@ -55,8 +61,15 @@ const wireStateFormat2: WireState = {
   outcome: [
     {
       asset: '0x4ad3F07BEFDC54511449A1f553E36A653c82eA57',
-      destinations: ['0x00000000000000000000000063E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7'],
-      targetChannelId: '0xb08bc94ebfbe1b23c419bec2d57993d33c41b112fbbca5d51f0f18194baadcf1'
+      metadata: '0x',
+      allocations: [
+        {
+          destination: '0xb08bc94ebfbe1b23c419bec2d57993d33c41b112fbbca5d51f0f18194baadcf1',
+          amount: '0x0000000000000000000000000000000000000000000000000000000000000055',
+          metadata: '0xdeadbeef',
+          allocationType: AllocationType.guarantee
+        }
+      ]
     }
   ],
   signatures: []
@@ -82,24 +95,30 @@ export const internalStateFormat: SignedState = {
   chainId: '0x2329',
   channelNonce: 123,
   isFinal: false,
-  outcome: {
-    type: 'SimpleAllocation',
-    asset: makeAddress('0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'),
-    allocationItems: [
-      {
-        amount: BN.from('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
-        destination: makeDestination(
-          '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
-        )
-      },
-      {
-        amount: BN.from('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
-        destination: makeDestination(
-          '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
-        )
-      }
-    ]
-  },
+  outcome: [
+    {
+      asset: makeAddress('0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'),
+      metadata: '0x',
+      allocations: [
+        {
+          amount: BN.from('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
+          destination: makeDestination(
+            '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+          ),
+          metadata: '0x',
+          allocationType: AllocationType.simple
+        },
+        {
+          amount: BN.from('0x00000000000000000000000000000000000000000000000006f05b59d3b20000'),
+          destination: makeDestination(
+            '0x00000000000000000000000063e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
+          ),
+          metadata: '0x',
+          allocationType: AllocationType.simple
+        }
+      ]
+    }
+  ],
   turnNum: 1,
   signatures: [
     {
@@ -113,12 +132,20 @@ export const internalStateFormat: SignedState = {
 export const internalStateFormat2: SignedState = {
   ...internalStateFormat,
   channelNonce: internalStateFormat.channelNonce + 1,
-  outcome: {
-    asset: makeAddress('0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'),
-    type: 'SimpleGuarantee',
-    targetChannelId: calculateChannelId(internalStateFormat),
-    destinations: [makeDestination('0x63E3FB11830c01ac7C9C64091c14Bb6CbAaC9Ac7')]
-  },
+  outcome: [
+    {
+      asset: makeAddress('0x4ad3F07BEFDC54511449A1f553E36A653c82eA57'),
+      metadata: '0x',
+      allocations: [
+        {
+          destination: makeDestination(calculateChannelId(internalStateFormat)),
+          amount: '0x0000000000000000000000000000000000000000000000000000000000000055' as Uint256,
+          metadata: '0xdeadbeef',
+          allocationType: AllocationType.guarantee
+        }
+      ]
+    }
+  ],
   signatures: []
 };
 

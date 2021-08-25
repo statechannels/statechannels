@@ -4,10 +4,10 @@ export * from './utils';
 export * from './bignumber';
 export * from './constants';
 
-export * from './serde/app-messages/deserialize';
-export * from './serde/app-messages/serialize';
-export * from './serde/wire-format/deserialize';
-export * from './serde/wire-format/serialize';
+export * as AppDeserialize from './serde/app-messages/deserialize';
+export * as AppSerialize from './serde/app-messages/serialize';
+export * as WireSerialize from './serde/wire-format/deserialize';
+export * as WireDeserialize from './serde/wire-format/serialize';
 
 export * from './protocols';
 
