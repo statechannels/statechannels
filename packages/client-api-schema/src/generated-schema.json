@@ -8,30 +8,11 @@
     },
     "Allocation": {
       "additionalProperties": false,
-      "description": "Array of destination-amount pairings for a given token",
-      "properties": {
-        "allocationItems": {
-          "description": "Array of destination-amount pairings",
-          "items": {
-            "$ref": "#/definitions/AllocationItem"
-          },
-          "type": "array"
-        },
-        "asset": {
-          "$ref": "#/definitions/Address",
-          "description": "The contract address of the asset"
-        }
-      },
-      "required": [
-        "asset",
-        "allocationItems"
-      ],
-      "type": "object"
-    },
-    "AllocationItem": {
-      "additionalProperties": false,
       "description": "Assigns some amount of an unspecified asset to a destination",
       "properties": {
+        "allocationType": {
+          "type": "number"
+        },
         "amount": {
           "$ref": "#/definitions/Uint256",
           "description": "How much funds will be transferred to the destination address."
@@ -39,11 +20,16 @@
         "destination": {
           "$ref": "#/definitions/Address",
           "description": "Address of EOA to receive channel proceeds."
+        },
+        "metadata": {
+          "type": "string"
         }
       },
       "required": [
         "destination",
-        "amount"
+        "amount",
+        "metadata",
+        "allocationType"
       ],
       "type": "object"
     },
@@ -154,12 +140,6 @@
           ],
           "type": "string"
         },
-        "allocations": {
-          "items": {
-            "$ref": "#/definitions/Allocation"
-          },
-          "type": "array"
-        },
         "appData": {
           "type": "string"
         },
@@ -171,6 +151,12 @@
         },
         "fundingStatus": {
           "$ref": "#/definitions/FundingStatus"
+        },
+        "outcome": {
+          "items": {
+            "$ref": "#/definitions/SingleAssetOutcome"
+          },
+          "type": "array"
         },
         "participants": {
           "items": {
@@ -187,7 +173,7 @@
       },
       "required": [
         "participants",
-        "allocations",
+        "outcome",
         "appData",
         "appDefinition",
         "channelId",
@@ -275,12 +261,6 @@
     "CreateChannelParams": {
       "additionalProperties": false,
       "properties": {
-        "allocations": {
-          "items": {
-            "$ref": "#/definitions/Allocation"
-          },
-          "type": "array"
-        },
         "appData": {
           "type": "string"
         },
@@ -296,6 +276,12 @@
         "fundingStrategy": {
           "$ref": "#/definitions/FundingStrategy"
         },
+        "outcome": {
+          "items": {
+            "$ref": "#/definitions/SingleAssetOutcome"
+          },
+          "type": "array"
+        },
         "participants": {
           "items": {
             "$ref": "#/definitions/Participant"
@@ -305,7 +291,7 @@
       },
       "required": [
         "participants",
-        "allocations",
+        "outcome",
         "appDefinition",
         "appData",
         "fundingStrategy",
@@ -392,7 +378,7 @@
       "$ref": "#/definitions/JsonRpcRequest%3C%22GetChannels%22%2Cstructure-1978982097-247-273-1978982097-217-274-1978982097-184-275-1978982097-0-344%3E"
     },
     "GetChannelsResponse": {
-      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-3336-3684-src_data-types.ts-0-4103%5B%5D%3E"
+      "$ref": "#/definitions/JsonRpcResponse%3Cdef-interface-src_data-types.ts-3287-3639-src_data-types.ts-0-4058%5B%5D%3E"
     },
     "GetStateError": {
       "$ref": "#/definitions/JsonRpcError%3C1200%2C%22Could%20not%20find%20channel%22%3E"
@@ -1684,7 +1670,7 @@
       ],
       "type": "object"
     },
-    "JsonRpcResponse<def-interface-src_data-types.ts-3336-3684-src_data-types.ts-0-4103[]>": {
+    "JsonRpcResponse<def-interface-src_data-types.ts-3287-3639-src_data-types.ts-0-4058[]>": {
       "additionalProperties": false,
       "description": "Specifies response headers as per {@link https://www.jsonrpc.org/specification | JSON-RPC 2.0 Specification }",
       "properties": {
@@ -1925,6 +1911,31 @@
       },
       "required": [
         "success"
+      ],
+      "type": "object"
+    },
+    "SingleAssetOutcome": {
+      "additionalProperties": false,
+      "properties": {
+        "allocations": {
+          "description": "Array of destination-amount pairings",
+          "items": {
+            "$ref": "#/definitions/Allocation"
+          },
+          "type": "array"
+        },
+        "asset": {
+          "$ref": "#/definitions/Address",
+          "description": "The contract address of the asset"
+        },
+        "metadata": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "asset",
+        "allocations",
+        "metadata"
       ],
       "type": "object"
     },
