@@ -151,7 +151,7 @@ export const internalStateFormat2: SignedState = {
       allocations: [
         {
           destination: makeDestination(calculateChannelId(internalStateFormat)),
-          amount: '0x0000000000000000000000000000000000000000000000000000000000000055' as Uint256,
+          amount: BN.from('0x0000000000000000000000000000000000000000000000000000000000000055'),
           metadata: '0xdeadbeef',
           allocationType: AllocationType.guarantee
         }
