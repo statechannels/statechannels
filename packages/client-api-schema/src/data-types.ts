@@ -52,7 +52,7 @@ export interface Participant {
 /**
  * Assigns some amount of an unspecified asset to a destination
  */
-export interface AllocationItem {
+export interface Allocation {
   /**
    * Address of EOA to receive channel proceeds.
    */
@@ -61,12 +61,11 @@ export interface AllocationItem {
    * How much funds will be transferred to the destination address.
    */
   amount: Uint256;
+  metadata: string;
+  allocationType: number;
 }
 
-/**
- * Array of destination-amount pairings for a given token
- */
-export interface Allocation {
+export interface SingleAssetOutcome {
   /**
    * The contract address of the asset
    */
@@ -74,14 +73,11 @@ export interface Allocation {
   /**
    * Array of destination-amount pairings
    */
-  allocationItems: AllocationItem[];
+  allocations: Allocation[];
+  metadata: string;
 }
 
-/**
- * Included for backwards compatibility
- */
-export type Allocations = Allocation[];
-
+export type Outcome = SingleAssetOutcome[];
 export interface ChannelBudget {
   channelId: Bytes32;
   amount: Uint256;
@@ -134,7 +130,7 @@ export type FundingStatus =
 
 export interface ChannelResult {
   participants: Participant[];
-  allocations: Allocation[];
+  outcome: SingleAssetOutcome[];
   appData: string;
   appDefinition: Address;
   channelId: ChannelId;

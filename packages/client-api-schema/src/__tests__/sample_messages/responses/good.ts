@@ -16,17 +16,22 @@ const channelResult: ChannelResult = {
       destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7'
     }
   ],
-  allocations: [
+  outcome: [
     {
       asset: '0x0000000000000000000000000000000000000000',
-      allocationItems: [
+      metadata: '0x',
+      allocations: [
         {
           destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
-          amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
+          amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
+          allocationType: 0,
+          metadata: '0x'
         },
         {
           destination: '0x63e3fb11830c01ac7c9c64091c14bb6cbaac9ac7',
-          amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000'
+          amount: '0x00000000000000000000000000000000000000000000000006f05b59d3b20000',
+          allocationType: 0,
+          metadata: '0x'
         }
       ]
     }
