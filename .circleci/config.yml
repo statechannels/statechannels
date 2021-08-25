@@ -244,7 +244,7 @@ jobs:
                   -u $GH_USER:$GH_API \
                   --header 'Content-Type: application/json' \
                   --data-raw '{
-                  "body": "A [new preview]('$preview_url') was generated for the docs-website."
+                  "body": "**CircleCI Generated Comment:** A [new preview]('$preview_url') was generated for the docs-website."
                   }'
 workflows:
   statechannels:
