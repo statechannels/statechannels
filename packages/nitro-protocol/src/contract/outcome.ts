@@ -2,6 +2,8 @@ import {BytesLike, constants, utils} from 'ethers';
 import {defaultAbiCoder} from '@ethersproject/abi';
 import * as ExitFormat from '@statechannels/exit-format';
 
+export type AllocationType = ExitFormat.AllocationType;
+export type Allocation = ExitFormat.Allocation;
 export type AssetOutcome = ExitFormat.SingleAssetExit;
 export type Outcome = ExitFormat.Exit;
 export const encodeOutcome = ExitFormat.encodeExit;
