@@ -3,7 +3,7 @@ pragma solidity 0.7.4;
 pragma experimental ABIEncoderV2;
 
 import './ForceMove.sol';
-import './Outcome.sol';
+import {ExitFormat as Outcome} from '@statechannels/exit-format/contracts/ExitFormat.sol';
 import './MultiAssetHolder.sol';
 
 /**
