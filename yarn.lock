@@ -5986,6 +5986,17 @@
   resolved "https://registry.npmjs.org/@solidity-parser/parser/-/parser-0.8.2.tgz#a6a5e93ac8dca6884a99a532f133beba59b87b69"
   integrity sha512-8LySx3qrNXPgB5JiULfG10O3V7QTxI/TLzSw5hFQhXWSkVxZBAv4rZQ0sYgLEbc8g3L2lmnujj1hKul38Eu5NQ==
 
+"@statechannels/nitro-protocol@0.17.3":
+  version "0.17.3"
+  resolved "https://registry.npmjs.org/@statechannels/nitro-protocol/-/nitro-protocol-0.17.3.tgz#5394d5454a6ee20399afe0a859cf5537caac7973"
+  integrity sha512-E372J29OerSFR5RdSwJPPy24C4WXOg9ibTvZ8wueIh0Kii0rNrY/3YxJ9ZFClKpnpZWFo3e2ATMD2Q/Nomf9wA==
+  dependencies:
+    "@openzeppelin/contracts" "3.2.2-solc-0.7"
+    ethers "5.0.12"
+    lodash.isequal "^4.5.0"
+    lodash.pick "4.4.0"
+    lodash.shuffle "^4.2.0"
+
 "@statechannels/wasm-utils@0.1.6-asset":
   version "0.1.6-asset"
   resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.6-asset.tgz#9e4342c94bd256990450cb03358740fb8fd34bf0"
