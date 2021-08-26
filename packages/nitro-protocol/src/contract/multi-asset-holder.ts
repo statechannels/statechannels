@@ -1,11 +1,9 @@
-import {utils, BigNumber, ethers, constants} from 'ethers';
-import ExitFormat, {AllocationType, Exit} from '@statechannels/exit-format';
+import {utils, BigNumber, constants} from 'ethers';
+import ExitFormat, {AllocationType} from '@statechannels/exit-format';
 
 import {parseEventResult} from '../ethers-utils';
-import NitroAdjudicatorArtifact from '../../artifacts/contracts/NitroAdjudicator.sol/NitroAdjudicator.json';
 
-import {decodeGuaranteeData, decodeOutcome, GuaranteeAllocation, Outcome} from './outcome';
-import {Address} from './types';
+import {decodeGuaranteeData} from './outcome';
 
 export interface DepositedEvent {
   destination: string;
