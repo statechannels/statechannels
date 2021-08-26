@@ -36,7 +36,7 @@
   },
   "Contract API": {
     "Overview": ["contract-api/contract-inheritance"],
-    "Libraries": ["contract-api/natspec/SafeMath", "contract-api/natspec/Outcome"],
+    "Libraries": ["contract-api/natspec/SafeMath"],
     "Base Contracts": [
       "contract-api/natspec/IStatusManager",
       "contract-api/natspec/StatusManager",
