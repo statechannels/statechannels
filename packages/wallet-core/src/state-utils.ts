@@ -171,7 +171,9 @@ function convertToNitroAllocations(allocations: Allocation[]): NitroAllocation[]
 function convertFromNitroAllocations(allocations: NitroAllocation[]): Allocation[] {
   return allocations.map(a => ({
     amount: BN.from(a.amount),
-    destination: makeDestination(a.destination)
+    destination: makeDestination(a.destination),
+    metadata: a.metadata as string, // TODO
+    allocationType: a.allocationType
   }));
 }
 

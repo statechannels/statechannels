@@ -1,5 +1,6 @@
 import {ethers} from 'ethers';
 import * as _ from 'lodash';
+import {AllocationType} from '@statechannels/exit-format';
 
 import {DirectFunder} from '../protocols';
 import {unreachable} from '../utils';
@@ -44,10 +45,21 @@ const deposits = {
 const asset = zeroAddress; // must be even length
 const singleAssetOutcome: SingleAssetOutcome = {
   allocations: [
-    {destination: participantA.destination, amount: deposits.A},
-    {destination: participantB.destination, amount: deposits.B}
+    {
+      destination: participantA.destination,
+      amount: deposits.A,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    },
+    {
+      destination: participantB.destination,
+      amount: deposits.B,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    }
   ],
-  asset
+  asset,
+  metadata: '0x'
 };
 
 const openingState: State = {
@@ -134,8 +146,9 @@ describe('initialization', () => {
   test('when the outcome does not match the expectations', () => {
     expect(() => initialize({...openingState, outcome: 'any' as any}, 0)).toThrow();
 
-    const singleAssetOutcome = {
+    const singleAssetOutcome: SingleAssetOutcome = {
       asset: zeroAddress,
+      metadata: '0x',
       allocations: []
     };
     expect(() => initialize({...openingState, outcome: [singleAssetOutcome]}, 0)).toThrow(
@@ -164,9 +177,20 @@ describe('cranking', () => {
       outcome: [
         {
           asset,
+          metadata: '0x',
           allocations: [
-            {destination: participants.A.destination, amount: BN.from(0)},
-            {destination: participants.B.destination, amount: BN.from(0)}
+            {
+              destination: participants.A.destination,
+              amount: BN.from(0),
+              metadata: '0x',
+              allocationType: AllocationType.simple
+            },
+            {
+              destination: participants.B.destination,
+              amount: BN.from(0),
+              metadata: '0x',
+              allocationType: AllocationType.simple
+            }
           ]
         }
       ]

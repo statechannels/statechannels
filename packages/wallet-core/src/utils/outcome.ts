@@ -1,5 +1,6 @@
 import * as _ from 'lodash';
 import {ethers} from 'ethers';
+import {AllocationType} from '@statechannels/exit-format';
 
 import {Allocation, Destination, makeAddress, SingleAssetOutcome, Address} from '../types';
 import {BN, Zero} from '../bignumber';
@@ -7,12 +8,14 @@ import {zeroAddress} from '../config';
 
 export const ethOutcome = (allocations: Allocation[]): SingleAssetOutcome => ({
   asset: zeroAddress,
-  allocations
+  allocations,
+  metadata: '0x'
 });
 
 export const tokenAllocation = (asset: Address, allocations: Allocation[]): SingleAssetOutcome => ({
   asset,
-  allocations
+  allocations,
+  metadata: '0x'
 });
 
 export enum Errors {
@@ -48,7 +51,12 @@ export function allocateToTarget(
       if (BN.lt(ledgerItem.amount, 0)) throw new Error(Errors.InsufficientFunds);
     });
 
-  currentAllocations.push({amount: total, destination: makeDestination(targetChannelId)});
+  currentAllocations.push({
+    amount: total,
+    destination: makeDestination(targetChannelId),
+    metadata: '0x',
+    allocationType: AllocationType.simple
+  });
   currentAllocations = currentAllocations.filter(i => BN.gt(i.amount, 0));
 
   currentOutcome.allocations = currentAllocations;

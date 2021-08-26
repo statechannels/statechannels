@@ -42,14 +42,14 @@ export type Destination = string & {_isDestination: void};
 export interface Allocation {
   destination: Destination;
   amount: Uint256;
-  allocationType?: AllocationType;
-  metadata?: string;
+  allocationType: AllocationType;
+  metadata: string;
 }
 
 export interface SingleAssetOutcome {
   asset: Address;
   allocations: Allocation[];
-  metadata?: string;
+  metadata: string;
 }
 
 export type Outcome = SingleAssetOutcome[];
