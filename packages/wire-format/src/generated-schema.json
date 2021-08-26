@@ -9,26 +9,43 @@
     "Allocation": {
       "additionalProperties": false,
       "properties": {
-        "allocationType": {
-          "$ref": "#/definitions/Uint8"
+        "allocationItems": {
+          "items": {
+            "$ref": "#/definitions/AllocationItem"
+          },
+          "type": "array"
         },
+        "asset": {
+          "$ref": "#/definitions/Address"
+        }
+      },
+      "required": [
+        "asset",
+        "allocationItems"
+      ],
+      "type": "object"
+    },
+    "AllocationItem": {
+      "additionalProperties": false,
+      "properties": {
         "amount": {
           "$ref": "#/definitions/Uint256"
         },
         "destination": {
           "$ref": "#/definitions/Bytes32"
-        },
-        "metadata": {
-          "$ref": "#/definitions/Bytes"
         }
       },
       "required": [
         "destination",
-        "amount",
-        "metadata",
-        "allocationType"
+        "amount"
       ],
       "type": "object"
+    },
+    "Allocations": {
+      "items": {
+        "$ref": "#/definitions/Allocation"
+      },
+      "type": "array"
     },
     "Bytes": {
       "description": "Bytes",
@@ -215,6 +232,35 @@
       ],
       "type": "object"
     },
+    "Guarantee": {
+      "additionalProperties": false,
+      "properties": {
+        "asset": {
+          "$ref": "#/definitions/Address"
+        },
+        "destinations": {
+          "items": {
+            "$ref": "#/definitions/Bytes32"
+          },
+          "type": "array"
+        },
+        "targetChannelId": {
+          "$ref": "#/definitions/Bytes32"
+        }
+      },
+      "required": [
+        "asset",
+        "targetChannelId",
+        "destinations"
+      ],
+      "type": "object"
+    },
+    "Guarantees": {
+      "items": {
+        "$ref": "#/definitions/Guarantee"
+      },
+      "type": "array"
+    },
     "Message": {
       "additionalProperties": false,
       "properties": {
@@ -311,10 +357,14 @@
       "type": "object"
     },
     "Outcome": {
-      "items": {
-        "$ref": "#/definitions/SingleAssetOutcome"
-      },
-      "type": "array"
+      "anyOf": [
+        {
+          "$ref": "#/definitions/Guarantees"
+        },
+        {
+          "$ref": "#/definitions/Allocations"
+        }
+      ]
     },
     "Participant": {
       "additionalProperties": false,
@@ -424,38 +474,12 @@
       ],
       "type": "object"
     },
-    "SingleAssetOutcome": {
-      "additionalProperties": false,
-      "properties": {
-        "allocations": {
-          "items": {
-            "$ref": "#/definitions/Allocation"
-          },
-          "type": "array"
-        },
-        "asset": {
-          "$ref": "#/definitions/Address"
-        },
-        "metadata": {
-          "$ref": "#/definitions/Bytes"
-        }
-      },
-      "required": [
-        "asset",
-        "allocations",
-        "metadata"
-      ],
-      "type": "object"
-    },
     "Uint256": {
       "description": "Uint256",
       "pattern": "^0x([a-fA-F0-9]{64})$",
       "type": "string"
     },
     "Uint48": {
-      "type": "number"
-    },
-    "Uint8": {
       "type": "number"
     },
     "VirtuallyFund": {
