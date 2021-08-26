@@ -348,7 +348,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
             .destination;
 
         // target checks
-        require(targetOutcome[targetAssetIndex].asset == asset, 'asset mismatch');
+        require(targetOutcome[targetAssetIndex].asset == asset, 'targetAsset != guaranteeAsset');
         _requireChannelFinalized(targetChannelId);
         _requireMatchingFingerprint(
             claimArgs.targetStateHash,

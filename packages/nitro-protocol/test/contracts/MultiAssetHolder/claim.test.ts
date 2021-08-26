@@ -97,7 +97,7 @@ describe('claim', () => {
       heldBefore,
       guaranteeDestinations,
       tOutcomeBefore,
-      payoutIndices: targetAllocationIndicesToPayout,
+      indices: targetAllocationIndicesToPayout,
       tOutcomeAfter,
       heldAfter,
       payouts,
@@ -106,7 +106,7 @@ describe('claim', () => {
       heldBefore: AssetOutcomeShortHand;
       guaranteeDestinations;
       tOutcomeBefore: AssetOutcomeShortHand;
-      payoutIndices: number[];
+      indices: number[];
       tOutcomeAfter: AssetOutcomeShortHand;
       heldAfter: AssetOutcomeShortHand;
       payouts: AssetOutcomeShortHand;
@@ -211,6 +211,15 @@ describe('claim', () => {
           })
         ).wait();
       }
+
+      // record eth balances before the transaction so we can check payouts later
+      const ethBalancesBefore = {};
+      await Promise.all(
+        Object.keys(payouts).map(async destination => {
+          const address = convertBytes32ToAddress(destination);
+          ethBalancesBefore[address] = await provider.getBalance(address);
+        })
+      );
 
       const tx = testNitroAdjudicator.claim({
         sourceChannelId,
