@@ -1,7 +1,7 @@
 {
   "name": "docs-website",
   "description": "Documentation for @statechannels packages",
-  "version": "0.7.5",
+  "version": "0.7.6",
   "author": "statechannels",
   "bugs": "https://github.com/statechannels/statechannels/issues",
   "dependencies": {
@@ -10,8 +10,8 @@
     "@mdx-js/react": "1.6.18",
     "@microsoft/api-documenter": "7.8.21",
     "@statechannels/client-api-schema": "0.10.2",
-    "@statechannels/nitro-protocol": "0.17.2",
-    "@statechannels/server-wallet": "1.25.1",
+    "@statechannels/nitro-protocol": "0.17.3",
+    "@statechannels/server-wallet": "1.25.2",
     "clsx": "1.1.1",
     "highlight.js": "10.0.2",
     "highlightjs-solidity": "https://github.com/highlightjs/highlightjs-solidity",
