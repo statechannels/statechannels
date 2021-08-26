@@ -1,9 +1,12 @@
+import {AllocationType} from '@statechannels/exit-format';
+
 import {BN} from '../bignumber';
 import {Allocation} from '../types';
 import {MOCK_ASSET_HOLDER_ADDRESS} from '../constants';
 
-import {Errors, allocateToTarget, makeDestination} from '.';
 import {ethOutcome, tokenAllocation} from './outcome';
+
+import {Errors, allocateToTarget, makeDestination} from '.';
 
 const zero = BN.from(0);
 const one = BN.from(1);
@@ -20,62 +23,86 @@ const targetChannelId = makeDestination(
 type Allocations = Allocation[];
 describe('allocateToTarget with valid input', () => {
   const target1: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: one}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: one, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const ledger1: Allocations = [...target1];
   const expected1 = [{destination: targetChannelId, amount: two}];
 
   const target2: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: two}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: two, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const ledger2: Allocations = [
-    {destination: left, amount: three},
-    {destination: right, amount: three}
+    {destination: left, amount: three, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: three, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const expected2: Allocations = [
-    {destination: left, amount: two},
-    {destination: right, amount: one},
-    {destination: targetChannelId, amount: three}
+    {destination: left, amount: two, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {
+      destination: targetChannelId,
+      amount: three,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    }
   ];
 
   const target3: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: two}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: two, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const ledger3: Allocations = [
-    {destination: right, amount: three},
-    {destination: left, amount: three}
+    {destination: right, amount: three, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: left, amount: three, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const expected3: Allocations = [
-    {destination: right, amount: one},
-    {destination: left, amount: two},
-    {destination: targetChannelId, amount: three}
+    {destination: right, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: left, amount: two, metadata: '0x', allocationType: AllocationType.simple},
+    {
+      destination: targetChannelId,
+      amount: three,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    }
   ];
 
   const target4: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: two}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: two, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const ledger4: Allocations = [
-    {destination: left, amount: three},
-    {destination: middle, amount: three},
-    {destination: right, amount: three}
+    {destination: left, amount: three, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: middle, amount: three, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: three, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const expected4: Allocations = [
-    {destination: left, amount: two},
-    {destination: middle, amount: three},
-    {destination: right, amount: one},
-    {destination: targetChannelId, amount: three}
+    {destination: left, amount: two, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: middle, amount: three, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {
+      destination: targetChannelId,
+      amount: three,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    }
   ];
 
   const target5: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: zero}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: zero, metadata: '0x', allocationType: AllocationType.simple}
   ];
-  const ledger5: Allocations = [{destination: left, amount: one}];
-  const expected5: Allocations = [{destination: targetChannelId, amount: one}];
+  const ledger5: Allocations = [
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple}
+  ];
+  const expected5: Allocations = [
+    {
+      destination: targetChannelId,
+      amount: one,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    }
+  ];
 
   it.each`
     description | deductions | ledgerAllocation | expectedAllocation
@@ -101,22 +128,22 @@ describe('allocateToTarget with valid input', () => {
 
 describe('allocateToTarget with invalid input', () => {
   const target1: Allocations = [
-    {destination: left, amount: one},
-    {destination: middle, amount: one}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: middle, amount: one, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const ledger1: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: one}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: one, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const error1 = Errors.DestinationMissing;
 
   const target2: Allocations = [
-    {destination: left, amount: three},
-    {destination: right, amount: three}
+    {destination: left, amount: three, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: three, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const ledger2: Allocations = [
-    {destination: left, amount: one},
-    {destination: right, amount: two}
+    {destination: left, amount: one, metadata: '0x', allocationType: AllocationType.simple},
+    {destination: right, amount: two, metadata: '0x', allocationType: AllocationType.simple}
   ];
   const error2 = Errors.InsufficientFunds;
 
