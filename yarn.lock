@@ -6156,6 +6156,16 @@
   dependencies:
     ethers "^5.1.4"
     lodash "^4.17.21"
+"@statechannels/nitro-protocol@0.17.3":
+  version "0.17.3"
+  resolved "https://registry.npmjs.org/@statechannels/nitro-protocol/-/nitro-protocol-0.17.3.tgz#5394d5454a6ee20399afe0a859cf5537caac7973"
+  integrity sha512-E372J29OerSFR5RdSwJPPy24C4WXOg9ibTvZ8wueIh0Kii0rNrY/3YxJ9ZFClKpnpZWFo3e2ATMD2Q/Nomf9wA==
+  dependencies:
+    "@openzeppelin/contracts" "3.2.2-solc-0.7"
+    ethers "5.0.12"
+    lodash.isequal "^4.5.0"
+    lodash.pick "4.4.0"
+    lodash.shuffle "^4.2.0"
 
 "@statechannels/wasm-utils@0.1.6-asset":
   version "0.1.6-asset"
