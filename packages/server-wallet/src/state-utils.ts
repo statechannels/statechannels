@@ -29,7 +29,11 @@ export const dropNonConstants = (s: State): ChannelConstants =>
 
 export const addHash = <T extends State = State>(s: T): T & Hashed => ({
   ...s,
-  stateHash: recordFunctionMetrics(hashState(toNitroState(s))),
+  stateHash: recordFunctionMetrics(
+    hashState(
+      toNitroState(s) as any // see https://github.com/statechannels/native-utils/issues/28))
+    )
+  ),
 });
 export const addHashes = (c: Channel): Channel =>
   _.assign(c, {vars: c.vars.map(v => addHash({...c.channelConstants, ...v})) as any});
