@@ -519,120 +519,20 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         );
     }
 
-    // **************
-    // Internal methods
-    // **************
-
-    function _computeNewAllocation(
-        uint256 initialHoldings,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices
-    )
-        public
-        pure
-        returns (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool allocatesOnlyZeros,
-            uint256[] memory payouts,
-            uint256 totalPayouts
-        )
-    {
-        // `indices == []` means "pay out to all"
-        // Note: by initializing payouts to be an array of fixed length, its entries are initialized to be `0`
-        payouts = new uint256[](indices.length > 0 ? indices.length : allocation.length);
-        totalPayouts = 0;
-        newAllocation = new Outcome.AllocationItem[](allocation.length);
-        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
-        //  We rely on the assumption that the indices are strictly increasing.
-        //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
-        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
-
-        // loop over allocations and decrease surplus
-        for (uint256 i = 0; i < allocation.length; i++) {
-            // copy destination part
-            newAllocation[i].destination = allocation[i].destination;
-            // compute new amount part
-            uint256 affordsForDestination = min(allocation[i].amount, surplus);
-            if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                // found a match
-                // reduce the current allocationItem.amount
-                newAllocation[i].amount = allocation[i].amount - affordsForDestination;
-                // increase the relevant payout
-                payouts[k] = affordsForDestination;
-                totalPayouts += affordsForDestination;
-                // move on to the next supplied index
-                ++k;
+    /**
+     * @notice Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
+     * @dev Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
+     * @param singleAssetExit The single asset exit to be paid out.
+     */
+    function _executeSingleAssetExit(Outcome.SingleAssetExit memory singleAssetExit) internal {
+        address asset = singleAssetExit.asset;
+        for (uint256 j = 0; j < singleAssetExit.allocations.length; j++) {
+            bytes32 destination = singleAssetExit.allocations[j].destination;
+            uint256 amount = singleAssetExit.allocations[j].amount;
+            if (_isExternalDestination(destination)) {
+                _transferAsset(asset, _bytes32ToAddress(destination), amount);
             } else {
-                newAllocation[i].amount = allocation[i].amount;
-            }
-            if (newAllocation[i].amount != 0) allocatesOnlyZeros = false;
-            // decrease surplus by the current amount if possible, else surplus goes to zero
-            surplus -= affordsForDestination;
-        }
-    }
-
-    function _computeNewAllocationWithGuarantee(
-        uint256 initialHoldings,
-        Outcome.AllocationItem[] memory allocation,
-        uint256[] memory indices,
-        Outcome.Guarantee memory guarantee // TODO this could just accept guarantee.destinations ?
-    )
-        public
-        pure
-        returns (
-            Outcome.AllocationItem[] memory newAllocation,
-            bool allocatesOnlyZeros,
-            uint256 totalPayouts
-        )
-    {
-        // `indices == []` means "pay out to all"
-        totalPayouts = 0;
-        allocatesOnlyZeros = true; // switched to false if there is an item remaining with amount > 0
-        uint256 surplus = initialHoldings; // tracks funds available during calculation
-        uint256 k = 0; // indexes the `indices` array
-        //  We rely on the assumption that the indices are strictly increasing.
-        //  This allows us to iterate over the destinations in order once, continuing until we hit the first index, then the second etc.
-        //  If the indices were to decrease, we would have to start from the beginning: doing a full search for each index.
-
-        // copy allocation
-        newAllocation = new Outcome.AllocationItem[](allocation.length);
-        for (uint256 i = 0; i < allocation.length; i++) {
-            newAllocation[i].destination = allocation[i].destination;
-            newAllocation[i].amount = allocation[i].amount;
-        }
-
-        // for each guarantee destination
-        for (uint256 j = 0; j < guarantee.destinations.length; j++) {
-            if (surplus == 0) break;
-            for (uint256 i = 0; i < newAllocation.length; i++) {
-                if (surplus == 0) break;
-                // search for it in the allocation
-                if (guarantee.destinations[j] == newAllocation[i].destination) {
-                    // if we find it, compute new amount
-                    uint256 affordsForDestination = min(allocation[i].amount, surplus);
-                    // decrease surplus by the current amount regardless of hitting a specified index
-                    surplus -= affordsForDestination;
-                    if ((indices.length == 0) || ((k < indices.length) && (indices[k] == i))) {
-                        // only if specified in supplied indices, or we if we are doing "all"
-                        // reduce the new allocationItem.amount
-                        newAllocation[i].amount -= affordsForDestination;
-                        // the amount subtracted should be paid out to this destination
-                        // increase the total payouts
-                        totalPayouts += affordsForDestination;
-                        // move on to the next supplied index
-                        ++k;
-                    }
-                    break; // start again with the next guarantee destination
-                }
-            }
-        }
-
-        for (uint256 i = 0; i < allocation.length; i++) {
-            if (newAllocation[i].amount != 0) {
-                allocatesOnlyZeros = false;
-                break;
+                holdings[asset][destination] += amount;
             }
         }
     }
