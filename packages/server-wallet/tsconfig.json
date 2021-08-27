@@ -20,9 +20,9 @@
     {
       "path": "../client-api-schema"
     },
-    {
-      "path": "../nitro-protocol"
-    },
+    // {
+    //   "path": "../nitro-protocol"
+    // }, // we don't need this as long as nitro-protocol is installed from npm
     {
       "path": "../wallet-core"
     }

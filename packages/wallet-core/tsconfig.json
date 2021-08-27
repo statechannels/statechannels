@@ -12,8 +12,8 @@
   },
   "include": ["./src"],
   "references": [
-    {"path": "../nitro-protocol"},
+    // {"path": "../nitro-protocol"}, // we don't need this as long as nitro is installed from npm
     {"path": "../devtools"},
-    {"path": "../wire-format"},
+    {"path": "../wire-format"}
   ]
 }
