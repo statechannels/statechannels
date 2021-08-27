@@ -1,5 +1,6 @@
 import {expectRevert} from '@statechannels/devtools';
 import {Contract, constants, BigNumber} from 'ethers';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 
 import {
   getTestProvider,
@@ -95,7 +96,7 @@ describe('claim', () => {
       heldBefore,
       guaranteeDestinations,
       tOutcomeBefore,
-      indices,
+      indices: targetAllocationIndicesToPayout,
       tOutcomeAfter,
       heldAfter,
       payouts,
@@ -112,10 +113,10 @@ describe('claim', () => {
     }) => {
       // Compute channelIds
       const targetId = randomChannelId();
-      const guarantorId = randomChannelId();
+      const sourceChannelId = randomChannelId();
       const applicationChannelId = randomChannelId();
       addresses.t = targetId;
-      addresses.g = guarantorId;
+      addresses.g = sourceChannelId;
       addresses.x = applicationChannelId;
 
       // Transform input data (unpack addresses and BigNumber amounts)
@@ -190,7 +191,7 @@ describe('claim', () => {
       // Set status for guarantor
       if (guaranteeDestinations.length > 0) {
         await (
-          await testNitroAdjudicator.setStatusFromChannelData(guarantorId, {
+          await testNitroAdjudicator.setStatusFromChannelData(sourceChannelId, {
             turnNumRecord,
             finalizesAt,
             stateHash,
@@ -208,15 +209,17 @@ describe('claim', () => {
         })
       );
 
-      const tx = testNitroAdjudicator.claim(
-        0,
-        guarantorId,
-        guarantorOutcomeBytes,
-        stateHash,
+      const tx = testNitroAdjudicator.claim({
+        sourceChannelId,
+        sourceStateHash: stateHash,
+        sourceOutcomeBytes,
+        sourceAssetIndex: 0, // TODO: introduce test cases with multiple-asset Source and Targets
+        indexOfTargetInSource: 0,
+        targetStateHash: stateHash,
         targetOutcomeBytes,
-        stateHash,
-        indices
-      );
+        targetAssetIndex: 0,
+        targetAllocationIndicesToPayout,
+      });
 
       // Call method in a slightly different way if expecting a revert
       if (reason) {
@@ -226,11 +229,13 @@ describe('claim', () => {
         const {events: eventsFromTx} = await (await tx).wait();
 
         // Check new holdings
-        Object.keys(heldAfter).forEach(async key =>
-          expect(await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, key)).toEqual(
-            heldAfter[key]
-          )
-        );
+        const heldAfterChecks = Object.keys(heldAfter).map(async g => {
+          return expect(
+            await testNitroAdjudicator.holdings(MAGIC_ADDRESS_INDICATING_ETH, g)
+          ).toEqual(heldAfter[g]);
+        });
+
+        await Promise.all(heldAfterChecks);
 
         // Check new outcomeHash
         const allocationAfter = [];
@@ -251,6 +256,14 @@ describe('claim', () => {
 
         // Compile event expectations
         const expectedEvents = [
+          {
+            event: 'AllocationUpdated',
+            args: {
+              channelId: sourceChannelId,
+              assetIndex: BigNumber.from(0),
+              initialHoldings: heldBefore[addresses.g],
+            },
+          },
           {
             event: 'AllocationUpdated',
             args: {
