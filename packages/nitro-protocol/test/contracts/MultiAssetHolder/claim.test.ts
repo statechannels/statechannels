@@ -20,6 +20,7 @@ import {
   Outcome,
 } from '../../../src';
 import {MAGIC_ADDRESS_INDICATING_ETH} from '../../../src/transactions';
+import {encodeGuaranteeData} from '../../../src/contract/outcome';
 const provider = getTestProvider();
 const testNitroAdjudicator: TESTNitroAdjudicator & Contract = (setupContract(
   provider,
@@ -146,16 +147,18 @@ describe('claim', () => {
       );
 
       // Compute an appropriate allocation.
-      const allocation = [];
+      const allocations: Allocation[] = [];
       Object.keys(tOutcomeBefore).forEach(key =>
-        allocation.push({destination: key, amount: tOutcomeBefore[key]})
+        allocations.push({
+          destination: key,
+          amount: tOutcomeBefore[key].toString(),
+          metadata: '0x',
+          allocationType: AllocationType.simple,
+        })
       );
-      const outcomeHash = hashOutcome([
-        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
-      ]);
-      const targetOutcomeBytes = encodeOutcome([
-        {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocation},
-      ]);
+      const outcome: Outcome = [{asset: MAGIC_ADDRESS_INDICATING_ETH, allocations, metadata: '0x'}];
+      const outcomeHash = hashOutcome(outcome);
+      const targetOutcomeBytes = encodeOutcome(outcome);
 
       // Set adjudicator status
       const stateHash = constants.HashZero; // not realistic, but OK for purpose of this test
@@ -174,17 +177,26 @@ describe('claim', () => {
       }
 
       // Compute an appropriate guarantee
+      const encodedGuaranteeData = encodeGuaranteeData(guaranteeDestinations);
+      const guaranteeOutcome: Outcome = [
+        {
+          metadata: '0x',
+          allocations: [
+            {
+              allocationType: AllocationType.guarantee,
+              amount: heldBefore[addresses.g].toString(),
+              destination: targetId,
+              metadata: encodedGuaranteeData,
+            },
+          ],
+          asset:
+            reason === reason6 // test case for mismatched source and target assets
+              ? '0xdac17f958d2ee523a2206206994597c13d831ec7' // USDT
+              : MAGIC_ADDRESS_INDICATING_ETH,
+        },
+      ];
 
-      const guarantee = {
-        destinations: guaranteeDestinations,
-        targetChannelId: targetId,
-      };
-
-      const guaranteeOutcome: Outcome =
-        reason === reason6
-          ? [{asset: '0xdac17f958d2ee523a2206206994597c13d831ec7', guarantee}] // USDT
-          : [{asset: MAGIC_ADDRESS_INDICATING_ETH, guarantee}];
-      const guarantorOutcomeBytes = encodeOutcome(guaranteeOutcome);
+      const sourceOutcomeBytes = encodeOutcome(guaranteeOutcome);
       const guarantorOutcomeHash = hashOutcome(guaranteeOutcome);
 
       // Set status for guarantor
@@ -233,12 +245,17 @@ describe('claim', () => {
         );
 
         // Check new outcomeHash
-        const allocationAfter = [];
+        const allocationAfter: Allocation[] = [];
         Object.keys(tOutcomeAfter).forEach(key => {
-          allocationAfter.push({destination: key, amount: tOutcomeAfter[key]});
+          allocationAfter.push({
+            destination: key,
+            amount: tOutcomeAfter[key].toString(),
+            metadata: '0x',
+            allocationType: AllocationType.simple,
+          });
         });
         const outcomeAfter: Outcome = [
-          {asset: MAGIC_ADDRESS_INDICATING_ETH, allocationItems: allocationAfter},
+          {asset: MAGIC_ADDRESS_INDICATING_ETH, allocations: allocationAfter, metadata: '0x'},
         ];
         const expectedStatusAfter = channelDataToStatus({
           turnNumRecord,
