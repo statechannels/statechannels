@@ -2,12 +2,7 @@ import {expectRevert} from '@statechannels/devtools';
 import {Contract, Wallet, constants} from 'ethers';
 
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {
-  AllocationAssetOutcome,
-  encodeOutcome,
-  hashOutcome,
-  Outcome,
-} from '../../../src/contract/outcome';
+import {encodeOutcome, hashOutcome, Outcome} from '../../../src/contract/outcome';
 import {
   computeOutcome,
   getRandomNonce,
@@ -68,8 +63,8 @@ const channelNonce = getRandomNonce('transferAllAssets');
 
 describe('transferAllAssets', () => {
   it.each`
-    description    | setOutcome                      | heldBefore                      | newOutcome                      | heldAfter                       | payouts                         | reasonString
-    ${description} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${{ETH: {c: 1}, ERC20: {c: 2}}} | ${{ETH: {A: 0}, ERC20: {A: 0}}} | ${{ETH: {c: 0}, ERC20: {c: 0}}} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${undefined}
+    description    | setOutcome                      | heldBefore                      | newOutcome | heldAfter                       | payouts                         | reasonString
+    ${description} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${{ETH: {c: 1}, ERC20: {c: 2}}} | ${{}}      | ${{ETH: {c: 0}, ERC20: {c: 0}}} | ${{ETH: {A: 1}, ERC20: {A: 2}}} | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -126,7 +121,7 @@ describe('transferAllAssets', () => {
       );
 
       // Compute the outcome.
-      const outcome: AllocationAssetOutcome[] = computeOutcome(setOutcome);
+      const outcome: Outcome = computeOutcome(setOutcome);
       const outcomeHash = hashOutcome(outcome);
       // Call public wrapper to set state (only works on test contract)
       const stateHash = constants.HashZero;
@@ -155,17 +150,20 @@ describe('transferAllAssets', () => {
 
         // expect an event per asset
         expect(eventsFromTx[0].event).toEqual('AllocationUpdated');
-        expect(eventsFromTx[2].event).toEqual('AllocationUpdated'); // skip out the erc20 transfer event in slot 1
+        expect(eventsFromTx[1].event).toEqual('AllocationUpdated'); // skip out the erc20 transfer event in slot 1
 
         // Check new status
         const outcomeAfter: Outcome = computeOutcome(newOutcome);
-        const expectedStatusAfter = channelDataToStatus({
-          turnNumRecord,
-          finalizesAt,
-          // stateHash will be set to HashZero by this helper fn
-          // if state property of this object is undefined
-          outcome: outcomeAfter,
-        });
+
+        const expectedStatusAfter = newOutcome.length
+          ? channelDataToStatus({
+              turnNumRecord,
+              finalizesAt,
+              // stateHash will be set to HashZero by this helper fn
+              // if state property of this object is undefined
+              outcome: outcomeAfter,
+            })
+          : constants.HashZero;
         expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedStatusAfter);
 
         // Check payouts

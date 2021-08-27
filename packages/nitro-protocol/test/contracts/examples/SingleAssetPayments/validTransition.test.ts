@@ -1,9 +1,10 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 import {Contract, ethers} from 'ethers';
 
 const {HashZero} = ethers.constants;
 import SingleAssetPaymentsArtifact from '../../../../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
-import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {encodeGuaranteeData, encodeOutcome, Outcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
 import {
   getTestProvider,
@@ -22,10 +23,7 @@ const addresses = {
   B: randomExternalDestination(),
   C: randomExternalDestination(),
 };
-const guarantee = {
-  targetChannelId: HashZero,
-  destinations: [addresses.A],
-};
+const guaranteeDestinations = [addresses.A];
 
 beforeAll(async () => {
   singleAssetPayments = setupContract(
@@ -64,21 +62,18 @@ describe('validTransition', () => {
       balancesB: any;
     }) => {
       balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
-      const allocationA: Allocation = [];
+      const allocationsA: Allocation[] = [];
       Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key, amount: balancesA[key]})
+        allocationsA.push({
+          destination: key,
+          amount: balancesA[key],
+          allocationType: isAllocation[0] ? AllocationType.simple : AllocationType.guarantee,
+          metadata: isAllocation[0] ? '0x' : encodeGuaranteeData(guaranteeDestinations),
+        })
       );
-      let outcomeA;
-      if (isAllocation[0]) {
-        outcomeA = [{asset: ethers.constants.AddressZero, allocationItems: allocationA}];
-      } else {
-        outcomeA = [
-          {
-            asset: ethers.constants.AddressZero,
-            guarantee,
-          },
-        ];
-      }
+      const outcomeA: Outcome = [
+        {asset: ethers.constants.AddressZero, allocations: allocationsA, metadata: '0x'},
+      ];
 
       if (numAssets[0] === 2) {
         outcomeA.push(outcomeA[0]);
@@ -89,18 +84,21 @@ describe('validTransition', () => {
       };
 
       balancesB = replaceAddressesAndBigNumberify(balancesB, addresses);
-      const allocationB: Allocation = [];
+      const allocationsB: Allocation[] = [];
 
       Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key, amount: balancesB[key]})
+        allocationsB.push({
+          destination: key,
+          amount: balancesB[key],
+          allocationType: isAllocation[1] ? AllocationType.simple : AllocationType.guarantee,
+          metadata: isAllocation[1] ? '0x' : encodeGuaranteeData(guaranteeDestinations),
+        })
       );
 
-      let outcomeB;
-      if (isAllocation[1]) {
-        outcomeB = [{asset: ethers.constants.AddressZero, allocationItems: allocationB}];
-      } else {
-        outcomeB = [{asset: ethers.constants.AddressZero, guarantee}];
-      }
+      const outcomeB: Outcome = [
+        {asset: ethers.constants.AddressZero, allocations: allocationsB, metadata: '0x'},
+      ];
+
       if (numAssets[1] === 2) {
         outcomeB.push(outcomeB[0]);
       }
