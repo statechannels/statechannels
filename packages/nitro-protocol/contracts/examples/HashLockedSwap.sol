@@ -28,8 +28,8 @@ contract HashLockedSwap is IForceMoveApp {
         //  - single asset in this channel
         //  - two parties in this channel
         //  - not a "guarantee" channel (c.f. Nitro paper)
-        Outcome.AllocationItem[] memory allocationA = decode2PartyAllocation(a.outcome);
-        Outcome.AllocationItem[] memory allocationB = decode2PartyAllocation(b.outcome);
+        Outcome.Allocation[] memory allocationsA = decode2PartyAllocation(a.outcome);
+        Outcome.Allocation[] memory allocationsB = decode2PartyAllocation(b.outcome);
         bytes memory preImage = abi.decode(b.appData, (AppData)).preImage;
         bytes32 h = abi.decode(a.appData, (AppData)).h;
 
@@ -44,15 +44,15 @@ contract HashLockedSwap is IForceMoveApp {
 
         // slots for each participant unchanged
         require(
-            allocationA[0].destination == allocationB[0].destination &&
-                allocationA[1].destination == allocationB[1].destination,
+            allocationsA[0].destination == allocationsB[0].destination &&
+                allocationsA[1].destination == allocationsB[1].destination,
             'destinations may not change'
         );
 
         // was the payment made?
         require(
-            allocationA[0].amount == allocationB[1].amount &&
-                allocationA[1].amount == allocationB[0].amount,
+            allocationsA[0].amount == allocationsB[1].amount &&
+                allocationsA[1].amount == allocationsB[0].amount,
             'amounts must be permuted'
         );
 
@@ -62,30 +62,18 @@ contract HashLockedSwap is IForceMoveApp {
     function decode2PartyAllocation(bytes memory outcomeBytes)
         private
         pure
-        returns (Outcome.AllocationItem[] memory allocation)
+        returns (Outcome.Allocation[] memory allocations)
     {
-        Outcome.OutcomeItem[] memory outcome = abi.decode(outcomeBytes, (Outcome.OutcomeItem[]));
-
-        // Throws if more than one asset
-        require(outcome.length == 1, 'outcome: Only one asset allowed');
-
-        Outcome.AssetOutcome memory assetOutcome = abi.decode(
-            outcome[0].assetOutcomeBytes,
-            (Outcome.AssetOutcome)
+        Outcome.SingleAssetExit[] memory outcome = abi.decode(
+            outcomeBytes,
+            (Outcome.SingleAssetExit[])
         );
 
-        // Throws unless the assetoutcome is an allocation
-        require(
-            assetOutcome.assetOutcomeType == Outcome.AssetOutcomeType.Allocation,
-            'AssetOutcome must be Allocation'
-        );
+        Outcome.SingleAssetExit memory assetOutcome = outcome[0];
 
-        allocation = abi.decode(
-            assetOutcome.allocationOrGuaranteeBytes,
-            (Outcome.AllocationItem[])
-        );
+        allocations = assetOutcome.allocations; // TODO should we check each allocation is a "simple" one?
 
-        // Throws unless there are exactly 2 allocations
-        require(allocation.length == 2, 'allocation.length != 2');
+        // Throws unless there are exactly 3 allocations
+        require(allocations.length == 2, 'allocation.length != 3');
     }
 }
