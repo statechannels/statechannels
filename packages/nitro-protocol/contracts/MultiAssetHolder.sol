@@ -285,6 +285,28 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
         return (newAllocation, initialHoldings);
     }
 
+    /**
+     * @notice Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
+     * @dev Executes a single asset exit by paying out the asset and calling external contracts, as well as updating the holdings stored in this contract.
+     * @param singleAssetExit The single asset exit to be paid out.
+     */
+    function _executeSingleAssetExit(Outcome.SingleAssetExit memory singleAssetExit) internal {
+        address asset = singleAssetExit.asset;
+        for (uint256 j = 0; j < singleAssetExit.allocations.length; j++) {
+            bytes32 destination = singleAssetExit.allocations[j].destination;
+            uint256 amount = singleAssetExit.allocations[j].amount;
+            if (_isExternalDestination(destination)) {
+                _transferAsset(asset, _bytes32ToAddress(destination), amount);
+            } else {
+                holdings[asset][destination] += amount;
+            }
+        }
+    }
+
+    // **************
+    // Internal methods
+    // **************
+
     function _computeNewAllocation(
         uint256 initialHoldings,
         Outcome.AllocationItem[] memory allocation,
