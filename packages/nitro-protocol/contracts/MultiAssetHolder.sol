@@ -545,7 +545,7 @@ contract MultiAssetHolder is IMultiAssetHolder, StatusManager {
      */
     function _transferAsset(
         address asset,
-        address payable destination,
+        address destination,
         uint256 amount
     ) internal {
         if (asset == address(0)) {
