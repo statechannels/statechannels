@@ -61,7 +61,8 @@ describe('transaction-generators', () => {
       ],
       walletA.privateKey
     );
-    expect(transactionRequest.data.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    expect(transactionRequest.data!.toString().slice(2).length / 2).toBeLessThan(MAX_TX_DATA_SIZE); // it's a hex string, so divide by 2 for bytes
   });
 
   it('creates a challenge transaction', async () => {
@@ -147,7 +148,7 @@ describe('transaction-generators', () => {
 
     it('throws an error when there is no challenge state', async () => {
       expect(() => {
-        createRespondTransaction(null, signedStateA);
+        createRespondTransaction((null as unknown) as State, signedStateA);
       }).toThrow();
     });
   });
