@@ -30,7 +30,7 @@ const participants = ['', '', ''];
 const wallets = new Array(3);
 const challengeDuration = 0x1000;
 const asset = Wallet.createRandom().address;
-const outcome: Outcome = [{asset, allocationItems: []}];
+const outcome: Outcome = [{asset, allocations: [], metadata: '0x'}];
 let appDefinition;
 
 const nParticipants = 3;
