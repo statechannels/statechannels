@@ -26,7 +26,7 @@ An Allocation outcome specifies
 The destination here might be an external destination (which means the assets will get paid out to an ethereum address) or a channelId. In the code snippet below, we import `convertAddressToBytes32` to convert an ethereum address to an external destination.
 
 :::tip
-In nitro protocol, channels can allocate funds to other channels. Cool!
+In nitro protocol, channels can allocate funds to other channels.
 :::
 
 To construct an outcome, you can import the `Outcome` type to ensure you're getting the basics right. Then go ahead and attach that outcome in place of the `[]` we used as a placeholder previously on our `States`:
