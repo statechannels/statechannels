@@ -214,7 +214,9 @@ export class Channel extends Model implements ChannelColumns {
     this.vars = this.vars.map(sv => dropNonVariables(sv));
 
     this.vars.map(sv => {
-      const correctHash = hashState(toNitroState({...this.channelConstants, ...sv}));
+      const correctHash = hashState(
+        toNitroState({...this.channelConstants, ...sv}) as any // see https://github.com/statechannels/native-utils/issues/28
+      );
       sv.stateHash = sv.stateHash ?? correctHash;
       if (sv.stateHash !== correctHash) {
         throw new ChannelError(ChannelError.reasons.incorrectHash, {
