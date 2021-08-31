@@ -171,13 +171,6 @@ export async function sendTransaction(
   return await response.wait();
 }
 
-export function guaranteeToParams(guarantee: Guarantee): [Bytes, Bytes32] {
-  const guaranteeBytes = encodeGuarantee(guarantee);
-
-  const assetOutcomeHash = hashAssetOutcome(guarantee);
-  return [guaranteeBytes, assetOutcomeHash];
-}
-
 // Recursively replaces any key with the value of that key in the addresses object
 // BigNumberify all numbers
 export function replaceAddressesAndBigNumberify(
