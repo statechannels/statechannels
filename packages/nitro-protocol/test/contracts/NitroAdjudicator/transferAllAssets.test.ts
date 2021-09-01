@@ -150,7 +150,7 @@ describe('transferAllAssets', () => {
 
         // expect an event per asset
         expect(eventsFromTx[0].event).toEqual('AllocationUpdated');
-        expect(eventsFromTx[1].event).toEqual('AllocationUpdated'); // skip out the erc20 transfer event in slot 1
+        expect(eventsFromTx[1].event).toEqual('AllocationUpdated');
 
         // Check new status
         const outcomeAfter: Outcome = computeOutcome(newOutcome);
