@@ -44,10 +44,19 @@ contract SingleAssetPayments is IForceMoveApp {
         Outcome.Allocation[] memory allocationsA = assetOutcomeA.allocations;
         Outcome.Allocation[] memory allocationsB = assetOutcomeB.allocations;
 
-        // TODO should we check each allocation is a "simple" one?
-
         require(allocationsA.length == nParticipants, '|AllocationA|!=|participants|');
         require(allocationsB.length == nParticipants, '|AllocationB|!=|participants|');
+
+        for (uint256 i = 0; i < nParticipants; i++) {
+            require(
+                allocationsA[i].allocationType == uint8(Outcome.AllocationType.simple),
+                'not a simple allocation'
+            );
+            require(
+                allocationsB[i].allocationType == uint8(Outcome.AllocationType.simple),
+                'not a simple allocation'
+            );
+        }
 
         // Interprets the nth outcome as benefiting participant n
         // checks the destinations have not changed
