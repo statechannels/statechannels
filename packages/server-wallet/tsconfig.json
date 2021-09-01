@@ -23,6 +23,7 @@
     // {
     //   "path": "../nitro-protocol"
     // }, // we don't need this as long as nitro-protocol is installed from npm
+    // TODO: See https://github.com/statechannels/statechannels/issues/3759 
     {
       "path": "../wallet-core"
     }
