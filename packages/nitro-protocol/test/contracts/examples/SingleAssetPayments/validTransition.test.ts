@@ -33,17 +33,21 @@ beforeAll(async () => {
   );
 });
 
+const reason1 = 'Nonmover balance decreased';
+const reason2 = 'not a simple allocation';
+const reason3 = 'Total allocated cannot change';
+
 describe('validTransition', () => {
   it.each`
-    isValid  | numAssets | isAllocation      | balancesA             | turnNumB | balancesB             | description
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${'A pays B 1 wei'}
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${4}     | ${{A: 1, B: 0, C: 2}} | ${'B pays C 1 wei'}
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 1, B: 2, C: 0}} | ${'C pays B 1 wei'}
-    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 0, B: 2, C: 1}} | ${'A pays B 1 wei (not their move)'}
-    ${false} | ${[1, 1]} | ${[false, false]} | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 1, B: 2, C: 1}} | ${'Guarantee'}
-    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 1, B: 2, C: 1}} | ${'Total amounts increase'}
-    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${'A pays themself 1 wei'}
-    ${false} | ${[2, 2]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${'More than one asset'}
+    isValid  | numAssets | isAllocation      | balancesA             | turnNumB | balancesB             | reason       | description
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${undefined} | ${'A pays B 1 wei'}
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${4}     | ${{A: 1, B: 0, C: 2}} | ${undefined} | ${'B pays C 1 wei'}
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 1, B: 2, C: 0}} | ${undefined} | ${'C pays B 1 wei'}
+    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 0, B: 2, C: 1}} | ${reason1}   | ${'A pays B 1 wei (not their move)'}
+    ${false} | ${[1, 1]} | ${[false, false]} | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${reason2}   | ${'Guarantee'}
+    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 1, B: 2, C: 1}} | ${reason3}   | ${'Total amounts increase'}
+    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${undefined} | ${'A pays themself 1 wei'}
+    ${false} | ${[2, 2]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${undefined} | ${'More than one asset'}
   `(
     '$description',
     async ({
@@ -53,6 +57,7 @@ describe('validTransition', () => {
       balancesA,
       turnNumB,
       balancesB,
+      reason,
     }: {
       isValid: boolean;
       isAllocation: boolean[];
@@ -60,6 +65,7 @@ describe('validTransition', () => {
       balancesA: any;
       turnNumB: number;
       balancesB: any;
+      reason?: string;
     }) => {
       balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
       const allocationsA: Allocation[] = [];
@@ -116,13 +122,15 @@ describe('validTransition', () => {
         );
         expect(isValidFromCall).toBe(true);
       } else {
-        await expectRevert(() =>
-          singleAssetPayments.validTransition(
-            variablePartA,
-            variablePartB,
-            turnNumB,
-            numParticipants
-          )
+        await expectRevert(
+          () =>
+            singleAssetPayments.validTransition(
+              variablePartA,
+              variablePartB,
+              turnNumB,
+              numParticipants
+            ),
+          reason
         );
       }
     }
