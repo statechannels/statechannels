@@ -14,10 +14,18 @@ export function signState(state: State, privateKey: string): {state: State; sign
     throw new Error("The state must be signed with a participant's private key");
   }
 
-  const signature = wasmUtils.signState(toNitroState(state), privateKey).signature;
+  const signature = wasmUtils.signState(
+    toNitroState(state) as any, // TODO: see https://github.com/statechannels/native-utils/issues/28
+    privateKey
+  ).signature;
   return {state, signature};
 }
 
 export function recoverAddress(signature: string, state: NitroState): Address {
-  return makeAddress(wasmUtils.recoverAddress(state, signature));
+  return makeAddress(
+    wasmUtils.recoverAddress(
+      state as any, // TODO: see https://github.com/statechannels/native-utils/issues/28
+      signature
+    )
+  );
 }

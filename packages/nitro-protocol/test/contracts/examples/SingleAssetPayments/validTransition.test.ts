@@ -1,9 +1,10 @@
 import {expectRevert} from '@statechannels/devtools';
+import {Allocation, AllocationType} from '@statechannels/exit-format';
 import {Contract, ethers} from 'ethers';
 
 const {HashZero} = ethers.constants;
 import SingleAssetPaymentsArtifact from '../../../../artifacts/contracts/examples/SingleAssetPayments.sol/SingleAssetPayments.json';
-import {Allocation, encodeOutcome} from '../../../../src/contract/outcome';
+import {encodeGuaranteeData, encodeOutcome, Outcome} from '../../../../src/contract/outcome';
 import {VariablePart} from '../../../../src/contract/state';
 import {
   getTestProvider,
@@ -22,10 +23,7 @@ const addresses = {
   B: randomExternalDestination(),
   C: randomExternalDestination(),
 };
-const guarantee = {
-  targetChannelId: HashZero,
-  destinations: [addresses.A],
-};
+const guaranteeDestinations = [addresses.A];
 
 beforeAll(async () => {
   singleAssetPayments = setupContract(
@@ -35,17 +33,21 @@ beforeAll(async () => {
   );
 });
 
+const reason1 = 'Nonmover balance decreased';
+const reason2 = 'not a simple allocation';
+const reason3 = 'Total allocated cannot change';
+
 describe('validTransition', () => {
   it.each`
-    isValid  | numAssets | isAllocation      | balancesA             | turnNumB | balancesB             | description
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${'A pays B 1 wei'}
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${4}     | ${{A: 1, B: 0, C: 2}} | ${'B pays C 1 wei'}
-    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 1, B: 2, C: 0}} | ${'C pays B 1 wei'}
-    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 0, B: 2, C: 1}} | ${'A pays B 1 wei (not their move)'}
-    ${false} | ${[1, 1]} | ${[false, false]} | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 1, B: 2, C: 1}} | ${'Guarantee'}
-    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 1, B: 2, C: 1}} | ${'Total amounts increase'}
-    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${'A pays themself 1 wei'}
-    ${false} | ${[2, 2]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${'More than one asset'}
+    isValid  | numAssets | isAllocation      | balancesA             | turnNumB | balancesB             | reason       | description
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${undefined} | ${'A pays B 1 wei'}
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${4}     | ${{A: 1, B: 0, C: 2}} | ${undefined} | ${'B pays C 1 wei'}
+    ${true}  | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 1, B: 2, C: 0}} | ${undefined} | ${'C pays B 1 wei'}
+    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${5}     | ${{A: 0, B: 2, C: 1}} | ${reason1}   | ${'A pays B 1 wei (not their move)'}
+    ${false} | ${[1, 1]} | ${[false, false]} | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 0, B: 2, C: 1}} | ${reason2}   | ${'Guarantee'}
+    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 1, B: 2, C: 1}} | ${reason3}   | ${'Total amounts increase'}
+    ${false} | ${[1, 1]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${undefined} | ${'A pays themself 1 wei'}
+    ${false} | ${[2, 2]} | ${[true, true]}   | ${{A: 1, B: 1, C: 1}} | ${3}     | ${{A: 2, B: 0, C: 1}} | ${undefined} | ${'More than one asset'}
   `(
     '$description',
     async ({
@@ -55,6 +57,7 @@ describe('validTransition', () => {
       balancesA,
       turnNumB,
       balancesB,
+      reason,
     }: {
       isValid: boolean;
       isAllocation: boolean[];
@@ -62,23 +65,21 @@ describe('validTransition', () => {
       balancesA: any;
       turnNumB: number;
       balancesB: any;
+      reason?: string;
     }) => {
       balancesA = replaceAddressesAndBigNumberify(balancesA, addresses);
-      const allocationA: Allocation = [];
+      const allocationsA: Allocation[] = [];
       Object.keys(balancesA).forEach(key =>
-        allocationA.push({destination: key, amount: balancesA[key]})
+        allocationsA.push({
+          destination: key,
+          amount: balancesA[key],
+          allocationType: isAllocation[0] ? AllocationType.simple : AllocationType.guarantee,
+          metadata: isAllocation[0] ? '0x' : encodeGuaranteeData(guaranteeDestinations),
+        })
       );
-      let outcomeA;
-      if (isAllocation[0]) {
-        outcomeA = [{asset: ethers.constants.AddressZero, allocationItems: allocationA}];
-      } else {
-        outcomeA = [
-          {
-            asset: ethers.constants.AddressZero,
-            guarantee,
-          },
-        ];
-      }
+      const outcomeA: Outcome = [
+        {asset: ethers.constants.AddressZero, allocations: allocationsA, metadata: '0x'},
+      ];
 
       if (numAssets[0] === 2) {
         outcomeA.push(outcomeA[0]);
@@ -89,18 +90,21 @@ describe('validTransition', () => {
       };
 
       balancesB = replaceAddressesAndBigNumberify(balancesB, addresses);
-      const allocationB: Allocation = [];
+      const allocationsB: Allocation[] = [];
 
       Object.keys(balancesB).forEach(key =>
-        allocationB.push({destination: key, amount: balancesB[key]})
+        allocationsB.push({
+          destination: key,
+          amount: balancesB[key],
+          allocationType: isAllocation[1] ? AllocationType.simple : AllocationType.guarantee,
+          metadata: isAllocation[1] ? '0x' : encodeGuaranteeData(guaranteeDestinations),
+        })
       );
 
-      let outcomeB;
-      if (isAllocation[1]) {
-        outcomeB = [{asset: ethers.constants.AddressZero, allocationItems: allocationB}];
-      } else {
-        outcomeB = [{asset: ethers.constants.AddressZero, guarantee}];
-      }
+      const outcomeB: Outcome = [
+        {asset: ethers.constants.AddressZero, allocations: allocationsB, metadata: '0x'},
+      ];
+
       if (numAssets[1] === 2) {
         outcomeB.push(outcomeB[0]);
       }
@@ -118,13 +122,15 @@ describe('validTransition', () => {
         );
         expect(isValidFromCall).toBe(true);
       } else {
-        await expectRevert(() =>
-          singleAssetPayments.validTransition(
-            variablePartA,
-            variablePartB,
-            turnNumB,
-            numParticipants
-          )
+        await expectRevert(
+          () =>
+            singleAssetPayments.validTransition(
+              variablePartA,
+              variablePartB,
+              turnNumB,
+              numParticipants
+            ),
+          reason
         );
       }
     }

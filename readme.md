@@ -39,9 +39,11 @@ This repository is a monorepo, and contains the following packages maintained wi
 - [client-api-schema](./packages/client-api-schema) : JSON-RPC based schema definitions for the Client API with TypeScript typings
 - [devtools](./packages/devtools) : Developer tooling
 - [jest-gas-reporter](./packages/jest-gas-reporter) : Reports the gas used by various calls to ethereum contracts
-- [nitro-protocol](./packages/nitro-protocol) : Smart contracts and typescript support
+- [nitro-protocol](./packages/nitro-protocol) : Smart contracts and typescript support ⚠️ see note below
 - [wallet-core](./packages/wallet-core) : Core wallet code that works in node-js and browser contexts
 - [wire-format](./packages/wire-format) : Format of messages that are sent over the wire between wallets
+
+⚠️ the packages that depend on `nitro-protocol` depend on a version published to npm, and *not* the version on the `master` branch of  this repository. See issue [#3759](https://github.com/statechannels/statechannels/issues/3759).
 
 ## Contributing
 

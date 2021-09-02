@@ -1,9 +1,9 @@
 import {expectRevert} from '@statechannels/devtools';
-import {Contract, Wallet, ethers, BigNumber} from 'ethers';
+import {Contract, Wallet, ethers, BigNumber, constants} from 'ethers';
 
 import TokenArtifact from '../../../artifacts/contracts/Token.sol/Token.json';
 import {Channel, getChannelId} from '../../../src/contract/channel';
-import {AllocationAssetOutcome, encodeOutcome} from '../../../src/contract/outcome';
+import {encodeOutcome, Outcome} from '../../../src/contract/outcome';
 import {getFixedPart, hashAppPart, State} from '../../../src/contract/state';
 import {
   computeOutcome,
@@ -63,18 +63,12 @@ const addresses = {
 const tenPayouts = {ERC20: {}};
 const fiftyPayouts = {ERC20: {}};
 const oneHundredPayouts = {ERC20: {}};
-const tenPayoutsZeroed = {ERC20: {}};
-const fiftyPayoutsZeroed = {ERC20: {}};
-const oneHundredPayoutsZeroed = {ERC20: {}};
 for (let i = 0; i < 100; i++) {
   addresses[i.toString()] =
     '0x000000000000000000000000e0c3b40fdff77c786dd3737837887c85' + (0x2392fa22 + i).toString(16); // they need to be distinct because JS objects
   if (i < 10) tenPayouts.ERC20[i.toString()] = 1;
   if (i < 50) fiftyPayouts.ERC20[i.toString()] = 1;
   if (i < 100) oneHundredPayouts.ERC20[i.toString()] = 1;
-  if (i < 10) tenPayoutsZeroed.ERC20[i.toString()] = 0;
-  if (i < 50) fiftyPayoutsZeroed.ERC20[i.toString()] = 0;
-  if (i < 100) oneHundredPayoutsZeroed.ERC20[i.toString()] = 0;
 }
 
 // Populate wallets and participants array
@@ -110,16 +104,16 @@ let channelNonce = getRandomNonce('concludeAndTransferAllAssets');
 describe('concludeAndTransferAllAssets', () => {
   beforeEach(() => (channelNonce += 1));
   it.each`
-    description  | outcomeShortHand           | heldBefore           | heldAfter          | newOutcome                 | payouts                    | reasonString
-    ${accepts1}  | ${{ETH: {A: 1}}}           | ${{ETH: {c: 1}}}     | ${{ETH: {c: 0}}}   | ${{ETH: {A: 0}}}           | ${{ETH: {A: 1}}}           | ${undefined}
-    ${accepts2}  | ${{ETH: {A: 1}}}           | ${{ETH: {c: 1}}}     | ${{ETH: {c: 0}}}   | ${{ETH: {A: 0}}}           | ${{ETH: {A: 1}}}           | ${undefined}
-    ${accepts3}  | ${{ETH: {A: 1, B: 1}}}     | ${{ETH: {c: 2}}}     | ${{ETH: {c: 0}}}   | ${{ETH: {A: 0, B: 0}}}     | ${{ETH: {A: 1, B: 1}}}     | ${undefined}
-    ${accepts4}  | ${{ERC20: {A: 1, B: 1}}}   | ${{ERC20: {c: 2}}}   | ${{ERC20: {c: 0}}} | ${{ERC20: {A: 0, B: 0}}}   | ${{ERC20: {A: 1, B: 1}}}   | ${undefined}
-    ${accepts4a} | ${{ERC20: {A: 1}}}         | ${{ERC20: {c: 1}}}   | ${{ERC20: {c: 0}}} | ${{ERC20: {A: 0}}}         | ${{ERC20: {A: 1}}}         | ${undefined}
-    ${accepts5}  | ${{ERC20: {At: 1, Bt: 1}}} | ${{ERC20: {c: 2}}}   | ${{ERC20: {c: 0}}} | ${{ERC20: {At: 0, Bt: 0}}} | ${{ERC20: {At: 1, Bt: 1}}} | ${undefined}
-    ${accepts6}  | ${tenPayouts}              | ${{ERC20: {c: 10}}}  | ${{ERC20: {c: 0}}} | ${tenPayoutsZeroed}        | ${tenPayouts}              | ${undefined}
-    ${accepts7}  | ${fiftyPayouts}            | ${{ERC20: {c: 50}}}  | ${{ERC20: {c: 0}}} | ${fiftyPayoutsZeroed}      | ${fiftyPayouts}            | ${undefined}
-    ${accepts8}  | ${oneHundredPayouts}       | ${{ERC20: {c: 100}}} | ${{ERC20: {c: 0}}} | ${oneHundredPayoutsZeroed} | ${oneHundredPayouts}       | ${undefined}
+    description  | outcomeShortHand           | heldBefore           | heldAfter          | newOutcome | payouts                    | reasonString
+    ${accepts1}  | ${{ETH: {A: 1}}}           | ${{ETH: {c: 1}}}     | ${{ETH: {c: 0}}}   | ${{}}      | ${{ETH: {A: 1}}}           | ${undefined}
+    ${accepts2}  | ${{ETH: {A: 1}}}           | ${{ETH: {c: 1}}}     | ${{ETH: {c: 0}}}   | ${{}}      | ${{ETH: {A: 1}}}           | ${undefined}
+    ${accepts3}  | ${{ETH: {A: 1, B: 1}}}     | ${{ETH: {c: 2}}}     | ${{ETH: {c: 0}}}   | ${{}}      | ${{ETH: {A: 1, B: 1}}}     | ${undefined}
+    ${accepts4}  | ${{ERC20: {A: 1, B: 1}}}   | ${{ERC20: {c: 2}}}   | ${{ERC20: {c: 0}}} | ${{}}      | ${{ERC20: {A: 1, B: 1}}}   | ${undefined}
+    ${accepts4a} | ${{ERC20: {A: 1}}}         | ${{ERC20: {c: 1}}}   | ${{ERC20: {c: 0}}} | ${{}}      | ${{ERC20: {A: 1}}}         | ${undefined}
+    ${accepts5}  | ${{ERC20: {At: 1, Bt: 1}}} | ${{ERC20: {c: 2}}}   | ${{ERC20: {c: 0}}} | ${{}}      | ${{ERC20: {At: 1, Bt: 1}}} | ${undefined}
+    ${accepts6}  | ${tenPayouts}              | ${{ERC20: {c: 10}}}  | ${{ERC20: {c: 0}}} | ${{}}      | ${tenPayouts}              | ${undefined}
+    ${accepts7}  | ${fiftyPayouts}            | ${{ERC20: {c: 50}}}  | ${{ERC20: {c: 0}}} | ${{}}      | ${fiftyPayouts}            | ${undefined}
+    ${accepts8}  | ${oneHundredPayouts}       | ${{ERC20: {c: 100}}} | ${{ERC20: {c: 0}}} | ${{}}      | ${oneHundredPayouts}       | ${undefined}
   `(
     '$description', // For the purposes of this test, chainId and participants are fixed, making channelId 1-1 with channelNonce
     async ({
@@ -180,7 +174,7 @@ describe('concludeAndTransferAllAssets', () => {
       ].map(object => replaceAddressesAndBigNumberify(object, addresses) as OutcomeShortHand);
 
       // Compute the outcome.
-      const outcome: AllocationAssetOutcome[] = computeOutcome(outcomeShortHand);
+      const outcome: Outcome = computeOutcome(outcomeShortHand);
 
       // Construct states
       const states: State[] = [];
@@ -221,11 +215,13 @@ describe('concludeAndTransferAllAssets', () => {
 
         // Compute expected ChannelDataHash
         const blockTimestamp = (await provider.getBlock(receipt.blockNumber)).timestamp;
-        const expectedFingerprint = channelDataToStatus({
-          turnNumRecord: 0,
-          finalizesAt: blockTimestamp,
-          outcome: computeOutcome(newOutcome),
-        });
+        const expectedFingerprint = newOutcome.length
+          ? channelDataToStatus({
+              turnNumRecord: 0,
+              finalizesAt: blockTimestamp,
+              outcome: computeOutcome(newOutcome),
+            })
+          : constants.HashZero;
 
         // Check fingerprint against the expected value
         expect(await testNitroAdjudicator.statusOf(channelId)).toEqual(expectedFingerprint);
