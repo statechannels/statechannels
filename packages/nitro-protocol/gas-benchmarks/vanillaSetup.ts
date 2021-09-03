@@ -70,19 +70,32 @@ expect.extend({
     received: any, // TransactionResponse
     benchmark: number
   ) {
-    const {gasUsed} = await received.wait();
-    const pass = (gasUsed as BigNumber).eq(benchmark); // This could get replaced with a looser check with upper/lower bounds
+    const {gasUsed: gasUsedBN} = await received.wait();
+    const gasUsed = (gasUsedBN as BigNumber).toNumber();
+
+    const pass = gasUsed === benchmark; // This could get replaced with a looser check with upper/lower bounds
+
     if (pass) {
       return {
         message: () => `expected to NOT consume ${benchmark} gas, but did`,
         pass: true,
       };
     } else {
-      const diff: BigNumber = (gasUsed as BigNumber).sub(benchmark);
-      const diffStr: string = diff.gt(0) ? '+' + diff.toString() : diff.toString();
+      const format = (x: number) => {
+        return x.toLocaleString().replace(/,/g, '_');
+      };
+      const green = (x: string) => `\x1b[32m${x}\x1b[0m`;
+      const red = (x: string) => `\x1b[31m${x}\x1b[0m`;
+
+      const diff = gasUsed - benchmark;
+      const diffStr: string = diff > 0 ? red('+' + format(diff)) : green(format(diff));
+      const diffPercent = `${Math.round((Math.abs(diff) / benchmark) * 100)}%`;
+
       return {
         message: () =>
-          `expected to consume ${benchmark} gas, but actually consumed ${(gasUsed as BigNumber).toNumber()} gas (${diffStr}). Consider updating the appropriate number in gas.ts!`,
+          `expected to consume ${format(benchmark)} gas, but actually consumed ${format(
+            gasUsed
+          )} gas (${diffStr}, ${diffPercent}). Consider updating the appropriate number in gas.ts!`,
         pass: false,
       };
     }

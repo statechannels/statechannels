@@ -28,15 +28,15 @@ type Path =
 export const gasRequiredTo: GasRequiredTo = {
   deployInfrastructureContracts: {
     vanillaNitro: {
-      NitroAdjudicator: 4228615, // Singleton
+      NitroAdjudicator: 4_228_615, // Singleton
     },
   },
   directlyFundAChannelWithETHFirst: {
-    vanillaNitro: 48014,
+    vanillaNitro: 48_014,
   },
   directlyFundAChannelWithETHSecond: {
     // meaning the second participant in the channel
-    vanillaNitro: 30926,
+    vanillaNitro: 30_926,
   },
   directlyFundAChannelWithERC20First: {
     // The depositor begins with zero tokens approved for the AssetHolder
@@ -44,30 +44,30 @@ export const gasRequiredTo: GasRequiredTo = {
     // The depositor retains a nonzero balance of tokens after depositing
     // The depositor retains some tokens approved for the AssetHolder after depositing
     vanillaNitro: {
-      approve: 46383,
+      approve: 46_383,
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 71392,
+      deposit: 71_392,
     },
   },
   directlyFundAChannelWithERC20Second: {
     // meaning the second participant in the channel
     vanillaNitro: {
-      approve: 46383,
+      approve: 46_383,
       // ^^^^^
       // In principle this only needs to be done once per account
       // (the cost may be amortized over several deposits into this AssetHolder)
-      deposit: 54304,
+      deposit: 54_304,
     },
   },
   ETHexit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 133112,
+    vanillaNitro: 133_112,
   },
   ERC20exit: {
     // We completely liquidate the channel (paying out both parties)
-    vanillaNitro: 123510,
+    vanillaNitro: 123_510,
   },
   ETHexitSad: {
     // Scenario: Counterparty Bob goes offline
@@ -75,9 +75,9 @@ export const gasRequiredTo: GasRequiredTo = {
     // challenge + timeout       ⬛ -> (X) -> 👩
     // transferAllAssets         ⬛ --------> 👩
     vanillaNitro: {
-      challenge: 94673,
-      transferAllAssets: 109517,
-      total: 204190,
+      challenge: 94_673,
+      transferAllAssets: 109_517,
+      total: 204_190,
     },
   },
   ETHexitSadLedgerFunded: {
@@ -87,11 +87,11 @@ export const gasRequiredTo: GasRequiredTo = {
       // challenge X, L and timeout  ⬛ -> (L) -> (X) -> 👩
       // transferAllAssetsL          ⬛ --------> (X) -> 👩
       // transferAllAssetsX          ⬛ ---------------> 👩
-      challengeX: 94673,
-      challengeL: 91703,
-      transferAllAssetsL: 58742,
-      transferAllAssetsX: 109517,
-      total: 354635,
+      challengeX: 94_673,
+      challengeL: 91_703,
+      transferAllAssetsL: 58_742,
+      transferAllAssetsX: 109_517,
+      total: 354_635,
     },
   },
   ETHexitSadVirtualFunded: {
@@ -101,12 +101,12 @@ export const gasRequiredTo: GasRequiredTo = {
       // challenge L,J,X + timeout   ⬛ -> (L) -> (J) -> (X) -> 👩
       // claimL                      ⬛ ---------------> (X) -> 👩
       // transferAllAssetsX          ⬛ ----------------------> 👩
-      challengeL: 94980,
-      challengeJ: 103014,
-      challengeX: 94673,
-      claimL: 95060,
-      transferAllAssetsX: 109517,
-      total: 497244,
+      challengeL: 94_980,
+      challengeJ: 103_014,
+      challengeX: 94_673,
+      claimL: 95_060,
+      transferAllAssetsX: 109_517,
+      total: 497_244,
     },
   },
 };
