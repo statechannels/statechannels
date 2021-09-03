@@ -78,11 +78,16 @@ expect.extend({
         pass: true,
       };
     } else {
+      const format = (x: number) => {
+        return x.toLocaleString().replace(/,/g, '_');
+      };
       const diff: BigNumber = (gasUsed as BigNumber).sub(benchmark);
       const diffStr: string = diff.gt(0) ? '+' + diff.toString() : diff.toString();
       return {
         message: () =>
-          `expected to consume ${benchmark} gas, but actually consumed ${(gasUsed as BigNumber).toNumber()} gas (${diffStr}). Consider updating the appropriate number in gas.ts!`,
+          `expected to consume ${format(benchmark)} gas, but actually consumed ${format(
+            (gasUsed as BigNumber).toNumber()
+          )} gas (${diffStr}). Consider updating the appropriate number in gas.ts!`,
         pass: false,
       };
     }
