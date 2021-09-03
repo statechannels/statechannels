@@ -83,7 +83,7 @@ describe('Consumes the expected gas for deposits', () => {
     );
   });
 });
-describe('Consumes the expected gas for happy-path exits', () => {
+describe.only('Consumes the expected gas for happy-path exits', () => {
   it(`when exiting a directly funded (with ETH) channel`, async () => {
     // begin setup
     await (

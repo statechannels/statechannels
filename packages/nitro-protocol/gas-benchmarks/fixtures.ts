@@ -27,7 +27,7 @@ import {Bytes} from '../src/contract/types';
 
 import {nitroAdjudicator, provider} from './vanillaSetup';
 
-export const chainId = '0x7a69'; // 31337 in hex (hardhat network default)
+export const chainId = '0x539'; // 1337 in hex (hardhat network default)
 
 export const Alice = new Wallet(
   '0x277fb9e0ad81dc836c60294e385b10dfcc0a9586eeb0b1d31da92e384a0d2efa'
