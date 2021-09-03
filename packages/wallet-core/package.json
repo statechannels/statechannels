@@ -5,7 +5,7 @@
   "author": "Alex Gap",
   "dependencies": {
     "@statechannels/client-api-schema": "0.10.2",
-    "@statechannels/nitro-protocol": "0.17.3",
+    "@statechannels/nitro-protocol": "0.17.3-exit-format",
     "@statechannels/wire-format": "0.9.2",
     "ethers": "5.0.12",
     "lodash": "4.17.21"
