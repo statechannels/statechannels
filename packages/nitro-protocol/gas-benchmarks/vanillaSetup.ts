@@ -28,16 +28,10 @@ const hardHatNetworkEndpoint = 'http://localhost:8545'; // the port should be un
 
 jest.setTimeout(5_000); // give hardhat network a chance to get going
 if (existsSync(logFile)) truncateSync(logFile);
-const hardhatProcess = exec(
-  // 'docker run -it -p 8545:8545 ethereum/client-go --dev --http',
-  'geth --dev --http --http.api personal,eth,net,web3,debug --verbosity 3', // an empemeral PoA blockchain
-  (error, stdout, stderr) => {
-    promises.appendFile(logFile, stdout);
-    promises.appendFile(logFile, stderr);
-  }
-);
-const hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
-const hardhatProcessClosed = new Promise(resolve => hardhatProcess.on('close', resolve));
+
+let hardhatProcess;
+let hardhatProcessExited: Promise<void>;
+let hardhatProcessClosed: Promise<void>;
 
 export const provider = new providers.StaticJsonRpcProvider(hardHatNetworkEndpoint);
 
@@ -55,17 +49,27 @@ const nitroAdjudicatorFactory = new ContractFactory(
 beforeAll(async () => {
   // await waitOn({resources: [hardHatNetworkEndpoint]}); // waitOn doesn't seem to work with geth
   // console.log('network ready');
-  nitroAdjudicator = (await nitroAdjudicatorFactory.deploy()) as NitroAdjudicator & Contract;
-  token = (await tokenFactory.deploy(provider.getSigner(0).getAddress())) as Token & Contract;
-  snapshotId = await provider.send('eth_blockNumber', []);
-  console.log(snapshotId);
 });
 
 beforeEach(async () => {
-  if (snapshotId) await provider.send('debug_setHead', [snapshotId]);
+  hardhatProcess = exec(
+    // 'docker run -it -p 8545:8545 ethereum/client-go --dev --http',
+    'geth --dev --http --http.api personal,eth,net,web3,debug --verbosity 3', // an empemeral PoA blockchain
+    (error, stdout, stderr) => {
+      promises.appendFile(logFile, stdout);
+      promises.appendFile(logFile, stderr);
+    }
+  );
+
+  hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
+  hardhatProcessClosed = new Promise(resolve => hardhatProcess.on('close', resolve));
+
+  await sleep(1000);
+  nitroAdjudicator = (await nitroAdjudicatorFactory.deploy()) as NitroAdjudicator & Contract;
+  token = (await tokenFactory.deploy(provider.getSigner(0).getAddress())) as Token & Contract;
 });
 
-afterAll(async () => {
+afterEach(async () => {
   await kill(hardhatProcess.pid);
   await hardhatProcessExited;
   await hardhatProcessClosed;
@@ -94,3 +98,7 @@ expect.extend({
     }
   },
 });
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
