@@ -2,7 +2,7 @@ import {exec} from 'child_process';
 import {promises, existsSync, truncateSync} from 'fs';
 
 import {ContractFactory, Contract} from '@ethersproject/contracts';
-import {ethers, providers} from 'ethers';
+import {providers} from 'ethers';
 import waitOn from 'wait-on';
 import kill from 'tree-kill';
 import {BigNumber} from '@ethersproject/bignumber';
@@ -11,7 +11,6 @@ import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.so
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import {NitroAdjudicator} from '../typechain/NitroAdjudicator';
 import {Token} from '../typechain/Token';
-import {X} from './fixtures';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
@@ -90,12 +89,13 @@ expect.extend({
 
       const diff = gasUsed - benchmark;
       const diffStr: string = diff > 0 ? red('+' + format(diff)) : green(format(diff));
+      const diffPercent = `${Math.round((Math.abs(diff) / benchmark) * 100)}%`;
 
       return {
         message: () =>
           `expected to consume ${format(benchmark)} gas, but actually consumed ${format(
             gasUsed
-          )} gas (${diffStr}). Consider updating the appropriate number in gas.ts!`,
+          )} gas (${diffStr}, ${diffPercent}). Consider updating the appropriate number in gas.ts!`,
         pass: false,
       };
     }
