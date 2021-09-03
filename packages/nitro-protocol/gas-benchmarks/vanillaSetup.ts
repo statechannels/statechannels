@@ -85,8 +85,11 @@ expect.extend({
       const format = (x: number) => {
         return x.toLocaleString().replace(/,/g, '_');
       };
+      const green = (x: string) => `\x1b[32m${x}\x1b[0m`;
+      const red = (x: string) => `\x1b[31m${x}\x1b[0m`;
+
       const diff = gasUsed - benchmark;
-      const diffStr: string = diff > 0 ? '+' + format(diff) : format(diff);
+      const diffStr: string = diff > 0 ? red('+' + format(diff)) : green(format(diff));
 
       return {
         message: () =>
