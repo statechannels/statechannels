@@ -2,7 +2,7 @@ import {exec} from 'child_process';
 import {promises, existsSync, truncateSync} from 'fs';
 
 import {ContractFactory, Contract} from '@ethersproject/contracts';
-import {providers} from 'ethers';
+import {ethers, providers} from 'ethers';
 import waitOn from 'wait-on';
 import kill from 'tree-kill';
 import {BigNumber} from '@ethersproject/bignumber';
@@ -11,6 +11,7 @@ import nitroAdjudicatorArtifact from '../artifacts/contracts/NitroAdjudicator.so
 import tokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
 import {NitroAdjudicator} from '../typechain/NitroAdjudicator';
 import {Token} from '../typechain/Token';
+import {X} from './fixtures';
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace jest {
@@ -70,8 +71,11 @@ expect.extend({
     received: any, // TransactionResponse
     benchmark: number
   ) {
-    const {gasUsed} = await received.wait();
-    const pass = (gasUsed as BigNumber).eq(benchmark); // This could get replaced with a looser check with upper/lower bounds
+    const {gasUsed: gasUsedBN} = await received.wait();
+    const gasUsed = (gasUsedBN as BigNumber).toNumber();
+
+    const pass = gasUsed === benchmark; // This could get replaced with a looser check with upper/lower bounds
+
     if (pass) {
       return {
         message: () => `expected to NOT consume ${benchmark} gas, but did`,
@@ -81,12 +85,13 @@ expect.extend({
       const format = (x: number) => {
         return x.toLocaleString().replace(/,/g, '_');
       };
-      const diff: BigNumber = (gasUsed as BigNumber).sub(benchmark);
-      const diffStr: string = diff.gt(0) ? '+' + diff.toString() : diff.toString();
+      const diff = gasUsed - benchmark;
+      const diffStr: string = diff > 0 ? '+' + format(diff) : format(diff);
+
       return {
         message: () =>
           `expected to consume ${format(benchmark)} gas, but actually consumed ${format(
-            (gasUsed as BigNumber).toNumber()
+            gasUsed
           )} gas (${diffStr}). Consider updating the appropriate number in gas.ts!`,
         pass: false,
       };
