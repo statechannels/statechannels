@@ -23,20 +23,25 @@ declare global {
 export let nitroAdjudicator: NitroAdjudicator & Contract;
 export let token: Token & Contract;
 
-const logFile = './hardhat-network-output.log';
-const hardHatNetworkEndpoint = 'http://localhost:9546'; // the port should be unique
+const logFile = __dirname + '/hardhat-network-output.log';
+const hardHatNetworkEndpoint = 'http://localhost:8545'; // the port should be unique
 
-jest.setTimeout(15_000); // give hardhat network a chance to get going
+jest.setTimeout(5_000); // give hardhat network a chance to get going
 if (existsSync(logFile)) truncateSync(logFile);
-const hardhatProcess = exec('npx hardhat node --no-deploy --port 9546', (error, stdout) => {
-  promises.appendFile(logFile, stdout);
-});
+const hardhatProcess = exec(
+  // 'docker run -it -p 8545:8545 ethereum/client-go --dev --http',
+  'geth --dev --http --http.api personal,eth,net,web3,debug --verbosity 3', // an empemeral PoA blockchain
+  (error, stdout, stderr) => {
+    promises.appendFile(logFile, stdout);
+    promises.appendFile(logFile, stderr);
+  }
+);
 const hardhatProcessExited = new Promise(resolve => hardhatProcess.on('exit', resolve));
 const hardhatProcessClosed = new Promise(resolve => hardhatProcess.on('close', resolve));
 
-export const provider = new providers.JsonRpcProvider(hardHatNetworkEndpoint);
+export const provider = new providers.StaticJsonRpcProvider(hardHatNetworkEndpoint);
 
-let snapshotId = 0;
+let snapshotId;
 
 const tokenFactory = new ContractFactory(tokenArtifact.abi, tokenArtifact.bytecode).connect(
   provider.getSigner(0)
@@ -48,15 +53,16 @@ const nitroAdjudicatorFactory = new ContractFactory(
 ).connect(provider.getSigner(0));
 
 beforeAll(async () => {
-  await waitOn({resources: [hardHatNetworkEndpoint]});
+  // await waitOn({resources: [hardHatNetworkEndpoint]}); // waitOn doesn't seem to work with geth
+  // console.log('network ready');
   nitroAdjudicator = (await nitroAdjudicatorFactory.deploy()) as NitroAdjudicator & Contract;
   token = (await tokenFactory.deploy(provider.getSigner(0).getAddress())) as Token & Contract;
-  snapshotId = await provider.send('evm_snapshot', []);
+  snapshotId = await provider.send('eth_blockNumber', []);
+  console.log(snapshotId);
 });
 
 beforeEach(async () => {
-  await provider.send('evm_revert', [snapshotId]);
-  snapshotId = await provider.send('evm_snapshot', []);
+  if (snapshotId) await provider.send('debug_setHead', [snapshotId]);
 });
 
 afterAll(async () => {
