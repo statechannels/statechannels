@@ -2,7 +2,7 @@ import {Message as WireMessage, SignedState as WireState} from '@statechannels/w
 import {AllocationType} from '@statechannels/exit-format';
 
 import {BN} from '../../bignumber';
-import {makeAddress, Payload, SignedState, Uint256} from '../../types';
+import {makeAddress, Payload, SignedState} from '../../types';
 import {makeDestination} from '../../utils';
 import {calculateChannelId} from '../../state-utils';
 
