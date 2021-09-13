@@ -9,18 +9,13 @@ export type Address = string;
 
 // @public
 export interface Allocation {
-    allocationItems: AllocationItem[];
-    asset: Address;
-}
-
-// @public
-export interface AllocationItem {
+    // (undocumented)
+    allocationType: number;
     amount: Uint256;
     destination: Address;
+    // (undocumented)
+    metadata: string;
 }
-
-// @public
-export type Allocations = Allocation[];
 
 // @public (undocumented)
 export interface ApproveBudgetAndFundParams {
@@ -112,8 +107,6 @@ export interface ChannelResult {
     // (undocumented)
     adjudicatorStatus: 'Challenge' | 'Open' | 'Finalized';
     // (undocumented)
-    allocations: Allocation[];
-    // (undocumented)
     appData: string;
     // (undocumented)
     appDefinition: Address;
@@ -121,6 +114,8 @@ export interface ChannelResult {
     channelId: ChannelId;
     // (undocumented)
     fundingStatus?: FundingStatus;
+    // (undocumented)
+    outcome: SingleAssetOutcome[];
     // (undocumented)
     participants: Participant[];
     // (undocumented)
@@ -191,8 +186,6 @@ export type CreateChannelError = SigningAddressNotFound | InvalidAppDefinition;
 // @public (undocumented)
 export interface CreateChannelParams {
     // (undocumented)
-    allocations: Allocation[];
-    // (undocumented)
     appData: string;
     // (undocumented)
     appDefinition: Address;
@@ -202,6 +195,8 @@ export interface CreateChannelParams {
     fundingLedgerChannelId?: Address;
     // (undocumented)
     fundingStrategy: FundingStrategy;
+    // (undocumented)
+    outcome: SingleAssetOutcome[];
     // (undocumented)
     participants: Participant[];
 }
@@ -486,6 +481,9 @@ export type MessageQueuedNotification = JsonRpcNotification<'MessageQueued', Mes
 // @public (undocumented)
 export type NotYourTurn = JsonRpcError<ErrorCodes_3['NotYourTurn'], 'Not your turn'>;
 
+// @public (undocumented)
+export type Outcome = SingleAssetOutcome[];
+
 // @public
 export function parseErrorResponse(jsonBlob: object): StateChannelsErrorResponse;
 
@@ -527,6 +525,14 @@ export type PushMessageResponse = JsonRpcResponse<PushMessageResult>;
 export type PushMessageResult = {
     success: boolean;
 };
+
+// @public (undocumented)
+export interface SingleAssetOutcome {
+    allocations: Allocation[];
+    asset: Address;
+    // (undocumented)
+    metadata: string;
+}
 
 // Warning: (ae-forgotten-export) The symbol "GenericError" needs to be exported by the entry point index.d.ts
 //
