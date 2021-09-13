@@ -6186,10 +6186,12 @@
     ethers "5.0.12"
     lodash "4.17.21"
 
-"@statechannels/wasm-utils@0.1.6-asset":
-  version "0.1.6-asset"
-  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.6-asset.tgz#9e4342c94bd256990450cb03358740fb8fd34bf0"
-  integrity sha512-+tu3u0e7K2Kyzz0NLj7UJDt8fXoF0CCRFRZfB/ORQegY90cohtBsmDEcJSc8uA9HWAbDV4bFVPk2YCnV7DgEkA==
+"@statechannels/wasm-utils@0.1.8":
+  version "0.1.8"
+  resolved "https://registry.npmjs.org/@statechannels/wasm-utils/-/wasm-utils-0.1.8.tgz#247e25507204c8ea5d0800d62176cba7ab5ba47f"
+  integrity sha512-a6MT9Ajd8BbpNSY6NGcr8GlHQKxci7wh3eA5KbIzU5FJJcfVJWaMZFhba7bJaWnbwBXV3AGoW6Hhl2xi+MBdww==
+  dependencies:
+    "@statechannels/nitro-protocol" "0.17.3"
 
 "@statechannels/wire-format@0.9.2":
   version "0.9.2"
