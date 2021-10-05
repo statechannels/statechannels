@@ -43,6 +43,11 @@ export function createRespondTransaction(
   });
 }
 
+/**
+ * Marshalls the supplied signedStates into an ethereum transaction for the checkpoint method. Automatically computes whosignedWhat, sigs, etc.
+ * @param signedStates an array of signed states
+ * @returns An ethers TransactionRequest. This can be launched with `await signer.sendTransaction({to: adjudicator.address, ...txRequest}`)
+ */
 export function createCheckpointTransaction(
   signedStates: SignedState[]
 ): providers.TransactionRequest {

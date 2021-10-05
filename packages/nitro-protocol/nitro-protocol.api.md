@@ -7407,7 +7407,7 @@ export function convertBytes32ToAddress(bytes32: string): string;
 // @public (undocumented)
 export function createChallengeTransaction(signedStates: SignedState[], challengePrivateKey: string): providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createCheckpointTransaction(signedStates: SignedState[]): providers.TransactionRequest;
 
 // @public (undocumented)
@@ -7470,7 +7470,7 @@ export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegist
 // @public (undocumented)
 export function getChannelId(channel: Channel): Bytes32;
 
-// @public (undocumented)
+// @public
 export function getChannelMode(finalizesAt: number, now: number): ChannelMode;
 
 // @public (undocumented)
@@ -7531,7 +7531,7 @@ export const randomExternalDestination: () => Bytes32;
 // @public (undocumented)
 export function replaceAddressesAndBigNumberify(object: AssetOutcomeShortHand | OutcomeShortHand | string, addresses: AddressesLookup): AssetOutcomeShortHand | OutcomeShortHand | string;
 
-// @public (undocumented)
+// @public
 export function requireValidProtocolTransition(fromState: State, toState: State): Status;
 
 // @public (undocumented)
@@ -7554,7 +7554,7 @@ export interface SignedState {
 // @public (undocumented)
 export function signState(state: State, privateKey: string): SignedState;
 
-// @public (undocumented)
+// @public
 export function signStates(states: State[], wallets: Wallet[], whoSignedWhat: number[]): Promise<Signature[]>;
 
 // @public (undocumented)
