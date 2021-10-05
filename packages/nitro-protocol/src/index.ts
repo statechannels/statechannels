@@ -81,21 +81,12 @@ export {
   hashState,
 } from './contract/state';
 
-export {
-  signState,
-  getStateSignerAddress,
-  signChallengeMessage,
-  signStates,
-  SignedState,
-} from './signatures';
-
-import * as Signatures from './signatures';
-import * as Transactions from './transactions';
+export * from './signatures';
+export * from './transactions';
 export {
   createERC20DepositTransaction,
   createETHDepositTransaction,
 } from './contract/transaction-creators/multi-asset-holder';
-export {Signatures, Transactions};
 
 // types
 export {Uint256, Bytes32} from './contract/types';
