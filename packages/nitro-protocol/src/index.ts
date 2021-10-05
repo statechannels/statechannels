@@ -22,7 +22,7 @@
  *     Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
  *     Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
  *
- *     /* The rest of your logic
+ *     // The rest of your logic ...
  *
  *     return true;
  *   }
