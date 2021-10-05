@@ -15,6 +15,11 @@ export const NITRO_MAX_GAS = 6_000_000; // should be below the block gas limit, 
 // rinkeby: 10000000
 // ganache:  6721975 (hardcoded but can be overriden via config)
 
+/**
+ * Marshalls the supplied signedStates into an ethereum transaction for the checkpoint method. Automatically computes whosignedWhat, sigs, etc.
+ * @param signedStates an array of signed states
+ * @returns An ethers TransactionRequest. This can be launched with `await signer.sendTransaction({to: adjudicator.address, ...txRequest}`)
+ */
 export function createChallengeTransaction(
   signedStates: SignedState[],
   challengePrivateKey: string
@@ -29,6 +34,11 @@ export function createChallengeTransaction(
   );
 }
 
+/**
+ * Marshalls the supplied signedStates into an ethereum transaction for the checkpoint method. Automatically computes whosignedWhat, sigs, etc.
+ * @param signedStates an array of signed states
+ * @returns An ethers TransactionRequest. This can be launched with `await signer.sendTransaction({to: adjudicator.address, ...txRequest}`)
+ */
 export function createRespondTransaction(
   challengeState: State,
   response: SignedState
@@ -59,6 +69,11 @@ export function createCheckpointTransaction(
   });
 }
 
+/**
+ * Marshalls the supplied signedStates into an ethereum transaction for the checkpoint method. Automatically computes whosignedWhat, sigs, etc.
+ * @param signedStates an array of signed states
+ * @returns An ethers TransactionRequest. This can be launched with `await signer.sendTransaction({to: adjudicator.address, ...txRequest}`)
+ */
 export function createConcludeAndTransferAllAssetsTransaction(
   signedStates: SignedState[]
 ): providers.TransactionRequest {
@@ -70,10 +85,20 @@ export function createConcludeAndTransferAllAssetsTransaction(
   );
 }
 
+/**
+ * Marshalls the supplied signedStates into an ethereum transaction for the checkpoint method. Automatically computes whosignedWhat, sigs, etc.
+ * @param signedStates an array of signed states
+ * @returns An ethers TransactionRequest. This can be launched with `await signer.sendTransaction({to: adjudicator.address, ...txRequest}`)
+ */
 export function createTransferAllAssetsTransaction(state: State): providers.TransactionRequest {
   return nitroAdjudicatorTrans.createTransferAllAssetsTransaction(state);
 }
 
+/**
+ * Marshalls the supplied signedStates into an ethereum transaction for the checkpoint method. Automatically computes whosignedWhat, sigs, etc.
+ * @param signedStates an array of signed states
+ * @returns An ethers TransactionRequest. This can be launched with `await signer.sendTransaction({to: adjudicator.address, ...txRequest}`)
+ */
 export function createConcludeTransaction(
   conclusionProof: SignedState[]
 ): providers.TransactionRequest {
@@ -81,8 +106,13 @@ export function createConcludeTransaction(
   return forceMoveTrans.createConcludeTransaction(states, signatures, whoSignedWhat);
 }
 
-// Currently we assume each signedState is a unique combination of state/signature
-// So if multiple participants sign a state we expect a SignedState for each participant
+/**
+ * Marshalls the supplied signedStates into the signature arguments  used in most on chain methods.]
+ * Currently we assume each signedState is a unique combination of state/signature
+ * So if multiple participants sign a state we expect a SignedState for each participant
+ * @param signedStates an array of signed states
+ * @returns Object with (states, signatures, whosignedWhat)
+ */
 export function createSignatureArguments(
   signedStates: SignedState[]
 ): {states: State[]; signatures: Signature[]; whoSignedWhat: number[]} {

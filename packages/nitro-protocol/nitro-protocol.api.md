@@ -7404,16 +7404,16 @@ export function convertAddressToBytes32(address: string): string;
 // @public (undocumented)
 export function convertBytes32ToAddress(bytes32: string): string;
 
-// @public (undocumented)
+// @public
 export function createChallengeTransaction(signedStates: SignedState[], challengePrivateKey: string): providers.TransactionRequest;
 
 // @public
 export function createCheckpointTransaction(signedStates: SignedState[]): providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createConcludeAndTransferAllAssetsTransaction(signedStates: SignedState[]): providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createConcludeTransaction(conclusionProof: SignedState[]): providers.TransactionRequest;
 
 // @public (undocumented)
@@ -7422,17 +7422,17 @@ export function createERC20DepositTransaction(tokenAddress: string, destination:
 // @public (undocumented)
 export function createETHDepositTransaction(destination: string, expectedHeld: string, amount: string): ethers.providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createRespondTransaction(challengeState: State, response: SignedState): providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createSignatureArguments(signedStates: SignedState[]): {
     states: State[];
     signatures: Signature[];
     whoSignedWhat: number[];
 };
 
-// @public (undocumented)
+// @public
 export function createTransferAllAssetsTransaction(state: State): providers.TransactionRequest;
 
 // @public (undocumented)
