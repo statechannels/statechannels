@@ -349,6 +349,10 @@ const tx = NitroAdjudicator.checkpoint(
 await(await tx).wait();
 ```
 
+:::info
+Note that `sigs` is an array of signatures for each participant, **in participant order** (e.g. `[sig of participant[0], sig of participant[1], ...]`). The above call to `signStates` returned an appropriate array because we passed in the `wallets` in the correct, participant order.
+:::
+
 ## Shortcutting `validTransition`
 
 Notice that a state may be supported simply by having a full set of signatures (one from each participant). In such a case, there will be no `validTransiiton` check made by the chain. 

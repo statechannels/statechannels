@@ -43,6 +43,9 @@ export async function sign(wallet: Wallet, msgHash: string | Uint8Array): Promis
   return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));
 }
 
+/**
+ * Maps the supplied wallets array to (a Promise of) an array f signatures by those wallets on the supplied states, using whoSignedWhat to map from wallet to state.
+ */
 export async function signStates(
   states: State[],
   wallets: Wallet[],
