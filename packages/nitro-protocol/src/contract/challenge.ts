@@ -89,6 +89,13 @@ export interface RespondTransactionArguments {
   variablePartAB: [VariablePart, VariablePart];
   sig: Signature;
 }
+
+/**
+ * Extracts a ChallengeClearedEvent (containing a new signedState) from the logs of a respond or checkpoint transaction 
+ * @param tx A suitable transaction causing a ChallengeCleared event to be emitted
+ * @param eventResult the event itself
+ * @returns 
+ */
 export function getChallengeClearedEvent(
   tx: ethers.Transaction,
   eventResult: any[]
