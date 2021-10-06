@@ -17,7 +17,7 @@ import { Wallet } from 'ethers';
 // @public (undocumented)
 export type AssetOutcome = ExitFormat.SingleAssetExit;
 
-// @public (undocumented)
+// @public
 export interface AssetOutcomeShortHand {
     // (undocumented)
     [destination: string]: BigNumberish;
@@ -26,7 +26,7 @@ export interface AssetOutcomeShortHand {
 // @public (undocumented)
 export type Bytes32 = string;
 
-// @public (undocumented)
+// @public
 export interface ChallengeRegisteredEvent {
     // (undocumented)
     challengeStates: SignedState[];
@@ -36,7 +36,7 @@ export interface ChallengeRegisteredEvent {
     finalizesAt: number;
 }
 
-// @public (undocumented)
+// @public
 export interface Channel {
     // (undocumented)
     chainId: Uint256;
@@ -52,7 +52,7 @@ export interface Channel {
 
 // Warning: (ae-forgotten-export) The symbol "ChannelData" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export function channelDataToStatus(channelData: ChannelData): Bytes32;
 
 // @public (undocumented)
@@ -64,10 +64,10 @@ export const ContractArtifacts: {
     HashLockedSwapArtifact: MinimalArtifact;
 };
 
-// @public (undocumented)
+// @public
 export function convertAddressToBytes32(address: string): string;
 
-// @public (undocumented)
+// @public
 export function convertBytes32ToAddress(bytes32: string): string;
 
 // @public
@@ -82,10 +82,10 @@ export function createConcludeAndTransferAllAssetsTransaction(signedStates: Sign
 // @public
 export function createConcludeTransaction(conclusionProof: SignedState[]): providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createERC20DepositTransaction(tokenAddress: string, destination: string, expectedHeld: string, amount: string): ethers.providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createETHDepositTransaction(destination: string, expectedHeld: string, amount: string): ethers.providers.TransactionRequest;
 
 // @public
@@ -101,7 +101,7 @@ export function createSignatureArguments(signedStates: SignedState[]): {
 // @public
 export function createTransferAllAssetsTransaction(state: State): providers.TransactionRequest;
 
-// @public (undocumented)
+// @public
 export function createValidTransitionTransaction(fromState: State, toState: State): {
     data: string;
 };
@@ -109,7 +109,7 @@ export function createValidTransitionTransaction(fromState: State, toState: Stat
 // @public (undocumented)
 export const decodeOutcome: typeof ExitFormat.decodeExit;
 
-// @public (undocumented)
+// @public
 export interface DepositedEvent {
     // (undocumented)
     amountDeposited: BigNumber;
@@ -127,24 +127,24 @@ export const ForceMoveAppContractInterface: utils.Interface;
 
 // Warning: (ae-forgotten-export) The symbol "ChallengeClearedEvent" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export function getChallengeClearedEvent(tx: ethers.Transaction, eventResult: any[]): ChallengeClearedEvent;
 
-// @public (undocumented)
+// @public
 export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegisteredEvent;
 
-// @public (undocumented)
+// @public
 export function getChannelId(channel: Channel): Bytes32;
 
 // @public
 export function getChannelMode(finalizesAt: number, now: number): ChannelMode;
 
-// @public (undocumented)
+// @public
 export function getDepositedEvent(eventResult: any[]): DepositedEvent;
 
 // Warning: (ae-forgotten-export) The symbol "FixedPart" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export function getFixedPart(state: State): FixedPart;
 
 // @public (undocumented)
@@ -153,19 +153,19 @@ export function getStateSignerAddress(signedState: SignedState): string;
 // @public (undocumented)
 export const getTestProvider: () => ethers.providers.JsonRpcProvider;
 
-// @public (undocumented)
+// @public
 export function getVariablePart(state: State): VariablePart;
 
-// @public (undocumented)
+// @public
 export function hashAppPart(state: State): Bytes32;
 
-// @public (undocumented)
+// @public
 export function hashOutcome(outcome: Outcome): Bytes32;
 
-// @public (undocumented)
+// @public
 export function hashState(state: State): Bytes32;
 
-// @public (undocumented)
+// @public
 export function isExternalDestination(bytes32: Bytes32): boolean;
 
 // @public (undocumented)
@@ -177,10 +177,10 @@ export const MAX_TX_DATA_SIZE: number;
 // @public (undocumented)
 export const NITRO_MAX_GAS = 6000000;
 
-// @public (undocumented)
+// @public
 export type Outcome = ExitFormat.Exit;
 
-// @public (undocumented)
+// @public
 export interface OutcomeShortHand {
     // (undocumented)
     [assetHolder: string]: AssetOutcomeShortHand;
@@ -194,22 +194,16 @@ export const randomExternalDestination: () => Bytes32;
 
 // Warning: (ae-forgotten-export) The symbol "AddressesLookup" needs to be exported by the entry point index.d.ts
 //
-// @public (undocumented)
+// @public
 export function replaceAddressesAndBigNumberify(object: AssetOutcomeShortHand | OutcomeShortHand | string, addresses: AddressesLookup): AssetOutcomeShortHand | OutcomeShortHand | string;
 
 // @public
-export function requireValidProtocolTransition(fromState: State, toState: State): Status;
+export function requireValidProtocolTransition(fromState: State, toState: State): ValidTransitionStatus;
 
-// @public (undocumented)
-export function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature>;
-
-// @public (undocumented)
+// @public
 export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature;
 
-// @public (undocumented)
-export function signData(hashedData: string, privateKey: string): Signature;
-
-// @public (undocumented)
+// @public
 export interface SignedState {
     // (undocumented)
     signature: Signature;
@@ -217,13 +211,13 @@ export interface SignedState {
     state: State;
 }
 
-// @public (undocumented)
+// @public
 export function signState(state: State, privateKey: string): SignedState;
 
 // @public
 export function signStates(states: State[], wallets: Wallet[], whoSignedWhat: number[]): Promise<Signature[]>;
 
-// @public (undocumented)
+// @public
 export interface State {
     // (undocumented)
     appData: string;
@@ -242,14 +236,6 @@ export interface State {
 }
 
 // @public (undocumented)
-export enum Status {
-    // (undocumented)
-    NeedToCheckApp = 1,
-    // (undocumented)
-    True = 0
-}
-
-// @public (undocumented)
 export const TestContractArtifacts: {
     CountingAppArtifact: MinimalArtifact;
     TestNitroAdjudicatorArtifact: MinimalArtifact;
@@ -259,10 +245,18 @@ export const TestContractArtifacts: {
 // @public (undocumented)
 export type Uint256 = string;
 
-// @public (undocumented)
+// @public
 export function validTransition(fromState: State, toState: State, appContract: Contract): Promise<boolean>;
 
-// @public (undocumented)
+// @public
+export enum ValidTransitionStatus {
+    // (undocumented)
+    NeedToCheckApp = 1,
+    // (undocumented)
+    True = 0
+}
+
+// @public
 export interface VariablePart {
     // (undocumented)
     appData: Bytes32;
@@ -273,6 +267,6 @@ export interface VariablePart {
 
 // Warnings were encountered during analysis:
 //
-// src/index.ts:92:31 - (ae-forgotten-export) The symbol "MinimalArtifact" needs to be exported by the entry point index.d.ts
+// src/index.ts:90:31 - (ae-forgotten-export) The symbol "MinimalArtifact" needs to be exported by the entry point index.d.ts
 
 ```
