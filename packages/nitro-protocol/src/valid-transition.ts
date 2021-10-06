@@ -19,7 +19,7 @@ export enum ValidTransitionStatus {
  * - returns Status.NeedToCheckApp (clears protocol checks, overall validity requires App.validTransition)
  * - throws an error
  *  */
-export function requireValidProtocolTransition(fromState: State, toState: State): Status {
+export function requireValidProtocolTransition(fromState: State, toState: State): ValidTransitionStatus {
   // explicit checks of expressions checked implicitly on chain
   _requireExtraImplicitChecks(fromState, toState);
 
