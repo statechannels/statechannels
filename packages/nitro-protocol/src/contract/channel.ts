@@ -12,6 +12,11 @@ export function isExternalDestination(bytes32: Bytes32): boolean {
   return /^0x(0{24})([a-fA-F0-9]{40})$/.test(bytes32);
 }
 
+/**
+ * Computes the unique id for the supplied channel
+ * @param channel Parameters which determine the id
+ * @returns a 32 byte hex string representing the id
+ */
 export function getChannelId(channel: Channel): Bytes32 {
   const {chainId, participants, channelNonce} = channel;
   const channelId = utils.keccak256(
