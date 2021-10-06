@@ -8,6 +8,11 @@ export interface Channel {
   chainId: Uint256;
 }
 
+/**
+ * Determines if the supplied 32 byte hex string represents an external destination (meaning funds will be paid _out_ of the adjudicator on chain)
+ * @param bytes32 a destination
+ * @returns true if the destination has 12 leading bytes as zero, false otherwise
+ */
 export function isExternalDestination(bytes32: Bytes32): boolean {
   return /^0x(0{24})([a-fA-F0-9]{40})$/.test(bytes32);
 }
