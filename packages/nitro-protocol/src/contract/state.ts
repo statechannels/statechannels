@@ -13,6 +13,10 @@ export interface State {
   appDefinition: string;
   appData: string;
 }
+
+/**
+ * The part of a State which does not ordinarily change during state channel updates
+ */
 export interface FixedPart {
   chainId: Uint256;
   participants: Address[];
@@ -20,21 +24,39 @@ export interface FixedPart {
   appDefinition: Address;
   challengeDuration: Uint48;
 }
+/**
+ * Extracts the FixedPart of a state
+ * @param state a State
+ * @returns the FixedPart, which does not ordinarily change during state channel updates
+ */
 export function getFixedPart(state: State): FixedPart {
   const {appDefinition, challengeDuration, channel} = state;
   const {chainId, participants, channelNonce} = channel;
   return {chainId, participants, channelNonce, appDefinition, challengeDuration};
 }
 
+/**
+ * The part of a State which usually changes during state channel updates
+ */
 export interface VariablePart {
   outcome: Bytes32;
   appData: Bytes32;
 }
 
+/**
+ * Extracts the VariablPart of a state
+ * @param state a State
+ * @returns the VariablePart, which usually changes during state channel updates
+ */
 export function getVariablePart(state: State): VariablePart {
   return {outcome: encodeOutcome(state.outcome), appData: state.appData};
 }
 
+/**
+ * Encodes and hashes the AppPart of a state
+ * @param state a State
+ * @returns a 32 byte hash
+ */
 export function hashAppPart(state: State): Bytes32 {
   const {challengeDuration, appDefinition, appData} = state;
   return utils.keccak256(
@@ -44,7 +66,11 @@ export function hashAppPart(state: State): Bytes32 {
     )
   );
 }
-
+/**
+ * Encodes and hashes a state
+ * @param state a State
+ * @returns a 32 byte hash
+ */
 export function hashState(state: State): Bytes32 {
   const {turnNum, isFinal} = state;
   const channelId = getChannelId(state.channel);
