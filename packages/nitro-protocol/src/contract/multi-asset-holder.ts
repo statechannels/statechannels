@@ -5,10 +5,13 @@ import {parseEventResult} from '../ethers-utils';
 
 import {decodeGuaranteeData} from './outcome';
 
+/**
+ * Holds rich information about a Deposited event emitted on chain
+ */
 export interface DepositedEvent {
-  destination: string;
-  amountDeposited: BigNumber;
-  destinationHoldings: BigNumber;
+  destination: string; // The channel that funds were deposited in to.
+  amountDeposited: BigNumber; // The amount deposited.
+  destinationHoldings: BigNumber; // The amount the holdings were updated to.
 }
 
 /**
