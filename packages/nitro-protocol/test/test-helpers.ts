@@ -173,6 +173,13 @@ export async function sendTransaction(
 
 // Recursively replaces any key with the value of that key in the addresses object
 // BigNumberify all numbers
+/**
+ * Recursively replaces any key in a copy of the supplied object with the value of that key in the supplied addresses object. Also BigNumberifies all numbers.
+ * Used in testing only.
+ * @param object Object to be copied and modified
+ * @param addresses Key-value address lookup
+ * @returns suitably modified copy of object
+ */
 export function replaceAddressesAndBigNumberify(
   object: AssetOutcomeShortHand | OutcomeShortHand | string,
   addresses: AddressesLookup
