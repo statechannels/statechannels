@@ -8,12 +8,18 @@ import {Bytes32} from '../src';
 
 // Interfaces
 
-// E.g. {ALICE:2, BOB:3}
+
+
+/**
+ * A mapping from destination to BigNumberish. E.g. {ALICE:2, BOB:3}. Only used in testing.
+ */
 export interface AssetOutcomeShortHand {
   [destination: string]: BigNumberish;
 }
 
-// E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+/**
+ * A mapping from asset to AssetOutcomeShorthand. E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}. Only used in testing.
+ */
 export interface OutcomeShortHand {
   [assetHolder: string]: AssetOutcomeShortHand;
 }
