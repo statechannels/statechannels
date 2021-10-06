@@ -11,6 +11,11 @@ export interface DepositedEvent {
   destinationHoldings: BigNumber;
 }
 
+/**
+ * Extracts a DepositedEvent from a suitable eventResult
+ * @param eventResult 
+ * @returns a DepositedEvent
+ */
 export function getDepositedEvent(eventResult: any[]): DepositedEvent {
   const {destination, amountDeposited, destinationHoldings} = parseEventResult(eventResult);
   return {
