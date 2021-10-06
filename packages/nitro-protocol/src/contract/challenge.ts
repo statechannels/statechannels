@@ -15,10 +15,13 @@ export function hashChallengeMessage(challengeState: State): Bytes32 {
   );
 }
 
+/**
+ * Holds hydrated information from a ChallengeRegistered event and the tx that caused it to be emitted
+ */
 export interface ChallengeRegisteredEvent {
-  channelId: Bytes32;
-  finalizesAt: number;
-  challengeStates: SignedState[];
+  channelId: Bytes32; // The id of the channel that was challenge
+  finalizesAt: number; // The timestamp when the channel will finalize if the challenge is not cleared
+  challengeStates: SignedState[]; // An array of states used to generate the challenge
 }
 export interface ChallengeRegisteredStruct {
   channelId: Bytes32;
