@@ -19,10 +19,8 @@
  *     uint256 turnNumB,
  *     uint256 nParticipants
  *   ) public override pure returns (bool) {
- *     Outcome.OutcomeItem[] memory outcomeA = abi.decode(a.outcome, (Outcome.OutcomeItem[]));
- *     Outcome.OutcomeItem[] memory outcomeB = abi.decode(b.outcome, (Outcome.OutcomeItem[]));
- *
- *     // The rest of your logic ...
+
+*     // Your logic ...
  *
  *     return true;
  *   }
