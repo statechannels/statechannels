@@ -17,7 +17,7 @@ export const MAX_OUTCOME_ITEMS = 600;
 export type AssetOutcome = ExitFormat.SingleAssetExit;
 
 /**
- * The part of a State which dictates how assets are redistributed when the channel closes
+ * The part of a {@link State} which dictates how assets are redistributed when the channel closes
  */
 export type Outcome = ExitFormat.Exit; // == AssetOutcome[]
 
