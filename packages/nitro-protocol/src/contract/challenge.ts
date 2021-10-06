@@ -31,6 +31,12 @@ export interface ChallengeRegisteredStruct {
   sigs: Signature[];
   whoSignedWhat: Uint8[];
 }
+
+/**
+ * Extracts a ChallengeRegisteredEvent (containing challengeStates) fron the supplied eventResult. 
+ * @param eventResult the event itself
+ * @returns a ChallengeRegisteredEvent
+ */
 export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegisteredEvent {
   const {
     channelId,
@@ -94,7 +100,7 @@ export interface RespondTransactionArguments {
  * Extracts a ChallengeClearedEvent (containing a new signedState) from the logs of a respond or checkpoint transaction 
  * @param tx A suitable transaction causing a ChallengeCleared event to be emitted
  * @param eventResult the event itself
- * @returns 
+ * @returns a ChallengeClearedEvent
  */
 export function getChallengeClearedEvent(
   tx: ethers.Transaction,
