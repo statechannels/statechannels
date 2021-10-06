@@ -55,7 +55,7 @@ export function getVariablePart(state: State): VariablePart {
 /**
  * Encodes and hashes the AppPart of a state
  * @param state a State
- * @returns a 32 byte hash
+ * @returns a 32 byte keccak256 hash
  */
 export function hashAppPart(state: State): Bytes32 {
   const {challengeDuration, appDefinition, appData} = state;
@@ -69,7 +69,7 @@ export function hashAppPart(state: State): Bytes32 {
 /**
  * Encodes and hashes a state
  * @param state a State
- * @returns a 32 byte hash
+ * @returns a 32 byte keccak256 hash
  */
 export function hashState(state: State): Bytes32 {
   const {turnNum, isFinal} = state;
