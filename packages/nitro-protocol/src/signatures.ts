@@ -25,6 +25,12 @@ export function getStateSignerAddress(signedState: SignedState): string {
   return recoveredAddress;
 }
 
+/**
+ * Encodes, hashes and signs a State using the supplied privateKey
+ * @param state a State
+ * @param privateKey an ECDSA private key 
+ * @returns a SignedState
+ */
 export function signState(state: State, privateKey: string): SignedState {
   const wallet = new Wallet(privateKey);
   if (state.channel.participants.indexOf(wallet.address) < 0) {
