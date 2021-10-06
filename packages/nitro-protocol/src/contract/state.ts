@@ -4,6 +4,9 @@ import {Channel, getChannelId} from './channel';
 import {encodeOutcome, hashOutcome, Outcome} from './outcome';
 import {Address, Bytes32, Uint256, Uint48} from './types';
 
+/**
+ * Holds all of the data defining the state of a channel
+ */
 export interface State {
   turnNum: number; // TODO: This should maybe be a string b/c it is uint256 in solidity
   isFinal: boolean;

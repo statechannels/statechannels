@@ -4,6 +4,11 @@ import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
 
+
+
+/**
+ * A {@link State} along with a {@link Signature} on it
+ */
 export interface SignedState {
   state: State;
   signature: Signature;
