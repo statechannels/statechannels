@@ -6,7 +6,6 @@ export const NitroAdjudicatorContractInterface = new ethers.utils.Interface(
   NitroAdjudicatorArtifact.abi
 );
 
-
 /**
  * Crafts an ethers TransactionRequest targeting the adjudicator's deposit method, specifically for ETH deposits
  * @param destination The channelId to deposit into

@@ -8,8 +8,6 @@ import {Bytes32} from '../src';
 
 // Interfaces
 
-
-
 /**
  * A mapping from destination to BigNumberish. E.g. {ALICE:2, BOB:3}. Only used in testing.
  */

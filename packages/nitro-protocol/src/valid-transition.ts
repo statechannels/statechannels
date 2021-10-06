@@ -3,7 +3,7 @@ import isEqual from 'lodash.isequal';
 import {State} from './contract/state';
 
 /**
- * IsValidTransition can be 
+ * IsValidTransition can be
  * True (0) (no further checks required)
  * NeedToCheckApp (1) (clears protocol checks, overall validity depends on App.validTransition)
  */
@@ -19,7 +19,10 @@ export enum ValidTransitionStatus {
  * - returns Status.NeedToCheckApp (clears protocol checks, overall validity requires App.validTransition)
  * - throws an error
  *  */
-export function requireValidProtocolTransition(fromState: State, toState: State): ValidTransitionStatus {
+export function requireValidProtocolTransition(
+  fromState: State,
+  toState: State
+): ValidTransitionStatus {
   // explicit checks of expressions checked implicitly on chain
   _requireExtraImplicitChecks(fromState, toState);
 

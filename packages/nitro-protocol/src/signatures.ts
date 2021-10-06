@@ -4,8 +4,6 @@ import {hashChallengeMessage} from './contract/challenge';
 import {getChannelId} from './contract/channel';
 import {hashState, State} from './contract/state';
 
-
-
 /**
  * A {@link State} along with a {@link Signature} on it
  */
@@ -33,7 +31,7 @@ export function getStateSignerAddress(signedState: SignedState): string {
 /**
  * Encodes, hashes and signs a State using the supplied privateKey
  * @param state a State
- * @param privateKey an ECDSA private key 
+ * @param privateKey an ECDSA private key
  * @returns a SignedState
  */
 export function signState(state: State, privateKey: string): SignedState {
@@ -47,7 +45,6 @@ export function signState(state: State, privateKey: string): SignedState {
   const signature = signData(hashedState, privateKey);
   return {state, signature};
 }
-
 
 async function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature> {
   // MsgHash is a hex string

@@ -16,7 +16,7 @@ export interface DepositedEvent {
 
 /**
  * Extracts a DepositedEvent from a suitable eventResult
- * @param eventResult 
+ * @param eventResult
  * @returns a DepositedEvent
  */
 export function getDepositedEvent(eventResult: any[]): DepositedEvent {
@@ -28,7 +28,6 @@ export function getDepositedEvent(eventResult: any[]): DepositedEvent {
   };
 }
 
-
 /**
  * Extracts a 20 byte address hex string from a 32 byte hex string by slicing
  * @param bytes32 a hex string
@@ -39,9 +38,8 @@ export function convertBytes32ToAddress(bytes32: string): string {
   return utils.getAddress(`0x${normalized.slice(-40)}`);
 }
 
-
 /**
- * Left pads a 20 byte address hex string with zeros until it is a 32 byte hex string  
+ * Left pads a 20 byte address hex string with zeros until it is a 32 byte hex string
  * e.g.,
  * 0x9546E319878D2ca7a21b481F873681DF344E0Df8 becomes
  * 0x0000000000000000000000009546E319878D2ca7a21b481F873681DF344E0Df8

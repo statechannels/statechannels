@@ -36,7 +36,7 @@ export interface ChallengeRegisteredStruct {
 }
 
 /**
- * Extracts a ChallengeRegisteredEvent (containing challengeStates) fron the supplied eventResult. 
+ * Extracts a ChallengeRegisteredEvent (containing challengeStates) fron the supplied eventResult.
  * @param eventResult the event itself
  * @returns a ChallengeRegisteredEvent
  */
@@ -100,7 +100,7 @@ export interface RespondTransactionArguments {
 }
 
 /**
- * Extracts a ChallengeClearedEvent (containing a new signedState) from the logs of a respond or checkpoint transaction 
+ * Extracts a ChallengeClearedEvent (containing a new signedState) from the logs of a respond or checkpoint transaction
  * @param tx A suitable transaction causing a ChallengeCleared event to be emitted
  * @param eventResult the event itself
  * @returns a ChallengeClearedEvent
