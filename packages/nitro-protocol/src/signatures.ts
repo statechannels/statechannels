@@ -63,6 +63,12 @@ export async function signStates(
   return Promise.all(promises);
 }
 
+/**
+ * Signs a challenge message (necessary for submitting a challenge) using the last of the supplied signedStates and privateKey
+ * @param signedStates an array of type SignedState
+ * @param privateKey an ECDSA private key (must be a participant in the channel)
+ * @returns a Signature
+ */
 export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature {
   if (signedStates.length === 0) {
     throw new Error('At least one signed state must be provided');
