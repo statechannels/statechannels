@@ -65,7 +65,11 @@ const commonCase: TestCase[] = [
     [{turnNum:6}, {turnNum:7}],
 ]
 
-function expectStatus(fromOverrides: Partial<State>, toOverrides: Partial<State>, status: ValidTransitionStatus) {
+function expectStatus(
+  fromOverrides: Partial<State>,
+  toOverrides: Partial<State>,
+  status: ValidTransitionStatus
+) {
   const from = {...baseFromState, ...fromOverrides};
   const to = {...baseToState, ...toOverrides};
   expect(requireValidProtocolTransition(from, to)).toEqual(status);
