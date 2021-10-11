@@ -1,7 +1,7 @@
 import {ethers, Wallet} from 'ethers';
 
 import {Channel, State} from '../../src';
-import {requireValidProtocolTransition, Status} from '../../src/valid-transition';
+import {requireValidProtocolTransition, ValidTransitionStatus} from '../../src/valid-transition';
 
 const walletA = Wallet.createRandom();
 const walletB = Wallet.createRandom();
@@ -65,7 +65,7 @@ const commonCase: TestCase[] = [
     [{turnNum:6}, {turnNum:7}],
 ]
 
-function expectStatus(fromOverrides: Partial<State>, toOverrides: Partial<State>, status: Status) {
+function expectStatus(fromOverrides: Partial<State>, toOverrides: Partial<State>, status: ValidTransitionStatus) {
   const from = {...baseFromState, ...fromOverrides};
   const to = {...baseToState, ...toOverrides};
   expect(requireValidProtocolTransition(from, to)).toEqual(status);
@@ -79,7 +79,7 @@ function expectError(fromOverrides: Partial<State>, toOverrides: Partial<State>,
 
 describe('getValidProtocolTransitionStatus', () => {
   it.each(valid)('Returns Status.True for valid cases ', (from: State, to: State) => {
-    expectStatus(from, to, Status.True);
+    expectStatus(from, to, ValidTransitionStatus.True);
   });
   it.each([
     ...incorrectTurnNumCases,
@@ -97,7 +97,7 @@ describe('getValidProtocolTransitionStatus', () => {
   it.each([...commonCase])(
     'Returns Status.NeedToCheckApp for otherwise valid cases ',
     (from: State, to: State) => {
-      expectStatus(from, to, Status.NeedToCheckApp);
+      expectStatus(from, to, ValidTransitionStatus.NeedToCheckApp);
     }
   );
 });
