@@ -200,8 +200,14 @@ export function replaceAddressesAndBigNumberify(object: AssetOutcomeShortHand | 
 // @public
 export function requireValidProtocolTransition(fromState: State, toState: State): ValidTransitionStatus;
 
+// @public (undocumented)
+export function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature>;
+
 // @public
 export function signChallengeMessage(signedStates: SignedState[], privateKey: string): Signature;
+
+// @public (undocumented)
+export function signData(hashedData: string, privateKey: string): Signature;
 
 // @public
 export interface SignedState {
