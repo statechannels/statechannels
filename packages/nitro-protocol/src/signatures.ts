@@ -46,7 +46,7 @@ export function signState(state: State, privateKey: string): SignedState {
   return {state, signature};
 }
 
-async function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature> {
+export async function sign(wallet: Wallet, msgHash: string | Uint8Array): Promise<Signature> {
   // MsgHash is a hex string
   // Returns an object with v, r, and s properties.
   return utils.splitSignature(await wallet.signMessage(utils.arrayify(msgHash)));
@@ -89,7 +89,7 @@ function hashMessage(hashedData: string): string {
   return utils.hashMessage(utils.arrayify(hashedData));
 }
 
-function signData(hashedData: string, privateKey: string): Signature {
+export function signData(hashedData: string, privateKey: string): Signature {
   const signingKey = new utils.SigningKey(privateKey);
 
   return utils.splitSignature(signingKey.signDigest(hashMessage(hashedData)));
