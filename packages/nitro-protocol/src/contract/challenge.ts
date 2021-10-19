@@ -16,7 +16,7 @@ export function hashChallengeMessage(challengeState: State): Bytes32 {
 }
 
 /**
- * Holds hydrated information from a ChallengeRegistered event and the tx that caused it to be emitted
+ * Holds information from a ChallengeRegistered event in a convenient form
  */
 export interface ChallengeRegisteredEvent {
   channelId: Bytes32; // The id of the channel that was challenged
