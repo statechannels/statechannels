@@ -19,7 +19,7 @@ contract NitroAdjudicator is ForceMove, MultiAssetHolder {
      * @param outcomeBytes abi.encode of an array of Outcome.OutcomeItem structs.
      * @param numStates The number of states in the finalization proof.
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
-: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
+* @param sigs Array of signatures, one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      */
     function concludeAndTransferAllAssets(
         uint48 largestTurnNum,

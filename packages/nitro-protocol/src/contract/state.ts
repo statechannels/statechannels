@@ -47,7 +47,7 @@ export interface VariablePart {
 }
 
 /**
- * Extracts the VariablPart of a state
+ * Extracts the VariablePart of a state
  * @param state a State
  * @returns the VariablePart, which usually changes during state channel updates
  */
