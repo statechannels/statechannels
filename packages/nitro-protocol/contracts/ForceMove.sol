@@ -181,7 +181,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
      * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
-     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      */
     function checkpoint(
@@ -228,7 +228,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all states in the finalization proof.
      * @param numStates The number of states in the finalization proof.
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
-     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      */
     function conclude(
         uint48 largestTurnNum,
@@ -259,7 +259,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param outcomeHash The keccak256 of the `outcome`. Applies to all stats in the finalization proof.
      * @param numStates The number of states in the finalization proof.
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
-     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`:: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      */
     function _conclude(
         uint48 largestTurnNum,
@@ -405,7 +405,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param participants A list of addresses representing the participants of a channel.
      * @param stateHashes Array of keccak256(State) submitted in support of a state,
-     * @param sigs Array of Signatures, one for each participant
+     * @param sigs Array of Signatures, one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      * @param whoSignedWhat participant[i] signed stateHashes[whoSignedWhat[i]]
      * @return true if the signatures are valid, false otherwise
      */
@@ -481,7 +481,7 @@ contract ForceMove is IForceMove, StatusManager {
      * @param isFinalCount How many of the states are final? The final isFinalCount states are implied final, the remainder are implied not final.
      * @param channelId Unique identifier for a channel.
      * @param fixedPart Fixed Part of the states in the support proof
-     * @param sigs A signature from each participant.
+     * @param sigs A signature from each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      * @param whoSignedWhat participant[i] signed stateHashes[whoSignedWhat[i]]
      * @return The hash of the latest state in the proof, if supported, else reverts.
      */

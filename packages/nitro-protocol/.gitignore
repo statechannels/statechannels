@@ -23,8 +23,10 @@ ganache/*[.js,.json]
 .eslintcache
 gas-artifacts
 typechain
+temp
 
 # hardhat directories
 cache
 solcInputs/
 hardhat-deployments
+

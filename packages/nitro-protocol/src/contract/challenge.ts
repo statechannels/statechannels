@@ -15,10 +15,13 @@ export function hashChallengeMessage(challengeState: State): Bytes32 {
   );
 }
 
+/**
+ * Holds information from a ChallengeRegistered event in a convenient form
+ */
 export interface ChallengeRegisteredEvent {
-  channelId: Bytes32;
-  finalizesAt: number;
-  challengeStates: SignedState[];
+  channelId: Bytes32; // The id of the channel that was challenged
+  finalizesAt: number; // The timestamp when the channel will finalize if the challenge is not cleared
+  challengeStates: SignedState[]; // An array of states used to generate the challenge
 }
 export interface ChallengeRegisteredStruct {
   channelId: Bytes32;
@@ -31,6 +34,12 @@ export interface ChallengeRegisteredStruct {
   sigs: Signature[];
   whoSignedWhat: Uint8[];
 }
+
+/**
+ * Extracts a ChallengeRegisteredEvent (containing challengeStates) from the supplied eventResult.
+ * @param eventResult the event itself
+ * @returns a ChallengeRegisteredEvent
+ */
 export function getChallengeRegisteredEvent(eventResult: any[]): ChallengeRegisteredEvent {
   const {
     channelId,
@@ -89,6 +98,13 @@ export interface RespondTransactionArguments {
   variablePartAB: [VariablePart, VariablePart];
   sig: Signature;
 }
+
+/**
+ * Extracts a ChallengeClearedEvent (containing a new signedState) from the logs of a respond or checkpoint transaction
+ * @param tx a suitable transaction causing a ChallengeCleared event to be emitted
+ * @param eventResult the event itself
+ * @returns a ChallengeClearedEvent
+ */
 export function getChallengeClearedEvent(
   tx: ethers.Transaction,
   eventResult: any[]

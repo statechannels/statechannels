@@ -30,6 +30,7 @@ describe('_acceptableWhoSignedWhat (expect a boolean)', () => {
     ${[0, 0, 0]}  | ${8}           | ${3}          | ${1}    | ${true}
     ${[0, 0, 2]}  | ${2}           | ${3}          | ${3}    | ${false}
     ${[0, 0, 2]}  | ${11}          | ${3}          | ${3}    | ${false}
+    ${[1, 0]}     | ${6}           | ${2}          | ${2}    | ${true}
   `(
     'returns $expectedResult for whoSignedWhat = $whoSignedWhat, largestTurnNum = $largestTurnNum, nParticipants = $nParticipants, nStates = $nStates',
     async ({whoSignedWhat, largestTurnNum, nParticipants, nStates, expectedResult}) => {

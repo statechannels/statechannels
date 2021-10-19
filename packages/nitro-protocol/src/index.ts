@@ -1,3 +1,63 @@
+/**
+ * @packageDocumentation Smart contracts that implement nitro protocol for state channel networks on ethereum. Includes javascript and typescript support.
+ *
+ * @remarks
+ *
+ * Building your state channel application contract against our interface:
+ *
+ * ```solidity
+ * pragma solidity ^0.7.0;
+ * pragma experimental ABIEncoderV2;
+ *
+ * import '@statechannels/nitro-protocol/contracts/interfaces/IForceMoveApp.sol';
+ * import '@statechannels/nitro-protocol/contracts/Outcome.sol';
+ *
+ * contract MyStateChannelApp is IForceMoveApp {
+ *   function validTransition(
+ *     VariablePart memory a,
+ *     VariablePart memory b,
+ *     uint256 turnNumB,
+ *     uint256 nParticipants
+ *   ) public override pure returns (bool) {
+
+*     // Your logic ...
+ *
+ *     return true;
+ *   }
+ * }
+ * ```
+ *
+ * Import precompiled artifacts for deployment/testing
+ *
+ * ```typescript
+ * const {
+ *   NitroAdjudicatorArtifact,
+ *   TrivialAppArtifact,
+ *   TokenArtifact,
+ * } = require('@statechannels/nitro-protocol').ContractArtifacts;
+ * ```
+ *
+ * Import typescript types
+ *
+ * ```typescript
+ * import {Channel} from '@statechannels/nitro-protocol';
+ *
+ * const channel: Channel = {
+ *   chainId: '0x1',
+ *   channelNonce: 0,
+ *   participants: ['0xalice...', '0xbob...'],
+ * };
+ * ```
+ *
+ * Import javascript helper functions
+ *
+ * ```typescript
+ * import {getChannelId} from '@statechannels/nitro-protocol';
+ *
+ * const channelId = getChannelId(channel);
+ * ```
+ */
+
 import pick from 'lodash.pick';
 
 import FULLTokenArtifact from '../artifacts/contracts/Token.sol/Token.json';
@@ -16,15 +76,14 @@ const fields = [
   'deployedLinkReferences',
 ];
 
-type MinimalArtifact = Pick<
-  typeof FULLNitroAdjudicatorArtifact,
-  | 'contractName'
-  | 'abi'
-  | 'bytecode'
-  | 'deployedBytecode'
-  | 'linkReferences'
-  | 'deployedLinkReferences'
->;
+interface MinimalArtifact {
+  contractName: string;
+  abi: any;
+  bytecode: string;
+  deployedBytecode: string;
+  linkReferences: any;
+  deployedLinkReferences: any;
+}
 
 const minimize = artifact => pick(artifact, fields) as MinimalArtifact;
 
@@ -81,21 +140,12 @@ export {
   hashState,
 } from './contract/state';
 
-export {
-  signState,
-  getStateSignerAddress,
-  signChallengeMessage,
-  signStates,
-  SignedState,
-} from './signatures';
-
-import * as Signatures from './signatures';
-import * as Transactions from './transactions';
+export * from './signatures';
+export * from './transactions';
 export {
   createERC20DepositTransaction,
   createETHDepositTransaction,
 } from './contract/transaction-creators/multi-asset-holder';
-export {Signatures, Transactions};
 
 // types
 export {Uint256, Bytes32} from './contract/types';

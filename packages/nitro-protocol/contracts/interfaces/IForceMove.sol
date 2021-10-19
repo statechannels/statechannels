@@ -44,7 +44,7 @@ interface IForceMove {
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
      * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
-     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      * @param challengerSig The signature of a participant on the keccak256 of the abi.encode of (supportedStateHash, 'forceMove').
      */
@@ -82,7 +82,7 @@ interface IForceMove {
      * @param largestTurnNum The largest turn number of the submitted states; will overwrite the stored value of `turnNumRecord`.
      * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
      * @param isFinalCount Describes how many of the submitted states have the `isFinal` property set to `true`. It is implied that the rightmost `isFinalCount` states are final, and the rest are not final.
-     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
      */
     function checkpoint(
@@ -103,7 +103,7 @@ interface IForceMove {
      * @param outcomeHash The keccak256 of the abi.encode of the `outcome`. Applies to all stats in the finalization proof.
      * @param numStates The number of states in the finalization proof.
      * @param whoSignedWhat An array denoting which participant has signed which state: `participant[i]` signed the state with index `whoSignedWhat[i]`.
-     * @param sigs An array of signatures that support the state with the `largestTurnNum`.
+     * @param sigs An array of signatures that support the state with the `largestTurnNum`:: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      */
     function conclude(
         uint48 largestTurnNum,
@@ -125,7 +125,7 @@ interface IForceMove {
      * @param isFinal Boolean denoting whether the challenge state is final.
      * @param fixedPart Data describing properties of the state channel that do not change with state updates.
      * @param variableParts An ordered array of structs, each decribing the properties of the state channel that may change with each state update.
-     * @param sigs A list of Signatures that supported the challenge
+     * @param sigs A list of Signatures that supported the challenge: one for each participant, in participant order (e.g. [sig of participant[0], sig of participant[1], ...]).
      * @param whoSignedWhat Indexing information to identify which signature was by which participant
      */
     event ChallengeRegistered(

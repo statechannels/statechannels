@@ -14,6 +14,7 @@
     "lodash.shuffle": "^4.2.0"
   },
   "devDependencies": {
+    "@microsoft/api-extractor": "7.13.1",
     "@nomiclabs/hardhat-etherscan": "^2.1.0",
     "@statechannels/devtools": "0.5.7",
     "@statechannels/jest-gas-reporter": "0.4.10",
@@ -90,7 +91,7 @@
     "contract:deploy-mainnet": "yarn hardhat deploy --network mainnet --export-all addresses.json && node ./scripts/postdeploy.js",
     "contract:deploy-arbitrum-testnet": "yarn hardhat deploy --network arbitrum_testnet_v4 --export-all addresses.json && node ./scripts/postdeploy.js",
     "docgen": "solidoc",
-    "generate-api": "yarn docgen",
+    "generate-api": "yarn docgen && yarn api-extractor run --local",
     "lint:check": "eslint \"*/**/*.ts\" --cache  --max-warnings=0 && yarn solhint:check",
     "lint:write": "eslint \"*/**/*.ts\" --fix && yarn prettier:write",
     "precommit": "lint-staged --quiet",

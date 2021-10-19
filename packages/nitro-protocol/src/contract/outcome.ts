@@ -15,6 +15,10 @@ export const MAX_OUTCOME_ITEMS = 600;
 //
 
 export type AssetOutcome = ExitFormat.SingleAssetExit;
+
+/**
+ * The part of a {@link State} which dictates how assets are redistributed when the channel closes
+ */
 export type Outcome = ExitFormat.Exit; // == AssetOutcome[]
 
 export type SimpleAllocation = ExitFormat.Allocation & {
@@ -40,6 +44,11 @@ export type GuaranteeOutcome = SingleAssetGuaranteeOutcome[];
 export const encodeOutcome = ExitFormat.encodeExit;
 export const decodeOutcome = ExitFormat.decodeExit;
 
+/**
+ * Encodes and hashes an Outcome
+ * @param outcome an Outcome
+ * @returns a 32 byte keccak256 hash
+ */
 export function hashOutcome(outcome: Outcome): Bytes32 {
   const encodedOutcome = encodeOutcome(outcome);
   return utils.keccak256(encodedOutcome);

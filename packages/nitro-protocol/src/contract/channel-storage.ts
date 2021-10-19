@@ -19,6 +19,11 @@ const FINGERPRINT_PREIMAGE_TYPE = `tuple(
   bytes32 outcomeHash
 )`;
 
+/**
+ * Computes the on chain status from the supplied channelData
+ * @param channelData
+ * @returns the 32 byte "status" word that may be stored on chain for this channel
+ */
 export function channelDataToStatus(channelData: ChannelData): Bytes32 {
   const {turnNumRecord, finalizesAt} = channelData;
   const hash = utils.keccak256(encodeFingerprintPreimage(channelData));

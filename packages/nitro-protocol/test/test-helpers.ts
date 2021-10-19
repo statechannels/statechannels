@@ -8,12 +8,16 @@ import {Bytes32} from '../src';
 
 // Interfaces
 
-// E.g. {ALICE:2, BOB:3}
+/**
+ * A mapping from destination to BigNumberish. E.g. {ALICE:2, BOB:3}. Only used in testing.
+ */
 export interface AssetOutcomeShortHand {
   [destination: string]: BigNumberish;
 }
 
-// E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}
+/**
+ * A mapping from asset to AssetOutcomeShorthand. E.g. {ETH: {ALICE:2, BOB:3}, DAI: {ALICE:1, BOB:4}}. Only used in testing.
+ */
 export interface OutcomeShortHand {
   [assetHolder: string]: AssetOutcomeShortHand;
 }
@@ -173,6 +177,13 @@ export async function sendTransaction(
 
 // Recursively replaces any key with the value of that key in the addresses object
 // BigNumberify all numbers
+/**
+ * Recursively replaces any key in a copy of the supplied object with the value of that key in the supplied addresses object. Also BigNumberifies all numbers.
+ * Used in testing only.
+ * @param object Object to be copied and modified
+ * @param addresses Key-value address lookup
+ * @returns suitably modified copy of object
+ */
 export function replaceAddressesAndBigNumberify(
   object: AssetOutcomeShortHand | OutcomeShortHand | string,
   addresses: AddressesLookup

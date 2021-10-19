@@ -2,7 +2,12 @@ import isEqual from 'lodash.isequal';
 
 import {State} from './contract/state';
 
-export enum Status {
+/**
+ * IsValidTransition can be
+ * True (0) (no further checks required)
+ * NeedToCheckApp (1) (clears protocol checks, overall validity depends on App.validTransition)
+ */
+export enum ValidTransitionStatus {
   True,
   NeedToCheckApp,
 }
@@ -11,10 +16,13 @@ export enum Status {
  *  Port of ForceMove#_requireValidProtocolTransition solidity code
  * either:
  * - returns Status.True (no further checks required)
- * - returns  Status.NeedToCheckApp (clears protocol checks, overall validity requires App.validTransition)
+ * - returns Status.NeedToCheckApp (clears protocol checks, overall validity requires App.validTransition)
  * - throws an error
  *  */
-export function requireValidProtocolTransition(fromState: State, toState: State): Status {
+export function requireValidProtocolTransition(
+  fromState: State,
+  toState: State
+): ValidTransitionStatus {
   // explicit checks of expressions checked implicitly on chain
   _requireExtraImplicitChecks(fromState, toState);
 
@@ -27,10 +35,10 @@ export function requireValidProtocolTransition(fromState: State, toState: State)
       _require(isEqual(toState.outcome, fromState.outcome), 'Outcome change forbidden');
       _require(toState.appData == fromState.appData, 'appData change forbidden');
     } else {
-      return Status.NeedToCheckApp;
+      return ValidTransitionStatus.NeedToCheckApp;
     }
   }
-  return Status.True;
+  return ValidTransitionStatus.True;
 }
 
 function _requireExtraImplicitChecks(fromState: State, toState: State) {
