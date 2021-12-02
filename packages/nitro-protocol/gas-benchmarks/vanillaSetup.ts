@@ -2,7 +2,7 @@ import {exec} from 'child_process';
 import {promises, existsSync, truncateSync} from 'fs';
 
 import {ContractFactory, Contract} from '@ethersproject/contracts';
-import {providers} from 'ethers';
+import {ethers, providers} from 'ethers';
 import waitOn from 'wait-on';
 import kill from 'tree-kill';
 import {BigNumber} from '@ethersproject/bignumber';
@@ -70,6 +70,15 @@ expect.extend({
     received: any, // TransactionResponse
     benchmark: number
   ) {
+    const nx = ethers.utils.hexDataLength(received.data); // ideally this would only count nonzero bytes
+    console.log(
+      'tx has ' + nx,
+      ' bytes of calldata (possibly including zeros): if EIP-4488 were merged, the gas used would decrease by ',
+      nx * (16 - 3),
+      'or ',
+      (100 * nx * (16 - 3)) / benchmark,
+      '%'
+    );
     const {gasUsed: gasUsedBN} = await received.wait();
     const gasUsed = (gasUsedBN as BigNumber).toNumber();
 
