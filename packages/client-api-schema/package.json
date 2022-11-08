@@ -8,7 +8,7 @@
     "Liam Horne <liam@l4v.io>"
   ],
   "dependencies": {
-    "ajv": "6.11.0"
+    "ajv": "6.12.3"
   },
   "devDependencies": {
     "@microsoft/api-extractor": "7.13.1",
