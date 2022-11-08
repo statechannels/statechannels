@@ -1,8 +1,8 @@
 import {
+  Allocation as NitroAllocation,
   State as NitroState,
   SignedState as NitroSignedState,
   Outcome as NitroOutcome,
-  AllocationItem as NitroAllocationItem,
   signState as signNitroState,
   hashState as hashNitroState,
   getStateSignerAddress as getNitroSignerAddress,
@@ -10,20 +10,21 @@ import {
   convertAddressToBytes32
 } from '@statechannels/nitro-protocol';
 import * as _ from 'lodash';
-import {Wallet, utils} from 'ethers';
+import {Wallet, utils, BigNumber} from 'ethers';
+import {AllocationType} from '@statechannels/exit-format';
 
 import {
+  Allocation,
   State,
   ChannelConstants,
   Outcome,
-  AllocationItem,
   SignedState,
   Destination,
-  SimpleAllocation,
   SignatureEntry,
   makeAddress,
   Address,
-  Hashed
+  Hashed,
+  SingleAssetOutcome
 } from './types';
 import {BN} from './bignumber';
 
@@ -120,35 +121,25 @@ export function statesEqual(left: State, right: State): boolean {
   return hashState(left) === hashState(right);
 }
 
-function simpleAllocationsEqual(left: SimpleAllocation, right: SimpleAllocation) {
+function singleAssetOutcomesEqual(left: SingleAssetOutcome, right: SingleAssetOutcome) {
   return (
     left.asset === right.asset &&
-    left.allocationItems.length === right.allocationItems.length &&
+    left.allocations.length === right.allocations.length &&
     _.every(
-      left.allocationItems,
+      left.allocations,
       (value, index) =>
-        value.destination === right.allocationItems[index].destination &&
-        BN.eq(value.amount, right.allocationItems[index].amount)
-    )
+        value.destination === right.allocations[index].destination &&
+        BN.eq(value.amount, right.allocations[index].amount)
+    ) &&
+    left.metadata === right.metadata
   );
 }
 
 export function outcomesEqual(left: Outcome, right?: Outcome): boolean {
-  if (left.type === 'SimpleAllocation' && right?.type === 'SimpleAllocation') {
-    return simpleAllocationsEqual(left, right);
-  }
-  if (left.type === 'SimpleGuarantee' && right?.type === 'SimpleGuarantee') {
-    return _.isEqual(left, right);
-  }
-  if (left.type === 'MixedAllocation' && right?.type === 'MixedAllocation') {
-    return (
-      left.simpleAllocations.length === right.simpleAllocations.length &&
-      _.every(left.simpleAllocations, (_, index) =>
-        simpleAllocationsEqual(left.simpleAllocations[index], right.simpleAllocations[index])
-      )
-    );
-  }
-  return false;
+  return (
+    left.length === right?.length &&
+    _.every(left, (_, index) => singleAssetOutcomesEqual(left[index], right[index]))
+  );
 }
 
 export const firstState = (
@@ -167,80 +158,42 @@ export const firstState = (
   outcome
 });
 
-function convertToNitroAllocationItems(allocationItems: AllocationItem[]): NitroAllocationItem[] {
-  return allocationItems.map(a => ({
+function convertToNitroAllocations(allocations: Allocation[]): NitroAllocation[] {
+  return allocations.map(a => ({
+    allocationType: a.allocationType ?? AllocationType.simple,
+    metadata: a.metadata ?? '0x',
     amount: a.amount,
     destination:
       a.destination.length === 42 ? convertAddressToBytes32(a.destination) : a.destination
   }));
 }
 
-function convertFromNitroAllocationItems(allocationItems: NitroAllocationItem[]): AllocationItem[] {
-  return allocationItems.map(a => ({
+function convertFromNitroAllocations(allocations: NitroAllocation[]): Allocation[] {
+  return allocations.map(a => ({
     amount: BN.from(a.amount),
-    destination: makeDestination(a.destination)
+    destination: makeDestination(a.destination),
+    metadata: a.metadata as string, // TODO
+    allocationType: a.allocationType
   }));
 }
 
 export function convertToNitroOutcome(outcome: Outcome): NitroOutcome {
-  switch (outcome.type) {
-    case 'SimpleAllocation':
-      return [
-        {
-          asset: outcome.asset,
-          allocationItems: convertToNitroAllocationItems(outcome.allocationItems)
-        }
-      ];
-    case 'SimpleGuarantee':
-      return [
-        {
-          asset: outcome.asset,
-          guarantee: {
-            targetChannelId: outcome.targetChannelId,
-            destinations: outcome.destinations
-          }
-        }
-      ];
-    case 'MixedAllocation':
-      // TODO: Update NitroOutcome to support multiple asset holders
-      console.warn('NOTE: MixedAllocation is using 0th-indexed allocation only');
-      return outcome.simpleAllocations.map(convertToNitroOutcome)[0];
-  }
+  return outcome.map(o => ({
+    asset: o.asset,
+    allocations: convertToNitroAllocations(o.allocations),
+    metadata: o.metadata ?? '0x'
+  }));
 }
 
 export function fromNitroOutcome(outcome: NitroOutcome): Outcome {
-  const [singleOutcomeItem] = outcome;
-
-  if (typeof singleOutcomeItem['allocationItems'] !== 'undefined') {
-    return {
-      type: 'SimpleAllocation',
-      asset: makeAddress(singleOutcomeItem.asset),
-      allocationItems: convertFromNitroAllocationItems(singleOutcomeItem['allocationItems'])
-    };
-  }
-
-  if (typeof singleOutcomeItem['guarantee'] !== 'undefined') {
-    return {
-      type: 'SimpleGuarantee',
-      asset: makeAddress(singleOutcomeItem.asset),
-      targetChannelId: singleOutcomeItem['guarantee'].targetChannelId,
-      destinations: singleOutcomeItem['guarantee'].destinations
-    };
-  }
-
-  return {
-    type: 'MixedAllocation',
-    // FIXME: Figure out what needs to be here
-    simpleAllocations: []
-    // simpleAllocations: outcome.map(fromNitroOutcome)
-  };
+  return outcome.map(o => ({
+    asset: makeAddress(o.asset),
+    allocations: convertFromNitroAllocations(o.allocations),
+    metadata: BigNumber.from(o.metadata).toString()
+  }));
 }
 
 export function nextState(state: State, outcome: Outcome): State {
-  if (state.outcome.type !== outcome.type) {
-    throw new Error('Attempting to change outcome type');
-  }
-
   return {...state, turnNum: state.turnNum + 1, outcome};
 }
 

@@ -1,6 +1,5 @@
 import * as _ from 'lodash';
 
-import {checkThat, isSimpleAllocation} from '../utils';
 import {BN} from '../bignumber';
 import {calculateChannelId, hashState, signState} from '../state-utils';
 import {Address, SignatureEntry, SignedState, State, Uint256} from '../types';
@@ -334,9 +333,10 @@ type FundingMilestone = {
 
 export const utils = {
   fundingMilestone(state: State, destination: string): FundingMilestone {
-    const {allocationItems} = checkThat(state.outcome, isSimpleAllocation);
+    if (state.outcome.length !== 1) throw Error('too many SingleAssetOutcomes');
+    const {allocations} = state.outcome[0];
 
-    const myAllocationItem = _.find(allocationItems, ai => ai.destination === destination);
+    const myAllocationItem = _.find(allocations, ai => ai.destination === destination);
     if (!myAllocationItem) {
       // throw new ChannelError(ChannelError.reasons.destinationNotInAllocations, {
       //   destination: this.participants[this.myIndex].destination
@@ -344,12 +344,12 @@ export const utils = {
       throw new Error('unexpected outcome');
     }
 
-    const allocationsBefore = _.takeWhile(allocationItems, a => a.destination !== destination);
+    const allocationsBefore = _.takeWhile(allocations, a => a.destination !== destination);
     const targetBefore = allocationsBefore.map(a => a.amount).reduce(BN.add, BN.from(0));
 
     const targetAfter = BN.add(targetBefore, myAllocationItem.amount);
 
-    const targetTotal = allocationItems.map(a => a.amount).reduce(BN.add, BN.from(0));
+    const targetTotal = allocations.map(a => a.amount).reduce(BN.add, BN.from(0));
 
     return {targetBefore, targetAfter, targetTotal};
   }

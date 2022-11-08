@@ -1,5 +1,5 @@
-import {serializeAllocation} from './serialize';
-import {deserializeAllocations} from './deserialize';
+import {serializeOutcome} from './serialize';
+import {deserializeOutcome} from './deserialize';
 import {
   externalEthAllocation,
   internalEthAllocation,
@@ -8,11 +8,11 @@ import {
 } from './example';
 
 it('works for a simple eth allocation', () => {
-  expect(deserializeAllocations(externalEthAllocation)).toEqual(internalEthAllocation);
-  expect(serializeAllocation(internalEthAllocation)).toEqual(externalEthAllocation);
+  expect(deserializeOutcome(externalEthAllocation)).toEqual(internalEthAllocation);
+  expect(serializeOutcome(internalEthAllocation)).toEqual(externalEthAllocation);
 });
 
 it('works for a mixed allocation', () => {
-  expect(deserializeAllocations(externalMixedAllocation)).toEqual(internalMixedAllocation);
-  expect(serializeAllocation(internalMixedAllocation)).toEqual(externalMixedAllocation);
+  expect(deserializeOutcome(externalMixedAllocation)).toEqual(internalMixedAllocation);
+  expect(serializeOutcome(internalMixedAllocation)).toEqual(externalMixedAllocation);
 });

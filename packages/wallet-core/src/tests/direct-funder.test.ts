@@ -1,5 +1,6 @@
 import {ethers} from 'ethers';
 import * as _ from 'lodash';
+import {AllocationType} from '@statechannels/exit-format';
 
 import {DirectFunder} from '../protocols';
 import {unreachable} from '../utils';
@@ -16,7 +17,14 @@ import {
   SignedStateHash,
   WaitingFor
 } from '../protocols/direct-funder';
-import {makeAddress, SignedState, SimpleAllocation, State, StateWithHash, Uint256} from '../types';
+import {
+  makeAddress,
+  SignedState,
+  SingleAssetOutcome,
+  State,
+  StateWithHash,
+  Uint256
+} from '../types';
 import {zeroAddress} from '../config';
 
 import {ONE_DAY, participants, signStateHelper} from './test-helpers';
@@ -35,13 +43,23 @@ const deposits = {
   total: BN.from(8)
 };
 const asset = zeroAddress; // must be even length
-const outcome: SimpleAllocation = {
-  type: 'SimpleAllocation',
-  allocationItems: [
-    {destination: participantA.destination, amount: deposits.A},
-    {destination: participantB.destination, amount: deposits.B}
+const singleAssetOutcome: SingleAssetOutcome = {
+  allocations: [
+    {
+      destination: participantA.destination,
+      amount: deposits.A,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    },
+    {
+      destination: participantB.destination,
+      amount: deposits.B,
+      metadata: '0x',
+      allocationType: AllocationType.simple
+    }
   ],
-  asset
+  asset,
+  metadata: '0x'
 };
 
 const openingState: State = {
@@ -52,7 +70,7 @@ const openingState: State = {
   appDefinition: zeroAddress,
   appData: makeAddress(AddressZero), // must be even length
   turnNum: 0,
-  outcome,
+  outcome: [singleAssetOutcome],
   isFinal: false
 };
 
@@ -126,16 +144,16 @@ describe('initialization', () => {
   });
 
   test('when the outcome does not match the expectations', () => {
-    expect(() => initialize({...openingState, outcome: 'any' as any}, 0)).toThrow(
-      /not valid, isSimpleAllocation failed/
-    );
+    expect(() => initialize({...openingState, outcome: 'any' as any}, 0)).toThrow();
 
-    const outcome = {
-      type: 'SimpleAllocation' as const,
+    const singleAssetOutcome: SingleAssetOutcome = {
       asset: zeroAddress,
-      allocationItems: []
+      metadata: '0x',
+      allocations: []
     };
-    expect(() => initialize({...openingState, outcome}, 0)).toThrow('unexpected outcome');
+    expect(() => initialize({...openingState, outcome: [singleAssetOutcome]}, 0)).toThrow(
+      'unexpected outcome'
+    );
   });
 });
 
@@ -156,14 +174,26 @@ describe('cranking', () => {
 
     const zeroOutcomeState = addHash({
       ...openingState,
-      outcome: {
-        type: 'SimpleAllocation',
-        asset,
-        allocationItems: [
-          {destination: participants.A.destination, amount: BN.from(0)},
-          {destination: participants.B.destination, amount: BN.from(0)}
-        ]
-      }
+      outcome: [
+        {
+          asset,
+          metadata: '0x',
+          allocations: [
+            {
+              destination: participants.A.destination,
+              amount: BN.from(0),
+              metadata: '0x',
+              allocationType: AllocationType.simple
+            },
+            {
+              destination: participants.B.destination,
+              amount: BN.from(0),
+              metadata: '0x',
+              allocationType: AllocationType.simple
+            }
+          ]
+        }
+      ]
     });
     const zeroOutcome = initialize(signStateHelper(zeroOutcomeState, 'A'), 1, true);
 
